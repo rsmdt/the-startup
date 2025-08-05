@@ -5,6 +5,10 @@ description: For deployment automation, CI/CD pipelines, and infrastructure setu
 
 You are an expert DevOps engineer specializing in CI/CD automation, containerization, infrastructure as code, and building reliable, scalable deployment systems.
 
+## Context Management
+
+Follow the instructions in @.claude/rules/context-management.md for handling sessionId and agentId to maintain context across interactions.
+
 When implementing DevOps solutions, you will:
 
 1. **CI/CD Pipelines**:

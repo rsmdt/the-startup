@@ -1,5 +1,5 @@
 ---
-allowed-tools: ["Task", "TodoWrite"]
+allowed-tools: ["Task", "TodoWrite", "Bash", "Write", "Read", "LS", "Glob"]
 description: "Orchestrates development through specialist agents"
 argument-hint: "describe your feature OR provide spec ID to resume (e.g., 001)"
 ---
@@ -8,12 +8,46 @@ argument-hint: "describe your feature OR provide spec ID to resume (e.g., 001)"
 
 You orchestrate specialists for: **$ARGUMENTS**
 
+## Session Initialization
+
+First, initialize the session:
+1. Generate sessionId: Use format `dev-YYYYMMDD-HHMMSS-XXXX` (where XXXX is 4 random alphanumeric)
+2. Create session directory: `.the-startup/[sessionId]/`
+3. Initialize `main.jsonl` with:
+   ```json
+   {"role": "user", "content": "$ARGUMENTS"}
+   {"role": "assistant", "content": "Starting development orchestration for: $ARGUMENTS"}
+   ```
+
 ## Context Management
 
 You implement the context management system described in @.claude/rules/context-management.md. You are responsible for:
 - Creating sessions with unique sessionIds
 - Tracking agentIds for each specialist instance
 - Deciding when to create new instances vs reuse existing ones
+
+## Agent Instance Tracking
+
+Maintain a mental map of agent instances throughout the conversation:
+```
+Agent Instances:
+- [agentId]: {type: "agent-type", purpose: "what this instance handles", created: "when"}
+```
+
+### When to Create New Instance
+- Different feature or component
+- Fresh analysis needed
+- Parallel work stream
+- Independent investigation
+
+### When to Reuse Instance
+- Clarifications on previous work
+- Refinements or iterations
+- Consolidating findings
+- Continuing interrupted work
+
+### AgentId Format
+Use 6-character alphanumeric IDs like: `a1b2c3`, `x7y8z9`
 
 ## Resume Mode
 
@@ -70,21 +104,32 @@ docs/
 
 ### How to Pass Context and Documentation
 
-When invoking ANY agent via the Task tool, you MUST include:
-1. Documentation path for their outputs
-2. Session and agent instance information
+When invoking ANY agent via the Task tool, you MUST:
+1. Determine appropriate agentId (new or existing)
+2. Include documentation path, sessionId, and agentId
+3. Log the invocation to main.jsonl
 
+#### Before Invoking
 ```
-prompt: "Analyze requirements for [feature description]. Documentation path: docs/specs/[XXX-feature-name]/. SessionId: [sessionId], AgentId: [agentId]"
+# Decide on agentId
+Is this a continuation? → Use existing agentId
+Is this fresh/parallel? → Generate new agentId
+
+# Log to main.jsonl
+{"role": "assistant", "content": "Invoking [agent-type] with agentId [agentId] for [purpose]"}
+```
+
+#### Invocation Format
+```
+prompt: "[Task description]. Documentation path: docs/specs/[XXX-feature-name]/. SessionId: [actual-sessionId], AgentId: [actual-agentId]"
 subagent_type: "the-business-analyst"
 ```
 
-The agent will recognize "Documentation path: [path]" as the instruction to create their document at that location.
-
-Example invocations:
-- "Analyze requirements for user authentication. Documentation path: docs/specs/001-user-auth/"
-- "Create system design for payment processing. Documentation path: docs/specs/002-payments/"
-- "Write PRD for notification system. Documentation path: docs/specs/003-notifications/"
+#### After Agent Response
+```
+# Log to main.jsonl
+{"role": "assistant", "content": "[Agent-type] (agentId: [agentId]) completed: [summary of response]"}
+```
 
 ## Agent Response Protocol
 
@@ -160,9 +205,63 @@ You respond:
 4. If user says yes → Add to todo list, then offer execution options
 5. If user says no → "What would you prefer to do instead?"
 
+## Helper Functions (Mental Models)
+
+### Generate SessionId
+```
+Format: dev-YYYYMMDD-HHMMSS-XXXX
+Example: dev-20250805-143022-a7b9
+```
+
+### Generate AgentId
+```
+Format: 6 random alphanumeric characters
+Example: a1b2c3, x7y8z9, m4n5p6
+```
+
+### Log to Main
+After EVERY significant action, append to `.the-startup/[sessionId]/main.jsonl`:
+- User inputs
+- Your decisions
+- Agent invocations
+- Agent responses summary
+- Task list updates
+
 ## Start
 
-1. **Check for Resume Mode**: If argument looks like a spec ID, attempt to resume
-2. **Otherwise**: Begin fresh by analyzing the request with the-chief
+1. **Initialize Session**:
+   - Generate sessionId
+   - Create `.the-startup/[sessionId]/` directory
+   - Create `main.jsonl` with initial user request
+   - Display: "Session initialized: [sessionId]"
 
-[Follow the protocol above for all responses]
+2. **Check for Resume Mode**: If argument looks like a spec ID, check both:
+   - `docs/specs/[ID]*` for existing documentation
+   - `.the-startup/` for any related sessions
+
+3. **Begin Orchestration**: 
+   - Start with the-chief (generate new agentId)
+   - Pass sessionId and agentId in prompt
+   - Follow the protocol for all responses
+
+## Example Implementation
+
+```
+User: "Create a user authentication system"
+
+1. Generate sessionId: dev-20250805-143022-a7b9
+2. Create .the-startup/dev-20250805-143022-a7b9/
+3. Initialize main.jsonl:
+   {"role": "user", "content": "Create a user authentication system"}
+   {"role": "assistant", "content": "Session initialized: dev-20250805-143022-a7b9"}
+
+4. Invoke the-chief:
+   - Generate agentId: ch1x2y
+   - Prompt: "Analyze: Create a user authentication system. SessionId: dev-20250805-143022-a7b9, AgentId: ch1x2y"
+   - Log invocation to main.jsonl
+
+5. After chief response:
+   - Display commentary
+   - Log summary to main.jsonl
+   - Track: ch1x2y → {type: "the-chief", purpose: "initial analysis", created: "2025-08-05 14:30:22"}
+```

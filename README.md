@@ -1,424 +1,770 @@
-# Multi-Agent Orchestration Research
+# The Startup - Agent System for Development Tools
 
-## Executive Summary
+A comprehensive agent system for enhancing development workflows with specialized AI agents, hooks, and commands.
 
-This document synthesizes research findings on multi-agent orchestration patterns from leading frameworks and implementations. The key finding is that successful systems use a **stateful orchestrator with stateless worker agents** pattern, where the main agent handles all user interaction and state management while sub-agents perform focused execution tasks.
+## Quick Installation
 
-## Table of Contents
-- [Framework Analysis](#framework-analysis)
-- [Orchestration Patterns](#orchestration-patterns)
-- [State Management Approaches](#state-management-approaches)
-- [Best Practices](#best-practices)
-- [Recommendations](#recommendations)
-- [Sources and References](#sources-and-references)
+### One-Line Install
 
-## Framework Analysis
+Install The Startup agent system with a single command:
 
-### LangChain/LangGraph
+```bash
+curl -LsSf https://raw.githubusercontent.com/the-startup/the-startup/main/install.sh | sh
+```
 
-**Overview**: LangChain provides building blocks for AI applications, while LangGraph focuses on stateful, cyclical agent workflows using graph structures.
+### Update Existing Installation
 
-**Key Features**:
-- Graph-based representation where agents are nodes and connections are edges
-- Built-in state management with durable execution
-- Integration with LangSmith for observability
-- Supports complex, cyclical workflows
+```bash
+curl -LsSf https://raw.githubusercontent.com/the-startup/the-startup/main/install.sh | sh -s -- --update
+```
 
-**State Management**: 
-- "Agents require more than just message buffers; they need structured state storage to persist across steps and failures"
-- Provides durable execution for long-running processes
-- Can pause and resume for tool calls, API waits, or human feedback
+The installer will:
+1. Check prerequisites (curl, Python, uv)
+2. Let you choose between global (`~/.claude`) or local (`./.claude`) installation
+3. Select which components to install (agents, hooks, commands)
+4. Configure everything automatically
+5. Create a lock file to track your installation
 
-**Sources**: 
-- [LangGraph: Multi-Agent Workflows](https://blog.langchain.com/langgraph-multi-agent-workflows/)
-- [How and when to build multi-agent systems](https://blog.langchain.com/how-and-when-to-build-multi-agent-systems/)
+### What Gets Installed
 
-### AutoGen (Microsoft)
+- **12+ Specialized Agents**: From architecture to security to testing
+- **Automated Hooks**: Log and track agent interactions
+- **Custom Commands**: Enhanced development workflows
+- **Context Management**: Smart session and agent tracking
 
-**Overview**: Facilitates building multi-agent conversation systems with highly conversational agents that can work in groups.
+## Features
 
-**Key Features**:
-- Linear communication pattern - agents process one request at a time
-- Strong multi-agent focus with Microsoft ecosystem integration
-- Built-in testing capabilities
-- Agents improve functionality based on gathered feedback
+### 🤖 Specialized Agents
 
-**User Interaction**: 
-- "Highly conversational agents that can work in groups and improve their functionalities on the basis of gathered feedback"
-- Supports human-in-the-loop patterns
+Each agent is an expert in their domain:
 
-**Sources**:
-- [Agent Orchestration Comparison](https://medium.com/@akankshasinha247/agent-orchestration-when-to-use-langchain-langgraph-autogen-or-build-an-agentic-rag-system-cc298f785ea4)
-- [Top AI Agent Frameworks in 2025](https://medium.com/@iamanraghuvanshi/agentic-ai-3-top-ai-agent-frameworks-in-2025-langchain-autogen-crewai-beyond-2fc3388e7dec)
+- **the-chief**: Routes requests to the right specialist
+- **the-architect**: Technical design and system architecture
+- **the-business-analyst**: Requirements gathering and analysis
+- **the-developer**: Implementation with TDD and clean code
+- **the-product-manager**: Product specifications and roadmaps
+- **the-project-manager**: Task coordination and progress tracking
+- **the-security-engineer**: Security assessments and compliance
+- **the-site-reliability-engineer**: Debugging and performance
+- **the-data-engineer**: Database optimization and data modeling
+- **the-devops-engineer**: Deployment automation and CI/CD
+- **the-technical-writer**: Documentation and guides
+- **the-tester**: Comprehensive testing strategies
 
-### CrewAI
+### 🎯 Smart Commands
 
-**Overview**: A lightweight Python framework built from scratch, focused on orchestrating role-playing AI agents.
+- **develop**: Orchestrates multiple agents for feature development
+- **start**: Quick project initialization
 
-**Key Features**:
-- 5.76x faster than LangGraph in certain benchmarks
-- Hierarchical communication patterns
-- Event-driven pipelines
-- Clear role-based structure
+### 🔍 Intelligent Hooks
 
-**Architecture**:
-- "Empowers developers with both high-level simplicity and precise low-level control"
-- Agents can communicate hierarchically or within groups
-- Sophisticated memory system for context preservation
+Automatically track:
+- Agent instructions and responses
+- Session management
+- Task progress
+- Debug information
 
-**Sources**:
-- [CrewAI GitHub Repository](https://github.com/crewAIInc/crewAI)
-- [CrewAI vs AutoGen Comparison](https://www.ampcome.com/post/crewai-vs-autogen-which-is-best-to-build-ai-agents)
+## System Requirements
 
-### Anthropic's Multi-Agent Research System
+- **curl**: For downloading files
+- **Python 3.8+**: For hook scripts
+- **uv** (optional): For Python package management
+- **gum** (optional): For enhanced UI experience
+- **jq** (optional): For JSON processing
 
-**Overview**: Uses an orchestrator-worker pattern with specialized sub-agents.
+## Installation Options
 
-**Architecture**:
-- Lead agent analyzes queries and develops strategies
-- Spawns specialized sub-agents (WebSurfer, FileSurfer, Coder, ComputerTerminal)
-- Sub-agents operate in parallel with clear boundaries
-- "Each subagent needs an objective, an output format, guidance on the tools and sources to use, and clear task boundaries"
+### Interactive Installation
 
-**Sources**:
-- [How we built our multi-agent research system](https://www.anthropic.com/engineering/built-multi-agent-research-system)
+The installer provides an interactive experience:
 
-## Orchestration Patterns
+1. **Tool Selection**: Currently supports Claude Code (more tools coming)
+2. **Location Choice**: 
+   - Global: `~/.claude` (all projects)
+   - Local: `./.claude` (current project only)
+3. **Component Selection**: Choose which agents, hooks, and commands to install
+4. **Automatic Configuration**: Sets up hooks and settings automatically
 
-### 1. Orchestrator-Worker Pattern
+### Manual Installation
 
-The most successful pattern identified across frameworks:
+If you prefer manual setup:
 
-- **Orchestrator (Main Agent)**:
-  - Manages overall workflow
-  - Handles all user interaction
-  - Maintains conversation state
-  - Delegates to specialized workers
+```bash
+# Clone the repository
+git clone https://github.com/the-startup/the-startup.git
+cd the-startup
 
-- **Workers (Sub-Agents)**:
-  - Focused, single-purpose execution
-  - No direct user interaction
-  - Stateless operation
-  - Return structured results
+# Copy files to your Claude directory
+cp -r agents ~/.claude/
+cp -r hooks ~/.claude/
+cp -r commands ~/.claude/
+cp -r rules ~/.claude/
 
-**Source**: [A Technical Guide to Multi-Agent Orchestration](https://dominguezdaniel.medium.com/a-technical-guide-to-multi-agent-orchestration-5f979c831c0d)
+# Make hooks executable
+chmod +x ~/.claude/hooks/*.py
+```
 
-### 2. MicroAgent Pattern
+## Configuration
 
-Microsoft's approach to agent design:
+### Lock File
 
-- "Each microagent's system instructions can be tailored for factors specific to its service"
-- Natural language interfaces for coordination
-- Each agent associated with a specific service or domain
-- Promotes loose coupling and high cohesion
+The installer creates a lock file at `~/.config/the-startup/the-startup.lock` to track:
+- Installed version
+- Installation type and path
+- Installed files with checksums
+- Installation date
 
-**Source**: [MicroAgents: Exploring Agentic Architecture](https://devblogs.microsoft.com/semantic-kernel/microagents-exploring-agentic-architecture-with-microservices/)
+### Settings
 
-### 3. Sequential vs Concurrent Patterns
+Hooks are configured in `.claude/settings.json`:
 
-**Sequential**: Chains agents in predefined order, each processing output from the previous agent.
+```json
+{
+  "hooks": {
+    "PreToolUse": [{
+      "matcher": "Task",
+      "hooks": [{
+        "type": "command",
+        "command": "uv run $CLAUDE_PROJECT_DIR/.claude/hooks/log_agent_start.py",
+        "_source": "the-startup"
+      }]
+    }]
+  }
+}
+```
 
-**Concurrent**: Runs multiple agents simultaneously on the same task for independent analysis.
+## Usage
 
-**Source**: [AI Agent Orchestration Patterns - Azure Architecture Center](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns)
+### Using Agents
 
-## State Management Approaches
+After installation, agents are available in Claude Code:
 
-### Stateless vs Stateful Agents
+```bash
+# Start a new development task
+/develop "Create a user authentication system"
 
-**Stateless Agents**:
-- Treat every interaction independently
-- No memory of past interactions
-- Simple to develop and maintain
-- Resource efficient
+# The chief will analyze and route to appropriate specialists
+# Agents work together to deliver comprehensive solutions
+```
 
-**Stateful Agents**:
-- Retain contextual information from past interactions
-- Enable personalization and continuity
-- More complex architecture
-- Higher storage and compute costs
+### Viewing Logs
 
-**Key Finding**: "Most 'agents' today are essentially stateless workflows: they have no way to persist interactions beyond what fits into the context window"
+Agent interactions are logged to:
+- `~/.the-startup/all-agent-instructions.jsonl` - Global log
+- `~/.the-startup/[session-id]/agent-instructions.jsonl` - Session-specific logs
 
-**Sources**:
-- [Stateful Agents: The Missing Link in LLM Intelligence](https://www.letta.com/blog/stateful-agents)
-- [Stateful vs. Stateless AI Agents](https://www.belsterns.com/post/stateful-vs-stateless-ai-agents-what-s-the-difference-and-why-does-it-matter)
+View logs with:
+```bash
+# View recent entries
+tail -f ~/.the-startup/all-agent-instructions.jsonl | jq .
 
-### Recommended Architecture: Stateful Orchestrator with Stateless Workers
+# Search for specific agent
+grep "the-developer" ~/.the-startup/all-agent-instructions.jsonl | jq .
+```
 
-This pattern combines the benefits of both approaches:
-- Orchestrator maintains all state and context
-- Workers receive complete context for each task
-- Enables parallelization and scaling
-- Simplifies testing and debugging
-
-## Context Management System
+## Claude Code Hooks Documentation
 
 ### Overview
 
-The `/develop` command implements a sophisticated context management system that enables stateful orchestration with intelligent agent instance management. This system preserves context across interactions while allowing both fresh analysis and continuation of previous work.
+Claude Code hooks are configurable scripts that intercept and respond to specific events during Claude Code execution. They enable you to customize behavior, log actions, validate inputs, and integrate with external systems without modifying the core Claude Code functionality.
 
-### Architecture
+### Key Benefits
+- **Non-intrusive monitoring**: Log and track actions without modifying existing code
+- **Safety controls**: Prevent dangerous operations before they execute
+- **Automation**: Trigger follow-up actions automatically
+- **Integration**: Connect Claude Code with external tools and services
 
-```
-.the-startup/
-└── [sessionId]/
-    ├── main.jsonl          # Main orchestrator context log
-    ├── a1b2c3.jsonl       # Agent instance (e.g., first BA call)
-    ├── d4e5f6.jsonl       # Agent instance (e.g., architect)
-    └── g7h8i9.jsonl       # Agent instance (e.g., second BA call)
-```
+### Security Considerations
+⚠️ **Important**: Hooks execute shell commands automatically with your current environment credentials. Always:
+- Review hook scripts before enabling them
+- Validate and sanitize any inputs
+- Use absolute paths to prevent command injection
+- Test hooks in a safe environment first
 
-### Agent Instance Management
+## Available Hook Types
 
-The orchestrator intelligently manages agent instances through unique identifiers (agentIds):
+### 1. PreToolUse
+**When**: Before a tool is executed  
+**Can block**: Yes (return non-zero exit code)  
+**Receives**: Tool name and input parameters  
+**Use cases**: Input validation, logging, preventing dangerous operations
 
-#### When to Create New Agent Instance (new agentId)
-- Fresh analysis task for a different feature
-- Independent investigation of separate components
-- Parallel work streams that shouldn't share context
-- Starting a new line of inquiry
+### 2. PostToolUse  
+**When**: After a tool completes successfully  
+**Can block**: No  
+**Receives**: Tool name, input parameters, and output  
+**Use cases**: Result logging, code formatting, triggering follow-ups
 
-#### When to Reuse Existing Agent Instance (same agentId)
-- Clarifications on previous work
-- Refinements based on user feedback
-- Consolidation of findings
-- Continuation of interrupted work
-- Iterative improvements
+### 3. UserPromptSubmit
+**When**: User submits a prompt to Claude  
+**Can block**: Yes  
+**Receives**: User's message  
+**Use cases**: Request logging, input validation, context injection
 
-### JSONL Format
+### 4. Stop
+**When**: Main agent finishes responding  
+**Can block**: No  
+**Receives**: Session information  
+**Use cases**: Cleanup, final logging, summary generation
 
-Each context file uses a simple, append-only JSONL format:
+### 5. SubagentStop
+**When**: A subagent (Task tool) finishes  
+**Can block**: No  
+**Receives**: Subagent information and results  
+**Use cases**: Subagent metrics, result collection
+
+### 6. PreCompact
+**When**: Before context compaction (conversation too long)  
+**Can block**: No  
+**Receives**: Current context information  
+**Use cases**: Save important context, create summaries
+
+### 7. SessionStart
+**When**: Starting new or resuming session  
+**Can block**: No  
+**Receives**: Session information  
+**Use cases**: Initialize logging, setup environment
+
+### 8. Notification
+**When**: Tool permissions or idle periods  
+**Can block**: No  
+**Receives**: Notification type and details  
+**Use cases**: Desktop alerts, status updates
+
+## Configuration Structure
+
+Hooks are configured in `.claude/settings.local.json`:
 
 ```json
-{"role": "user", "content": "Create user authentication system"}
-{"role": "assistant", "content": "I'll orchestrate the development of user authentication..."}
-{"role": "user", "content": "Include OAuth support"}
-{"role": "assistant", "content": "I'll refine the requirements to include OAuth..."}
+{
+  "hooks": {
+    "EventName": [
+      {
+        "matcher": "RegexPattern",  // Optional: filter which tools/events
+        "hooks": [
+          {
+            "type": "command",
+            "command": "path/to/script.sh or python3 script.py"
+          }
+        ]
+      }
+    ]
+  }
+}
 ```
 
-### Implementation Details
+### Matcher Patterns
+- Use regex to filter specific tools or patterns
+- Example: `"^the-.*"` matches all agents starting with "the-"
+- Omit matcher to apply to all events of that type
 
-#### Orchestrator Responsibilities
-1. **Session Management**: Creates session folder at `.the-startup/[sessionId]/`
-2. **Context Logging**: Writes all interactions to `main.jsonl`
-3. **Agent Tracking**: Maintains mapping of agentIds to their purposes
-4. **Instance Decisions**: Determines when to create new vs reuse existing instances
+## Implementation Example: Agent Instruction Logging
 
-#### Sub-Agent Responsibilities
-1. **Context Discovery**: Check for `.the-startup/[sessionId]/[agentId].jsonl`
-2. **Context Creation**: Create new file if first invocation
-3. **Context Reading**: Load previous interactions if file exists
-4. **Context Appending**: Add new interactions to maintain history
+This example demonstrates intercepting Task tool calls for agents starting with "the-" to log their instructions and responses.
 
-### Use Cases
+### Problem Statement
+We want to:
+1. Capture exact instructions sent to each agent (the-chief, the-developer, etc.)
+2. Log when each agent completes their task
+3. Organize logs by session for debugging and analysis
 
-#### 1. Fresh Analysis
-```
-User: "Analyze requirements for user authentication"
-Orchestrator: Creates new BA instance with agentId "a1b2c3"
-
-User: "Also analyze payment processing requirements"
-Orchestrator: Creates new BA instance with agentId "x7y8z9"
-Result: Two separate context files for independent analyses
-```
-
-#### 2. Refinement and Clarification
-```
-User: "Analyze requirements for user authentication"
-Orchestrator: Creates BA instance with agentId "a1b2c3"
-
-User: "Can you add two-factor authentication to those requirements?"
-Orchestrator: Reuses BA instance "a1b2c3" with previous context
-Result: BA continues from where it left off, refining existing work
-```
-
-#### 3. Parallel Architecture Work
-```
-User: "Design the system architecture"
-Orchestrator: 
-- Creates Architect instance "m1n2o3" for authentication subsystem
-- Creates Architect instance "p4q5r6" for payment subsystem
-Result: Parallel architecture design with separate contexts
-```
-
-#### 4. Consolidation
-```
-User: "Combine the authentication and payment architectures"
-Orchestrator: Reuses Architect instance "m1n2o3" 
-- Architect reads its previous auth work
-- Consolidates with payment architecture
-Result: Unified architecture building on previous work
-```
-
-#### 5. Interrupted Work Recovery
-```
-Session 1:
-User: "Design user authentication"
-Orchestrator: Creates Architect "m1n2o3", work partially complete
-
-Session 2 (using resume):
-User: "/develop 001-user-auth"
-Orchestrator: Recognizes existing work, reuses Architect "m1n2o3"
-Result: Architect continues from saved state
-```
-
-### Example Workflow
+### Solution Architecture
 
 ```
-1. User requests: "Build a user authentication system"
-
-2. Orchestrator creates:
-   .the-startup/abc123/main.jsonl
-   
-3. Chief analyzes → creates instance "ch1" → .the-startup/abc123/ch1.jsonl
-
-4. BA clarifies requirements → creates "ba1" → .the-startup/abc123/ba1.jsonl
-
-5. User adds: "Include OAuth support"
-
-6. BA refines (same instance) → appends to .the-startup/abc123/ba1.jsonl
-
-7. Architect designs → creates "ar1" → .the-startup/abc123/ar1.jsonl
-
-8. Developer implements → creates "dv1" → .the-startup/abc123/dv1.jsonl
-
-Final structure:
-.the-startup/
-└── abc123/
-    ├── main.jsonl  # Full orchestration log
-    ├── ch1.jsonl   # Chief's analysis
-    ├── ba1.jsonl   # BA's requirements (initial + refinements)
-    ├── ar1.jsonl   # Architect's design
-    └── dv1.jsonl   # Developer's implementation
+Task Tool Called → PreToolUse Hook → Log Instruction → Agent Executes → PostToolUse Hook → Log Response
 ```
 
-### Benefits
+### Step 1: Create Hook Directory
 
-1. **State Preservation**: Full context maintained across interactions
-2. **Parallel Execution**: Multiple instances work independently without collision
-3. **Intelligent Continuation**: Agents resume with their specific context
-4. **Clear Audit Trail**: Complete history of decisions and refinements
-5. **Flexible Orchestration**: Supports both fresh starts and continuations
-6. **Debugging Support**: Each agent's thought process is isolated and traceable
+```bash
+mkdir -p .claude/hooks
+```
+
+### Step 2: Create Start Hook Script
+
+**File**: `.claude/hooks/log_agent_start.py`
+
+```python
+#!/usr/bin/env python3
+"""
+Log agent Task instructions before execution.
+Only captures agents with subagent_type starting with "the-"
+"""
+
+import json
+import sys
+import os
+import re
+from datetime import datetime
+from pathlib import Path
+
+def extract_session_id(prompt):
+    """Extract sessionId from prompt text."""
+    match = re.search(r'SessionId:\s*([^\s,]+)', prompt)
+    return match.group(1) if match else None
+
+def extract_agent_id(prompt):
+    """Extract agentId from prompt text."""
+    match = re.search(r'AgentId:\s*([^\s,]+)', prompt)
+    return match.group(1) if match else None
+
+def find_latest_session(project_dir):
+    """Find the most recent session directory."""
+    startup_dir = Path(project_dir) / '.the-startup'
+    if not startup_dir.exists():
+        return None
+    
+    session_dirs = [d for d in startup_dir.iterdir() 
+                   if d.is_dir() and d.name.startswith('dev-')]
+    
+    if not session_dirs:
+        return None
+    
+    latest = max(session_dirs, key=lambda d: d.stat().st_mtime)
+    return latest.name
+
+def main():
+    try:
+        # Read JSON input from stdin
+        input_data = json.loads(sys.stdin.read())
+        
+        # Check if this is a Task tool call
+        if input_data.get('tool_name') != 'Task':
+            sys.exit(0)
+        
+        tool_input = input_data.get('tool_input', {})
+        subagent_type = tool_input.get('subagent_type', '')
+        
+        # Only process agents starting with "the-"
+        if not subagent_type.startswith('the-'):
+            sys.exit(0)
+        
+        prompt = tool_input.get('prompt', '')
+        description = tool_input.get('description', '')
+        
+        # Get project directory
+        project_dir = os.environ.get('CLAUDE_PROJECT_DIR', '.')
+        
+        # Extract context
+        session_id = extract_session_id(prompt)
+        agent_id = extract_agent_id(prompt)
+        
+        # Find session if not in prompt
+        if not session_id:
+            session_id = find_latest_session(project_dir)
+        
+        # Create log entry
+        log_entry = {
+            'timestamp': datetime.utcnow().isoformat() + 'Z',
+            'event': 'agent_start',
+            'agent_type': subagent_type,
+            'agent_id': agent_id,
+            'description': description,
+            'instruction': prompt,
+            'session_id': session_id
+        }
+        
+        # Ensure directories exist
+        startup_dir = Path(project_dir) / '.the-startup'
+        startup_dir.mkdir(exist_ok=True)
+        
+        # Write to session-specific file
+        if session_id:
+            session_dir = startup_dir / session_id
+            session_dir.mkdir(exist_ok=True)
+            
+            context_file = session_dir / 'agent-instructions.jsonl'
+            with open(context_file, 'a') as f:
+                json.dump(log_entry, f)
+                f.write('\n')
+        
+        # Write to global log
+        global_log = startup_dir / 'all-agent-instructions.jsonl'
+        with open(global_log, 'a') as f:
+            json.dump(log_entry, f)
+            f.write('\n')
+        
+        # Debug output if enabled
+        if os.environ.get('DEBUG_HOOKS'):
+            print(f"[HOOK] Agent starting: {subagent_type} (session: {session_id}, agent: {agent_id})", 
+                  file=sys.stderr)
+        
+    except Exception as e:
+        if os.environ.get('DEBUG_HOOKS'):
+            print(f"[HOOK ERROR] {e}", file=sys.stderr)
+        sys.exit(0)
+
+if __name__ == '__main__':
+    main()
+```
+
+### Step 3: Create Completion Hook Script
+
+**File**: `.claude/hooks/log_agent_complete.py`
+
+```python
+#!/usr/bin/env python3
+"""
+Log agent Task completion after execution.
+Only captures agents with subagent_type starting with "the-"
+"""
+
+import json
+import sys
+import os
+import re
+from datetime import datetime
+from pathlib import Path
+
+def extract_session_id(prompt):
+    """Extract sessionId from prompt text."""
+    match = re.search(r'SessionId:\s*([^\s,]+)', prompt)
+    return match.group(1) if match else None
+
+def extract_agent_id(prompt):
+    """Extract agentId from prompt text."""
+    match = re.search(r'AgentId:\s*([^\s,]+)', prompt)
+    return match.group(1) if match else None
+
+def find_latest_session(project_dir):
+    """Find the most recent session directory."""
+    startup_dir = Path(project_dir) / '.the-startup'
+    if not startup_dir.exists():
+        return None
+    
+    session_dirs = [d for d in startup_dir.iterdir() 
+                   if d.is_dir() and d.name.startswith('dev-')]
+    
+    if not session_dirs:
+        return None
+    
+    latest = max(session_dirs, key=lambda d: d.stat().st_mtime)
+    return latest.name
+
+def truncate_output(output, max_length=1000):
+    """Truncate output if too long."""
+    if isinstance(output, str) and len(output) > max_length:
+        return output[:max_length] + f"... [truncated {len(output) - max_length} chars]"
+    return output
+
+def main():
+    try:
+        # Read JSON input from stdin
+        input_data = json.loads(sys.stdin.read())
+        
+        # Check if this is a Task tool call
+        if input_data.get('tool_name') != 'Task':
+            sys.exit(0)
+        
+        tool_input = input_data.get('tool_input', {})
+        subagent_type = tool_input.get('subagent_type', '')
+        
+        # Only process agents starting with "the-"
+        if not subagent_type.startswith('the-'):
+            sys.exit(0)
+        
+        prompt = tool_input.get('prompt', '')
+        description = tool_input.get('description', '')
+        output = input_data.get('output', '')
+        
+        # Get project directory
+        project_dir = os.environ.get('CLAUDE_PROJECT_DIR', '.')
+        
+        # Extract context
+        session_id = extract_session_id(prompt)
+        agent_id = extract_agent_id(prompt)
+        
+        # Find session if not in prompt
+        if not session_id:
+            session_id = find_latest_session(project_dir)
+        
+        # Create log entry
+        log_entry = {
+            'timestamp': datetime.utcnow().isoformat() + 'Z',
+            'event': 'agent_complete',
+            'agent_type': subagent_type,
+            'agent_id': agent_id,
+            'description': description,
+            'output_summary': truncate_output(output),
+            'session_id': session_id
+        }
+        
+        # Ensure directories exist
+        startup_dir = Path(project_dir) / '.the-startup'
+        startup_dir.mkdir(exist_ok=True)
+        
+        # Write to session-specific file
+        if session_id:
+            session_dir = startup_dir / session_id
+            session_dir.mkdir(exist_ok=True)
+            
+            context_file = session_dir / 'agent-instructions.jsonl'
+            with open(context_file, 'a') as f:
+                json.dump(log_entry, f)
+                f.write('\n')
+        
+        # Write to global log
+        global_log = startup_dir / 'all-agent-instructions.jsonl'
+        with open(global_log, 'a') as f:
+            json.dump(log_entry, f)
+            f.write('\n')
+        
+        # Debug output if enabled
+        if os.environ.get('DEBUG_HOOKS'):
+            print(f"[HOOK] Agent completed: {subagent_type} (session: {session_id}, agent: {agent_id})", 
+                  file=sys.stderr)
+        
+    except Exception as e:
+        if os.environ.get('DEBUG_HOOKS'):
+            print(f"[HOOK ERROR] {e}", file=sys.stderr)
+        sys.exit(0)
+
+if __name__ == '__main__':
+    main()
+```
+
+### Step 4: Update Settings Configuration
+
+**File**: `.claude/settings.local.json`
+
+```json
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:docs.anthropic.com)",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(mkdir:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(mkdir:*)",
+      "Bash(mv:*)"
+    ],
+    "deny": []
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/log_agent_start.py"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/log_agent_complete.py"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+## Quick Installation
+
+### Prerequisites
+- **uv**: Python package manager (`curl -LsSf https://astral.sh/uv/install.sh | sh`)
+- **Gum** (optional): For enhanced UI (`brew install gum` on macOS)
+
+### Automated Setup
+
+```bash
+# Make installer executable
+chmod +x .claude/scripts/setup.sh
+
+# Run interactive setup
+.claude/scripts/setup.sh
+```
+
+The installer will:
+1. Check and install prerequisites
+2. Configure hooks interactively
+3. Set up logging directories
+4. Test the installation
+5. Provide usage instructions
+
+### Hook Management
+
+After installation, use the hook manager for ongoing maintenance:
+
+```bash
+# Make manager executable
+chmod +x .claude/scripts/hook-manager.sh
+
+# Run hook manager
+.claude/scripts/hook-manager.sh
+
+# Or use direct commands:
+.claude/scripts/hook-manager.sh status  # Check hook status
+.claude/scripts/hook-manager.sh logs    # View logs
+.claude/scripts/hook-manager.sh toggle  # Enable/disable hooks
+.claude/scripts/hook-manager.sh clear   # Clear logs
+.claude/scripts/hook-manager.sh test    # Test hooks
+```
+
+### Manual Setup (Alternative)
+
+If you prefer manual configuration:
+
+```bash
+# 1. Make scripts executable
+chmod +x .claude/hooks/log_agent_start.py
+chmod +x .claude/hooks/log_agent_complete.py
+chmod +x .claude/scripts/*.sh
+
+# 2. Ensure uv is installed
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 3. Hooks are already configured in settings.local.json
+```
+
+## Testing the Hooks
+
+### 1. Enable Debug Output (Optional)
+```bash
+export DEBUG_HOOKS=1
+```
+
+### 2. Run a Command That Uses Agents
+```bash
+claude /develop "create a user authentication system"
+```
+
+### 3. Check the Logs
+
+**Session-specific log:**
+```bash
+cat .the-startup/dev-*/agent-instructions.jsonl | jq .
+```
+
+**Global log:**
+```bash
+cat .the-startup/all-agent-instructions.jsonl | jq .
+```
+
+### Expected Output Format
+
+```json
+{
+  "timestamp": "2025-01-10T15:30:45Z",
+  "event": "agent_start",
+  "agent_type": "the-business-analyst",
+  "agent_id": "ba3k5m",
+  "description": "Analyze requirements",
+  "instruction": "Analyze user authentication requirements. SessionId: dev-20250110-153045-a7b9, AgentId: ba3k5m",
+  "session_id": "dev-20250110-153045-a7b9"
+}
+```
+
+```json
+{
+  "timestamp": "2025-01-10T15:31:20Z",
+  "event": "agent_complete",
+  "agent_type": "the-business-analyst",
+  "agent_id": "ba3k5m",
+  "description": "Analyze requirements",
+  "output_summary": "Requirements analysis complete. Identified 5 key features...",
+  "session_id": "dev-20250110-153045-a7b9"
+}
+```
+
+## Troubleshooting
+
+### Hooks Not Firing
+1. Check settings file is valid JSON: `jq . .claude/settings.local.json`
+2. Verify scripts are executable: `ls -la .claude/hooks/`
+3. Enable debug output: `export DEBUG_HOOKS=1`
+4. Check stderr output during execution
+
+### Permission Errors
+```bash
+chmod +x .claude/hooks/*.py
+```
+
+### Python Not Found
+Ensure Python 3 is installed and in PATH:
+```bash
+which python3
+python3 --version
+```
+
+### Logs Not Created
+1. Check `.the-startup/` directory exists and is writable
+2. Verify `CLAUDE_PROJECT_DIR` environment variable is set correctly
+3. Look for error messages in stderr when `DEBUG_HOOKS=1`
+
+### Session ID Not Found
+The hooks will attempt to:
+1. Extract from prompt text (pattern: `SessionId: xxx`)
+2. Find the latest session directory if not in prompt
+3. Still log to global file even if session not found
+
+## API Reference
+
+### Hook Input Structure (stdin)
+```json
+{
+  "tool_name": "Task",
+  "tool_input": {
+    "description": "Short description",
+    "prompt": "Full instructions with context",
+    "subagent_type": "the-agent-name"
+  },
+  "output": "Tool execution result (PostToolUse only)"
+}
+```
+
+### Hook Exit Codes
+- `0`: Success, continue execution
+- `Non-zero`: (PreToolUse only) Block tool execution
+
+### Environment Variables
+- `CLAUDE_PROJECT_DIR`: Project root directory
+- `DEBUG_HOOKS`: Enable debug output to stderr
+
+## Advanced Usage
+
+### Filtering Specific Agents
+Modify the Python scripts to filter specific agents:
+```python
+ALLOWED_AGENTS = ['the-developer', 'the-architect']
+if subagent_type not in ALLOWED_AGENTS:
+    sys.exit(0)
+```
+
+### Adding Metrics
+Extend log entries with performance metrics:
+```python
+log_entry['duration_ms'] = execution_time
+log_entry['memory_usage'] = get_memory_usage()
+```
+
+### Integration with External Services
+Send logs to external services:
+```python
+import requests
+requests.post('https://api.logging-service.com/logs', json=log_entry)
+```
 
 ## Best Practices
 
-### 1. Context Engineering
+1. **Always handle exceptions** - Never let a hook crash block tool execution
+2. **Keep hooks fast** - Long-running hooks slow down Claude Code
+3. **Use structured logging** - JSON format enables easy parsing
+4. **Rotate logs periodically** - Prevent unlimited growth
+5. **Test in isolation** - Verify hooks work before enabling
+6. **Document custom hooks** - Help future maintainers understand your setup
 
-"Context engineering is about doing this automatically in a dynamic system. It takes more nuance and is effectively the #1 job of engineers building AI agents"
+## Further Resources
 
-- Provide clear task boundaries
-- Include relevant context without overwhelming
-- Structure information for easy parsing
-
-### 2. Error Handling
-
-"Agents are stateful and errors compound. Minor system failures can be catastrophic for agents"
-
-- Implement durable execution
-- Design for resumability
-- Clear error propagation
-
-### 3. Human-in-the-Loop Design
-
-- Centralize user interaction in orchestrator
-- Design clear handoff mechanisms
-- Preserve context across interactions
-
-### 4. Task Decomposition
-
-From Anthropic's system:
-- Break complex queries into subtasks
-- Provide each agent with:
-  - Clear objective
-  - Expected output format
-  - Tool/source guidance
-  - Task boundaries
-
-## Recommendations
-
-### Orchestrator Design
-
-1. **Responsibilities**:
-   - All user interaction
-   - State and context management
-   - Task decomposition and delegation
-   - Result synthesis and presentation
-
-2. **Implementation**:
-   ```json
-   {
-     "conversation_history": [...],
-     "task_progress": {...},
-     "intermediate_results": {...},
-     "user_preferences": {...}
-   }
-   ```
-
-### Sub-Agent Design
-
-1. **Characteristics**:
-   - Single, well-defined purpose
-   - Stateless execution
-   - No user interaction capability
-   - Clear input/output contracts
-
-2. **Context Package**:
-   ```json
-   {
-     "task": "specific_action_to_perform",
-     "context": {
-       "relevant_data": {...},
-       "constraints": [...],
-       "previous_findings": {...}
-     },
-     "expected_output": {
-       "format": "structured_data",
-       "required_fields": [...]
-     }
-   }
-   ```
-
-### Execution Flow
-
-1. User → Orchestrator: Request/Feedback
-2. Orchestrator → Sub-Agent: Task + Context
-3. Sub-Agent → Orchestrator: Results
-4. Orchestrator decides:
-   - Present to user
-   - Chain to another agent
-   - Request clarification
-   - Synthesize multiple results
-
-## Sources and References
-
-### Primary Research Papers and Blogs
-1. [How we built our multi-agent research system - Anthropic](https://www.anthropic.com/engineering/built-multi-agent-research-system)
-2. [LangGraph: Multi-Agent Workflows](https://blog.langchain.com/langgraph-multi-agent-workflows/)
-3. [Stateful Agents: The Missing Link in LLM Intelligence - Letta](https://www.letta.com/blog/stateful-agents)
-4. [MicroAgents: Exploring Agentic Architecture - Microsoft](https://devblogs.microsoft.com/semantic-kernel/microagents-exploring-agentic-architecture-with-microservices/)
-
-### Framework Documentation
-5. [CrewAI GitHub Repository](https://github.com/crewAIInc/crewAI)
-6. [OpenAI Agents SDK - Orchestrating multiple agents](https://openai.github.io/openai-agents-python/multi_agent/)
-7. [Semantic Kernel Agent Architecture - Microsoft](https://learn.microsoft.com/en-us/semantic-kernel/frameworks/agent/agent-architecture)
-
-### Comparative Analyses
-8. [Agent Orchestration: When to Use LangChain, LangGraph, AutoGen](https://medium.com/@akankshasinha247/agent-orchestration-when-to-use-langchain-langgraph-autogen-or-build-an-agentic-rag-system-cc298f785ea4)
-9. [CrewAI vs AutoGen: Which One To Choose](https://www.ampcome.com/post/crewai-vs-autogen-which-is-best-to-build-ai-agents)
-10. [Top AI Agent Frameworks in 2025](https://medium.com/@iamanraghuvanshi/agentic-ai-3-top-ai-agent-frameworks-in-2025-langchain-autogen-crewai-beyond-2fc3388e7dec)
-
-### Technical Guides
-11. [A Technical Guide to Multi-Agent Orchestration](https://dominguezdaniel.medium.com/a-technical-guide-to-multi-agent-orchestration-5f979c831c0d)
-12. [AI Agent Orchestration Patterns - Azure Architecture Center](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns)
-13. [Understanding AI Agent Orchestration - Botpress](https://botpress.com/blog/ai-agent-orchestration)
-
-### Industry Perspectives
-14. [What is AI Agent Orchestration? - IBM](https://www.ibm.com/think/topics/ai-agent-orchestration)
-15. [Stateful vs. Stateless AI Agents - Belsterns](https://www.belsterns.com/post/stateful-vs-stateless-ai-agents-what-s-the-difference-and-why-does-it-matter)
-16. [Multi-agent Orchestration Overview - Medium](https://medium.com/@yugank.aman/multi-agent-orchestration-overview-aa7e27c4e99e)
-
-## Conclusion
-
-The research strongly supports a clear architectural pattern: **stateful orchestrators managing stateless worker agents**. This approach provides the best balance of capability, maintainability, and scalability. The orchestrator handles all complexity around user interaction and state management, while worker agents remain focused tools for specific execution tasks.
+- [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
+- [Hooks Guide](https://docs.anthropic.com/en/docs/claude-code/hooks-guide)
+- [Hooks Reference](https://docs.anthropic.com/en/docs/claude-code/hooks)

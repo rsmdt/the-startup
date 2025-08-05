@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+# /// script
+# requires-python = ">=3.8"
+# ///
+"""
+Log agent Task instructions before execution.
+Only captures agents with subagent_type starting with "the-"
+"""
+
+import json
+import sys
+import os
+import re
+from datetime import datetime
+from pathlib import Path
+
+def extract_session_id(prompt):
+    """Extract sessionId from prompt text."""
+    match = re.search(r'SessionId:\s*([^\s,]+)', prompt)
+    return match.group(1) if match else None
+
+def extract_agent_id(prompt):
+    """Extract agentId from prompt text."""
+    match = re.search(r'AgentId:\s*([^\s,]+)', prompt)
+    return match.group(1) if match else None
+
+def find_latest_session(project_dir):
+    """Find the most recent session directory."""
+    startup_dir = Path(project_dir) / '.the-startup'
+    if not startup_dir.exists():
+        return None
+    
+    session_dirs = [d for d in startup_dir.iterdir() 
+                   if d.is_dir() and d.name.startswith('dev-')]
+    
+    if not session_dirs:
+        return None
+    
+    latest = max(session_dirs, key=lambda d: d.stat().st_mtime)
+    return latest.name
+
+def main():
+    try:
+        # Read JSON input from stdin
+        input_data = json.loads(sys.stdin.read())
+        
+        # Check if this is a Task tool call
+        if input_data.get('tool_name') != 'Task':
+            sys.exit(0)
+        
+        tool_input = input_data.get('tool_input', {})
+        subagent_type = tool_input.get('subagent_type', '')
+        
+        # Only process agents starting with "the-"
+        if not subagent_type.startswith('the-'):
+            sys.exit(0)
+        
+        prompt = tool_input.get('prompt', '')
+        description = tool_input.get('description', '')
+        
+        # Get project directory
+        project_dir = os.environ.get('CLAUDE_PROJECT_DIR', '.')
+        
+        # Extract context
+        session_id = extract_session_id(prompt)
+        agent_id = extract_agent_id(prompt)
+        
+        # Find session if not in prompt
+        if not session_id:
+            session_id = find_latest_session(project_dir)
+        
+        # Create log entry
+        log_entry = {
+            'timestamp': datetime.utcnow().isoformat() + 'Z',
+            'event': 'agent_start',
+            'agent_type': subagent_type,
+            'agent_id': agent_id,
+            'description': description,
+            'instruction': prompt,
+            'session_id': session_id
+        }
+        
+        # Ensure directories exist
+        startup_dir = Path(project_dir) / '.the-startup'
+        startup_dir.mkdir(exist_ok=True)
+        
+        # Write to session-specific file
+        if session_id:
+            session_dir = startup_dir / session_id
+            session_dir.mkdir(exist_ok=True)
+            
+            context_file = session_dir / 'agent-instructions.jsonl'
+            with open(context_file, 'a') as f:
+                json.dump(log_entry, f)
+                f.write('\n')
+        
+        # Write to global log
+        global_log = startup_dir / 'all-agent-instructions.jsonl'
+        with open(global_log, 'a') as f:
+            json.dump(log_entry, f)
+            f.write('\n')
+        
+        # Debug output if enabled
+        if os.environ.get('DEBUG_HOOKS'):
+            print(f"[HOOK] Agent starting: {subagent_type} (session: {session_id}, agent: {agent_id})", 
+                  file=sys.stderr)
+        
+    except Exception as e:
+        if os.environ.get('DEBUG_HOOKS'):
+            print(f"[HOOK ERROR] {e}", file=sys.stderr)
+        sys.exit(0)
+
+if __name__ == '__main__':
+    main()
