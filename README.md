@@ -152,6 +152,156 @@ This pattern combines the benefits of both approaches:
 - Enables parallelization and scaling
 - Simplifies testing and debugging
 
+## Context Management System
+
+### Overview
+
+The `/develop` command implements a sophisticated context management system that enables stateful orchestration with intelligent agent instance management. This system preserves context across interactions while allowing both fresh analysis and continuation of previous work.
+
+### Architecture
+
+```
+.the-startup/
+└── [sessionId]/
+    ├── main.jsonl          # Main orchestrator context log
+    ├── a1b2c3.jsonl       # Agent instance (e.g., first BA call)
+    ├── d4e5f6.jsonl       # Agent instance (e.g., architect)
+    └── g7h8i9.jsonl       # Agent instance (e.g., second BA call)
+```
+
+### Agent Instance Management
+
+The orchestrator intelligently manages agent instances through unique identifiers (agentIds):
+
+#### When to Create New Agent Instance (new agentId)
+- Fresh analysis task for a different feature
+- Independent investigation of separate components
+- Parallel work streams that shouldn't share context
+- Starting a new line of inquiry
+
+#### When to Reuse Existing Agent Instance (same agentId)
+- Clarifications on previous work
+- Refinements based on user feedback
+- Consolidation of findings
+- Continuation of interrupted work
+- Iterative improvements
+
+### JSONL Format
+
+Each context file uses a simple, append-only JSONL format:
+
+```json
+{"role": "user", "content": "Create user authentication system"}
+{"role": "assistant", "content": "I'll orchestrate the development of user authentication..."}
+{"role": "user", "content": "Include OAuth support"}
+{"role": "assistant", "content": "I'll refine the requirements to include OAuth..."}
+```
+
+### Implementation Details
+
+#### Orchestrator Responsibilities
+1. **Session Management**: Creates session folder at `.the-startup/[sessionId]/`
+2. **Context Logging**: Writes all interactions to `main.jsonl`
+3. **Agent Tracking**: Maintains mapping of agentIds to their purposes
+4. **Instance Decisions**: Determines when to create new vs reuse existing instances
+
+#### Sub-Agent Responsibilities
+1. **Context Discovery**: Check for `.the-startup/[sessionId]/[agentId].jsonl`
+2. **Context Creation**: Create new file if first invocation
+3. **Context Reading**: Load previous interactions if file exists
+4. **Context Appending**: Add new interactions to maintain history
+
+### Use Cases
+
+#### 1. Fresh Analysis
+```
+User: "Analyze requirements for user authentication"
+Orchestrator: Creates new BA instance with agentId "a1b2c3"
+
+User: "Also analyze payment processing requirements"
+Orchestrator: Creates new BA instance with agentId "x7y8z9"
+Result: Two separate context files for independent analyses
+```
+
+#### 2. Refinement and Clarification
+```
+User: "Analyze requirements for user authentication"
+Orchestrator: Creates BA instance with agentId "a1b2c3"
+
+User: "Can you add two-factor authentication to those requirements?"
+Orchestrator: Reuses BA instance "a1b2c3" with previous context
+Result: BA continues from where it left off, refining existing work
+```
+
+#### 3. Parallel Architecture Work
+```
+User: "Design the system architecture"
+Orchestrator: 
+- Creates Architect instance "m1n2o3" for authentication subsystem
+- Creates Architect instance "p4q5r6" for payment subsystem
+Result: Parallel architecture design with separate contexts
+```
+
+#### 4. Consolidation
+```
+User: "Combine the authentication and payment architectures"
+Orchestrator: Reuses Architect instance "m1n2o3" 
+- Architect reads its previous auth work
+- Consolidates with payment architecture
+Result: Unified architecture building on previous work
+```
+
+#### 5. Interrupted Work Recovery
+```
+Session 1:
+User: "Design user authentication"
+Orchestrator: Creates Architect "m1n2o3", work partially complete
+
+Session 2 (using resume):
+User: "/develop 001-user-auth"
+Orchestrator: Recognizes existing work, reuses Architect "m1n2o3"
+Result: Architect continues from saved state
+```
+
+### Example Workflow
+
+```
+1. User requests: "Build a user authentication system"
+
+2. Orchestrator creates:
+   .the-startup/abc123/main.jsonl
+   
+3. Chief analyzes → creates instance "ch1" → .the-startup/abc123/ch1.jsonl
+
+4. BA clarifies requirements → creates "ba1" → .the-startup/abc123/ba1.jsonl
+
+5. User adds: "Include OAuth support"
+
+6. BA refines (same instance) → appends to .the-startup/abc123/ba1.jsonl
+
+7. Architect designs → creates "ar1" → .the-startup/abc123/ar1.jsonl
+
+8. Developer implements → creates "dv1" → .the-startup/abc123/dv1.jsonl
+
+Final structure:
+.the-startup/
+└── abc123/
+    ├── main.jsonl  # Full orchestration log
+    ├── ch1.jsonl   # Chief's analysis
+    ├── ba1.jsonl   # BA's requirements (initial + refinements)
+    ├── ar1.jsonl   # Architect's design
+    └── dv1.jsonl   # Developer's implementation
+```
+
+### Benefits
+
+1. **State Preservation**: Full context maintained across interactions
+2. **Parallel Execution**: Multiple instances work independently without collision
+3. **Intelligent Continuation**: Agents resume with their specific context
+4. **Clear Audit Trail**: Complete history of decisions and refinements
+5. **Flexible Orchestration**: Supports both fresh starts and continuations
+6. **Debugging Support**: Each agent's thought process is isolated and traceable
+
 ## Best Practices
 
 ### 1. Context Engineering

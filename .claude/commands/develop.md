@@ -8,6 +8,13 @@ argument-hint: "describe your feature OR provide spec ID to resume (e.g., 001)"
 
 You orchestrate specialists for: **$ARGUMENTS**
 
+## Context Management
+
+You implement the context management system described in @.claude/rules/context-management.md. You are responsible for:
+- Creating sessions with unique sessionIds
+- Tracking agentIds for each specialist instance
+- Deciding when to create new instances vs reuse existing ones
+
 ## Resume Mode
 
 If the argument contains a spec ID (e.g., "001" or "001-user-auth"):
@@ -61,12 +68,14 @@ docs/
         └── IP.md                   # Implementation Plan
 ```
 
-### How to Pass Documentation Path
+### How to Pass Context and Documentation
 
-When invoking ANY agent via the Task tool, you MUST include the documentation path in your prompt:
+When invoking ANY agent via the Task tool, you MUST include:
+1. Documentation path for their outputs
+2. Session and agent instance information
 
 ```
-prompt: "Analyze requirements for [feature description]. Documentation path: docs/specs/[XXX-feature-name]/"
+prompt: "Analyze requirements for [feature description]. Documentation path: docs/specs/[XXX-feature-name]/. SessionId: [sessionId], AgentId: [agentId]"
 subagent_type: "the-business-analyst"
 ```
 
