@@ -1,0 +1,127 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., v1.0.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os: linux
+            arch: amd64
+          - os: linux
+            arch: arm64
+          - os: darwin
+            arch: amd64
+          - os: darwin
+            arch: arm64
+          - os: windows
+            arch: amd64
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+      
+      - name: Get dependencies
+        run: go mod download
+      
+      - name: Build binary
+        env:
+          GOOS: ${{ matrix.os }}
+          GOARCH: ${{ matrix.arch }}
+        run: |
+          VERSION="${{ github.event.inputs.version || github.ref_name }}"
+          GIT_COMMIT=$(git rev-parse --short HEAD)
+          BUILD_DATE=$(date -u +"%Y-%m-%d")
+          
+          OUTPUT_NAME="the-startup-${{ matrix.os }}-${{ matrix.arch }}"
+          if [ "${{ matrix.os }}" = "windows" ]; then
+            OUTPUT_NAME="${OUTPUT_NAME}.exe"
+          fi
+          
+          go build \
+            -ldflags "-X main.Version=${VERSION} -X main.GitCommit=${GIT_COMMIT} -X main.BuildDate=${BUILD_DATE}" \
+            -o "${OUTPUT_NAME}" \
+            .
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: the-startup-${{ matrix.os }}-${{ matrix.arch }}
+          path: the-startup-*
+  
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+      
+      - name: Prepare release files
+        run: |
+          mkdir -p release
+          find artifacts -type f -name 'the-startup-*' -exec mv {} release/ \;
+          chmod +x release/the-startup-*
+          ls -la release/
+      
+      - name: Create checksums
+        run: |
+          cd release
+          sha256sum the-startup-* > checksums.txt
+          cd ..
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.version || github.ref_name }}
+          name: Release ${{ github.event.inputs.version || github.ref_name }}
+          draft: false
+          prerelease: false
+          files: |
+            release/the-startup-*
+            release/checksums.txt
+          body: |
+            ## Installation
+            
+            ### Quick Install (recommended)
+            ```bash
+            curl -LsSf https://raw.githubusercontent.com/the-startup/the-startup/main/install.sh | sh
+            ```
+            
+            ### Manual Download
+            Download the appropriate binary for your platform from the assets below.
+            
+            ### With Go
+            ```bash
+            go install github.com/the-startup/the-startup@latest
+            ```
+            
+            ## Changes
+            See [CHANGELOG.md](https://github.com/the-startup/the-startup/blob/main/CHANGELOG.md) for details.
+            
+            ## Checksums
+            SHA256 checksums are available in `checksums.txt`
