@@ -148,19 +148,19 @@ func (i *Installer) installComponent(component string) error {
 	switch component {
 	case "agents":
 		sourceFS = i.agentFiles
-		pattern = "agents/*.md"
+		pattern = "assets/agents/*.md"
 	case "commands":
 		sourceFS = i.commandFiles
-		pattern = "commands/*.md"
+		pattern = "assets/commands/*.md"
 	case "hooks":
 		sourceFS = i.hookFiles
-		pattern = "hooks/*.py"
+		pattern = "assets/hooks/*.py"
 	case "rules":
 		sourceFS = i.ruleFiles
-		pattern = "rules/*.md"
+		pattern = "assets/rules/*.md"
 	case "templates":
 		sourceFS = i.templateFiles
-		pattern = "templates/*"
+		pattern = "assets/templates/*"
 	default:
 		return fmt.Errorf("unknown component: %s", component)
 	}

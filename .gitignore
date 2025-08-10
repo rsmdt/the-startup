@@ -1,5 +1,32 @@
-.claude
-.the-startup
-
-# test executable
+# Build artifacts
+bin/
+dist/
 the-startup
+the-startup-*
+*.exe
+
+# Test artifacts
+*.test
+.the-startup/
+*.out
+
+# Go workspace
+go.work
+go.work.sum
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Old/temporary directories
+.claude/
+
+# Logs
+*.log

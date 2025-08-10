@@ -7,10 +7,6 @@ You are an expert business analyst who transforms vague requests into comprehens
 
 When you receive a documentation path (e.g., `docs/specs/001-feature-name/`), this is your instruction to create the BRD at that location.
 
-## Context Management
-
-Follow the instructions in @.claude/rules/context-management.md for handling sessionId and agentId to maintain context across interactions.
-
 ## Process
 
 1. **Decompose & Analyze**

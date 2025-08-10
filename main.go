@@ -18,19 +18,19 @@ var (
 
 // Embedded assets
 //
-//go:embed agents/*.md
+//go:embed assets/agents/*.md
 var agentFiles embed.FS
 
-//go:embed commands/*.md
+//go:embed assets/commands/*.md
 var commandFiles embed.FS
 
-//go:embed hooks/*.py
+//go:embed assets/hooks/*.py
 var hookFiles embed.FS
 
-//go:embed rules/*.md
+//go:embed assets/rules/*.md
 var ruleFiles embed.FS
 
-//go:embed templates/*
+//go:embed assets/templates/*
 var templateFiles embed.FS
 
 func main() {
