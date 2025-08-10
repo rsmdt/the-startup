@@ -20,17 +20,26 @@ curl -LsSf https://raw.githubusercontent.com/the-startup/the-startup/main/instal
 
 The installer will:
 1. Check prerequisites (curl, Python, uv)
-2. Let you choose between global (`~/.claude`) or local (`./.claude`) installation
+2. Let you choose between:
+   - Global installation: `~/.config/the-startup/` (recommended)
+   - Local installation: `./.the-startup` (project-specific)
 3. Select which components to install (agents, hooks, commands)
-4. Configure everything automatically
-5. Create a lock file to track your installation
+4. Configure everything automatically:
+   - Installs files to the chosen location (e.g., `~/.config/the-startup/`)
+   - Creates references in `~/.claude/` that point to the installed files using `@path` syntax
+5. Create a lock file at `~/.config/the-startup/the-startup.lock` to track your installation
 
 ### What Gets Installed
 
 - **12+ Specialized Agents**: From architecture to security to testing
+  - Installed to: `~/.config/the-startup/agents/*.md`
+  - Referenced from: `~/.claude/agents/` using `@~/.config/the-startup/agents/[agent-name].md`
 - **Automated Hooks**: Log and track agent interactions
+  - Installed to: `~/.config/the-startup/hooks/*.py`
+  - Copied to: `~/.claude/hooks/` (made executable)
 - **Custom Commands**: Enhanced development workflows
-- **Context Management**: Smart session and agent tracking
+  - Installed to: `~/.config/the-startup/commands/*.md`
+  - Copied to: `~/.claude/commands/`
 
 ## Features
 
@@ -80,10 +89,14 @@ The installer provides an interactive experience:
 
 1. **Tool Selection**: Currently supports Claude Code (more tools coming)
 2. **Location Choice**: 
-   - Global: `~/.claude` (all projects)
-   - Local: `./.claude` (current project only)
+   - Global: `~/.config/the-startup/` (recommended, works across all projects)
+   - Local: `./.the-startup` (current project only)
+   - Custom: Choose your own installation path
 3. **Component Selection**: Choose which agents, hooks, and commands to install
-4. **Automatic Configuration**: Sets up hooks and settings automatically
+4. **Automatic Configuration**: 
+   - Installs all files to the chosen location
+   - Creates references in `~/.claude/` using the `@path/to/file` syntax
+   - Configures hooks in settings automatically
 
 ### Manual Installation
 
@@ -108,11 +121,12 @@ chmod +x ~/.claude/hooks/*.py
 
 ### Lock File
 
-The installer creates a lock file at `~/.config/the-startup/the-startup.lock` to track:
+The installer creates a lock file at your installation path (e.g., `~/.config/the-startup/the-startup.lock`) to track:
 - Installed version
 - Installation type and path
 - Installed files with checksums
 - Installation date
+- Component locations
 
 ### Settings
 
@@ -137,7 +151,7 @@ Hooks are configured in `.claude/settings.json`:
 
 ### Using Agents
 
-After installation, agents are available in Claude Code:
+After installation, agents are available in Claude Code through reference files:
 
 ```bash
 # Start a new development task
@@ -145,6 +159,77 @@ After installation, agents are available in Claude Code:
 
 # The chief will analyze and route to appropriate specialists
 # Agents work together to deliver comprehensive solutions
+```
+
+**How it works:**
+- Agents are installed to `~/.config/the-startup/agents/`
+- Claude Code reads references from `~/.claude/agents/`
+- Each reference contains `@~/.config/the-startup/agents/[agent-name].md`
+- This allows centralized updates while maintaining Claude compatibility
+
+### Understanding the @path Syntax
+
+The `@path/to/file` syntax is Claude Code's reference mechanism that allows files to point to other files:
+
+**Example Reference File** (`~/.claude/agents/the-chief.md`):
+```
+@~/.config/the-startup/agents/the-chief.md
+```
+
+**Dynamic Path Resolution:**
+- Agent and command files use `{{INSTALL_PATH}}` placeholders
+- The installer replaces these with your actual installation path
+- This allows flexible installation locations (global, local, or custom)
+
+**Example Placeholder Usage in Agent Files:**
+```markdown
+# Before installation (in source)
+Follow instructions in @{{INSTALL_PATH}}/rules/context-management.md
+
+# After installation (with default path)
+Follow instructions in @~/.config/the-startup/rules/context-management.md
+
+# After installation (with custom path)
+Follow instructions in @/my/custom/path/rules/context-management.md
+```
+
+**Benefits:**
+- **Centralized Management**: Update agents in one location
+- **Flexible Installation**: Choose any installation directory
+- **Version Control**: Keep agents in the git repository, install them anywhere
+- **Clean Separation**: Claude's working directory stays uncluttered
+- **Easy Updates**: Pull latest changes and reinstall to update all projects
+
+**File Structure After Installation:**
+```
+~/.config/the-startup/          # Main installation directory
+├── agents/                     # Agent source files
+│   ├── the-architect.md
+│   ├── the-chief.md
+│   └── ...
+├── commands/                   # Command source files
+│   ├── develop.md
+│   └── create.md
+├── hooks/                      # Hook scripts
+│   └── *.py
+├── templates/                  # Document templates
+│   └── *.md
+└── the-startup.lock           # Installation manifest
+
+~/.claude/                      # Claude Code directory
+├── agents/                     # Reference files (contain @paths)
+│   ├── the-architect.md       # Contains: @~/.config/the-startup/agents/the-architect.md
+│   ├── the-chief.md           # Contains: @~/.config/the-startup/agents/the-chief.md
+│   └── ...
+├── commands/                   # Copied command files (with placeholders replaced)
+│   ├── develop.md
+│   └── create.md
+├── hooks/                      # Copied hook scripts (executable)
+│   └── *.py
+└── templates/                  # Reference files (contain @paths)
+    ├── PRD.md                  # Contains: @~/.config/the-startup/templates/PRD.md
+    ├── BRD.md                  # Contains: @~/.config/the-startup/templates/BRD.md
+    └── ...
 ```
 
 ### Viewing Logs

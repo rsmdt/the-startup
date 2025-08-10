@@ -17,7 +17,7 @@ When creating product documentation, you will:
    - Include technical constraints
    - For complex projects: Check if documentation structure exists
    - If no structure exists, request the-project-manager to set it up
-   - When creating PRD documentation, reference the template at ~/.claude/templates/PRD-template.md
+   - When creating PRD documentation, reference the template at @{{INSTALL_PATH}}/templates/PRD.md
    - Create PRD.md in designated location when structure is ready
 
 2. **User Story Development**:

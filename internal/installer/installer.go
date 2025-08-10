@@ -1,6 +1,7 @@
 package installer
 
 import (
+	"bytes"
 	"embed"
 	"encoding/json"
 	"fmt"
@@ -18,7 +19,6 @@ type Installer struct {
 	agentFiles    *embed.FS
 	commandFiles  *embed.FS
 	hookFiles     *embed.FS
-	ruleFiles     *embed.FS
 	templateFiles *embed.FS
 	
 	installPath  string
@@ -29,7 +29,7 @@ type Installer struct {
 }
 
 // New creates a new installer
-func New(agents, commands, hooks, rules, templates *embed.FS) *Installer {
+func New(agents, commands, hooks, templates *embed.FS) *Installer {
 	homeDir, _ := os.UserHomeDir()
 	configDir := os.Getenv("XDG_CONFIG_HOME")
 	if configDir == "" {
@@ -40,12 +40,11 @@ func New(agents, commands, hooks, rules, templates *embed.FS) *Installer {
 		agentFiles:    agents,
 		commandFiles:  commands,
 		hookFiles:     hooks,
-		ruleFiles:     rules,
 		templateFiles: templates,
 		installPath:   filepath.Join(configDir, "the-startup"),
 		claudePath:    filepath.Join(homeDir, ".claude"),
 		tool:          "claude-code",
-		components:    []string{"agents", "hooks", "commands", "rules"},
+		components:    []string{"agents", "hooks", "commands", "templates"},
 	}
 }
 
@@ -155,9 +154,6 @@ func (i *Installer) installComponent(component string) error {
 	case "hooks":
 		sourceFS = i.hookFiles
 		pattern = "assets/hooks/*.py"
-	case "rules":
-		sourceFS = i.ruleFiles
-		pattern = "assets/rules/*.md"
 	case "templates":
 		sourceFS = i.templateFiles
 		pattern = "assets/templates/*"
@@ -194,6 +190,11 @@ func (i *Installer) copyFile(sourceFS *embed.FS, sourcePath, destDir string) err
 		return err
 	}
 	
+	// Replace placeholders in .md files
+	if strings.HasSuffix(sourcePath, ".md") {
+		data = i.replacePlaceholders(data)
+	}
+	
 	// Determine destination path
 	fileName := filepath.Base(sourcePath)
 	destPath := filepath.Join(destDir, fileName)
@@ -217,9 +218,9 @@ func (i *Installer) createClaudeReferences() error {
 	claudeAgents := filepath.Join(i.claudePath, "agents")
 	claudeCommands := filepath.Join(i.claudePath, "commands")
 	claudeHooks := filepath.Join(i.claudePath, "hooks")
-	claudeRules := filepath.Join(i.claudePath, "rules")
+	claudeTemplates := filepath.Join(i.claudePath, "templates")
 	
-	for _, dir := range []string{claudeAgents, claudeCommands, claudeHooks, claudeRules} {
+	for _, dir := range []string{claudeAgents, claudeCommands, claudeHooks, claudeTemplates} {
 		if err := os.MkdirAll(dir, 0755); err != nil {
 			return err
 		}
@@ -231,8 +232,8 @@ func (i *Installer) createClaudeReferences() error {
 		entries, _ := os.ReadDir(agentsDir)
 		for _, entry := range entries {
 			if strings.HasSuffix(entry.Name(), ".md") {
-				name := strings.TrimSuffix(entry.Name(), ".md")
-				refPath := filepath.Join(claudeAgents, name)
+				// Keep the .md extension for the reference file
+				refPath := filepath.Join(claudeAgents, entry.Name())
 				refContent := fmt.Sprintf("@%s/agents/%s", i.installPath, entry.Name())
 				if err := os.WriteFile(refPath, []byte(refContent), 0644); err != nil {
 					return err
@@ -284,22 +285,16 @@ func (i *Installer) createClaudeReferences() error {
 		}
 	}
 	
-	// Copy rules
-	if contains(i.components, "rules") {
-		rulesDir := filepath.Join(i.installPath, "rules")
-		entries, _ := os.ReadDir(rulesDir)
+	// Create reference files for templates
+	if contains(i.components, "templates") {
+		templatesDir := filepath.Join(i.installPath, "templates")
+		entries, _ := os.ReadDir(templatesDir)
 		for _, entry := range entries {
-			if strings.HasSuffix(entry.Name(), ".md") {
-				srcPath := filepath.Join(rulesDir, entry.Name())
-				destPath := filepath.Join(claudeRules, entry.Name())
-				
-				data, err := os.ReadFile(srcPath)
-				if err != nil {
-					return err
-				}
-				if err := os.WriteFile(destPath, data, 0644); err != nil {
-					return err
-				}
+			// Keep the full filename with extension for the reference file
+			refPath := filepath.Join(claudeTemplates, entry.Name())
+			refContent := fmt.Sprintf("@%s/templates/%s", i.installPath, entry.Name())
+			if err := os.WriteFile(refPath, []byte(refContent), 0644); err != nil {
+				return err
 			}
 		}
 	}
@@ -407,6 +402,12 @@ func (i *Installer) createLockFile() error {
 }
 
 // contains checks if a slice contains a string
+// replacePlaceholders replaces {{INSTALL_PATH}} with the actual installation path
+func (i *Installer) replacePlaceholders(data []byte) []byte {
+	// Replace {{INSTALL_PATH}} with the actual installation path
+	return bytes.ReplaceAll(data, []byte("{{INSTALL_PATH}}"), []byte(i.installPath))
+}
+
 func contains(slice []string, item string) bool {
 	for _, s := range slice {
 		if s == item {

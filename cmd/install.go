@@ -32,7 +32,7 @@ var (
 )
 
 // NewInstallCommand creates the install command
-func NewInstallCommand(agents, commands, hooks, rules, templates *embed.FS) *cobra.Command {
+func NewInstallCommand(agents, commands, hooks, templates *embed.FS) *cobra.Command {
 	var (
 		installPath string
 		toolType    string
@@ -50,7 +50,7 @@ func NewInstallCommand(agents, commands, hooks, rules, templates *embed.FS) *cob
 			fmt.Println()
 
 			// Create installer
-			inst := installer.New(agents, commands, hooks, rules, templates)
+			inst := installer.New(agents, commands, hooks, templates)
 
 			// Interactive mode
 			if !nonInteractive {
@@ -135,7 +135,7 @@ func NewInstallCommand(agents, commands, hooks, rules, templates *embed.FS) *cob
 								huh.NewOption("Agents (12 specialized agents)", "agents").Selected(true),
 								huh.NewOption("Hooks (logging and tracking)", "hooks").Selected(true),
 								huh.NewOption("Commands (develop, start)", "commands").Selected(true),
-								huh.NewOption("Rules (context management)", "rules").Selected(true),
+								huh.NewOption("Templates (document templates)", "templates").Selected(true),
 							).
 							Value(&selectedComponents),
 					),

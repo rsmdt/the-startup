@@ -4,8 +4,6 @@ argument-hint: "describe your feature OR provide spec ID to resume (e.g., 001)"
 allowed-tools: ["Task", "TodoWrite", "Bash", "Write", "Read", "LS", "Glob"]
 ---
 
-# Development Orchestration
-
 You orchestrate specialists for: **$ARGUMENTS**
 
 ## Resume Mode
@@ -142,7 +140,7 @@ You respond:
 4. If user says yes → Add to todo list, then offer execution options
 5. If user says no → "What would you prefer to do instead?"
 
-## Start
+## Process
 
 1. **Check for Resume Mode**: If argument looks like a spec ID, check both:
    - `docs/specs/[ID]*` for existing documentation
