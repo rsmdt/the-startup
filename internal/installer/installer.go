@@ -103,7 +103,14 @@ func (i *Installer) checkFileExistsInClaude(componentPath string) bool {
 		case "agents":
 			filePath = filepath.Join(i.claudePath, "agents", fileName)
 		case "commands":
-			filePath = filepath.Join(i.claudePath, "commands", fileName)
+			// Handle namespaced commands (e.g., commands/s/implement.md)
+			if len(parts) > 2 {
+				// Join all parts after "commands" to form the full path
+				subPath := strings.Join(parts[1:], "/")
+				filePath = filepath.Join(i.claudePath, "commands", subPath)
+			} else {
+				filePath = filepath.Join(i.claudePath, "commands", fileName)
+			}
 		case "hooks":
 			// Hooks are now the binary in STARTUP_PATH/bin
 			if fileName == "the-startup" {
@@ -136,7 +143,14 @@ func (i *Installer) CheckFileExists(componentPath string) bool {
 		case "agents":
 			filePath = filepath.Join(i.claudePath, "agents", fileName)
 		case "commands":
-			filePath = filepath.Join(i.claudePath, "commands", fileName)
+			// Handle namespaced commands (e.g., commands/s/implement.md)
+			if len(parts) > 2 {
+				// Join all parts after "commands" to form the full path
+				subPath := strings.Join(parts[1:], "/")
+				filePath = filepath.Join(i.claudePath, "commands", subPath)
+			} else {
+				filePath = filepath.Join(i.claudePath, "commands", fileName)
+			}
 		case "hooks":
 			// Hooks are now the binary in STARTUP_PATH/bin
 			if fileName == "the-startup" {
@@ -295,7 +309,7 @@ func (i *Installer) installComponentToClaude(component string) error {
 		pattern = "assets/agents/*.md"
 	case "commands":
 		sourceFS = i.commandFiles
-		pattern = "assets/commands/*.md"
+		pattern = "assets/commands/**/*.md"
 	default:
 		return fmt.Errorf("unknown component: %s", component)
 	}
@@ -345,8 +359,21 @@ func (i *Installer) copyFile(sourceFS *embed.FS, sourcePath, destDir string) err
 	}
 	
 	// Determine destination path
-	fileName := filepath.Base(sourcePath)
-	destPath := filepath.Join(destDir, fileName)
+	// For commands with namespace, preserve the directory structure
+	var destPath string
+	if strings.Contains(sourcePath, "assets/commands/") && strings.Contains(sourcePath, "/s/") {
+		// This is a namespaced command, preserve the namespace directory
+		relPath := strings.TrimPrefix(sourcePath, "assets/commands/")
+		destPath = filepath.Join(destDir, relPath)
+		// Create the namespace directory if it doesn't exist
+		namespaceDir := filepath.Dir(destPath)
+		if err := os.MkdirAll(namespaceDir, 0755); err != nil {
+			return fmt.Errorf("failed to create namespace directory: %w", err)
+		}
+	} else {
+		fileName := filepath.Base(sourcePath)
+		destPath = filepath.Join(destDir, fileName)
+	}
 	
 	// Write file
 	if err := os.WriteFile(destPath, data, 0644); err != nil {

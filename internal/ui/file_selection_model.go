@@ -4,7 +4,6 @@ import (
 	"embed"
 	"io/fs"
 	"os"
-	"path/filepath"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -150,8 +149,10 @@ func (m FileSelectionModel) getAllAvailableFiles() []string {
 	addFiles := func(embedFS *embed.FS, pattern, prefix string) {
 		if files, err := fs.Glob(embedFS, pattern); err == nil {
 			for _, file := range files {
-				fileName := filepath.Base(file)
-				filePath := prefix + fileName
+				// Extract relative path from the pattern base
+				basePath := strings.Split(pattern, "/")[0] + "/" + strings.Split(pattern, "/")[1] + "/"
+				relPath := strings.TrimPrefix(file, basePath)
+				filePath := prefix + relPath
 				allFiles = append(allFiles, filePath)
 			}
 		}
@@ -162,7 +163,7 @@ func (m FileSelectionModel) getAllAvailableFiles() []string {
 		addFiles(m.agentFiles, pattern, "agents/")
 	}
 	
-	patterns = []string{"assets/commands/*.md", "test_assets/assets/commands/*.md"}
+	patterns = []string{"assets/commands/**/*.md", "test_assets/assets/commands/**/*.md"}
 	for _, pattern := range patterns {
 		addFiles(m.commandFiles, pattern, "commands/")
 	}
@@ -199,14 +200,19 @@ func (m FileSelectionModel) buildStaticTree() string {
 		for _, pattern := range patterns {
 			if files, err := fs.Glob(embedFS, pattern); err == nil {
 				for _, file := range files {
-					fileName := filepath.Base(file)
-					filePath := prefix + fileName
+					// Extract relative path from the pattern base
+					basePath := strings.Split(pattern, "/")[0] + "/" + strings.Split(pattern, "/")[1] + "/"
+					relPath := strings.TrimPrefix(file, basePath)
+					filePath := prefix + relPath
+					
+					// Format display name (preserve namespace for commands)
+					displayName := relPath
 					
 					// Apply orange color if file will be updated
 					if existingFiles[filePath] {
-						items = append(items, updateStyle.Render(fileName+" (will update)"))
+						items = append(items, updateStyle.Render(displayName+" (will update)"))
 					} else {
-						items = append(items, itemStyle.Render(fileName))
+						items = append(items, itemStyle.Render(displayName))
 					}
 				}
 			}
@@ -215,7 +221,7 @@ func (m FileSelectionModel) buildStaticTree() string {
 	}
 	
 	agentItems := buildSubtree(m.agentFiles, []string{"assets/agents/*.md", "test_assets/assets/agents/*.md"}, "agents/")
-	commandItems := buildSubtree(m.commandFiles, []string{"assets/commands/*.md", "test_assets/assets/commands/*.md"}, "commands/")
+	commandItems := buildSubtree(m.commandFiles, []string{"assets/commands/**/*.md", "test_assets/assets/commands/**/*.md"}, "commands/")
 	hookItems := buildSubtree(m.hookFiles, []string{"assets/hooks/*.py", "test_assets/assets/hooks/*.py"}, "hooks/")
 	templateItems := buildSubtree(m.templateFiles, []string{"assets/templates/*", "test_assets/assets/templates/*"}, "templates/")
 	
