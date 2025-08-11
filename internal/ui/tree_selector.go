@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 type TreeNode struct {
@@ -27,28 +26,10 @@ type TreeSelector struct {
 	title     string
 	done      bool
 	cancelled bool // Indicates user cancelled with ESC
+	showHelp  bool // Show help overlay
+	styles    Styles // Theme styles
 }
 
-var (
-	// Match huh library default theme colors
-	cursorIndicatorStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("212")) // Pink/magenta for ">" cursor indicator only
-	
-	cursorLineStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("42")) // Green for text on cursor line
-	
-	normalItemStyle = lipgloss.NewStyle() // Default/neutral color for non-cursor lines
-	
-	existsStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("214")) // Orange/amber for update indicator
-	
-	helpStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("241")) // Darker gray for help text
-	
-	filledCircle = "●"  // Selected item indicator
-	emptyCircle = "○"   // Unselected item indicator
-	updateMark = "↻"    // Indicator for files that will be updated
-)
 
 func NewTreeSelector(title string, root *TreeNode) *TreeSelector {
 	ts := &TreeSelector{
@@ -57,6 +38,7 @@ func NewTreeSelector(title string, root *TreeNode) *TreeSelector {
 		cursor: 0,
 		width:  80,
 		height: 20,
+		styles: GetStyles(),
 	}
 	ts.flatten()
 	ts.updateDirectorySelections()
@@ -73,34 +55,81 @@ func (ts *TreeSelector) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		ts.width = msg.Width
 		ts.height = msg.Height - 6 // Leave room for title and help
 	
+	case tea.MouseMsg:
+		switch msg.Type {
+		case tea.MouseWheelUp:
+			if !ts.showHelp && ts.cursor > 0 {
+				ts.cursor--
+			}
+		
+		case tea.MouseWheelDown:
+			if !ts.showHelp && ts.cursor < len(ts.nodes)-1 {
+				ts.cursor++
+			}
+		
+		case tea.MouseLeft:
+			if !ts.showHelp {
+				// Calculate which item was clicked based on Y position
+				// Account for title (2 lines) and top margin
+				itemY := msg.Y - 3
+				if itemY >= 0 && itemY < len(ts.nodes) {
+					ts.cursor = itemY
+					// Toggle the clicked item
+					if ts.cursor < len(ts.nodes) {
+						node := ts.nodes[ts.cursor]
+						if node.IsDir {
+							newState := !node.Selected
+							ts.setNodeAndChildren(node, newState)
+						} else {
+							node.Selected = !node.Selected
+						}
+						ts.updateDirectorySelections()
+					}
+				}
+			}
+		}
+	
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
-			ts.done = true
-			ts.cancelled = true
-			return ts, tea.Quit
+			if ts.showHelp {
+				ts.showHelp = false
+			} else {
+				ts.done = true
+				ts.cancelled = true
+				return ts, tea.Quit
+			}
 		
 		case "esc":
-			ts.done = true
-			ts.cancelled = true
-			return ts, tea.Quit
+			if ts.showHelp {
+				ts.showHelp = false
+			} else {
+				ts.done = true
+				ts.cancelled = true
+				return ts, tea.Quit
+			}
+		
+		case "?":
+			ts.showHelp = !ts.showHelp
 		
 		case "enter":
-			ts.done = true
-			return ts, tea.Quit
+			if !ts.showHelp {
+				ts.done = true
+				return ts, tea.Quit
+			}
 		
 		case "up", "k":
-			if ts.cursor > 0 {
+			if !ts.showHelp && ts.cursor > 0 {
 				ts.cursor--
 			}
 		
 		case "down", "j":
-			if ts.cursor < len(ts.nodes)-1 {
+			if !ts.showHelp && ts.cursor < len(ts.nodes)-1 {
 				ts.cursor++
 			}
 		
 		case " ":
-			if ts.cursor < len(ts.nodes) {
+			if !ts.showHelp && ts.cursor < len(ts.nodes) {
 				node := ts.nodes[ts.cursor]
 				if node.IsDir {
 					// Toggle all children when space is pressed on a directory
@@ -115,19 +144,21 @@ func (ts *TreeSelector) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		
 		case "a", "A":
-			// Toggle all files on/off
-			allSelected := true
-			for _, node := range ts.nodes {
-				if !node.IsDir && !node.Selected {
-					allSelected = false
-					break
+			if !ts.showHelp {
+				// Toggle all files on/off
+				allSelected := true
+				for _, node := range ts.nodes {
+					if !node.IsDir && !node.Selected {
+						allSelected = false
+						break
+					}
 				}
+				
+				// Set all files to opposite of current state
+				newState := !allSelected
+				ts.setAllFiles(ts.root, newState)
+				ts.updateDirectorySelections()
 			}
-			
-			// Set all files to opposite of current state
-			newState := !allSelected
-			ts.setAllFiles(ts.root, newState)
-			ts.updateDirectorySelections()
 		}
 	}
 	
@@ -139,10 +170,14 @@ func (ts *TreeSelector) View() string {
 		return ""
 	}
 	
+	if ts.showHelp {
+		return ts.renderHelp()
+	}
+	
 	var s strings.Builder
 	
 	// Title
-	s.WriteString(lipgloss.NewStyle().Bold(true).Render(ts.title))
+	s.WriteString(ts.styles.Title.Render(ts.title))
 	s.WriteString("\n\n")
 	
 	// Tree view
@@ -175,8 +210,8 @@ func (ts *TreeSelector) View() string {
 		isCursor := i == ts.cursor
 		
 		if isCursor {
-			// Pink ">" for cursor, rest of line will be green
-			line = cursorIndicatorStyle.Render(">") + " "
+			// Primary color ">" for cursor
+			line = ts.styles.Cursor.Render(">") + " "
 		} else {
 			line = "  "
 		}
@@ -189,9 +224,9 @@ func (ts *TreeSelector) View() string {
 		
 		// Selection state (filled/empty circle)
 		if node.Selected {
-			content += filledCircle
+			content += IconSelected
 		} else {
-			content += emptyCircle
+			content += IconUnselected
 		}
 		
 		// Add space and name
@@ -199,16 +234,16 @@ func (ts *TreeSelector) View() string {
 		
 		// Add update indicator if file exists
 		if node.Exists && !node.IsDir {
-			content += " " + existsStyle.Render("("+updateMark+" update)")
+			content += " " + ts.styles.Warning.Render("("+IconUpdate+" update)")
 		}
 		
 		// Apply appropriate styling to content
 		if isCursor {
-			// Green for cursor line content
-			line += cursorLineStyle.Render(content)
+			// Bright text for cursor line content
+			line += ts.styles.CursorLine.Render(content)
 		} else {
-			// Neutral/default for non-cursor lines
-			line += content
+			// Normal text for non-cursor lines
+			line += ts.styles.Normal.Render(content)
 		}
 		
 		s.WriteString(line)
@@ -217,7 +252,39 @@ func (ts *TreeSelector) View() string {
 	
 	// Help text
 	s.WriteString("\n")
-	s.WriteString(helpStyle.Render("↑↓/jk: navigate • space: toggle • a: all on/off • enter: confirm • esc: back"))
+	s.WriteString(ts.styles.Help.Render("↑↓/jk/mouse: navigate • space/click: toggle • a: all • enter: confirm • ?: help • esc: back"))
+	
+	return s.String()
+}
+
+func (ts *TreeSelector) renderHelp() string {
+	var s strings.Builder
+	
+	// Help overlay
+	s.WriteString(ts.styles.Title.Render("🔑 Keyboard Shortcuts"))
+	s.WriteString("\n\n")
+	
+	helpItems := []struct {
+		key  string
+		desc string
+	}{
+		{"↑/k", "Move up"},
+		{"↓/j", "Move down"},
+		{"space", "Toggle selection"},
+		{"a", "Toggle all files"},
+		{"enter", "Confirm selection"},
+		{"esc", "Cancel/Go back"},
+		{"?", "Toggle this help"},
+		{"q", "Quit"},
+	}
+	
+	for _, item := range helpItems {
+		key := ts.styles.Info.Render(item.key)
+		s.WriteString(fmt.Sprintf("  %-20s %s\n", key, item.desc))
+	}
+	
+	s.WriteString("\n")
+	s.WriteString(ts.styles.Help.Render("Press any key to close this help"))
 	
 	return s.String()
 }
@@ -242,14 +309,8 @@ func (ts *TreeSelector) flattenNode(node *TreeNode, level int) {
 }
 
 func (ts *TreeSelector) getIndent(node *TreeNode) string {
-	level := 0
-	parent := node.Parent
-	// Skip root in indentation calculation
-	for parent != nil && parent != ts.root {
-		level++
-		parent = parent.Parent
-	}
-	return strings.Repeat("  ", level)
+	// Remove indentation for consistent flat display
+	return ""
 }
 
 func (ts *TreeSelector) setAllFiles(node *TreeNode, selected bool) {
@@ -329,7 +390,7 @@ func (ts *TreeSelector) collectUpdatingFiles(node *TreeNode, paths *[]string) {
 }
 
 func RunTreeSelector(title string, root *TreeNode) ([]string, error) {
-	p := tea.NewProgram(NewTreeSelector(title, root))
+	p := tea.NewProgram(NewTreeSelector(title, root), tea.WithMouseCellMotion())
 	model, err := p.Run()
 	if err != nil {
 		return nil, err

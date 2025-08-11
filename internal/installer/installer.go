@@ -159,16 +159,26 @@ func (i *Installer) Install() error {
 	
 	// Install each component
 	for _, component := range i.components {
+		fmt.Printf("Installing %s...\n", component)
+		
 		if err := i.installComponent(component); err != nil {
+			fmt.Printf("✗ Error installing %s: %v\n", component, err)
 			return fmt.Errorf("failed to install %s: %w", component, err)
 		}
+		
+		fmt.Printf("✓ %s installed\n", component)
 	}
 	
 	// Create references in Claude directory
 	if i.tool == "claude-code" {
+		fmt.Println("Creating Claude references...")
+		
 		if err := i.createClaudeReferences(); err != nil {
+			fmt.Printf("✗ Error creating Claude references: %v\n", err)
 			return fmt.Errorf("failed to create Claude references: %w", err)
 		}
+		
+		fmt.Println("✓ Claude references created")
 		
 		// Configure hooks
 		if contains(i.components, "hooks") {
@@ -179,9 +189,14 @@ func (i *Installer) Install() error {
 	}
 	
 	// Create lock file
+	fmt.Println("Creating lock file...")
+	
 	if err := i.createLockFile(); err != nil {
+		fmt.Printf("✗ Error creating lock file: %v\n", err)
 		return fmt.Errorf("failed to create lock file: %w", err)
 	}
+	
+	fmt.Println("✓ Lock file created")
 	
 	return nil
 }
@@ -289,7 +304,7 @@ func (i *Installer) createClaudeReferences() error {
 		}
 	}
 	
-	// Create reference files for agents
+	// Copy agents with full file contents
 	if contains(i.components, "agents") {
 		agentsDir := filepath.Join(i.installPath, "agents")
 		entries, _ := os.ReadDir(agentsDir)
@@ -310,10 +325,15 @@ func (i *Installer) createClaudeReferences() error {
 					}
 				}
 				
-				// Keep the .md extension for the reference file
-				refPath := filepath.Join(claudeAgents, entry.Name())
-				refContent := fmt.Sprintf("@%s/agents/%s", i.installPath, entry.Name())
-				if err := os.WriteFile(refPath, []byte(refContent), 0644); err != nil {
+				// Copy the full file contents
+				srcPath := filepath.Join(agentsDir, entry.Name())
+				destPath := filepath.Join(claudeAgents, entry.Name())
+				
+				data, err := os.ReadFile(srcPath)
+				if err != nil {
+					return err
+				}
+				if err := os.WriteFile(destPath, data, 0644); err != nil {
 					return err
 				}
 			}
@@ -393,7 +413,7 @@ func (i *Installer) createClaudeReferences() error {
 		}
 	}
 	
-	// Create reference files for templates
+	// Copy templates with full file contents
 	if contains(i.components, "templates") {
 		templatesDir := filepath.Join(i.installPath, "templates")
 		entries, _ := os.ReadDir(templatesDir)
@@ -413,10 +433,15 @@ func (i *Installer) createClaudeReferences() error {
 				}
 			}
 			
-			// Keep the full filename with extension for the reference file
-			refPath := filepath.Join(claudeTemplates, entry.Name())
-			refContent := fmt.Sprintf("@%s/templates/%s", i.installPath, entry.Name())
-			if err := os.WriteFile(refPath, []byte(refContent), 0644); err != nil {
+			// Copy the full file contents
+			srcPath := filepath.Join(templatesDir, entry.Name())
+			destPath := filepath.Join(claudeTemplates, entry.Name())
+			
+			data, err := os.ReadFile(srcPath)
+			if err != nil {
+				return err
+			}
+			if err := os.WriteFile(destPath, data, 0644); err != nil {
 				return err
 			}
 		}
