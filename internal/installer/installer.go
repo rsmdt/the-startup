@@ -72,6 +72,47 @@ func (i *Installer) GetInstallPath() string {
 	return i.installPath
 }
 
+// GetClaudePath returns the claude path
+func (i *Installer) GetClaudePath() string {
+	return i.claudePath
+}
+
+// CheckFileExists checks if a component file exists in either install path or claude path
+func (i *Installer) CheckFileExists(componentPath string) bool {
+	// Check in installation directory
+	installFilePath := filepath.Join(i.installPath, componentPath)
+	if _, err := os.Stat(installFilePath); err == nil {
+		return true
+	}
+	
+	// Check in claude directory for certain components
+	parts := strings.Split(componentPath, "/")
+	if len(parts) >= 2 {
+		component := parts[0]
+		fileName := parts[1]
+		
+		var claudeFilePath string
+		switch component {
+		case "agents":
+			claudeFilePath = filepath.Join(i.claudePath, "agents", fileName)
+		case "commands":
+			claudeFilePath = filepath.Join(i.claudePath, "commands", fileName)
+		case "hooks":
+			claudeFilePath = filepath.Join(i.claudePath, "hooks", fileName)
+		case "templates":
+			claudeFilePath = filepath.Join(i.claudePath, "templates", fileName)
+		}
+		
+		if claudeFilePath != "" {
+			if _, err := os.Stat(claudeFilePath); err == nil {
+				return true
+			}
+		}
+	}
+	
+	return false
+}
+
 // SetTool sets the tool type
 func (i *Installer) SetTool(tool string) {
 	i.tool = tool

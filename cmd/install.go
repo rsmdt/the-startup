@@ -33,8 +33,8 @@ var (
 			Foreground(lipgloss.Color("#3C7EFF"))
 )
 
-// buildFileTree creates a tree structure from embedded files
-func buildFileTree(agents, commands, hooks, templates *embed.FS) *ui.TreeNode {
+// buildFileTree creates a tree structure from embedded files and checks for existing files
+func buildFileTree(agents, commands, hooks, templates *embed.FS, inst *installer.Installer) *ui.TreeNode {
 	root := &ui.TreeNode{
 		Name:     "Components",
 		IsDir:    true,
@@ -54,11 +54,13 @@ func buildFileTree(agents, commands, hooks, templates *embed.FS) *ui.TreeNode {
 	if files, err := fs.Glob(agents, "assets/agents/*.md"); err == nil {
 		for _, file := range files {
 			fileName := filepath.Base(file)
+			filePath := "agents/" + fileName
 			agentsNode.Children = append(agentsNode.Children, &ui.TreeNode{
 				Name:     fileName,
-				Path:     "agents/" + fileName,
+				Path:     filePath,
 				IsDir:    false,
 				Selected: true, // Default to selected
+				Exists:   inst.CheckFileExists(filePath),
 				Parent:   agentsNode,
 			})
 		}
@@ -77,11 +79,13 @@ func buildFileTree(agents, commands, hooks, templates *embed.FS) *ui.TreeNode {
 	if files, err := fs.Glob(commands, "assets/commands/*.md"); err == nil {
 		for _, file := range files {
 			fileName := filepath.Base(file)
+			filePath := "commands/" + fileName
 			commandsNode.Children = append(commandsNode.Children, &ui.TreeNode{
 				Name:     fileName,
-				Path:     "commands/" + fileName,
+				Path:     filePath,
 				IsDir:    false,
 				Selected: true, // Default to selected
+				Exists:   inst.CheckFileExists(filePath),
 				Parent:   commandsNode,
 			})
 		}
@@ -100,11 +104,13 @@ func buildFileTree(agents, commands, hooks, templates *embed.FS) *ui.TreeNode {
 	if files, err := fs.Glob(hooks, "assets/hooks/*.py"); err == nil {
 		for _, file := range files {
 			fileName := filepath.Base(file)
+			filePath := "hooks/" + fileName
 			hooksNode.Children = append(hooksNode.Children, &ui.TreeNode{
 				Name:     fileName,
-				Path:     "hooks/" + fileName,
+				Path:     filePath,
 				IsDir:    false,
 				Selected: true, // Default to selected
+				Exists:   inst.CheckFileExists(filePath),
 				Parent:   hooksNode,
 			})
 		}
@@ -123,11 +129,13 @@ func buildFileTree(agents, commands, hooks, templates *embed.FS) *ui.TreeNode {
 	if files, err := fs.Glob(templates, "assets/templates/*"); err == nil {
 		for _, file := range files {
 			fileName := filepath.Base(file)
+			filePath := "templates/" + fileName
 			templatesNode.Children = append(templatesNode.Children, &ui.TreeNode{
 				Name:     fileName,
-				Path:     "templates/" + fileName,
+				Path:     filePath,
 				IsDir:    false,
 				Selected: true, // Default to selected
+				Exists:   inst.CheckFileExists(filePath),
 				Parent:   templatesNode,
 			})
 		}
@@ -137,26 +145,6 @@ func buildFileTree(agents, commands, hooks, templates *embed.FS) *ui.TreeNode {
 	return root
 }
 
-// confirmQuit asks the user to confirm they want to quit
-func confirmQuit() bool {
-	var shouldQuit bool
-	quitForm := huh.NewForm(
-		huh.NewGroup(
-			huh.NewConfirm().
-				Title("Are you sure you want to quit the installer?").
-				Value(&shouldQuit).
-				Affirmative("Yes, quit").
-				Negative("No, continue"),
-		),
-	)
-	
-	if err := quitForm.Run(); err != nil {
-		// If the quit confirmation itself is cancelled, stay in installer
-		return false
-	}
-	
-	return shouldQuit
-}
 
 // NewInstallCommand creates the install command
 func NewInstallCommand(agents, commands, hooks, templates *embed.FS) *cobra.Command {
@@ -181,40 +169,34 @@ func NewInstallCommand(agents, commands, hooks, templates *embed.FS) *cobra.Comm
 			inst := installer.New(agents, commands, hooks, templates)
 
 			// Interactive mode
+			var updatesAlreadyConfirmed bool
 			if !nonInteractive {
 				// Select tool type
 			toolSelectionLoop:
-				for {
-					var selectedTool string
-					toolForm := huh.NewForm(
-						huh.NewGroup(
-							huh.NewSelect[string]().
-								Title("Select your development tool").
-								Options(
-									huh.NewOption("Claude Code", "claude-code"),
-									huh.NewOption("Cancel", "cancel"),
-								).
-								Value(&selectedTool),
-						),
-					)
+				var selectedTool string
+				toolForm := huh.NewForm(
+					huh.NewGroup(
+						huh.NewSelect[string]().
+							Title("Select your development tool").
+							Options(
+								huh.NewOption("Claude Code", "claude-code"),
+								huh.NewOption("Cancel", "cancel"),
+							).
+							Value(&selectedTool),
+					),
+				)
 
-					if err := toolForm.Run(); err != nil {
-						// ESC was pressed on first screen - show quit confirmation
-						if confirmQuit() {
-							fmt.Println(infoStyle.Render("Installation cancelled"))
-							return nil
-						}
-						// User chose to continue, show the form again
-						continue
-					}
-
-					if selectedTool == "cancel" {
-						fmt.Println(infoStyle.Render("Installation cancelled"))
-						return nil
-					}
-					toolType = selectedTool
-					break toolSelectionLoop
+				if err := toolForm.Run(); err != nil {
+					// ESC was pressed - exit immediately
+					fmt.Println(infoStyle.Render("Installation cancelled"))
+					return nil
 				}
+
+				if selectedTool == "cancel" {
+					fmt.Println(infoStyle.Render("Installation cancelled"))
+					return nil
+				}
+				toolType = selectedTool
 
 				// Select installation path
 			pathSelectionLoop:
@@ -271,6 +253,12 @@ func NewInstallCommand(agents, commands, hooks, templates *embed.FS) *cobra.Comm
 					}
 				}
 
+				// Set the installer configuration NOW so file existence checks work
+				inst.SetTool(toolType)
+				if installPath != "" {
+					inst.SetInstallPath(installPath)
+				}
+				
 				// Select components
 			componentSelectionLoop:
 				for {
@@ -297,7 +285,7 @@ func NewInstallCommand(agents, commands, hooks, templates *embed.FS) *cobra.Comm
 					
 					if useTreeMode || treeMode {
 						// Use tree selector for individual file selection
-						root := buildFileTree(agents, commands, hooks, templates)
+						root := buildFileTree(agents, commands, hooks, templates, inst)
 						selectedPaths, err := ui.RunTreeSelector(
 							"Select files to install (use 'a' to toggle all, space to toggle selection)",
 							root,
@@ -320,6 +308,62 @@ func NewInstallCommand(agents, commands, hooks, templates *embed.FS) *cobra.Comm
 						// Extract unique components
 						for component := range componentsMap {
 							selectedComponents = append(selectedComponents, component)
+						}
+						
+						// Check for existing files that will be updated
+						var updatingFiles []string
+						for _, path := range selectedFiles {
+							if inst.CheckFileExists(path) {
+								updatingFiles = append(updatingFiles, path)
+							}
+						}
+						
+						// If there are files to update, show confirmation
+						if len(updatingFiles) > 0 {
+							var confirmUpdate bool
+							
+							// Build tree-structured update message
+							updateMsg := fmt.Sprintf("%d file(s) will be updated:\n\n", len(updatingFiles))
+							
+							// Group files by component for tree display
+							filesByComponent := make(map[string][]string)
+							for _, file := range updatingFiles {
+								parts := strings.Split(file, "/")
+								if len(parts) >= 2 {
+									component := parts[0]
+									fileName := parts[1]
+									filesByComponent[component] = append(filesByComponent[component], fileName)
+								}
+							}
+							
+							// Display as tree
+							for _, component := range []string{"agents", "commands", "hooks", "templates"} {
+								if files, ok := filesByComponent[component]; ok && len(files) > 0 {
+									updateMsg += fmt.Sprintf("%s/\n", component)
+									for _, file := range files {
+										updateMsg += fmt.Sprintf("  • %s\n", file)
+									}
+								}
+							}
+							updateMsg += "\nDo you want to continue?"
+							
+							updateConfirm := huh.NewForm(
+								huh.NewGroup(
+									huh.NewConfirm().
+										Title("Files will be updated").
+										Description(updateMsg).
+										Value(&confirmUpdate).
+										Affirmative("Yes, update files").
+										Negative("No, go back"),
+								),
+							)
+							
+							if err := updateConfirm.Run(); err != nil || !confirmUpdate {
+								// User cancelled or said no - go back to file selection
+								continue componentSelectionLoop
+							}
+							// User confirmed updates
+							updatesAlreadyConfirmed = true
 						}
 						
 						// Set both components and individual files
@@ -347,6 +391,111 @@ func NewInstallCommand(agents, commands, hooks, templates *embed.FS) *cobra.Comm
 							continue componentSelectionLoop
 						}
 						
+						// Check for existing files in selected components
+						var updatingFiles []string
+						for _, component := range selectedComponents {
+							// Check all files in this component
+							switch component {
+							case "agents":
+								if files, err := fs.Glob(agents, "assets/agents/*.md"); err == nil {
+									for _, file := range files {
+										fileName := filepath.Base(file)
+										filePath := "agents/" + fileName
+										if inst.CheckFileExists(filePath) {
+											updatingFiles = append(updatingFiles, filePath)
+										}
+									}
+								}
+							case "commands":
+								if files, err := fs.Glob(commands, "assets/commands/*.md"); err == nil {
+									for _, file := range files {
+										fileName := filepath.Base(file)
+										filePath := "commands/" + fileName
+										if inst.CheckFileExists(filePath) {
+											updatingFiles = append(updatingFiles, filePath)
+										}
+									}
+								}
+							case "hooks":
+								if files, err := fs.Glob(hooks, "assets/hooks/*.py"); err == nil {
+									for _, file := range files {
+										fileName := filepath.Base(file)
+										filePath := "hooks/" + fileName
+										if inst.CheckFileExists(filePath) {
+											updatingFiles = append(updatingFiles, filePath)
+										}
+									}
+								}
+							case "templates":
+								if files, err := fs.Glob(templates, "assets/templates/*"); err == nil {
+									for _, file := range files {
+										fileName := filepath.Base(file)
+										filePath := "templates/" + fileName
+										if inst.CheckFileExists(filePath) {
+											updatingFiles = append(updatingFiles, filePath)
+										}
+									}
+								}
+							}
+						}
+						
+						// If there are files to update, show confirmation
+						if len(updatingFiles) > 0 {
+							var confirmUpdate bool
+							
+							// Build tree-structured update message
+							updateMsg := fmt.Sprintf("%d file(s) will be updated:\n\n", len(updatingFiles))
+							
+							// Group files by component for tree display
+							filesByComponent := make(map[string][]string)
+							for _, file := range updatingFiles {
+								parts := strings.Split(file, "/")
+								if len(parts) >= 2 {
+									component := parts[0]
+									fileName := parts[1]
+									filesByComponent[component] = append(filesByComponent[component], fileName)
+								}
+							}
+							
+							// Display as tree (limit to 10 files per component for readability)
+							totalShown := 0
+							for _, component := range []string{"agents", "commands", "hooks", "templates"} {
+								if files, ok := filesByComponent[component]; ok && len(files) > 0 {
+									updateMsg += fmt.Sprintf("%s/\n", component)
+									showCount := len(files)
+									if showCount > 10 {
+										showCount = 10
+									}
+									for i := 0; i < showCount; i++ {
+										updateMsg += fmt.Sprintf("  • %s\n", files[i])
+										totalShown++
+									}
+									if len(files) > 10 {
+										updateMsg += fmt.Sprintf("  ... and %d more\n", len(files)-10)
+									}
+								}
+							}
+							updateMsg += "\nDo you want to continue?"
+							
+							updateConfirm := huh.NewForm(
+								huh.NewGroup(
+									huh.NewConfirm().
+										Title("Files will be updated").
+										Description(updateMsg).
+										Value(&confirmUpdate).
+										Affirmative("Yes, update files").
+										Negative("No, go back"),
+								),
+							)
+							
+							if err := updateConfirm.Run(); err != nil || !confirmUpdate {
+								// User cancelled or said no - go back to component selection
+								continue componentSelectionLoop
+							}
+							// User confirmed updates
+							updatesAlreadyConfirmed = true
+						}
+						
 						// Set installer options
 						inst.SetComponents(selectedComponents)
 						break componentSelectionLoop
@@ -354,14 +503,10 @@ func NewInstallCommand(agents, commands, hooks, templates *embed.FS) *cobra.Comm
 				}
 			}
 
-			// Set configuration
-			inst.SetTool(toolType)
-			if installPath != "" {
-				inst.SetInstallPath(installPath)
-			}
+			// Configuration already set above
 
-			// Check for existing installation
-			if inst.IsInstalled() {
+			// Check for existing installation (skip if updates were already confirmed)
+			if !updatesAlreadyConfirmed && inst.IsInstalled() {
 				fmt.Println(infoStyle.Render("Found existing installation"))
 				
 				if !nonInteractive {
@@ -375,6 +520,8 @@ func NewInstallCommand(agents, commands, hooks, templates *embed.FS) *cobra.Comm
 					)
 
 					if err := updateForm.Run(); err != nil {
+						// ESC was pressed - for now just return error
+						// (can't easily go back to component selection from here due to scope)
 						return fmt.Errorf("update confirmation cancelled: %w", err)
 					}
 

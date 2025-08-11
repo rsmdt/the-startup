@@ -13,6 +13,7 @@ type TreeNode struct {
 	Path     string
 	IsDir    bool
 	Selected bool
+	Exists   bool // Whether this file already exists
 	Children []*TreeNode
 	Parent   *TreeNode
 }
@@ -29,21 +30,24 @@ type TreeSelector struct {
 }
 
 var (
-	selectedStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#04B575"))
+	// Match huh library default theme colors
+	cursorIndicatorStyle = lipgloss.NewStyle().
+		Foreground(lipgloss.Color("212")) // Pink/magenta for ">" cursor indicator only
 	
-	cursorStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#FF06B7")).
-		Bold(true)
+	cursorLineStyle = lipgloss.NewStyle().
+		Foreground(lipgloss.Color("42")) // Green for text on cursor line
 	
-	dirStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#3C7EFF")).
-		Bold(true)
+	normalItemStyle = lipgloss.NewStyle() // Default/neutral color for non-cursor lines
+	
+	existsStyle = lipgloss.NewStyle().
+		Foreground(lipgloss.Color("214")) // Orange/amber for update indicator
 	
 	helpStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("#666"))
+		Foreground(lipgloss.Color("241")) // Darker gray for help text
 	
-	checkMark = "✓"
+	filledCircle = "●"  // Selected item indicator
+	emptyCircle = "○"   // Unselected item indicator
+	updateMark = "↻"    // Indicator for files that will be updated
 )
 
 func NewTreeSelector(title string, root *TreeNode) *TreeSelector {
@@ -164,44 +168,47 @@ func (ts *TreeSelector) View() string {
 		node := ts.nodes[i]
 		indent := ts.getIndent(node)
 		
-		// Build the line
-		line := ""
+		// Build the line (matching huh style)
+		var line string
 		
 		// Cursor indicator
-		if i == ts.cursor {
-			line += "> "
+		isCursor := i == ts.cursor
+		
+		if isCursor {
+			// Pink ">" for cursor, rest of line will be green
+			line = cursorIndicatorStyle.Render(">") + " "
 		} else {
-			line += "  "
+			line = "  "
 		}
 		
 		// Indentation
 		line += indent
 		
-		// Selection indicator - dot or check
+		// Build rest of line content
+		var content string
+		
+		// Selection state (filled/empty circle)
 		if node.Selected {
-			line += fmt.Sprintf("%s ", checkMark)
+			content += filledCircle
 		} else {
-			line += "• "
+			content += emptyCircle
 		}
 		
-		// Name
-		name := node.Name
-		if node.IsDir {
-			// Format directory names without trailing slash, in directory style
-			line += dirStyle.Render(name)
-		} else {
-			line += name
+		// Add space and name
+		content += " " + node.Name
+		
+		// Add update indicator if file exists
+		if node.Exists && !node.IsDir {
+			content += " " + existsStyle.Render("("+updateMark+" update)")
 		}
 		
-		// Apply cursor highlighting to the whole line if this is the current item
-		if i == ts.cursor {
-			line = cursorStyle.Render(line)
-		} else if node.Selected && !node.IsDir {
-			// Apply selected style to selected files (but not the cursor indicator)
-			parts := strings.SplitN(line, " ", 2)
-			if len(parts) == 2 {
-				line = parts[0] + " " + selectedStyle.Render(parts[1])
-			}
+		// Apply appropriate styling to content
+		if isCursor {
+			// Green for cursor line content
+			line += cursorLineStyle.Render(content)
+		} else {
+			// Neutral/default for non-cursor lines
+			line += content
 		}
 		
 		s.WriteString(line)
@@ -303,6 +310,21 @@ func (ts *TreeSelector) collectSelectedPaths(node *TreeNode, paths *[]string) {
 	}
 	for _, child := range node.Children {
 		ts.collectSelectedPaths(child, paths)
+	}
+}
+
+func (ts *TreeSelector) GetUpdatingFiles() []string {
+	paths := []string{}
+	ts.collectUpdatingFiles(ts.root, &paths)
+	return paths
+}
+
+func (ts *TreeSelector) collectUpdatingFiles(node *TreeNode, paths *[]string) {
+	if !node.IsDir && node.Selected && node.Exists {
+		*paths = append(*paths, node.Path)
+	}
+	for _, child := range node.Children {
+		ts.collectUpdatingFiles(child, paths)
 	}
 }
 
