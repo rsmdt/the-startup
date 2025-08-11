@@ -109,6 +109,33 @@ func TestMainModelFileSelectionIntegration(t *testing.T) {
 	if len(view) == 0 {
 		t.Error("Expected file selection view to have content")
 	}
+	
+	// Verify the view contains the tree structure
+	if !strings.Contains(view, "agents") {
+		t.Error("Expected view to contain 'agents' folder in tree")
+	}
+	if !strings.Contains(view, "commands") {
+		t.Error("Expected view to contain 'commands' folder in tree")
+	}
+	if !strings.Contains(view, "hooks") {
+		t.Error("Expected view to contain 'hooks' folder in tree")
+	}
+	if !strings.Contains(view, "templates") {
+		t.Error("Expected view to contain 'templates' folder in tree")
+	}
+	
+	// Verify confirmation options are shown
+	if !strings.Contains(view, "Yes, give me awesome") {
+		t.Error("Expected view to contain confirmation option 'Yes, give me awesome'")
+	}
+	if !strings.Contains(view, "Huh? I did not sign up for this") {
+		t.Error("Expected view to contain confirmation option 'Huh? I did not sign up for this'")
+	}
+	
+	// Verify the ready to install prompt
+	if !strings.Contains(view, "Ready to install?") {
+		t.Error("Expected view to contain 'Ready to install?' prompt")
+	}
 }
 
 func TestMainModelHuhIntegration(t *testing.T) {

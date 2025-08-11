@@ -14,7 +14,6 @@ const (
 	StateToolSelection InstallerState = iota
 	StatePathSelection
 	StateFileSelection
-	StateInstalling
 	StateComplete
 	StateError
 )
@@ -28,8 +27,6 @@ func (s InstallerState) String() string {
 		return "Path Selection"
 	case StateFileSelection:
 		return "File Selection"
-	case StateInstalling:
-		return "Installing"
 	case StateComplete:
 		return "Complete"
 	case StateError:
@@ -50,9 +47,8 @@ var ValidTransitions = map[StateTransition]bool{
 	// Forward transitions
 	{StateToolSelection, StatePathSelection}: true,
 	{StatePathSelection, StateFileSelection}: true,
-	{StateFileSelection, StateInstalling}:    true,
-	{StateInstalling, StateComplete}:         true,
-	{StateInstalling, StateError}:            true,
+	{StateFileSelection, StateComplete}:      true,
+	{StateFileSelection, StateError}:         true,
 	
 	// Backward transitions (ESC)
 	{StatePathSelection, StateToolSelection}: true,

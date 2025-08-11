@@ -77,6 +77,47 @@ func (i *Installer) GetClaudePath() string {
 	return i.claudePath
 }
 
+// GetExistingFiles returns a list of files that already exist and will be updated
+func (i *Installer) GetExistingFiles(files []string) []string {
+	var existing []string
+	for _, file := range files {
+		// Only check if file exists in the actual Claude directory where it will be installed
+		if i.checkFileExistsInClaude(file) {
+			existing = append(existing, file)
+		}
+	}
+	return existing
+}
+
+// checkFileExistsInClaude checks if a file exists specifically in the Claude directory
+func (i *Installer) checkFileExistsInClaude(componentPath string) bool {
+	parts := strings.Split(componentPath, "/")
+	if len(parts) >= 2 {
+		component := parts[0]
+		fileName := parts[1]
+		
+		var claudeFilePath string
+		switch component {
+		case "agents":
+			claudeFilePath = filepath.Join(i.claudePath, "agents", fileName)
+		case "commands":
+			claudeFilePath = filepath.Join(i.claudePath, "commands", fileName)
+		case "hooks":
+			claudeFilePath = filepath.Join(i.claudePath, "hooks", fileName)
+		case "templates":
+			claudeFilePath = filepath.Join(i.claudePath, "templates", fileName)
+		}
+		
+		if claudeFilePath != "" {
+			if _, err := os.Stat(claudeFilePath); err == nil {
+				return true
+			}
+		}
+	}
+	
+	return false
+}
+
 // CheckFileExists checks if a component file exists in either install path or claude path
 func (i *Installer) CheckFileExists(componentPath string) bool {
 	// Check in installation directory

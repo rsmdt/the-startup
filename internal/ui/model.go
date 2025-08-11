@@ -8,18 +8,6 @@ import (
 	"github.com/the-startup/the-startup/internal/installer"
 )
 
-// InstallProgressMsg represents installation progress
-type InstallProgressMsg struct {
-	Stage   string
-	Message string
-	Percent float64
-}
-
-// InstallCompleteMsg indicates installation completion
-type InstallCompleteMsg struct {
-	Success bool
-	Error   error
-}
 
 // MainModel manages the overall installer flow by composing sub-models
 type MainModel struct {
@@ -42,7 +30,6 @@ type MainModel struct {
 	toolSelectionModel ToolSelectionModel
 	pathSelectionModel PathSelectionModel
 	fileSelectionModel FileSelectionModel
-	installingModel    InstallingModel
 	completeModel      CompleteModel
 	errorModel         ErrorModel
 	
@@ -65,7 +52,6 @@ func NewMainModel(agents, commands, hooks, templates *embed.FS) *MainModel {
 		width:              80,
 		height:             24,
 		toolSelectionModel: NewToolSelectionModel(),
-		installingModel:    NewInstallingModel(),
 		errorModel:         NewErrorModel(nil, ""),
 	}
 	
@@ -142,29 +128,18 @@ func (m *MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.fileSelectionModel = newModel
 		if m.fileSelectionModel.Ready() {
 			if m.fileSelectionModel.Confirmed() {
-				m.transitionToState(StateInstalling)
-				return m, m.performInstallation()
+				// Perform installation synchronously
+				err := m.installer.Install()
+				if err != nil {
+					m.errorModel = NewErrorModel(err, "during installation")
+					m.transitionToState(StateError)
+				} else {
+					m.transitionToState(StateComplete)
+					// Return the Init command from the CompleteModel to start the auto-exit timer
+					return m, m.completeModel.Init()
+				}
 			} else {
 				m.transitionToState(StatePathSelection)
-			}
-		}
-		return m, cmd
-	
-	case StateInstalling:
-		newModel, cmd := m.installingModel.Update(msg)
-		m.installingModel = newModel
-		
-		// Handle installation messages
-		if progressMsg, ok := msg.(InstallProgressMsg); ok {
-			m.installingModel, _ = m.installingModel.Update(progressMsg)
-		}
-		if completeMsg, ok := msg.(InstallCompleteMsg); ok {
-			m.installingModel, _ = m.installingModel.Update(completeMsg)
-			if completeMsg.Success {
-				m.transitionToState(StateComplete)
-			} else {
-				m.errorModel = NewErrorModel(completeMsg.Error, "during installation")
-				m.transitionToState(StateError)
 			}
 		}
 		return m, cmd
@@ -213,9 +188,6 @@ func (m *MainModel) transitionToState(newState InstallerState) {
 		)
 		m.selectedFiles = m.fileSelectionModel.selectedFiles
 	
-	case StateInstalling:
-		m.installingModel = NewInstallingModel()
-	
 	case StateComplete:
 		m.completeModel = NewCompleteModel(m.selectedTool, m.installer)
 	
@@ -233,8 +205,6 @@ func (m *MainModel) View() string {
 		return m.pathSelectionModel.View()
 	case StateFileSelection:
 		return m.fileSelectionModel.View()
-	case StateInstalling:
-		return m.installingModel.View()
 	case StateComplete:
 		return m.completeModel.View()
 	case StateError:
@@ -267,16 +237,6 @@ func (m *MainModel) handleBack() (tea.Model, tea.Cmd) {
 
 
 
-// performInstallation starts the installation process
-func (m *MainModel) performInstallation() tea.Cmd {
-	return func() tea.Msg {
-		// Perform actual installation
-		if err := m.installer.Install(); err != nil {
-			return InstallCompleteMsg{Success: false, Error: err}
-		}
-		return InstallCompleteMsg{Success: true}
-	}
-}
 
 // getAllAvailableFiles returns all files that would be installed (for testing)
 func (m *MainModel) getAllAvailableFiles() []string {
@@ -292,11 +252,7 @@ func (m *MainModel) getAllAvailableFiles() []string {
 func RunMainInstaller(agents, commands, hooks, templates *embed.FS) error {
 	model := NewMainModel(agents, commands, hooks, templates)
 	
-	program := tea.NewProgram(
-		model,
-		tea.WithAltScreen(),
-		tea.WithMouseCellMotion(),
-	)
+	program := tea.NewProgram(model)
 	
 	_, err := program.Run()
 	return err

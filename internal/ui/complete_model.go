@@ -1,8 +1,8 @@
 package ui
 
 import (
-	"fmt"
 	"strings"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/the-startup/the-startup/internal/installer"
@@ -15,6 +15,9 @@ type CompleteModel struct {
 	ready        bool
 }
 
+// autoExitMsg is sent after a delay to automatically exit
+type autoExitMsg struct{}
+
 func NewCompleteModel(selectedTool string, installer *installer.Installer) CompleteModel {
 	return CompleteModel{
 		styles:       GetStyles(),
@@ -25,11 +28,19 @@ func NewCompleteModel(selectedTool string, installer *installer.Installer) Compl
 }
 
 func (m CompleteModel) Init() tea.Cmd {
-	return nil
+	// Automatically exit after 3 seconds
+	return tea.Tick(3*time.Second, func(t time.Time) tea.Msg {
+		return autoExitMsg{}
+	})
 }
 
 func (m CompleteModel) Update(msg tea.Msg) (CompleteModel, tea.Cmd) {
-	if _, ok := msg.(tea.KeyMsg); ok {
+	switch msg.(type) {
+	case tea.KeyMsg:
+		// Allow immediate exit on any key press
+		m.ready = true
+	case autoExitMsg:
+		// Auto-exit after delay
 		m.ready = true
 	}
 	return m, nil
@@ -38,32 +49,56 @@ func (m CompleteModel) Update(msg tea.Msg) (CompleteModel, tea.Cmd) {
 func (m CompleteModel) View() string {
 	var s strings.Builder
 	
+	// Banner
 	s.WriteString(m.styles.Title.Render(AppBanner))
 	s.WriteString("\n\n")
 	
+	// Success message
 	s.WriteString(m.styles.Success.Render("✅ Installation Complete!"))
 	s.WriteString("\n\n")
 	
+	// Installation location
 	installLocation := m.installer.GetInstallPath()
-	s.WriteString(m.styles.Normal.Render(fmt.Sprintf("The Startup has been installed to: %s", installLocation)))
+	if installLocation == "" {
+		installLocation = "~/.config/the-startup/.claude"
+	}
+	
+	// Simplify the path for display
+	displayPath := installLocation
+	if strings.Contains(installLocation, ".config/the-startup") {
+		displayPath = "~/.config/the-startup/.claude"
+	} else if strings.Contains(installLocation, ".the-startup") {
+		displayPath = ".the-startup/.claude (local)"
+	}
+	
+	s.WriteString(m.styles.Normal.Render("Installation location:"))
+	s.WriteString("\n")
+	s.WriteString(m.styles.Info.Render("  " + displayPath))
 	s.WriteString("\n\n")
 	
-	s.WriteString(m.styles.Info.Render("Next steps:"))
-	s.WriteString("\n")
-	s.WriteString(m.styles.Normal.Render("1. Restart your " + m.selectedTool + " session"))
+	// Next steps
+	s.WriteString(m.styles.Normal.Render("Next steps:"))
+	s.WriteString("\n\n")
+	
+	// Step 1
+	s.WriteString(m.styles.Normal.Render("  1. Restart your Claude Code session"))
 	s.WriteString("\n")
 	
+	// Step 2
 	isLocal := strings.Contains(installLocation, ".the-startup") && !strings.Contains(installLocation, ".config")
 	if isLocal {
-		s.WriteString(m.styles.Normal.Render("2. Use /develop command in this project"))
+		s.WriteString(m.styles.Normal.Render("  2. Use /develop command in this project"))
 	} else {
-		s.WriteString(m.styles.Normal.Render("2. Use /develop command in any project"))
+		s.WriteString(m.styles.Normal.Render("  2. Use /develop command in any project"))
 	}
 	s.WriteString("\n")
-	s.WriteString(m.styles.Normal.Render("3. Check logs in ~/.the-startup/"))
+	
+	// Step 3
+	s.WriteString(m.styles.Normal.Render("  3. Check logs in ~/.the-startup/"))
 	s.WriteString("\n\n")
 	
-	s.WriteString(m.styles.Help.Render("Press any key to exit"))
+	// Auto-exit message
+	s.WriteString(m.styles.Help.Render("Exiting in 3 seconds..."))
 	
 	return s.String()
 }

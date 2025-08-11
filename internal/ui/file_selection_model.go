@@ -184,30 +184,67 @@ func (m FileSelectionModel) buildStaticTree() string {
 	enumeratorStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("63")).MarginRight(1)
 	rootStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("35"))
 	itemStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
+	updateStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("214")) // Orange for updates
 	
-	buildSubtree := func(embedFS *embed.FS, patterns []string) *tree.Tree {
-		subtree := tree.New()
+	// Get list of existing files that will be updated
+	existingFiles := make(map[string]bool)
+	if m.installer != nil {
+		for _, file := range m.installer.GetExistingFiles(m.selectedFiles) {
+			existingFiles[file] = true
+		}
+	}
+	
+	buildSubtree := func(embedFS *embed.FS, patterns []string, prefix string) []string {
+		var items []string
 		for _, pattern := range patterns {
 			if files, err := fs.Glob(embedFS, pattern); err == nil {
 				for _, file := range files {
 					fileName := filepath.Base(file)
-					subtree = subtree.Child(fileName)
+					filePath := prefix + fileName
+					
+					// Apply orange color if file will be updated
+					if existingFiles[filePath] {
+						items = append(items, updateStyle.Render(fileName+" (will update)"))
+					} else {
+						items = append(items, itemStyle.Render(fileName))
+					}
 				}
 			}
 		}
-		return subtree
+		return items
 	}
 	
-	agentsTree := buildSubtree(m.agentFiles, []string{"assets/agents/*.md", "test_assets/assets/agents/*.md"})
-	commandsTree := buildSubtree(m.commandFiles, []string{"assets/commands/*.md", "test_assets/assets/commands/*.md"})
-	hooksTree := buildSubtree(m.hookFiles, []string{"assets/hooks/*.py", "test_assets/assets/hooks/*.py"})
-	templatesTree := buildSubtree(m.templateFiles, []string{"assets/templates/*", "test_assets/assets/templates/*"})
+	agentItems := buildSubtree(m.agentFiles, []string{"assets/agents/*.md", "test_assets/assets/agents/*.md"}, "agents/")
+	commandItems := buildSubtree(m.commandFiles, []string{"assets/commands/*.md", "test_assets/assets/commands/*.md"}, "commands/")
+	hookItems := buildSubtree(m.hookFiles, []string{"assets/hooks/*.py", "test_assets/assets/hooks/*.py"}, "hooks/")
+	templateItems := buildSubtree(m.templateFiles, []string{"assets/templates/*", "test_assets/assets/templates/*"}, "templates/")
 	
 	claudePath := m.installer.GetClaudePath()
 	
 	displayPath := claudePath
 	if strings.HasPrefix(claudePath, os.Getenv("HOME")) {
 		displayPath = strings.Replace(claudePath, os.Getenv("HOME"), "~", 1)
+	}
+	
+	// Build the tree with colored items
+	agentsTree := tree.New()
+	for _, item := range agentItems {
+		agentsTree = agentsTree.Child(item)
+	}
+	
+	commandsTree := tree.New()
+	for _, item := range commandItems {
+		commandsTree = commandsTree.Child(item)
+	}
+	
+	hooksTree := tree.New()
+	for _, item := range hookItems {
+		hooksTree = hooksTree.Child(item)
+	}
+	
+	templatesTree := tree.New()
+	for _, item := range templateItems {
+		templatesTree = templatesTree.Child(item)
 	}
 	
 	t := tree.
@@ -224,8 +261,7 @@ func (m FileSelectionModel) buildStaticTree() string {
 		).
 		Enumerator(tree.RoundedEnumerator).
 		EnumeratorStyle(enumeratorStyle).
-		RootStyle(rootStyle).
-		ItemStyle(itemStyle)
+		RootStyle(rootStyle)
 	
 	return t.String()
 }

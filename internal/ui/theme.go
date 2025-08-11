@@ -64,10 +64,6 @@ type Styles struct {
 	CursorLine     lipgloss.Style
 	Normal         lipgloss.Style
 	Selected       lipgloss.Style
-	Spinner        lipgloss.Style
-	ProgressBar    lipgloss.Style
-	ProgressFilled lipgloss.Style
-	ProgressEmpty  lipgloss.Style
 }
 
 // GetStyles returns styles for the current theme
@@ -108,20 +104,6 @@ func GetStyles() Styles {
 		Selected: lipgloss.NewStyle().
 			Foreground(CurrentTheme.Primary).
 			Bold(true),
-
-		Spinner: lipgloss.NewStyle().
-			Foreground(CurrentTheme.Primary),
-
-		ProgressBar: lipgloss.NewStyle().
-			Foreground(CurrentTheme.TextMuted),
-
-		ProgressFilled: lipgloss.NewStyle().
-			Foreground(CurrentTheme.Primary).
-			Background(CurrentTheme.Primary),
-
-		ProgressEmpty: lipgloss.NewStyle().
-			Foreground(CurrentTheme.TextMuted).
-			Background(CurrentTheme.Background),
 	}
 }
 
