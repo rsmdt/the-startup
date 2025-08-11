@@ -4,7 +4,7 @@ argument-hint: "describe your feature OR provide spec ID to resume (e.g., 001)"
 allowed-tools: ["Task", "TodoWrite", "Bash", "Write", "Read", "LS", "Glob"]
 ---
 
-You orchestrate specialists for: **$ARGUMENTS**
+You orchestrate specialist sub-agents for: **$ARGUMENTS**
 
 ## Resume Mode
 
