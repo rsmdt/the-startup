@@ -21,11 +21,12 @@ type Installer struct {
 	hookFiles     *embed.FS
 	templateFiles *embed.FS
 	
-	installPath  string
-	claudePath   string
-	tool         string
-	components   []string
-	lockFile     *config.LockFile
+	installPath    string
+	claudePath     string
+	tool           string
+	components     []string
+	selectedFiles  []string // Specific files to install (optional)
+	lockFile       *config.LockFile
 }
 
 // New creates a new installer
@@ -79,6 +80,11 @@ func (i *Installer) SetTool(tool string) {
 // SetComponents sets which components to install
 func (i *Installer) SetComponents(components []string) {
 	i.components = components
+}
+
+// SetSelectedFiles sets specific files to install
+func (i *Installer) SetSelectedFiles(files []string) {
+	i.selectedFiles = files
 }
 
 // IsInstalled checks if already installed
@@ -174,6 +180,22 @@ func (i *Installer) installComponent(component string) error {
 	}
 	
 	for _, file := range files {
+		// If specific files are selected, check if this file should be installed
+		if len(i.selectedFiles) > 0 {
+			fileName := filepath.Base(file)
+			filePath := component + "/" + fileName
+			shouldInstall := false
+			for _, selected := range i.selectedFiles {
+				if selected == filePath {
+					shouldInstall = true
+					break
+				}
+			}
+			if !shouldInstall {
+				continue // Skip this file
+			}
+		}
+		
 		if err := i.copyFile(sourceFS, file, componentPath); err != nil {
 			return fmt.Errorf("failed to copy %s: %w", file, err)
 		}
@@ -232,6 +254,21 @@ func (i *Installer) createClaudeReferences() error {
 		entries, _ := os.ReadDir(agentsDir)
 		for _, entry := range entries {
 			if strings.HasSuffix(entry.Name(), ".md") {
+				// If specific files are selected, check if this file was installed
+				if len(i.selectedFiles) > 0 {
+					filePath := "agents/" + entry.Name()
+					shouldInclude := false
+					for _, selected := range i.selectedFiles {
+						if selected == filePath {
+							shouldInclude = true
+							break
+						}
+					}
+					if !shouldInclude {
+						continue
+					}
+				}
+				
 				// Keep the .md extension for the reference file
 				refPath := filepath.Join(claudeAgents, entry.Name())
 				refContent := fmt.Sprintf("@%s/agents/%s", i.installPath, entry.Name())
@@ -248,6 +285,21 @@ func (i *Installer) createClaudeReferences() error {
 		entries, _ := os.ReadDir(commandsDir)
 		for _, entry := range entries {
 			if strings.HasSuffix(entry.Name(), ".md") {
+				// If specific files are selected, check if this file was installed
+				if len(i.selectedFiles) > 0 {
+					filePath := "commands/" + entry.Name()
+					shouldInclude := false
+					for _, selected := range i.selectedFiles {
+						if selected == filePath {
+							shouldInclude = true
+							break
+						}
+					}
+					if !shouldInclude {
+						continue
+					}
+				}
+				
 				name := strings.TrimSuffix(entry.Name(), ".md")
 				refPath := filepath.Join(claudeCommands, name+".md")
 				
@@ -270,6 +322,21 @@ func (i *Installer) createClaudeReferences() error {
 		entries, _ := os.ReadDir(hooksDir)
 		for _, entry := range entries {
 			if strings.HasSuffix(entry.Name(), ".py") {
+				// If specific files are selected, check if this file was installed
+				if len(i.selectedFiles) > 0 {
+					filePath := "hooks/" + entry.Name()
+					shouldInclude := false
+					for _, selected := range i.selectedFiles {
+						if selected == filePath {
+							shouldInclude = true
+							break
+						}
+					}
+					if !shouldInclude {
+						continue
+					}
+				}
+				
 				srcPath := filepath.Join(hooksDir, entry.Name())
 				destPath := filepath.Join(claudeHooks, entry.Name())
 				
@@ -290,6 +357,21 @@ func (i *Installer) createClaudeReferences() error {
 		templatesDir := filepath.Join(i.installPath, "templates")
 		entries, _ := os.ReadDir(templatesDir)
 		for _, entry := range entries {
+			// If specific files are selected, check if this file was installed
+			if len(i.selectedFiles) > 0 {
+				filePath := "templates/" + entry.Name()
+				shouldInclude := false
+				for _, selected := range i.selectedFiles {
+					if selected == filePath {
+						shouldInclude = true
+						break
+					}
+				}
+				if !shouldInclude {
+					continue
+				}
+			}
+			
 			// Keep the full filename with extension for the reference file
 			refPath := filepath.Join(claudeTemplates, entry.Name())
 			refContent := fmt.Sprintf("@%s/templates/%s", i.installPath, entry.Name())
