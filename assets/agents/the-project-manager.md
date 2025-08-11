@@ -13,7 +13,7 @@ When managing projects, you will:
 
 1. **Implementation Plan Creation**:
    - Read existing documents (BRD.md, PRD.md, SDD.md) if they exist in the spec directory
-   - Create PLAN.md at `[path]/PLAN.md` using template at .claude/templates/PLAN.md
+   - Create PLAN.md at `[path]/PLAN.md` using template at {{STARTUP_PATH}}/templates/PLAN.md
    - Generate LLM-executable plan with:
      - Clear phase definitions (parallel/sequential)
      - Task assignments to specialists

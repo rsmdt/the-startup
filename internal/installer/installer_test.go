@@ -2,6 +2,8 @@ package installer
 
 import (
 	"embed"
+	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -25,7 +27,7 @@ func setupTestDir(t *testing.T) string {
 }
 
 func TestNew(t *testing.T) {
-	installer := New(&testAssets, &testAssets, &testAssets, &testAssets)
+	installer := New(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 	
 	if installer == nil {
 		t.Fatal("New() returned nil")
@@ -33,6 +35,11 @@ func TestNew(t *testing.T) {
 	
 	if installer.tool != "claude-code" {
 		t.Errorf("Expected default tool 'claude-code', got '%s'", installer.tool)
+	}
+	
+	// Check that default install path is .the-startup
+	if installer.installPath != ".the-startup" {
+		t.Errorf("Expected default installPath '.the-startup', got '%s'", installer.installPath)
 	}
 	
 	expectedComponents := []string{"agents", "hooks", "commands", "templates"}
@@ -48,7 +55,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestSetInstallPath(t *testing.T) {
-	installer := New(&testAssets, &testAssets, &testAssets, &testAssets)
+	installer := New(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 	
 	// Test absolute path
 	testPath := "/tmp/test-install"
@@ -83,7 +90,7 @@ func TestSetInstallPath(t *testing.T) {
 }
 
 func TestSetters(t *testing.T) {
-	installer := New(&testAssets, &testAssets, &testAssets, &testAssets)
+	installer := New(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 	
 	// Test SetTool
 	installer.SetTool("cursor")
@@ -122,7 +129,7 @@ func TestSetters(t *testing.T) {
 
 func TestCheckFileExists(t *testing.T) {
 	tmpDir := setupTestDir(t)
-	installer := New(&testAssets, &testAssets, &testAssets, &testAssets)
+	installer := New(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 	installer.SetInstallPath(tmpDir)
 	
 	// Get the claude path (set based on test setup)
@@ -153,7 +160,7 @@ func TestCheckFileExists(t *testing.T) {
 
 func TestIsInstalled(t *testing.T) {
 	tmpDir := setupTestDir(t)
-	installer := New(&testAssets, &testAssets, &testAssets, &testAssets)
+	installer := New(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 	
 	// Set both install and claude paths to the temp directory to avoid conflicts
 	installer.SetInstallPath(tmpDir)
@@ -189,7 +196,7 @@ func TestIsInstalled(t *testing.T) {
 
 func TestInstallComponentUnknown(t *testing.T) {
 	tmpDir := setupTestDir(t)
-	installer := New(&testAssets, &testAssets, &testAssets, &testAssets)
+	installer := New(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 	installer.SetInstallPath(tmpDir)
 	
 	// Test unknown component
@@ -204,22 +211,58 @@ func TestInstallComponentUnknown(t *testing.T) {
 }
 
 func TestReplacePlaceholders(t *testing.T) {
-	installer := New(&testAssets, &testAssets, &testAssets, &testAssets)
-	installer.SetInstallPath("/test/path")
+	installer := New(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
+	installer.SetInstallPath("/custom/startup/path")
 	
-	input := []byte("Install path: {{INSTALL_PATH}}/config")
-	expected := "Install path: /test/path/config"
+	// Set claude path (normally set in New())
+	homeDir, _ := os.UserHomeDir()
+	installer.claudePath = filepath.Join(homeDir, ".claude")
 	
-	result := installer.replacePlaceholders(input)
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "Replace STARTUP_PATH",
+			input:    "Template at {{STARTUP_PATH}}/templates/test.md",
+			expected: "Template at /custom/startup/path/templates/test.md",
+		},
+		{
+			name:     "Replace INSTALL_PATH (backward compatibility)",
+			input:    "Template at {{INSTALL_PATH}}/templates/test.md",
+			expected: "Template at /custom/startup/path/templates/test.md",
+		},
+		{
+			name:     "Replace CLAUDE_PATH",
+			input:    "Agent at {{CLAUDE_PATH}}/agents/test.md",
+			expected: fmt.Sprintf("Agent at %s/agents/test.md", installer.claudePath),
+		},
+		{
+			name:     "Replace multiple variables",
+			input:    "From {{CLAUDE_PATH}} to {{STARTUP_PATH}} and {{INSTALL_PATH}}",
+			expected: fmt.Sprintf("From %s to /custom/startup/path and /custom/startup/path", installer.claudePath),
+		},
+		{
+			name:     "No variables to replace",
+			input:    "No template variables here",
+			expected: "No template variables here",
+		},
+	}
 	
-	if string(result) != expected {
-		t.Errorf("Expected '%s', got '%s'", expected, string(result))
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := installer.replacePlaceholders([]byte(tt.input))
+			if string(result) != tt.expected {
+				t.Errorf("Expected '%s', got '%s'", tt.expected, string(result))
+			}
+		})
 	}
 }
 
 func TestGetPaths(t *testing.T) {
 	tmpDir := setupTestDir(t)
-	installer := New(&testAssets, &testAssets, &testAssets, &testAssets)
+	installer := New(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 	installer.SetInstallPath(tmpDir)
 	
 	// Test GetInstallPath
@@ -256,7 +299,7 @@ func TestInstallDirectoryCreation(t *testing.T) {
 	tmpDir := setupTestDir(t)
 	nonExistentDir := filepath.Join(tmpDir, "deep", "nested", "path")
 	
-	installer := New(&testAssets, &testAssets, &testAssets, &testAssets)
+	installer := New(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 	installer.SetInstallPath(nonExistentDir)
 	installer.SetComponents([]string{}) // No components to avoid installation errors
 	
@@ -274,7 +317,7 @@ func TestInstallDirectoryCreation(t *testing.T) {
 
 func TestInstallWithSelectedFiles(t *testing.T) {
 	tmpDir := setupTestDir(t)
-	installer := New(&testAssets, &testAssets, &testAssets, &testAssets)
+	installer := New(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 	installer.SetInstallPath(tmpDir)
 	installer.SetComponents([]string{"agents"})
 	installer.SetSelectedFiles([]string{"agents/specific-agent.md"})
@@ -291,9 +334,94 @@ func TestInstallWithSelectedFiles(t *testing.T) {
 	}
 }
 
+func TestMergeSettings(t *testing.T) {
+	installer := New(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
+	
+	tests := []struct {
+		name     string
+		existing map[string]interface{}
+		template map[string]interface{}
+		expected map[string]interface{}
+	}{
+		{
+			name:     "Nil existing settings",
+			existing: nil,
+			template: map[string]interface{}{
+				"permissions": map[string]interface{}{
+					"additionalDirectories": []interface{}{".the-startup"},
+				},
+			},
+			expected: map[string]interface{}{
+				"permissions": map[string]interface{}{
+					"additionalDirectories": []interface{}{".the-startup"},
+				},
+			},
+		},
+		{
+			name: "Merge with existing settings",
+			existing: map[string]interface{}{
+				"someOtherKey": "value",
+				"permissions": map[string]interface{}{
+					"allow": []interface{}{"Read(~/docs)"},
+				},
+			},
+			template: map[string]interface{}{
+				"permissions": map[string]interface{}{
+					"additionalDirectories": []interface{}{".the-startup"},
+				},
+				"hooks": map[string]interface{}{
+					"PreToolUse": []interface{}{},
+				},
+			},
+			expected: map[string]interface{}{
+				"someOtherKey": "value",
+				"permissions": map[string]interface{}{
+					"allow":                 []interface{}{"Read(~/docs)"},
+					"additionalDirectories": []interface{}{".the-startup"},
+				},
+				"hooks": map[string]interface{}{
+					"PreToolUse": []interface{}{},
+				},
+			},
+		},
+		{
+			name: "Template hooks override existing",
+			existing: map[string]interface{}{
+				"hooks": map[string]interface{}{
+					"PreToolUse": []interface{}{"old-hook"},
+				},
+			},
+			template: map[string]interface{}{
+				"hooks": map[string]interface{}{
+					"PreToolUse": []interface{}{"new-hook"},
+				},
+			},
+			expected: map[string]interface{}{
+				"hooks": map[string]interface{}{
+					"PreToolUse": []interface{}{"new-hook"},
+				},
+			},
+		},
+	}
+	
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := installer.mergeSettings(tt.existing, tt.template)
+			
+			// Compare the results
+			resultJSON, _ := json.Marshal(result)
+			expectedJSON, _ := json.Marshal(tt.expected)
+			
+			if string(resultJSON) != string(expectedJSON) {
+				t.Errorf("Expected %s, got %s", string(expectedJSON), string(resultJSON))
+			}
+		})
+	}
+}
+
 func TestCopyCurrentExecutable(t *testing.T) {
 	tmpDir := setupTestDir(t)
-	installer := New(&testAssets, &testAssets, &testAssets, &testAssets)
+	installer := New(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 	
 	// Test copying current executable
 	err := installer.copyCurrentExecutable(tmpDir)
@@ -318,26 +446,26 @@ func TestCopyCurrentExecutable(t *testing.T) {
 
 func TestHooksComponentInstallsGoBinary(t *testing.T) {
 	tmpDir := setupTestDir(t)
-	installer := New(&testAssets, &testAssets, &testAssets, &testAssets)
+	installer := New(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 	installer.SetInstallPath(tmpDir)
 	installer.claudePath = filepath.Join(tmpDir, ".claude")
 	
-	// Install hooks component - should deploy Go binary instead of Python files
+	// Install hooks component - should now skip installation to Claude directory
 	err := installer.installComponentToClaude("hooks")
 	if err != nil {
 		t.Errorf("Expected hooks component installation to succeed, got error: %v", err)
 	}
 	
-	// Check that the Go binary was deployed
+	// Check that the binary was NOT deployed to .claude/hooks (it's handled separately now)
 	hooksBinaryPath := filepath.Join(tmpDir, ".claude", "hooks", "the-startup")
-	if _, err := os.Stat(hooksBinaryPath); err != nil {
-		t.Errorf("Expected Go binary to be deployed to %s, but file doesn't exist: %v", hooksBinaryPath, err)
+	if _, err := os.Stat(hooksBinaryPath); err == nil {
+		t.Errorf("Expected no binary in .claude/hooks (it should be in STARTUP_PATH/bin), but found file at %s", hooksBinaryPath)
 	}
 }
 
 func TestConfigureHooksUsesGoCommands(t *testing.T) {
 	tmpDir := setupTestDir(t)
-	installer := New(&testAssets, &testAssets, &testAssets, &testAssets)
+	installer := New(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 	installer.SetInstallPath(tmpDir)
 	installer.claudePath = filepath.Join(tmpDir, ".claude")
 	
@@ -359,9 +487,9 @@ func TestConfigureHooksUsesGoCommands(t *testing.T) {
 	
 	settingsContent := string(data)
 	
-	// Verify Go hook commands are present
-	expectedPreCommand := "$CLAUDE_PROJECT_DIR/.claude/hooks/the-startup log --assistant"
-	expectedPostCommand := "$CLAUDE_PROJECT_DIR/.claude/hooks/the-startup log --user"
+	// Verify Go hook commands are present with new path
+	expectedPreCommand := "/bin/the-startup log --assistant"
+	expectedPostCommand := "/bin/the-startup log --user"
 	
 	if !strings.Contains(settingsContent, expectedPreCommand) {
 		t.Errorf("Expected settings.json to contain PreToolUse command '%s', but content was:\n%s", expectedPreCommand, settingsContent)
@@ -381,7 +509,7 @@ func TestConfigureHooksUsesGoCommands(t *testing.T) {
 // Integration test that validates the full state machine works with installer
 func TestInstallerIntegration(t *testing.T) {
 	tmpDir := setupTestDir(t)
-	installer := New(&testAssets, &testAssets, &testAssets, &testAssets)
+	installer := New(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 	installer.SetInstallPath(tmpDir)
 	
 	// Test the full configuration sequence
@@ -405,7 +533,7 @@ func TestInstallerIntegration(t *testing.T) {
 // Full integration test for Go hooks deployment
 func TestGoHooksIntegration(t *testing.T) {
 	tmpDir := setupTestDir(t)
-	installer := New(&testAssets, &testAssets, &testAssets, &testAssets)
+	installer := New(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 	installer.SetInstallPath(tmpDir)
 	installer.claudePath = filepath.Join(tmpDir, ".claude")
 	installer.SetTool("claude-code")
@@ -417,10 +545,10 @@ func TestGoHooksIntegration(t *testing.T) {
 		t.Errorf("Expected full installation to succeed, got error: %v", err)
 	}
 	
-	// Verify binary was deployed
-	hooksBinaryPath := filepath.Join(tmpDir, ".claude", "hooks", "the-startup")
-	if _, err := os.Stat(hooksBinaryPath); err != nil {
-		t.Errorf("Expected Go binary to be deployed to %s, but file doesn't exist: %v", hooksBinaryPath, err)
+	// Verify binary was deployed to STARTUP_PATH/bin
+	binaryPath := filepath.Join(tmpDir, "bin", "the-startup")
+	if _, err := os.Stat(binaryPath); err != nil {
+		t.Errorf("Expected Go binary to be deployed to %s, but file doesn't exist: %v", binaryPath, err)
 	}
 	
 	// Verify settings.json was configured with Go commands

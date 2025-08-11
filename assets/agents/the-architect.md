@@ -33,7 +33,7 @@ When you receive a documentation path (e.g., `docs/specs/001-feature-name/`), th
 
 3. **Document**
    - If documentation path provided, create SDD at `[path]/SDD.md`
-   - Use template at .claude/templates/SDD.md
+   - Use template at {{STARTUP_PATH}}/templates/SDD.md
    - Include system architecture, component design, data flow, technology decisions
    - Consolidate any parallel findings into unified design
    

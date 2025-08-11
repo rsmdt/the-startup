@@ -39,8 +39,8 @@ type MainModel struct {
 }
 
 // NewMainModel creates a new main model with composed sub-models
-func NewMainModel(agents, commands, hooks, templates *embed.FS) *MainModel {
-	installerInstance := installer.New(agents, commands, hooks, templates)
+func NewMainModel(agents, commands, hooks, templates, settings *embed.FS) *MainModel {
+	installerInstance := installer.New(agents, commands, hooks, templates, settings)
 	
 	m := &MainModel{
 		state:              StateToolSelection, // Start directly with tool selection
@@ -249,8 +249,8 @@ func (m *MainModel) getAllAvailableFiles() []string {
 }
 
 // RunMainInstaller starts the installation UI using the MainModel
-func RunMainInstaller(agents, commands, hooks, templates *embed.FS) error {
-	model := NewMainModel(agents, commands, hooks, templates)
+func RunMainInstaller(agents, commands, hooks, templates, settings *embed.FS) error {
+	model := NewMainModel(agents, commands, hooks, templates, settings)
 	
 	program := tea.NewProgram(model)
 	

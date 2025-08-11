@@ -33,7 +33,7 @@ When you receive a documentation path (e.g., `docs/specs/001-feature-name/`), th
 
 3. **Document**
    - If documentation path provided, create BRD at `[path]/BRD.md`
-   - Use template at .claude/templates/BRD.md
+   - Use template at {{STARTUP_PATH}}/templates/BRD.md
    - Include problem statement, all stakeholders, constraints, risks, success metrics
    - Consolidate any parallel findings into unified requirements
 

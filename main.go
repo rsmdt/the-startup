@@ -28,6 +28,9 @@ var commandFiles embed.FS
 //go:embed assets/templates/*
 var templateFiles embed.FS
 
+//go:embed assets/settings.json
+var settingsTemplate embed.FS
+
 func main() {
 	rootCmd := &cobra.Command{
 		Use:   "the-startup",
@@ -38,7 +41,7 @@ workflows with specialized AI agents, hooks, and commands.`,
 	}
 
 	// Add commands
-	rootCmd.AddCommand(cmd.NewInstallCommand(&agentFiles, &commandFiles, nil, &templateFiles))
+	rootCmd.AddCommand(cmd.NewInstallCommand(&agentFiles, &commandFiles, nil, &templateFiles, &settingsTemplate))
 	rootCmd.AddCommand(cmd.NewUpdateCommand())
 	rootCmd.AddCommand(cmd.NewValidateCommand())
 	rootCmd.AddCommand(cmd.NewHooksCommand())

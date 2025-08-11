@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "additionalDirectories": [
+      "{{STARTUP_PATH}}"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{STARTUP_PATH}}/bin/the-startup log --assistant",
+            "_source": "the-startup"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "{{STARTUP_PATH}}/bin/the-startup log --user",
+            "_source": "the-startup"
+          }
+        ]
+      }
+    ]
+  }
+}

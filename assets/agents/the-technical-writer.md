@@ -40,7 +40,7 @@ When creating documentation, you will:
 5. **Documentation Structure**:
    - For new projects: Check if documentation structure exists
    - If no structure exists, request the-project-manager to set it up
-   - When creating documentation, reference appropriate templates from @{{INSTALL_PATH}}/templates/
+   - When creating documentation, reference appropriate templates from @{{STARTUP_PATH}}/templates/
    - Place documentation in designated locations when structure is ready
 
 ## Output Format
