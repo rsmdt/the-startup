@@ -6,64 +6,60 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// ErrorModel handles error display
 type ErrorModel struct {
-	context    *Context
+	styles     Styles
+	renderer   *ProgressiveDisclosureRenderer
 	err        error
 	errContext string
+	ready      bool
 }
 
-// NewErrorModel creates a new error model
-func NewErrorModel(context *Context) *ErrorModel {
-	return &ErrorModel{
-		context: context,
+func NewErrorModel(err error, context string) ErrorModel {
+	return ErrorModel{
+		styles:     GetStyles(),
+		renderer:   NewProgressiveDisclosureRenderer(),
+		err:        err,
+		errContext: context,
+		ready:      false,
 	}
 }
 
-// SetError sets the error and context for display
-func (m *ErrorModel) SetError(err error, context string) {
-	m.err = err
-	m.errContext = context
-}
-
-// Init initializes the error model
-func (m *ErrorModel) Init() tea.Cmd {
+func (m ErrorModel) Init() tea.Cmd {
 	return nil
 }
 
-// Update handles messages for the error screen
-func (m *ErrorModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m ErrorModel) Update(msg tea.Msg) (ErrorModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "ctrl+c", "q":
-			return m, tea.Quit
-		
 		case "esc":
-			// Return to welcome screen for recovery
-			return m, func() tea.Msg {
-				return ViewTransitionMsg{NextView: StateWelcome}
-			}
+			m.ready = true
 		}
 	}
-	
 	return m, nil
 }
 
-// View renders the error screen
-func (m *ErrorModel) View() string {
+func (m ErrorModel) View() string {
 	var s strings.Builder
 	
-	// ASCII art banner
-	s.WriteString(m.context.Styles.Title.Render(WelcomeBanner))
+	s.WriteString(m.styles.Title.Render(AppBanner))
 	s.WriteString("\n\n")
 	
-	// Error message
-	s.WriteString(m.context.Renderer.RenderError(m.err, m.errContext))
+	s.WriteString(m.renderer.RenderError(m.err, m.errContext))
 	s.WriteString("\n")
 	
-	// Recovery instructions
-	s.WriteString(m.context.Styles.Help.Render("Press Escape to return to welcome screen"))
+	s.WriteString(m.styles.Help.Render("Press Escape to go back"))
 	
 	return s.String()
+}
+
+func (m ErrorModel) Ready() bool {
+	return m.ready
+}
+
+func (m ErrorModel) SetError(err error, context string) ErrorModel {
+	m.err = err
+	m.errContext = context
+	m.ready = false
+	return m
 }

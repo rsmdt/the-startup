@@ -11,12 +11,9 @@ import (
 type InstallerState int
 
 const (
-	StateWelcome InstallerState = iota
-	StateToolSelection
+	StateToolSelection InstallerState = iota
 	StatePathSelection
 	StateFileSelection
-	StateHuhConfirmation
-	StateConfirmation
 	StateInstalling
 	StateComplete
 	StateError
@@ -25,18 +22,12 @@ const (
 // String returns the string representation of the state
 func (s InstallerState) String() string {
 	switch s {
-	case StateWelcome:
-		return "Welcome"
 	case StateToolSelection:
 		return "Tool Selection"
 	case StatePathSelection:
 		return "Path Selection"
 	case StateFileSelection:
 		return "File Selection"
-	case StateHuhConfirmation:
-		return "Huh Confirmation"
-	case StateConfirmation:
-		return "Confirmation"
 	case StateInstalling:
 		return "Installing"
 	case StateComplete:
@@ -57,24 +48,18 @@ type StateTransition struct {
 // ValidTransitions defines allowed state transitions
 var ValidTransitions = map[StateTransition]bool{
 	// Forward transitions
-	{StateWelcome, StateToolSelection}:         true,
-	{StateToolSelection, StatePathSelection}:   true,
-	{StatePathSelection, StateFileSelection}:   true,
-	{StateFileSelection, StateHuhConfirmation}: true,
-	{StateHuhConfirmation, StateConfirmation}:  true,
-	{StateConfirmation, StateInstalling}:       true,
-	{StateInstalling, StateComplete}:           true,
-	{StateInstalling, StateError}:              true,
+	{StateToolSelection, StatePathSelection}: true,
+	{StatePathSelection, StateFileSelection}: true,
+	{StateFileSelection, StateInstalling}:    true,
+	{StateInstalling, StateComplete}:         true,
+	{StateInstalling, StateError}:            true,
 	
 	// Backward transitions (ESC)
-	{StateToolSelection, StateWelcome}:         true,
-	{StatePathSelection, StateToolSelection}:   true,
-	{StateFileSelection, StatePathSelection}:   true,
-	{StateHuhConfirmation, StateFileSelection}: true,
-	{StateConfirmation, StateHuhConfirmation}:  true,
+	{StatePathSelection, StateToolSelection}: true,
+	{StateFileSelection, StatePathSelection}: true,
 	
 	// Error recovery
-	{StateError, StateWelcome}: true,
+	{StateError, StateToolSelection}: true,
 }
 
 // IsValidTransition checks if a state transition is allowed

@@ -63,6 +63,7 @@ type Styles struct {
 	Cursor         lipgloss.Style
 	CursorLine     lipgloss.Style
 	Normal         lipgloss.Style
+	Selected       lipgloss.Style
 	Spinner        lipgloss.Style
 	ProgressBar    lipgloss.Style
 	ProgressFilled lipgloss.Style
@@ -103,6 +104,10 @@ func GetStyles() Styles {
 
 		Normal: lipgloss.NewStyle().
 			Foreground(CurrentTheme.Text),
+
+		Selected: lipgloss.NewStyle().
+			Foreground(CurrentTheme.Primary).
+			Bold(true),
 
 		Spinner: lipgloss.NewStyle().
 			Foreground(CurrentTheme.Primary),

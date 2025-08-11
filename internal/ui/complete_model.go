@@ -5,71 +5,69 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/the-startup/the-startup/internal/installer"
 )
 
-// CompleteModel handles installation completion display
 type CompleteModel struct {
-	context *Context
+	styles       Styles
+	installer    *installer.Installer
+	selectedTool string
+	ready        bool
 }
 
-// NewCompleteModel creates a new complete model
-func NewCompleteModel(context *Context) *CompleteModel {
-	return &CompleteModel{
-		context: context,
+func NewCompleteModel(selectedTool string, installer *installer.Installer) CompleteModel {
+	return CompleteModel{
+		styles:       GetStyles(),
+		installer:    installer,
+		selectedTool: selectedTool,
+		ready:        false,
 	}
 }
 
-// Init initializes the complete model
-func (m *CompleteModel) Init() tea.Cmd {
+func (m CompleteModel) Init() tea.Cmd {
 	return nil
 }
 
-// Update handles messages for completion screen
-func (m *CompleteModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg.(type) {
-	case tea.KeyMsg:
-		// Any key exits
-		return m, tea.Quit
+func (m CompleteModel) Update(msg tea.Msg) (CompleteModel, tea.Cmd) {
+	if _, ok := msg.(tea.KeyMsg); ok {
+		m.ready = true
 	}
-	
 	return m, nil
 }
 
-// View renders the completion screen
-func (m *CompleteModel) View() string {
+func (m CompleteModel) View() string {
 	var s strings.Builder
 	
-	// ASCII art banner
-	s.WriteString(m.context.Styles.Title.Render(WelcomeBanner))
+	s.WriteString(m.styles.Title.Render(AppBanner))
 	s.WriteString("\n\n")
 	
-	// Success message
-	s.WriteString(m.context.Styles.Success.Render("✅ Installation Complete!"))
+	s.WriteString(m.styles.Success.Render("✅ Installation Complete!"))
 	s.WriteString("\n\n")
 	
-	// Installation details
-	installLocation := m.context.Installer.GetInstallPath()
-	s.WriteString(m.context.Styles.Normal.Render(fmt.Sprintf("The Startup has been installed to: %s", installLocation)))
+	installLocation := m.installer.GetInstallPath()
+	s.WriteString(m.styles.Normal.Render(fmt.Sprintf("The Startup has been installed to: %s", installLocation)))
 	s.WriteString("\n\n")
 	
-	// Next steps
-	s.WriteString(m.context.Styles.Info.Render("Next steps:"))
+	s.WriteString(m.styles.Info.Render("Next steps:"))
 	s.WriteString("\n")
-	s.WriteString(m.context.Styles.Normal.Render("1. Restart your " + m.context.SelectedTool + " session"))
+	s.WriteString(m.styles.Normal.Render("1. Restart your " + m.selectedTool + " session"))
 	s.WriteString("\n")
 	
 	isLocal := strings.Contains(installLocation, ".the-startup") && !strings.Contains(installLocation, ".config")
 	if isLocal {
-		s.WriteString(m.context.Styles.Normal.Render("2. Use /develop command in this project"))
+		s.WriteString(m.styles.Normal.Render("2. Use /develop command in this project"))
 	} else {
-		s.WriteString(m.context.Styles.Normal.Render("2. Use /develop command in any project"))
+		s.WriteString(m.styles.Normal.Render("2. Use /develop command in any project"))
 	}
 	s.WriteString("\n")
-	s.WriteString(m.context.Styles.Normal.Render("3. Check logs in ~/.the-startup/"))
+	s.WriteString(m.styles.Normal.Render("3. Check logs in ~/.the-startup/"))
 	s.WriteString("\n\n")
 	
-	// Exit instruction
-	s.WriteString(m.context.Styles.Help.Render("Press any key to exit"))
+	s.WriteString(m.styles.Help.Render("Press any key to exit"))
 	
 	return s.String()
+}
+
+func (m CompleteModel) Ready() bool {
+	return m.ready
 }

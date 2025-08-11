@@ -1,10 +1,16 @@
 package ui
 
 import (
+	"strings"
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
+
+// containsString checks if a string contains a substring
+func containsString(s, substr string) bool {
+	return strings.Contains(s, substr)
+}
 
 func TestNewMainModel(t *testing.T) {
 	// Test that NewMainModel creates a valid model
@@ -14,141 +20,143 @@ func TestNewMainModel(t *testing.T) {
 		t.Fatal("NewMainModel returned nil")
 	}
 	
-	if model.state != StateWelcome {
-		t.Errorf("Expected initial state to be StateWelcome, got %v", model.state)
+	// Should start directly with ToolSelection state
+	if model.state != StateToolSelection {
+		t.Errorf("Expected initial state to be StateToolSelection, got %v", model.state)
 	}
 	
-	if model.context == nil {
-		t.Error("Expected context to be initialized")
-	}
-	
-	if model.context.Installer == nil {
+	if model.installer == nil {
 		t.Error("Expected installer to be initialized")
 	}
 	
-	if model.currentView == nil {
-		t.Error("Expected current view to be initialized")
+	// Check that sub-models are initialized
+	if model.toolSelectionModel.renderer == nil {
+		t.Error("Expected tool selection model renderer to be initialized")
 	}
 }
 
 func TestMainModelInit(t *testing.T) {
 	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
 	
-	// Init should delegate to current view (WelcomeModel)
+	// Init should return nil for consolidated model
 	cmd := model.Init()
-	if cmd == nil {
-		t.Error("Expected Init() to return a command from WelcomeModel")
+	if cmd != nil {
+		t.Error("Expected Init() to return nil for consolidated model")
 	}
 }
 
-func TestMainModelViewTransitions(t *testing.T) {
+func TestMainModelDirectStates(t *testing.T) {
 	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
 	
-	// Test transition from Welcome to Tool Selection
-	transitionMsg := ViewTransitionMsg{NextView: StateToolSelection}
-	updatedModel, cmd := model.Update(transitionMsg)
-	
-	if updatedModel == nil {
-		t.Fatal("Expected model to be returned")
+	// Test that we start directly with ToolSelection
+	if model.state != StateToolSelection {
+		t.Errorf("Expected StateToolSelection, got %v", model.state)
 	}
 	
-	mainModel := updatedModel.(*MainModel)
-	if mainModel.state != StateToolSelection {
-		t.Errorf("Expected state to be StateToolSelection, got %v", mainModel.state)
-	}
-	
-	// cmd should be from the new view's Init()
-	_ = cmd // cmd can be nil, that's fine
-}
-
-func TestMainModelInvalidTransition(t *testing.T) {
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
-	
-	// Try invalid transition from Welcome to Complete
-	transitionMsg := ViewTransitionMsg{NextView: StateComplete}
-	updatedModel, _ := model.Update(transitionMsg)
-	
-	mainModel := updatedModel.(*MainModel)
-	if mainModel.state != StateError {
-		t.Errorf("Expected state to transition to StateError for invalid transition, got %v", mainModel.state)
-	}
-}
-
-func TestMainModelSelectionMadeMsg(t *testing.T) {
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
-	
-	// Test tool selection
-	selectionMsg := SelectionMadeMsg{Tool: "claude-code"}
-	updatedModel, _ := model.Update(selectionMsg)
-	
-	mainModel := updatedModel.(*MainModel)
-	if mainModel.context.SelectedTool != "claude-code" {
-		t.Errorf("Expected SelectedTool to be 'claude-code', got '%s'", mainModel.context.SelectedTool)
-	}
-}
-
-func TestMainModelWindowSizeMsg(t *testing.T) {
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
-	
-	// Test window resize
-	sizeMsg := tea.WindowSizeMsg{Width: 120, Height: 40}
-	updatedModel, _ := model.Update(sizeMsg)
-	
-	mainModel := updatedModel.(*MainModel)
-	if mainModel.context.Width != 120 || mainModel.context.Height != 40 {
-		t.Errorf("Expected dimensions to be 120x40, got %dx%d", 
-			mainModel.context.Width, mainModel.context.Height)
-	}
-}
-
-func TestMainModelView(t *testing.T) {
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
-	
-	// Test that view delegates to current view
+	// Test view renders
 	view := model.View()
-	if view == "" {
-		t.Error("Expected non-empty view")
+	if len(view) == 0 {
+		t.Error("Expected tool selection view to have content")
 	}
 	
-	// Should contain welcome content since we start in StateWelcome
-	if !containsString(view, "Startup") {
-		t.Error("Expected view to contain welcome content")
+	// Test state transition
+	model.transitionToState(StatePathSelection)
+	if model.state != StatePathSelection {
+		t.Errorf("Expected StatePathSelection, got %v", model.state)
+	}
+	
+	view = model.View()
+	if len(view) == 0 {
+		t.Error("Expected path selection view to have content")
 	}
 }
 
-func TestMainModelErrorHandling(t *testing.T) {
+func TestMainModelKeyHandling(t *testing.T) {
 	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
 	
-	// Test error transition with data
-	errorData := map[string]interface{}{
-		"error": &TestError{"test error"},
-		"context": "test context",
-	}
+	// Test ESC key - should quit from tool selection
+	escMsg := tea.KeyMsg{Type: tea.KeyEsc}
+	_, cmd := model.Update(escMsg)
 	
-	transitionMsg := ViewTransitionMsg{NextView: StateError, Data: errorData}
-	updatedModel, _ := model.Update(transitionMsg)
-	
-	mainModel := updatedModel.(*MainModel)
-	if mainModel.state != StateError {
-		t.Errorf("Expected state to be StateError, got %v", mainModel.state)
-	}
-	
-	// Check that error view received the error data
-	errorView, ok := mainModel.currentView.(*ErrorModel)
-	if !ok {
-		t.Fatal("Expected current view to be ErrorModel")
-	}
-	
-	if errorView.err == nil {
-		t.Error("Expected error to be set in ErrorModel")
+	// Should return tea.Quit command when going back from tool selection to welcome
+	if cmd == nil {
+		t.Error("Expected ESC to return a quit command from initial state")
 	}
 }
 
-// TestError implements error interface for testing
-type TestError struct {
-	message string
+func TestMainModelFileSelectionIntegration(t *testing.T) {
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
+	
+	// Navigate through proper flow to file selection
+	model.selectedTool = "claude-code"
+	model.transitionToState(StateFileSelection)
+	
+	// Should have files auto-selected after proper path selection
+	if len(model.selectedFiles) == 0 {
+		// Debug: check what files are available
+		allFiles := model.getAllAvailableFiles()
+		t.Logf("Available files: %v", allFiles)
+		t.Error("Expected files to be auto-selected when entering file selection state properly")
+	}
+	
+	// Should have confirmation choices initialized in file selection model
+	if len(model.fileSelectionModel.choices) != 2 {
+		t.Error("Expected confirmation choices to be initialized in file selection state")
+	}
+	
+	// Test view renders
+	view := model.View()
+	if len(view) == 0 {
+		t.Error("Expected file selection view to have content")
+	}
 }
 
-func (e *TestError) Error() string {
-	return e.message
+func TestMainModelHuhIntegration(t *testing.T) {
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
+	
+	// Setup file selection state
+	model.selectedTool = "claude-code"
+	model.transitionToState(StateFileSelection)
+	
+	// Test view renders with huh form always visible
+	view := model.View()
+	if len(view) == 0 {
+		t.Error("Expected file selection view with huh form to have content")
+	}
+	
+	// Test that state is FileSelection with huh form always shown
+	if model.state != StateFileSelection {
+		t.Errorf("Expected state to be StateFileSelection, got %v", model.state)
+	}
+	
+	// Confirmation choices should be initialized in file selection model
+	if len(model.fileSelectionModel.choices) != 2 {
+		t.Error("Expected confirmation choices to be initialized")
+	}
+}
+
+func TestMainModelChoicesInitialization(t *testing.T) {
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
+	
+	// Should start with tool selection choices
+	expectedChoices := []string{"claude-code", "Cancel"}
+	if len(model.toolSelectionModel.choices) != len(expectedChoices) {
+		t.Errorf("Expected %d choices for tool selection, got %d", len(expectedChoices), len(model.toolSelectionModel.choices))
+	}
+	
+	// Test path selection choices
+	model.transitionToState(StatePathSelection)
+	if len(model.pathSelectionModel.choices) < 3 { // Should have at least recommended, local, custom, cancel
+		t.Errorf("Expected at least 3 choices for path selection, got %d", len(model.pathSelectionModel.choices))
+	}
+	
+	// Test file selection choices - should have confirmation options
+	model.transitionToState(StateFileSelection)
+	expectedFileChoices := []string{
+		"Yes, give me awesome",
+		"Huh? I did not sign up for this",
+	}
+	if len(model.fileSelectionModel.choices) != len(expectedFileChoices) {
+		t.Errorf("Expected %d choices for file selection, got %d", len(expectedFileChoices), len(model.fileSelectionModel.choices))
+	}
 }

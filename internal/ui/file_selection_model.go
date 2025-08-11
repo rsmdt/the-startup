@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"embed"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -9,112 +10,212 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/tree"
+	"github.com/the-startup/the-startup/internal/installer"
 )
 
-// FileSelectionModel handles file selection display
 type FileSelectionModel struct {
-	context *Context
-	cursor  int
-	choices []string
+	styles        Styles
+	renderer      *ProgressiveDisclosureRenderer
+	installer     *installer.Installer
+	agentFiles    *embed.FS
+	commandFiles  *embed.FS
+	hookFiles     *embed.FS
+	templateFiles *embed.FS
+	selectedTool  string
+	selectedPath  string
+	selectedFiles []string
+	cursor        int
+	choices       []string
+	ready         bool
+	confirmed     bool
 }
 
-// NewFileSelectionModel creates a new file selection model
-func NewFileSelectionModel(context *Context) *FileSelectionModel {
-	return &FileSelectionModel{
-		context: context,
-		cursor:  0,
-		choices: []string{"Continue"},
+func NewFileSelectionModel(selectedTool, selectedPath string, installer *installer.Installer, agents, commands, hooks, templates *embed.FS) FileSelectionModel {
+	m := FileSelectionModel{
+		styles:        GetStyles(),
+		renderer:      NewProgressiveDisclosureRenderer(),
+		installer:     installer,
+		agentFiles:    agents,
+		commandFiles:  commands,
+		hookFiles:     hooks,
+		templateFiles: templates,
+		selectedTool:  selectedTool,
+		selectedPath:  selectedPath,
+		choices: []string{
+			"Yes, give me awesome",
+			"Huh? I did not sign up for this",
+		},
+		cursor: 0,
+		ready:  false,
 	}
+	
+	m.selectedFiles = m.getAllAvailableFiles()
+	if m.installer != nil {
+		m.installer.SetSelectedFiles(m.selectedFiles)
+	}
+	
+	return m
 }
 
-// Init initializes the file selection model
-func (m *FileSelectionModel) Init() tea.Cmd {
+func (m FileSelectionModel) Init() tea.Cmd {
 	return nil
 }
 
-// Update handles messages for file selection
-func (m *FileSelectionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m FileSelectionModel) Update(msg tea.Msg) (FileSelectionModel, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "ctrl+c", "q":
-			return m, tea.Quit
-		
-		case "esc":
-			// Go back to path selection
-			return m, func() tea.Msg {
-				return ViewTransitionMsg{NextView: StatePathSelection}
+		case "up", "k":
+			if m.cursor > 0 {
+				m.cursor--
 			}
-		
+		case "down", "j":
+			if m.cursor < len(m.choices)-1 {
+				m.cursor++
+			}
 		case "enter":
-			// Proceed to huh confirmation
-			return m, func() tea.Msg {
-				return ViewTransitionMsg{NextView: StateHuhConfirmation}
+			if m.cursor < len(m.choices) {
+				choice := m.choices[m.cursor]
+				if choice == "Yes, give me awesome" {
+					m.confirmed = true
+					m.ready = true
+				} else {
+					m.confirmed = false
+					m.ready = true
+				}
+			}
+		}
+	}
+	return m, nil
+}
+
+func (m FileSelectionModel) View() string {
+	var s strings.Builder
+	
+	s.WriteString(m.styles.Title.Render(AppBanner))
+	s.WriteString("\n\n")
+	
+	displayPath := m.selectedPath
+	if displayPath == "" {
+		displayPath = "~/.config/the-startup"
+	}
+	s.WriteString(m.renderer.RenderSelections(m.selectedTool, displayPath, len(m.selectedFiles)))
+	
+	s.WriteString(m.renderer.RenderTitle("Files to be moved to your .claude directory"))
+	
+	s.WriteString(m.styles.Info.Render("The following files will be moved to your selected .claude directory:"))
+	s.WriteString("\n\n")
+	
+	s.WriteString(m.buildStaticTree())
+	s.WriteString("\n")
+	
+	s.WriteString("\n\n")
+	s.WriteString(m.styles.Title.Render("Ready to install?"))
+	s.WriteString("\n")
+	s.WriteString(m.styles.Info.Render("This will install The (Agentic) Startup to your .claude directory."))
+	s.WriteString("\n\n")
+	
+	for i, option := range m.choices {
+		if i == m.cursor {
+			s.WriteString(m.styles.Selected.Render("> " + option))
+		} else {
+			s.WriteString(m.styles.Normal.Render("  " + option))
+		}
+		s.WriteString("\n")
+	}
+	
+	s.WriteString("\n")
+	s.WriteString(m.styles.Help.Render("Press Enter to confirm • Escape to go back"))
+	
+	return s.String()
+}
+
+func (m FileSelectionModel) Ready() bool {
+	return m.ready
+}
+
+func (m FileSelectionModel) Confirmed() bool {
+	return m.confirmed
+}
+
+func (m FileSelectionModel) Reset() FileSelectionModel {
+	m.ready = false
+	m.cursor = 0
+	return m
+}
+
+func (m FileSelectionModel) getAllAvailableFiles() []string {
+	allFiles := make([]string, 0)
+	
+	addFiles := func(embedFS *embed.FS, pattern, prefix string) {
+		if files, err := fs.Glob(embedFS, pattern); err == nil {
+			for _, file := range files {
+				fileName := filepath.Base(file)
+				filePath := prefix + fileName
+				allFiles = append(allFiles, filePath)
 			}
 		}
 	}
 	
-	return m, nil
+	patterns := []string{"assets/agents/*.md", "test_assets/assets/agents/*.md"}
+	for _, pattern := range patterns {
+		addFiles(m.agentFiles, pattern, "agents/")
+	}
+	
+	patterns = []string{"assets/commands/*.md", "test_assets/assets/commands/*.md"}
+	for _, pattern := range patterns {
+		addFiles(m.commandFiles, pattern, "commands/")
+	}
+	
+	patterns = []string{"assets/hooks/*.py", "test_assets/assets/hooks/*.py"}
+	for _, pattern := range patterns {
+		addFiles(m.hookFiles, pattern, "hooks/")
+	}
+	
+	patterns = []string{"assets/templates/*", "test_assets/assets/templates/*"}
+	for _, pattern := range patterns {
+		addFiles(m.templateFiles, pattern, "templates/")
+	}
+	
+	return allFiles
 }
 
-// buildStaticTree creates a lipgloss tree display for file preview
-func (m *FileSelectionModel) buildStaticTree() string {
+func (m FileSelectionModel) buildStaticTree() string {
 	enumeratorStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("63")).MarginRight(1)
 	rootStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("35"))
 	itemStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
 	
-	// Build agents subtree
-	agentsTree := tree.New()
-	if files, err := fs.Glob(m.context.AgentFiles, "assets/agents/*.md"); err == nil {
-		for _, file := range files {
-			fileName := filepath.Base(file)
-			agentsTree = agentsTree.Child(fileName)
+	buildSubtree := func(embedFS *embed.FS, patterns []string) *tree.Tree {
+		subtree := tree.New()
+		for _, pattern := range patterns {
+			if files, err := fs.Glob(embedFS, pattern); err == nil {
+				for _, file := range files {
+					fileName := filepath.Base(file)
+					subtree = subtree.Child(fileName)
+				}
+			}
 		}
+		return subtree
 	}
 	
-	// Build commands subtree
-	commandsTree := tree.New()
-	if files, err := fs.Glob(m.context.CommandFiles, "assets/commands/*.md"); err == nil {
-		for _, file := range files {
-			fileName := filepath.Base(file)
-			commandsTree = commandsTree.Child(fileName)
-		}
-	}
+	agentsTree := buildSubtree(m.agentFiles, []string{"assets/agents/*.md", "test_assets/assets/agents/*.md"})
+	commandsTree := buildSubtree(m.commandFiles, []string{"assets/commands/*.md", "test_assets/assets/commands/*.md"})
+	hooksTree := buildSubtree(m.hookFiles, []string{"assets/hooks/*.py", "test_assets/assets/hooks/*.py"})
+	templatesTree := buildSubtree(m.templateFiles, []string{"assets/templates/*", "test_assets/assets/templates/*"})
 	
-	// Build hooks subtree
-	hooksTree := tree.New()
-	if files, err := fs.Glob(m.context.HookFiles, "assets/hooks/*.py"); err == nil {
-		for _, file := range files {
-			fileName := filepath.Base(file)
-			hooksTree = hooksTree.Child(fileName)
-		}
-	}
+	claudePath := m.installer.GetClaudePath()
 	
-	// Build templates subtree
-	templatesTree := tree.New()
-	if files, err := fs.Glob(m.context.TemplateFiles, "assets/templates/*"); err == nil {
-		for _, file := range files {
-			fileName := filepath.Base(file)
-			templatesTree = templatesTree.Child(fileName)
-		}
-	}
-	
-	// Get the actual Claude path that will be used
-	claudePath := m.context.Installer.GetClaudePath()
-	
-	// Abbreviate the path for display
 	displayPath := claudePath
 	if strings.HasPrefix(claudePath, os.Getenv("HOME")) {
 		displayPath = strings.Replace(claudePath, os.Getenv("HOME"), "~", 1)
 	}
 	
-	// Create main tree with actual Claude path
 	t := tree.
 		Root("⁜ " + displayPath).
 		Child(
 			"agents",
 			agentsTree,
-			"commands", 
+			"commands",
 			commandsTree,
 			"hooks",
 			hooksTree,
@@ -127,42 +228,4 @@ func (m *FileSelectionModel) buildStaticTree() string {
 		ItemStyle(itemStyle)
 	
 	return t.String()
-}
-
-// View renders the file selection screen
-func (m *FileSelectionModel) View() string {
-	var s strings.Builder
-	
-	// ASCII art banner
-	s.WriteString(m.context.Styles.Title.Render(WelcomeBanner))
-	s.WriteString("\n\n")
-	
-	// Progressive disclosure header
-	displayPath := m.context.SelectedPath
-	if displayPath == "" {
-		displayPath = "~/.config/the-startup"
-	}
-	s.WriteString(m.context.Renderer.RenderSelections(m.context.SelectedTool, displayPath, len(m.context.SelectedFiles)))
-	
-	// Title
-	s.WriteString(m.context.Renderer.RenderTitle("Files to be moved to your .claude directory"))
-	
-	// Informative message
-	s.WriteString(m.context.Styles.Info.Render("The following files will be moved to your selected .claude directory:"))
-	s.WriteString("\n\n")
-	
-	// Show static tree of files that will be installed
-	s.WriteString(m.buildStaticTree())
-	s.WriteString("\n")
-	
-	// Choices
-	for i, choice := range m.choices {
-		s.WriteString(m.context.Renderer.RenderChoiceWithMultiSelect(choice, i == m.cursor, false, false))
-		s.WriteString("\n")
-	}
-	
-	// Help
-	s.WriteString(m.context.Renderer.RenderHelp("Enter: continue to installation • Escape: back"))
-	
-	return s.String()
 }

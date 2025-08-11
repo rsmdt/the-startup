@@ -1,169 +1,126 @@
 package ui
 
 import (
+	"embed"
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-// TestMainModelIntegration tests the complete flow through the MainModel
-func TestMainModelIntegration(t *testing.T) {
+//go:embed test_assets/assets/*
+var testAssets embed.FS
+
+// TestMainModelConsolidatedIntegration tests the new consolidated MainModel
+func TestMainModelConsolidatedIntegration(t *testing.T) {
 	// Create MainModel
 	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
 	
-	// Should start in Welcome state
-	if model.state != StateWelcome {
-		t.Fatalf("Expected initial state to be StateWelcome, got %v", model.state)
-	}
-	
-	// Simulate complete flow: Welcome -> Tool Selection -> Path Selection -> File Selection -> Confirmation
-	
-	// 1. Transition from Welcome to Tool Selection
-	transitionMsg := ViewTransitionMsg{NextView: StateToolSelection}
-	updatedModel, _ := model.Update(transitionMsg)
-	model = updatedModel.(*MainModel)
-	
+	// Should start directly with ToolSelection state
 	if model.state != StateToolSelection {
-		t.Fatalf("Expected state to be StateToolSelection, got %v", model.state)
+		t.Fatalf("Expected initial state to be StateToolSelection, got %v", model.state)
 	}
 	
-	// 2. Make tool selection
-	selectionMsg := SelectionMadeMsg{Tool: "claude-code"}
-	updatedModel, _ = model.Update(selectionMsg)
-	model = updatedModel.(*MainModel)
-	
-	if model.context.SelectedTool != "claude-code" {
-		t.Fatalf("Expected SelectedTool to be 'claude-code', got '%s'", model.context.SelectedTool)
+	// Test view renders without error
+	view := model.View()
+	if len(view) == 0 {
+		t.Error("Expected view to have content")
 	}
 	
-	// 3. Transition to Path Selection
-	transitionMsg = ViewTransitionMsg{NextView: StatePathSelection}
-	updatedModel, _ = model.Update(transitionMsg)
+	// Test basic navigation
+	// Simulate pressing Enter to select first option (claude-code)
+	enterMsg := tea.KeyMsg{Type: tea.KeyEnter}
+	updatedModel, _ := model.Update(enterMsg)
 	model = updatedModel.(*MainModel)
 	
+	// Should transition to Path Selection and have tool selected
 	if model.state != StatePathSelection {
-		t.Fatalf("Expected state to be StatePathSelection, got %v", model.state)
+		t.Fatalf("Expected state to be StatePathSelection after selection, got %v", model.state)
 	}
 	
-	// 4. Make path and file selection
-	selectionMsg = SelectionMadeMsg{Path: "/test/path", Files: []string{"test1.md", "test2.md"}}
-	updatedModel, _ = model.Update(selectionMsg)
+	if model.selectedTool != "claude-code" {
+		t.Fatalf("Expected SelectedTool to be 'claude-code', got '%s'", model.selectedTool)
+	}
+	
+	// Test view renders in new state
+	view = model.View()
+	if len(view) == 0 {
+		t.Error("Expected path selection view to have content")
+	}
+	
+	// Test ESC key for back navigation
+	escMsg := tea.KeyMsg{Type: tea.KeyEsc}
+	updatedModel, _ = model.Update(escMsg)
 	model = updatedModel.(*MainModel)
 	
-	if model.context.SelectedPath != "/test/path" {
-		t.Fatalf("Expected SelectedPath to be '/test/path', got '%s'", model.context.SelectedPath)
+	// Should go back to Tool Selection
+	if model.state != StateToolSelection {
+		t.Fatalf("Expected state to go back to StateToolSelection after ESC, got %v", model.state)
 	}
+}
+
+// TestMainModelFileSelectionWithHuh tests the file selection with integrated huh confirmation
+func TestMainModelFileSelectionWithHuh(t *testing.T) {
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
 	
-	if len(model.context.SelectedFiles) != 2 {
-		t.Fatalf("Expected 2 selected files, got %d", len(model.context.SelectedFiles))
-	}
+	// Navigate through proper flow to file selection
+	model.selectedTool = "claude-code"
+	model.transitionToState(StatePathSelection)
 	
-	// 5. Transition to File Selection
-	transitionMsg = ViewTransitionMsg{NextView: StateFileSelection}
-	updatedModel, _ = model.Update(transitionMsg)
+	// Select recommended path (first option) - this will auto-select files
+	enterMsg := tea.KeyMsg{Type: tea.KeyEnter}
+	updatedModel, _ := model.Update(enterMsg)
 	model = updatedModel.(*MainModel)
 	
+	// Should transition to File Selection
 	if model.state != StateFileSelection {
 		t.Fatalf("Expected state to be StateFileSelection, got %v", model.state)
 	}
 	
-	// 6. Transition to HuhConfirmation first
-	transitionMsg = ViewTransitionMsg{NextView: StateHuhConfirmation}
-	updatedModel, _ = model.Update(transitionMsg)
-	model = updatedModel.(*MainModel)
-	
-	if model.state != StateHuhConfirmation {
-		t.Fatalf("Expected state to be StateHuhConfirmation, got %v", model.state)
+	// Should have files selected automatically
+	if len(model.selectedFiles) == 0 {
+		// Debug: check what files are available
+		allFiles := model.getAllAvailableFiles()
+		t.Errorf("Expected files to be selected automatically. Available files: %v", allFiles)
 	}
 	
-	// 7. Then transition to Confirmation
-	transitionMsg = ViewTransitionMsg{NextView: StateConfirmation}
-	updatedModel, _ = model.Update(transitionMsg)
-	model = updatedModel.(*MainModel)
-	
-	if model.state != StateConfirmation {
-		t.Fatalf("Expected state to be StateConfirmation, got %v", model.state)
-	}
-	
-	// 8. Test View delegation works at each stage
+	// Test view renders file tree
 	view := model.View()
-	if view == "" {
-		t.Error("Expected non-empty view from ConfirmationModel")
+	if len(view) == 0 {
+		t.Error("Expected file selection view to have content")
 	}
 	
-	// All state and context should be preserved throughout
-	if model.context.SelectedTool != "claude-code" {
-		t.Error("SelectedTool was lost during transitions")
+	// Should have confirmation choices in the file selection model
+	if len(model.fileSelectionModel.choices) != 2 {
+		t.Error("Expected confirmation choices to be set")
 	}
 	
-	if model.context.SelectedPath != "/test/path" {
-		t.Error("SelectedPath was lost during transitions")
-	}
-	
-	if len(model.context.SelectedFiles) != 2 {
-		t.Error("SelectedFiles were lost during transitions")
+	// State should still be FileSelection
+	if model.state != StateFileSelection {
+		t.Fatalf("Expected state to remain StateFileSelection, got %v", model.state)
 	}
 }
 
-// TestMainModelIntegrationErrorHandling tests error scenarios
-func TestMainModelIntegrationErrorHandling(t *testing.T) {
+// TestMainModelConsolidation tests that the consolidated model works correctly
+func TestMainModelConsolidation(t *testing.T) {
 	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
 	
-	// Test invalid transition
-	invalidMsg := ViewTransitionMsg{NextView: StateComplete} // Invalid from Welcome
-	updatedModel, _ := model.Update(invalidMsg)
-	model = updatedModel.(*MainModel)
-	
-	if model.state != StateError {
-		t.Fatalf("Expected state to be StateError for invalid transition, got %v", model.state)
+	// Test that all required fields are properly initialized
+	if model.installer == nil {
+		t.Error("Expected installer to be initialized")
 	}
 	
-	// Test error recovery
-	recoveryMsg := ViewTransitionMsg{NextView: StateWelcome}
-	updatedModel, _ = model.Update(recoveryMsg)
-	model = updatedModel.(*MainModel)
-	
-	if model.state != StateWelcome {
-		t.Fatalf("Expected state to recover to StateWelcome, got %v", model.state)
-	}
-}
-
-// TestMainModelViewDelegation tests that views are properly delegated
-func TestMainModelViewDelegation(t *testing.T) {
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
-	
-	// Test Welcome view
-	view := model.View()
-	if !containsString(view, "Startup") {
-		t.Error("Welcome view should contain 'Startup'")
+	// Test that sub-models are initialized
+	if model.toolSelectionModel.renderer == nil {
+		t.Error("Expected tool selection model renderer to be initialized")
 	}
 	
-	// Transition to Tool Selection
-	transitionMsg := ViewTransitionMsg{NextView: StateToolSelection}
-	updatedModel, _ := model.Update(transitionMsg)
-	model = updatedModel.(*MainModel)
-	
-	// Test Tool Selection view
-	view = model.View()
-	if !containsString(view, "development tool") {
-		t.Error("Tool selection view should contain selection prompt")
-	}
-}
-
-// TestMainModelWindowResize tests window resize handling
-func TestMainModelWindowResize(t *testing.T) {
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
-	
-	// Test window resize
-	resizeMsg := tea.WindowSizeMsg{Width: 120, Height: 40}
-	updatedModel, _ := model.Update(resizeMsg)
-	model = updatedModel.(*MainModel)
-	
-	if model.context.Width != 120 {
-		t.Errorf("Expected width to be 120, got %d", model.context.Width)
+	// Test that choices are set up correctly for tool selection
+	if len(model.toolSelectionModel.choices) == 0 {
+		t.Error("Expected choices to be initialized for tool selection")
 	}
 	
-	if model.context.Height != 40 {
-		t.Errorf("Expected height to be 40, got %d", model.context.Height)
+	expectedChoices := []string{"claude-code", "Cancel"}
+	if len(model.toolSelectionModel.choices) != len(expectedChoices) {
+		t.Errorf("Expected %d choices, got %d", len(expectedChoices), len(model.toolSelectionModel.choices))
 	}
 }
