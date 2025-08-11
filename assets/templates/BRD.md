@@ -1,29 +1,34 @@
-# Business Requirements Document (BRD)
-**Project:** [Project Name]  
-**Version:** 1.0  
-**Date:** [Date]  
-**Author:** the-business-analyst
+# Business Requirements Document
 
 ## Executive Summary
 [Brief overview of the business problem and proposed solution - 2-3 paragraphs]
 
-## Business Problem Statement
+## Business Problem Definition
 
 ### What Problem Are We Solving?
 [2-3 sentences maximum describing the core problem]
 
-### Current State
-- [Description of current situation]
-- [Pain points and inefficiencies]
-- [Quantifiable impacts]
+### Who Is Affected?
+- Primary users: [specific user segment]
+- Impact: [quantifiable if possible]
 
-### Desired Future State
-- [Vision for solution]
-- [Expected improvements]
-- [Success metrics]
+**Stakeholder Matrix:**
+| Stakeholder  | Role         | Interest/Impact   | Requirements |
+|--------------|--------------|-------------------|--------------|
+| [Name/Group] | [Their role] | [High/Medium/Low] | [Key needs]  |
 
 ### Why Now?
 [Business driver or trigger event]
+
+### Success Looks Like
+- [ ] [Specific, measurable outcome]
+- [ ] [User-observable change]
+- [ ] [Business metric improvement]
+
+**Key Performance Indicators:**
+1. [KPI/Metric]: [Value or Expected ROI OR Benefit]
+2. [KPI/Metric]: [Value or Expected ROI OR Benefit]
+3. ...
 
 ## Business Objectives
 1. **Primary Objective:** [Main goal]
@@ -33,33 +38,24 @@
 2. **Secondary Objectives:**
    - [Additional goals with criteria]
 
-## Stakeholder Analysis
-
-### Who Is Affected?
-- **Primary users:** [specific user segment]
-- **Impact:** [quantifiable if possible]
-
-### Stakeholder Matrix
-| Stakeholder | Role | Interest/Impact | Requirements |
-|------------|------|-----------------|--------------|
-| [Name/Group] | [Their role] | [High/Medium/Low] | [Key needs] |
-
 ## Business Requirements
+
 ### Functional Requirements
-| ID | Requirement | Priority | Acceptance Criteria |
-|----|-------------|----------|-------------------|
-| BR001 | [Business need] | [Must/Should/Could] | [How to verify] |
+| ID    | Requirement                   | Priority              | Acceptance Criteria   |
+|-------|-------------------------------|-----------------------|-----------------------|
+| FR01  | [Business need]               | [Must/Should/Could]   | [How to verify]       |
 
 ### Non-Functional Requirements
-| Category | Requirement | Justification |
-|----------|-------------|---------------|
-| Performance | [Requirement] | [Business reason] |
-| Security | [Requirement] | [Business reason] |
-| Compliance | [Requirement] | [Business reason] |
-| Usability | [User experience requirements] | [Business impact] |
-| Reliability | [Error handling and recovery requirements] | [Business continuity] |
+| ID    | Requirement                   | Priority              | Acceptance Criteria   |
+|-------|-------------------------------|-----------------------|-----------------------|
+| NR01  | [Performance Requirement]     | [Must/Should/Could]   | [How to verify]       |
+| NR02  | [Security Requirement]        | [Must/Should/Could]   | [How to verify]       |
+| NR03  | [Compliance Requirement]      | [Must/Should/Could]   | [How to verify]       |
+| NR04  | [User Experience Requirement] | [Must/Should/Could]   | [How to verify]       |
+| NR05  | [Error Recovery Requirement]  | [Must/Should/Could]   | [How to verify]       |
 
 ## Assumptions and Dependencies
+
 ### Assumptions
 - [Assumption about business context]
 - [Assumption about resources]
@@ -69,21 +65,10 @@
 - [Third-party service]
 
 ## Risks and Mitigation
-| Risk | Impact | Probability | Mitigation Strategy |
-|------|--------|-------------|-------------------|
-| [Risk description] | [High/Med/Low] | [High/Med/Low] | [Strategy] |
 
-## Success Metrics
-
-### Success Looks Like
-- [ ] [Specific, measurable outcome]
-- [ ] [User-observable change]
-- [ ] [Business metric improvement]
-
-### Key Performance Indicators
-- **KPI 1:** [Metric] - Target: [Value]
-- **KPI 2:** [Metric] - Target: [Value]
-- **Business Value:** [Expected ROI or benefit]
+| ID    | Risk                  | Impact            | Probability       | Mitigation Strategy   |
+|-------|-----------------------|-------------------|-------------------|-----------------------|
+| RI01  | [Risk description]    | [High/Med/Low]    | [High/Med/Low]    | [Strategy]            |
 
 ## Constraints
 - **Budget:** [If applicable]
@@ -92,8 +77,3 @@
 - **Regulatory:** [Compliance needs]
 - **Organizational:** [Coding standards, deployment restrictions]
 - **Security/Compliance:** [Auth requirements, data protection needs]
-
-## Approval
-| Stakeholder | Role | Date | Signature |
-|-------------|------|------|-----------|
-| [Name] | [Title] | [Date] | [Approval] |

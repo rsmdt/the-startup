@@ -1,88 +1,99 @@
-# System Design Document (SDD)
-**Project:** [Project Name]  
-**Version:** 1.0  
-**Date:** [Date]  
-**Authors:** the-architect, the-developer, the-devops-engineer
+# Solution Design Document
 
-## System Overview
-### Purpose
-[Brief description of what the system does and why]
+## Constraints
 
-### Scope
-[What's included and explicitly excluded]
+- [Technical, e.g. Language/framework requirements, performance targets]
+- [Organizational, e.g. Coding standards, deployment restrictions]
+- [Security/Compliance, e.g. Auth requirements, data protection needs]
 
-### Architecture Philosophy
-[Key principles: microservices vs monolith, event-driven, etc.]
+## Implementation Context
 
-## Context Assembly Guide
+*[INSTRUCTION: List source code files and external documentation needed to understand the existing implementation. This provides the bridge between constraints and solution strategy. Pattern and interface documentation belong in Cross-Cutting Concepts section. The document flows from problem → constraints → existing implementation → solution.]*
 
-### Critical Context (Must Read First)
+### Source Code to Analyze
 ```yaml
+# Core implementation files that must be understood
 - file: @src/components/critical/file.ts
   relevance: CRITICAL
   sections: [lines 50-100, function processOrder]
   why: "Core business logic that must be preserved"
-
-- doc: @docs/patterns/auth-flow.md
-  relevance: MEDIUM
-  why: "Follow this authentication pattern"
   
-- url: https://docs.library.com/api
-  relevance: LOW
-  why: "Reference if using advanced features"
+# Alternative: relative path format
+- file: ./src/components/critical/file.ts
+  relevance: CRITICAL
+  sections: [lines 50-100, function processOrder]
+  why: "Core business logic that must be preserved"
+
+# Configuration and setup files
+- file: @package.json
+  relevance: MEDIUM
+  why: "Dependencies and scripts that constrain solution"
 ```
 
-### Supporting Context (Read as Needed)
+### External Documentation
 ```yaml
-- file: [additional files]
-  relevance: [level]
-  why: [reason]
+# Third-party library docs and architectural context
+- url: https://docs.library.com/api
+  relevance: MEDIUM
+  why: "API constraints we must work within"
+
+- doc: @docs/architecture/decisions/adr-001.md
+  relevance: HIGH
+  why: "Previous decisions that constrain approach"
 ```
 
-### Context Boundaries
-- **In Scope**: [What this feature will change]
-- **Out of Scope**: [What this feature will NOT touch]
-- **Do Not Modify**: [Critical files/systems to avoid]
+### Implementation Boundaries
+- **Must Preserve**: [Critical behavior/interfaces to maintain]
+- **Can Modify**: [Areas open for refactoring]
+- **Must Not Touch**: [Files/systems that are off-limits]
 
-## Solution Approach
+### Project Commands
 
-### Constraints
-- **Technical:** [Language/framework requirements, performance targets]
-- **Organizational:** [Coding standards, deployment restrictions]
-- **Security/Compliance:** [Auth requirements, data protection needs]
+*[INSTRUCTION: These commands will be discovered during codebase analysis and populated by the create command. This note should not appear in the final PRD.]*
 
-### Solution Strategy
-- **Architecture Pattern:** [Describe the approach (e.g., layered, modular, microservice)]
-- **Integration Approach:** [Describe how this feature integrates with the current system architecture]
-- **Justification:** [Brief rationale for why this approach fits given the constraints and scope]
+```bash
+# Environment Setup
+Install Dependencies: [project-specific install command]
+Environment Setup: [additional setup steps if needed]
+Start Development: [development server command]
 
-## Architecture Design
-### High-Level Architecture
+# Validation (run after each phase)
+Code Quality: [linting/formatting command] 
+Type Safety: [type checking command, if applicable]
+Run Tests: [test execution command]
+Build Project: [build/compile command]
+
+# Database (if applicable)
+Database Migration: [migration command]
+Database Seed: [test data setup command]
+
+# Additional Project-Specific Commands
+[Any other relevant commands discovered in the codebase]
 ```
-[ASCII diagram or mermaid diagram]
-┌─────────────┐     ┌─────────────┐
-│   Frontend  │────▶│   Backend   │
-└─────────────┘     └─────────────┘
-                           │
-                    ┌──────▼──────┐
-                    │   Database  │
-                    └─────────────┘
-```
 
-### Component Architecture
-| Component | Purpose | Technology | Interfaces |
-|-----------|---------|------------|------------|
-| [Name] | [What it does] | [Stack] | [APIs/Events] |
+*[INSTRUCTION: The execute command should run these validation commands after each implementation phase to ensure code quality and catch issues early. This note should not appear in the final PRD.]*
 
-### Data Flow
-1. **User Action:** [Description]
-2. **Processing:** [Steps]
-3. **Storage:** [Where/How]
-4. **Response:** [Format]
+## Solution Strategy
+
+- [Architecture Pattern, e.g. Describe the approach (e.g., layered, modular, microservice)]
+- [Integration Approach, e.g. Describe how this feature integrates with the current system architecture]
+- [Justification, e.g. Brief rationale for why this approach fits given the constraints and scope]
+- ...
 
 ## Building Block View
 
+### Components
+
+```mermaid
+graph LR
+    User --> Component
+    Component --> Hook
+    Hook --> API
+    API --> Database
+```
+
 ### Directory Map
+
 ```
 .
 ├── src/
@@ -96,78 +107,79 @@
 │       └── types                  # NEW: Shared type definitions
 ```
 
-## Detailed Component Design
-### Component: [Component Name]
-**Responsibility:** [Single responsibility]
+*[INSTRUCTION: Actual paths and file names will be determined based on project conventions discovered during implementation. This note should not appear in the final PRD.]*
 
-**Structure:**
-```
-component/
-├── models/      # Data models
-├── services/    # Business logic
-├── controllers/ # Request handling
-└── utils/       # Helpers
-```
+### Interface Specifications (Internal Changes Only)
 
-**Key Classes/Modules:**
-- `[ClassName]`: [Purpose]
-- `[ModuleName]`: [Purpose]
+*[INSTRUCTION: Include this section only when the feature involves changes to data structures, internal APIs, or core application interfaces. This note should not appear in the final PRD.]*
 
-**Dependencies:**
-- Internal: [Components]
-- External: [Libraries/Services]
-
-## Data Design
-### Data Models
-```typescript
-// Example entity
-interface User {
-  id: string;
-  email: string;
-  profile: UserProfile;
-  createdAt: Date;
-}
-```
-
-### Database Schema
-| Table | Columns | Indexes | Relationships |
-|-------|---------|---------|---------------|
-| users | id, email, created_at | email (unique) | 1:n posts |
-
-### Data Storage Strategy
-- **Primary Storage:** [Database type and why]
-- **Caching:** [Strategy and TTL]
-- **File Storage:** [Approach for media]
-
-## API Design
-### REST Endpoints
-| Method | Endpoint | Purpose | Request | Response |
-|--------|----------|---------|---------|----------|
-| GET | /api/v1/users | List users | Query params | User[] |
-| POST | /api/v1/users | Create user | User object | User |
-
-### API Contracts
+#### Data Storage Changes
 ```yaml
-# OpenAPI/Swagger example
-/api/v1/users:
-  post:
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/User'
+# Database/storage schema modifications
+Table: primary_entity_table
+  ADD COLUMN: new_field (data_type, constraints)
+  MODIFY COLUMN: existing_field (new_constraints) 
+  ADD INDEX: performance_index (fields)
+
+Table: supporting_entity_table (NEW)
+  id: primary_key
+  related_id: foreign_key
+  business_field: data_type, constraints
 ```
 
-### Error Handling
-| Error Code | Meaning | Response |
-|------------|---------|----------|
-| 400 | Bad Request | `{error: "Validation failed", details: [...]}` |
-| 401 | Unauthorized | `{error: "Authentication required"}` |
+#### Internal API Changes
+```yaml
+# Application endpoints being added/modified
+Endpoint: Feature Operation
+  Method: HTTP_METHOD
+  Path: /api/version/resource/operation
+  Request:
+    required_field: data_type, validation_rules
+    optional_field: data_type, default_value
+  Response:
+    success:
+      result_field: data_type
+      metadata: object_structure
+    error:
+      error_code: string
+      message: string
+      details: object (optional)
+```
+
+#### Application Data Models
+```pseudocode
+# Core business objects being modified/created
+ENTITY: PrimaryEntity (MODIFIED/NEW)
+  FIELDS: 
+    existing_field: data_type
+    + new_field: data_type (NEW)
+    ~ modified_field: updated_type (CHANGED)
+  
+  BEHAVIORS:
+    existing_method(): return_type
+    + new_method(parameters): return_type (NEW)
+    ~ modified_method(): updated_return_type (CHANGED)
+
+ENTITY: SupportingEntity (NEW)
+  FIELDS: [field_definitions]
+  BEHAVIORS: [method_definitions]
+```
+
+#### Integration Points
+```yaml
+# Where this feature connects to external systems
+# (Full specifications in docs/interfaces/)
+
+External_Service_Name:
+  - doc: @docs/interfaces/service-name.md
+  - sections: [relevant_endpoints, data_formats]
+  - integration: "Brief description of how systems connect"
+  - critical_data: [data_elements_exchanged]
+```
 
 ## Runtime View
 
-### Primary Flow: [Main User Action]
+#### Primary Flow: [Main User Action]
 1. User triggers [action]
 2. System validates [what]
 3. Process executes [how]
@@ -208,72 +220,67 @@ OUTPUT: processed_result
 6. RESPOND: return_result, update_user_interface
 ```
 
-## Security Design
-### Authentication & Authorization
-- **Method:** [JWT/OAuth/Sessions]
-- **Flow:** [Description]
-- **Permissions Model:** [RBAC/ACL]
+## Deployment View
 
-### Security Measures
-| Threat | Mitigation |
-|--------|------------|
-| SQL Injection | Parameterized queries |
-| XSS | Input sanitization, CSP |
-| CSRF | CSRF tokens |
-
-### Data Protection
-- **Encryption at Rest:** [Method]
-- **Encryption in Transit:** [TLS version]
-- **PII Handling:** [Approach]
-
-## Infrastructure Design
-### Deployment Architecture
-```
-Production Environment:
-- Load Balancer (ALB)
-- App Servers (ECS/K8s)
-- Database (RDS)
-- Cache (Redis)
-- CDN (CloudFront)
-```
-
-### Scaling Strategy
-- **Horizontal Scaling:** [Auto-scaling rules]
-- **Vertical Scaling:** [Limits and triggers]
-- **Database Scaling:** [Read replicas, sharding]
-
-### Monitoring & Observability
-| Aspect | Tool | Metrics |
-|--------|------|---------|
-| APM | [Tool] | Response time, error rate |
-| Logs | [Tool] | Centralized logging |
-| Metrics | [Tool] | Custom business metrics |
-
-## Integration Design
-### External Services
-| Service | Purpose | Integration Method | Fallback |
-|---------|---------|-------------------|----------|
-| [Service] | [Why] | [REST/GraphQL/gRPC] | [Strategy] |
-
-### Event Architecture
-```
-Event: UserCreated
-Producer: UserService
-Consumers: EmailService, AnalyticsService
-Format: JSON
-Schema: {...}
-```
+- **Environment**: [Where this runs - client/server/edge]
+- **Configuration**: [Required env vars or settings]
+- **Dependencies**: [External services or APIs needed]
+- **Performance**: [Expected load, caching strategy]
 
 ## Cross-Cutting Concepts
 
-### Core Concepts
-- **Security:** Authentication, authorization, encryption
-- **Error Handling:** Global vs local strategies
-- **Performance Optimization:** Caching, batching, async patterns
-- **i18n/L10n:** Support for multi-language or regional content
-- **Logging/Auditing:** System observability practices
+*[INSTRUCTION: Document concepts, patterns, and implementation approaches that span multiple components. This section ensures consistency and conceptual integrity across the system. Focus on "how things work" rather than "what exists" or "what's wrong".]*
+
+### Pattern Documentation
+```yaml
+# Existing patterns used in this feature
+- pattern: @docs/patterns/[pattern-name].md
+  relevance: [CRITICAL|HIGH|MEDIUM|LOW]
+  why: "[Brief explanation of why this pattern is needed]"
+
+# New patterns created for this feature  
+- pattern: @docs/patterns/[new-pattern-name].md (NEW)
+  relevance: [CRITICAL|HIGH|MEDIUM|LOW]
+  why: "[Brief explanation of why this pattern was created]"
+```
+
+### Interface Specifications
+```yaml
+# External interfaces this feature integrates with
+- interface: @docs/interfaces/[interface-name].md
+  relevance: [CRITICAL|HIGH|MEDIUM|LOW]
+  why: "[Brief explanation of why this interface is relevant]"
+
+# New interfaces created
+- interface: @docs/interfaces/[new-interface-name].md (NEW)
+  relevance: [CRITICAL|HIGH|MEDIUM|LOW]
+  why: "[Brief explanation of why this interface is being created]"
+```
+
+### System-Wide Patterns
+- [Security: Authentication, authorization, encryption patterns used throughout]
+- [Error Handling: Global vs local strategies, error propagation patterns]
+- [Performance: Caching strategies, batching approaches, async patterns]
+- [i18n/L10n: Multi-language support patterns, localization approaches]
+- [Logging/Auditing: Observability patterns, audit trail implementation]
 
 ### Implementation Patterns
+
+*[INSTRUCTION: Include code patterns, conventions, and technical approaches that affect multiple parts of the system. This is where recurring implementation details belong when they represent patterns rather than problems.]*
+
+#### Code Patterns and Conventions
+[Document recurring code structures, naming conventions, and implementation approaches that ensure consistency]
+
+#### State Management Patterns
+[How state, refs, side effects, and data flow are managed across the application]
+
+#### Performance Characteristics
+[System-wide performance strategies, optimization patterns, resource management approaches]
+
+#### Integration Patterns
+[Common approaches for external service integration, API communication patterns, event handling]
+
+*[INSTRUCTION: For each pattern, provide concrete examples from the codebase. Implementation specifics should follow established patterns in the codebase. The execute command will discover and apply appropriate patterns dynamically. This note should not appear in the final PRD.]*
 
 #### Component Structure Pattern
 ```pseudocode
@@ -327,106 +334,96 @@ TEST_SCENARIO: "Feature operates correctly under normal conditions"
 ```
 
 ### Integration Points
+
 - [Where this connects to existing system]
 - [Data flow in/out]
 - [Events triggered/consumed]
 
-## Performance Considerations
-### Performance Targets
-- **API Response Time:** <200ms p95
-- **Page Load Time:** <3s
-- **Concurrent Users:** 10,000
+## Architecture Decisions
 
-### Optimization Strategies
-- **Caching:** [Multi-level caching approach]
-- **Database:** [Query optimization, indexes]
-- **Assets:** [CDN, compression]
+1. **[Decision Name]**: [Choice made]
+   - Rationale: [Why this over alternatives]
+   - Trade-offs: [What we accept]
 
-## Testing Strategy
-### Test Levels
-| Level | Coverage Target | Tools |
-|-------|----------------|-------|
-| Unit | 80% | Jest |
-| Integration | Key flows | Supertest |
-| E2E | Critical paths | Cypress |
+2. **[Decision Name]**: [Choice made]
+   - Rationale: [Why this over alternatives]
+   - Trade-offs: [What we accept]
 
-### Test Data Strategy
-- **Approach:** [Fixtures/Factories/Snapshots]
-- **Test Environments:** [How they mirror production]
+## Quality Requirements
 
-## Deployment Design
-### CI/CD Pipeline
+- [Performance: Specific, measurable targets that can be validated]
+- [Usability: User experience requirements]
+- [Security: Access control and data protection needs]
+- [Reliability: Error handling and recovery requirements]
+
+## Risks and Technical Debt
+
+*[INSTRUCTION: Document known issues, workarounds, technical compromises, and implementation challenges. This section makes problems visible to all stakeholders. Focus on current, concrete issues rather than theoretical risks.]*
+
+### Known Technical Issues
+- [Current bugs or limitations that affect the system]
+- [Performance bottlenecks and their specific locations (with line numbers if applicable)]
+- [Memory leaks or resource management problems]
+- [Integration issues with external systems]
+
+### Technical Debt
+- [Code duplication that needs refactoring (specify locations)]
+- [Temporary workarounds that need proper solutions]
+- [Anti-patterns that exist but shouldn't be replicated]
+- [Architectural violations or deviations from established patterns]
+
+### Implementation Gotchas
+- [Non-obvious dependencies or side effects]
+- [Timing issues, race conditions, or synchronization problems]
+- [Configuration quirks or environment-specific issues]
+- [Known issues with third-party dependencies]
+
+*[INSTRUCTION: For each item, include: Description, Impact (what problems it causes), Location (file/line numbers if applicable), and Potential Solution if known. Prioritize by severity and impact on development/operations.]*
+
+## Test Specifications
+
+### Critical Test Scenarios
+
+**Scenario 1: Primary Happy Path**
+```gherkin
+Given: [System in valid initial state]
+And: [Required preconditions met]
+When: [User performs main action]
+Then: [Expected outcome occurs]
+And: [System state updated correctly]
+And: [Appropriate feedback provided]
 ```
-1. Code Push → 2. Build → 3. Test → 4. Deploy Staging → 5. Deploy Prod
+
+**Scenario 2: Validation Error Handling**
+```gherkin
+Given: [System ready for input]
+When: [User provides invalid input]
+Then: [Specific error message displayed]
+And: [System state remains unchanged]
+And: [User can recover/retry]
 ```
 
-### Deployment Strategy
-- **Method:** [Blue-Green/Canary/Rolling]
-- **Rollback:** [Automatic triggers and process]
+**Scenario 3: System Error Recovery**
+```gherkin
+Given: [Normal operation in progress]
+When: [System error occurs during processing]
+Then: [Error handled gracefully]
+And: [User notified appropriately]
+And: [System maintains data integrity]
+```
 
-### Environment Configuration
-| Environment | Purpose | Configuration |
-|-------------|---------|---------------|
-| Development | Local dev | `.env.development` |
-| Staging | Pre-prod testing | `.env.staging` |
-| Production | Live system | `.env.production` |
+**Scenario 4: Edge Case Handling**
+```gherkin
+Given: [Boundary condition scenario]
+When: [Edge case operation attempted]
+Then: [System handles edge case correctly]
+And: [No unexpected behavior occurs]
+```
 
-## Disaster Recovery
-### Backup Strategy
-- **Frequency:** [Schedule]
-- **Retention:** [Policy]
-- **Testing:** [Recovery drills]
-
-### RTO/RPO Targets
-- **RTO:** [Recovery Time Objective]
-- **RPO:** [Recovery Point Objective]
-
-## Anti-Patterns to Avoid
-
-### Architecture Anti-Patterns
-- ❌ Creating new architectural patterns when established ones exist
-- ❌ Modifying unrelated systems "while you're there"
-- ❌ Adding external dependencies without checking internal capabilities
-- ❌ Changing core conventions without explicit approval
-- ❌ Implementing business logic in presentation layer
-- ❌ Tight coupling between independent components
-
-### Integration Anti-Patterns
-- ❌ Hardcoding external service URLs or credentials
-- ❌ Ignoring rate limits and retry mechanisms for external services
-- ❌ Exposing internal data structures to external systems
-- ❌ Synchronous calls to external services in critical paths
-- ❌ Assuming external services are always available
-
-### Data Anti-Patterns
-- ❌ Direct database access from presentation layer
-- ❌ Storing business logic in database triggers or procedures
-- ❌ Missing data validation at application boundaries
-- ❌ Inconsistent data state across related entities
-- ❌ Exposing database structure through API responses
-
-### Testing Anti-Patterns
-- ❌ Testing implementation details instead of behavior
-- ❌ Skipping tests for "simple" functions
-- ❌ Not testing error conditions and edge cases
-- ❌ Over-mocking dependencies in integration tests
-- ❌ Writing tests that depend on specific execution order
-- ❌ Ignoring test failures or marking them as "flaky"
-
-### Process Anti-Patterns
-- ❌ Skipping validation steps to move faster
-- ❌ Implementing without understanding existing patterns
-- ❌ Making assumptions about user requirements
-- ❌ Continuing implementation when blocked on critical decisions
-- ❌ Deploying changes without proper testing
-- ❌ Ignoring performance implications until production
-
-## Appendices
-### Technology Stack Justification
-[Why each technology was chosen]
-
-### Alternative Approaches Considered
-[What was evaluated and rejected]
-
-### References
-[Design patterns, architectural decisions records]
+### Test Coverage Requirements
+- **Business Logic**: All decision paths, calculation formulas, validation rules
+- **User Interface**: All interaction flows, error states, loading states, accessibility  
+- **Integration Points**: External service calls, data persistence, event handling
+- **Edge Cases**: Boundary values, empty states, concurrent operations, system limits
+- **Performance**: Response times under expected load, resource usage
+- **Security**: Input validation, authorization checks, data protection

@@ -1,214 +1,82 @@
-# Implementation Plan (IP)
-**Project:** [Project Name]  
-**Version:** 1.0  
-**Date:** [Date]  
-**Author:** the-project-manager  
-**Complexity:** [Simple/Medium/Complex]
+# Implementation Plan
 
-## Execution Rules for Main Agent
+*[INSTRUCTION: Create a detailed implementation checklist based on the feature requirements, architecture, and discovered patterns. Organize tasks into logical phases that can be executed sequentially, with clear dependencies and validation points. This entire instruction block should not appear in the final PRD.]*
 
-### How to Read This Document
-This implementation plan uses a checklist format optimized for LLM execution while remaining human-readable.
+## Checklist Structure Guidelines
 
-### Phase Execution Types
-- **parallel**: All tasks in the phase can be executed simultaneously
-  - Invoke multiple agents at once using batch Task tool calls
-  - Monitor all parallel executions
-  - Wait for all to complete before proceeding
-  
-- **sequential**: Tasks must be completed in the order listed
-  - Complete each task fully before starting the next
-  - Pass outputs from previous tasks as context to subsequent tasks
-  - Stop on any failures
+Organize implementation tasks into phases that make sense for this specific feature:
+- Group related tasks that can be worked on together
+- Identify dependencies between tasks
+- Include validation points after each significant milestone
+- Consider the feature's architecture when determining phases
 
-### Task Annotations
-Each task line contains:
-1. **Checkbox**: `- [ ]` tracks completion status
-2. **Task description**: What needs to be done
-3. **Agent assignment**: `{agent: specialist-name}` 
-4. **Source reference**: `[→ doc#section]` links to requirements
+Each task should be:
+- [ ] Specific and actionable
+- [ ] Independently verifiable as complete
+- [ ] Sized appropriately (not too large, not too granular)
 
-Example:
-```
-- [ ] Implement user authentication {agent: developer} [→ PRD#auth-requirements]
-```
+Include validation commands from the Project Commands section at appropriate checkpoints.
 
-### Subtasks
-Indented items are subtasks that should be included in the agent's prompt:
-```
-- [ ] Main task {agent: developer}
-  - [ ] Subtask 1 (include in prompt)
-  - [ ] Subtask 2 (include in prompt)
-```
+## Example Phase Structure (adapt based on feature):
 
-### Validation Checkpoints
-**Validation** tasks use available project commands to verify progress:
-```
-- [ ] **Validation**: npm test, npm run lint
-```
+**Phase X: [Descriptive Phase Name]**
+- [ ] [Specific task with clear completion criteria]
+- [ ] [Another related task]
+- [ ] **Validation**: [Specific validation command or check]
 
-### Status Tracking
-As you execute:
-- Mark `- [ ]` as `- [x]` when complete
-- Update the status in memory/context
-- Report progress to user periodically
+*[INSTRUCTION: The number and nature of phases should match the feature complexity. Simple features might need 2-3 phases, complex ones might need 5-7. Always include context file reading as an early task. Always end with integration testing and final validation. This note should not appear in the final PRD.]*
 
-### Available Commands
-```bash
-# Setup
-npm install              # Install dependencies
-npm run dev              # Start development
+## Validation Checklist
 
-# Validation
-npm run lint             # Code quality
-npm run typecheck        # Type safety
-npm test                 # Run tests
-npm run build            # Build project
+*[INSTRUCTION: Define validation criteria to ensure the implementation meets all requirements. Use project-specific validation commands identified during research. This note should not appear in the final PRD.]*
 
-# Database
-npm run db:migrate       # Run migrations
-npm run db:seed          # Seed test data
-```
+### Validation Areas to Consider:
 
-## Phase 1: Foundation & Analysis
-**Execution**: parallel  
-**Dependencies**: Project approved
+- **Code Quality**: Linting, formatting, type checking
+- **Functionality**: All test scenarios pass, features work as specified
+- **Integration**: Component interactions, API contracts, data flow
+- **Performance**: Response times, resource usage, scalability
+- **Security**: Input validation, authorization, data protection
+- **Standards**: Code conventions, architectural patterns, best practices
 
-- [ ] Read and analyze existing codebase {agent: architect} [→ SDD#context]
-  - [ ] Identify architectural patterns
-  - [ ] Map component structure
-  - [ ] Document integration points
-- [ ] Clarify business requirements {agent: business-analyst} [→ BRD#requirements]
-  - [ ] Validate assumptions
-  - [ ] Identify missing requirements
-  - [ ] Get stakeholder confirmation
-- [ ] Setup development environment {agent: devops} [→ SDD#deployment]
-  - [ ] Initialize repository
-  - [ ] Configure CI/CD pipeline
-  - [ ] Setup environments (dev/staging/prod)
-- [ ] **Validation**: All setup commands pass, requirements documented
+Structure validation tasks based on available project commands and the feature's specific requirements.
 
-## Phase 2: Core Infrastructure
-**Execution**: sequential  
-**Dependencies**: Phase 1 complete
+## Anti-Patterns to Avoid
 
-- [ ] Design system architecture {agent: architect} [→ SDD#architecture]
-  - [ ] Create component diagrams
-  - [ ] Define API contracts
-  - [ ] Plan data models
-- [ ] Implement data layer {agent: data-engineer} [→ SDD#data-design]
-  - [ ] Create database schema
-  - [ ] Setup migrations
-  - [ ] Add seed data
-- [ ] Setup authentication {agent: developer} [→ PRD#auth-requirements]
-  - [ ] Implement auth flow
-  - [ ] Add authorization checks
-  - [ ] Create user management
-- [ ] Security hardening {agent: security-engineer} [→ SDD#security]
-  - [ ] Audit auth implementation
-  - [ ] Add input validation
-  - [ ] Configure security headers
-- [ ] **Validation**: npm test, security scan passes
+### Architecture Anti-Patterns
+- ❌ Creating new architectural patterns when established ones exist
+- ❌ Modifying unrelated systems "while you're there"
+- ❌ Adding external dependencies without checking internal capabilities
+- ❌ Changing core conventions without explicit approval
+- ❌ Implementing business logic in presentation layer
+- ❌ Tight coupling between independent components
 
-## Phase 3: Feature Implementation
-**Execution**: parallel  
-**Dependencies**: Phase 2 complete, auth working
+### Integration Anti-Patterns
+- ❌ Hardcoding external service URLs or credentials
+- ❌ Ignoring rate limits and retry mechanisms for external services
+- ❌ Exposing internal data structures to external systems
+- ❌ Synchronous calls to external services in critical paths
+- ❌ Assuming external services are always available
 
-- [ ] Backend API development {agent: developer} [→ SDD#api-design]
-  - [ ] Implement REST endpoints
-    - [ ] User endpoints [→ PRD#user-stories-1]
-    - [ ] Resource endpoints [→ PRD#user-stories-2]
-  - [ ] Add business logic [→ SDD#business-rules]
-  - [ ] Implement error handling
-  - [ ] **Validation**: API tests pass
-  
-- [ ] Frontend components {agent: developer} [→ PRD#ui-requirements]
-  - [ ] Create base components
-    - [ ] Navigation [→ PRD#navigation]
-    - [ ] Forms [→ PRD#forms]
-    - [ ] Data displays [→ PRD#displays]
-  - [ ] Implement state management
-  - [ ] Add loading/error states
-  - [ ] **Validation**: Component tests pass
+### Data Anti-Patterns
+- ❌ Direct database access from presentation layer
+- ❌ Storing business logic in database triggers or procedures
+- ❌ Missing data validation at application boundaries
+- ❌ Inconsistent data state across related entities
+- ❌ Exposing database structure through API responses
 
-- [ ] Integration layer {agent: developer} [→ SDD#integration]
-  - [ ] Connect frontend to API
-  - [ ] Add caching strategy
-  - [ ] Handle offline scenarios
-  - [ ] **Validation**: Integration tests pass
+### Testing Anti-Patterns
+- ❌ Testing implementation details instead of behavior
+- ❌ Skipping tests for "simple" functions
+- ❌ Not testing error conditions and edge cases
+- ❌ Over-mocking dependencies in integration tests
+- ❌ Writing tests that depend on specific execution order
+- ❌ Ignoring test failures or marking them as "flaky"
 
-## Phase 4: Quality Assurance
-**Execution**: sequential  
-**Dependencies**: Phase 3 complete
-
-- [ ] Comprehensive testing {agent: tester} [→ PRD#test-scenarios]
-  - [ ] Unit test coverage >80%
-  - [ ] Integration test critical paths
-  - [ ] E2E test user journeys
-    - [ ] Happy path flows [→ PRD#scenario-1]
-    - [ ] Error scenarios [→ PRD#scenario-2]
-    - [ ] Edge cases [→ PRD#scenario-3]
-  - [ ] Accessibility testing
-  - [ ] **Validation**: All test suites pass
-
-- [ ] Performance optimization {agent: site-reliability-engineer} [→ SDD#performance]
-  - [ ] Run load tests
-  - [ ] Optimize slow queries
-  - [ ] Implement caching
-  - [ ] Monitor resource usage
-  - [ ] **Validation**: Meets performance targets
-
-- [ ] Documentation {agent: technical-writer} [→ PRD#documentation]
-  - [ ] API documentation
-  - [ ] User guides
-  - [ ] Deployment guide
-  - [ ] **Validation**: Docs review complete
-
-## Phase 5: Deployment
-**Execution**: sequential  
-**Dependencies**: All tests passing, documentation complete
-
-- [ ] Production setup {agent: devops} [→ SDD#infrastructure]
-  - [ ] Provision infrastructure
-  - [ ] Configure monitoring
-  - [ ] Setup backups
-  - [ ] Deploy to staging
-  - [ ] **Validation**: Staging deployment successful
-
-- [ ] Security review {agent: security-engineer} [→ BRD#security-requirements]
-  - [ ] Penetration testing
-  - [ ] Compliance check
-  - [ ] Security scan
-  - [ ] **Validation**: Security approval received
-
-- [ ] Production deployment {agent: devops} [→ SDD#deployment-strategy]
-  - [ ] Deploy with rollback plan
-  - [ ] Monitor metrics
-  - [ ] Verify functionality
-  - [ ] **Validation**: Production healthy, metrics normal
-
-## Completion Criteria
-- [ ] All tasks marked complete
-- [ ] Test coverage meets targets
-- [ ] Performance benchmarks achieved
-- [ ] Security review passed
-- [ ] Documentation approved
-- [ ] Production deployment successful
-- [ ] Stakeholder sign-off received
-
-## Dynamic Task Addition
-
-When adding new tasks during execution:
-```markdown
-- [ ] [New task description] {agent: specialist} [→ source#ref]
-  - **Reason**: [Why this was added]
-  - **Dependencies**: [What must complete first]
-```
-
-## Rollback Plan
-
-If deployment fails:
-1. {agent: devops} Execute rollback procedure
-2. {agent: site-reliability-engineer} Diagnose failure  
-3. {agent: project-manager} Update plan with fixes
-4. Resume from appropriate phase
+### Process Anti-Patterns
+- ❌ Skipping validation steps to move faster
+- ❌ Implementing without understanding existing patterns
+- ❌ Making assumptions about user requirements
+- ❌ Continuing implementation when blocked on critical decisions
+- ❌ Deploying changes without proper testing
+- ❌ Ignoring performance implications until production

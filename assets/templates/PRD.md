@@ -1,10 +1,7 @@
-# Product Requirements Document (PRD)
-**Project:** [Project Name]  
-**Version:** 1.0  
-**Date:** [Date]  
-**Author:** the-product-manager
+# Product Requirements Document
 
 ## Product Overview
+
 ### Vision
 [One sentence product vision]
 
@@ -15,6 +12,7 @@
 [Why users will love this]
 
 ## User Personas
+
 ### Primary Persona: [Name]
 - **Demographics:** [Age, role, tech-savvy level]
 - **Goals:** [What they want to achieve]
@@ -25,6 +23,7 @@
 [Additional user types if applicable]
 
 ## User Journey Maps
+
 ### [Journey Name]
 1. **Awareness:** [How they discover the need]
 2. **Consideration:** [What they evaluate]
@@ -32,6 +31,7 @@
 4. **Retention:** [How we keep them engaged]
 
 ## Feature Requirements
+
 ### Feature Set 1: [Feature Group Name]
 | Feature | User Story | Priority | Acceptance Criteria |
 |---------|-----------|----------|-------------------|
@@ -53,6 +53,7 @@
 - [Future feature]
 
 ## Detailed Feature Specifications
+
 ### Feature: [Feature Name]
 **Description:** [Detailed explanation]
 
@@ -72,19 +73,12 @@
 - [Interaction pattern]
 - [Visual requirement]
 
-## Non-Functional Requirements
-| Requirement | Specification | Rationale |
-|-------------|---------------|-----------|
-| Performance | [e.g., <2s page load] | [User expectation] |
-| Accessibility | [WCAG 2.1 AA] | [Compliance] |
-| Browser Support | [List] | [User base] |
-| Mobile | [Responsive/Native] | [Usage patterns] |
-
 ## Integration Requirements
+
 ### External Systems
-| System | Purpose | Data Flow | Authentication |
-|--------|---------|-----------|----------------|
-| [System name] | [Why needed] | [In/Out/Both] | [Method] |
+| System        | Purpose       | Data Flow     | Authentication  |
+|---------------|---------------|---------------|-----------------|
+| [System name] | [Why needed]  | [In/Out/Both] | [Method]        |
 
 ### API Requirements
 - [Endpoint needs]
@@ -92,6 +86,7 @@
 - [Data formats]
 
 ## Analytics and Metrics
+
 ### Success Metrics
 - **Adoption:** [Target metric]
 - **Engagement:** [Target metric]
@@ -103,6 +98,7 @@
 | [User action] | [Data to capture] | [Why we track] |
 
 ## Release Strategy
+
 ### MVP Scope
 [Minimal feature set for launch]
 
@@ -125,7 +121,8 @@
 - [ ] [Technical feasibility question]
 
 ## Appendix
-### Mockups/Wireframes
+
+### Mockups/Wireframes/Competitors
 [Links or embedded images]
 
 ### Competitive Analysis
