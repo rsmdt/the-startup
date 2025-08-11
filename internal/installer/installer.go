@@ -118,15 +118,9 @@ func (i *Installer) checkFileExistsInClaude(componentPath string) bool {
 	return false
 }
 
-// CheckFileExists checks if a component file exists in either install path or claude path
+// CheckFileExists checks if a component file exists in the claude path
 func (i *Installer) CheckFileExists(componentPath string) bool {
-	// Check in installation directory
-	installFilePath := filepath.Join(i.installPath, componentPath)
-	if _, err := os.Stat(installFilePath); err == nil {
-		return true
-	}
-	
-	// Check in claude directory for certain components
+	// Only check in claude directory since that's where files are installed
 	parts := strings.Split(componentPath, "/")
 	if len(parts) >= 2 {
 		component := parts[0]
@@ -193,33 +187,23 @@ func (i *Installer) IsInstalled() bool {
 
 // Install performs the installation
 func (i *Installer) Install() error {
-	// Create installation directory
+	// Create installation directory for lock file
 	if err := os.MkdirAll(i.installPath, 0755); err != nil {
 		return fmt.Errorf("failed to create install directory: %w", err)
 	}
 	
-	// Install each component
-	for _, component := range i.components {
-		fmt.Printf("Installing %s...\n", component)
-		
-		if err := i.installComponent(component); err != nil {
-			fmt.Printf("✗ Error installing %s: %v\n", component, err)
-			return fmt.Errorf("failed to install %s: %w", component, err)
-		}
-		
-		fmt.Printf("✓ %s installed\n", component)
-	}
-	
-	// Create references in Claude directory
+	// Install components directly to Claude directory
 	if i.tool == "claude-code" {
-		fmt.Println("Creating Claude references...")
-		
-		if err := i.createClaudeReferences(); err != nil {
-			fmt.Printf("✗ Error creating Claude references: %v\n", err)
-			return fmt.Errorf("failed to create Claude references: %w", err)
+		for _, component := range i.components {
+			fmt.Printf("Installing %s...\n", component)
+			
+			if err := i.installComponentToClaude(component); err != nil {
+				fmt.Printf("✗ Error installing %s: %v\n", component, err)
+				return fmt.Errorf("failed to install %s: %w", component, err)
+			}
+			
+			fmt.Printf("✓ %s installed\n", component)
 		}
-		
-		fmt.Println("✓ Claude references created")
 		
 		// Configure hooks
 		if contains(i.components, "hooks") {
@@ -242,8 +226,8 @@ func (i *Installer) Install() error {
 	return nil
 }
 
-// installComponent installs a specific component
-func (i *Installer) installComponent(component string) error {
+// installComponentToClaude installs a specific component directly to Claude directory
+func (i *Installer) installComponentToClaude(component string) error {
 	var sourceFS *embed.FS
 	var pattern string
 	
@@ -264,8 +248,8 @@ func (i *Installer) installComponent(component string) error {
 		return fmt.Errorf("unknown component: %s", component)
 	}
 	
-	// Create component directory
-	componentPath := filepath.Join(i.installPath, component)
+	// Create component directory in Claude path
+	componentPath := filepath.Join(i.claudePath, component)
 	if err := os.MkdirAll(componentPath, 0755); err != nil {
 		return err
 	}
@@ -331,165 +315,6 @@ func (i *Installer) copyFile(sourceFS *embed.FS, sourcePath, destDir string) err
 	return nil
 }
 
-// createClaudeReferences creates reference files in ~/.claude
-func (i *Installer) createClaudeReferences() error {
-	// Create directories
-	claudeAgents := filepath.Join(i.claudePath, "agents")
-	claudeCommands := filepath.Join(i.claudePath, "commands")
-	claudeHooks := filepath.Join(i.claudePath, "hooks")
-	claudeTemplates := filepath.Join(i.claudePath, "templates")
-	
-	for _, dir := range []string{claudeAgents, claudeCommands, claudeHooks, claudeTemplates} {
-		if err := os.MkdirAll(dir, 0755); err != nil {
-			return err
-		}
-	}
-	
-	// Copy agents with full file contents
-	if contains(i.components, "agents") {
-		agentsDir := filepath.Join(i.installPath, "agents")
-		entries, _ := os.ReadDir(agentsDir)
-		for _, entry := range entries {
-			if strings.HasSuffix(entry.Name(), ".md") {
-				// If specific files are selected, check if this file was installed
-				if len(i.selectedFiles) > 0 {
-					filePath := "agents/" + entry.Name()
-					shouldInclude := false
-					for _, selected := range i.selectedFiles {
-						if selected == filePath {
-							shouldInclude = true
-							break
-						}
-					}
-					if !shouldInclude {
-						continue
-					}
-				}
-				
-				// Copy the full file contents
-				srcPath := filepath.Join(agentsDir, entry.Name())
-				destPath := filepath.Join(claudeAgents, entry.Name())
-				
-				data, err := os.ReadFile(srcPath)
-				if err != nil {
-					return err
-				}
-				if err := os.WriteFile(destPath, data, 0644); err != nil {
-					return err
-				}
-			}
-		}
-	}
-	
-	// Create reference files for commands
-	if contains(i.components, "commands") {
-		commandsDir := filepath.Join(i.installPath, "commands")
-		entries, _ := os.ReadDir(commandsDir)
-		for _, entry := range entries {
-			if strings.HasSuffix(entry.Name(), ".md") {
-				// If specific files are selected, check if this file was installed
-				if len(i.selectedFiles) > 0 {
-					filePath := "commands/" + entry.Name()
-					shouldInclude := false
-					for _, selected := range i.selectedFiles {
-						if selected == filePath {
-							shouldInclude = true
-							break
-						}
-					}
-					if !shouldInclude {
-						continue
-					}
-				}
-				
-				name := strings.TrimSuffix(entry.Name(), ".md")
-				refPath := filepath.Join(claudeCommands, name+".md")
-				
-				// Commands are copied directly (not references)
-				srcPath := filepath.Join(commandsDir, entry.Name())
-				data, err := os.ReadFile(srcPath)
-				if err != nil {
-					return err
-				}
-				if err := os.WriteFile(refPath, data, 0644); err != nil {
-					return err
-				}
-			}
-		}
-	}
-	
-	// Copy hooks directly (they need to be executable)
-	if contains(i.components, "hooks") {
-		hooksDir := filepath.Join(i.installPath, "hooks")
-		entries, _ := os.ReadDir(hooksDir)
-		for _, entry := range entries {
-			if strings.HasSuffix(entry.Name(), ".py") {
-				// If specific files are selected, check if this file was installed
-				if len(i.selectedFiles) > 0 {
-					filePath := "hooks/" + entry.Name()
-					shouldInclude := false
-					for _, selected := range i.selectedFiles {
-						if selected == filePath {
-							shouldInclude = true
-							break
-						}
-					}
-					if !shouldInclude {
-						continue
-					}
-				}
-				
-				srcPath := filepath.Join(hooksDir, entry.Name())
-				destPath := filepath.Join(claudeHooks, entry.Name())
-				
-				// Copy file
-				data, err := os.ReadFile(srcPath)
-				if err != nil {
-					return err
-				}
-				if err := os.WriteFile(destPath, data, 0755); err != nil {
-					return err
-				}
-			}
-		}
-	}
-	
-	// Copy templates with full file contents
-	if contains(i.components, "templates") {
-		templatesDir := filepath.Join(i.installPath, "templates")
-		entries, _ := os.ReadDir(templatesDir)
-		for _, entry := range entries {
-			// If specific files are selected, check if this file was installed
-			if len(i.selectedFiles) > 0 {
-				filePath := "templates/" + entry.Name()
-				shouldInclude := false
-				for _, selected := range i.selectedFiles {
-					if selected == filePath {
-						shouldInclude = true
-						break
-					}
-				}
-				if !shouldInclude {
-					continue
-				}
-			}
-			
-			// Copy the full file contents
-			srcPath := filepath.Join(templatesDir, entry.Name())
-			destPath := filepath.Join(claudeTemplates, entry.Name())
-			
-			data, err := os.ReadFile(srcPath)
-			if err != nil {
-				return err
-			}
-			if err := os.WriteFile(destPath, data, 0644); err != nil {
-				return err
-			}
-		}
-	}
-	
-	return nil
-}
 
 // configureHooks updates settings.json to include hooks
 func (i *Installer) configureHooks() error {
@@ -560,15 +385,15 @@ func (i *Installer) createLockFile() error {
 		Files:       make(map[string]config.FileInfo),
 	}
 	
-	// Record installed files
+	// Record installed files from Claude directory
 	for _, component := range i.components {
-		componentPath := filepath.Join(i.installPath, component)
+		componentPath := filepath.Join(i.claudePath, component)
 		err := filepath.Walk(componentPath, func(path string, info os.FileInfo, err error) error {
 			if err != nil || info.IsDir() {
 				return nil
 			}
 			
-			relPath, _ := filepath.Rel(i.installPath, path)
+			relPath, _ := filepath.Rel(i.claudePath, path)
 			lockFile.Files[relPath] = config.FileInfo{
 				Size:         info.Size(),
 				LastModified: info.ModTime().Format(time.RFC3339),
@@ -576,7 +401,10 @@ func (i *Installer) createLockFile() error {
 			return nil
 		})
 		if err != nil {
-			return err
+			// Component might not exist if not selected, that's ok
+			if !os.IsNotExist(err) {
+				return err
+			}
 		}
 	}
 	

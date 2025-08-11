@@ -124,9 +124,14 @@ func TestCheckFileExists(t *testing.T) {
 	installer := New(&testAssets, &testAssets, &testAssets, &testAssets)
 	installer.SetInstallPath(tmpDir)
 	
-	// Create test directories and files
-	agentsDir := filepath.Join(tmpDir, "agents")
+	// Get the claude path (set based on test setup)
+	homeDir, _ := os.UserHomeDir()
+	claudePath := filepath.Join(homeDir, ".claude")
+	
+	// Create test directories and files in Claude directory
+	agentsDir := filepath.Join(claudePath, "agents")
 	os.MkdirAll(agentsDir, 0755)
+	defer os.RemoveAll(filepath.Join(claudePath, "agents", "test-agent.md")) // Clean up
 	
 	testFile := filepath.Join(agentsDir, "test-agent.md")
 	os.WriteFile(testFile, []byte("test content"), 0644)
@@ -141,17 +146,8 @@ func TestCheckFileExists(t *testing.T) {
 		t.Error("Expected CheckFileExists to return false for non-existing file")
 	}
 	
-	// Test checking in Claude directory
-	claudeDir := filepath.Join(tmpDir, ".claude", "agents")
-	os.MkdirAll(claudeDir, 0755)
-	claudeFile := filepath.Join(claudeDir, "claude-agent.md")
-	os.WriteFile(claudeFile, []byte("claude content"), 0644)
-	
-	installer.claudePath = filepath.Join(tmpDir, ".claude")
-	
-	if !installer.CheckFileExists("agents/claude-agent.md") {
-		t.Error("Expected CheckFileExists to return true for file in Claude directory")
-	}
+	// Clean up test file
+	os.Remove(testFile)
 }
 
 func TestIsInstalled(t *testing.T) {
@@ -196,7 +192,7 @@ func TestInstallComponentUnknown(t *testing.T) {
 	installer.SetInstallPath(tmpDir)
 	
 	// Test unknown component
-	err := installer.installComponent("unknown")
+	err := installer.installComponentToClaude("unknown")
 	if err == nil {
 		t.Error("Expected error for unknown component")
 	}
