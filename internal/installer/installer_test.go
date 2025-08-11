@@ -4,6 +4,7 @@ import (
 	"embed"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -290,6 +291,93 @@ func TestInstallWithSelectedFiles(t *testing.T) {
 	}
 }
 
+func TestCopyCurrentExecutable(t *testing.T) {
+	tmpDir := setupTestDir(t)
+	installer := New(&testAssets, &testAssets, &testAssets, &testAssets)
+	
+	// Test copying current executable
+	err := installer.copyCurrentExecutable(tmpDir)
+	if err != nil {
+		t.Errorf("Expected copyCurrentExecutable to succeed, got error: %v", err)
+	}
+	
+	// Check that the binary was copied
+	binaryPath := filepath.Join(tmpDir, "the-startup")
+	if _, err := os.Stat(binaryPath); err != nil {
+		t.Errorf("Expected binary to be copied to %s, but file doesn't exist: %v", binaryPath, err)
+	}
+	
+	// Check permissions (should be executable)
+	info, err := os.Stat(binaryPath)
+	if err != nil {
+		t.Errorf("Failed to stat binary: %v", err)
+	} else if info.Mode().Perm() != 0755 {
+		t.Errorf("Expected binary permissions 0755, got %o", info.Mode().Perm())
+	}
+}
+
+func TestHooksComponentInstallsGoBinary(t *testing.T) {
+	tmpDir := setupTestDir(t)
+	installer := New(&testAssets, &testAssets, &testAssets, &testAssets)
+	installer.SetInstallPath(tmpDir)
+	installer.claudePath = filepath.Join(tmpDir, ".claude")
+	
+	// Install hooks component - should deploy Go binary instead of Python files
+	err := installer.installComponentToClaude("hooks")
+	if err != nil {
+		t.Errorf("Expected hooks component installation to succeed, got error: %v", err)
+	}
+	
+	// Check that the Go binary was deployed
+	hooksBinaryPath := filepath.Join(tmpDir, ".claude", "hooks", "the-startup")
+	if _, err := os.Stat(hooksBinaryPath); err != nil {
+		t.Errorf("Expected Go binary to be deployed to %s, but file doesn't exist: %v", hooksBinaryPath, err)
+	}
+}
+
+func TestConfigureHooksUsesGoCommands(t *testing.T) {
+	tmpDir := setupTestDir(t)
+	installer := New(&testAssets, &testAssets, &testAssets, &testAssets)
+	installer.SetInstallPath(tmpDir)
+	installer.claudePath = filepath.Join(tmpDir, ".claude")
+	
+	// Create claude directory
+	os.MkdirAll(installer.claudePath, 0755)
+	
+	// Configure hooks
+	err := installer.configureHooks()
+	if err != nil {
+		t.Errorf("Expected configureHooks to succeed, got error: %v", err)
+	}
+	
+	// Check that settings.json was created with Go commands
+	settingsPath := filepath.Join(installer.claudePath, "settings.json")
+	data, err := os.ReadFile(settingsPath)
+	if err != nil {
+		t.Errorf("Expected settings.json to be created, got error: %v", err)
+	}
+	
+	settingsContent := string(data)
+	
+	// Verify Go hook commands are present
+	expectedPreCommand := "$CLAUDE_PROJECT_DIR/.claude/hooks/the-startup log --assistant"
+	expectedPostCommand := "$CLAUDE_PROJECT_DIR/.claude/hooks/the-startup log --user"
+	
+	if !strings.Contains(settingsContent, expectedPreCommand) {
+		t.Errorf("Expected settings.json to contain PreToolUse command '%s', but content was:\n%s", expectedPreCommand, settingsContent)
+	}
+	
+	if !strings.Contains(settingsContent, expectedPostCommand) {
+		t.Errorf("Expected settings.json to contain PostToolUse command '%s', but content was:\n%s", expectedPostCommand, settingsContent)
+	}
+	
+	// Verify Python commands are NOT present (regression test)
+	oldPythonCommand := "uv run $CLAUDE_PROJECT_DIR/.claude/hooks/log_agent_start.py"
+	if strings.Contains(settingsContent, oldPythonCommand) {
+		t.Errorf("Settings.json should not contain old Python commands, but found '%s'", oldPythonCommand)
+	}
+}
+
 // Integration test that validates the full state machine works with installer
 func TestInstallerIntegration(t *testing.T) {
 	tmpDir := setupTestDir(t)
@@ -311,5 +399,46 @@ func TestInstallerIntegration(t *testing.T) {
 	
 	if installer.GetInstallPath() != tmpDir {
 		t.Errorf("Expected install path '%s', got '%s'", tmpDir, installer.GetInstallPath())
+	}
+}
+
+// Full integration test for Go hooks deployment
+func TestGoHooksIntegration(t *testing.T) {
+	tmpDir := setupTestDir(t)
+	installer := New(&testAssets, &testAssets, &testAssets, &testAssets)
+	installer.SetInstallPath(tmpDir)
+	installer.claudePath = filepath.Join(tmpDir, ".claude")
+	installer.SetTool("claude-code")
+	installer.SetComponents([]string{"hooks"})
+	
+	// Install hooks component
+	err := installer.Install()
+	if err != nil {
+		t.Errorf("Expected full installation to succeed, got error: %v", err)
+	}
+	
+	// Verify binary was deployed
+	hooksBinaryPath := filepath.Join(tmpDir, ".claude", "hooks", "the-startup")
+	if _, err := os.Stat(hooksBinaryPath); err != nil {
+		t.Errorf("Expected Go binary to be deployed to %s, but file doesn't exist: %v", hooksBinaryPath, err)
+	}
+	
+	// Verify settings.json was configured with Go commands
+	settingsPath := filepath.Join(tmpDir, ".claude", "settings.json")
+	data, err := os.ReadFile(settingsPath)
+	if err != nil {
+		t.Errorf("Expected settings.json to be created, got error: %v", err)
+	}
+	
+	settingsContent := string(data)
+	expectedCommand := "the-startup log --assistant"
+	if !strings.Contains(settingsContent, expectedCommand) {
+		t.Errorf("Expected settings.json to contain Go command '%s', but content was:\n%s", expectedCommand, settingsContent)
+	}
+	
+	// Verify lock file was created
+	lockFilePath := filepath.Join(tmpDir, "the-startup.lock")
+	if _, err := os.Stat(lockFilePath); err != nil {
+		t.Errorf("Expected lock file to be created at %s, but file doesn't exist: %v", lockFilePath, err)
 	}
 }

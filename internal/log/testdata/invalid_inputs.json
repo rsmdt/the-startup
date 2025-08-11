@@ -1,0 +1,137 @@
+[
+  {
+    "name": "empty_json",
+    "description": "Completely empty JSON object",
+    "input": "{}"
+  },
+  {
+    "name": "malformed_json_missing_brace",
+    "description": "JSON missing closing brace",
+    "input": "{\"tool_name\":\"Task\",\"tool_input\":{\"subagent_type\":\"the-tester\""
+  },
+  {
+    "name": "malformed_json_invalid_syntax",
+    "description": "JSON with invalid syntax",
+    "input": "{tool_name:\"Task\",\"tool_input\":{\"subagent_type\":\"the-tester\"}}"
+  },
+  {
+    "name": "non_task_tool",
+    "description": "Valid JSON but not a Task tool (should be filtered)",
+    "input": "{\"tool_name\":\"Read\",\"tool_input\":{\"subagent_type\":\"the-architect\",\"description\":\"test\",\"prompt\":\"test\"}}"
+  },
+  {
+    "name": "non_the_agent",
+    "description": "Task tool but subagent_type doesn't start with 'the-'",
+    "input": "{\"tool_name\":\"Task\",\"tool_input\":{\"subagent_type\":\"regular-agent\",\"description\":\"test\",\"prompt\":\"test\"}}"
+  },
+  {
+    "name": "missing_tool_name",
+    "description": "JSON missing tool_name field",
+    "input": "{\"tool_input\":{\"subagent_type\":\"the-tester\",\"description\":\"test\",\"prompt\":\"test\"}}"
+  },
+  {
+    "name": "missing_tool_input",
+    "description": "JSON missing tool_input field",
+    "input": "{\"tool_name\":\"Task\"}"
+  },
+  {
+    "name": "missing_subagent_type",
+    "description": "tool_input missing subagent_type",
+    "input": "{\"tool_name\":\"Task\",\"tool_input\":{\"description\":\"test\",\"prompt\":\"test\"}}"
+  },
+  {
+    "name": "null_tool_name",
+    "description": "tool_name is null",
+    "input": "{\"tool_name\":null,\"tool_input\":{\"subagent_type\":\"the-tester\",\"description\":\"test\",\"prompt\":\"test\"}}"
+  },
+  {
+    "name": "null_subagent_type",
+    "description": "subagent_type is null",
+    "input": "{\"tool_name\":\"Task\",\"tool_input\":{\"subagent_type\":null,\"description\":\"test\",\"prompt\":\"test\"}}"
+  },
+  {
+    "name": "empty_tool_name",
+    "description": "tool_name is empty string",
+    "input": "{\"tool_name\":\"\",\"tool_input\":{\"subagent_type\":\"the-tester\",\"description\":\"test\",\"prompt\":\"test\"}}"
+  },
+  {
+    "name": "empty_subagent_type",
+    "description": "subagent_type is empty string",
+    "input": "{\"tool_name\":\"Task\",\"tool_input\":{\"subagent_type\":\"\",\"description\":\"test\",\"prompt\":\"test\"}}"
+  },
+  {
+    "name": "wrong_data_types",
+    "description": "Fields have wrong data types",
+    "input": "{\"tool_name\":123,\"tool_input\":{\"subagent_type\":456,\"description\":789,\"prompt\":null}}"
+  },
+  {
+    "name": "tool_input_not_object",
+    "description": "tool_input is not an object",
+    "input": "{\"tool_name\":\"Task\",\"tool_input\":\"not-an-object\"}"
+  },
+  {
+    "name": "array_instead_of_object",
+    "description": "Root is an array instead of object",
+    "input": "[{\"tool_name\":\"Task\",\"tool_input\":{\"subagent_type\":\"the-tester\"}}]"
+  },
+  {
+    "name": "string_instead_of_object",
+    "description": "Root is a string instead of object", 
+    "input": "\"not-an-object\""
+  },
+  {
+    "name": "number_instead_of_object",
+    "description": "Root is a number instead of object",
+    "input": "12345"
+  },
+  {
+    "name": "boolean_instead_of_object",
+    "description": "Root is a boolean instead of object",
+    "input": "true"
+  },
+  {
+    "name": "null_input",
+    "description": "Root is null",
+    "input": "null"
+  },
+  {
+    "name": "extremely_large_json",
+    "description": "JSON with extremely large string values",
+    "input": "{\"tool_name\":\"Task\",\"tool_input\":{\"subagent_type\":\"the-tester\",\"description\":\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\",\"prompt\":\"test\"}}"
+  },
+  {
+    "name": "deeply_nested_json",
+    "description": "JSON with very deep nesting",
+    "input": "{\"tool_name\":\"Task\",\"tool_input\":{\"subagent_type\":\"the-tester\",\"description\":\"test\",\"prompt\":\"test\",\"nested\":{\"level\":{\"level\":{\"level\":{\"level\":{\"level\":\"deep\"}}}}}}"
+  },
+  {
+    "name": "invalid_unicode",
+    "description": "Invalid Unicode escape sequences",
+    "input": "{\"tool_name\":\"Task\",\"tool_input\":{\"subagent_type\":\"the-tester\",\"description\":\"\\uXXXX invalid unicode\",\"prompt\":\"test\"}}"
+  },
+  {
+    "name": "unescaped_control_chars",
+    "description": "Unescaped control characters in JSON strings",
+    "input": "{\"tool_name\":\"Task\",\"tool_input\":{\"subagent_type\":\"the-tester\",\"description\":\"unescaped\nnewline\",\"prompt\":\"test\"}}"
+  },
+  {
+    "name": "partial_the_prefix",
+    "description": "subagent_type has partial 'the' prefix but not complete",
+    "input": "{\"tool_name\":\"Task\",\"tool_input\":{\"subagent_type\":\"th-incomplete\",\"description\":\"test\",\"prompt\":\"test\"}}"
+  },
+  {
+    "name": "case_sensitive_the_prefix",
+    "description": "subagent_type with different case 'The-' instead of 'the-'",
+    "input": "{\"tool_name\":\"Task\",\"tool_input\":{\"subagent_type\":\"The-Architect\",\"description\":\"test\",\"prompt\":\"test\"}}"
+  },
+  {
+    "name": "task_case_sensitive",
+    "description": "tool_name with different case 'task' instead of 'Task'",
+    "input": "{\"tool_name\":\"task\",\"tool_input\":{\"subagent_type\":\"the-tester\",\"description\":\"test\",\"prompt\":\"test\"}}"
+  },
+  {
+    "name": "extra_whitespace_fields",
+    "description": "Fields with extra whitespace",
+    "input": "{\"tool_name\":\" Task \",\"tool_input\":{\"subagent_type\":\" the-tester \",\"description\":\"test\",\"prompt\":\"test\"}}"
+  }
+]

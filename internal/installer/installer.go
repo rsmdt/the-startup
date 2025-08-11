@@ -5,6 +5,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -228,6 +229,18 @@ func (i *Installer) Install() error {
 
 // installComponentToClaude installs a specific component directly to Claude directory
 func (i *Installer) installComponentToClaude(component string) error {
+	// Create component directory in Claude path
+	componentPath := filepath.Join(i.claudePath, component)
+	if err := os.MkdirAll(componentPath, 0755); err != nil {
+		return err
+	}
+	
+	// Special handling for hooks component - deploy Go binary instead of Python files
+	if component == "hooks" {
+		return i.copyCurrentExecutable(componentPath)
+	}
+	
+	// For other components, use the original logic
 	var sourceFS *embed.FS
 	var pattern string
 	
@@ -238,20 +251,11 @@ func (i *Installer) installComponentToClaude(component string) error {
 	case "commands":
 		sourceFS = i.commandFiles
 		pattern = "assets/commands/*.md"
-	case "hooks":
-		sourceFS = i.hookFiles
-		pattern = "assets/hooks/*.py"
 	case "templates":
 		sourceFS = i.templateFiles
 		pattern = "assets/templates/*"
 	default:
 		return fmt.Errorf("unknown component: %s", component)
-	}
-	
-	// Create component directory in Claude path
-	componentPath := filepath.Join(i.claudePath, component)
-	if err := os.MkdirAll(componentPath, 0755); err != nil {
-		return err
 	}
 	
 	// Copy files
@@ -316,6 +320,44 @@ func (i *Installer) copyFile(sourceFS *embed.FS, sourcePath, destDir string) err
 }
 
 
+// copyCurrentExecutable copies the current executable to the destination directory
+func (i *Installer) copyCurrentExecutable(destDir string) error {
+	// Get the path of the current executable
+	execPath, err := os.Executable()
+	if err != nil {
+		return fmt.Errorf("failed to get executable path: %w", err)
+	}
+	
+	// Open source file
+	src, err := os.Open(execPath)
+	if err != nil {
+		return fmt.Errorf("failed to open source executable: %w", err)
+	}
+	defer src.Close()
+	
+	// Create destination path
+	destPath := filepath.Join(destDir, "the-startup")
+	
+	// Create destination file
+	dst, err := os.Create(destPath)
+	if err != nil {
+		return fmt.Errorf("failed to create destination file: %w", err)
+	}
+	defer dst.Close()
+	
+	// Copy file contents
+	if _, err := io.Copy(dst, src); err != nil {
+		return fmt.Errorf("failed to copy executable: %w", err)
+	}
+	
+	// Make executable
+	if err := os.Chmod(destPath, 0755); err != nil {
+		return fmt.Errorf("failed to set executable permissions: %w", err)
+	}
+	
+	return nil
+}
+
 // configureHooks updates settings.json to include hooks
 func (i *Installer) configureHooks() error {
 	settingsPath := filepath.Join(i.claudePath, "settings.json")
@@ -334,14 +376,14 @@ func (i *Installer) configureHooks() error {
 	}
 	hooks := settings["hooks"].(map[string]interface{})
 	
-	// Add PreToolUse hook
+	// Add PreToolUse hook for Go binary
 	preToolUse := []map[string]interface{}{
 		{
 			"matcher": "Task",
 			"hooks": []map[string]interface{}{
 				{
 					"type":    "command",
-					"command": "uv run $CLAUDE_PROJECT_DIR/.claude/hooks/log_agent_start.py",
+					"command": "$CLAUDE_PROJECT_DIR/.claude/hooks/the-startup log --assistant",
 					"_source": "the-startup",
 				},
 			},
@@ -349,14 +391,14 @@ func (i *Installer) configureHooks() error {
 	}
 	hooks["PreToolUse"] = preToolUse
 	
-	// Add PostToolUse hook
+	// Add PostToolUse hook for Go binary
 	postToolUse := []map[string]interface{}{
 		{
 			"matcher": "Task",
 			"hooks": []map[string]interface{}{
 				{
 					"type":    "command",
-					"command": "uv run $CLAUDE_PROJECT_DIR/.claude/hooks/log_agent_complete.py",
+					"command": "$CLAUDE_PROJECT_DIR/.claude/hooks/the-startup log --user",
 					"_source": "the-startup",
 				},
 			},
