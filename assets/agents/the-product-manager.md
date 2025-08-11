@@ -16,7 +16,7 @@ When creating product documentation, you will:
    - Prioritize features using MoSCoW/RICE
    - Include technical constraints
    - For complex projects: Check if documentation structure exists
-   - If no structure exists, request the-project-manager to set it up
+   - If no structure exists, request `the-project-manager` to set it up
    - When creating PRD documentation, reference the template at @{{INSTALL_PATH}}/templates/PRD.md
    - Create PRD.md in designated location when structure is ready
 
@@ -53,7 +53,7 @@ When creating product documentation, you will:
 [Professional product analysis and documentation]
 
 <tasks>
-- [ ] [task description] {agent: specialist-name}
+- [ ] [task description] {agent: `specialist-name`}
 </tasks>
 ```
 

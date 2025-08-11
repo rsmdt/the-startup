@@ -1,156 +1,157 @@
 ---
-description: Execute the implementation for the provided specification
-allowed-tools:
-  - LS
-  - Glob
-  - Grep
-  - Read
-  - Write
-  - MultiEdit
-  - Edit
-  - Bash
-  - WebSearch
-  - WebFetch
-  - Task
-  - TodoWrite
-argument-hint: </path/to/spec directory or spec ID>
+description: "Executes the implementation plan from a specification"
+argument-hint: "spec ID to implement (e.g., 001 or 001-user-auth)"
+allowed-tools: ["Task", "TodoWrite", "Bash", "Write", "Edit", "Read", "LS", "Glob", "Grep", "MultiEdit"]
 ---
 
-Execute the passed specification for: **$ARGUMENTS**. You orchestrate specification implementation through specialized sub-agents, ensuring systematic execution, proper validation, and clear progress tracking.
+You execute the implementation plan for: **$ARGUMENTS**
+
+## Core Rules
+
+1. **You are an implementation executor** - You follow PLAN.md instructions exactly
+2. **You work through phases sequentially** - Complete each phase before moving to next
+3. **You track progress meticulously** - Update todo list for every task
+4. **You validate at checkpoints** - Run validation commands when specified
 
 ## Process
 
-### Phase 1: Initialization
-1. **Locate Specification**: Find the PRD using the provided argument
-   - If ID (e.g., "001"): Search `docs/specs/001-*/`
-   - If path: Use directly
-   - If name: Search `docs/specs/` for matching title
+### Phase 1: Locate and Load Plan
+1. **Find PLAN.md**: 
+   - Search for `docs/specs/$ARGUMENTS*/PLAN.md`
+   - If not found, inform user that specification needs to be created first
+   - If multiple matches, ask user to be more specific
 
-2. **Prepare Context**: 
-   - Read CLAUDE.md files (global and project)
-   - Use `the-project-manager` sub-agent to analyze all files in the specification directory:
-     1. PRD.md - Product Specification Document
-     2. SDD.md - Solution Design Documentation
-     3. PLAN.md - Implementation Plan
+2. **Read PLAN.md**:
+   - Load the entire implementation plan
+   - Extract all phases and their execution types (parallel/sequential)
+   - Note all tasks with agent assignments
+   - Identify validation checkpoints
 
-### Phase 2: Implementation Loop
-Execute implementation phases as identified by the task manager:
+### Phase 2: Create Todo List
+1. **Convert to Todos**:
+   - Transform all tasks from PLAN.md into todo items
+   - Preserve phase groupings and execution types
+   - Include agent assignments for each task
+   - Mark all as pending initially
 
-1. **Task Planning**: 
-   Use `the-project-manager` to:
-   - Identify next tasks to execute
-   - Determine which tasks can run in parallel
-   - Mark identified tasks as `[~]` in PRD before execution
+2. **Present to User**:
+   - Show total phases and task count
+   - Display phase breakdown
+   - Ask for confirmation to begin
 
-2. **Parallel Implementation**:
-   For each group of independent tasks, identify the most-suitable sub-agent and spawn multiple instances simultaneously, each with:
-   - Specific and detailed task assignment for clear execution
-   - Relevant PRD, SDD, and PLAN context (patterns, specs, examples, todo's)
-   - Clear scope boundaries
-   
-   While implementers run, provide progress updates in chat:
-   ```
-   🔄 Starting parallel execution:
-   - Task 1: Component structure
-   - Task 2: Data fetching logic
-   - Task 3: Error handling
-   ```
+### Phase 3: Execute Implementation
+For each phase in PLAN.md:
 
-3. **Task Completion**:
-   As implementers return results:
-   - Task manager updates PLAN: `[~]` → `[x]` for success
-   - Task manager updates PLAN: `[~]` → `[BLOCKED: reason]` for blockers
-   - You only report status in chat
+1. **Sequential Execution**:
+   If phase marked as sequential:
+   - Execute tasks one at a time in listed order
+   - Mark each as in_progress when starting
+   - Invoke assigned agent with task description and context
+   - Mark as completed when agent succeeds
+   - Stop phase if any task fails
 
-4. **Validation**:
-   After all implementers in phase complete, use the most-suitable sub-agents to:
-   - Run all validation commands
-   - Interpret results
-   - Suggest fixes for issues
+2. **Parallel Execution**:
+   If phase marked as parallel:
+   - Identify all tasks in the phase
+   - Invoke multiple agents simultaneously using batch Task calls
+   - Each agent gets: task description, subtasks, spec path, document references
+   - Monitor all executions
+   - Wait for all to complete before proceeding
 
-5. **Progress Update**:
-   Task manager provides comprehensive status and determines next phase
+3. **Validation Checkpoints**:
+   When encountering **Validation** tasks:
+   - Run specified commands (npm test, npm run lint, etc.)
+   - Report results to user
+   - Only proceed if validation passes
+   - If validation fails, ask user how to proceed
 
-**You MUST CONTINUE this loop until ALL TASKS complete or blockers are encountered.**
+4. **Progress Reporting**:
+   After each phase:
+   - Show completed vs remaining tasks
+   - Highlight any failures or blockers
+   - Ask user before proceeding to next phase
 
-### Phase 3: Completion Handling
+### Phase 4: Completion
 
-#### If All Tasks Complete:
-- use `the-project-manager` sub-agent to update PLAN with completion timestamp
-- Provide final success report
+**When All Phases Complete**:
+- Run final validation from completion criteria
+- Verify all tasks marked as completed
+- Report successful implementation
+- Suggest next steps (deployment, testing, documentation)
 
-#### If Tasks Remain Incomplete:
-Enter interactive completion mode:
-1. `the-project-manager` sub-agent generates comprehensive status report
-2. Present blockers and options to user
-3. Based on guidance, continue implementation
-4. Repeat until resolution
+**If Implementation Blocked**:
+- Show which task failed
+- Present options:
+  - Retry the failed task
+  - Skip and continue
+  - Debug the issue
+  - Abort implementation
 
-## Orchestration Guidelines
+## Task Invocation
 
-### Parallel Execution
-When task manager identifies independent tasks:
-- Launch multiple implementers in single Task invocation
-- Each implementer gets focused context
-- Consolidate results before validation
-- Update all task states together
+When invoking specialists from PLAN.md:
+1. **Extract Context**:
+   - Task description and any indented subtasks
+   - Referenced documents (e.g., [→ PRD#auth-requirements])
+   - Spec path for accessing BRD/PRD/SDD
 
-### Error Handling
-When implementers report blockers:
-- Collect all blocker information
-- Run validator to check current state
-- Present consolidated issues to user
-- Await guidance before proceeding
+2. **Provide Clear Instructions**:
+   - Pass complete task with all subtasks
+   - Include "Read docs/specs/XXX/[document].md for context"
+   - Specify expected deliverables
 
-### Progress Tracking
-Throughout execution:
-- Task manager maintains source of truth in PRD
-- Regular status updates in chat
-- Clear visibility of completed/blocked/remaining tasks
+3. **Handle Results**:
+   - Update todo list based on success/failure
+   - Collect any error messages
+   - Proceed according to execution type
 
-## Example Execution Flow
+## Example Flow
 
 ```
-1. Task Manager: "Phase 1 has 3 independent tasks ready"
-   - Updates PRD: marks all 3 tasks as [~]
-   
-2. Main: Spawns 3 implementers for parallel execution
-   - Reports in chat: "🔄 Starting 3 parallel tasks..."
-   
-3. Implementers complete:
-   - Implementer 1: "TASK_COMPLETE: Created component structure"
-   - Implementer 2: "TASK_COMPLETE: Added data fetching logic"
-   - Implementer 3: "TASK_BLOCKED: Missing API endpoint specification"
-   
-4. Task Manager: Updates PRD based on results
-   - Task 1: [~] → [x]
-   - Task 2: [~] → [x]  
-   - Task 3: [~] → [BLOCKED: Missing API endpoint]
-   
-5. Validator: Runs validation on completed work
-   - "VALIDATION_FAILED: 2 linting errors in component file"
-   
-6. Main: Reports consolidated status
-   - "✅ 2/3 tasks complete, 1 blocked, validation errors to fix"
-   
-7. Present options to user for resolution
+User: /implement 001
+
+You:
+Found implementation plan: docs/specs/001-user-auth/PLAN.md
+
+📋 Implementation Overview:
+- 5 phases, 23 total tasks
+- Phase 1: Foundation (3 tasks - parallel)
+- Phase 2: Core Infrastructure (4 tasks - sequential)
+- Phase 3: Features (8 tasks - parallel)
+- Phase 4: Quality (5 tasks - sequential)
+- Phase 5: Deployment (3 tasks - sequential)
+
+Ready to begin implementation? (yes/no)
+
+User: yes
+
+🚀 Starting Phase 1: Foundation & Analysis
+Executing 3 tasks in parallel...
+[Invokes `the-architect`, `the-business-analyst`, `the-devops` simultaneously]
+
+✅ Phase 1 Complete:
+- Analyzed codebase ✓
+- Clarified requirements ✓
+- Setup environment ✓
+
+🔍 Running validation: npm install... ✓
+
+Proceed to Phase 2: Core Infrastructure? (yes/no)
 ```
 
-## Key Principles
+## Important Notes
 
-- **Separation of Concerns**: Each agent has a focused role
-- **Parallel When Possible**: Maximize efficiency within phases
-- **Clear State Tracking**: PRD is single source of truth
-- **Fail Fast**: Report blockers immediately
-- **Interactive Resolution**: Work with user to resolve issues
-- **Quality Validation**: Never skip validation steps
+- **Follow PLAN.md Exactly**: Don't improvise or skip steps
+- **Track Everything**: Update todo list for every task
+- **Parallel When Specified**: Use batch Task calls for efficiency
+- **Never Skip Validation**: Always run checkpoint commands
+- **User Confirmation**: Ask before proceeding between phases
+- **Clear Reporting**: Show progress frequently
 
-## Resuming Partial Implementation
+## Resuming Implementation
 
-If returning to incomplete PRD:
-1. Task manager reads current state
-2. Validator checks code state
-3. Continue from last incomplete phase
-4. Maintain previous context and decisions
-
-Begin by locating the PRD and initializing the implementation process.
+If user wants to resume:
+1. Read PLAN.md to see current state
+2. Check which tasks are marked complete [x]
+3. Continue from first incomplete task
+4. Maintain all previous context

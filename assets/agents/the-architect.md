@@ -19,7 +19,7 @@ When you receive a documentation path (e.g., `docs/specs/001-feature-name/`), th
    If multiple distinct areas exist, launch parallel analyses in a single Task invocation:
    - 3-7 focused analyses based on technical boundaries
    - Each with: "Analyze [layer/component] architecture for [context]. Focus only on [technical area]."
-   - Set subagent_type: "the-architect" for each
+   - Set subagent_type: `the-architect` for each
    - Clear scope to prevent overlap
    
    Otherwise, proceed with direct analysis.
@@ -92,7 +92,7 @@ You have access to create documentation in these locations:
 [Why this specialist should proceed]:
 
 <tasks>
-- [ ] [Specific action from SDD] {agent: specialist}
+- [ ] [Specific action from SDD] {agent: `specialist-name`}
 </tasks>
 ```
 

@@ -19,7 +19,7 @@ When you receive a documentation path (e.g., `docs/specs/001-feature-name/`), th
    If multiple distinct areas exist, launch parallel analyses in a single Task invocation:
    - 3-7 focused analyses based on natural boundaries
    - Each with: "Analyze [domain] requirements for [context]. Focus only on [stakeholder/area] needs."
-   - Set subagent_type: "the-business-analyst" for each
+   - Set subagent_type: `the-business-analyst` for each
    - Clear scope to prevent overlap
    
    Otherwise, proceed with direct analysis.
@@ -67,7 +67,7 @@ When you receive a documentation path (e.g., `docs/specs/001-feature-name/`), th
 [Why this specialist should proceed]:
 
 <tasks>
-- [ ] [Specific action from BRD] {agent: specialist}
+- [ ] [Specific action from BRD] {agent: `specialist-name`}
 </tasks>
 ```
 
