@@ -1,8 +1,8 @@
 package ui
 
 import (
+	"os"
 	"strings"
-	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/the-startup/the-startup/internal/installer"
@@ -28,10 +28,10 @@ func NewCompleteModel(selectedTool string, installer *installer.Installer) Compl
 }
 
 func (m CompleteModel) Init() tea.Cmd {
-	// Automatically exit after 3 seconds
-	return tea.Tick(3*time.Second, func(t time.Time) tea.Msg {
+	// Exit immediately
+	return func() tea.Msg {
 		return autoExitMsg{}
-	})
+	}
 }
 
 func (m CompleteModel) Update(msg tea.Msg) (CompleteModel, tea.Cmd) {
@@ -57,48 +57,68 @@ func (m CompleteModel) View() string {
 	s.WriteString(m.styles.Success.Render("✅ Installation Complete!"))
 	s.WriteString("\n\n")
 	
-	// Installation location
-	installLocation := m.installer.GetInstallPath()
-	if installLocation == "" {
-		installLocation = "~/.config/the-startup/.claude"
+	// Installation locations
+	claudePath := m.installer.GetClaudePath()
+	startupPath := m.installer.GetInstallPath()
+	
+	// Simplify paths for display
+	displayClaudePath := claudePath
+	displayStartupPath := startupPath
+	
+	home := os.Getenv("HOME")
+	if home != "" {
+		if strings.HasPrefix(claudePath, home) {
+			displayClaudePath = strings.Replace(claudePath, home, "~", 1)
+		}
+		if strings.HasPrefix(startupPath, home) {
+			displayStartupPath = strings.Replace(startupPath, home, "~", 1)
+		}
 	}
 	
-	// Simplify the path for display
-	displayPath := installLocation
-	if strings.Contains(installLocation, ".config/the-startup") {
-		displayPath = "~/.config/the-startup/.claude"
-	} else if strings.Contains(installLocation, ".the-startup") {
-		displayPath = ".the-startup/.claude (local)"
-	}
-	
-	s.WriteString(m.styles.Normal.Render("Installation location:"))
+	s.WriteString(m.styles.Normal.Render("Installation locations:"))
 	s.WriteString("\n")
-	s.WriteString(m.styles.Info.Render("  " + displayPath))
+	s.WriteString(m.styles.Info.Render("  Claude files: " + displayClaudePath))
+	s.WriteString("\n")
+	s.WriteString(m.styles.Info.Render("  Startup files: " + displayStartupPath))
 	s.WriteString("\n\n")
 	
-	// Next steps
-	s.WriteString(m.styles.Normal.Render("Next steps:"))
+	// Available commands and agents
+	s.WriteString(m.styles.Normal.Render("Now available in Claude Code:"))
 	s.WriteString("\n\n")
 	
-	// Step 1
-	s.WriteString(m.styles.Normal.Render("  1. Restart your Claude Code session"))
+	s.WriteString(m.styles.Info.Render("  Commands:"))
 	s.WriteString("\n")
-	
-	// Step 2
-	isLocal := strings.Contains(installLocation, ".the-startup") && !strings.Contains(installLocation, ".config")
-	if isLocal {
-		s.WriteString(m.styles.Normal.Render("  2. Use /develop command in this project"))
-	} else {
-		s.WriteString(m.styles.Normal.Render("  2. Use /develop command in any project"))
-	}
+	s.WriteString(m.styles.Normal.Render("    • /s specify - Create detailed specifications"))
 	s.WriteString("\n")
-	
-	// Step 3
-	s.WriteString(m.styles.Normal.Render("  3. Check logs in ~/.the-startup/"))
+	s.WriteString(m.styles.Normal.Render("    • /s implement - Implement from specifications"))
 	s.WriteString("\n\n")
 	
-	// Auto-exit message
-	s.WriteString(m.styles.Help.Render("Exiting in 3 seconds..."))
+	s.WriteString(m.styles.Info.Render("  Agents:"))
+	s.WriteString("\n")
+	s.WriteString(m.styles.Normal.Render("    • the-chief - Routes any new request to the right specialist"))
+	s.WriteString("\n")
+	s.WriteString(m.styles.Normal.Render("    • the-architect - Deep technical design decisions"))
+	s.WriteString("\n")
+	s.WriteString(m.styles.Normal.Render("    • the-business-analyst - Clarifies vague requirements"))
+	s.WriteString("\n")
+	s.WriteString(m.styles.Normal.Render("    • the-data-engineer - Database optimization & data modeling"))
+	s.WriteString("\n")
+	s.WriteString(m.styles.Normal.Render("    • the-developer - Implements features with TDD"))
+	s.WriteString("\n")
+	s.WriteString(m.styles.Normal.Render("    • the-devops-engineer - CI/CD & infrastructure automation"))
+	s.WriteString("\n")
+	s.WriteString(m.styles.Normal.Render("    • the-product-manager - Creates PRDs & user stories"))
+	s.WriteString("\n")
+	s.WriteString(m.styles.Normal.Render("    • the-project-manager - Task coordination & tracking"))
+	s.WriteString("\n")
+	s.WriteString(m.styles.Normal.Render("    • the-security-engineer - Security assessments & compliance"))
+	s.WriteString("\n")
+	s.WriteString(m.styles.Normal.Render("    • the-site-reliability-engineer - Debugs errors & incidents"))
+	s.WriteString("\n")
+	s.WriteString(m.styles.Normal.Render("    • the-technical-writer - API docs & user guides"))
+	s.WriteString("\n")
+	s.WriteString(m.styles.Normal.Render("    • the-tester - Comprehensive testing & QA"))
+	s.WriteString("\n")
 	
 	return s.String()
 }

@@ -11,8 +11,8 @@ import (
 type InstallerState int
 
 const (
-	StateToolSelection InstallerState = iota
-	StatePathSelection
+	StateStartupPath InstallerState = iota
+	StateClaudePath
 	StateFileSelection
 	StateComplete
 	StateError
@@ -21,10 +21,10 @@ const (
 // String returns the string representation of the state
 func (s InstallerState) String() string {
 	switch s {
-	case StateToolSelection:
-		return "Tool Selection"
-	case StatePathSelection:
-		return "Path Selection"
+	case StateStartupPath:
+		return "Startup Path Selection"
+	case StateClaudePath:
+		return "Claude Path Selection"
 	case StateFileSelection:
 		return "File Selection"
 	case StateComplete:
@@ -45,17 +45,17 @@ type StateTransition struct {
 // ValidTransitions defines allowed state transitions
 var ValidTransitions = map[StateTransition]bool{
 	// Forward transitions
-	{StateToolSelection, StatePathSelection}: true,
-	{StatePathSelection, StateFileSelection}: true,
+	{StateStartupPath, StateClaudePath}:      true,
+	{StateClaudePath, StateFileSelection}:    true,
 	{StateFileSelection, StateComplete}:      true,
 	{StateFileSelection, StateError}:         true,
 	
 	// Backward transitions (ESC)
-	{StatePathSelection, StateToolSelection}: true,
-	{StateFileSelection, StatePathSelection}: true,
+	{StateClaudePath, StateStartupPath}:      true,
+	{StateFileSelection, StateClaudePath}:    true,
 	
 	// Error recovery
-	{StateError, StateToolSelection}: true,
+	{StateError, StateStartupPath}: true,
 }
 
 // IsValidTransition checks if a state transition is allowed

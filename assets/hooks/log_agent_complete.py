@@ -57,6 +57,20 @@ def truncate_output(output, max_length=1000):
         return output[:max_length] + f"... [truncated {len(output) - max_length} chars]"
     return output
 
+def extract_commentary(output):
+    """Extract commentary section from agent output."""
+    if not isinstance(output, str):
+        return None
+    
+    # Look for <commentary> tags
+    import re
+    pattern = r'<commentary>(.*?)</commentary>'
+    match = re.search(pattern, output, re.DOTALL)
+    
+    if match:
+        return match.group(1).strip()
+    return None
+
 def main():
     try:
         # Read JSON input from stdin
@@ -88,6 +102,9 @@ def main():
         if not session_id:
             session_id = find_latest_session(project_dir)
         
+        # Extract commentary if present
+        commentary = extract_commentary(output)
+        
         # Create log entry
         log_entry = {
             'timestamp': datetime.utcnow().isoformat() + 'Z',
@@ -96,6 +113,7 @@ def main():
             'agent_id': agent_id,
             'description': description,
             'output_summary': truncate_output(output),
+            'commentary': commentary,  # Add commentary to log
             'session_id': session_id
         }
         
@@ -117,6 +135,15 @@ def main():
         with open(global_log, 'a') as f:
             json.dump(log_entry, f)
             f.write('\n')
+        
+        # Display commentary in chat if present
+        if commentary:
+            # Print to stdout to display in chat
+            print(f"\n{'='*60}", file=sys.stdout)
+            print(f"📝 {subagent_type} Commentary:", file=sys.stdout)
+            print(f"{'='*60}", file=sys.stdout)
+            print(commentary, file=sys.stdout)
+            print(f"{'='*60}\n", file=sys.stdout)
         
         # Debug output if enabled
         if os.environ.get('DEBUG_HOOKS'):

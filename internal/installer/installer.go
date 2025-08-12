@@ -47,7 +47,7 @@ func New(agents, commands, hooks, templates, settings *embed.FS) *Installer {
 		installPath:     installPath,
 		claudePath:      filepath.Join(homeDir, ".claude"),
 		tool:            "claude-code",
-		components:      []string{"agents", "hooks", "commands", "templates"},
+		components:      []string{"agents", "commands", "templates"},  // hooks removed - handled separately as binary
 	}
 }
 
@@ -59,14 +59,16 @@ func (i *Installer) SetInstallPath(path string) {
 		path = filepath.Join(homeDir, path[2:])
 	}
 	i.installPath = path
-	
-	// If this is a local installation (.the-startup in current dir),
-	// also set Claude path to local .claude
-	if strings.Contains(path, ".the-startup") && !strings.Contains(path, ".config") {
-		// This appears to be a local installation
-		dir := filepath.Dir(path)
-		i.claudePath = filepath.Join(dir, ".claude")
+}
+
+// SetClaudePath sets the Claude directory path
+func (i *Installer) SetClaudePath(path string) {
+	// Expand ~ to home directory
+	if strings.HasPrefix(path, "~/") {
+		homeDir, _ := os.UserHomeDir()
+		path = filepath.Join(homeDir, path[2:])
 	}
+	i.claudePath = path
 }
 
 // GetInstallPath returns the installation path
@@ -91,40 +93,52 @@ func (i *Installer) GetExistingFiles(files []string) []string {
 	return existing
 }
 
+// CheckSettingsExists checks if settings.json exists in the Claude directory
+func (i *Installer) CheckSettingsExists() bool {
+	settingsPath := filepath.Join(i.claudePath, "settings.json")
+	if _, err := os.Stat(settingsPath); err == nil {
+		return true
+	}
+	return false
+}
+
 // checkFileExistsInClaude checks if a file exists specifically in the Claude directory
 func (i *Installer) checkFileExistsInClaude(componentPath string) bool {
+	// Dynamically determine destination path based on component type
+	// This mirrors the exact structure: assets/X/... -> claudePath/X/...
+	
 	parts := strings.Split(componentPath, "/")
-	if len(parts) >= 2 {
-		component := parts[0]
-		fileName := parts[1]
-		
-		var filePath string
-		switch component {
-		case "agents":
-			filePath = filepath.Join(i.claudePath, "agents", fileName)
-		case "commands":
-			// Handle namespaced commands (e.g., commands/s/implement.md)
-			if len(parts) > 2 {
-				// Join all parts after "commands" to form the full path
-				subPath := strings.Join(parts[1:], "/")
-				filePath = filepath.Join(i.claudePath, "commands", subPath)
-			} else {
-				filePath = filepath.Join(i.claudePath, "commands", fileName)
-			}
-		case "hooks":
-			// Hooks are now the binary in STARTUP_PATH/bin
-			if fileName == "the-startup" {
-				filePath = filepath.Join(i.installPath, "bin", "the-startup")
-			}
-		case "templates":
-			// Templates are in STARTUP_PATH/templates
-			filePath = filepath.Join(i.installPath, "templates", fileName)
-		}
-		
-		if filePath != "" {
-			if _, err := os.Stat(filePath); err == nil {
-				return true
-			}
+	if len(parts) < 2 {
+		return false
+	}
+	
+	component := parts[0]
+	
+	// Build the rest of the path after the component
+	restPath := strings.Join(parts[1:], "/")
+	
+	var filePath string
+	switch component {
+	case "agents", "commands":
+		// These go to .claude directory, preserving full path structure
+		filePath = filepath.Join(i.claudePath, component, restPath)
+	case "hooks":
+		// Hooks are now the binary in STARTUP_PATH/bin
+		// This shouldn't be checked as part of .claude files
+		return false
+	case "templates":
+		// Templates go to STARTUP_PATH/templates
+		// This shouldn't be checked as part of .claude files
+		return false
+	default:
+		// Unknown component type
+		return false
+	}
+	
+	// Check if the file exists
+	if filePath != "" {
+		if _, err := os.Stat(filePath); err == nil {
+			return true
 		}
 	}
 	
@@ -133,42 +147,8 @@ func (i *Installer) checkFileExistsInClaude(componentPath string) bool {
 
 // CheckFileExists checks if a component file exists
 func (i *Installer) CheckFileExists(componentPath string) bool {
-	parts := strings.Split(componentPath, "/")
-	if len(parts) >= 2 {
-		component := parts[0]
-		fileName := parts[1]
-		
-		var filePath string
-		switch component {
-		case "agents":
-			filePath = filepath.Join(i.claudePath, "agents", fileName)
-		case "commands":
-			// Handle namespaced commands (e.g., commands/s/implement.md)
-			if len(parts) > 2 {
-				// Join all parts after "commands" to form the full path
-				subPath := strings.Join(parts[1:], "/")
-				filePath = filepath.Join(i.claudePath, "commands", subPath)
-			} else {
-				filePath = filepath.Join(i.claudePath, "commands", fileName)
-			}
-		case "hooks":
-			// Hooks are now the binary in STARTUP_PATH/bin
-			if fileName == "the-startup" {
-				filePath = filepath.Join(i.installPath, "bin", "the-startup")
-			}
-		case "templates":
-			// Templates are in STARTUP_PATH/templates
-			filePath = filepath.Join(i.installPath, "templates", fileName)
-		}
-		
-		if filePath != "" {
-			if _, err := os.Stat(filePath); err == nil {
-				return true
-			}
-		}
-	}
-	
-	return false
+	// Use the same logic as checkFileExistsInClaude for consistency
+	return i.checkFileExistsInClaude(componentPath)
 }
 
 // SetTool sets the tool type
@@ -228,19 +208,17 @@ func (i *Installer) Install() error {
 			fmt.Printf("✓ %s installed\n", component)
 		}
 		
-		// Install the binary to STARTUP_PATH/bin
-		if contains(i.components, "hooks") {
-			fmt.Println("Installing the-startup binary...")
-			if err := i.installBinary(); err != nil {
-				fmt.Printf("✗ Error installing binary: %v\n", err)
-				return fmt.Errorf("failed to install binary: %w", err)
-			}
-			fmt.Printf("✓ Binary installed to %s/bin\n", i.installPath)
-			
-			// Configure hooks in settings.json
-			if err := i.configureHooks(); err != nil {
-				return fmt.Errorf("failed to configure hooks: %w", err)
-			}
+		// Always install the binary to STARTUP_PATH/bin and configure hooks
+		fmt.Println("Installing the-startup binary...")
+		if err := i.installBinary(); err != nil {
+			fmt.Printf("✗ Error installing binary: %v\n", err)
+			return fmt.Errorf("failed to install binary: %w", err)
+		}
+		fmt.Printf("✓ Binary installed to %s/bin\n", i.installPath)
+		
+		// Configure hooks in settings.json
+		if err := i.configureHooks(); err != nil {
+			return fmt.Errorf("failed to configure hooks: %w", err)
 		}
 	}
 	
@@ -306,7 +284,11 @@ func (i *Installer) installComponentToClaude(component string) error {
 	switch component {
 	case "agents":
 		sourceFS = i.agentFiles
-		pattern = "assets/agents/*.md"
+		// Try nested first, fall back to flat structure
+		pattern = "assets/agents/**/*.md"
+		if files, _ := fs.Glob(sourceFS, pattern); len(files) == 0 {
+			pattern = "assets/agents/*.md"
+		}
 	case "commands":
 		sourceFS = i.commandFiles
 		pattern = "assets/commands/**/*.md"
@@ -323,11 +305,13 @@ func (i *Installer) installComponentToClaude(component string) error {
 	for _, file := range files {
 		// If specific files are selected, check if this file should be installed
 		if len(i.selectedFiles) > 0 {
-			fileName := filepath.Base(file)
-			filePath := component + "/" + fileName
+			// Extract relative path from the source file
+			// Remove the "assets/" prefix to get the component-relative path
+			relPath := strings.TrimPrefix(file, "assets/")
+			
 			shouldInstall := false
 			for _, selected := range i.selectedFiles {
-				if selected == filePath {
+				if selected == relPath {
 					shouldInstall = true
 					break
 				}
@@ -358,21 +342,27 @@ func (i *Installer) copyFile(sourceFS *embed.FS, sourcePath, destDir string) err
 		data = i.replacePlaceholders(data)
 	}
 	
-	// Determine destination path
-	// For commands with namespace, preserve the directory structure
+	// Determine destination path - dynamically preserve directory structure
 	var destPath string
-	if strings.Contains(sourcePath, "assets/commands/") && strings.Contains(sourcePath, "/s/") {
-		// This is a namespaced command, preserve the namespace directory
-		relPath := strings.TrimPrefix(sourcePath, "assets/commands/")
-		destPath = filepath.Join(destDir, relPath)
-		// Create the namespace directory if it doesn't exist
-		namespaceDir := filepath.Dir(destPath)
-		if err := os.MkdirAll(namespaceDir, 0755); err != nil {
-			return fmt.Errorf("failed to create namespace directory: %w", err)
+	
+	// Extract the relative path from the source, removing the "assets/component/" prefix
+	// This works for any nested structure: assets/agents/sub/file.md, assets/commands/a/b/c/file.md, etc.
+	prefixes := []string{"assets/agents/", "assets/commands/", "assets/hooks/", "assets/templates/"}
+	relPath := sourcePath
+	for _, prefix := range prefixes {
+		if strings.HasPrefix(sourcePath, prefix) {
+			relPath = strings.TrimPrefix(sourcePath, prefix)
+			break
 		}
-	} else {
-		fileName := filepath.Base(sourcePath)
-		destPath = filepath.Join(destDir, fileName)
+	}
+	
+	// Build the full destination path
+	destPath = filepath.Join(destDir, relPath)
+	
+	// Create any necessary parent directories
+	parentDir := filepath.Dir(destPath)
+	if err := os.MkdirAll(parentDir, 0755); err != nil {
+		return fmt.Errorf("failed to create directory %s: %w", parentDir, err)
 	}
 	
 	// Write file
@@ -553,20 +543,6 @@ func (i *Installer) createLockFile() error {
 	
 	// Record installed files from Claude directory
 	for _, component := range i.components {
-		// Skip hooks component as it's not in Claude directory anymore
-		if component == "hooks" {
-			// Record the binary instead
-			binPath := filepath.Join(i.installPath, "bin", "the-startup")
-			if info, err := os.Stat(binPath); err == nil {
-				relPath := filepath.Join("bin", "the-startup")
-				lockFile.Files[relPath] = config.FileInfo{
-					Size:         info.Size(),
-					LastModified: info.ModTime().Format(time.RFC3339),
-				}
-			}
-			continue
-		}
-		
 		componentPath := filepath.Join(i.claudePath, component)
 		err := filepath.Walk(componentPath, func(path string, info os.FileInfo, err error) error {
 			if err != nil || info.IsDir() {
@@ -585,6 +561,16 @@ func (i *Installer) createLockFile() error {
 			if !os.IsNotExist(err) {
 				return err
 			}
+		}
+	}
+	
+	// Record the binary in STARTUP_PATH/bin
+	binPath := filepath.Join(i.installPath, "bin", "the-startup")
+	if info, err := os.Stat(binPath); err == nil {
+		relPath := filepath.Join("bin", "the-startup")
+		lockFile.Files[relPath] = config.FileInfo{
+			Size:         info.Size(),
+			LastModified: info.ModTime().Format(time.RFC3339),
 		}
 	}
 	
@@ -622,11 +608,3 @@ func (i *Installer) replacePlaceholders(data []byte) []byte {
 	return data
 }
 
-func contains(slice []string, item string) bool {
-	for _, s := range slice {
-		if s == item {
-			return true
-		}
-	}
-	return false
-}

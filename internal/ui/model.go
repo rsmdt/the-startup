@@ -2,7 +2,6 @@ package ui
 
 import (
 	"embed"
-	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/the-startup/the-startup/internal/installer"
@@ -22,13 +21,13 @@ type MainModel struct {
 	templateFiles *embed.FS
 	
 	// User selections (shared state)
-	selectedTool  string
-	selectedPath  string
+	startupPath   string
+	claudePath    string
 	selectedFiles []string
 	
 	// Sub-models
-	toolSelectionModel ToolSelectionModel
-	pathSelectionModel PathSelectionModel
+	startupPathModel   StartupPathModel
+	claudePathModel    ClaudePathModel
 	fileSelectionModel FileSelectionModel
 	completeModel      CompleteModel
 	errorModel         ErrorModel
@@ -43,16 +42,16 @@ func NewMainModel(agents, commands, hooks, templates, settings *embed.FS) *MainM
 	installerInstance := installer.New(agents, commands, hooks, templates, settings)
 	
 	m := &MainModel{
-		state:              StateToolSelection, // Start directly with tool selection
-		installer:          installerInstance,
-		agentFiles:         agents,
-		commandFiles:       commands,
-		hookFiles:          hooks,
-		templateFiles:      templates,
-		width:              80,
-		height:             24,
-		toolSelectionModel: NewToolSelectionModel(),
-		errorModel:         NewErrorModel(nil, ""),
+		state:            StateStartupPath, // Start with startup path selection
+		installer:        installerInstance,
+		agentFiles:       agents,
+		commandFiles:     commands,
+		hookFiles:        hooks,
+		templateFiles:    templates,
+		width:            80,
+		height:           24,
+		startupPathModel: NewStartupPathModel(),
+		errorModel:       NewErrorModel(nil, ""),
 	}
 	
 	return m
@@ -69,7 +68,7 @@ func (m *MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if keyMsg, ok := msg.(tea.KeyMsg); ok {
 		switch keyMsg.String() {
 		case "ctrl+c", "q":
-			if m.state == StateToolSelection {
+			if m.state == StateStartupPath {
 				return m, tea.Quit
 			}
 			// In other states, treat as ESC (go back)
@@ -89,37 +88,36 @@ func (m *MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	
 	// Delegate to appropriate sub-model based on state
 	switch m.state {
-	case StateToolSelection:
-		newModel, cmd := m.toolSelectionModel.Update(msg)
-		m.toolSelectionModel = newModel
-		if m.toolSelectionModel.Ready() {
-			if m.toolSelectionModel.Selected() == "Cancel" {
+	case StateStartupPath:
+		newModel, cmd := m.startupPathModel.Update(msg)
+		m.startupPathModel = newModel
+		if m.startupPathModel.Ready() {
+			path := m.startupPathModel.SelectedPath()
+			if path == "CANCEL" {
 				return m, tea.Quit
 			}
-			m.selectedTool = m.toolSelectionModel.Selected()
-			m.installer.SetTool(m.selectedTool)
-			m.transitionToState(StatePathSelection)
+			m.startupPath = path
+			m.installer.SetInstallPath(path)
+			m.transitionToState(StateClaudePath)
 		}
 		return m, cmd
 	
-	case StatePathSelection:
-		newModel, cmd := m.pathSelectionModel.Update(msg)
-		m.pathSelectionModel = newModel
-		if m.pathSelectionModel.Ready() {
-			path := m.pathSelectionModel.SelectedPath()
-			switch path {
-			case "CANCEL":
+	case StateClaudePath:
+		newModel, cmd := m.claudePathModel.Update(msg)
+		m.claudePathModel = newModel
+		if m.claudePathModel.Ready() {
+			path := m.claudePathModel.SelectedPath()
+			if path == "CANCEL" {
 				return m, tea.Quit
-			case "CUSTOM":
-				m.errorModel = NewErrorModel(fmt.Errorf("custom path input not yet implemented"), "selecting custom path")
-				m.transitionToState(StateError)
-			default:
-				m.selectedPath = path
-				if path != "" {
-					m.installer.SetInstallPath(path)
-				}
-				m.transitionToState(StateFileSelection)
 			}
+			m.claudePath = path
+			// Set Claude path in installer
+			if m.installer != nil {
+				// We need to add a method to set Claude path
+				m.installer.SetClaudePath(path)
+			}
+			m.installer.SetTool("claude-code") // Always use claude-code
+			m.transitionToState(StateFileSelection)
 		}
 		return m, cmd
 	
@@ -139,7 +137,7 @@ func (m *MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, m.completeModel.Init()
 				}
 			} else {
-				m.transitionToState(StatePathSelection)
+				m.transitionToState(StateClaudePath)
 			}
 		}
 		return m, cmd
@@ -156,7 +154,7 @@ func (m *MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		newModel, cmd := m.errorModel.Update(msg)
 		m.errorModel = newModel
 		if m.errorModel.Ready() {
-			m.transitionToState(StateToolSelection)
+			m.transitionToState(StateStartupPath)
 		}
 		return m, cmd
 	}
@@ -170,16 +168,16 @@ func (m *MainModel) transitionToState(newState InstallerState) {
 	
 	// Initialize or reset sub-models as needed
 	switch newState {
-	case StateToolSelection:
-		m.toolSelectionModel = m.toolSelectionModel.Reset()
+	case StateStartupPath:
+		m.startupPathModel = m.startupPathModel.Reset()
 	
-	case StatePathSelection:
-		m.pathSelectionModel = NewPathSelectionModel(m.selectedTool)
+	case StateClaudePath:
+		m.claudePathModel = NewClaudePathModel(m.startupPath)
 	
 	case StateFileSelection:
 		m.fileSelectionModel = NewFileSelectionModel(
-			m.selectedTool,
-			m.selectedPath,
+			"claude-code", // Always use claude-code
+			m.claudePath,
 			m.installer,
 			m.agentFiles,
 			m.commandFiles,
@@ -189,7 +187,7 @@ func (m *MainModel) transitionToState(newState InstallerState) {
 		m.selectedFiles = m.fileSelectionModel.selectedFiles
 	
 	case StateComplete:
-		m.completeModel = NewCompleteModel(m.selectedTool, m.installer)
+		m.completeModel = NewCompleteModel("claude-code", m.installer)
 	
 	case StateError:
 		// Error model is set before transition
@@ -199,10 +197,10 @@ func (m *MainModel) transitionToState(newState InstallerState) {
 // View delegates rendering to the appropriate sub-model
 func (m *MainModel) View() string {
 	switch m.state {
-	case StateToolSelection:
-		return m.toolSelectionModel.View()
-	case StatePathSelection:
-		return m.pathSelectionModel.View()
+	case StateStartupPath:
+		return m.startupPathModel.View()
+	case StateClaudePath:
+		return m.claudePathModel.View()
 	case StateFileSelection:
 		return m.fileSelectionModel.View()
 	case StateComplete:
@@ -218,16 +216,16 @@ func (m *MainModel) View() string {
 // handleBack processes back navigation (ESC key)
 func (m *MainModel) handleBack() (tea.Model, tea.Cmd) {
 	switch m.state {
-	case StateToolSelection:
+	case StateStartupPath:
 		return m, tea.Quit
-	case StatePathSelection:
-		m.transitionToState(StateToolSelection)
+	case StateClaudePath:
+		m.transitionToState(StateStartupPath)
 	case StateFileSelection:
-		m.transitionToState(StatePathSelection)
+		m.transitionToState(StateClaudePath)
 	case StateComplete:
 		return m, tea.Quit
 	case StateError:
-		m.transitionToState(StateToolSelection) // Go back to tool selection instead of welcome
+		m.transitionToState(StateStartupPath)
 	default:
 		return m, nil
 	}
@@ -244,7 +242,7 @@ func (m *MainModel) getAllAvailableFiles() []string {
 		return m.fileSelectionModel.selectedFiles
 	}
 	// Create a temporary file selection model to get the files
-	tempModel := NewFileSelectionModel(m.selectedTool, m.selectedPath, m.installer, m.agentFiles, m.commandFiles, m.hookFiles, m.templateFiles)
+	tempModel := NewFileSelectionModel("claude-code", m.claudePath, m.installer, m.agentFiles, m.commandFiles, m.hookFiles, m.templateFiles)
 	return tempModel.getAllAvailableFiles()
 }
 

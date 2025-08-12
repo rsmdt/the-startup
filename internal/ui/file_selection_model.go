@@ -2,6 +2,7 @@ package ui
 
 import (
 	"embed"
+	"fmt"
 	"io/fs"
 	"os"
 	"strings"
@@ -94,15 +95,31 @@ func (m FileSelectionModel) View() string {
 	s.WriteString(m.styles.Title.Render(AppBanner))
 	s.WriteString("\n\n")
 	
-	displayPath := m.selectedPath
-	if displayPath == "" {
-		displayPath = "~/.config/the-startup"
+	// Show both paths in the header
+	startupPath := m.installer.GetInstallPath()
+	claudePath := m.installer.GetClaudePath()
+	
+	// Format paths for display
+	home := os.Getenv("HOME")
+	if home != "" {
+		if strings.HasPrefix(startupPath, home) {
+			startupPath = "~" + strings.TrimPrefix(startupPath, home)
+		}
+		if strings.HasPrefix(claudePath, home) {
+			claudePath = "~" + strings.TrimPrefix(claudePath, home)
+		}
 	}
-	s.WriteString(m.renderer.RenderSelections(m.selectedTool, displayPath, len(m.selectedFiles)))
 	
-	s.WriteString(m.renderer.RenderTitle("Files to be moved to your .claude directory"))
+	s.WriteString(m.styles.Info.Render("Installation Paths:"))
+	s.WriteString("\n")
+	s.WriteString(m.styles.Normal.Render(fmt.Sprintf("  Startup: %s", startupPath)))
+	s.WriteString("\n")
+	s.WriteString(m.styles.Normal.Render(fmt.Sprintf("  Claude:  %s", claudePath)))
+	s.WriteString("\n\n")
 	
-	s.WriteString(m.styles.Info.Render("The following files will be moved to your selected .claude directory:"))
+	s.WriteString(m.renderer.RenderTitle("Files to be installed to .claude"))
+	
+	s.WriteString(m.styles.Info.Render("The following files will be installed to your Claude directory:"))
 	s.WriteString("\n\n")
 	
 	s.WriteString(m.buildStaticTree())
@@ -111,7 +128,7 @@ func (m FileSelectionModel) View() string {
 	s.WriteString("\n\n")
 	s.WriteString(m.styles.Title.Render("Ready to install?"))
 	s.WriteString("\n")
-	s.WriteString(m.styles.Info.Render("This will install The (Agentic) Startup to your .claude directory."))
+	s.WriteString(m.styles.Info.Render("This will install The (Agentic) Startup to the selected directories."))
 	s.WriteString("\n\n")
 	
 	for i, option := range m.choices {
@@ -158,7 +175,8 @@ func (m FileSelectionModel) getAllAvailableFiles() []string {
 		}
 	}
 	
-	patterns := []string{"assets/agents/*.md", "test_assets/assets/agents/*.md"}
+	// Try both nested and flat patterns for agents
+	patterns := []string{"assets/agents/**/*.md", "assets/agents/*.md", "test_assets/assets/agents/**/*.md", "test_assets/assets/agents/*.md"}
 	for _, pattern := range patterns {
 		addFiles(m.agentFiles, pattern, "agents/")
 	}
@@ -220,10 +238,13 @@ func (m FileSelectionModel) buildStaticTree() string {
 		return items
 	}
 	
-	agentItems := buildSubtree(m.agentFiles, []string{"assets/agents/*.md", "test_assets/assets/agents/*.md"}, "agents/")
+	// Only show files that go to .claude directory (agents and commands)
+	agentItems := buildSubtree(m.agentFiles, []string{"assets/agents/**/*.md", "assets/agents/*.md", "test_assets/assets/agents/**/*.md", "test_assets/assets/agents/*.md"}, "agents/")
 	commandItems := buildSubtree(m.commandFiles, []string{"assets/commands/**/*.md", "test_assets/assets/commands/**/*.md"}, "commands/")
-	hookItems := buildSubtree(m.hookFiles, []string{"assets/hooks/*.py", "test_assets/assets/hooks/*.py"}, "hooks/")
-	templateItems := buildSubtree(m.templateFiles, []string{"assets/templates/*", "test_assets/assets/templates/*"}, "templates/")
+	// Don't show hooks and templates as they go to .the-startup, not .claude
+	
+	// Check if settings.json exists using installer's method
+	settingsExists := m.installer.CheckSettingsExists()
 	
 	claudePath := m.installer.GetClaudePath()
 	
@@ -243,14 +264,12 @@ func (m FileSelectionModel) buildStaticTree() string {
 		commandsTree = commandsTree.Child(item)
 	}
 	
-	hooksTree := tree.New()
-	for _, item := range hookItems {
-		hooksTree = hooksTree.Child(item)
-	}
-	
-	templatesTree := tree.New()
-	for _, item := range templateItems {
-		templatesTree = templatesTree.Child(item)
+	// Add settings.json with appropriate styling
+	settingsItem := "settings.json"
+	if settingsExists {
+		settingsItem = updateStyle.Render("settings.json (will update)")
+	} else {
+		settingsItem = itemStyle.Render("settings.json")
 	}
 	
 	t := tree.
@@ -260,10 +279,7 @@ func (m FileSelectionModel) buildStaticTree() string {
 			agentsTree,
 			"commands",
 			commandsTree,
-			"hooks",
-			hooksTree,
-			"templates",
-			templatesTree,
+			settingsItem,
 		).
 		Enumerator(tree.RoundedEnumerator).
 		EnumeratorStyle(enumeratorStyle).
