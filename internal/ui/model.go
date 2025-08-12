@@ -17,7 +17,6 @@ type MainModel struct {
 	installer     *installer.Installer
 	agentFiles    *embed.FS
 	commandFiles  *embed.FS
-	hookFiles     *embed.FS
 	templateFiles *embed.FS
 	
 	// User selections (shared state)
@@ -38,15 +37,14 @@ type MainModel struct {
 }
 
 // NewMainModel creates a new main model with composed sub-models
-func NewMainModel(agents, commands, hooks, templates, settings *embed.FS) *MainModel {
-	installerInstance := installer.New(agents, commands, hooks, templates, settings)
+func NewMainModel(agents, commands, templates, settings *embed.FS) *MainModel {
+	installerInstance := installer.New(agents, commands, templates, settings)
 	
 	m := &MainModel{
 		state:            StateStartupPath, // Start with startup path selection
 		installer:        installerInstance,
 		agentFiles:       agents,
 		commandFiles:     commands,
-		hookFiles:        hooks,
 		templateFiles:    templates,
 		width:            80,
 		height:           24,
@@ -181,7 +179,6 @@ func (m *MainModel) transitionToState(newState InstallerState) {
 			m.installer,
 			m.agentFiles,
 			m.commandFiles,
-			m.hookFiles,
 			m.templateFiles,
 		)
 		m.selectedFiles = m.fileSelectionModel.selectedFiles
@@ -242,13 +239,13 @@ func (m *MainModel) getAllAvailableFiles() []string {
 		return m.fileSelectionModel.selectedFiles
 	}
 	// Create a temporary file selection model to get the files
-	tempModel := NewFileSelectionModel("claude-code", m.claudePath, m.installer, m.agentFiles, m.commandFiles, m.hookFiles, m.templateFiles)
+	tempModel := NewFileSelectionModel("claude-code", m.claudePath, m.installer, m.agentFiles, m.commandFiles, m.templateFiles)
 	return tempModel.getAllAvailableFiles()
 }
 
 // RunMainInstaller starts the installation UI using the MainModel
-func RunMainInstaller(agents, commands, hooks, templates, settings *embed.FS) error {
-	model := NewMainModel(agents, commands, hooks, templates, settings)
+func RunMainInstaller(agents, commands, templates, settings *embed.FS) error {
+	model := NewMainModel(agents, commands, templates, settings)
 	
 	program := tea.NewProgram(model)
 	

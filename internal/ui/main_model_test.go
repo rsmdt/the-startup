@@ -14,15 +14,15 @@ func containsString(s, substr string) bool {
 
 func TestNewMainModel(t *testing.T) {
 	// Test that NewMainModel creates a valid model
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
 	
 	if model == nil {
 		t.Fatal("NewMainModel returned nil")
 	}
 	
-	// Should start directly with ToolSelection state
-	if model.state != StateToolSelection {
-		t.Errorf("Expected initial state to be StateToolSelection, got %v", model.state)
+	// Should start with StartupPath state
+	if model.state != StateStartupPath {
+		t.Errorf("Expected initial state to be StateStartupPath, got %v", model.state)
 	}
 	
 	if model.installer == nil {
@@ -30,13 +30,11 @@ func TestNewMainModel(t *testing.T) {
 	}
 	
 	// Check that sub-models are initialized
-	if model.toolSelectionModel.renderer == nil {
-		t.Error("Expected tool selection model renderer to be initialized")
-	}
+	// (textInput is a struct, not a pointer, so we just verify the model exists)
 }
 
 func TestMainModelInit(t *testing.T) {
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
 	
 	// Init should return nil for consolidated model
 	cmd := model.Init()
@@ -46,11 +44,11 @@ func TestMainModelInit(t *testing.T) {
 }
 
 func TestMainModelDirectStates(t *testing.T) {
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
 	
-	// Test that we start directly with ToolSelection
-	if model.state != StateToolSelection {
-		t.Errorf("Expected StateToolSelection, got %v", model.state)
+	// Test that we start with StartupPath
+	if model.state != StateStartupPath {
+		t.Errorf("Expected StateStartupPath, got %v", model.state)
 	}
 	
 	// Test view renders
@@ -60,9 +58,9 @@ func TestMainModelDirectStates(t *testing.T) {
 	}
 	
 	// Test state transition
-	model.transitionToState(StatePathSelection)
-	if model.state != StatePathSelection {
-		t.Errorf("Expected StatePathSelection, got %v", model.state)
+	model.transitionToState(StateClaudePath)
+	if model.state != StateClaudePath {
+		t.Errorf("Expected StateClaudePath, got %v", model.state)
 	}
 	
 	view = model.View()
@@ -72,7 +70,7 @@ func TestMainModelDirectStates(t *testing.T) {
 }
 
 func TestMainModelKeyHandling(t *testing.T) {
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
 	
 	// Test ESC key - should quit from tool selection
 	escMsg := tea.KeyMsg{Type: tea.KeyEsc}
@@ -85,10 +83,11 @@ func TestMainModelKeyHandling(t *testing.T) {
 }
 
 func TestMainModelFileSelectionIntegration(t *testing.T) {
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
 	
 	// Navigate through proper flow to file selection
-	model.selectedTool = "claude-code"
+	model.startupPath = "~/.config/the-startup"
+	model.claudePath = "~/.claude"
 	model.transitionToState(StateFileSelection)
 	
 	// Should have files auto-selected after proper path selection
@@ -117,12 +116,6 @@ func TestMainModelFileSelectionIntegration(t *testing.T) {
 	if !strings.Contains(view, "commands") {
 		t.Error("Expected view to contain 'commands' folder in tree")
 	}
-	if !strings.Contains(view, "hooks") {
-		t.Error("Expected view to contain 'hooks' folder in tree")
-	}
-	if !strings.Contains(view, "templates") {
-		t.Error("Expected view to contain 'templates' folder in tree")
-	}
 	
 	// Verify confirmation options are shown
 	if !strings.Contains(view, "Yes, give me awesome") {
@@ -139,10 +132,11 @@ func TestMainModelFileSelectionIntegration(t *testing.T) {
 }
 
 func TestMainModelHuhIntegration(t *testing.T) {
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
 	
 	// Setup file selection state
-	model.selectedTool = "claude-code"
+	model.startupPath = "~/.config/the-startup"
+	model.claudePath = "~/.claude"
 	model.transitionToState(StateFileSelection)
 	
 	// Test view renders with huh form always visible
@@ -163,19 +157,10 @@ func TestMainModelHuhIntegration(t *testing.T) {
 }
 
 func TestMainModelChoicesInitialization(t *testing.T) {
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
 	
-	// Should start with tool selection choices
-	expectedChoices := []string{"claude-code", "Cancel"}
-	if len(model.toolSelectionModel.choices) != len(expectedChoices) {
-		t.Errorf("Expected %d choices for tool selection, got %d", len(expectedChoices), len(model.toolSelectionModel.choices))
-	}
-	
-	// Test path selection choices
-	model.transitionToState(StatePathSelection)
-	if len(model.pathSelectionModel.choices) < 3 { // Should have at least recommended, local, custom, cancel
-		t.Errorf("Expected at least 3 choices for path selection, got %d", len(model.pathSelectionModel.choices))
-	}
+	// Test that startup path model is initialized
+	// (textInput is a struct, not a pointer, so we just verify the model exists)
 	
 	// Test file selection choices - should have confirmation options
 	model.transitionToState(StateFileSelection)

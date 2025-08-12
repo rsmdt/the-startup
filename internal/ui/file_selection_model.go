@@ -19,7 +19,6 @@ type FileSelectionModel struct {
 	installer     *installer.Installer
 	agentFiles    *embed.FS
 	commandFiles  *embed.FS
-	hookFiles     *embed.FS
 	templateFiles *embed.FS
 	selectedTool  string
 	selectedPath  string
@@ -30,14 +29,13 @@ type FileSelectionModel struct {
 	confirmed     bool
 }
 
-func NewFileSelectionModel(selectedTool, selectedPath string, installer *installer.Installer, agents, commands, hooks, templates *embed.FS) FileSelectionModel {
+func NewFileSelectionModel(selectedTool, selectedPath string, installer *installer.Installer, agents, commands, templates *embed.FS) FileSelectionModel {
 	m := FileSelectionModel{
 		styles:        GetStyles(),
 		renderer:      NewProgressiveDisclosureRenderer(),
 		installer:     installer,
 		agentFiles:    agents,
 		commandFiles:  commands,
-		hookFiles:     hooks,
 		templateFiles: templates,
 		selectedTool:  selectedTool,
 		selectedPath:  selectedPath,
@@ -184,11 +182,6 @@ func (m FileSelectionModel) getAllAvailableFiles() []string {
 	patterns = []string{"assets/commands/**/*.md", "test_assets/assets/commands/**/*.md"}
 	for _, pattern := range patterns {
 		addFiles(m.commandFiles, pattern, "commands/")
-	}
-	
-	patterns = []string{"assets/hooks/*.py", "test_assets/assets/hooks/*.py"}
-	for _, pattern := range patterns {
-		addFiles(m.hookFiles, pattern, "hooks/")
 	}
 	
 	patterns = []string{"assets/templates/*", "test_assets/assets/templates/*"}

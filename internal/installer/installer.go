@@ -19,7 +19,6 @@ import (
 type Installer struct {
 	agentFiles      *embed.FS
 	commandFiles    *embed.FS
-	hookFiles       *embed.FS
 	templateFiles   *embed.FS
 	settingsFile    *embed.FS
 	
@@ -32,7 +31,7 @@ type Installer struct {
 }
 
 // New creates a new installer
-func New(agents, commands, hooks, templates, settings *embed.FS) *Installer {
+func New(agents, commands, templates, settings *embed.FS) *Installer {
 	homeDir, _ := os.UserHomeDir()
 	
 	// Default to project-local .the-startup directory
@@ -41,7 +40,6 @@ func New(agents, commands, hooks, templates, settings *embed.FS) *Installer {
 	return &Installer{
 		agentFiles:      agents,
 		commandFiles:    commands,
-		hookFiles:       hooks,
 		templateFiles:   templates,
 		settingsFile:    settings,
 		installPath:     installPath,
@@ -368,11 +366,6 @@ func (i *Installer) copyFile(sourceFS *embed.FS, sourcePath, destDir string) err
 	// Write file
 	if err := os.WriteFile(destPath, data, 0644); err != nil {
 		return err
-	}
-	
-	// Make Python files executable
-	if strings.HasSuffix(destPath, ".py") {
-		os.Chmod(destPath, 0755)
 	}
 	
 	return nil

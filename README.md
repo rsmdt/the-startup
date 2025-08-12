@@ -78,6 +78,13 @@ go test ./...
 ./the-startup install
 ```
 
+### Run commands directly
+
+```bash
+# run install command
+go run . install
+```
+
 ### Project Structure
 
 This is a Go project using:
