@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/the-startup/the-startup/internal/log"
+	"github.com/rsmdt/the-startup/internal/log"
 )
 
 // NewLogCommand creates the log command for hook processing

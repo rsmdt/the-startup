@@ -1,4 +1,4 @@
-module github.com/the-startup/the-startup
+module github.com/rsmdt/the-startup
 
 go 1.23.0
 

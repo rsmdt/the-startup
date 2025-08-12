@@ -4,7 +4,7 @@ import (
 	"embed"
 
 	"github.com/spf13/cobra"
-	"github.com/the-startup/the-startup/internal/ui"
+	"github.com/rsmdt/the-startup/internal/ui"
 )
 
 // NewInstallCommand creates the install command

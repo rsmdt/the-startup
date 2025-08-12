@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/the-startup/the-startup/internal/log"
+	"github.com/rsmdt/the-startup/internal/log"
 )
 
 func TestLogCommandIntegration(t *testing.T) {

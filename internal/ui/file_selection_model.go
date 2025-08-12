@@ -10,7 +10,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/tree"
-	"github.com/the-startup/the-startup/internal/installer"
+	"github.com/rsmdt/the-startup/internal/installer"
 )
 
 type FileSelectionModel struct {

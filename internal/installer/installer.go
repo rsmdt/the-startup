@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/the-startup/the-startup/internal/config"
+	"github.com/rsmdt/the-startup/internal/config"
 )
 
 // Installer handles the installation process

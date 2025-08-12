@@ -117,11 +117,11 @@ jobs:
             
             ### With Go
             ```bash
-            go install github.com/the-startup/the-startup@latest
+            go install github.com/rsmdt/the-startup@latest
             ```
             
             ## Changes
-            See [CHANGELOG.md](https://github.com/the-startup/the-startup/blob/main/CHANGELOG.md) for details.
+            See [CHANGELOG.md](https://github.com/rsmdt/the-startup/blob/main/CHANGELOG.md) for details.
             
             ## Checksums
             SHA256 checksums are available in `checksums.txt`

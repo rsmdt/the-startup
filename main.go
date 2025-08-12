@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/the-startup/the-startup/cmd"
+	"github.com/rsmdt/the-startup/cmd"
 )
 
 var (

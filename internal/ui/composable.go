@@ -4,7 +4,7 @@ import (
 	"embed"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/the-startup/the-startup/internal/installer"
+	"github.com/rsmdt/the-startup/internal/installer"
 )
 
 // ViewModel represents a composable view in the installer
