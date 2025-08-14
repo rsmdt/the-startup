@@ -12,15 +12,28 @@ type HookInput struct {
 	Output         string                 `json:"output,omitempty"` // Only present in PostToolUse
 }
 
-// HookData represents the JSONL log entry structure
-// This matches the output format from the Python hooks
+// HookData represents the simplified JSONL log entry structure
 type HookData struct {
-	Event         string `json:"event"`          // "agent_start" or "agent_complete"
-	AgentType     string `json:"agent_type"`     // subagent_type from tool_input
-	AgentID       string `json:"agent_id"`       // extracted from prompt
-	Description   string `json:"description"`    // description from tool_input
-	Instruction   string `json:"instruction,omitempty"`    // full prompt (agent_start only)
-	OutputSummary string `json:"output_summary,omitempty"` // truncated output (agent_complete only)
-	SessionID     string `json:"session_id"`     // extracted from prompt or found latest
-	Timestamp     string `json:"timestamp"`      // UTC ISO format with Z suffix
+	Role      string `json:"role"`      // "user" for agent_start, "assistant" for agent_complete
+	Content   string `json:"content"`   // prompt for user, response for assistant
+	Timestamp string `json:"timestamp"` // UTC ISO format with Z suffix
+	
+	// Internal fields not serialized to JSON
+	SessionID string `json:"-"` // Used internally for file routing
+	AgentID   string `json:"-"` // Used internally for file naming
+}
+
+// LogFlags represents command-line flags for log command
+type LogFlags struct {
+	// Write mode flags
+	Assistant bool // --assistant, -a
+	User      bool // --user, -u
+	
+	// Read mode flags
+	Read            bool   // --read, -r
+	AgentID         string // --agent-id
+	Lines           int    // --lines
+	Session         string // --session
+	Format          string // --format
+	IncludeMetadata bool   // --include-metadata
 }

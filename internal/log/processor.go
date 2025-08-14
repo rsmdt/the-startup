@@ -36,34 +36,33 @@ func ProcessToolCall(input io.Reader, isPostHook bool) (*HookData, error) {
 
 	// Extract tool input fields
 	subagentType, _ := hookInput.ToolInput["subagent_type"].(string)
-	description, _ := hookInput.ToolInput["description"].(string)
 	prompt, _ := hookInput.ToolInput["prompt"].(string)
 
 	// Extract session and agent IDs
 	sessionID := ExtractSessionID(prompt)
-	agentID := ExtractAgentID(prompt)
-
+	
 	// If no session ID found in prompt, try to find latest session
 	if sessionID == "" {
 		projectDir := GetProjectDir()
 		sessionID = FindLatestSession(projectDir)
 	}
+	
+	// Use enhanced AgentID extraction with fallback generation
+	agentID := ExtractOrGenerateAgentID(prompt, subagentType, sessionID)
 
-	// Create log entry based on hook type
+	// Create simplified log entry based on hook type
 	hookData := &HookData{
-		AgentType:   subagentType,
-		AgentID:     agentID,
-		Description: description,
-		SessionID:   sessionID,
-		Timestamp:   time.Now().UTC().Format("2006-01-02T15:04:05.000Z"),
+		Timestamp: time.Now().UTC().Format("2006-01-02T15:04:05.000Z"),
+		SessionID: sessionID, // Internal use only
+		AgentID:   agentID,   // Internal use only
 	}
 
 	if isPostHook {
-		hookData.Event = "agent_complete"
-		hookData.OutputSummary = TruncateOutput(hookInput.Output, 1000)
+		hookData.Role = "assistant"
+		hookData.Content = hookInput.Output // Full output, not truncated
 	} else {
-		hookData.Event = "agent_start"
-		hookData.Instruction = prompt
+		hookData.Role = "user"
+		hookData.Content = prompt // Full prompt sent to agent
 	}
 
 	return hookData, nil
@@ -105,22 +104,6 @@ func ExtractAgentID(prompt string) string {
 	return ""
 }
 
-// TruncateOutput truncates output if it exceeds maxLength
-func TruncateOutput(output string, maxLength int) string {
-	// Handle edge cases with negative or zero maxLength
-	if maxLength <= 0 {
-		remaining := len(output)
-		return fmt.Sprintf("... [truncated %d chars]", remaining)
-	}
-	
-	if len(output) <= maxLength {
-		return output
-	}
-	
-	truncated := output[:maxLength]
-	remaining := len(output) - maxLength
-	return fmt.Sprintf("%s... [truncated %d chars]", truncated, remaining)
-}
 
 // DebugLog outputs debug information to stderr if DEBUG_HOOKS is set
 func DebugLog(format string, args ...interface{}) {

@@ -39,20 +39,6 @@ func WriteSessionLog(sessionID string, data *HookData) error {
 	return appendJSONL(sessionFile, data)
 }
 
-// WriteGlobalLog writes hook data to global JSONL file
-func WriteGlobalLog(data *HookData) error {
-	projectDir := GetProjectDir()
-	startupDir := GetStartupDir(projectDir)
-
-	// Ensure startup directory exists
-	if err := EnsureDirectories(startupDir); err != nil {
-		return fmt.Errorf("failed to ensure directories: %w", err)
-	}
-
-	// Write to global file
-	globalFile := filepath.Join(startupDir, "all-agent-instructions.jsonl")
-	return appendJSONL(globalFile, data)
-}
 
 // EnsureDirectories creates the required directories if they don't exist
 func EnsureDirectories(startupDir string) error {

@@ -128,8 +128,9 @@ func TestProcessToolCallEdgeCases(t *testing.T) {
 				if data.SessionID != "dev-session_with-special.chars" {
 					t.Errorf("Expected special characters in session ID, got: %s", data.SessionID)
 				}
-				if data.AgentID != "agent_with-special.chars" {
-					t.Errorf("Expected special characters in agent ID, got: %s", data.AgentID)
+				// AgentID with dots is invalid, so should generate fallback
+				if !strings.HasPrefix(data.AgentID, "the-special-") {
+					t.Errorf("Expected fallback AgentID starting with 'the-special-', got: %s", data.AgentID)
 				}
 			},
 		},
@@ -139,9 +140,9 @@ func TestProcessToolCallEdgeCases(t *testing.T) {
 			isPostHook: false,
 			expectNil: false,
 			validateFn: func(t *testing.T, data *HookData, err error) {
-				// Should have empty agent ID but attempt to find session
-				if data.AgentID != "" {
-					t.Errorf("Expected empty agent ID, got: %s", data.AgentID)
+				// Should generate fallback agent ID since no explicit AgentID provided
+				if !strings.HasPrefix(data.AgentID, "the-fallback-") {
+					t.Errorf("Expected fallback AgentID starting with 'the-fallback-', got: %s", data.AgentID)
 				}
 				// Session ID might be empty or found from latest session
 				// Don't test specific value as it depends on environment

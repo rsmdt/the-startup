@@ -49,28 +49,35 @@ For each phase in PLAN.md:
    If phase marked as sequential:
    - Execute tasks one at a time in listed order
    - **ALWAYS use TodoWrite to mark as in_progress BEFORE starting**
-   - Invoke assigned agent with task description and context
+   - Generate unique AgentID for this task
+   - Invoke assigned agent with enhanced prompt (see Task Invocation section)
    - **Display agent response with full commentary (see Agent Response Protocol)**
+   - Parse response for "IMPLEMENTATION COMPLETE" or "BLOCKED"
    - **IMMEDIATELY use TodoWrite to mark as completed when done**
-   - Stop phase if any task fails
+   - **Use Edit to update PLAN.md checkbox from `- [ ]` to `- [x]`**
+   - Stop phase if any task fails or is blocked
 
 2. **Parallel Execution**:
    If phase marked as parallel:
    - Identify all tasks in the phase
    - **Use TodoWrite to mark ALL as in_progress**
+   - Generate unique AgentID for each task
    - Invoke multiple agents simultaneously using batch Task calls
-   - Each agent gets: task description, subtasks, spec path, document references
+   - Each agent gets: AgentID, boundaries, task description, subtasks, context instructions
    - Monitor all executions
    - **Display EACH agent's response separately with commentary**
+   - Parse each response for completion status
    - Wait for all to complete before proceeding
-   - **Use TodoWrite to mark all as completed**
+   - **Use TodoWrite to mark each as completed based on response**
+   - **Use Edit to update PLAN.md checkboxes for successful tasks**
 
 3. **Validation Checkpoints**:
    When encountering **Validation** tasks:
    - Run specified commands (npm test, npm run lint, etc.)
    - Report results to user
+   - Update PLAN.md checkbox based on validation result
    - Only proceed if validation passes
-   - If validation fails, ask user how to proceed
+   - If validation fails, keep task as incomplete and ask user how to proceed
 
 4. **Progress Reporting**:
    After each phase:
@@ -101,15 +108,40 @@ When invoking specialists from PLAN.md:
    - Task description and any indented subtasks
    - Referenced documents (e.g., [→ PRD#auth-requirements])
    - Spec path for accessing BRD/PRD/SDD
+   - Generate unique AgentID: `{agent-type}-{phase}-{timestamp}` (e.g., "dev-auth-20240113-142530")
 
 2. **Provide Clear Instructions**:
-   - Pass complete task with all subtasks
-   - Include "Read docs/specs/XXX/[document].md for context"
-   - Specify expected deliverables
+   ```
+   AgentId: {generated-agent-id}
+   
+   CRITICAL: You MUST stay focused on ONLY the following task. Do NOT explore beyond these specific requirements.
+   
+   ## Your Task
+   {complete task with all subtasks from PLAN.md}
+   
+   ## Context Loading
+   You can load previous context using:
+   the-startup log --read --agent-id {your-agent-id} --lines 20 --format json
+   
+   ## Required Documents
+   Read docs/specs/XXX/[document].md for requirements and specifications
+   
+   ## Success Criteria
+   Return "IMPLEMENTATION COMPLETE" when ALL subtasks are done
+   Return "BLOCKED: {reason}" if you cannot proceed
+   
+   ## Boundaries
+   - ONLY implement the specified task and subtasks
+   - Do NOT modify unrelated files
+   - Do NOT add features not in the task list
+   - Do NOT refactor code outside the task scope
+   ```
 
 3. **Handle Results**:
-   - Update todo list based on success/failure
-   - Collect any error messages
+   - Parse agent response for "IMPLEMENTATION COMPLETE" or "BLOCKED"
+   - Update TodoWrite based on success/failure
+   - Update PLAN.md checkboxes using Edit tool
+   - Collect any error messages or blockers
    - Proceed according to execution type
 
 ## Example Flow
@@ -148,14 +180,34 @@ Proceed to Phase 2: Core Infrastructure? (yes/no)
 
 ## Task Management - CRITICAL REQUIREMENT
 
-**You MUST use the TodoWrite tool throughout the entire workflow:**
+**You MUST maintain synchronization between TodoWrite and PLAN.md:**
+
+### TodoWrite Management
 - **Initial load from PLAN.md**: Create complete todo list immediately
 - **Before executing ANY task**: Mark as in_progress using TodoWrite
 - **After task completion**: Immediately mark as completed using TodoWrite
 - **Phase transitions**: Update todo list to show phase progress
 - **Status progression**: pending → in_progress → completed
 - **Never skip todo updates**: Every task change requires TodoWrite
-- **Continue until empty**: The implementation ends when no pending tasks remain
+
+### PLAN.md Synchronization
+- **After EACH agent completes successfully**:
+  1. Mark todo as completed in TodoWrite
+  2. Use Edit tool to update PLAN.md checkbox from `- [ ]` to `- [x]`
+  3. Include all nested subtasks in the update
+- **If agent reports BLOCKED**:
+  1. Keep todo as in_progress
+  2. Do NOT update PLAN.md checkbox
+  3. Ask user how to proceed
+- **Real-time tracking**: PLAN.md should always reflect current state
+
+### Progress Determination
+- Parse agent response for explicit completion signals:
+  - "IMPLEMENTATION COMPLETE" = task succeeded
+  - "BLOCKED: {reason}" = task blocked
+  - Any unhandled errors = task failed
+- Only mark complete when agent explicitly confirms ALL subtasks done
+- The implementation ends when no pending tasks remain in BOTH TodoWrite AND PLAN.md
 
 ## Agent Response Protocol - MANDATORY
 

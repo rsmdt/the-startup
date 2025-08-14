@@ -55,13 +55,13 @@ func TestLogCommand(t *testing.T) {
 			name:          "no flags provided",
 			args:          []string{},
 			expectSuccess: false,
-			expectedErr:   "exactly one of --assistant or --user must be specified",
+			expectedErr:   "exactly one mode required: --assistant, --user, or --read",
 		},
 		{
 			name:          "both flags provided",
 			args:          []string{"--assistant", "--user"},
 			expectSuccess: false,
-			expectedErr:   "exactly one of --assistant or --user must be specified",
+			expectedErr:   "exactly one mode required: --assistant, --user, or --read",
 		},
 	}
 
@@ -114,7 +114,7 @@ func TestLogCommand(t *testing.T) {
 func TestLogCommandFlags(t *testing.T) {
 	cmd := NewLogCommand()
 
-	// Check that flags are properly defined
+	// Check that existing flags are properly defined
 	assistantFlag := cmd.Flags().Lookup("assistant")
 	if assistantFlag == nil {
 		t.Error("--assistant flag not found")
@@ -125,6 +125,37 @@ func TestLogCommandFlags(t *testing.T) {
 		t.Error("--user flag not found")
 	}
 
+	// Check new read mode flags
+	readFlag := cmd.Flags().Lookup("read")
+	if readFlag == nil {
+		t.Error("--read flag not found")
+	}
+
+	agentIDFlag := cmd.Flags().Lookup("agent-id")
+	if agentIDFlag == nil {
+		t.Error("--agent-id flag not found")
+	}
+
+	linesFlag := cmd.Flags().Lookup("lines")
+	if linesFlag == nil {
+		t.Error("--lines flag not found")
+	}
+
+	sessionFlag := cmd.Flags().Lookup("session")
+	if sessionFlag == nil {
+		t.Error("--session flag not found")
+	}
+
+	formatFlag := cmd.Flags().Lookup("format")
+	if formatFlag == nil {
+		t.Error("--format flag not found")
+	}
+
+	metadataFlag := cmd.Flags().Lookup("include-metadata")
+	if metadataFlag == nil {
+		t.Error("--include-metadata flag not found")
+	}
+
 	// Check short versions
 	if assistantFlag.Shorthand != "a" {
 		t.Errorf("Expected --assistant short flag to be 'a', got '%s'", assistantFlag.Shorthand)
@@ -132,5 +163,108 @@ func TestLogCommandFlags(t *testing.T) {
 
 	if userFlag.Shorthand != "u" {
 		t.Errorf("Expected --user short flag to be 'u', got '%s'", userFlag.Shorthand)
+	}
+
+	if readFlag.Shorthand != "r" {
+		t.Errorf("Expected --read short flag to be 'r', got '%s'", readFlag.Shorthand)
+	}
+}
+
+func TestLogCommand_ReadModeValidation(t *testing.T) {
+	testCases := []struct {
+		name        string
+		args        []string
+		expectError bool
+		errorMsg    string
+	}{
+		{
+			name:        "Read mode without agent-id",
+			args:        []string{"--read"},
+			expectError: true,
+			errorMsg:    "--agent-id required",
+		},
+		{
+			name:        "Read mode with invalid agent-id format",
+			args:        []string{"--read", "--agent-id", "invalid@id"},
+			expectError: true,
+			errorMsg:    "invalid agent-id format",
+		},
+		{
+			name:        "Read mode with reserved word agent-id",
+			args:        []string{"--read", "--agent-id", "main"},
+			expectError: true,
+			errorMsg:    "invalid agent-id format",
+		},
+		{
+			name:        "Read mode with lines too small",
+			args:        []string{"--read", "--agent-id", "arch-001", "--lines", "0"},
+			expectError: true,
+			errorMsg:    "--lines must be between 1 and 1000",
+		},
+		{
+			name:        "Read mode with lines too large",
+			args:        []string{"--read", "--agent-id", "arch-001", "--lines", "1001"},
+			expectError: true,
+			errorMsg:    "--lines must be between 1 and 1000",
+		},
+		{
+			name:        "Read mode with invalid format",
+			args:        []string{"--read", "--agent-id", "arch-001", "--format", "xml"},
+			expectError: true,
+			errorMsg:    "invalid format",
+		},
+		{
+			name:        "Valid read mode",
+			args:        []string{"--read", "--agent-id", "arch-001"},
+			expectError: false,
+		},
+		{
+			name:        "Valid read mode with all options",
+			args:        []string{"--read", "--agent-id", "test-agent", "--lines", "100", "--session", "dev-test", "--format", "text", "--include-metadata"},
+			expectError: false,
+		},
+		{
+			name:        "Multiple modes - assistant and read",
+			args:        []string{"--assistant", "--read", "--agent-id", "arch-001"},
+			expectError: true,
+			errorMsg:    "exactly one mode required",
+		},
+		{
+			name:        "Multiple modes - user and read",
+			args:        []string{"--user", "--read", "--agent-id", "arch-001"},
+			expectError: true,
+			errorMsg:    "exactly one mode required",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tempDir := t.TempDir()
+			os.Setenv("CLAUDE_PROJECT_DIR", tempDir)
+			defer os.Unsetenv("CLAUDE_PROJECT_DIR")
+
+			cmd := NewLogCommand()
+			cmd.SetArgs(tc.args)
+
+			// Capture output to prevent test pollution
+			var stdout, stderr bytes.Buffer
+			cmd.SetOut(&stdout)
+			cmd.SetErr(&stderr)
+
+			err := cmd.Execute()
+
+			if tc.expectError {
+				if err == nil {
+					t.Errorf("Expected error but command succeeded")
+				} else if !strings.Contains(err.Error(), tc.errorMsg) {
+					t.Errorf("Expected error containing '%s', got: %v", tc.errorMsg, err)
+				}
+			} else {
+				// For valid read mode, we expect it to succeed even with no data
+				if err != nil {
+					t.Errorf("Expected success but got error: %v", err)
+				}
+			}
+		})
 	}
 }
