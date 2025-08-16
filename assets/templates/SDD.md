@@ -19,7 +19,7 @@
   why: "Core business logic that must be preserved"
   
 # Alternative: relative path format
-- file: ./src/components/critical/file.ts
+- file: @src/components/critical/file.ts
   relevance: CRITICAL
   sections: [lines 50-100, function processOrder]
   why: "Core business logic that must be preserved"

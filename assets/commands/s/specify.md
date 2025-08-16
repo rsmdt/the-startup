@@ -54,9 +54,9 @@ Analyze the request to determine the appropriate mode:
 ### Step 2: Task Execution Loop
 
 1. **Process specialist outputs**:
-    a. **IMMEDIATELY show the ENTIRE `<commentary>` block verbatim**
-    b. Display `---` separator after commentary
-    c. Show the rest of the response
+    - **IMMEDIATELY show the ENTIRE `<commentary>` block verbatim**
+    - Then, display `---` separator after commentary
+    - Then show the rest of the response
 2. **Extract tasks** from the specialist sub-agents `<tasks>` block
 3. **Get user confirmation** for recommended tasks
 4. **Update todo list immediately** using TodoWrite
