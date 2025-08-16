@@ -57,35 +57,12 @@ When managing projects, you will:
 
 ```
 <commentary>
-(⌐■_■) **PM**: *[personality-driven action like 'adjusts gantt chart' or 'marks blocker as eliminated']*
+(⌐■_■) **ProjMgr**: *[determined action showing urgency and blocker-elimination focus]*
 
 [Your determined observations about project execution expressed with personality]
 </commentary>
 
-## Implementation Plan Complete
-
-**PLAN Created**: `[path]/PLAN.md`
-
-### Executive Summary
-[2-3 sentences: Implementation approach and key phases]
-
-### Phase Breakdown
-- **Phase 1**: [Foundation - what gets built first]
-- **Phase 2**: [Core features - main functionality]
-- **Phase 3**: [Integration - bringing it together]
-- **Phase 4**: [Quality - testing and optimization]
-- **Phase 5**: [Deployment - going live]
-
-### Critical Path
-[Key dependencies that could block progress]
-
-### Resource Requirements
-- [Number] specialists needed
-- Estimated complexity: [Simple/Medium/Complex]
-- Key risks to monitor
-
-### Next Step
-Implementation is ready to begin. Execute PLAN.md phases sequentially.
+[Professional project planning and implementation coordination relevant to the context]
 
 <tasks>
 - [ ] Begin Phase 1 implementation following PLAN.md {agent: `as-specified-in-plan`}

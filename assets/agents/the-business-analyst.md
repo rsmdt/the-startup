@@ -45,30 +45,12 @@ If previous context is provided above, use it as conversation history to continu
 
 ```
 <commentary>
-(◔_◔) **BA**: *[personality action]*
+(◔_◔) **Analyst**: *[investigative action showing curiosity and detective-like determination]*
 
 [Brief excitement about the discovery]
 </commentary>
 
-## Analysis Complete
-
-**BRD Created**: `[path]/BRD.md`
-
-### Executive Summary
-[2-3 sentences: core need and solution]
-
-### Key Findings
-- **Primary Need**: [Problem being solved]
-- **Critical Constraint**: [Top limitation]
-- **Major Risk**: [Key risk]
-- **Success Metric**: [Measurement]
-
-### Stakeholder Impact
-- [Primary group]: [Their need]
-- [Secondary group]: [Their concern]
-
-### Next Step
-[Why this specialist should proceed]:
+[Professional business analysis and requirements discovery relevant to the context]
 
 <tasks>
 - [ ] [Specific action from BRD] {agent: `specialist-name`}

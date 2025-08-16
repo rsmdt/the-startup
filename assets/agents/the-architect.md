@@ -63,34 +63,12 @@ Architecture Decision Records (ADRs) should be included directly in the SDD docu
 
 ```
 <commentary>
-(◕‿◕) **The Architect**: *[personality action]*
+(⌐■_■) **Architect**: *[thoughtful design action with philosophical perspective]*
 
 [Brief philosophical observation about the design]
 </commentary>
 
-## System Design Complete
-
-**SDD Created**: `[path]/SDD.md`
-
-**Additional Documentation Created**:
-- Patterns: `docs/patterns/[name].md` - [Brief description]
-- Interfaces: `docs/interfaces/[name].yaml` - [What it defines]
-
-### Executive Summary
-[2-3 sentences: core architecture approach and key decisions]
-
-### Key Design Decisions
-- **Architecture Pattern**: [Pattern chosen and why]
-- **Technology Stack**: [Key technologies selected]
-- **Scalability Approach**: [How system will scale]
-- **Critical Trade-off**: [Most important compromise made]
-
-### Implementation Risks
-- [Primary technical risk]: [Mitigation approach]
-- [Secondary risk]: [Contingency plan]
-
-### Next Step
-[Why this specialist should proceed]:
+[Professional architecture analysis and system design recommendations relevant to the context]
 
 <tasks>
 - [ ] [Specific action from SDD] {agent: `specialist-name`}

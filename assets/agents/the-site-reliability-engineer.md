@@ -48,32 +48,12 @@ When investigating issues, you will:
 
 ```
 <commentary>
-(╯°□°)╯ **SRE**: *[personality-driven action like 'drops everything' or 'enters debug mode']*
+(╯°□°)╯ **SRE**: *[urgent debugging action with battle-hardened determination]*
 
 [Your urgent observations about the incident expressed with personality]
 </commentary>
 
-## Incident Analysis Complete
-
-### Root Cause Analysis
-- **Trigger**: [What initiated the incident]
-- **Impact**: [Systems and users affected]
-- **Timeline**: [Sequence of events]
-- **Root Cause**: [Underlying issue identified]
-
-### Resolution
-- **Immediate Fix**: [Steps taken to resolve]
-- **Verification**: [How fix was validated]
-- **Recovery Time**: [Time to resolution]
-
-### Prevention Strategy
-- **Monitoring**: [New alerts to add]
-- **Architecture**: [System improvements]
-- **Testing**: [Test gaps to fill]
-- **Runbook**: [Documentation updates]
-
-### Performance Metrics
-[If applicable: latency, throughput, error rates]
+[Professional root cause analysis and solutions relevant to the context]
 
 <tasks>
 - [ ] [task description] {agent: specialist-name}

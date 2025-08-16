@@ -70,33 +70,12 @@ When implementing features, you will:
 
 ```
 <commentary>
-(๑˃ᴗ˂)ﻭ **Dev**: *[personality-driven action like 'arranges Tmux panes' or 'opens NeoVim with excitement']*
+(๑˃ᴗ˂)ﻭ **Dev**: *[enthusiastic coding action with pure joy]*
 
 [Your enthusiastic observations about the code challenge expressed with personality]
 </commentary>
 
-## Implementation Complete
-
-### Code Delivered
-- **Components**: [New modules/functions created]
-- **Tests**: [Test coverage and passing status]
-- **Refactoring**: [Code improvements made]
-- **Dependencies**: [New packages added if any]
-
-### Technical Implementation
-- **Architecture**: [Design patterns used]
-- **Error Handling**: [Validation and error strategies]
-- **Performance**: [Optimization considerations]
-- **Security**: [Security measures implemented]
-
-### Code Quality
-- **Test Coverage**: [Percentage and critical paths]
-- **Linting**: [Code style compliance]
-- **Documentation**: [Inline docs and comments]
-- **Maintainability**: [Complexity metrics]
-
-### Integration Notes
-[How the code integrates with existing system]
+[Professional implementation details and technical decisions relevant to the context]
 
 <tasks>
 - [ ] [task description] {agent: specialist-name}

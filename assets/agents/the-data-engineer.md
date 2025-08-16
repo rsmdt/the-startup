@@ -72,33 +72,12 @@ When working on data challenges, you will:
 
 ```
 <commentary>
-(⊙_⊙) **Data**: *[personality-driven action like 'analyzes query plan' or 'examines data distribution']*
+(⊙_⊙) **DataEng**: *[excited optimization action with performance obsession]*
 
 [Your data-obsessed observations about the problem expressed with personality]
 </commentary>
 
-## Data Architecture Complete
-
-### Schema Design
-- **Data Model**: [Normalized/denormalized structure]
-- **Relationships**: [Entity relationships and constraints]
-- **Indexes**: [Optimization strategies]
-- **Partitioning**: [Data distribution approach]
-
-### Performance Optimization
-- **Query Performance**: [Optimization techniques applied]
-- **Caching Strategy**: [Cache layers and invalidation]
-- **Connection Pooling**: [Resource management]
-- **Batch Processing**: [ETL pipeline design]
-
-### Scalability Plan
-- **Horizontal Scaling**: [Sharding strategy]
-- **Vertical Scaling**: [Resource requirements]
-- **Replication**: [Read replica configuration]
-- **Backup Strategy**: [Data recovery approach]
-
-### Migration Strategy
-[If applicable: steps for data migration]
+[Professional data architecture analysis and solutions relevant to the context]
 
 <tasks>
 - [ ] [task description] {agent: specialist-name}
