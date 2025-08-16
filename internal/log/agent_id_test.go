@@ -271,7 +271,7 @@ func TestValidationRules(t *testing.T) {
 // TestReservedWords validates reserved word checking
 func TestReservedWords(t *testing.T) {
 	reservedWords := []string{"main", "global", "system"}
-	
+
 	for _, word := range reservedWords {
 		t.Run("Reserved word: "+word, func(t *testing.T) {
 			if !isReservedWord(word) {
@@ -323,15 +323,15 @@ func TestRegexPattern(t *testing.T) {
 	}
 
 	invalidCases := []string{
-		"NotAgentId: test-id",   // Wrong keyword
-		"AgentId test-id",       // No colon
-		"AgentId: -test",        // Starts with hyphen
-		"AgentId: test-",        // Ends with hyphen
-		"AgentId: t",            // Too short
-		"AgentId: test@id",      // Invalid character
-		"AgentId: test id",      // Contains space
-		"AgentId: ",             // Empty
-		"AgentId:   ",           // Whitespace only
+		"NotAgentId: test-id", // Wrong keyword
+		"AgentId test-id",     // No colon
+		"AgentId: -test",      // Starts with hyphen
+		"AgentId: test-",      // Ends with hyphen
+		"AgentId: t",          // Too short
+		"AgentId: test@id",    // Invalid character
+		"AgentId: test id",    // Contains space
+		"AgentId: ",           // Empty
+		"AgentId:   ",         // Whitespace only
 	}
 
 	for _, tc := range invalidCases {
@@ -371,33 +371,33 @@ func TestCaseConversion(t *testing.T) {
 // TestGenerateAgentID_DeterministicGeneration validates that the same inputs produce the same AgentID
 func TestGenerateAgentID_DeterministicGeneration(t *testing.T) {
 	testCases := []struct {
-		name        string
-		sessionID   string
-		agentType   string
+		name          string
+		sessionID     string
+		agentType     string
 		promptExcerpt string
 	}{
 		{
-			name:        "Standard case",
-			sessionID:   "dev-20250812-143022",
-			agentType:   "the-architect",
+			name:          "Standard case",
+			sessionID:     "dev-20250812-143022",
+			agentType:     "the-architect",
 			promptExcerpt: "Design authentication system for the web application",
 		},
 		{
-			name:        "Different agent type",
-			sessionID:   "dev-20250812-143022",
-			agentType:   "the-developer",
+			name:          "Different agent type",
+			sessionID:     "dev-20250812-143022",
+			agentType:     "the-developer",
 			promptExcerpt: "Implement frontend components",
 		},
 		{
-			name:        "Long prompt excerpt (truncated to 100 chars)",
-			sessionID:   "dev-20250812-143022",
-			agentType:   "the-tester",
+			name:          "Long prompt excerpt (truncated to 100 chars)",
+			sessionID:     "dev-20250812-143022",
+			agentType:     "the-tester",
 			promptExcerpt: strings.Repeat("This is a very long prompt that should be truncated to exactly 100 characters. ", 5),
 		},
 		{
-			name:        "Empty prompt excerpt",
-			sessionID:   "dev-20250812-143022",
-			agentType:   "the-devops-engineer",
+			name:          "Empty prompt excerpt",
+			sessionID:     "dev-20250812-143022",
+			agentType:     "the-devops-engineer",
 			promptExcerpt: "",
 		},
 	}
@@ -444,7 +444,7 @@ func TestGenerateAgentID_DeterministicGeneration(t *testing.T) {
 			if len(hashStr) != 8 {
 				t.Errorf("Expected hash part to be 8 characters, got: %s", hashStr)
 			}
-			
+
 			// Verify hash contains only hex characters
 			for _, char := range hashStr {
 				if !((char >= '0' && char <= '9') || (char >= 'a' && char <= 'f')) {
@@ -492,7 +492,7 @@ func TestGenerateAgentID_PromptExcerptTruncation(t *testing.T) {
 
 	// Create prompts of different lengths
 	shortPrompt := "Short prompt"
-	longPrompt := strings.Repeat("This is a long prompt. ", 10) // Much longer than 100 chars
+	longPrompt := strings.Repeat("This is a long prompt. ", 10)        // Much longer than 100 chars
 	veryLongPrompt := strings.Repeat("Very long prompt content. ", 20) // Even longer
 
 	// Generate IDs
@@ -508,10 +508,10 @@ func TestGenerateAgentID_PromptExcerptTruncation(t *testing.T) {
 	// Test that truncation works correctly - same 100-char prefix should produce same ID
 	prefix100 := longPrompt[:100]
 	extendedPrompt := prefix100 + " additional text beyond 100 characters"
-	
+
 	id100 := GenerateAgentID(sessionID, agentType, prefix100)
 	idExtended := GenerateAgentID(sessionID, agentType, extendedPrompt)
-	
+
 	if id100 != idExtended {
 		t.Errorf("Prompts with same 100-char prefix should produce same ID: %s vs %s", id100, idExtended)
 	}
@@ -589,12 +589,12 @@ func TestGenerateAgentID_SHA256Consistency(t *testing.T) {
 	// Extract hash part and verify it's consistent
 	parts := strings.Split(ids[0], "-")
 	hash := parts[len(parts)-1]
-	
+
 	// Verify it's exactly 8 hex characters
 	if len(hash) != 8 {
 		t.Errorf("Hash should be 8 characters, got %d: %s", len(hash), hash)
 	}
-	
+
 	for _, char := range hash {
 		if !((char >= '0' && char <= '9') || (char >= 'a' && char <= 'f')) {
 			t.Errorf("Hash should contain only lowercase hex characters, found: %c", char)
@@ -605,53 +605,53 @@ func TestGenerateAgentID_SHA256Consistency(t *testing.T) {
 // TestGenerateAgentID_EdgeCases validates edge cases and boundary conditions
 func TestGenerateAgentID_EdgeCases(t *testing.T) {
 	testCases := []struct {
-		name         string
-		sessionID    string
-		agentType    string
+		name          string
+		sessionID     string
+		agentType     string
 		promptExcerpt string
-		expectValid  bool
+		expectValid   bool
 	}{
 		{
-			name:         "Empty session ID",
-			sessionID:    "",
-			agentType:    "the-architect",
+			name:          "Empty session ID",
+			sessionID:     "",
+			agentType:     "the-architect",
 			promptExcerpt: "Test task",
-			expectValid:  true, // Should still generate valid ID
+			expectValid:   true, // Should still generate valid ID
 		},
 		{
-			name:         "Empty agent type",
-			sessionID:    "dev-20250812-143022",
-			agentType:    "",
+			name:          "Empty agent type",
+			sessionID:     "dev-20250812-143022",
+			agentType:     "",
 			promptExcerpt: "Test task",
-			expectValid:  true, // Should still generate valid ID (will become "unknown")
+			expectValid:   true, // Should still generate valid ID (will become "unknown")
 		},
 		{
-			name:         "Empty prompt excerpt",
-			sessionID:    "dev-20250812-143022",
-			agentType:    "the-architect",
+			name:          "Empty prompt excerpt",
+			sessionID:     "dev-20250812-143022",
+			agentType:     "the-architect",
 			promptExcerpt: "",
-			expectValid:  true, // Should still generate valid ID
+			expectValid:   true, // Should still generate valid ID
 		},
 		{
-			name:         "All empty inputs",
-			sessionID:    "",
-			agentType:    "",
+			name:          "All empty inputs",
+			sessionID:     "",
+			agentType:     "",
 			promptExcerpt: "",
-			expectValid:  true, // Should still generate valid ID (will become "unknown")
+			expectValid:   true, // Should still generate valid ID (will become "unknown")
 		},
 		{
-			name:         "Special characters in inputs",
-			sessionID:    "dev-20250812@143022!",
-			agentType:    "the-architect@test",
+			name:          "Special characters in inputs",
+			sessionID:     "dev-20250812@143022!",
+			agentType:     "the-architect@test",
 			promptExcerpt: "Test task with @#$% special chars",
-			expectValid:  true, // Should generate valid ID despite special chars in input (will be sanitized)
+			expectValid:   true, // Should generate valid ID despite special chars in input (will be sanitized)
 		},
 		{
-			name:         "Unicode characters",
-			sessionID:    "dev-20250812-143022",
-			agentType:    "the-architect",
+			name:          "Unicode characters",
+			sessionID:     "dev-20250812-143022",
+			agentType:     "the-architect",
 			promptExcerpt: "Test with unicode: 你好世界 🚀",
-			expectValid:  true, // Should handle unicode gracefully
+			expectValid:   true, // Should handle unicode gracefully
 		},
 	}
 
@@ -705,9 +705,9 @@ func TestEnsureUniqueness_WithCollisions(t *testing.T) {
 
 	// Create conflicting files
 	existingFiles := []string{
-		baseID + ".jsonl",                    // Original collision
-		baseID + "-1.jsonl",                  // First disambiguation
-		baseID + "-2.jsonl",                  // Second disambiguation
+		baseID + ".jsonl",   // Original collision
+		baseID + "-1.jsonl", // First disambiguation
+		baseID + "-2.jsonl", // Second disambiguation
 	}
 
 	for _, fileName := range existingFiles {
@@ -744,7 +744,7 @@ func TestEnsureUniqueness_MaxDisambiguation(t *testing.T) {
 			fileName += fmt.Sprintf("-%d", i)
 		}
 		fileName += ".jsonl"
-		
+
 		filePath := sessionDir + "/" + fileName
 		if err := os.WriteFile(filePath, []byte("test"), 0644); err != nil {
 			t.Fatalf("Failed to create test file %s: %v", fileName, err)
@@ -753,19 +753,19 @@ func TestEnsureUniqueness_MaxDisambiguation(t *testing.T) {
 
 	// Test ultimate fallback with UUID
 	result := ensureUniqueness(baseID, sessionID, tempDir)
-	
+
 	// Should have UUID suffix pattern: baseID-uuid{8chars}
 	expectedPrefix := baseID + "-uuid"
 	if !strings.HasPrefix(result, expectedPrefix) {
 		t.Errorf("Expected result to start with %s, got: %s", expectedPrefix, result)
 	}
-	
+
 	// UUID part should be exactly 8 characters
 	uuidPart := result[len(expectedPrefix):]
 	if len(uuidPart) != 8 {
 		t.Errorf("Expected UUID part to be 8 characters, got %d: %s", len(uuidPart), uuidPart)
 	}
-	
+
 	// Verify the result is still a valid agent ID
 	if !isValidAgentID(result) {
 		t.Errorf("Ultimate fallback should produce valid agent ID: %s", result)
@@ -781,7 +781,7 @@ func TestEnsureUniqueness_DirectoryPermissions(t *testing.T) {
 	// Test with non-existent base directory (should handle gracefully)
 	nonExistentDir := tempDir + "/nonexistent"
 	result := ensureUniqueness(baseID, sessionID, nonExistentDir)
-	
+
 	// Should return original ID when directory doesn't exist
 	if result != baseID {
 		t.Errorf("Expected original ID when directory doesn't exist: %s, got: %s", baseID, result)
@@ -845,44 +845,44 @@ func TestTruncateString(t *testing.T) {
 // TestExtractOrGenerateAgentID_Integration validates the complete extraction/generation flow
 func TestExtractOrGenerateAgentID_Integration(t *testing.T) {
 	testCases := []struct {
-		name           string
-		prompt         string
-		agentType      string
-		sessionID      string
+		name            string
+		prompt          string
+		agentType       string
+		sessionID       string
 		expectExtracted bool
-		expectedPrefix string
+		expectedPrefix  string
 	}{
 		{
-			name:           "Successful extraction",
-			prompt:         "AgentId: arch-auth-001\nDesign authentication system",
-			agentType:      "the-architect",
-			sessionID:      "dev-20250812-143022",
+			name:            "Successful extraction",
+			prompt:          "AgentId: arch-auth-001\nDesign authentication system",
+			agentType:       "the-architect",
+			sessionID:       "dev-20250812-143022",
 			expectExtracted: true,
-			expectedPrefix: "arch-auth-001",
+			expectedPrefix:  "arch-auth-001",
 		},
 		{
-			name:           "Invalid ID triggers generation",
-			prompt:         "AgentId: invalid@id\nWork on task",
-			agentType:      "the-developer",
-			sessionID:      "dev-20250812-143022",
+			name:            "Invalid ID triggers generation",
+			prompt:          "AgentId: invalid@id\nWork on task",
+			agentType:       "the-developer",
+			sessionID:       "dev-20250812-143022",
 			expectExtracted: false,
-			expectedPrefix: "the-developer-",
+			expectedPrefix:  "the-developer-",
 		},
 		{
-			name:           "No ID triggers generation",
-			prompt:         "Design frontend components without explicit ID",
-			agentType:      "the-developer",
-			sessionID:      "dev-20250812-143022",
+			name:            "No ID triggers generation",
+			prompt:          "Design frontend components without explicit ID",
+			agentType:       "the-developer",
+			sessionID:       "dev-20250812-143022",
 			expectExtracted: false,
-			expectedPrefix: "the-developer-",
+			expectedPrefix:  "the-developer-",
 		},
 		{
-			name:           "Reserved word triggers generation",
-			prompt:         "AgentId: main\nMain task",
-			agentType:      "the-architect",
-			sessionID:      "dev-20250812-143022",
+			name:            "Reserved word triggers generation",
+			prompt:          "AgentId: main\nMain task",
+			agentType:       "the-architect",
+			sessionID:       "dev-20250812-143022",
 			expectExtracted: false,
-			expectedPrefix: "the-architect-",
+			expectedPrefix:  "the-architect-",
 		},
 	}
 

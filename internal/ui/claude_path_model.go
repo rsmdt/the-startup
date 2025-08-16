@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/bubbles/textinput"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 type ClaudePathModel struct {
@@ -27,15 +27,15 @@ type ClaudePathModel struct {
 func NewClaudePathModel(startupPath string) ClaudePathModel {
 	// Default choices - always show global first, then local if applicable
 	choices := []string{"~/.claude (recommended)"}
-	
+
 	// Determine if startup path is local or global
 	isLocal := !strings.Contains(startupPath, ".config")
-	
+
 	// Add local option if startup is local
 	if isLocal {
 		cwd, _ := os.Getwd()
 		homeDir, _ := os.UserHomeDir()
-		
+
 		// Format local path with tilde notation
 		localFullPath := filepath.Join(cwd, ".claude")
 		if strings.HasPrefix(localFullPath, homeDir) {
@@ -44,16 +44,16 @@ func NewClaudePathModel(startupPath string) ClaudePathModel {
 		localClaudePath := fmt.Sprintf("%s (local)", localFullPath)
 		choices = append(choices, localClaudePath)
 	}
-	
+
 	choices = append(choices, "Custom location")
 	choices = append(choices, "Cancel")
-	
+
 	ti := textinput.New()
 	ti.Placeholder = "Enter custom path (Tab for autocomplete)"
 	ti.Focus()
 	ti.CharLimit = 256
 	ti.Width = 60
-	
+
 	return ClaudePathModel{
 		styles:          GetStyles(),
 		renderer:        NewProgressiveDisclosureRenderer(),
@@ -76,7 +76,7 @@ func (m ClaudePathModel) Update(msg tea.Msg) (ClaudePathModel, tea.Cmd) {
 	if m.inputMode {
 		return m.updateInputMode(msg)
 	}
-	
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -118,7 +118,7 @@ func (m ClaudePathModel) Update(msg tea.Msg) (ClaudePathModel, tea.Cmd) {
 
 func (m ClaudePathModel) updateInputMode(msg tea.Msg) (ClaudePathModel, tea.Cmd) {
 	var cmd tea.Cmd
-	
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -127,18 +127,18 @@ func (m ClaudePathModel) updateInputMode(msg tea.Msg) (ClaudePathModel, tea.Cmd)
 			m.suggestions = []string{}
 			m.suggestionIndex = -1
 			return m, nil
-			
+
 		case "tab":
 			// Handle autocomplete
 			currentPath := m.textInput.Value()
 			m.suggestions = m.getPathSuggestions(currentPath)
-			
+
 			if len(m.suggestions) > 0 {
 				m.suggestionIndex = (m.suggestionIndex + 1) % len(m.suggestions)
 				m.textInput.SetValue(m.suggestions[m.suggestionIndex])
 			}
 			return m, nil
-			
+
 		case "enter":
 			path := m.textInput.Value()
 			if path != "" {
@@ -147,18 +147,18 @@ func (m ClaudePathModel) updateInputMode(msg tea.Msg) (ClaudePathModel, tea.Cmd)
 					homeDir, _ := os.UserHomeDir()
 					path = filepath.Join(homeDir, path[2:])
 				}
-				
+
 				// Ensure it ends with .claude
 				if !strings.HasSuffix(path, ".claude") {
 					path = filepath.Join(path, ".claude")
 				}
-				
+
 				m.selectedPath = path
 				m.ready = true
 				m.inputMode = false
 			}
 			return m, nil
-		
+
 		default:
 			// Reset suggestions when typing
 			if msg.String() != "tab" {
@@ -167,66 +167,66 @@ func (m ClaudePathModel) updateInputMode(msg tea.Msg) (ClaudePathModel, tea.Cmd)
 			}
 		}
 	}
-	
+
 	m.textInput, cmd = m.textInput.Update(msg)
 	return m, cmd
 }
 
 func (m ClaudePathModel) getPathSuggestions(input string) []string {
 	suggestions := []string{}
-	
+
 	// Expand tilde for suggestions
 	expandedInput := input
 	if strings.HasPrefix(input, "~/") {
 		homeDir, _ := os.UserHomeDir()
 		expandedInput = filepath.Join(homeDir, input[2:])
 	}
-	
+
 	// Get directory to search
 	dir := filepath.Dir(expandedInput)
 	base := filepath.Base(expandedInput)
-	
+
 	// If directory doesn't exist, try parent
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		dir = filepath.Dir(dir)
 		base = ""
 	}
-	
+
 	// Read directory entries
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return suggestions
 	}
-	
+
 	// Find matching directories
 	for _, entry := range entries {
 		if entry.IsDir() && strings.HasPrefix(entry.Name(), base) {
 			fullPath := filepath.Join(dir, entry.Name())
-			
+
 			// Convert back to tilde notation if in home directory
 			homeDir, _ := os.UserHomeDir()
 			if strings.HasPrefix(fullPath, homeDir) {
 				fullPath = "~" + strings.TrimPrefix(fullPath, homeDir)
 			}
-			
+
 			suggestions = append(suggestions, fullPath)
-			
+
 			// Limit suggestions
 			if len(suggestions) >= 5 {
 				break
 			}
 		}
 	}
-	
+
 	return suggestions
 }
 
 func (m ClaudePathModel) View() string {
 	var s strings.Builder
-	
+
 	s.WriteString(m.styles.Title.Render(AppBanner))
 	s.WriteString("\n\n")
-	
+
 	// Show previous selection
 	displayStartupPath := m.startupPath
 	homeDir, _ := os.UserHomeDir()
@@ -234,17 +234,17 @@ func (m ClaudePathModel) View() string {
 		displayStartupPath = "~" + strings.TrimPrefix(m.startupPath, homeDir)
 	}
 	s.WriteString(m.renderer.RenderSelections("", displayStartupPath, 0))
-	
+
 	s.WriteString(m.renderer.RenderTitle("Select .claude directory location"))
 	s.WriteString(m.styles.Info.Render("This is where agents and commands will be installed for Claude Code"))
 	s.WriteString("\n\n")
-	
+
 	if m.inputMode {
 		s.WriteString(m.styles.Normal.Render("Enter custom path:"))
 		s.WriteString("\n")
 		s.WriteString(m.textInput.View())
 		s.WriteString("\n\n")
-		
+
 		if len(m.suggestions) > 0 {
 			s.WriteString(m.styles.Help.Render("Suggestions (Tab to cycle):"))
 			s.WriteString("\n")
@@ -258,17 +258,17 @@ func (m ClaudePathModel) View() string {
 			}
 			s.WriteString("\n")
 		}
-		
+
 		s.WriteString(m.renderer.RenderHelp("Tab: autocomplete • Enter: confirm • Escape: cancel"))
 	} else {
 		for i, choice := range m.choices {
 			s.WriteString(m.renderer.RenderChoiceWithMultiSelect(choice, i == m.cursor, false, false))
 			s.WriteString("\n")
 		}
-		
+
 		s.WriteString(m.renderer.RenderHelp("↑↓ navigate • Enter: select • Escape: back"))
 	}
-	
+
 	return s.String()
 }
 

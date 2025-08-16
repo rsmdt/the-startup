@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/bubbles/textinput"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 type StartupPathModel struct {
@@ -26,23 +26,23 @@ type StartupPathModel struct {
 func NewStartupPathModel() StartupPathModel {
 	cwd, _ := os.Getwd()
 	homeDir, _ := os.UserHomeDir()
-	
+
 	// Format local path with tilde notation
 	localFullPath := filepath.Join(cwd, ".the-startup")
 	if strings.HasPrefix(localFullPath, homeDir) {
 		localFullPath = "~" + strings.TrimPrefix(localFullPath, homeDir)
 	}
 	localPath := fmt.Sprintf("%s (local)", localFullPath)
-	
+
 	ti := textinput.New()
 	ti.Placeholder = "Enter custom path (Tab for autocomplete)"
 	ti.Focus()
 	ti.CharLimit = 256
 	ti.Width = 60
-	
+
 	return StartupPathModel{
-		styles:       GetStyles(),
-		renderer:     NewProgressiveDisclosureRenderer(),
+		styles:   GetStyles(),
+		renderer: NewProgressiveDisclosureRenderer(),
 		choices: []string{
 			"~/.config/the-startup (recommended)",
 			localPath,
@@ -66,7 +66,7 @@ func (m StartupPathModel) Update(msg tea.Msg) (StartupPathModel, tea.Cmd) {
 	if m.inputMode {
 		return m.updateInputMode(msg)
 	}
-	
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -108,7 +108,7 @@ func (m StartupPathModel) Update(msg tea.Msg) (StartupPathModel, tea.Cmd) {
 
 func (m StartupPathModel) updateInputMode(msg tea.Msg) (StartupPathModel, tea.Cmd) {
 	var cmd tea.Cmd
-	
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -117,18 +117,18 @@ func (m StartupPathModel) updateInputMode(msg tea.Msg) (StartupPathModel, tea.Cm
 			m.suggestions = []string{}
 			m.suggestionIndex = -1
 			return m, nil
-			
+
 		case "tab":
 			// Handle autocomplete
 			currentPath := m.textInput.Value()
 			m.suggestions = m.getPathSuggestions(currentPath)
-			
+
 			if len(m.suggestions) > 0 {
 				m.suggestionIndex = (m.suggestionIndex + 1) % len(m.suggestions)
 				m.textInput.SetValue(m.suggestions[m.suggestionIndex])
 			}
 			return m, nil
-			
+
 		case "enter":
 			path := m.textInput.Value()
 			if path != "" {
@@ -137,18 +137,18 @@ func (m StartupPathModel) updateInputMode(msg tea.Msg) (StartupPathModel, tea.Cm
 					homeDir, _ := os.UserHomeDir()
 					path = filepath.Join(homeDir, path[2:])
 				}
-				
+
 				// Ensure it ends with .the-startup
 				if !strings.HasSuffix(path, ".the-startup") {
 					path = filepath.Join(path, ".the-startup")
 				}
-				
+
 				m.selectedPath = path
 				m.ready = true
 				m.inputMode = false
 			}
 			return m, nil
-		
+
 		default:
 			// Reset suggestions when typing
 			if msg.String() != "tab" {
@@ -157,76 +157,76 @@ func (m StartupPathModel) updateInputMode(msg tea.Msg) (StartupPathModel, tea.Cm
 			}
 		}
 	}
-	
+
 	m.textInput, cmd = m.textInput.Update(msg)
 	return m, cmd
 }
 
 func (m StartupPathModel) getPathSuggestions(input string) []string {
 	suggestions := []string{}
-	
+
 	// Expand tilde for suggestions
 	expandedInput := input
 	if strings.HasPrefix(input, "~/") {
 		homeDir, _ := os.UserHomeDir()
 		expandedInput = filepath.Join(homeDir, input[2:])
 	}
-	
+
 	// Get directory to search
 	dir := filepath.Dir(expandedInput)
 	base := filepath.Base(expandedInput)
-	
+
 	// If directory doesn't exist, try parent
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		dir = filepath.Dir(dir)
 		base = ""
 	}
-	
+
 	// Read directory entries
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return suggestions
 	}
-	
+
 	// Find matching directories
 	for _, entry := range entries {
 		if entry.IsDir() && strings.HasPrefix(entry.Name(), base) {
 			fullPath := filepath.Join(dir, entry.Name())
-			
+
 			// Convert back to tilde notation if in home directory
 			homeDir, _ := os.UserHomeDir()
 			if strings.HasPrefix(fullPath, homeDir) {
 				fullPath = "~" + strings.TrimPrefix(fullPath, homeDir)
 			}
-			
+
 			suggestions = append(suggestions, fullPath)
-			
+
 			// Limit suggestions
 			if len(suggestions) >= 5 {
 				break
 			}
 		}
 	}
-	
+
 	return suggestions
 }
 
 func (m StartupPathModel) View() string {
 	var s strings.Builder
-	
+
 	s.WriteString(m.styles.Title.Render(AppBanner))
 	s.WriteString("\n\n")
-	
+
 	s.WriteString(m.renderer.RenderTitle("Select .the-startup installation location"))
 	s.WriteString(m.styles.Info.Render("This is where The Startup's binary and templates will be installed"))
 	s.WriteString("\n\n")
-	
+
 	if m.inputMode {
 		s.WriteString(m.styles.Normal.Render("Enter custom path:"))
 		s.WriteString("\n")
 		s.WriteString(m.textInput.View())
 		s.WriteString("\n\n")
-		
+
 		if len(m.suggestions) > 0 {
 			s.WriteString(m.styles.Help.Render("Suggestions (Tab to cycle):"))
 			s.WriteString("\n")
@@ -240,17 +240,17 @@ func (m StartupPathModel) View() string {
 			}
 			s.WriteString("\n")
 		}
-		
+
 		s.WriteString(m.renderer.RenderHelp("Tab: autocomplete • Enter: confirm • Escape: cancel"))
 	} else {
 		for i, choice := range m.choices {
 			s.WriteString(m.renderer.RenderChoiceWithMultiSelect(choice, i == m.cursor, false, false))
 			s.WriteString("\n")
 		}
-		
+
 		s.WriteString(m.renderer.RenderHelp("↑↓ navigate • Enter: select • Escape: quit"))
 	}
-	
+
 	return s.String()
 }
 

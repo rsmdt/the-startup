@@ -48,23 +48,23 @@ func (m CompleteModel) Update(msg tea.Msg) (CompleteModel, tea.Cmd) {
 
 func (m CompleteModel) View() string {
 	var s strings.Builder
-	
+
 	// Banner
 	s.WriteString(m.styles.Title.Render(AppBanner))
 	s.WriteString("\n\n")
-	
+
 	// Success message
 	s.WriteString(m.styles.Success.Render("✅ Installation Complete!"))
 	s.WriteString("\n\n")
-	
+
 	// Installation locations
 	claudePath := m.installer.GetClaudePath()
 	startupPath := m.installer.GetInstallPath()
-	
+
 	// Simplify paths for display
 	displayClaudePath := claudePath
 	displayStartupPath := startupPath
-	
+
 	home := os.Getenv("HOME")
 	if home != "" {
 		if strings.HasPrefix(claudePath, home) {
@@ -74,25 +74,25 @@ func (m CompleteModel) View() string {
 			displayStartupPath = strings.Replace(startupPath, home, "~", 1)
 		}
 	}
-	
+
 	s.WriteString(m.styles.Normal.Render("Installation locations:"))
 	s.WriteString("\n")
 	s.WriteString(m.styles.Info.Render("  Claude files: " + displayClaudePath))
 	s.WriteString("\n")
 	s.WriteString(m.styles.Info.Render("  Startup files: " + displayStartupPath))
 	s.WriteString("\n\n")
-	
+
 	// Available commands and agents
 	s.WriteString(m.styles.Normal.Render("Now available in Claude Code:"))
 	s.WriteString("\n\n")
-	
+
 	s.WriteString(m.styles.Info.Render("  Commands:"))
 	s.WriteString("\n")
 	s.WriteString(m.styles.Normal.Render("    • /s specify - Create detailed specifications"))
 	s.WriteString("\n")
 	s.WriteString(m.styles.Normal.Render("    • /s implement - Implement from specifications"))
 	s.WriteString("\n\n")
-	
+
 	s.WriteString(m.styles.Info.Render("  Agents:"))
 	s.WriteString("\n")
 	s.WriteString(m.styles.Normal.Render("    • the-chief - Routes any new request to the right specialist"))
@@ -119,7 +119,7 @@ func (m CompleteModel) View() string {
 	s.WriteString("\n")
 	s.WriteString(m.styles.Normal.Render("    • the-tester - Comprehensive testing & QA"))
 	s.WriteString("\n")
-	
+
 	return s.String()
 }
 

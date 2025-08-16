@@ -7,30 +7,29 @@ import (
 	"github.com/rsmdt/the-startup/internal/installer"
 )
 
-
 // MainModel manages the overall installer flow by composing sub-models
 type MainModel struct {
 	// State management
 	state InstallerState
-	
+
 	// Dependencies
 	installer     *installer.Installer
 	agentFiles    *embed.FS
 	commandFiles  *embed.FS
 	templateFiles *embed.FS
-	
+
 	// User selections (shared state)
 	startupPath   string
 	claudePath    string
 	selectedFiles []string
-	
+
 	// Sub-models
 	startupPathModel   StartupPathModel
 	claudePathModel    ClaudePathModel
 	fileSelectionModel FileSelectionModel
 	completeModel      CompleteModel
 	errorModel         ErrorModel
-	
+
 	// UI state
 	width  int
 	height int
@@ -39,7 +38,7 @@ type MainModel struct {
 // NewMainModel creates a new main model with composed sub-models
 func NewMainModel(agents, commands, templates, settings *embed.FS) *MainModel {
 	installerInstance := installer.New(agents, commands, templates, settings)
-	
+
 	m := &MainModel{
 		state:            StateStartupPath, // Start with startup path selection
 		installer:        installerInstance,
@@ -51,7 +50,7 @@ func NewMainModel(agents, commands, templates, settings *embed.FS) *MainModel {
 		startupPathModel: NewStartupPathModel(),
 		errorModel:       NewErrorModel(nil, ""),
 	}
-	
+
 	return m
 }
 
@@ -71,19 +70,19 @@ func (m *MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			// In other states, treat as ESC (go back)
 			return m.handleBack()
-		
+
 		case "esc":
 			return m.handleBack()
 		}
 	}
-	
+
 	// Handle window size
 	if sizeMsg, ok := msg.(tea.WindowSizeMsg); ok {
 		m.width = sizeMsg.Width
 		m.height = sizeMsg.Height
 		return m, nil
 	}
-	
+
 	// Delegate to appropriate sub-model based on state
 	switch m.state {
 	case StateStartupPath:
@@ -99,7 +98,7 @@ func (m *MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.transitionToState(StateClaudePath)
 		}
 		return m, cmd
-	
+
 	case StateClaudePath:
 		newModel, cmd := m.claudePathModel.Update(msg)
 		m.claudePathModel = newModel
@@ -118,7 +117,7 @@ func (m *MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.transitionToState(StateFileSelection)
 		}
 		return m, cmd
-	
+
 	case StateFileSelection:
 		newModel, cmd := m.fileSelectionModel.Update(msg)
 		m.fileSelectionModel = newModel
@@ -139,7 +138,7 @@ func (m *MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 		return m, cmd
-	
+
 	case StateComplete:
 		newModel, cmd := m.completeModel.Update(msg)
 		m.completeModel = newModel
@@ -147,7 +146,7 @@ func (m *MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 		return m, cmd
-	
+
 	case StateError:
 		newModel, cmd := m.errorModel.Update(msg)
 		m.errorModel = newModel
@@ -156,22 +155,22 @@ func (m *MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, cmd
 	}
-	
+
 	return m, nil
 }
 
 // transitionToState handles state transitions and initializes sub-models
 func (m *MainModel) transitionToState(newState InstallerState) {
 	m.state = newState
-	
+
 	// Initialize or reset sub-models as needed
 	switch newState {
 	case StateStartupPath:
 		m.startupPathModel = m.startupPathModel.Reset()
-	
+
 	case StateClaudePath:
 		m.claudePathModel = NewClaudePathModel(m.startupPath)
-	
+
 	case StateFileSelection:
 		m.fileSelectionModel = NewFileSelectionModel(
 			"claude-code", // Always use claude-code
@@ -182,10 +181,10 @@ func (m *MainModel) transitionToState(newState InstallerState) {
 			m.templateFiles,
 		)
 		m.selectedFiles = m.fileSelectionModel.selectedFiles
-	
+
 	case StateComplete:
 		m.completeModel = NewCompleteModel("claude-code", m.installer)
-	
+
 	case StateError:
 		// Error model is set before transition
 	}
@@ -209,7 +208,6 @@ func (m *MainModel) View() string {
 	}
 }
 
-
 // handleBack processes back navigation (ESC key)
 func (m *MainModel) handleBack() (tea.Model, tea.Cmd) {
 	switch m.state {
@@ -229,10 +227,6 @@ func (m *MainModel) handleBack() (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-
-
-
-
 // getAllAvailableFiles returns all files that would be installed (for testing)
 func (m *MainModel) getAllAvailableFiles() []string {
 	if m.fileSelectionModel.selectedFiles != nil {
@@ -246,10 +240,9 @@ func (m *MainModel) getAllAvailableFiles() []string {
 // RunMainInstaller starts the installation UI using the MainModel
 func RunMainInstaller(agents, commands, templates, settings *embed.FS) error {
 	model := NewMainModel(agents, commands, templates, settings)
-	
+
 	program := tea.NewProgram(model)
-	
+
 	_, err := program.Run()
 	return err
 }
-

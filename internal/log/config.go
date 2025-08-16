@@ -31,7 +31,7 @@ func GetStartupDir(projectDir string) string {
 	}
 
 	homeStartup := filepath.Join(homeDir, ".the-startup")
-	
+
 	// Don't auto-create the home directory - let the caller decide
 	// This prevents test pollution and gives more control
 	return homeStartup

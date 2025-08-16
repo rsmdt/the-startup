@@ -23,45 +23,45 @@ func ExtractAgentIDFromPrompt(prompt string) string {
 	// Find AgentId: pattern and capture the complete line after it
 	pattern := `(?i)\bAgentId\s*:\s*([^\n\r]*)`
 	re := regexp.MustCompile(pattern)
-	
+
 	// Find the first match
 	matches := re.FindStringSubmatch(prompt)
 	if len(matches) < 2 {
 		return "" // No match found
 	}
-	
+
 	// Extract the captured line and trim whitespace
 	line := strings.TrimSpace(matches[1])
 	if line == "" {
 		return "" // Empty or whitespace-only value
 	}
-	
+
 	// Split by whitespace to get the first token (the agent ID)
 	tokens := strings.Fields(line)
 	if len(tokens) == 0 {
 		return ""
 	}
-	
+
 	// If there's more than one token, it means there are additional words which makes it invalid
 	if len(tokens) > 1 {
 		return "" // Invalid: contains spaces separating multiple tokens
 	}
-	
+
 	extracted := tokens[0]
-	
+
 	// Convert to lowercase as specified
 	extracted = strings.ToLower(extracted)
-	
+
 	// Validate the extracted ID against the exact specification pattern
 	if !isValidAgentID(extracted) {
 		return ""
 	}
-	
+
 	// Check if it's a reserved word
 	if isReservedWord(extracted) {
 		return ""
 	}
-	
+
 	return extracted
 }
 
@@ -74,19 +74,19 @@ func isValidAgentID(id string) bool {
 	if len(id) < 2 || len(id) > 64 {
 		return false
 	}
-	
+
 	// Must start and end with alphanumeric
 	if !isAlphanumeric(id[0]) || !isAlphanumeric(id[len(id)-1]) {
 		return false
 	}
-	
+
 	// Check all characters are valid (alphanumeric, hyphen, or underscore)
 	for _, char := range id {
 		if !isAlphanumeric(byte(char)) && char != '-' && char != '_' {
 			return false
 		}
 	}
-	
+
 	return true
 }
 
@@ -95,13 +95,13 @@ func isValidAgentID(id string) bool {
 func isReservedWord(id string) bool {
 	reserved := []string{"main", "global", "system"}
 	lower := strings.ToLower(id)
-	
+
 	for _, word := range reserved {
 		if lower == word {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -122,13 +122,13 @@ func GenerateAgentID(sessionID, agentType, promptExcerpt string) string {
 	if agentType == "" {
 		agentType = "unknown"
 	}
-	
+
 	// Generate 8-character alphanumeric shortId
 	shortId := generateShortId()
-	
+
 	// Format: "{shortId}-{agentType}"
 	baseID := fmt.Sprintf("%s-%s", shortId, agentType)
-	
+
 	return baseID
 }
 
@@ -146,7 +146,6 @@ func generateShortId() string {
 	return string(b)
 }
 
-
 // ExtractOrGenerateAgentID implements the complete AgentID extraction/generation flow
 // as specified in SDD section 3.2.3. First attempts regex extraction, then falls back
 // to deterministic generation with uniqueness checking.
@@ -156,10 +155,10 @@ func ExtractOrGenerateAgentID(prompt, agentType, sessionID string) string {
 	if extracted != "" {
 		return extracted
 	}
-	
+
 	// Step 2: Generate deterministic fallback
 	baseID := GenerateAgentID(sessionID, agentType, prompt)
-	
+
 	// Step 3: Ensure uniqueness (using default base directory ".the-startup")
 	return ensureUniqueness(baseID, sessionID, ".the-startup")
 }
@@ -172,7 +171,7 @@ func truncateString(s string, maxLen int) string {
 	if len(runes) <= maxLen {
 		return s
 	}
-	
+
 	return string(runes[:maxLen])
 }
 
@@ -192,13 +191,13 @@ func ensureUniqueness(baseID, sessionID, baseDir string) string {
 	if _, err := os.Stat(sessionDir); os.IsNotExist(err) {
 		return baseID
 	}
-	
+
 	// Check if base ID is available
 	baseFilePath := filepath.Join(sessionDir, baseID+".jsonl")
 	if _, err := os.Stat(baseFilePath); os.IsNotExist(err) {
 		return baseID // Base ID is available
 	}
-	
+
 	// Try numeric suffixes 1-999
 	for i := 1; i <= 999; i++ {
 		candidateID := fmt.Sprintf("%s-%d", baseID, i)
@@ -207,11 +206,11 @@ func ensureUniqueness(baseID, sessionID, baseDir string) string {
 			return candidateID // Found available suffix
 		}
 	}
-	
+
 	// Ultimate fallback: append 8-character UUID segment
 	uuidSegment := generateRandomHex(8)
 	fallbackID := fmt.Sprintf("%s-uuid%s", baseID, uuidSegment)
-	
+
 	return fallbackID
 }
 
@@ -224,11 +223,11 @@ func generateRandomHex(length int) string {
 		timestamp := time.Now().UnixNano()
 		return fmt.Sprintf("%x", timestamp)[:length]
 	}
-	
+
 	hexStr := hex.EncodeToString(bytes)
 	if len(hexStr) > length {
 		hexStr = hexStr[:length]
 	}
-	
+
 	return hexStr
 }

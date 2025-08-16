@@ -18,7 +18,7 @@ func BenchmarkProcessToolCall(b *testing.B) {
 			"prompt": "SessionId: dev-benchmark-123 AgentId: arch-001\nPlease design a scalable microservices architecture"
 		}
 	}`
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		reader := strings.NewReader(testInput)
@@ -33,7 +33,7 @@ func BenchmarkProcessToolCall(b *testing.B) {
 func BenchmarkProcessToolCallLarge(b *testing.B) {
 	largeDescription := strings.Repeat("This is a very detailed description that contains a lot of text. ", 1000)
 	largePrompt := strings.Repeat("This is a comprehensive prompt with extensive details about the task. ", 1000)
-	
+
 	testInput := fmt.Sprintf(`{
 		"tool_name": "Task",
 		"tool_input": {
@@ -42,7 +42,7 @@ func BenchmarkProcessToolCallLarge(b *testing.B) {
 			"prompt": "SessionId: dev-large-123 AgentId: arch-002\n%s"
 		}
 	}`, largeDescription, largePrompt)
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		reader := strings.NewReader(testInput)
@@ -62,7 +62,7 @@ func BenchmarkExtractSessionID(b *testing.B) {
 		"No session ID in this prompt at all, just regular content",
 		"Multiple SessionId: first-session and SessionId: second-session patterns",
 	}
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		prompt := testPrompts[i%len(testPrompts)]
@@ -79,7 +79,7 @@ func BenchmarkExtractAgentID(b *testing.B) {
 		"No agent ID here",
 		"Multiple AgentId: first-agent and AgentId: second-agent",
 	}
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		prompt := testPrompts[i%len(testPrompts)]
@@ -99,7 +99,7 @@ func BenchmarkShouldProcess(b *testing.B) {
 		{"Other", map[string]interface{}{"subagent_type": "the-test"}}, // Should be filtered
 		{"Task", map[string]interface{}{"other_field": "value"}},       // Should be filtered
 	}
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		tc := testCases[i%len(testCases)]
@@ -113,9 +113,9 @@ func BenchmarkTruncateOutput(b *testing.B) {
 	smallOutput := "Short output"
 	mediumOutput := strings.Repeat("Medium length output. ", 50)
 	largeOutput := strings.Repeat("This is a large output that will be truncated. ", 100)
-	
+
 	testOutputs := []string{smallOutput, mediumOutput, largeOutput}
-	
+
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		output := testOutputs[i%len(testOutputs)]
@@ -141,7 +141,7 @@ func BenchmarkRegexPerformance(b *testing.B) {
 		strings.Repeat("Very long prompt without any matching patterns. ", 500),
 		"Multiple SessionId: first SessionId: second SessionId: third patterns",
 	}
-	
+
 	b.Run("SessionID", func(b *testing.B) {
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -149,7 +149,7 @@ func BenchmarkRegexPerformance(b *testing.B) {
 			_ = ExtractSessionID(prompt)
 		}
 	})
-	
+
 	b.Run("AgentID", func(b *testing.B) {
 		b.ResetTimer()
 		for i := 0; i < b.N; i++ {
@@ -169,10 +169,10 @@ func BenchmarkMemoryUsage(b *testing.B) {
 			"prompt": "SessionId: dev-memory-123 AgentId: mem-001\nTest memory usage patterns"
 		}
 	}`
-	
+
 	b.ResetTimer()
 	b.ReportAllocs()
-	
+
 	for i := 0; i < b.N; i++ {
 		reader := strings.NewReader(testInput)
 		result, err := ProcessToolCall(reader, false)
@@ -194,7 +194,7 @@ func BenchmarkConcurrentProcessing(b *testing.B) {
 			"prompt": "SessionId: dev-concurrent-123 AgentId: conc-001\nTest concurrent processing"
 		}
 	}`
-	
+
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {
 		for pb.Next() {
@@ -221,12 +221,12 @@ func BenchmarkJSONMarshalUnmarshal(b *testing.B) {
 		"cwd": "/current/working/directory",
 		"hook_event_name": "PreToolUse"
 	}`
-	
+
 	b.Run("Unmarshal", func(b *testing.B) {
 		inputBytes := []byte(testInput)
 		b.ResetTimer()
 		b.ReportAllocs()
-		
+
 		for i := 0; i < b.N; i++ {
 			var hookInput HookInput
 			err := json.Unmarshal(inputBytes, &hookInput)
@@ -236,7 +236,7 @@ func BenchmarkJSONMarshalUnmarshal(b *testing.B) {
 			_ = hookInput
 		}
 	})
-	
+
 	b.Run("Marshal", func(b *testing.B) {
 		hookData := &HookData{
 			Event:       "agent_start",
@@ -247,10 +247,10 @@ func BenchmarkJSONMarshalUnmarshal(b *testing.B) {
 			Timestamp:   "2025-01-11T12:00:00.000Z",
 			Instruction: "Test JSON performance",
 		}
-		
+
 		b.ResetTimer()
 		b.ReportAllocs()
-		
+
 		for i := 0; i < b.N; i++ {
 			_, err := json.Marshal(hookData)
 			if err != nil {
@@ -259,4 +259,3 @@ func BenchmarkJSONMarshalUnmarshal(b *testing.B) {
 		}
 	})
 }
-

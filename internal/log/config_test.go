@@ -66,26 +66,26 @@ func TestGetStartupDirCompatibility(t *testing.T) {
 
 func TestFindLatestSessionCompatibility(t *testing.T) {
 	tests := []struct {
-		name        string
-		setupFn     func(tempDir string)
-		projectDir  string
-		expected    string
+		name       string
+		setupFn    func(tempDir string)
+		projectDir string
+		expected   string
 	}{
 		{
 			name: "multiple dev- sessions - find latest",
 			setupFn: func(tempDir string) {
 				startupDir := filepath.Join(tempDir, ".the-startup")
 				os.MkdirAll(startupDir, 0755)
-				
+
 				// Create session directories with different timestamps
 				session1 := filepath.Join(startupDir, "dev-session-1")
 				session2 := filepath.Join(startupDir, "dev-session-2")
 				session3 := filepath.Join(startupDir, "dev-session-3")
-				
+
 				os.MkdirAll(session1, 0755)
 				os.MkdirAll(session2, 0755)
 				os.MkdirAll(session3, 0755)
-				
+
 				// Make session2 the most recently modified
 				// We can't easily manipulate timestamps in tests, so we'll just verify
 				// the function finds a valid dev- session
@@ -97,7 +97,7 @@ func TestFindLatestSessionCompatibility(t *testing.T) {
 			setupFn: func(tempDir string) {
 				startupDir := filepath.Join(tempDir, ".the-startup")
 				os.MkdirAll(startupDir, 0755)
-				
+
 				// Create non-dev directories
 				otherDir := filepath.Join(startupDir, "other-session")
 				os.MkdirAll(otherDir, 0755)
@@ -118,9 +118,9 @@ func TestFindLatestSessionCompatibility(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
 			tt.setupFn(tempDir)
-			
+
 			result := FindLatestSession(tempDir)
-			
+
 			if tt.expected == "" {
 				if result != "" {
 					t.Errorf("FindLatestSession() = %q, expected empty string", result)
@@ -274,7 +274,7 @@ func TestGetStartupDirErrorHandling(t *testing.T) {
 				originalUserProfile := os.Getenv("USERPROFILE")
 				os.Unsetenv("HOME")
 				os.Unsetenv("USERPROFILE")
-				
+
 				t.Cleanup(func() {
 					if originalHome != "" {
 						os.Setenv("HOME", originalHome)
@@ -283,7 +283,7 @@ func TestGetStartupDirErrorHandling(t *testing.T) {
 						os.Setenv("USERPROFILE", originalUserProfile)
 					}
 				})
-				
+
 				return tempDir
 			},
 			validateFn: func(t *testing.T, result string) {
@@ -307,9 +307,9 @@ func TestGetStartupDirErrorHandling(t *testing.T) {
 
 func TestDirExists(t *testing.T) {
 	tests := []struct {
-		name       string
-		setupFn    func(*testing.T, string) string
-		expected   bool
+		name     string
+		setupFn  func(*testing.T, string) string
+		expected bool
 	}{
 		{
 			name: "directory exists",
@@ -350,7 +350,7 @@ func TestDirExists(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
 			path := tt.setupFn(t, tempDir)
-			
+
 			result := dirExists(path)
 			if result != tt.expected {
 				t.Errorf("dirExists(%q) = %t, expected %t", path, result, tt.expected)

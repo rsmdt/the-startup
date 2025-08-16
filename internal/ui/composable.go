@@ -35,7 +35,7 @@ type Context struct {
 	TemplateFiles *embed.FS
 	Styles        Styles
 	Renderer      *ProgressiveDisclosureRenderer
-	
+
 	// Shared state
 	SelectedTool  string
 	SelectedPath  string

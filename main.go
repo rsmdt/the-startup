@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/spf13/cobra"
 	"github.com/rsmdt/the-startup/cmd"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -23,7 +23,6 @@ var agentFiles embed.FS
 
 //go:embed assets/commands/**/*.md
 var commandFiles embed.FS
-
 
 //go:embed assets/templates/*
 var templateFiles embed.FS

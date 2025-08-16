@@ -41,15 +41,15 @@ func (m ErrorModel) Update(msg tea.Msg) (ErrorModel, tea.Cmd) {
 
 func (m ErrorModel) View() string {
 	var s strings.Builder
-	
+
 	s.WriteString(m.styles.Title.Render(AppBanner))
 	s.WriteString("\n\n")
-	
+
 	s.WriteString(m.renderer.RenderError(m.err, m.errContext))
 	s.WriteString("\n")
-	
+
 	s.WriteString(m.styles.Help.Render("Press Escape to go back"))
-	
+
 	return s.String()
 }
 

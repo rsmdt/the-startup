@@ -14,9 +14,9 @@ func TestHookInputMarshaling(t *testing.T) {
 		HookEventName:  "PreToolUse",
 		ToolName:       "Task",
 		ToolInput: map[string]interface{}{
-			"description":    "Short task description",
-			"prompt":         "Full prompt for the agent",
-			"subagent_type":  "the-architect",
+			"description":   "Short task description",
+			"prompt":        "Full prompt for the agent",
+			"subagent_type": "the-architect",
 		},
 	}
 
@@ -42,7 +42,7 @@ func TestHookInputMarshaling(t *testing.T) {
 	if unmarshaled.HookEventName != input.HookEventName {
 		t.Errorf("HookEventName mismatch: expected %s, got %s", input.HookEventName, unmarshaled.HookEventName)
 	}
-	
+
 	// Verify tool_input fields
 	subagentType, ok := unmarshaled.ToolInput["subagent_type"].(string)
 	if !ok || subagentType != "the-architect" {
@@ -53,7 +53,7 @@ func TestHookInputMarshaling(t *testing.T) {
 func TestHookInputWithOutput(t *testing.T) {
 	// Test PostToolUse case with output
 	input := HookInput{
-		ToolName:  "Task",
+		ToolName:      "Task",
 		HookEventName: "PostToolUse",
 		ToolInput: map[string]interface{}{
 			"subagent_type": "the-developer",
@@ -140,7 +140,7 @@ func TestHookDataAgentComplete(t *testing.T) {
 	if _, exists := jsonMap["output_summary"]; !exists {
 		t.Error("Expected output_summary field in agent_complete JSON")
 	}
-	
+
 	// Instruction should be empty and omitted from JSON
 	if instruction, exists := jsonMap["instruction"]; exists && instruction != "" {
 		t.Error("Instruction should be omitted in agent_complete JSON")

@@ -246,8 +246,8 @@ func TestProcessToolCallCompatibility(t *testing.T) {
 		validateFn  func(*testing.T, *HookData)
 	}{
 		{
-			name:      "valid PreToolUse Task with the- prefix",
-			jsonInput: `{"tool_name":"Task","tool_input":{"subagent_type":"the-architect","description":"Design system","prompt":"SessionId: dev-123 AgentId: arch-001\nPlease design the system"},"session_id":"dev-123","hook_event_name":"PreToolUse"}`,
+			name:       "valid PreToolUse Task with the- prefix",
+			jsonInput:  `{"tool_name":"Task","tool_input":{"subagent_type":"the-architect","description":"Design system","prompt":"SessionId: dev-123 AgentId: arch-001\nPlease design the system"},"session_id":"dev-123","hook_event_name":"PreToolUse"}`,
 			isPostHook: false,
 			expectNil:  false,
 			validateFn: func(t *testing.T, data *HookData) {
@@ -272,8 +272,8 @@ func TestProcessToolCallCompatibility(t *testing.T) {
 			},
 		},
 		{
-			name:      "valid PostToolUse Task with the- prefix",
-			jsonInput: `{"tool_name":"Task","tool_input":{"subagent_type":"the-developer","description":"Implement feature","prompt":"SessionId: dev-456 AgentId: dev-002\nImplement the feature"},"session_id":"dev-456","hook_event_name":"PostToolUse","output":"Feature implemented successfully"}`,
+			name:       "valid PostToolUse Task with the- prefix",
+			jsonInput:  `{"tool_name":"Task","tool_input":{"subagent_type":"the-developer","description":"Implement feature","prompt":"SessionId: dev-456 AgentId: dev-002\nImplement the feature"},"session_id":"dev-456","hook_event_name":"PostToolUse","output":"Feature implemented successfully"}`,
 			isPostHook: true,
 			expectNil:  false,
 			validateFn: func(t *testing.T, data *HookData) {
@@ -298,14 +298,14 @@ func TestProcessToolCallCompatibility(t *testing.T) {
 			},
 		},
 		{
-			name:      "Non-Task tool - should be filtered",
-			jsonInput: `{"tool_name":"Other","tool_input":{"subagent_type":"the-architect","description":"Design system","prompt":"Test"},"session_id":"dev-123","hook_event_name":"PreToolUse"}`,
+			name:       "Non-Task tool - should be filtered",
+			jsonInput:  `{"tool_name":"Other","tool_input":{"subagent_type":"the-architect","description":"Design system","prompt":"Test"},"session_id":"dev-123","hook_event_name":"PreToolUse"}`,
 			isPostHook: false,
 			expectNil:  true,
 		},
 		{
-			name:      "Task without the- prefix - should be filtered",
-			jsonInput: `{"tool_name":"Task","tool_input":{"subagent_type":"architect","description":"Design system","prompt":"Test"},"session_id":"dev-123","hook_event_name":"PreToolUse"}`,
+			name:       "Task without the- prefix - should be filtered",
+			jsonInput:  `{"tool_name":"Task","tool_input":{"subagent_type":"architect","description":"Design system","prompt":"Test"},"session_id":"dev-123","hook_event_name":"PreToolUse"}`,
 			isPostHook: false,
 			expectNil:  true,
 		},

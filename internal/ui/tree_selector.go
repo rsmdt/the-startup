@@ -25,11 +25,10 @@ type TreeSelector struct {
 	height    int
 	title     string
 	done      bool
-	cancelled bool // Indicates user cancelled with ESC
-	showHelp  bool // Show help overlay
+	cancelled bool   // Indicates user cancelled with ESC
+	showHelp  bool   // Show help overlay
 	styles    Styles // Theme styles
 }
-
 
 func NewTreeSelector(title string, root *TreeNode) *TreeSelector {
 	ts := &TreeSelector{
@@ -54,19 +53,19 @@ func (ts *TreeSelector) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		ts.width = msg.Width
 		ts.height = msg.Height - 6 // Leave room for title and help
-	
+
 	case tea.MouseMsg:
 		switch msg.Type {
 		case tea.MouseWheelUp:
 			if !ts.showHelp && ts.cursor > 0 {
 				ts.cursor--
 			}
-		
+
 		case tea.MouseWheelDown:
 			if !ts.showHelp && ts.cursor < len(ts.nodes)-1 {
 				ts.cursor++
 			}
-		
+
 		case tea.MouseLeft:
 			if !ts.showHelp {
 				// Calculate which item was clicked based on Y position
@@ -88,7 +87,7 @@ func (ts *TreeSelector) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 		}
-	
+
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "ctrl+c", "q":
@@ -99,7 +98,7 @@ func (ts *TreeSelector) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				ts.cancelled = true
 				return ts, tea.Quit
 			}
-		
+
 		case "esc":
 			if ts.showHelp {
 				ts.showHelp = false
@@ -108,26 +107,26 @@ func (ts *TreeSelector) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				ts.cancelled = true
 				return ts, tea.Quit
 			}
-		
+
 		case "?":
 			ts.showHelp = !ts.showHelp
-		
+
 		case "enter":
 			if !ts.showHelp {
 				ts.done = true
 				return ts, tea.Quit
 			}
-		
+
 		case "up", "k":
 			if !ts.showHelp && ts.cursor > 0 {
 				ts.cursor--
 			}
-		
+
 		case "down", "j":
 			if !ts.showHelp && ts.cursor < len(ts.nodes)-1 {
 				ts.cursor++
 			}
-		
+
 		case " ":
 			if !ts.showHelp && ts.cursor < len(ts.nodes) {
 				node := ts.nodes[ts.cursor]
@@ -142,7 +141,7 @@ func (ts *TreeSelector) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				// Update directory selections based on children
 				ts.updateDirectorySelections()
 			}
-		
+
 		case "a", "A":
 			if !ts.showHelp {
 				// Toggle all files on/off
@@ -153,7 +152,7 @@ func (ts *TreeSelector) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 						break
 					}
 				}
-				
+
 				// Set all files to opposite of current state
 				newState := !allSelected
 				ts.setAllFiles(ts.root, newState)
@@ -161,7 +160,7 @@ func (ts *TreeSelector) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 	}
-	
+
 	return ts, nil
 }
 
@@ -169,21 +168,21 @@ func (ts *TreeSelector) View() string {
 	if ts.done {
 		return ""
 	}
-	
+
 	if ts.showHelp {
 		return ts.renderHelp()
 	}
-	
+
 	var s strings.Builder
-	
+
 	// Title
 	s.WriteString(ts.styles.Title.Render(ts.title))
 	s.WriteString("\n\n")
-	
+
 	// Tree view
 	start := 0
 	end := len(ts.nodes)
-	
+
 	// Viewport scrolling
 	if ts.height > 0 && len(ts.nodes) > ts.height {
 		// Keep cursor in view
@@ -198,45 +197,45 @@ func (ts *TreeSelector) View() string {
 			start = end - ts.height
 		}
 	}
-	
+
 	for i := start; i < end && i < len(ts.nodes); i++ {
 		node := ts.nodes[i]
 		indent := ts.getIndent(node)
-		
+
 		// Build the line (matching huh style)
 		var line string
-		
+
 		// Cursor indicator
 		isCursor := i == ts.cursor
-		
+
 		if isCursor {
 			// Primary color ">" for cursor
 			line = ts.styles.Cursor.Render(">") + " "
 		} else {
 			line = "  "
 		}
-		
+
 		// Indentation
 		line += indent
-		
+
 		// Build rest of line content
 		var content string
-		
+
 		// Selection state (filled/empty circle)
 		if node.Selected {
 			content += IconSelected
 		} else {
 			content += IconUnselected
 		}
-		
+
 		// Add space and name
 		content += " " + node.Name
-		
+
 		// Add update indicator if file exists
 		if node.Exists && !node.IsDir {
 			content += " " + ts.styles.Warning.Render("("+IconUpdate+" update)")
 		}
-		
+
 		// Apply appropriate styling to content
 		if isCursor {
 			// Bright text for cursor line content
@@ -245,25 +244,25 @@ func (ts *TreeSelector) View() string {
 			// Normal text for non-cursor lines
 			line += ts.styles.Normal.Render(content)
 		}
-		
+
 		s.WriteString(line)
 		s.WriteString("\n")
 	}
-	
+
 	// Help text
 	s.WriteString("\n")
 	s.WriteString(ts.styles.Help.Render("↑↓/jk/mouse: navigate • space/click: toggle • a: all • enter: confirm • ?: help • esc: back"))
-	
+
 	return s.String()
 }
 
 func (ts *TreeSelector) renderHelp() string {
 	var s strings.Builder
-	
+
 	// Help overlay
 	s.WriteString(ts.styles.Title.Render("🔑 Keyboard Shortcuts"))
 	s.WriteString("\n\n")
-	
+
 	helpItems := []struct {
 		key  string
 		desc string
@@ -277,15 +276,15 @@ func (ts *TreeSelector) renderHelp() string {
 		{"?", "Toggle this help"},
 		{"q", "Quit"},
 	}
-	
+
 	for _, item := range helpItems {
 		key := ts.styles.Info.Render(item.key)
 		s.WriteString(fmt.Sprintf("  %-20s %s\n", key, item.desc))
 	}
-	
+
 	s.WriteString("\n")
 	s.WriteString(ts.styles.Help.Render("Press any key to close this help"))
-	
+
 	return s.String()
 }
 
@@ -338,14 +337,14 @@ func (ts *TreeSelector) updateDirNode(node *TreeNode) {
 	if !node.IsDir {
 		return
 	}
-	
+
 	// First, update all child directories
 	for _, child := range node.Children {
 		if child.IsDir {
 			ts.updateDirNode(child)
 		}
 	}
-	
+
 	// Then check if all children are selected
 	if len(node.Children) > 0 {
 		allSelected := true
@@ -395,7 +394,7 @@ func RunTreeSelector(title string, root *TreeNode) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	ts := model.(*TreeSelector)
 	if ts.cancelled {
 		return nil, fmt.Errorf("selection cancelled")

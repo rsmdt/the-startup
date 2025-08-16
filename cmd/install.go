@@ -3,8 +3,8 @@ package cmd
 import (
 	"embed"
 
-	"github.com/spf13/cobra"
 	"github.com/rsmdt/the-startup/internal/ui"
+	"github.com/spf13/cobra"
 )
 
 // NewInstallCommand creates the install command

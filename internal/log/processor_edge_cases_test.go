@@ -10,12 +10,12 @@ import (
 // TestProcessToolCallEdgeCases tests edge cases and error scenarios
 func TestProcessToolCallEdgeCases(t *testing.T) {
 	tests := []struct {
-		name         string
-		input        string
-		isPostHook   bool
-		expectNil    bool
-		expectError  bool
-		validateFn   func(*testing.T, *HookData, error)
+		name        string
+		input       string
+		isPostHook  bool
+		expectNil   bool
+		expectError bool
+		validateFn  func(*testing.T, *HookData, error)
 	}{
 		{
 			name:        "empty input",
@@ -72,10 +72,10 @@ func TestProcessToolCallEdgeCases(t *testing.T) {
 			expectNil:  true,
 		},
 		{
-			name:      "very large JSON input",
-			input:     fmt.Sprintf(`{"tool_name": "Task", "tool_input": {"subagent_type": "the-test", "description": "%s", "prompt": "SessionId: dev-large AgentId: test-001\nTest"}}`, strings.Repeat("x", 10000)),
+			name:       "very large JSON input",
+			input:      fmt.Sprintf(`{"tool_name": "Task", "tool_input": {"subagent_type": "the-test", "description": "%s", "prompt": "SessionId: dev-large AgentId: test-001\nTest"}}`, strings.Repeat("x", 10000)),
 			isPostHook: false,
-			expectNil: false,
+			expectNil:  false,
 			validateFn: func(t *testing.T, data *HookData, err error) {
 				if err != nil {
 					t.Errorf("Large input should be handled: %v", err)
@@ -86,10 +86,10 @@ func TestProcessToolCallEdgeCases(t *testing.T) {
 			},
 		},
 		{
-			name:      "unicode characters in JSON",
-			input:     `{"tool_name": "Task", "tool_input": {"subagent_type": "the-测试", "description": "测试描述", "prompt": "SessionId: dev-unicode AgentId: test-unicode\n测试提示"}}`,
+			name:       "unicode characters in JSON",
+			input:      `{"tool_name": "Task", "tool_input": {"subagent_type": "the-测试", "description": "测试描述", "prompt": "SessionId: dev-unicode AgentId: test-unicode\n测试提示"}}`,
 			isPostHook: false,
-			expectNil: false,
+			expectNil:  false,
 			validateFn: func(t *testing.T, data *HookData, err error) {
 				if err != nil {
 					t.Errorf("Unicode input should be handled: %v", err)
@@ -103,10 +103,10 @@ func TestProcessToolCallEdgeCases(t *testing.T) {
 			},
 		},
 		{
-			name:      "PostToolUse with very large output",
-			input:     fmt.Sprintf(`{"tool_name": "Task", "tool_input": {"subagent_type": "the-test", "description": "Test", "prompt": "SessionId: dev-large-output AgentId: test-002\nTest"}, "output": "%s"}`, strings.Repeat("A", 5000)),
+			name:       "PostToolUse with very large output",
+			input:      fmt.Sprintf(`{"tool_name": "Task", "tool_input": {"subagent_type": "the-test", "description": "Test", "prompt": "SessionId: dev-large-output AgentId: test-002\nTest"}, "output": "%s"}`, strings.Repeat("A", 5000)),
 			isPostHook: true,
-			expectNil: false,
+			expectNil:  false,
 			validateFn: func(t *testing.T, data *HookData, err error) {
 				if err != nil {
 					t.Errorf("Large output should be handled: %v", err)
@@ -120,10 +120,10 @@ func TestProcessToolCallEdgeCases(t *testing.T) {
 			},
 		},
 		{
-			name:      "special characters in session and agent IDs",
-			input:     `{"tool_name": "Task", "tool_input": {"subagent_type": "the-special", "description": "Test", "prompt": "SessionId: dev-session_with-special.chars AgentId: agent_with-special.chars\nTest"}}`,
+			name:       "special characters in session and agent IDs",
+			input:      `{"tool_name": "Task", "tool_input": {"subagent_type": "the-special", "description": "Test", "prompt": "SessionId: dev-session_with-special.chars AgentId: agent_with-special.chars\nTest"}}`,
 			isPostHook: false,
-			expectNil: false,
+			expectNil:  false,
 			validateFn: func(t *testing.T, data *HookData, err error) {
 				if data.SessionID != "dev-session_with-special.chars" {
 					t.Errorf("Expected special characters in session ID, got: %s", data.SessionID)
@@ -135,10 +135,10 @@ func TestProcessToolCallEdgeCases(t *testing.T) {
 			},
 		},
 		{
-			name:      "missing session and agent IDs - should find latest session",
-			input:     `{"tool_name": "Task", "tool_input": {"subagent_type": "the-fallback", "description": "Test", "prompt": "Just a prompt without IDs"}}`,
+			name:       "missing session and agent IDs - should find latest session",
+			input:      `{"tool_name": "Task", "tool_input": {"subagent_type": "the-fallback", "description": "Test", "prompt": "Just a prompt without IDs"}}`,
 			isPostHook: false,
-			expectNil: false,
+			expectNil:  false,
 			validateFn: func(t *testing.T, data *HookData, err error) {
 				// Should generate fallback agent ID since no explicit AgentID provided
 				if !strings.HasPrefix(data.AgentID, "the-fallback-") {
@@ -149,22 +149,22 @@ func TestProcessToolCallEdgeCases(t *testing.T) {
 			},
 		},
 		{
-			name:      "case sensitivity in tool name",
-			input:     `{"tool_name": "task", "tool_input": {"subagent_type": "the-case", "description": "Test"}}`,
+			name:       "case sensitivity in tool name",
+			input:      `{"tool_name": "task", "tool_input": {"subagent_type": "the-case", "description": "Test"}}`,
 			isPostHook: false,
-			expectNil: true, // Should be filtered - only "Task" is valid
+			expectNil:  true, // Should be filtered - only "Task" is valid
 		},
 		{
-			name:      "case sensitivity in subagent_type prefix",
-			input:     `{"tool_name": "Task", "tool_input": {"subagent_type": "The-case", "description": "Test"}}`,
+			name:       "case sensitivity in subagent_type prefix",
+			input:      `{"tool_name": "Task", "tool_input": {"subagent_type": "The-case", "description": "Test"}}`,
 			isPostHook: false,
-			expectNil: true, // Should be filtered - only "the-" prefix is valid
+			expectNil:  true, // Should be filtered - only "the-" prefix is valid
 		},
 		{
-			name:      "nested objects in tool_input",
-			input:     `{"tool_name": "Task", "tool_input": {"subagent_type": "the-nested", "description": "Test", "nested": {"key": "value"}, "prompt": "SessionId: dev-nested AgentId: nested-001\nTest"}}`,
+			name:       "nested objects in tool_input",
+			input:      `{"tool_name": "Task", "tool_input": {"subagent_type": "the-nested", "description": "Test", "nested": {"key": "value"}, "prompt": "SessionId: dev-nested AgentId: nested-001\nTest"}}`,
 			isPostHook: false,
-			expectNil: false,
+			expectNil:  false,
 			validateFn: func(t *testing.T, data *HookData, err error) {
 				if data.AgentType != "the-nested" {
 					t.Errorf("Expected nested agent type, got: %s", data.AgentType)

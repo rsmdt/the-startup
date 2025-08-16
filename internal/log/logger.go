@@ -39,7 +39,6 @@ func WriteSessionLog(sessionID string, data *HookData) error {
 	return appendJSONL(sessionFile, data)
 }
 
-
 // EnsureDirectories creates the required directories if they don't exist
 func EnsureDirectories(startupDir string) error {
 	return os.MkdirAll(startupDir, 0755)
@@ -48,7 +47,7 @@ func EnsureDirectories(startupDir string) error {
 // FindLatestSession finds the most recent session directory
 func FindLatestSession(projectDir string) string {
 	startupDir := GetStartupDir(projectDir)
-	
+
 	entries, err := os.ReadDir(startupDir)
 	if err != nil {
 		return ""
@@ -61,7 +60,7 @@ func FindLatestSession(projectDir string) string {
 		if !entry.IsDir() {
 			continue
 		}
-		
+
 		name := entry.Name()
 		if !strings.HasPrefix(name, "dev-") {
 			continue

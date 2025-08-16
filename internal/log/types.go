@@ -17,7 +17,7 @@ type HookData struct {
 	Role      string `json:"role"`      // "user" for agent_start, "assistant" for agent_complete
 	Content   string `json:"content"`   // prompt for user, response for assistant
 	Timestamp string `json:"timestamp"` // UTC ISO format with Z suffix
-	
+
 	// Internal fields not serialized to JSON
 	SessionID string `json:"-"` // Used internally for file routing
 	AgentID   string `json:"-"` // Used internally for file naming
@@ -28,7 +28,7 @@ type LogFlags struct {
 	// Write mode flags
 	Assistant bool // --assistant, -a
 	User      bool // --user, -u
-	
+
 	// Read mode flags
 	Read            bool   // --read, -r
 	AgentID         string // --agent-id

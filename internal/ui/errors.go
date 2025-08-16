@@ -57,7 +57,7 @@ func RenderError(err error, context *ErrorContext) string {
 		b.WriteString(styles.Help.Render("Context:"))
 		b.WriteString("\n")
 		for key, value := range context.Context {
-			b.WriteString(fmt.Sprintf("  %s: %s\n", 
+			b.WriteString(fmt.Sprintf("  %s: %s\n",
 				styles.Info.Render(key),
 				styles.Normal.Render(value)))
 		}
@@ -80,7 +80,7 @@ func RenderError(err error, context *ErrorContext) string {
 // GetErrorContext analyzes an error and provides context
 func GetErrorContext(err error, operation string) *ErrorContext {
 	errStr := err.Error()
-	
+
 	// Permission denied
 	if strings.Contains(errStr, "permission denied") || strings.Contains(errStr, "access denied") {
 		return &ErrorContext{
@@ -203,7 +203,7 @@ func getCurrentUser() string {
 // ErrorBox creates a bordered error message
 func ErrorBox(title, message string) string {
 	styles := GetStyles()
-	
+
 	errorStyle := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(styles.Error.GetForeground()).
@@ -217,7 +217,7 @@ func ErrorBox(title, message string) string {
 // WarningBox creates a bordered warning message
 func WarningBox(title, message string) string {
 	styles := GetStyles()
-	
+
 	warningStyle := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(styles.Warning.GetForeground()).
@@ -231,7 +231,7 @@ func WarningBox(title, message string) string {
 // InfoBox creates a bordered info message
 func InfoBox(title, message string) string {
 	styles := GetStyles()
-	
+
 	infoStyle := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(styles.Info.GetForeground()).
@@ -242,10 +242,10 @@ func InfoBox(title, message string) string {
 	return infoStyle.Render(content)
 }
 
-// SuccessBox creates a bordered success message  
+// SuccessBox creates a bordered success message
 func SuccessBox(title, message string) string {
 	styles := GetStyles()
-	
+
 	successStyle := lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(styles.Success.GetForeground()).

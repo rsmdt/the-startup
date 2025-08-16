@@ -16,41 +16,41 @@ import (
 // TestAgentFileManager tests the AgentFileManager structure and its methods
 func TestAgentFileManager(t *testing.T) {
 	tempDir := t.TempDir()
-	
+
 	t.Run("GetAgentFilePath", func(t *testing.T) {
 		afm := &AgentFileManager{
 			SessionID: "dev-20250812-143022",
 			AgentID:   "arch-001",
 			BaseDir:   tempDir,
 		}
-		
+
 		expected := filepath.Join(tempDir, "dev-20250812-143022", "arch-001.jsonl")
 		actual := afm.GetAgentFilePath()
 		assert.Equal(t, expected, actual)
 	})
-	
+
 	t.Run("GetSessionDir", func(t *testing.T) {
 		afm := &AgentFileManager{
 			SessionID: "dev-20250812-143022",
-			AgentID:   "arch-001", 
+			AgentID:   "arch-001",
 			BaseDir:   tempDir,
 		}
-		
+
 		expected := filepath.Join(tempDir, "dev-20250812-143022")
 		actual := afm.GetSessionDir()
 		assert.Equal(t, expected, actual)
 	})
-	
+
 	t.Run("EnsureSessionDir", func(t *testing.T) {
 		afm := &AgentFileManager{
 			SessionID: "dev-20250812-143022",
 			AgentID:   "arch-001",
 			BaseDir:   tempDir,
 		}
-		
+
 		err := afm.EnsureSessionDir()
 		assert.NoError(t, err)
-		
+
 		// Verify directory was created with proper permissions
 		sessionDir := filepath.Join(tempDir, "dev-20250812-143022")
 		info, err := os.Stat(sessionDir)
@@ -68,14 +68,14 @@ func TestWriteAgentContext(t *testing.T) {
 	originalClaudeDir := os.Getenv("CLAUDE_PROJECT_DIR")
 	defer os.Setenv("CLAUDE_PROJECT_DIR", originalClaudeDir)
 	os.Setenv("CLAUDE_PROJECT_DIR", tempDir)
-	
+
 	// Create the .the-startup directory so GetStartupDir will use project-local directory
 	startupDir := filepath.Join(tempDir, ".the-startup")
 	require.NoError(t, os.MkdirAll(startupDir, 0755))
-	
+
 	sessionID := "dev-test-session"
 	agentID := "arch-001"
-	
+
 	hookData := &HookData{
 		Event:       "agent_start",
 		AgentType:   "the-architect",
@@ -84,19 +84,19 @@ func TestWriteAgentContext(t *testing.T) {
 		SessionID:   sessionID,
 		Timestamp:   "2025-08-12T14:00:00.000Z",
 	}
-	
+
 	t.Run("Successful write", func(t *testing.T) {
 		err := WriteAgentContext(sessionID, agentID, hookData)
 		assert.NoError(t, err)
-		
+
 		// Verify file exists
 		expectedPath := filepath.Join(tempDir, ".the-startup", sessionID, agentID+".jsonl")
 		assert.FileExists(t, expectedPath)
-		
+
 		// Verify content
 		content, err := os.ReadFile(expectedPath)
 		assert.NoError(t, err)
-		
+
 		// Parse the JSONL line (remove trailing newline if present)
 		jsonLine := strings.TrimSpace(string(content))
 		var parsedData HookData
@@ -104,21 +104,21 @@ func TestWriteAgentContext(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, *hookData, parsedData)
 	})
-	
+
 	t.Run("Append operation", func(t *testing.T) {
 		// Write second entry
 		hookData2 := &HookData{
 			Event:       "agent_complete",
-			AgentType:   "the-architect", 
+			AgentType:   "the-architect",
 			AgentID:     agentID,
 			Description: "Task completed",
 			SessionID:   sessionID,
 			Timestamp:   "2025-08-12T14:05:00.000Z",
 		}
-		
+
 		err := WriteAgentContext(sessionID, agentID, hookData2)
 		assert.NoError(t, err)
-		
+
 		// Verify file contains both entries
 		expectedPath := filepath.Join(tempDir, ".the-startup", sessionID, agentID+".jsonl")
 		content, err := os.ReadFile(expectedPath)
@@ -126,18 +126,18 @@ func TestWriteAgentContext(t *testing.T) {
 		lines := strings.Split(strings.TrimSpace(string(content)), "\n")
 		assert.Len(t, lines, 2)
 	})
-	
+
 	t.Run("Parameter validation", func(t *testing.T) {
 		// Test empty sessionID
 		err := WriteAgentContext("", agentID, hookData)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "sessionID, agentID, and data required")
-		
+
 		// Test empty agentID
 		err = WriteAgentContext(sessionID, "", hookData)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "sessionID, agentID, and data required")
-		
+
 		// Test nil data
 		err = WriteAgentContext(sessionID, agentID, nil)
 		assert.Error(t, err)
@@ -151,78 +151,78 @@ func TestReadAgentContext(t *testing.T) {
 	originalClaudeDir := os.Getenv("CLAUDE_PROJECT_DIR")
 	defer os.Setenv("CLAUDE_PROJECT_DIR", originalClaudeDir)
 	os.Setenv("CLAUDE_PROJECT_DIR", tempDir)
-	
+
 	// Create the .the-startup directory so GetStartupDir will use project-local directory
 	startupDir := filepath.Join(tempDir, ".the-startup")
 	require.NoError(t, os.MkdirAll(startupDir, 0755))
-	
+
 	sessionID := "dev-test-session"
 	agentID := "arch-001"
-	
+
 	t.Run("Read existing context", func(t *testing.T) {
 		// Create test context file
 		sessionDir := filepath.Join(tempDir, ".the-startup", sessionID)
 		require.NoError(t, os.MkdirAll(sessionDir, 0755))
-		
+
 		contextFile := filepath.Join(sessionDir, agentID+".jsonl")
 		testData := []string{
 			`{"event":"agent_start","agent_type":"the-architect","agent_id":"arch-001","description":"Task 1","session_id":"dev-test-session","timestamp":"2025-08-12T14:00:00.000Z"}`,
 			`{"event":"agent_complete","agent_type":"the-architect","agent_id":"arch-001","description":"Task 1 complete","session_id":"dev-test-session","timestamp":"2025-08-12T14:05:00.000Z"}`,
 			`{"event":"agent_start","agent_type":"the-architect","agent_id":"arch-001","description":"Task 2","session_id":"dev-test-session","timestamp":"2025-08-12T14:10:00.000Z"}`,
 		}
-		
+
 		err := os.WriteFile(contextFile, []byte(strings.Join(testData, "\n")+"\n"), 0644)
 		require.NoError(t, err)
-		
+
 		// Test reading with limit
 		entries, err := ReadAgentContext(sessionID, agentID, 2)
 		assert.NoError(t, err)
 		assert.Len(t, entries, 2)
-		
+
 		// Should return most recent entries (last 2 lines)
 		assert.Equal(t, "Task 1 complete", entries[0].Description)
 		assert.Equal(t, "Task 2", entries[1].Description)
 	})
-	
+
 	t.Run("Non-existent agent returns empty", func(t *testing.T) {
 		entries, err := ReadAgentContext("nonexistent-session", "nonexistent-agent", 10)
 		assert.NoError(t, err)
 		assert.Empty(t, entries)
 	})
-	
+
 	t.Run("Parameter validation", func(t *testing.T) {
 		// Test empty agentID
 		entries, err := ReadAgentContext(sessionID, "", 10)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "agentID required")
 		assert.Nil(t, entries)
-		
-		// Test invalid maxLines - should default to 50  
+
+		// Test invalid maxLines - should default to 50
 		var entries2 []*HookData
 		var err2 error
 		entries2, err2 = ReadAgentContext(sessionID, "some-agent", 0)
-		assert.NoError(t, err2) // Should not error but use default
+		assert.NoError(t, err2)    // Should not error but use default
 		assert.NotNil(t, entries2) // Should return empty slice, not nil
-		
+
 		entries2, err2 = ReadAgentContext(sessionID, "some-agent", 2000)
-		assert.NoError(t, err2) // Should not error but use default
+		assert.NoError(t, err2)    // Should not error but use default
 		assert.NotNil(t, entries2) // Should return empty slice, not nil
 	})
-	
+
 	t.Run("Corrupted JSONL handling", func(t *testing.T) {
 		sessionDir := filepath.Join(tempDir, ".the-startup", "corrupt-session")
 		require.NoError(t, os.MkdirAll(sessionDir, 0755))
-		
+
 		contextFile := filepath.Join(sessionDir, "arch-corrupt.jsonl")
 		corruptData := []string{
 			`{"event":"agent_start","agent_id":"arch-corrupt","timestamp":"2025-08-12T14:00:00.000Z"}`,
 			`invalid json line`,
 			`{"event":"agent_complete","agent_id":"arch-corrupt","timestamp":"2025-08-12T14:05:00.000Z"}`,
 		}
-		
+
 		err := os.WriteFile(contextFile, []byte(strings.Join(corruptData, "\n")+"\n"), 0644)
 		require.NoError(t, err)
-		
+
 		entries, err := ReadAgentContext("corrupt-session", "arch-corrupt", 10)
 		assert.NoError(t, err)
 		assert.Len(t, entries, 2) // Should skip corrupted line
@@ -235,11 +235,11 @@ func TestFindLatestSessionWithAgent(t *testing.T) {
 	originalClaudeDir := os.Getenv("CLAUDE_PROJECT_DIR")
 	defer os.Setenv("CLAUDE_PROJECT_DIR", originalClaudeDir)
 	os.Setenv("CLAUDE_PROJECT_DIR", tempDir)
-	
+
 	baseDir := filepath.Join(tempDir, ".the-startup")
 	require.NoError(t, os.MkdirAll(baseDir, 0755))
 	agentID := "arch-001"
-	
+
 	t.Run("Find latest session with agent", func(t *testing.T) {
 		// Create multiple sessions with the agent
 		sessions := []string{
@@ -247,16 +247,16 @@ func TestFindLatestSessionWithAgent(t *testing.T) {
 			"dev-20250812-150000", // This should be latest
 			"dev-20250812-130000",
 		}
-		
+
 		baseTime := time.Now()
 		for _, session := range sessions {
 			sessionDir := filepath.Join(baseDir, session)
 			require.NoError(t, os.MkdirAll(sessionDir, 0755))
-			
+
 			agentFile := filepath.Join(sessionDir, agentID+".jsonl")
 			testData := fmt.Sprintf(`{"event":"agent_start","agent_id":"%s","session_id":"%s"}`, agentID, session)
 			require.NoError(t, os.WriteFile(agentFile, []byte(testData), 0644))
-			
+
 			// Set specific modification times - make dev-20250812-150000 (index 1) the latest
 			var modTime time.Time
 			switch session {
@@ -267,15 +267,15 @@ func TestFindLatestSessionWithAgent(t *testing.T) {
 			case "dev-20250812-130000":
 				modTime = baseTime.Add(-3 * time.Hour) // Middle
 			}
-			
+
 			require.NoError(t, os.Chtimes(agentFile, modTime, modTime))
 		}
-		
+
 		latestSession, err := findLatestSessionWithAgent(agentID)
 		assert.NoError(t, err)
 		assert.Equal(t, "dev-20250812-150000", latestSession)
 	})
-	
+
 	t.Run("No session found", func(t *testing.T) {
 		session, err := findLatestSessionWithAgent("nonexistent-agent")
 		assert.Error(t, err)
@@ -287,46 +287,46 @@ func TestFindLatestSessionWithAgent(t *testing.T) {
 // TestReadLastNLines tests the efficient file reading helper
 func TestReadLastNLines(t *testing.T) {
 	tempDir := t.TempDir()
-	
+
 	t.Run("Small file - read all", func(t *testing.T) {
 		testFile := filepath.Join(tempDir, "small.jsonl")
 		testLines := []string{
 			"line 1",
-			"line 2", 
+			"line 2",
 			"line 3",
 			"line 4",
 			"line 5",
 		}
-		
+
 		content := strings.Join(testLines, "\n") + "\n"
 		require.NoError(t, os.WriteFile(testFile, []byte(content), 0644))
-		
+
 		lines, err := readLastNLines(testFile, 3)
 		assert.NoError(t, err)
 		assert.Len(t, lines, 3)
 		assert.Equal(t, "line 3", lines[0])
-		assert.Equal(t, "line 4", lines[1]) 
+		assert.Equal(t, "line 4", lines[1])
 		assert.Equal(t, "line 5", lines[2])
 	})
-	
+
 	t.Run("Empty file", func(t *testing.T) {
 		testFile := filepath.Join(tempDir, "empty.jsonl")
 		require.NoError(t, os.WriteFile(testFile, []byte(""), 0644))
-		
+
 		lines, err := readLastNLines(testFile, 10)
 		assert.NoError(t, err)
 		assert.Empty(t, lines)
 	})
-	
+
 	t.Run("File not exists", func(t *testing.T) {
 		lines, err := readLastNLines("/nonexistent/file.jsonl", 10)
 		assert.Error(t, err)
 		assert.Nil(t, lines)
 	})
-	
+
 	t.Run("Large file - use buffered reading", func(t *testing.T) {
 		testFile := filepath.Join(tempDir, "large.jsonl")
-		
+
 		// Create a file larger than 1MB threshold
 		var lines []string
 		for i := 0; i < 50000; i++ {
@@ -334,14 +334,14 @@ func TestReadLastNLines(t *testing.T) {
 			line := fmt.Sprintf(`{"event":"agent_start","agent_id":"test","description":"Line %05d with some extra padding"}`, i)
 			lines = append(lines, line)
 		}
-		
+
 		content := strings.Join(lines, "\n") + "\n"
 		require.NoError(t, os.WriteFile(testFile, []byte(content), 0644))
-		
+
 		result, err := readLastNLines(testFile, 3)
 		assert.NoError(t, err)
 		assert.Len(t, result, 3)
-		
+
 		// Verify we got the last 3 lines
 		expectedLines := lines[len(lines)-3:]
 		assert.Equal(t, expectedLines, result)
@@ -352,35 +352,35 @@ func TestReadLastNLines(t *testing.T) {
 func TestReadTailWithBuffer(t *testing.T) {
 	tempDir := t.TempDir()
 	testFile := filepath.Join(tempDir, "test.jsonl")
-	
+
 	// Create test data
 	testLines := []string{
 		"first line",
-		"second line", 
+		"second line",
 		"third line",
 		"fourth line",
 		"fifth line",
 	}
-	
+
 	content := strings.Join(testLines, "\n") + "\n"
 	require.NoError(t, os.WriteFile(testFile, []byte(content), 0644))
-	
+
 	file, err := os.Open(testFile)
 	require.NoError(t, err)
 	defer file.Close()
-	
+
 	stat, err := file.Stat()
 	require.NoError(t, err)
-	
+
 	t.Run("Read last N lines", func(t *testing.T) {
 		lines, err := readTailWithBuffer(file, stat.Size(), 3)
 		assert.NoError(t, err)
 		assert.Len(t, lines, 3)
-		
+
 		expected := []string{"third line", "fourth line", "fifth line"}
 		assert.Equal(t, expected, lines)
 	})
-	
+
 	t.Run("Request more lines than available", func(t *testing.T) {
 		lines, err := readTailWithBuffer(file, stat.Size(), 10)
 		assert.NoError(t, err)

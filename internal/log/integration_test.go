@@ -112,7 +112,7 @@ func TestFullPythonCompatibilityFlow(t *testing.T) {
 	t.Run("agent_complete_flow", func(t *testing.T) {
 		// Long output to test truncation
 		longOutput := strings.Repeat("The architecture has been designed with the following components: ", 30) + " [additional content...]"
-		
+
 		jsonInput := `{
 			"session_id": "dev-test-session",
 			"transcript_path": "/path/to/transcript.jsonl",
@@ -196,13 +196,13 @@ func TestFullPythonCompatibilityFlow(t *testing.T) {
 func TestDebugOutputIntegration(t *testing.T) {
 	// This test verifies debug output behavior but can't easily capture stderr
 	// in unit tests, so we just verify the functions don't crash
-	
+
 	os.Setenv("DEBUG_HOOKS", "1")
 	defer os.Unsetenv("DEBUG_HOOKS")
-	
+
 	DebugLog("Test debug message: %s", "value")
 	DebugError(os.ErrNotExist)
-	
+
 	// Verify debug is enabled
 	if !IsDebugEnabled() {
 		t.Error("Expected debug to be enabled with DEBUG_HOOKS=1")
@@ -212,7 +212,7 @@ func TestDebugOutputIntegration(t *testing.T) {
 // TestPythonJSONFormatCompatibility ensures JSON output exactly matches Python format
 func TestPythonJSONFormatCompatibility(t *testing.T) {
 	reader := strings.NewReader(`{"tool_name":"Task","tool_input":{"subagent_type":"the-developer","description":"Implement feature","prompt":"SessionId: test-123 AgentId: dev-456\nImplement the user authentication system"},"session_id":"test-123","hook_event_name":"PreToolUse"}`)
-	
+
 	hookData, err := ProcessToolCall(reader, false)
 	if err != nil {
 		t.Fatalf("ProcessToolCall failed: %v", err)
@@ -253,7 +253,7 @@ func TestPythonJSONFormatCompatibility(t *testing.T) {
 
 	// Test agent_complete JSON format
 	completeReader := strings.NewReader(`{"tool_name":"Task","tool_input":{"subagent_type":"the-developer","description":"Implement feature","prompt":"SessionId: test-123 AgentId: dev-456\nImplement the user authentication system"},"session_id":"test-123","hook_event_name":"PostToolUse","output":"Feature implemented successfully with tests"}`)
-	
+
 	completeHookData, err := ProcessToolCall(completeReader, true)
 	if err != nil {
 		t.Fatalf("ProcessToolCall failed for complete: %v", err)
@@ -309,11 +309,11 @@ func TestEnvironmentVariableHandling(t *testing.T) {
 
 		// Test that logs go to project directory
 		expectedStartupDir := filepath.Join(tempDir, ".the-startup")
-		
+
 		// Create the directory to test the logic
 		os.MkdirAll(expectedStartupDir, 0755)
 		actualStartupDir := GetStartupDir(projectDir)
-		
+
 		if actualStartupDir != expectedStartupDir {
 			t.Errorf("Expected startup dir %q, got %q", expectedStartupDir, actualStartupDir)
 		}
@@ -370,10 +370,10 @@ func TestCrossPlatformFileSystemBehavior(t *testing.T) {
 		// Test that path separators work correctly on all platforms
 		sessionID := "dev-cross-platform-test"
 		startupDir := filepath.Join(tempDir, ".the-startup")
-		
+
 		// Create the .the-startup directory first so GetStartupDir will find it
 		os.MkdirAll(startupDir, 0755)
-		
+
 		expectedSessionDir := filepath.Join(startupDir, sessionID)
 		expectedSessionFile := filepath.Join(expectedSessionDir, "agent-instructions.jsonl")
 
@@ -451,10 +451,10 @@ func TestCrossPlatformFileSystemBehavior(t *testing.T) {
 		// Create the .the-startup directory first
 		startupDir := filepath.Join(tempDir, ".the-startup")
 		os.MkdirAll(startupDir, 0755)
-		
+
 		// Test file creation and appending behavior
 		sessionID := "dev-file-ops-test"
-		
+
 		hookData1 := &HookData{
 			Event:     "agent_start",
 			AgentType: "the-tester",
@@ -528,7 +528,7 @@ func TestDirectoryStructureValidation(t *testing.T) {
 
 		// Get startup directory (should fall back to home)
 		startupDir := GetStartupDir(tempProjectDir)
-		
+
 		// Should not be in the project directory
 		if strings.HasPrefix(startupDir, tempProjectDir) {
 			t.Errorf("Expected fallback to home directory, but got project-relative path: %s", startupDir)
@@ -542,7 +542,7 @@ func TestDirectoryStructureValidation(t *testing.T) {
 
 	t.Run("CompleteDirectoryStructure", func(t *testing.T) {
 		sessionID := "dev-structure-test"
-		
+
 		hookData := &HookData{
 			Event:     "agent_start",
 			AgentType: "the-developer",
@@ -590,7 +590,7 @@ func TestConcurrentExecution(t *testing.T) {
 	t.Run("ConcurrentSessionWrites", func(t *testing.T) {
 		numConcurrent := 10
 		sessionID := "dev-concurrent-test"
-		
+
 		// Use WaitGroup to coordinate goroutines
 		var wg sync.WaitGroup
 		var mu sync.Mutex
@@ -601,7 +601,7 @@ func TestConcurrentExecution(t *testing.T) {
 			wg.Add(1)
 			go func(id int) {
 				defer wg.Done()
-				
+
 				hookData := &HookData{
 					Event:     "agent_start",
 					AgentType: "the-concurrent-tester",
@@ -656,7 +656,7 @@ func TestConcurrentExecution(t *testing.T) {
 
 	t.Run("ConcurrentGlobalWrites", func(t *testing.T) {
 		numConcurrent := 5
-		
+
 		var wg sync.WaitGroup
 		var mu sync.Mutex
 		errors := []error{}
@@ -666,7 +666,7 @@ func TestConcurrentExecution(t *testing.T) {
 			wg.Add(1)
 			go func(id int) {
 				defer wg.Done()
-				
+
 				hookData := &HookData{
 					Event:     "agent_complete",
 					AgentType: "the-global-tester",

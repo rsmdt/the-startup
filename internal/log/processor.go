@@ -40,13 +40,13 @@ func ProcessToolCall(input io.Reader, isPostHook bool) (*HookData, error) {
 
 	// Extract session and agent IDs
 	sessionID := ExtractSessionID(prompt)
-	
+
 	// If no session ID found in prompt, try to find latest session
 	if sessionID == "" {
 		projectDir := GetProjectDir()
 		sessionID = FindLatestSession(projectDir)
 	}
-	
+
 	// Use enhanced AgentID extraction with fallback generation
 	agentID := ExtractOrGenerateAgentID(prompt, subagentType, sessionID)
 
@@ -103,7 +103,6 @@ func ExtractAgentID(prompt string) string {
 	}
 	return ""
 }
-
 
 // DebugLog outputs debug information to stderr if DEBUG_HOOKS is set
 func DebugLog(format string, args ...interface{}) {

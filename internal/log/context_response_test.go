@@ -16,25 +16,25 @@ func TestReadContext(t *testing.T) {
 	originalClaudeDir := os.Getenv("CLAUDE_PROJECT_DIR")
 	defer os.Setenv("CLAUDE_PROJECT_DIR", originalClaudeDir)
 	os.Setenv("CLAUDE_PROJECT_DIR", tempDir)
-	
+
 	// Create the .the-startup directory
 	startupDir := filepath.Join(tempDir, ".the-startup")
 	require.NoError(t, os.MkdirAll(startupDir, 0755))
-	
+
 	sessionID := "dev-20250812-143022"
 	agentID := "arch-001"
 
 	// Create test data using the working pattern
 	sessionDir := filepath.Join(startupDir, sessionID)
 	require.NoError(t, os.MkdirAll(sessionDir, 0755))
-	
+
 	contextFile := filepath.Join(sessionDir, agentID+".jsonl")
 	testData := []string{
 		`{"event":"agent_start","agent_type":"the-architect","agent_id":"arch-001","description":"Design authentication system","session_id":"dev-20250812-143022","timestamp":"2025-08-12T14:00:00.000Z"}`,
 		`{"event":"agent_complete","agent_type":"the-architect","agent_id":"arch-001","description":"Authentication design completed","session_id":"dev-20250812-143022","timestamp":"2025-08-12T14:05:00.000Z"}`,
 		`{"event":"agent_start","agent_type":"the-architect","agent_id":"arch-001","description":"Implement security features","session_id":"dev-20250812-143022","timestamp":"2025-08-12T14:10:00.000Z"}`,
 	}
-	
+
 	require.NoError(t, os.WriteFile(contextFile, []byte(strings.Join(testData, "\n")+"\n"), 0644))
 
 	testCases := []struct {
@@ -55,11 +55,11 @@ func TestReadContext(t *testing.T) {
 			expectError: false,
 			checkResult: func(t *testing.T, result string, err error) {
 				assert.NoError(t, err)
-				
+
 				var response ContextResponse
 				err = json.Unmarshal([]byte(result), &response)
 				assert.NoError(t, err)
-				
+
 				assert.Equal(t, agentID, response.Metadata.AgentID)
 				assert.Equal(t, sessionID, response.Metadata.SessionID)
 				assert.Equal(t, 3, response.Metadata.TotalEntries)
@@ -77,13 +77,13 @@ func TestReadContext(t *testing.T) {
 			expectError: false,
 			checkResult: func(t *testing.T, result string, err error) {
 				assert.NoError(t, err)
-				
+
 				lines := strings.Split(result, "\n")
 				assert.Contains(t, lines[0], "Agent: arch-001")
 				assert.Contains(t, lines[0], "Session: dev-20250812-143022")
 				assert.Contains(t, lines[0], "Entries: 3")
 				assert.Equal(t, "---", lines[1])
-				
+
 				// Check entries format
 				assert.Contains(t, lines[2], "[agent_start]")
 				assert.Contains(t, lines[3], "[agent_complete]")
@@ -101,11 +101,11 @@ func TestReadContext(t *testing.T) {
 			expectError: false,
 			checkResult: func(t *testing.T, result string, err error) {
 				assert.NoError(t, err)
-				
+
 				var response ContextResponse
 				err = json.Unmarshal([]byte(result), &response)
 				assert.NoError(t, err)
-				
+
 				assert.Len(t, response.Entries, 2)
 				assert.Equal(t, 2, response.Metadata.TotalEntries)
 			},
@@ -121,11 +121,11 @@ func TestReadContext(t *testing.T) {
 			expectError: false, // Should return empty context, not error
 			checkResult: func(t *testing.T, result string, err error) {
 				assert.NoError(t, err)
-				
+
 				var response ContextResponse
 				err = json.Unmarshal([]byte(result), &response)
 				assert.NoError(t, err)
-				
+
 				assert.Empty(t, response.Entries)
 				assert.Equal(t, 0, response.Metadata.TotalEntries)
 			},
@@ -152,11 +152,11 @@ func TestReadContext(t *testing.T) {
 			expectError: false,
 			checkResult: func(t *testing.T, result string, err error) {
 				assert.NoError(t, err)
-				
+
 				var response ContextResponse
 				err = json.Unmarshal([]byte(result), &response)
 				assert.NoError(t, err)
-				
+
 				// Should use defaults: maxLines=50, format=json
 				assert.Len(t, response.Entries, 3) // All entries since less than 50
 			},
@@ -171,7 +171,7 @@ func TestReadContext(t *testing.T) {
 			expectError: false,
 			checkResult: func(t *testing.T, result string, err error) {
 				assert.NoError(t, err)
-				
+
 				// Should be valid JSON despite invalid format request
 				var response ContextResponse
 				err = json.Unmarshal([]byte(result), &response)
@@ -203,7 +203,7 @@ func TestBuildMetadata(t *testing.T) {
 
 	// Create test context file
 	setupTestContext(t, startupDir, sessionID, agentID)
-	
+
 	// Verify the test file was created
 	expectedFile := filepath.Join(startupDir, sessionID, agentID+".jsonl")
 	require.FileExists(t, expectedFile)
@@ -273,7 +273,7 @@ func TestFormatTextResponse(t *testing.T) {
 	}
 
 	result := formatTextResponse(response)
-	
+
 	lines := strings.Split(result, "\n")
 	assert.Contains(t, lines[0], "Agent: arch-001")
 	assert.Contains(t, lines[0], "Session: dev-20250812-143022")
@@ -302,12 +302,12 @@ func TestFormatJSONResponse(t *testing.T) {
 
 	result, err := formatJSONResponse(response)
 	assert.NoError(t, err)
-	
+
 	// Verify it's valid JSON
 	var parsed ContextResponse
 	err = json.Unmarshal([]byte(result), &parsed)
 	assert.NoError(t, err)
-	
+
 	assert.Equal(t, response.Metadata.AgentID, parsed.Metadata.AgentID)
 	assert.Equal(t, response.Metadata.SessionID, parsed.Metadata.SessionID)
 	assert.Len(t, parsed.Entries, 1)

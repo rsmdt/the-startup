@@ -45,15 +45,15 @@ type StateTransition struct {
 // ValidTransitions defines allowed state transitions
 var ValidTransitions = map[StateTransition]bool{
 	// Forward transitions
-	{StateStartupPath, StateClaudePath}:      true,
-	{StateClaudePath, StateFileSelection}:    true,
-	{StateFileSelection, StateComplete}:      true,
-	{StateFileSelection, StateError}:         true,
-	
+	{StateStartupPath, StateClaudePath}:   true,
+	{StateClaudePath, StateFileSelection}: true,
+	{StateFileSelection, StateComplete}:   true,
+	{StateFileSelection, StateError}:      true,
+
 	// Backward transitions (ESC)
-	{StateClaudePath, StateStartupPath}:      true,
-	{StateFileSelection, StateClaudePath}:    true,
-	
+	{StateClaudePath, StateStartupPath}:   true,
+	{StateFileSelection, StateClaudePath}: true,
+
 	// Error recovery
 	{StateError, StateStartupPath}: true,
 }
@@ -83,14 +83,14 @@ func (p *ProgressiveDisclosureRenderer) RenderSelections(
 	if tool == "" {
 		return ""
 	}
-	
+
 	var sections []string
-	
+
 	// Tool selection
 	if tool != "" {
 		sections = append(sections, fmt.Sprintf("Tool: %s", tool))
 	}
-	
+
 	// Path selection
 	if path != "" {
 		// Show abbreviated path for display
@@ -102,25 +102,25 @@ func (p *ProgressiveDisclosureRenderer) RenderSelections(
 		}
 		sections = append(sections, fmt.Sprintf("Path: %s", displayPath))
 	}
-	
+
 	// Files selection
 	if filesCount > 0 {
 		sections = append(sections, fmt.Sprintf("Files: %d selected", filesCount))
 	}
-	
+
 	if len(sections) == 0 {
 		return ""
 	}
-	
+
 	// Create bordered box with selections
 	content := strings.Join(sections, " • ")
-	
+
 	return lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(p.styles.Info.GetForeground()).
 		Padding(0, 1).
 		MarginBottom(1).
-		Render("The (Agentic) Startup Installation\n" + content) + "\n"
+		Render("The (Agentic) Startup Installation\n"+content) + "\n"
 }
 
 // RenderTitle creates a consistent title bar
@@ -146,11 +146,11 @@ func (p *ProgressiveDisclosureRenderer) GetChoiceStyle(isCursor bool, isSelected
 		}
 		return p.styles.CursorLine
 	}
-	
+
 	if isSelected {
 		return p.styles.Info
 	}
-	
+
 	return p.styles.Normal
 }
 
@@ -167,15 +167,15 @@ func (p *ProgressiveDisclosureRenderer) RenderChoiceWithMultiSelect(text string,
 	} else {
 		prefix = "  "
 	}
-	
+
 	style := p.GetChoiceStyle(isCursor, isSelected)
-	
+
 	// Only show circles for multi-select contexts
 	if isMultiSelect {
 		if isSelected {
-			return prefix + style.Render("● " + text)
+			return prefix + style.Render("● "+text)
 		}
-		return prefix + style.Render("○ " + text)
+		return prefix + style.Render("○ "+text)
 	} else {
 		// Single-select: just show text without circles
 		return prefix + style.Render(text)
@@ -189,16 +189,16 @@ func (p *ProgressiveDisclosureRenderer) RenderInstallationSummary(
 	updatingFiles []string,
 ) string {
 	var summary strings.Builder
-	
+
 	summary.WriteString(p.styles.Info.Render("📋 Installation Summary"))
 	summary.WriteString("\n\n")
-	
+
 	// Basic configuration
 	summary.WriteString(fmt.Sprintf("Tool: %s\n", tool))
 	summary.WriteString(fmt.Sprintf("Path: %s\n", path))
-	
+
 	summary.WriteString(fmt.Sprintf("Files to install: %d\n", len(files)))
-	
+
 	// Group files by component
 	filesByComponent := make(map[string][]string)
 	for _, file := range files {
@@ -209,7 +209,7 @@ func (p *ProgressiveDisclosureRenderer) RenderInstallationSummary(
 			filesByComponent[component] = append(filesByComponent[component], fileName)
 		}
 	}
-	
+
 	summary.WriteString("\n")
 	for _, component := range []string{"agents", "commands", "hooks", "templates"} {
 		if componentFiles, ok := filesByComponent[component]; ok && len(componentFiles) > 0 {
@@ -224,12 +224,12 @@ func (p *ProgressiveDisclosureRenderer) RenderInstallationSummary(
 			}
 		}
 	}
-	
+
 	// File updates
 	if len(updatingFiles) > 0 {
-		summary.WriteString(fmt.Sprintf("\n%s Files to update: %d\n", 
+		summary.WriteString(fmt.Sprintf("\n%s Files to update: %d\n",
 			p.styles.Warning.Render("⚠"), len(updatingFiles)))
 	}
-	
+
 	return summary.String() + "\n"
 }

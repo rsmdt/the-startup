@@ -50,14 +50,14 @@ func TestLogCommandIntegration(t *testing.T) {
 
 	// Verify global log file was created
 	globalLogPath := filepath.Join(startupDir, "all-agent-instructions.jsonl")
-	
+
 	if _, err := os.Stat(globalLogPath); os.IsNotExist(err) {
 		t.Errorf("Global log file was not created at %s", globalLogPath)
 	}
 
 	// Verify session log file was created
 	sessionLogPath := filepath.Join(startupDir, "dev-integration-test", "agent-instructions.jsonl")
-	
+
 	if _, err := os.Stat(sessionLogPath); os.IsNotExist(err) {
 		t.Errorf("Session log file was not created at %s", sessionLogPath)
 	}
@@ -181,7 +181,7 @@ func TestLogCommandFlagValidation(t *testing.T) {
 	t.Run("BothFlagsSpecified", func(t *testing.T) {
 		cmd := NewLogCommand()
 		cmd.SetArgs([]string{"--assistant", "--user"})
-		
+
 		err := cmd.Execute()
 		if err == nil {
 			t.Error("Expected error when both --assistant and --user flags are specified")
@@ -191,7 +191,7 @@ func TestLogCommandFlagValidation(t *testing.T) {
 	t.Run("NoFlagsSpecified", func(t *testing.T) {
 		cmd := NewLogCommand()
 		cmd.SetArgs([]string{})
-		
+
 		err := cmd.Execute()
 		if err == nil {
 			t.Error("Expected error when no flags are specified")
@@ -431,7 +431,7 @@ func TestLogCommandErrorHandling(t *testing.T) {
 		// Create startup directory and make it read-only
 		startupDir := filepath.Join(tempDir, ".the-startup")
 		os.MkdirAll(startupDir, 0755)
-		
+
 		// Try to make directory read-only (may not work on all systems)
 		os.Chmod(startupDir, 0444)
 		defer os.Chmod(startupDir, 0755) // Restore permissions for cleanup

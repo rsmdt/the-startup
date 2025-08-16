@@ -199,7 +199,7 @@ func TestValidateLogCommand(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			err := ValidateLogCommand(tc.flags)
-			
+
 			if tc.expectError {
 				assert.Error(t, err)
 				assert.Contains(t, err.Error(), tc.errorMsg)
@@ -274,7 +274,7 @@ func TestValidateLogCommand_EdgeCases(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			err := ValidateLogCommand(tc.flags)
-			
+
 			if tc.expectError {
 				assert.Error(t, err)
 				assert.Contains(t, err.Error(), tc.errorMsg)

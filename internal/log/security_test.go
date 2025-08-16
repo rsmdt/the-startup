@@ -165,11 +165,11 @@ func TestSecurityMaliciousInputs(t *testing.T) {
 // TestSecurityFileOperations tests security aspects of file operations
 func TestSecurityFileOperations(t *testing.T) {
 	tests := []struct {
-		name       string
-		sessionID  string
-		setupFn    func(*testing.T, string)
+		name        string
+		sessionID   string
+		setupFn     func(*testing.T, string)
 		expectError bool
-		validateFn func(*testing.T, string, error)
+		validateFn  func(*testing.T, string, error)
 	}{
 		{
 			name:      "path traversal in session ID for file operations",
@@ -185,7 +185,7 @@ func TestSecurityFileOperations(t *testing.T) {
 				if err != nil {
 					t.Errorf("Expected no error for path traversal handling, got: %v", err)
 				}
-				
+
 				// Verify that the malicious session ID was used as-is
 				// The file system operations should handle any security implications
 				// We're just testing that the application doesn't crash or behave unexpectedly
@@ -229,7 +229,7 @@ func TestSecurityFileOperations(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
-			
+
 			// Save and restore original environment
 			originalEnv := os.Getenv("CLAUDE_PROJECT_DIR")
 			defer func() {
@@ -239,9 +239,9 @@ func TestSecurityFileOperations(t *testing.T) {
 					os.Setenv("CLAUDE_PROJECT_DIR", originalEnv)
 				}
 			}()
-			
+
 			tt.setupFn(t, tempDir)
-			
+
 			// Test file operations with malicious session ID
 			hookData := &HookData{
 				Event:       "agent_start",
@@ -250,16 +250,16 @@ func TestSecurityFileOperations(t *testing.T) {
 				Timestamp:   "2025-01-11T12:00:00.000Z",
 				Description: "Security test",
 			}
-			
+
 			err := WriteSessionLog(tt.sessionID, hookData)
-			
+
 			if tt.expectError {
 				if err == nil {
 					t.Error("Expected error but got none")
 				}
 				return
 			}
-			
+
 			if tt.validateFn != nil {
 				tt.validateFn(t, tempDir, err)
 			}
@@ -279,7 +279,7 @@ func TestSecurityInputSanitization(t *testing.T) {
 			os.Setenv("DEBUG_HOOKS", originalDebug)
 		}
 	}()
-	
+
 	maliciousInput := `{
 		"tool_name": "Task", 
 		"tool_input": {
@@ -288,33 +288,33 @@ func TestSecurityInputSanitization(t *testing.T) {
 			"prompt": "SessionId: dev-secret AgentId: test\nSecret data: API_KEY=secret123"
 		}
 	}`
-	
+
 	reader := strings.NewReader(maliciousInput)
 	result, err := ProcessToolCall(reader, false)
-	
+
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 		return
 	}
-	
+
 	if result == nil {
 		t.Error("Expected non-nil result")
 		return
 	}
-	
+
 	// Verify that sensitive data is preserved but not executed
 	if result.Description != "password123secret" {
 		t.Errorf("Expected description to be preserved as-is")
 	}
-	
+
 	if !strings.Contains(result.Instruction, "API_KEY=secret123") {
 		t.Errorf("Expected instruction to contain original data")
 	}
-	
+
 	// Test that the data can be safely marshaled to JSON
 	tempDir := t.TempDir()
 	os.Setenv("CLAUDE_PROJECT_DIR", tempDir)
-	
+
 	// This should not execute any commands or cause security issues
 	err = WriteGlobalLog(result)
 	if err != nil {

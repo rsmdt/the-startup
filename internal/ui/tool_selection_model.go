@@ -53,14 +53,14 @@ func (m ToolSelectionModel) Update(msg tea.Msg) (ToolSelectionModel, tea.Cmd) {
 
 func (m ToolSelectionModel) View() string {
 	var s strings.Builder
-	
+
 	s.WriteString(m.styles.Title.Render(AppBanner))
 	s.WriteString("\n\n")
-	
+
 	s.WriteString(m.renderer.RenderSelections("", "", 0))
-	
+
 	s.WriteString(m.renderer.RenderTitle("Select your development tool"))
-	
+
 	for i, choice := range m.choices {
 		displayText := choice
 		if choice != "Cancel" {
@@ -69,9 +69,9 @@ func (m ToolSelectionModel) View() string {
 		s.WriteString(m.renderer.RenderChoiceWithMultiSelect(displayText, i == m.cursor, false, false))
 		s.WriteString("\n")
 	}
-	
+
 	s.WriteString(m.renderer.RenderHelp("↑↓ navigate • Enter: select • Escape: back"))
-	
+
 	return s.String()
 }
 
