@@ -17,21 +17,21 @@
 - [x] **Validation**: `go fmt ./... && go vet ./...` - Ensure no syntax errors
 
 ## Phase 3: Enhance Lower-Rated Agents (7/10 ratings)
-- [ ] the-developer: Add error handling patterns, API design guidance
-- [ ] the-technical-writer: Add detailed process, template references
-- [ ] the-security-engineer: Add OWASP checklist, specific tools
-- [ ] the-devops-engineer: Add CI/CD tools (GitHub Actions, Terraform)
-- [ ] the-data-engineer: Add database patterns, migration strategies
-- [ ] the-tester: Add testing frameworks (Jest, Pytest), automation patterns
-- [ ] **Validation**: Review each agent follows template structure
+- [x] the-developer: Add error handling patterns, API design guidance
+- [x] the-technical-writer: Add detailed process, template references
+- [x] the-security-engineer: Add OWASP checklist, specific tools
+- [x] the-devops-engineer: Add CI/CD tools (GitHub Actions, Terraform)
+- [x] the-data-engineer: Add database patterns, migration strategies
+- [x] the-tester: Add testing frameworks (Jest, Pytest), automation patterns
+- [x] **Validation**: Review each agent follows template structure
 
 ## Phase 4: Implement New Agents
-- [ ] Install the-lead-developer.md in assets/agents/
-- [ ] Install the-ux-designer.md in assets/agents/
-- [ ] Install the-compliance-officer.md in assets/agents/
-- [ ] Verify new agents follow agent-template.md pattern
-- [ ] Ensure new agents have unique emoji personalities
-- [ ] **Validation**: `go test ./internal/log/...` - Verify agent filtering works
+- [x] Install the-lead-developer.md in assets/agents/
+- [x] Install the-ux-designer.md in assets/agents/
+- [x] Install the-compliance-officer.md in assets/agents/
+- [x] Verify new agents follow agent-template.md pattern
+- [x] Ensure new agents have unique emoji personalities
+- [x] **Validation**: `go test ./internal/log/...` - Verify agent filtering works
 
 ## Phase 5: Testing and Validation
 
