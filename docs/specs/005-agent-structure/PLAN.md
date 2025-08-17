@@ -57,13 +57,13 @@ Per research: "LLM-as-a-judge worked well... but human evaluation was essential"
 - [ ] **Validation**: `./the-startup validate agents` (when implemented)
 
 ## Phase 6: Documentation Updates
-- [ ] Update README.md with new agent descriptions
-- [ ] Create agent capability matrix showing all 17 agents
-- [ ] Add "Agent Discovery Guide" section
-- [ ] Document common agent collaboration patterns
-- [ ] Include training examples for new agents
-- [ ] Add troubleshooting section for agent invocation issues
-- [ ] **Validation**: Review documentation for completeness
+- [x] Update README.md with new agent descriptions
+- [x] Create agent capability matrix showing all 17 agents
+- [x] Add "Agent Discovery Guide" section
+- [x] Document common agent collaboration patterns
+- [x] Include training examples for new agents
+- [x] Add troubleshooting section for agent invocation issues
+- [x] **Validation**: Review documentation for completeness
 
 ## Phase 7: Final Validation
 - [ ] Run full test suite: `go test ./...`
