@@ -21,36 +21,488 @@ You are an intelligent implementation orchestrator that executes the plan for: *
 
 ### Phase 1: Context Loading and Plan Discovery
 
-1. **Find Specification**:
-   - Search for `docs/specs/$ARGUMENTS*/PLAN.md`
-   - If not found, inform user that specification needs to be created first
-   - If multiple matches, ask user to be more specific
+#### 1. Specification Discovery
 
-2. **Load Context Documents**:
-   - Check for and read BRD.md (if exists) - extract business requirements
-   - Check for and read PRD.md (if exists) - extract product requirements
-   - Check for and read SDD.md (if exists) - extract technical design
-   - These provide critical context for agents during implementation
+```
+# Search for specification directory
+SPEC_PATH = Glob("docs/specs/$ARGUMENTS*")
 
-3. **Read PLAN.md**:
-   - Load the entire implementation plan
-   - Extract all phases and their execution types (parallel/sequential)
-   - Parse task metadata: [`agent: name`], [`review: true/false`], [`review_focus: areas`]
-   - Identify validation checkpoints
-   - Note which tasks are already complete (marked with [x])
+IF not found:
+  "❌ No specification found for '$ARGUMENTS'
+   
+   To create a specification, run:
+   /s:specify $ARGUMENTS
+   
+   This will generate:
+   - docs/specs/$ARGUMENTS/PLAN.md (implementation plan)
+   - docs/specs/$ARGUMENTS/BRD.md (business requirements)
+   - docs/specs/$ARGUMENTS/PRD.md (product requirements)
+   - docs/specs/$ARGUMENTS/SDD.md (technical design)"
+  EXIT
+
+IF multiple matches:
+  "🔍 Multiple specifications found:
+   - docs/specs/001-user-auth/
+   - docs/specs/001-payment-gateway/
+   
+   Please be more specific. Examples:
+   /s:implement 001-user-auth
+   /s:implement 001-payment"
+  EXIT
+
+VALIDATE spec_path contains PLAN.md:
+  IF not exists:
+    "⚠️ Specification incomplete: PLAN.md not found
+     
+     Run /s:specify $ARGUMENTS to generate the implementation plan."
+    EXIT
+```
+
+#### 2. Context Document Loading
+
+**Load and Extract Business Requirements (BRD.md)**:
+```
+IF exists(spec_path/BRD.md):
+  brd_content = Read(spec_path/BRD.md)
+  
+  EXTRACT from BRD:
+  - Business Objectives:
+    * Primary goals (## Business Objectives section)
+    * Success metrics (## Success Metrics section)
+    * Key stakeholders (## Stakeholders section)
+  
+  - Business Context:
+    * Problem statement (## Problem Statement section)
+    * Current state vs desired state
+    * Business constraints and dependencies
+  
+  - Value Proposition:
+    * Expected ROI or business value
+    * Risk factors identified
+    * Timeline expectations
+  
+  FORMAT as:
+  business_context = {
+    "objectives": ["objective1", "objective2"],
+    "success_metrics": ["metric1", "metric2"],
+    "constraints": ["constraint1", "constraint2"],
+    "value_prop": "summary of business value"
+  }
+ELSE:
+  business_context = {
+    "status": "No BRD found - proceeding without business context"
+  }
+```
+
+**Load and Extract Product Requirements (PRD.md)**:
+```
+IF exists(spec_path/PRD.md):
+  prd_content = Read(spec_path/PRD.md)
+  
+  EXTRACT from PRD:
+  - User Stories:
+    * Parse "As a [role], I want [feature], so that [benefit]"
+    * Extract acceptance criteria for each story
+    * Note priority levels (P0, P1, P2)
+  
+  - Functional Requirements:
+    * Core features list (## Features section)
+    * User workflows (## User Flows section)
+    * Integration points (## Integrations section)
+  
+  - Non-Functional Requirements:
+    * Performance targets (response times, throughput)
+    * Security requirements (auth, encryption)
+    * Scalability needs (user counts, data volumes)
+    * Accessibility standards (WCAG compliance)
+  
+  - Acceptance Criteria:
+    * Definition of done for each feature
+    * Test scenarios to validate
+    * Edge cases to handle
+  
+  FORMAT as:
+  product_context = {
+    "user_stories": [
+      {"role": "...", "want": "...", "benefit": "...", "criteria": [...]}
+    ],
+    "features": ["feature1", "feature2"],
+    "performance": {"response_time": "<100ms", "throughput": "1000 rps"},
+    "security": ["JWT auth", "TLS 1.3", "input validation"],
+    "acceptance_criteria": ["criteria1", "criteria2"]
+  }
+ELSE:
+  product_context = {
+    "status": "No PRD found - proceeding without product requirements"
+  }
+```
+
+**Load and Extract Technical Design (SDD.md)**:
+```
+IF exists(spec_path/SDD.md):
+  sdd_content = Read(spec_path/SDD.md)
+  
+  EXTRACT from SDD:
+  - Architecture Overview:
+    * System architecture pattern (hexagonal, microservices, monolith)
+    * Component breakdown and responsibilities
+    * Data flow diagrams interpretation
+  
+  - Technical Stack:
+    * Programming languages and versions
+    * Frameworks and libraries with versions
+    * Database technology and schema approach
+    * Infrastructure requirements (cloud, containers)
+  
+  - API Design:
+    * Endpoint specifications (REST/GraphQL/gRPC)
+    * Request/response schemas
+    * Authentication mechanisms
+    * Rate limiting strategies
+  
+  - Data Models:
+    * Entity relationships
+    * Database schemas
+    * Data validation rules
+    * Migration strategies
+  
+  - Security Architecture:
+    * Authentication flow (OAuth, JWT, sessions)
+    * Authorization model (RBAC, ABAC)
+    * Encryption standards (at rest, in transit)
+    * Security headers and CORS policies
+  
+  - Error Handling:
+    * Error taxonomy and codes
+    * Logging strategies
+    * Monitoring and alerting approach
+    * Recovery mechanisms
+  
+  FORMAT as:
+  technical_context = {
+    "architecture": "hexagonal with ports and adapters",
+    "stack": {
+      "language": "Go 1.21",
+      "framework": "gin",
+      "database": "PostgreSQL 15",
+      "cache": "Redis 7"
+    },
+    "patterns": ["repository", "factory", "observer"],
+    "api": {
+      "style": "RESTful",
+      "auth": "JWT with refresh tokens",
+      "versioning": "URL path (v1, v2)"
+    },
+    "security": {
+      "auth_flow": "OAuth 2.0 with PKCE",
+      "encryption": "AES-256-GCM",
+      "headers": ["CSP", "HSTS", "X-Frame-Options"]
+    },
+    "constraints": ["must support 10k concurrent users", "99.9% uptime SLA"]
+  }
+ELSE:
+  technical_context = {
+    "status": "No SDD found - agents will make technical decisions"
+  }
+```
+
+#### 3. Load Implementation Plan (PLAN.md)
+
+```
+plan_content = Read(spec_path/PLAN.md)
+
+PARSE PLAN structure:
+- Extract all ## Phase headers
+- Identify execution type: (parallel) or (sequential)
+- Parse task format:
+  * Task description line
+  * Metadata in brackets: [agent: name], [review: true/false]
+  * Nested subtasks (indented items)
+  * Checkbox status: [ ] = pending, [x] = complete
+
+BUILD execution_plan:
+{
+  "total_phases": 5,
+  "total_tasks": 23,
+  "phases": [
+    {
+      "number": 1,
+      "name": "Foundation & Setup",
+      "execution": "parallel",
+      "tasks": [
+        {
+          "description": "Set up database schema",
+          "agent": "the-developer",
+          "review": true,
+          "review_focus": ["schema design", "indexes"],
+          "subtasks": ["Create tables", "Add indexes", "Set up migrations"],
+          "status": "pending"
+        }
+      ]
+    }
+  ],
+  "validation_checkpoints": [
+    {"after_phase": 2, "command": "npm test"},
+    {"after_phase": 4, "command": "npm run integration-test"}
+  ],
+  "completion_criteria": [
+    "All tests passing",
+    "Code review approved",
+    "Documentation updated"
+  ]
+}
+```
+
+#### 4. Context Compilation and Presentation
+
+```
+# Compile comprehensive context package
+IMPLEMENTATION_CONTEXT = {
+  "specification_id": "$ARGUMENTS",
+  "spec_path": spec_path,
+  "business": business_context,
+  "product": product_context,
+  "technical": technical_context,
+  "plan": execution_plan,
+  "session_metadata": {
+    "start_time": current_timestamp,
+    "orchestrator_version": "1.0.0",
+    "context_loaded": ["BRD", "PRD", "SDD", "PLAN"]
+  }
+}
+
+# Present context summary to user
+DISPLAY:
+"📁 Loading specification context for '$ARGUMENTS'...
+
+✅ Documents found:
+- BRD.md: {business_context.objectives[0] if exists else 'Not found'}
+- PRD.md: {len(product_context.user_stories)} user stories found
+- SDD.md: {technical_context.architecture if exists else 'Not found'}
+- PLAN.md: {execution_plan.total_phases} phases, {execution_plan.total_tasks} tasks
+
+📊 Context Summary:
+
+Business Context:
+- Primary Goal: {business_context.objectives[0]}
+- Success Metrics: {', '.join(business_context.success_metrics[:2])}
+
+Product Requirements:
+- Core Features: {len(product_context.features)} identified
+- User Stories: {len(product_context.user_stories)} defined
+- Performance Target: {product_context.performance.response_time}
+
+Technical Architecture:
+- Pattern: {technical_context.architecture}
+- Stack: {technical_context.stack.language}, {technical_context.stack.framework}
+- Database: {technical_context.stack.database}
+- API Style: {technical_context.api.style}
+- Auth Method: {technical_context.api.auth}
+
+Implementation Plan:
+- Total Phases: {execution_plan.total_phases}
+- Total Tasks: {execution_plan.total_tasks}
+- Tasks Requiring Review: {count(task.review == true)}
+- Validation Checkpoints: {len(execution_plan.validation_checkpoints)}
+- Already Completed: {count(task.status == 'complete')} tasks
+"
+```
+
+#### 5. Context Injection for Agents
+
+When delegating tasks to agents, inject relevant context:
+
+```
+# Build agent-specific context based on task type
+FOR each task delegation:
+  
+  agent_context = """
+  === PROJECT CONTEXT ===
+  
+  BUSINESS REQUIREMENTS:
+  {if business_context exists:
+    - Objectives: {business_context.objectives}
+    - Constraints: {business_context.constraints}
+    - Success Metrics: {business_context.success_metrics}
+  }
+  
+  PRODUCT SPECIFICATIONS:
+  {if product_context exists:
+    - User Story: {relevant_user_story_for_task}
+    - Acceptance Criteria: {relevant_criteria}
+    - Performance Requirements: {product_context.performance}
+    - Security Requirements: {product_context.security}
+  }
+  
+  TECHNICAL DESIGN:
+  {if technical_context exists:
+    - Architecture Pattern: {technical_context.architecture}
+    - Technology Stack: {technical_context.stack}
+    - API Specifications: {technical_context.api}
+    - Design Patterns to Follow: {technical_context.patterns}
+    - Constraints: {technical_context.constraints}
+  }
+  
+  === CURRENT TASK ===
+  Phase {phase_number}: {phase_name}
+  Task: {task_description}
+  Subtasks:
+  {formatted_subtasks}
+  
+  === INTEGRATION NOTES ===
+  - Previous phases completed: {list_completed_phases}
+  - Dependencies from other tasks: {list_dependencies}
+  - Files already created: {list_existing_files}
+  - Patterns established: {list_patterns_in_use}
+  """
+  
+  # Different agents need different context emphasis
+  IF agent == "the-architect":
+    EMPHASIZE: technical_context.architecture, patterns, constraints
+  ELIF agent == "the-developer":
+    EMPHASIZE: technical_context.stack, api specs, acceptance criteria
+  ELIF agent == "the-security-engineer":
+    EMPHASIZE: technical_context.security, auth flow, encryption
+  ELIF agent == "the-tester":
+    EMPHASIZE: product_context.acceptance_criteria, edge cases
+  ELIF agent == "the-database-administrator":
+    EMPHASIZE: data models, schemas, performance requirements
+```
+
+#### 6. Missing Document Handling
+
+```
+# Graceful degradation when documents are missing
+IF missing BRD.md:
+  LOG: "📝 Note: No BRD.md found - proceeding without business context"
+  ADD to agent instructions:
+    "Note: Business requirements not provided. Make reasonable assumptions
+     for business value and document them in your implementation."
+
+IF missing PRD.md:
+  LOG: "📝 Note: No PRD.md found - proceeding without product requirements"
+  ADD to agent instructions:
+    "Note: Product requirements not provided. Focus on technical implementation
+     based on task description. Flag any user-facing decisions for review."
+
+IF missing SDD.md:
+  LOG: "📝 Note: No SDD.md found - agents will make technical decisions"
+  ADD to agent instructions:
+    "Note: No technical design document provided. Use industry best practices
+     and document your architectural decisions in code comments."
+
+IF all context documents missing:
+  WARN: "⚠️ No context documents found (BRD, PRD, SDD)
+         
+         Implementation will proceed based solely on PLAN.md.
+         Agents will make autonomous decisions following best practices.
+         
+         Consider running /s:specify $ARGUMENTS first for better results.
+         
+         Continue anyway? (yes/no)"
+```
+
+#### 7. Context Validation
+
+```
+# Validate context consistency
+VALIDATE_CONTEXT:
+  
+  # Check for conflicts between documents
+  IF technical_context.stack.language != detected_language_in_project:
+    WARN: "⚠️ SDD specifies {technical_context.stack.language} but project uses {detected_language}"
+    ASK: "Which should take precedence? (sdd/existing)"
+  
+  # Verify technical feasibility
+  IF product_context.performance.response_time < "10ms" AND technical_context.stack.database == "PostgreSQL":
+    WARN: "⚠️ Performance requirement of {response_time} may be challenging with {database}"
+    NOTE: "Consider caching strategy or read replicas"
+  
+  # Check for incomplete specifications
+  IF execution_plan.total_tasks > 50 AND missing(SDD.md):
+    WARN: "⚠️ Large implementation ({total_tasks} tasks) without technical design"
+    SUGGEST: "Consider creating SDD.md first: /s:specify --sdd-only $ARGUMENTS"
+```
+
+#### 8. Progress Resumption Support
+
+```
+# Support for resuming partial implementations
+IF any tasks marked [x] in PLAN.md:
+  completed_count = count_completed_tasks()
+  remaining_count = execution_plan.total_tasks - completed_count
+  
+  DISPLAY:
+  "📊 Previous Progress Detected:
+   - Completed: {completed_count} tasks
+   - Remaining: {remaining_count} tasks
+   - Last completed: {last_completed_task_description}
+   
+   Resume from where you left off? (yes/no/restart)"
+  
+  IF user_choice == "restart":
+    CONFIRM: "This will mark all tasks as pending. Continue? (yes/no)"
+    IF yes:
+      Reset all checkboxes in PLAN.md to [ ]
+      Reset execution_plan.tasks.status to "pending"
+  ELIF user_choice == "yes":
+    Start from first pending task
+    Include context about completed work in agent instructions
+```
 
 ### Phase 2: Create Todo List
 1. **MANDATORY: Use TodoWrite to create initial todo list**:
-   - Transform ALL tasks from PLAN.md into todo items
+   - Transform ALL tasks from PLAN.md into todo items with unique IDs
    - Preserve phase groupings and execution types
    - Include agent assignments for each task
+   - Add metadata for review requirements and checkpoints
    - Mark all as pending initially
+   - Include subtask hierarchies in todo descriptions
    - Show the complete todo list to user
 
-2. **Present to User**:
-   - Show total phases and task count
-   - Display phase breakdown with todo list
-   - Ask for confirmation to begin
+2. **Initialize Progress Tracking**:
+   ```
+   progress_state = {
+     "session_id": "impl-{timestamp}",
+     "total_phases": execution_plan.total_phases,
+     "total_tasks": execution_plan.total_tasks,
+     "completed_tasks": 0,
+     "in_progress_tasks": 0,
+     "blocked_tasks": 0,
+     "review_cycles": {},
+     "phase_status": {},
+     "start_time": current_timestamp,
+     "checkpoints_passed": [],
+     "completion_percentage": 0
+   }
+   
+   # Save initial state
+   Write(".the-startup/implementation-progress.json", progress_state)
+   ```
+
+3. **Present Implementation Dashboard**:
+   ```
+   📊 Implementation Dashboard for {$ARGUMENTS}
+   ═══════════════════════════════════════════
+   
+   📈 Overall Progress: [░░░░░░░░░░] 0% (0/{total_tasks} tasks)
+   
+   🔄 Phase Breakdown:
+   {for each phase:
+     Phase {num}: {name} ({execution_type})
+     ├─ Tasks: {task_count}
+     ├─ Reviews Required: {review_count}
+     └─ Status: ⏳ Pending
+   }
+   
+   📋 Todo List Created:
+   - Total Items: {total_tasks}
+   - Phases: {total_phases}
+   - Review Points: {review_count}
+   - Validation Checkpoints: {checkpoint_count}
+   
+   Ready to begin orchestrated implementation? (yes/no)
+   ```
 
 ### Phase 3: Orchestrated Implementation
 For each phase in PLAN.md:
@@ -70,15 +522,79 @@ For each phase in PLAN.md:
    - Generate unique AgentID: `{agent-type}-phase{number}-{unix-timestamp}`
    - NEVER execute tasks directly - ALWAYS delegate to agents
 
-2. **Implementation Lifecycle**:
-   - **MANDATORY TodoWrite before EACH delegation**: Mark task as in_progress
+2. **Implementation Lifecycle with Real-Time Tracking**:
+   
+   a) **Pre-Task Progress Update**:
+   ```
+   # Before delegation
+   TodoWrite: Mark task as in_progress
+   progress_state.in_progress_tasks += 1
+   progress_state.phase_status[current_phase] = "active"
+   
+   DISPLAY:
+   "⚡ Starting Task {task_number}/{total_tasks}
+    Phase: {phase_name}
+    Task: {task_description}
+    Agent: {selected_agent}
+    Progress: [{progress_bar}] {percentage}%"
+   ```
+   
+   b) **Task Delegation**:
    - Build delegation context using Task tool with subagent parameter
    - Include full context package: BRD/PRD/SDD excerpts + specific requirements
-   - Display ALL agent responses with commentary blocks intact
-   - Parse for explicit signals: "IMPLEMENTATION COMPLETE" or "BLOCKED: [reason]"
-   - **MANDATORY TodoWrite after EACH response**: Update task status immediately
-   - If task requires review, proceed to review cycle
-   - **Update PLAN.md checkbox** from `- [ ]` to `- [x]` only after approval
+   - Add progress metadata to agent instructions
+   
+   c) **Response Processing & Progress Update**:
+   ```
+   # Display agent response with commentary intact
+   [Full agent response...]
+   
+   # Parse completion signals
+   IF "IMPLEMENTATION COMPLETE":
+     progress_state.completed_tasks += 1
+     progress_state.in_progress_tasks -= 1
+     progress_state.completion_percentage = (completed_tasks / total_tasks) * 100
+     
+     # Update TodoWrite immediately
+     TodoWrite: Mark task as completed
+     
+     # Update PLAN.md checkbox (if no review required)
+     IF not requires_review:
+       Edit PLAN.md: "- [ ] {task}" → "- [x] {task}"
+       
+     DISPLAY:
+     "✅ Task Complete ({completed}/{total})
+      Progress: [{progress_bar}] {percentage}%
+      Remaining in Phase: {phase_remaining} tasks"
+   
+   ELIF "BLOCKED: [reason]":
+     progress_state.blocked_tasks += 1
+     progress_state.in_progress_tasks -= 1
+     
+     TodoWrite: Keep as in_progress with blocked note
+     
+     DISPLAY:
+     "🚫 Task Blocked: {reason}
+      Progress Halted at {percentage}%
+      User intervention required"
+   ```
+   
+   d) **Subtask Progress Tracking**:
+   ```
+   # For tasks with subtasks, track granular progress
+   IF task has subtasks:
+     FOR each subtask mentioned in agent response:
+       IF subtask completed:
+         Edit PLAN.md: update nested checkbox
+         Update progress_state.subtask_completion[task_id]
+     
+     DISPLAY:
+     "📝 Subtask Progress:
+      {for each subtask:
+        [x] {completed_subtask}
+        [ ] {pending_subtask}
+      }"
+   ```
 
 3. **Dynamic Review Selection** (when `review: true`):
    After task completion, intelligently select reviewer:
@@ -150,18 +666,57 @@ For each phase in PLAN.md:
       - Specify review focus based on identified concerns
       - Request actionable feedback with specific examples
 
-4. **Review Cycle Management**:
+4. **Review Cycle Management with Progress Integration**:
    
    ### Persistent State Management
-   Before starting review cycles, load existing state:
-   - Check if `.the-startup/review-cycles.json` exists
-   - If exists, load cycle counts and patterns
-   - If not, initialize new tracking structure
+   Before starting review cycles:
+   ```
+   # Load or initialize review tracking
+   review_state = load_json(".the-startup/review-cycles.json") || {}
    
-   After each cycle update:
-   - Write current state to `.the-startup/review-cycles.json`
-   - Include: cycle_count, feedback_history, reviewer_patterns
-   - Ensure atomic writes to prevent corruption
+   # Initialize task review entry
+   review_state[task_id] = {
+     "task_description": task.description,
+     "implementer": selected_agent,
+     "cycles": [],
+     "status": "pending_review",
+     "start_time": timestamp
+   }
+   
+   # Update progress tracking
+   progress_state.review_cycles[task_id] = {
+     "current_cycle": 0,
+     "max_cycles": 3,
+     "status": "in_review"
+   }
+   ```
+   
+   After each review cycle:
+   ```
+   # Update review state
+   review_state[task_id].cycles.append({
+     "cycle_number": current_cycle,
+     "reviewer": selected_reviewer,
+     "feedback": parsed_feedback,
+     "status": review_status,
+     "timestamp": current_timestamp
+   })
+   
+   # Update progress state
+   progress_state.review_cycles[task_id].current_cycle = current_cycle
+   progress_state.review_cycles[task_id].status = review_status
+   
+   # Persist both states atomically
+   save_json(".the-startup/review-cycles.json", review_state)
+   save_json(".the-startup/implementation-progress.json", progress_state)
+   
+   # Display review progress
+   DISPLAY:
+   "🔄 Review Cycle {current}/{max}
+    Reviewer: {reviewer_name}
+    Status: {review_status}
+    Overall Progress: [{progress_bar}] {percentage}%"
+   ```
    
    a) **Feedback Parsing and Status Detection**:
       ```
@@ -257,21 +812,91 @@ For each phase in PLAN.md:
         6. Update review-cycles.json with current state
       ```
    
-   d) **Approval Flow**:
-      - Mark task as completed in TodoWrite
-      - Update PLAN.md checkbox to [x]
-      - Store approval confirmation
-      - Move to next task
-      - Log successful review pattern for learning
+   d) **Approval Flow with Progress Updates**:
+      ```
+      # On approval
+      IF status == "APPROVED":
+        # Update TodoWrite
+        TodoWrite: Mark task as completed
+        
+        # Update PLAN.md with review confirmation
+        Edit PLAN.md: 
+          "- [ ] {task} [agent: x] [review: true]"
+          → "- [x] {task} [agent: x] [review: ✓ approved]"
+        
+        # Update all subtasks if present
+        IF task has subtasks:
+          FOR each subtask in PLAN.md:
+            Edit PLAN.md: "  - [ ] {subtask}" → "  - [x] {subtask}"
+        
+        # Update progress tracking
+        progress_state.completed_tasks += 1
+        progress_state.review_cycles[task_id].status = "approved"
+        progress_state.completion_percentage = (completed_tasks / total_tasks) * 100
+        
+        # Store approval details
+        review_state[task_id].status = "approved"
+        review_state[task_id].approval_time = timestamp
+        review_state[task_id].final_reviewer = reviewer_name
+        
+        # Display success with progress
+        DISPLAY:
+        "✅ Task Approved After Review
+         Reviewer: {reviewer_name}
+         Cycles Required: {cycles_used}
+         
+         📊 Updated Progress:
+         - Completed: {completed_tasks}/{total_tasks} tasks
+         - Progress: [{progress_bar}] {percentage}%
+         - Phase Status: {current_phase} - {phase_tasks_done}/{phase_total} complete
+         - Time Elapsed: {elapsed_time}
+         
+         Moving to next task..."
+        
+        # Log pattern for optimization
+        log_review_pattern(task_type, reviewer, cycles_used, "success")
+      ```
    
-   e) **Revision Flow**:
+   e) **Revision Flow with Progress Tracking**:
+      ```
       1. Parse and categorize feedback
-      2. Check cycle count (if >= 3, escalate)
-      3. Format feedback for implementer clarity
-      4. Re-delegate with full context
-      5. Wait for revision completion
-      6. Automatically trigger re-review
-      7. Update cycle tracking
+      
+      2. Check cycle count and update progress:
+         IF cycles >= 3:
+           progress_state.review_cycles[task_id].status = "escalated"
+           ESCALATE to user with full context
+         
+      3. Format feedback with progress context:
+         "📝 Revision Required (Cycle {current}/3)
+          Task Progress: {task_completion}%
+          Overall Progress: [{progress_bar}] {percentage}%
+          
+          Feedback to Address:
+          {formatted_feedback_items}"
+      
+      4. Re-delegate with revision tracking:
+         Task(
+           instructions="""REVISION CYCLE {current} of 3
+             
+             Progress Context:
+             - Implementation: {percentage}% complete
+             - This task: Cycle {current}/3
+             - Previous attempts: {summary_of_attempts}
+             
+             {revision_requirements}
+           """
+         )
+      
+      5. Update progress during revision:
+         progress_state.review_cycles[task_id].current_cycle += 1
+         TodoWrite: Update task with revision status
+         
+      6. Automatically trigger re-review with context
+      
+      7. Persist all tracking:
+         save_json(".the-startup/review-cycles.json", review_state)
+         save_json(".the-startup/implementation-progress.json", progress_state)
+      ```
    
    f) **User Intervention Points**:
       ```
@@ -396,27 +1021,276 @@ For each phase in PLAN.md:
    - Only proceed if validation passes
    - If validation fails, keep task as incomplete and ask user how to proceed
 
-6. **Progress Reporting**:
-   After each phase:
-   - Show completed vs remaining tasks
-   - Highlight any failures or blockers
-   - Ask user before proceeding to next phase
+6. **Comprehensive Progress Reporting**:
+   
+   a) **Real-Time Task Progress**:
+   ```
+   # After EVERY task completion/update
+   DISPLAY:
+   "📊 Real-Time Progress Update
+    ════════════════════════════
+    
+    Current Task: {task_name}
+    Status: {task_status} {status_emoji}
+    
+    Phase {current_phase_num} Progress:
+    [{phase_progress_bar}] {phase_percentage}%
+    ├─ Completed: {phase_completed}/{phase_total}
+    ├─ In Progress: {phase_in_progress}
+    └─ Blocked: {phase_blocked}
+    
+    Overall Implementation:
+    [{overall_progress_bar}] {overall_percentage}%
+    ├─ Total Completed: {completed_tasks}/{total_tasks}
+    ├─ Review Cycles Active: {active_reviews}
+    ├─ Checkpoints Passed: {checkpoints_passed}/{total_checkpoints}
+    └─ Est. Time Remaining: {estimated_time}
+    
+    {IF blockers exist:
+      ⚠️ Active Blockers:
+      {for each blocker:
+        - {task}: {blocker_reason}
+      }
+    }"
+   ```
+   
+   b) **Phase Completion Summary**:
+   ```
+   # After completing a phase
+   DISPLAY:
+   "🎯 Phase {num} Complete: {phase_name}
+    ═══════════════════════════════════
+    
+    ✅ Phase Statistics:
+    - Tasks Completed: {phase_tasks_completed}/{phase_tasks_total}
+    - Review Cycles: {total_review_cycles} across {reviewed_tasks} tasks
+    - Average Cycles per Review: {avg_cycles}
+    - Time Taken: {phase_duration}
+    - Success Rate: {success_percentage}%
+    
+    📝 Tasks Summary:
+    {for each task in phase:
+      {status_icon} {task_name}
+      {if reviewed: └─ Review: {cycles} cycles, {reviewer}}
+    }
+    
+    {IF validation_checkpoint:
+      🔍 Validation Checkpoint Required:
+      Command: {validation_command}
+      Run validation now? (yes/skip)
+    }
+    
+    📊 Overall Progress:
+    [{progress_bar}] {overall_percentage}% Complete
+    - Phases: {completed_phases}/{total_phases}
+    - Tasks: {completed_tasks}/{total_tasks}
+    - Next Phase: {next_phase_name} ({next_phase_tasks} tasks)
+    
+    Continue to Phase {next_phase_num}? (yes/no/review)"
+   ```
+   
+   c) **Review Cycle Progress Display**:
+   ```
+   # During review cycles
+   DISPLAY:
+   "🔄 Review Cycle Progress
+    ═══════════════════════
+    
+    Task: {task_name}
+    Cycle: {current_cycle}/3
+    
+    Review History:
+    {for each past cycle:
+      Cycle {num}: {reviewer} → {status}
+      {key_feedback_point}
+    }
+    
+    Current Review:
+    - Reviewer: {current_reviewer}
+    - Status: {awaiting|in_progress|complete}
+    - Focus Areas: {review_focus_areas}
+    
+    Implementation Progress:
+    [{progress_bar}] {percentage}%
+    Impact on Overall: This task represents {task_weight}% of total"
+   ```
+   
+   d) **Checkpoint Validation Progress**:
+   ```
+   # During validation runs
+   DISPLAY:
+   "🔍 Running Validation Checkpoint {checkpoint_num}/{total_checkpoints}
+    ══════════════════════════════════════════════
+    
+    Command: {validation_command}
+    Phase: {phase_name}
+    Prerequisites: {prerequisite_tasks} ✅
+    
+    [Running validation...]
+    
+    {After completion:
+      Result: {PASSED|FAILED}
+      
+      {IF PASSED:
+        ✅ Validation Successful
+        - Tests Passed: {test_results}
+        - Coverage: {coverage_percentage}%
+        - Performance: {metrics}
+        
+        Updating Progress:
+        - Checkpoint {checkpoint_num} ✅
+        - Remaining Checkpoints: {remaining}
+      }
+      
+      {IF FAILED:
+        ❌ Validation Failed
+        
+        Errors:
+        {error_output}
+        
+        Failed Tasks May Include:
+        {likely_failed_tasks}
+        
+        Options:
+        1. Debug and fix issues
+        2. Rollback recent changes
+        3. Skip checkpoint (not recommended)
+        4. Get help from specialist
+        
+        How to proceed?
+      }
+    }"
+   ```
+   
+   e) **Progress Persistence**:
+   ```
+   # Save progress after each significant update
+   progress_data = {
+     "last_updated": timestamp,
+     "session_id": session_id,
+     "overall_progress": percentage,
+     "phase_progress": phase_states,
+     "task_status": task_states,
+     "review_cycles": review_states,
+     "checkpoints": checkpoint_results,
+     "blockers": active_blockers,
+     "time_tracking": {
+       "start_time": start_timestamp,
+       "elapsed": elapsed_seconds,
+       "estimated_remaining": estimate_seconds
+     }
+   }
+   
+   save_json(".the-startup/implementation-progress.json", progress_data)
+   ```
 
-### Phase 4: Completion
+### Phase 4: Completion with Final Progress Report
 
 **When All Phases Complete**:
-- Run final validation from completion criteria
-- Verify all tasks marked as completed
-- Report successful implementation
-- Suggest next steps (deployment, testing, documentation)
+```
+# Generate comprehensive completion report
+DISPLAY:
+"🎉 IMPLEMENTATION COMPLETE!
+ ════════════════════════════
+ 
+ 📊 Final Statistics:
+ ─────────────────────
+ ✅ Success Metrics:
+ - Total Tasks Completed: {completed_tasks}/{total_tasks} (100%)
+ - Phases Completed: {total_phases}/{total_phases}
+ - Review Cycles Total: {total_review_cycles}
+ - Checkpoints Passed: {checkpoints_passed}/{total_checkpoints}
+ - First-Try Success Rate: {first_try_percentage}%
+ - Average Review Cycles: {avg_review_cycles}
+ 
+ ⏱️ Time Analysis:
+ - Total Duration: {total_time}
+ - Average Task Time: {avg_task_time}
+ - Review Time: {total_review_time} ({review_time_percentage}%)
+ - Validation Time: {validation_time}
+ 
+ 📝 Implementation Summary:
+ {for each phase:
+   Phase {num}: {name} ✅
+   ├─ Tasks: {completed}/{total}
+   ├─ Duration: {phase_time}
+   └─ Review Cycles: {phase_reviews}
+ }
+ 
+ 🔍 Review Insights:
+ - Most Reviewed: {most_reviewed_task} ({max_cycles} cycles)
+ - Best Reviewers: {top_reviewers_by_approval_rate}
+ - Common Issues: {top_3_feedback_patterns}
+ 
+ 📁 Artifacts Generated:
+ - Files Created: {created_files_count}
+ - Files Modified: {modified_files_count}
+ - Tests Added: {test_files_count}
+ - Documentation: {docs_updated}
+ 
+ {IF completion_criteria exists:
+   ✅ Completion Criteria Validation:
+   {for each criterion:
+     [x] {criterion}: {status}
+   }
+ }
+ 
+ 🚀 Suggested Next Steps:
+ 1. Run full test suite: npm test
+ 2. Deploy to staging environment
+ 3. Update documentation
+ 4. Create release notes
+ 5. Schedule code review session
+ 
+ 💾 Progress archived to: .the-startup/completed-implementations/{session_id}/
+ 
+ Implementation session complete. Great work! 🎊"
+
+# Archive final state
+archive_implementation_state(session_id)
+```
 
 **If Implementation Blocked**:
-- Show which task failed
-- Present options:
-  - Retry the failed task
-  - Skip and continue
-  - Debug the issue
-  - Abort implementation
+```
+DISPLAY:
+"⚠️ IMPLEMENTATION BLOCKED
+ ═══════════════════════
+ 
+ 🚫 Blocker Details:
+ - Task: {blocked_task_name}
+ - Phase: {phase_num} - {phase_name}
+ - Reason: {blocker_reason}
+ - Agent: {agent_name}
+ 
+ 📊 Progress at Block:
+ [{progress_bar}] {percentage}% Complete
+ - Completed Tasks: {completed}/{total}
+ - Blocked Tasks: {blocked_count}
+ - In Progress: {in_progress_count}
+ 
+ 📝 Context:
+ {blocker_full_context}
+ 
+ 🔄 Attempted Solutions:
+ {if review_cycles:
+   - Review Cycles: {cycles_attempted}
+   - Feedback History: {feedback_summary}
+ }
+ 
+ 💡 Options:
+ 1. 🔄 Retry the failed task with same agent
+ 2. 👤 Assign to different specialist agent
+ 3. ⏭️ Skip and continue (mark as known issue)
+ 4. 🐛 Debug interactively
+ 5. 📝 Modify task requirements
+ 6. 🛑 Abort implementation (save progress)
+ 7. 💬 Get expert consultation
+ 
+ Current progress has been saved to:
+ .the-startup/implementation-progress.json
+ 
+ How would you like to proceed? (1-7):"
+```
 
 ## Agent Invocation Patterns
 
@@ -835,24 +1709,88 @@ Selecting the-security-engineer to review because:
 - **Status progression**: pending → in_progress → completed
 - **Never skip todo updates**: Every task change requires TodoWrite
 
-### PLAN.md Synchronization
+### PLAN.md Synchronization with Enhanced Tracking
 - **After EACH agent completes successfully**:
-  1. Mark todo as completed in TodoWrite
+  1. Mark todo as completed in TodoWrite with timestamp
   2. Use Edit tool to update PLAN.md checkbox from `- [ ]` to `- [x]`
   3. Include all nested subtasks in the update
+  4. Add completion metadata: `[✓ {timestamp} by {agent}]`
+  5. Update progress percentage in comment: `<!-- Progress: {percent}% -->`
+  
 - **If agent reports BLOCKED**:
-  1. Keep todo as in_progress
-  2. Do NOT update PLAN.md checkbox
-  3. Ask user how to proceed
-- **Real-time tracking**: PLAN.md should always reflect current state
+  1. Keep todo as in_progress in TodoWrite
+  2. Add blocker note to PLAN.md: `- [ ] {task} [⚠️ BLOCKED: {reason}]`
+  3. Update progress state with blocker details
+  4. Ask user how to proceed with full context
+  
+- **For Review Cycles**:
+  1. Update PLAN.md with cycle count: `[review: cycle {n}/3]`
+  2. After approval: `[review: ✓ approved by {reviewer}]`
+  3. Track reviewer patterns for optimization
+  
+- **Real-time tracking**: 
+  - PLAN.md should always reflect current state
+  - Progress comments updated after each task
+  - Checkpoint results noted inline
+  - Time estimates adjusted based on actual completion
 
-### Progress Determination
-- Parse agent response for explicit completion signals:
-  - "IMPLEMENTATION COMPLETE" = task succeeded
-  - "BLOCKED: {reason}" = task blocked
-  - Any unhandled errors = task failed
-- Only mark complete when agent explicitly confirms ALL subtasks done
-- The implementation ends when no pending tasks remain in BOTH TodoWrite AND PLAN.md
+### Progress Determination with Granular Tracking
+- **Parse agent response for completion signals**:
+  ```
+  COMPLETION_SIGNALS = {
+    "success": ["IMPLEMENTATION COMPLETE", "TASK COMPLETE", "✅ Done", "Successfully implemented"],
+    "blocked": ["BLOCKED:", "CANNOT PROCEED:", "STUCK:", "REQUIRES:"],
+    "partial": ["PARTIALLY COMPLETE:", "PROGRESS:", "COMPLETED {n} OF {m}:"],
+    "failed": ["FAILED:", "ERROR:", "UNABLE TO:", "CRITICAL:"]
+  }
+  
+  # Fuzzy matching for status detection
+  status = detect_status(agent_response, COMPLETION_SIGNALS)
+  
+  # Update progress based on status
+  IF status == "success":
+    mark_task_complete(task_id)
+    update_progress(+1)
+  ELIF status == "partial":
+    parse_subtask_completion(response)
+    update_partial_progress(completed_subtasks)
+  ELIF status == "blocked":
+    mark_task_blocked(task_id, reason)
+    trigger_escalation()
+  ELIF status == "failed":
+    mark_task_failed(task_id)
+    offer_retry_options()
+  ```
+  
+- **Subtask Completion Tracking**:
+  - Parse agent response for mentioned subtasks
+  - Match against PLAN.md subtask list
+  - Update individual subtask checkboxes
+  - Calculate partial progress percentage
+  - Show granular progress in UI
+  
+- **Implementation Completion Criteria**:
+  - All tasks in TodoWrite marked as completed ✓
+  - All checkboxes in PLAN.md marked [x] ✓
+  - All validation checkpoints passed ✓
+  - No blocked or failed tasks remaining ✓
+  - All review cycles resolved ✓
+  - Progress state shows 100% completion ✓
+  
+- **Progress Calculation Formula**:
+  ```
+  base_progress = (completed_tasks / total_tasks) * 100
+  
+  # Weight by task complexity
+  weighted_progress = sum(task_weight * task_completion) / total_weight
+  
+  # Account for review cycles
+  review_penalty = (total_review_cycles - expected_cycles) * 0.5
+  adjusted_progress = max(0, weighted_progress - review_penalty)
+  
+  # Display both metrics
+  show_progress(simple=base_progress, weighted=adjusted_progress)
+  ```
 
 ## Agent Response Protocol
 
@@ -893,10 +1831,143 @@ When a task doesn't specify an agent via `[agent: name]` metadata:
 - **User Confirmation**: Ask before proceeding between phases
 - **Clear Reporting**: Show progress frequently
 
-## Resuming Implementation
+## Resuming Implementation with Progress Recovery
 
 If user wants to resume:
-1. Read PLAN.md to see current state
-2. Check which tasks are marked complete [x]
-3. Continue from first incomplete task
-4. Maintain all previous context
+
+1. **Load Previous Progress State**:
+   ```
+   # Check for existing progress file
+   IF exists(".the-startup/implementation-progress.json"):
+     progress_state = load_json(".the-startup/implementation-progress.json")
+     review_state = load_json(".the-startup/review-cycles.json")
+     
+     DISPLAY:
+     "📂 Previous Session Found: {progress_state.session_id}
+      Started: {progress_state.start_time}
+      Last Updated: {progress_state.last_updated}
+      Progress: [{progress_bar}] {progress_state.completion_percentage}%
+      
+      📊 Session Summary:
+      - Completed: {progress_state.completed_tasks} tasks
+      - In Progress: {progress_state.in_progress_tasks} tasks
+      - Blocked: {progress_state.blocked_tasks} tasks
+      - Review Cycles: {len(progress_state.review_cycles)} active
+      
+      Resume from last position? (yes/restart/inspect)"
+   ```
+
+2. **Analyze PLAN.md State**:
+   ```
+   # Read PLAN.md and extract completion state
+   plan_content = Read(spec_path/PLAN.md)
+   
+   task_states = parse_checkboxes(plan_content)
+   completed = count("[x]")
+   pending = count("[ ]")
+   blocked = count("[⚠️ BLOCKED")
+   
+   # Identify resume point
+   resume_point = find_first_incomplete_task()
+   resume_phase = get_phase_for_task(resume_point)
+   
+   DISPLAY:
+   "📋 PLAN.md Analysis:
+    - Total Tasks: {total}
+    - Completed: {completed} ✅
+    - Pending: {pending} ⏳
+    - Blocked: {blocked} ⚠️
+    
+    Resume Point:
+    - Phase {resume_phase.number}: {resume_phase.name}
+    - Next Task: {resume_point.description}
+    - Agent: {resume_point.agent}"
+   ```
+
+3. **Restore Context and Continue**:
+   ```
+   # Rebuild context from saved state
+   context = {
+     "previous_progress": progress_state,
+     "completed_work": get_completed_tasks(),
+     "active_reviews": review_state,
+     "known_blockers": get_blockers(),
+     "patterns_learned": extract_patterns(review_state)
+   }
+   
+   # Restore TodoWrite state
+   todos = build_todos_from_plan(plan_content)
+   update_todo_states(todos, task_states)
+   TodoWrite(todos)
+   
+   # Show continuation plan
+   DISPLAY:
+   "🚀 Resuming Implementation
+    ═══════════════════════
+    
+    Continuing from Phase {resume_phase.number}
+    {phases_remaining} phases remaining
+    {tasks_remaining} tasks to complete
+    
+    📝 Next 3 Tasks:
+    1. {next_task_1} [{agent_1}]
+    2. {next_task_2} [{agent_2}]
+    3. {next_task_3} [{agent_3}]
+    
+    Context from previous session loaded ✅
+    Ready to continue? (yes/no)"
+   ```
+
+4. **Handle Incomplete Reviews**:
+   ```
+   IF active_reviews exist:
+     DISPLAY:
+     "⚠️ Incomplete Review Cycles Detected:
+      
+      {for each active_review:
+        Task: {task_name}
+        Cycle: {current_cycle}/3
+        Last Feedback: {last_feedback_summary}
+        
+        Options:
+        1. Continue review cycle
+        2. Restart review from beginning
+        3. Skip review (accept as-is)
+        4. Assign different reviewer
+      }
+      
+      How to handle incomplete reviews?"
+   ```
+
+5. **Progress Recovery Options**:
+   ```
+   # Offer recovery strategies
+   IF blockers exist:
+     "🚫 Blocked Tasks Recovery:
+      
+      {for each blocker:
+        Task: {task_name}
+        Blocked Since: {timestamp}
+        Reason: {blocker_reason}
+        
+        Suggested Actions:
+        - Retry with different approach
+        - Modify requirements
+        - Skip and document
+        - Manual intervention
+      }"
+   
+   IF failed_checkpoints exist:
+     "❌ Failed Checkpoints:
+      
+      {for each failed_checkpoint:
+        Checkpoint: {name}
+        Command: {command}
+        Last Error: {error_message}
+        
+        Options:
+        - Re-run validation
+        - Debug and fix
+        - Skip checkpoint
+      }"
+   ```
