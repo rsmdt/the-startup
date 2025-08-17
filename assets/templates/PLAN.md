@@ -106,23 +106,21 @@ Before proceeding with implementation, verify:
 Tasks support the following metadata fields for orchestration:
 
 #### Execution Control
-- **`agent`**: Specifies which specialist agent should execute the task
-  - Common agents: `the-developer`, `the-architect`, `the-tester`, `the-reviewer`
-  - Default: Selected based on task content if not specified
+- **`agent`** (optional): Specifies which specialist agent should execute the task
+  - Only use when specific expertise is required
+  - If omitted, orchestrator selects best agent based on task requirements
+  - Examples: `the-architect` for design tasks, `the-security-engineer` for auth tasks
   
 #### Review Configuration
-- **`review`**: Boolean flag or conditional expression for review requirements
-  - `true`: Always requires review
-  - `false`: Skip review (default for simple tasks)
-  - `auto`: Let orchestrator decide based on complexity/risk
-  
-- **`review_focus`**: Specific areas the reviewer should examine
+- **`review`**: Areas to focus on during review (presence indicates review required)
   - Examples: `"security, authentication"`, `"performance, scalability"`, `"patterns, architecture"`
   - Multiple areas can be comma-separated
+  - Omit entirely if no review needed
+  - Orchestrator selects reviewer based on specified areas
   
-- **`reviewer`**: Explicitly specify reviewing agent (overrides dynamic selection)
-  - Examples: `the-architect` for design reviews, `the-security-expert` for security reviews
-  - Leave blank for dynamic selection based on context
+- **`reviewer`** (rare): Explicitly specify reviewing agent
+  - Only use when specific reviewer is mandatory
+  - Usually better to let orchestrator select based on review areas
 
 #### Complexity and Risk Indicators
 - **`complexity`**: Task complexity level driving review decisions
@@ -172,26 +170,29 @@ The orchestrator intelligently selects reviewers based on multiple factors:
 
 #### Simple Task (No Review)
 ```markdown
-- [ ] **Update README documentation** [`agent: the-developer`] [`complexity: low`]
+- [ ] **Update README documentation** [`complexity: low`]
   - Add installation instructions
   - Update API examples
+  # Orchestrator will select appropriate agent
 ```
 
-#### Standard Development Task (Conditional Review)
+#### Standard Development Task (With Review)
 ```markdown
-- [ ] **Implement user profile endpoint** [`agent: the-developer`] [`review: auto`] [`complexity: medium`] [`validation: integration`]
+- [ ] **Implement user profile endpoint** [`review: database, error-handling`] [`complexity: medium`] [`validation: integration`]
   - Create GET /api/users/:id endpoint
   - Add database query with proper indexing
   - Include error handling for missing users
+  # Review required with focus on database and error handling
 ```
 
 #### Complex Task with Dependencies
 ```markdown
-- [ ] **Refactor authentication system** [`agent: the-architect`] [`review: true`] [`reviewer: the-security-expert`] [`complexity: high`] [`risk: critical`] [`depends_on: task-2, task-3`] [`validation: integration`]
+- [ ] **Refactor authentication system** [`review: security, architecture`] [`complexity: high`] [`risk: critical`] [`depends_on: task-2, task-3`] [`validation: integration`]
   - Design new JWT token structure
   - Implement refresh token rotation
   - Add rate limiting for login attempts
   - Ensure backward compatibility
+  # Critical task with security review required
 ```
 
 #### Parallel Execution Example
@@ -205,23 +206,18 @@ The orchestrator intelligently selects reviewers based on multiple factors:
   - Update error response format
 ```
 
-#### Dynamic Review Selection Example
+#### Payment Task (Critical Review)
 ```markdown
-- [ ] **Process payment integration** [`agent: the-developer`] [`review: auto`] [`complexity: critical`] [`risk: critical`] [`review_focus: security, error-handling, compliance`]
-  # Orchestrator will automatically:
-  # 1. Detect payment/financial context
-  # 2. Select security-focused reviewer
-  # 3. Enforce mandatory review due to critical risk
-  # 4. Include compliance checks in validation
+- [ ] **Process payment integration** [`review: security, compliance, error-handling`] [`complexity: critical`] [`risk: critical`]
+  # Critical risk + payment context = mandatory security review
+  # Orchestrator selects security-focused reviewer
 ```
 
-#### Conditional Review Based on Complexity
+#### Database Migration (Context-Aware Review)
 ```markdown
-- [ ] **Database migration** [`agent: the-developer`] [`review: auto`] [`complexity: high`] [`validation: manual`] [`validation_cmd: "./scripts/verify-migration.sh"`]
-  # Review triggered if:
-  # - Migration affects > 1000 records
-  # - Includes destructive operations
-  # - Modifies critical tables
+- [ ] **Database migration** [`review: data-integrity, rollback`] [`complexity: high`] [`validation: manual`] [`validation_cmd: "./scripts/verify-migration.sh"`]
+  # High complexity database work triggers review
+  # Focus on data integrity and rollback procedures
 ```
 
 ### Orchestration Behavior
@@ -237,12 +233,12 @@ Based on metadata, the orchestrator will:
 
 ### Best Practices
 
-1. **Be Explicit for Critical Tasks**: Always specify review requirements for security/payment tasks
-2. **Use Complexity Indicators**: Help orchestrator make intelligent decisions
-3. **Define Dependencies**: Prevent race conditions and ensure correct order
-4. **Specify Validation**: Include concrete validation steps for quality assurance
-5. **Focus Reviews**: Use `review_focus` to guide reviewer attention
-6. **Let Orchestrator Optimize**: Use `auto` for review to leverage intelligent routing
+1. **Let Orchestrator Choose Agents**: Only specify agent when specific expertise is mandatory
+2. **Simplify Review Metadata**: Use `[review: areas]` format - presence means review required
+3. **Be Explicit for Critical Tasks**: Always include review areas for security/payment tasks
+4. **Use Complexity Indicators**: Help orchestrator make intelligent decisions
+5. **Define Dependencies**: Prevent race conditions and ensure correct order
+6. **Specify Validation**: Include concrete validation steps for quality assurance
 
 ### Backward Compatibility
 
