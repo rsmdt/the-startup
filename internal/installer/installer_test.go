@@ -3,7 +3,6 @@ package installer
 import (
 	"embed"
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -221,12 +220,57 @@ func TestInstallComponentUnknown(t *testing.T) {
 	}
 }
 
+func TestToTildePath(t *testing.T) {
+	homeDir, _ := os.UserHomeDir()
+	
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "Home directory path",
+			input:    filepath.Join(homeDir, ".the-startup"),
+			expected: "~/.the-startup",
+		},
+		{
+			name:     "Nested home directory path",
+			input:    filepath.Join(homeDir, ".config", "the-startup"),
+			expected: "~/.config/the-startup",
+		},
+		{
+			name:     "Path outside home",
+			input:    "/opt/the-startup",
+			expected: "/opt/the-startup",
+		},
+		{
+			name:     "Root path",
+			input:    "/",
+			expected: "/",
+		},
+		{
+			name:     "Relative path",
+			input:    "./the-startup",
+			expected: "./the-startup",
+		},
+	}
+	
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := toTildePath(tt.input)
+			if result != tt.expected {
+				t.Errorf("toTildePath(%s) = %s, want %s", tt.input, result, tt.expected)
+			}
+		})
+	}
+}
+
 func TestReplacePlaceholders(t *testing.T) {
 	installer := New(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
-	installer.SetInstallPath("/custom/startup/path")
-
-	// Set claude path (normally set in New())
+	
+	// Test with paths in home directory (should use ~)
 	homeDir, _ := os.UserHomeDir()
+	installer.SetInstallPath(filepath.Join(homeDir, ".the-startup"))
 	installer.claudePath = filepath.Join(homeDir, ".claude")
 
 	tests := []struct {
@@ -235,19 +279,19 @@ func TestReplacePlaceholders(t *testing.T) {
 		expected string
 	}{
 		{
-			name:     "Replace STARTUP_PATH",
+			name:     "Replace STARTUP_PATH with tilde",
 			input:    "Template at {{STARTUP_PATH}}/templates/test.md",
-			expected: "Template at /custom/startup/path/templates/test.md",
+			expected: "Template at ~/.the-startup/templates/test.md",
 		},
 		{
-			name:     "Replace CLAUDE_PATH",
+			name:     "Replace CLAUDE_PATH with tilde",
 			input:    "Agent at {{CLAUDE_PATH}}/agents/test.md",
-			expected: fmt.Sprintf("Agent at %s/agents/test.md", installer.claudePath),
+			expected: "Agent at ~/.claude/agents/test.md",
 		},
 		{
-			name:     "Replace multiple variables",
+			name:     "Replace multiple variables with tilde",
 			input:    "From {{CLAUDE_PATH}} to {{STARTUP_PATH}}",
-			expected: fmt.Sprintf("From %s to /custom/startup/path", installer.claudePath),
+			expected: "From ~/.claude to ~/.the-startup",
 		},
 		{
 			name:     "No variables to replace",
@@ -264,6 +308,18 @@ func TestReplacePlaceholders(t *testing.T) {
 			}
 		})
 	}
+
+	// Test with paths outside home directory (should keep absolute)
+	t.Run("Absolute paths outside home", func(t *testing.T) {
+		installer.SetInstallPath("/opt/the-startup")
+		input := "Path: {{STARTUP_PATH}}/bin"
+		expected := "Path: /opt/the-startup/bin"
+		
+		result := installer.replacePlaceholders([]byte(input))
+		if string(result) != expected {
+			t.Errorf("Expected '%s', got '%s'", expected, string(result))
+		}
+	})
 }
 
 func TestGetPaths(t *testing.T) {

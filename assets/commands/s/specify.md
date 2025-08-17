@@ -63,56 +63,31 @@ Your choice: _
 Based on complexity level, execute the appropriate workflow:
 
 #### For Level 1 (Direct):
-- Apply clarification protocol if ambiguity detected (see @{{STARTUP_PATH}}/rules/orchestration-protocol.md)
-- Create PLAN.md directly using @assets/templates/PLAN.md template
+- Apply clarification protocol if ambiguity detected
+- Create PLAN.md directly using `{{STARTUP_PATH}}/templates/PLAN.md` template
 - No sub-agent delegation needed
 
-#### For Level 2-3 (Delegation Required):
+#### When Delegating to Specialists:
 
-**Parallel Execution Strategy:**
+**Execution Strategy:**
 
-1. **Level 2 (Design) - Parallel Research**:
-   ```
-   🔄 Launching parallel research phase...
-   ```
-   - Invoke multiple specialists simultaneously for different aspects:
-     - the-architect: Technical patterns and architecture decisions
-     - the-developer: Implementation complexity and dependencies
-     - the-security-engineer: Security requirements (if applicable)
-   - Gather all responses before synthesis
-   - Create SDD/PRD using combined insights
-
-2. **Level 3 (Discovery) - Staged Parallel Research**:
-   ```
-   Stage 1: Business Analysis (solo)
-   → the-business-analyst for requirements discovery
-   
-   Stage 2: Parallel Deep Dive (based on discovered requirements)
-   → Multiple specialists simultaneously:
-     - the-architect: Technical feasibility
-     - the-product-manager: User journeys and features
-     - the-developer: Implementation estimates
-     - Additional specialists as needed
-   ```
+Apply delegation patterns from @{{STARTUP_PATH}}/rules/agent-delegation.md when invoking specialists. Consider parallel execution when tasks are independent.
 
 3. **Execution Flow**:
    - **Gather Information from Specialists**:
-     - For parallel tasks: Launch all at once using multiple Task tool invocations
-     - Each gets bounded context with specific research questions
-     - Apply protocols:
-       - Orchestration: @{{STARTUP_PATH}}/rules/orchestration-protocol.md
-       - Response handling: @{{STARTUP_PATH}}/rules/agent-response-handling.md
-       - Validation: @{{STARTUP_PATH}}/rules/delegation-validation.md
+     - Apply patterns from @{{STARTUP_PATH}}/rules/agent-delegation.md
+     - Provide bounded context with specific questions
+     - Validate all responses before proceeding
 
    - **Synthesize and Create Documents**:
      - Wait for all parallel responses
      - Validate each response for drift
      - Synthesize insights into cohesive narrative
      - Create document following the appropriate template:
-       - BRD: @assets/templates/BRD.md
-       - PRD: @assets/templates/PRD.md
-       - SDD: @assets/templates/SDD.md
-       - PLAN: @assets/templates/PLAN.md
+       - BRD: `{{STARTUP_PATH}}/templates/BRD.md`
+       - PRD: `{{STARTUP_PATH}}/templates/PRD.md`
+       - SDD: `{{STARTUP_PATH}}/templates/SDD.md`
+       - PLAN: `{{STARTUP_PATH}}/templates/PLAN.md`
      - Write document to `docs/specs/[ID]-[feature-name]/[TYPE].md`
 
 3. **Phase Transition**:
@@ -133,10 +108,10 @@ When all documents are created:
 ✅ Specification complete for [ID]-[feature-name]
 
 Documents created:
-- BRD: docs/specs/[ID]/BRD.md (if applicable)
-- PRD: docs/specs/[ID]/PRD.md (if applicable)
-- SDD: docs/specs/[ID]/SDD.md (if applicable)
-- PLAN: docs/specs/[ID]/PLAN.md
+- BRD: docs/specs/[ID]-[feature-name]/BRD.md (if applicable)
+- PRD: docs/specs/[ID]-[feature-name]/PRD.md (if applicable)
+- SDD: docs/specs/[ID]-[feature-name]/SDD.md (if applicable)
+- PLAN: docs/specs/[ID]-[feature-name]/PLAN.md
 
 Next step: Use `/s:implement [ID]` to execute the implementation plan
 ```
@@ -156,14 +131,7 @@ docs/
 
 ## Delegation Guidelines
 
-When delegating to specialists:
-
-1. **Provide clear task**: What analysis or design work is needed
-2. **Share relevant context**: Any information that helps them provide better expertise
-3. **Explicitly exclude**: What they should NOT consider (prevent scope creep)
-4. **Request specific deliverables**: What information you need from them
-
-Trust your judgment on what context would help the specialist succeed. Remember: specialists provide expertise and analysis, not formatted documents.
+Apply the delegation patterns from @{{STARTUP_PATH}}/rules/agent-delegation.md for all specialist invocations. Remember: specialists provide expertise and analysis, not formatted documents.
 
 ## Specialist Roles
 
@@ -191,7 +159,7 @@ Trust your judgment on what context would help the specialist succeed. Remember:
 
 **Document Creation** (orchestrator's responsibility):
 - Take specialist input and create properly formatted documents
-- Follow templates from @assets/templates/
+- Follow templates from {{STARTUP_PATH}}/templates/*.md
 - Ensure consistency across all documents
 
 ## Task Management

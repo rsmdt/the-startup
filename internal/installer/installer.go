@@ -690,6 +690,21 @@ func (i *Installer) GetInstalledCommands() []string {
 	return commands
 }
 
+// toTildePath converts an absolute path to use ~ for the home directory
+func toTildePath(path string) string {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return path // Return original if we can't get home dir
+	}
+	
+	// If path starts with home directory, replace it with ~
+	if strings.HasPrefix(path, homeDir) {
+		return "~" + strings.TrimPrefix(path, homeDir)
+	}
+	
+	return path
+}
+
 // replacePlaceholders replaces template variables with actual paths.
 // This function is called for ALL asset files (agents, commands, templates, rules)
 // during installation to ensure placeholders work across all content types.
@@ -701,14 +716,18 @@ func (i *Installer) GetInstalledCommands() []string {
 // This generic approach ensures that any future agents, commands, or other assets
 // can use these placeholders without requiring code changes.
 func (i *Installer) replacePlaceholders(data []byte) []byte {
-	// Replace {{STARTUP_PATH}} with the installation path
-	data = bytes.ReplaceAll(data, []byte("{{STARTUP_PATH}}"), []byte(i.installPath))
+	// Convert paths to ~ format for better readability
+	startupPath := toTildePath(i.installPath)
+	claudePath := toTildePath(i.claudePath)
+	
+	// Replace {{STARTUP_PATH}} with the installation path (using ~ format)
+	data = bytes.ReplaceAll(data, []byte("{{STARTUP_PATH}}"), []byte(startupPath))
 
-	// Replace {{CLAUDE_PATH}} with ~/.claude
-	data = bytes.ReplaceAll(data, []byte("{{CLAUDE_PATH}}"), []byte(i.claudePath))
+	// Replace {{CLAUDE_PATH}} with ~/.claude (using ~ format)
+	data = bytes.ReplaceAll(data, []byte("{{CLAUDE_PATH}}"), []byte(claudePath))
 
 	// Future placeholders can be added here without modifying the calling code
-	// Example: data = bytes.ReplaceAll(data, []byte("{{USER_HOME}}"), []byte(os.UserHomeDir()))
+	// Example: data = bytes.ReplaceAll(data, []byte("{{USER_HOME}}"), []byte("~"))
 
 	return data
 }

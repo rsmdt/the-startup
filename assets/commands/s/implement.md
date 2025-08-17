@@ -45,31 +45,18 @@ You execute the implementation plan for: **$ARGUMENTS**
 ### Phase 3: Execute Implementation
 For each phase in PLAN.md:
 
-1. **Sequential Execution**:
-   If phase marked as sequential:
-   - Execute tasks one at a time in listed order
-   - **ALWAYS use TodoWrite to mark as in_progress BEFORE starting**
-   - Generate unique AgentID for this task
-   - Invoke assigned agent with enhanced prompt (see Task Invocation section)
-   - **Display agent response with full commentary (see Agent Response Protocol)**
-   - Parse response for "IMPLEMENTATION COMPLETE" or "BLOCKED"
-   - **IMMEDIATELY use TodoWrite to mark as completed when done**
-   - **Use Edit to update PLAN.md checkbox from `- [ ]` to `- [x]`**
-   - Stop phase if any task fails or is blocked
+1. **Apply Delegation Patterns**:
+   - Follow execution patterns from @{{STARTUP_PATH}}/rules/agent-delegation.md
+   - Use sequential execution for dependent tasks
+   - Use parallel execution for independent tasks within a phase
+   - Generate unique AgentID format: `{agent-type}-{phase}-{timestamp}`
 
-2. **Parallel Execution**:
-   If phase marked as parallel:
-   - Identify all tasks in the phase
-   - **Use TodoWrite to mark ALL as in_progress**
-   - Generate unique AgentID for each task
-   - Invoke multiple agents simultaneously using batch Task calls
-   - Each agent gets: AgentID, boundaries, task description, subtasks, context instructions
-   - Monitor all executions
-   - **Display EACH agent's response separately with commentary**
-   - Parse each response for completion status
-   - Wait for all to complete before proceeding
-   - **Use TodoWrite to mark each as completed based on response**
-   - **Use Edit to update PLAN.md checkboxes for successful tasks**
+2. **Task Lifecycle**:
+   - **ALWAYS use TodoWrite** to track task status (pending → in_progress → completed)
+   - Display ALL agent responses with commentary as specified in delegation rule
+   - Parse responses for "IMPLEMENTATION COMPLETE" or "BLOCKED"
+   - **Use Edit to update PLAN.md checkboxes** from `- [ ]` to `- [x]` for completed tasks
+   - Apply validation from delegation rule to detect drift
 
 3. **Validation Checkpoints**:
    When encountering **Validation** tasks:
@@ -103,46 +90,13 @@ For each phase in PLAN.md:
 
 ## Task Invocation
 
-When invoking specialists from PLAN.md:
-1. **Extract Context**:
-   - Task description and any indented subtasks
-   - Referenced documents (e.g., [→ PRD#auth-requirements])
-   - Spec path for accessing BRD/PRD/SDD
-   - Generate unique AgentID: `{agent-type}-{phase}-{timestamp}` (e.g., "dev-auth-20240113-142530")
+Apply the context management and invocation patterns from @{{STARTUP_PATH}}/rules/agent-delegation.md:
 
-2. **Provide Clear Instructions**:
-   ```
-   AgentId: {generated-agent-id}
-   
-   CRITICAL: You MUST stay focused on ONLY the following task. Do NOT explore beyond these specific requirements.
-   
-   ## Your Task
-   {complete task with all subtasks from PLAN.md}
-   
-   ## Context Loading
-   You can load previous context using:
-   the-startup log --read --agent-id {your-agent-id} --lines 20 --format json
-   
-   ## Required Documents
-   Read docs/specs/XXX/[document].md for requirements and specifications
-   
-   ## Success Criteria
-   Return "IMPLEMENTATION COMPLETE" when ALL subtasks are done
-   Return "BLOCKED: {reason}" if you cannot proceed
-   
-   ## Boundaries
-   - ONLY implement the specified task and subtasks
-   - Do NOT modify unrelated files
-   - Do NOT add features not in the task list
-   - Do NOT refactor code outside the task scope
-   ```
-
-3. **Handle Results**:
-   - Parse agent response for "IMPLEMENTATION COMPLETE" or "BLOCKED"
-   - Update TodoWrite based on success/failure
-   - Update PLAN.md checkboxes using Edit tool
-   - Collect any error messages or blockers
-   - Proceed according to execution type
+1. **Context Template**: Use the standard context template from the delegation rule
+2. **AgentID Format**: `{agent-type}-{phase}-{timestamp}`
+3. **Success Criteria**: "IMPLEMENTATION COMPLETE" or "BLOCKED: {reason}"
+4. **Boundaries**: Apply explicit exclusions to prevent scope drift
+5. **Validation**: Check all responses for drift using validation protocol
 
 ## Example Flow
 
@@ -209,33 +163,13 @@ Proceed to Phase 2: Core Infrastructure? (yes/no)
 - Only mark complete when agent explicitly confirms ALL subtasks done
 - The implementation ends when no pending tasks remain in BOTH TodoWrite AND PLAN.md
 
-## Agent Response Protocol - MANDATORY
+## Agent Response Protocol
 
-**You MUST display EVERY agent response completely, including their personality/commentary:**
-
-1. **Display Commentary First**:
-   - Show any `<commentary>...</commentary>` block EXACTLY as written
-   - Display it immediately after "Response from [agent-name]:"
-   - Include ALL formatting, emojis, personality messages
-   - Add `---` separator after commentary
-
-2. **For Parallel Execution**:
-   - Display EACH agent's response separately
-   - Show all commentaries in full
-   - Never merge or summarize responses
-
-3. **Example of CORRECT Display**:
-   ```
-   Response from the-developer:
-   
-   💻 **The Developer**: *cracks knuckles*
-   
-   Time to implement this authentication system. I've built dozens of these...
-   
-   ---
-   
-   [rest of response]
-   ```
+Follow the response handling patterns from @{{STARTUP_PATH}}/rules/agent-delegation.md:
+- Display ALL agent commentary blocks verbatim
+- Show each parallel response separately
+- Never merge or summarize responses
+- Extract and present any `<tasks>` blocks for user confirmation
 
 ## Important Notes
 
