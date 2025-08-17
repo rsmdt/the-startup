@@ -77,12 +77,11 @@ func TestWriteAgentContext(t *testing.T) {
 	agentID := "arch-001"
 
 	hookData := &HookData{
-		Event:       "agent_start",
-		AgentType:   "the-architect",
-		AgentID:     agentID,
-		Description: "Test task",
-		SessionID:   sessionID,
-		Timestamp:   "2025-08-12T14:00:00.000Z",
+		Role:      "user",
+		Content:   "Test task content",
+		Timestamp: "2025-08-12T14:00:00.000Z",
+		SessionID: sessionID,
+		AgentID:   agentID,
 	}
 
 	t.Run("Successful write", func(t *testing.T) {
@@ -108,12 +107,11 @@ func TestWriteAgentContext(t *testing.T) {
 	t.Run("Append operation", func(t *testing.T) {
 		// Write second entry
 		hookData2 := &HookData{
-			Event:       "agent_complete",
-			AgentType:   "the-architect",
-			AgentID:     agentID,
-			Description: "Task completed",
-			SessionID:   sessionID,
-			Timestamp:   "2025-08-12T14:05:00.000Z",
+			Role:      "assistant",
+			Content:   "Task completed content",
+			Timestamp: "2025-08-12T14:05:00.000Z",
+			SessionID: sessionID,
+			AgentID:   agentID,
 		}
 
 		err := WriteAgentContext(sessionID, agentID, hookData2)
@@ -145,8 +143,8 @@ func TestWriteAgentContext(t *testing.T) {
 	})
 }
 
-// TestReadAgentContext tests the ReadAgentContext function
-func TestReadAgentContext(t *testing.T) {
+// TestReadAgentContextRaw tests the ReadAgentContextRaw function
+func TestReadAgentContextRaw(t *testing.T) {
 	tempDir := t.TempDir()
 	originalClaudeDir := os.Getenv("CLAUDE_PROJECT_DIR")
 	defer os.Setenv("CLAUDE_PROJECT_DIR", originalClaudeDir)
@@ -166,47 +164,45 @@ func TestReadAgentContext(t *testing.T) {
 
 		contextFile := filepath.Join(sessionDir, agentID+".jsonl")
 		testData := []string{
-			`{"event":"agent_start","agent_type":"the-architect","agent_id":"arch-001","description":"Task 1","session_id":"dev-test-session","timestamp":"2025-08-12T14:00:00.000Z"}`,
-			`{"event":"agent_complete","agent_type":"the-architect","agent_id":"arch-001","description":"Task 1 complete","session_id":"dev-test-session","timestamp":"2025-08-12T14:05:00.000Z"}`,
-			`{"event":"agent_start","agent_type":"the-architect","agent_id":"arch-001","description":"Task 2","session_id":"dev-test-session","timestamp":"2025-08-12T14:10:00.000Z"}`,
+			`{"role":"user","content":"Task 1","timestamp":"2025-08-12T14:00:00.000Z"}`,
+			`{"role":"assistant","content":"Task 1 complete","timestamp":"2025-08-12T14:05:00.000Z"}`,
+			`{"role":"user","content":"Task 2","timestamp":"2025-08-12T14:10:00.000Z"}`,
 		}
 
 		err := os.WriteFile(contextFile, []byte(strings.Join(testData, "\n")+"\n"), 0644)
 		require.NoError(t, err)
 
 		// Test reading with limit
-		entries, err := ReadAgentContext(sessionID, agentID, 2)
+		lines, err := ReadAgentContextRaw(sessionID, agentID, 2)
 		assert.NoError(t, err)
-		assert.Len(t, entries, 2)
+		assert.Len(t, lines, 2)
 
-		// Should return most recent entries (last 2 lines)
-		assert.Equal(t, "Task 1 complete", entries[0].Description)
-		assert.Equal(t, "Task 2", entries[1].Description)
+		// Should return most recent lines (last 2 lines)
+		assert.Contains(t, lines[0], "Task 1 complete")
+		assert.Contains(t, lines[1], "Task 2")
 	})
 
 	t.Run("Non-existent agent returns empty", func(t *testing.T) {
-		entries, err := ReadAgentContext("nonexistent-session", "nonexistent-agent", 10)
+		lines, err := ReadAgentContextRaw("nonexistent-session", "nonexistent-agent", 10)
 		assert.NoError(t, err)
-		assert.Empty(t, entries)
+		assert.Empty(t, lines)
 	})
 
 	t.Run("Parameter validation", func(t *testing.T) {
 		// Test empty agentID
-		entries, err := ReadAgentContext(sessionID, "", 10)
+		lines, err := ReadAgentContextRaw(sessionID, "", 10)
 		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "agentID required")
-		assert.Nil(t, entries)
+		assert.Contains(t, err.Error(), "agentID is required")
+		assert.Nil(t, lines)
 
 		// Test invalid maxLines - should default to 50
-		var entries2 []*HookData
-		var err2 error
-		entries2, err2 = ReadAgentContext(sessionID, "some-agent", 0)
+		lines2, err2 := ReadAgentContextRaw(sessionID, "some-agent", 0)
 		assert.NoError(t, err2)    // Should not error but use default
-		assert.NotNil(t, entries2) // Should return empty slice, not nil
+		assert.NotNil(t, lines2)   // Should return empty slice, not nil
 
-		entries2, err2 = ReadAgentContext(sessionID, "some-agent", 2000)
-		assert.NoError(t, err2)    // Should not error but use default
-		assert.NotNil(t, entries2) // Should return empty slice, not nil
+		lines3, err3 := ReadAgentContextRaw(sessionID, "some-agent", 2000)
+		assert.NoError(t, err3)    // Should not error but use default
+		assert.NotNil(t, lines3)   // Should return empty slice, not nil
 	})
 
 	t.Run("Corrupted JSONL handling", func(t *testing.T) {
@@ -215,17 +211,17 @@ func TestReadAgentContext(t *testing.T) {
 
 		contextFile := filepath.Join(sessionDir, "arch-corrupt.jsonl")
 		corruptData := []string{
-			`{"event":"agent_start","agent_id":"arch-corrupt","timestamp":"2025-08-12T14:00:00.000Z"}`,
+			`{"role":"user","content":"start","timestamp":"2025-08-12T14:00:00.000Z"}`,
 			`invalid json line`,
-			`{"event":"agent_complete","agent_id":"arch-corrupt","timestamp":"2025-08-12T14:05:00.000Z"}`,
+			`{"role":"assistant","content":"complete","timestamp":"2025-08-12T14:05:00.000Z"}`,
 		}
 
 		err := os.WriteFile(contextFile, []byte(strings.Join(corruptData, "\n")+"\n"), 0644)
 		require.NoError(t, err)
 
-		entries, err := ReadAgentContext("corrupt-session", "arch-corrupt", 10)
+		lines, err := ReadAgentContextRaw("corrupt-session", "arch-corrupt", 10)
 		assert.NoError(t, err)
-		assert.Len(t, entries, 2) // Should skip corrupted line
+		assert.Len(t, lines, 3) // Should return all lines including corrupted one
 	})
 }
 
@@ -254,7 +250,7 @@ func TestFindLatestSessionWithAgent(t *testing.T) {
 			require.NoError(t, os.MkdirAll(sessionDir, 0755))
 
 			agentFile := filepath.Join(sessionDir, agentID+".jsonl")
-			testData := fmt.Sprintf(`{"event":"agent_start","agent_id":"%s","session_id":"%s"}`, agentID, session)
+			testData := fmt.Sprintf(`{"role":"user","content":"test content","timestamp":"2025-08-12T14:00:00.000Z"}`)  
 			require.NoError(t, os.WriteFile(agentFile, []byte(testData), 0644))
 
 			// Set specific modification times - make dev-20250812-150000 (index 1) the latest
@@ -331,7 +327,7 @@ func TestReadLastNLines(t *testing.T) {
 		var lines []string
 		for i := 0; i < 50000; i++ {
 			// Each line is about 50 bytes, so 50000 lines ~ 2.5MB
-			line := fmt.Sprintf(`{"event":"agent_start","agent_id":"test","description":"Line %05d with some extra padding"}`, i)
+			line := fmt.Sprintf(`{"role":"user","content":"Line %05d with some extra padding","timestamp":"2025-08-12T14:00:00.000Z"}`, i)
 			lines = append(lines, line)
 		}
 

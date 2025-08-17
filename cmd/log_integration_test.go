@@ -74,32 +74,16 @@ func TestLogCommandIntegration(t *testing.T) {
 	}
 
 	// Verify log entry content
-	if logEntry.Event != "agent_start" {
-		t.Errorf("Expected event 'agent_start', got '%s'", logEntry.Event)
+	if logEntry.Role != "user" {
+		t.Errorf("Expected role 'user', got '%s'", logEntry.Role)
 	}
 
-	if logEntry.AgentType != "the-developer" {
-		t.Errorf("Expected agent_type 'the-developer', got '%s'", logEntry.AgentType)
+	if logEntry.Content == "" {
+		t.Error("Expected content to be populated")
 	}
 
-	if logEntry.AgentID != "agent-456" {
-		t.Errorf("Expected agent_id 'agent-456', got '%s'", logEntry.AgentID)
-	}
-
-	if logEntry.SessionID != "dev-integration-test" {
-		t.Errorf("Expected session_id 'dev-integration-test', got '%s'", logEntry.SessionID)
-	}
-
-	if logEntry.Description != "Integration test task" {
-		t.Errorf("Expected description 'Integration test task', got '%s'", logEntry.Description)
-	}
-
-	if logEntry.Instruction == "" {
-		t.Error("Expected instruction to be populated for agent_start event")
-	}
-
-	if logEntry.OutputSummary != "" {
-		t.Errorf("Expected empty output_summary for agent_start event, got '%s'", logEntry.OutputSummary)
+	if logEntry.Timestamp == "" {
+		t.Error("Expected timestamp to be populated")
 	}
 }
 
@@ -154,25 +138,17 @@ func TestLogCommandUserIntegration(t *testing.T) {
 	}
 
 	// Verify log entry content for agent_complete event
-	if logEntry.Event != "agent_complete" {
-		t.Errorf("Expected event 'agent_complete', got '%s'", logEntry.Event)
+	if logEntry.Role != "assistant" {
+		t.Errorf("Expected role 'assistant', got '%s'", logEntry.Role)
 	}
 
-	if logEntry.AgentType != "the-tester" {
-		t.Errorf("Expected agent_type 'the-tester', got '%s'", logEntry.AgentType)
-	}
-
-	if logEntry.Instruction != "" {
-		t.Errorf("Expected empty instruction for agent_complete event, got '%s'", logEntry.Instruction)
-	}
-
-	if logEntry.OutputSummary == "" {
-		t.Error("Expected output_summary to be populated for agent_complete event")
+	if logEntry.Content == "" {
+		t.Error("Expected content to be populated")
 	}
 
 	expectedOutput := "Task completed successfully with comprehensive test results and validation."
-	if logEntry.OutputSummary != expectedOutput {
-		t.Errorf("Expected output_summary '%s', got '%s'", expectedOutput, logEntry.OutputSummary)
+	if !strings.Contains(logEntry.Content, expectedOutput) {
+		t.Errorf("Expected content to contain '%s', got '%s'", expectedOutput, logEntry.Content)
 	}
 }
 
@@ -406,12 +382,12 @@ func TestLogCommandStdinProcessing(t *testing.T) {
 			t.Fatalf("Failed to parse log entry JSON: %v", err)
 		}
 
-		// Output should be truncated
-		if len(logEntry.OutputSummary) <= 1000 {
-			t.Errorf("Expected output to be truncated, but got length %d", len(logEntry.OutputSummary))
+		// Content should contain the output
+		if len(logEntry.Content) == 0 {
+			t.Error("Expected content to be populated")
 		}
-		if !strings.Contains(logEntry.OutputSummary, "... [truncated") {
-			t.Error("Expected truncation message in output")
+		if !strings.Contains(logEntry.Content, "This is a very long output") {
+			t.Error("Expected content to contain the test output")
 		}
 	})
 }

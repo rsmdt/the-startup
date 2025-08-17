@@ -46,12 +46,9 @@ func TestFullPythonCompatibilityFlow(t *testing.T) {
 			t.Fatal("Expected non-nil hookData")
 		}
 
-		// Validate fields match Python output exactly
-		if hookData.Event != "agent_start" {
-			t.Errorf("Expected event 'agent_start', got %q", hookData.Event)
-		}
-		if hookData.AgentType != "the-architect" {
-			t.Errorf("Expected agent_type 'the-architect', got %q", hookData.AgentType)
+		// Validate fields match the current structure
+		if hookData.Role != "user" {
+			t.Errorf("Expected role 'user', got %q", hookData.Role)
 		}
 		if hookData.AgentID != "arch-001" {
 			t.Errorf("Expected agent_id 'arch-001', got %q", hookData.AgentID)
@@ -59,25 +56,14 @@ func TestFullPythonCompatibilityFlow(t *testing.T) {
 		if hookData.SessionID != "dev-test-session" {
 			t.Errorf("Expected session_id 'dev-test-session', got %q", hookData.SessionID)
 		}
-		if hookData.Description != "Design the system architecture" {
-			t.Errorf("Expected specific description, got %q", hookData.Description)
-		}
-		if !strings.Contains(hookData.Instruction, "Please design a scalable microservices architecture") {
-			t.Errorf("Expected instruction to contain prompt, got %q", hookData.Instruction)
-		}
-		if hookData.OutputSummary != "" {
-			t.Errorf("Expected empty output_summary for agent_start, got %q", hookData.OutputSummary)
+		if !strings.Contains(hookData.Content, "Please design a scalable microservices architecture") {
+			t.Errorf("Expected content to contain prompt, got %q", hookData.Content)
 		}
 
 		// Write logs and verify files
 		err = WriteSessionLog(hookData.SessionID, hookData)
 		if err != nil {
 			t.Fatalf("WriteSessionLog failed: %v", err)
-		}
-
-		err = WriteGlobalLog(hookData)
-		if err != nil {
-			t.Fatalf("WriteGlobalLog failed: %v", err)
 		}
 
 		// Verify session file exists and has correct content
@@ -97,15 +83,12 @@ func TestFullPythonCompatibilityFlow(t *testing.T) {
 			t.Fatalf("Failed to parse session file JSON: %v", err)
 		}
 
-		if sessionEntry.Event != "agent_start" {
-			t.Errorf("Session file: Expected event 'agent_start', got %q", sessionEntry.Event)
+		if sessionEntry.Role != "user" {
+			t.Errorf("Session file: Expected role 'user', got %q", sessionEntry.Role)
 		}
 
-		// Verify global file exists
-		globalFile := filepath.Join(startupDir, "all-agent-instructions.jsonl")
-		if _, err := os.Stat(globalFile); os.IsNotExist(err) {
-			t.Errorf("Global file does not exist: %s", globalFile)
-		}
+		// Note: Global files are no longer created in the current implementation
+		// This test used to check for global files but they've been removed
 	})
 
 	// Test PostToolUse (agent_complete) flow
@@ -137,34 +120,26 @@ func TestFullPythonCompatibilityFlow(t *testing.T) {
 			t.Fatal("Expected non-nil hookData")
 		}
 
-		// Validate fields match Python output exactly
-		if hookData.Event != "agent_complete" {
-			t.Errorf("Expected event 'agent_complete', got %q", hookData.Event)
+		// Validate fields match the current structure
+		if hookData.Role != "assistant" {
+			t.Errorf("Expected role 'assistant', got %q", hookData.Role)
 		}
-		if hookData.AgentType != "the-architect" {
-			t.Errorf("Expected agent_type 'the-architect', got %q", hookData.AgentType)
-		}
-		if hookData.Instruction != "" {
-			t.Errorf("Expected empty instruction for agent_complete, got %q", hookData.Instruction)
+		if hookData.AgentID != "arch-001" {
+			t.Errorf("Expected agent_id 'arch-001', got %q", hookData.AgentID)
 		}
 
-		// Verify output truncation
-		if len(hookData.OutputSummary) <= 1000 {
-			t.Errorf("Expected output to be truncated, but got length %d", len(hookData.OutputSummary))
+		// Verify output truncation is handled in Content
+		if len(hookData.Content) <= 1000 {
+			t.Errorf("Expected content to be truncated, but got length %d", len(hookData.Content))
 		}
-		if !strings.Contains(hookData.OutputSummary, "... [truncated") {
-			t.Errorf("Expected truncation message in output, got %q", hookData.OutputSummary)
+		if !strings.Contains(hookData.Content, "... [truncated") {
+			t.Errorf("Expected truncation message in content, got %q", hookData.Content)
 		}
 
 		// Write logs
 		err = WriteSessionLog(hookData.SessionID, hookData)
 		if err != nil {
 			t.Fatalf("WriteSessionLog failed: %v", err)
-		}
-
-		err = WriteGlobalLog(hookData)
-		if err != nil {
-			t.Fatalf("WriteGlobalLog failed: %v", err)
 		}
 
 		// Verify files were written (should append to existing files)
@@ -186,8 +161,8 @@ func TestFullPythonCompatibilityFlow(t *testing.T) {
 			t.Fatalf("Failed to parse second line JSON: %v", err)
 		}
 
-		if completeEntry.Event != "agent_complete" {
-			t.Errorf("Second line: Expected event 'agent_complete', got %q", completeEntry.Event)
+		if completeEntry.Role != "assistant" {
+			t.Errorf("Second line: Expected role 'assistant', got %q", completeEntry.Role)
 		}
 	})
 }
@@ -230,18 +205,16 @@ func TestPythonJSONFormatCompatibility(t *testing.T) {
 		t.Fatalf("Failed to unmarshal to map: %v", err)
 	}
 
-	// Check required fields are present
-	requiredFields := []string{"timestamp", "event", "agent_type", "agent_id", "description", "instruction", "session_id"}
+	// Check required fields are present in the current structure
+	requiredFields := []string{"role", "content", "timestamp"}
 	for _, field := range requiredFields {
 		if _, exists := jsonMap[field]; !exists {
 			t.Errorf("Required field %q missing from JSON output", field)
 		}
 	}
 
-	// Check that output_summary is omitted (agent_start)
-	if _, exists := jsonMap["output_summary"]; exists {
-		t.Error("output_summary should be omitted for agent_start events")
-	}
+	// SessionID and AgentID are internal fields and not serialized to JSON
+	// This is correct behavior
 
 	// Verify timestamp format
 	timestamp, ok := jsonMap["timestamp"].(string)
@@ -269,14 +242,14 @@ func TestPythonJSONFormatCompatibility(t *testing.T) {
 		t.Fatalf("Failed to unmarshal complete to map: %v", err)
 	}
 
-	// Check that instruction is omitted (agent_complete)
-	if _, exists := completeJsonMap["instruction"]; exists {
-		t.Error("instruction should be omitted for agent_complete events")
+	// Check that content is present for assistant role
+	if _, exists := completeJsonMap["content"]; !exists {
+		t.Error("content should be present for assistant role")
 	}
 
-	// Check that output_summary is present
-	if _, exists := completeJsonMap["output_summary"]; !exists {
-		t.Error("output_summary should be present for agent_complete events")
+	// Check that role is assistant
+	if role, exists := completeJsonMap["role"]; !exists || role != "assistant" {
+		t.Errorf("Expected role 'assistant', got %v", role)
 	}
 }
 
@@ -379,13 +352,11 @@ func TestCrossPlatformFileSystemBehavior(t *testing.T) {
 
 		// Create test data
 		hookData := &HookData{
-			Event:       "agent_start",
-			AgentType:   "the-tester",
-			AgentID:     "test-001",
-			Description: "Cross-platform test",
-			Instruction: "Test path separators",
-			SessionID:   sessionID,
-			Timestamp:   "2025-01-11T12:00:00.000Z",
+			Role:      "user",
+			Content:   "Test path separators",
+			SessionID: sessionID,
+			AgentID:   "test-001",
+			Timestamp: "2025-01-11T12:00:00.000Z",
 		}
 
 		// Write session log
@@ -422,9 +393,10 @@ func TestCrossPlatformFileSystemBehavior(t *testing.T) {
 		sessionDir := filepath.Join(startupDir, sessionID)
 
 		hookData := &HookData{
-			Event:     "agent_start",
-			AgentType: "the-tester",
+			Role:      "user",
+			Content:   "Test directory permissions",
 			SessionID: sessionID,
+			AgentID:   "the-tester",
 			Timestamp: "2025-01-11T12:00:00.000Z",
 		}
 
@@ -456,16 +428,18 @@ func TestCrossPlatformFileSystemBehavior(t *testing.T) {
 		sessionID := "dev-file-ops-test"
 
 		hookData1 := &HookData{
-			Event:     "agent_start",
-			AgentType: "the-tester",
+			Role:      "user",
+			Content:   "Test file creation start",
 			SessionID: sessionID,
+			AgentID:   "the-tester",
 			Timestamp: "2025-01-11T12:00:00.000Z",
 		}
 
 		hookData2 := &HookData{
-			Event:     "agent_complete",
-			AgentType: "the-tester",
+			Role:      "assistant",
+			Content:   "Test file creation complete",
 			SessionID: sessionID,
+			AgentID:   "the-tester",
 			Timestamp: "2025-01-11T12:01:00.000Z",
 		}
 
@@ -544,9 +518,10 @@ func TestDirectoryStructureValidation(t *testing.T) {
 		sessionID := "dev-structure-test"
 
 		hookData := &HookData{
-			Event:     "agent_start",
-			AgentType: "the-developer",
+			Role:      "user",
+			Content:   "Test directory structure",
 			SessionID: sessionID,
+			AgentID:   "the-developer",
 			Timestamp: "2025-01-11T12:00:00.000Z",
 		}
 
@@ -556,17 +531,13 @@ func TestDirectoryStructureValidation(t *testing.T) {
 			t.Fatalf("WriteSessionLog failed: %v", err)
 		}
 
-		err = WriteGlobalLog(hookData)
-		if err != nil {
-			t.Fatalf("WriteGlobalLog failed: %v", err)
-		}
+		// Global logging is no longer supported
 
-		// Verify complete directory structure
+		// Verify complete directory structure (without global files)
 		expectedStructure := []string{
 			filepath.Join(tempDir, ".the-startup"),
 			filepath.Join(tempDir, ".the-startup", sessionID),
 			filepath.Join(tempDir, ".the-startup", sessionID, "agent-instructions.jsonl"),
-			filepath.Join(tempDir, ".the-startup", "all-agent-instructions.jsonl"),
 		}
 
 		for _, path := range expectedStructure {
@@ -603,10 +574,10 @@ func TestConcurrentExecution(t *testing.T) {
 				defer wg.Done()
 
 				hookData := &HookData{
-					Event:     "agent_start",
-					AgentType: "the-concurrent-tester",
-					AgentID:   fmt.Sprintf("concurrent-%d", id),
+					Role:      "user",
+					Content:   fmt.Sprintf("Concurrent test %d", id),
 					SessionID: sessionID,
+					AgentID:   fmt.Sprintf("concurrent-%d", id),
 					Timestamp: fmt.Sprintf("2025-01-11T12:00:%02d.000Z", id),
 				}
 
@@ -668,14 +639,15 @@ func TestConcurrentExecution(t *testing.T) {
 				defer wg.Done()
 
 				hookData := &HookData{
-					Event:     "agent_complete",
-					AgentType: "the-global-tester",
-					AgentID:   fmt.Sprintf("global-%d", id),
+					Role:      "assistant",
+					Content:   fmt.Sprintf("Global test %d complete", id),
 					SessionID: fmt.Sprintf("session-%d", id),
+					AgentID:   fmt.Sprintf("global-%d", id),
 					Timestamp: fmt.Sprintf("2025-01-11T12:01:%02d.000Z", id),
 				}
 
-				if err := WriteGlobalLog(hookData); err != nil {
+				// Use session log instead of global log
+				if err := WriteSessionLog(fmt.Sprintf("session-%d", id), hookData); err != nil {
 					mu.Lock()
 					errors = append(errors, err)
 					mu.Unlock()
@@ -690,24 +662,19 @@ func TestConcurrentExecution(t *testing.T) {
 			t.Fatalf("Concurrent global writes failed with %d errors: %v", len(errors), errors[0])
 		}
 
-		// Verify all entries were written to global file
-		globalFile := filepath.Join(startupDir, "all-agent-instructions.jsonl")
-		content, err := os.ReadFile(globalFile)
-		if err != nil {
-			t.Fatalf("Failed to read global file: %v", err)
-		}
-
-		lines := strings.Split(strings.TrimSpace(string(content)), "\n")
-		if len(lines) < numConcurrent {
-			t.Errorf("Expected at least %d lines in global file, got %d", numConcurrent, len(lines))
-		}
-
-		// Count agent_complete events
+		// Verify all entries were written to their respective session files
+		// Count total assistant entries across all session files
 		completeCount := 0
-		for _, line := range lines {
-			var entry HookData
-			if err := json.Unmarshal([]byte(line), &entry); err == nil && entry.Event == "agent_complete" {
-				completeCount++
+		for i := 0; i < numConcurrent; i++ {
+			sessionFile := filepath.Join(startupDir, fmt.Sprintf("session-%d", i), "agent-instructions.jsonl")
+			if content, err := os.ReadFile(sessionFile); err == nil {
+				lines := strings.Split(strings.TrimSpace(string(content)), "\n")
+				for _, line := range lines {
+					var entry HookData
+					if err := json.Unmarshal([]byte(line), &entry); err == nil && entry.Role == "assistant" {
+						completeCount++
+					}
+				}
 			}
 		}
 

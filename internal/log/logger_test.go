@@ -21,12 +21,11 @@ func TestWriteSessionLog(t *testing.T) {
 			name:      "valid session log write",
 			sessionID: "dev-session-123",
 			hookData: &HookData{
-				Event:       "agent_start",
-				AgentType:   "the-architect",
-				AgentID:     "arch-001",
-				Description: "Design system",
-				SessionID:   "dev-session-123",
-				Timestamp:   "2025-01-11T10:00:00.000Z",
+				Role:      "user",
+				Content:   "Design system",
+				SessionID: "dev-session-123",
+				AgentID:   "arch-001",
+				Timestamp: "2025-01-11T10:00:00.000Z",
 			},
 			expectError: false,
 			validateFn: func(t *testing.T, sessionDir string) {
@@ -50,18 +49,18 @@ func TestWriteSessionLog(t *testing.T) {
 					return
 				}
 
-				if logEntry.Event != "agent_start" {
-					t.Errorf("Expected event 'agent_start', got %s", logEntry.Event)
+				if logEntry.Role != "user" {
+					t.Errorf("Expected role 'user', got %s", logEntry.Role)
 				}
-				if logEntry.AgentType != "the-architect" {
-					t.Errorf("Expected agent_type 'the-architect', got %s", logEntry.AgentType)
+				if !strings.Contains(logEntry.Content, "Design system") {
+					t.Errorf("Expected content to contain 'Design system', got %s", logEntry.Content)
 				}
 			},
 		},
 		{
 			name:        "empty session ID - should skip",
 			sessionID:   "",
-			hookData:    &HookData{Event: "agent_start"},
+			hookData:    &HookData{Role: "user", Content: "test", Timestamp: "2025-01-11T10:00:00.000Z"},
 			expectError: false,
 			validateFn: func(t *testing.T, sessionDir string) {
 				// For empty session ID, sessionDir will be empty string
@@ -72,9 +71,10 @@ func TestWriteSessionLog(t *testing.T) {
 			name:      "append to existing session file",
 			sessionID: "dev-session-456",
 			hookData: &HookData{
-				Event:     "agent_complete",
-				AgentType: "the-developer",
+				Role:      "assistant",
+				Content:   "Task completed",
 				SessionID: "dev-session-456",
+				AgentID:   "dev-001",
 				Timestamp: "2025-01-11T10:05:00.000Z",
 			},
 			expectError: false,
@@ -83,9 +83,10 @@ func TestWriteSessionLog(t *testing.T) {
 
 				// Write first entry
 				firstData := &HookData{
-					Event:     "agent_start",
-					AgentType: "the-developer",
+					Role:      "user",
+					Content:   "Start task",
 					SessionID: "dev-session-456",
+					AgentID:   "dev-001",
 					Timestamp: "2025-01-11T10:00:00.000Z",
 				}
 				if err := WriteSessionLog("dev-session-456", firstData); err != nil {
@@ -147,119 +148,9 @@ func TestWriteSessionLog(t *testing.T) {
 	}
 }
 
-func TestWriteGlobalLog(t *testing.T) {
-	tests := []struct {
-		name        string
-		hookData    *HookData
-		expectError bool
-		validateFn  func(*testing.T, string)
-	}{
-		{
-			name: "valid global log write",
-			hookData: &HookData{
-				Event:       "agent_start",
-				AgentType:   "the-tester",
-				AgentID:     "test-001",
-				Description: "Run tests",
-				SessionID:   "dev-session-789",
-				Timestamp:   "2025-01-11T11:00:00.000Z",
-			},
-			expectError: false,
-			validateFn: func(t *testing.T, startupDir string) {
-				globalFile := filepath.Join(startupDir, "all-agent-instructions.jsonl")
-				content, err := os.ReadFile(globalFile)
-				if err != nil {
-					t.Errorf("Failed to read global JSONL file: %v", err)
-					return
-				}
-
-				var logEntry HookData
-				if err := json.Unmarshal(content[:len(content)-1], &logEntry); err != nil {
-					t.Errorf("Failed to parse global JSONL content: %v", err)
-					return
-				}
-
-				if logEntry.AgentType != "the-tester" {
-					t.Errorf("Expected agent_type 'the-tester', got %s", logEntry.AgentType)
-				}
-			},
-		},
-		{
-			name: "append to existing global file",
-			hookData: &HookData{
-				Event:     "agent_complete",
-				AgentType: "the-architect",
-				SessionID: "dev-session-999",
-				Timestamp: "2025-01-11T11:05:00.000Z",
-			},
-			expectError: false,
-			validateFn: func(t *testing.T, startupDir string) {
-				// Write multiple entries to verify appending
-				secondData := &HookData{
-					Event:     "agent_start",
-					AgentType: "the-developer",
-					SessionID: "dev-session-999",
-					Timestamp: "2025-01-11T11:10:00.000Z",
-				}
-
-				if err := WriteGlobalLog(secondData); err != nil {
-					t.Fatalf("Failed to write second entry: %v", err)
-				}
-
-				globalFile := filepath.Join(startupDir, "all-agent-instructions.jsonl")
-				content, err := os.ReadFile(globalFile)
-				if err != nil {
-					t.Errorf("Failed to read global JSONL file: %v", err)
-					return
-				}
-
-				lines := strings.Split(strings.TrimSpace(string(content)), "\n")
-				if len(lines) != 2 {
-					t.Errorf("Expected 2 lines in global JSONL file, got %d", len(lines))
-				}
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// Set up temporary project directory
-			tempDir := t.TempDir()
-			originalEnv := os.Getenv("CLAUDE_PROJECT_DIR")
-			defer func() {
-				if originalEnv == "" {
-					os.Unsetenv("CLAUDE_PROJECT_DIR")
-				} else {
-					os.Setenv("CLAUDE_PROJECT_DIR", originalEnv)
-				}
-			}()
-			os.Setenv("CLAUDE_PROJECT_DIR", tempDir)
-
-			// Create local .the-startup directory to ensure test isolation
-			localStartup := filepath.Join(tempDir, ".the-startup")
-			os.MkdirAll(localStartup, 0755)
-
-			err := WriteGlobalLog(tt.hookData)
-
-			if tt.expectError {
-				if err == nil {
-					t.Error("Expected error but got none")
-				}
-				return
-			}
-
-			if err != nil {
-				t.Errorf("Unexpected error: %v", err)
-				return
-			}
-
-			if tt.validateFn != nil {
-				startupDir := GetStartupDir(tempDir)
-				tt.validateFn(t, startupDir)
-			}
-		})
-	}
-}
+// TestWriteGlobalLog has been removed because WriteGlobalLog function no longer exists.
+// Only WriteSessionLog function is available in the current implementation.
+// Global logging has been removed from the current architecture.
 
 func TestAppendJSONL(t *testing.T) {
 	tests := []struct {
@@ -275,9 +166,11 @@ func TestAppendJSONL(t *testing.T) {
 				return filepath.Join(tempDir, "new-file.jsonl")
 			},
 			hookData: &HookData{
-				Event:     "agent_start",
-				AgentType: "the-new",
+				Role:      "user",
+				Content:   "Start new task",
 				Timestamp: "2025-01-11T12:00:00.000Z",
+				SessionID: "test-session",
+				AgentID:   "the-new",
 			},
 			expectError: false,
 			validateFn: func(t *testing.T, filename string) {
@@ -314,9 +207,11 @@ func TestAppendJSONL(t *testing.T) {
 				return filepath.Join(readOnlyDir, "test.jsonl")
 			},
 			hookData: &HookData{
-				Event:     "agent_start",
-				AgentType: "the-test",
+				Role:      "user",
+				Content:   "Test content",
 				Timestamp: "2025-01-11T12:05:00.000Z",
+				SessionID: "test-session",
+				AgentID:   "the-test",
 			},
 			expectError: true,
 		},
