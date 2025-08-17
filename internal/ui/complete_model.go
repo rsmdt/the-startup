@@ -2,6 +2,7 @@ package ui
 
 import (
 	"os"
+	"sort"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -86,38 +87,34 @@ func (m CompleteModel) View() string {
 	s.WriteString(m.styles.Normal.Render("Now available in Claude Code:"))
 	s.WriteString("\n\n")
 
-	s.WriteString(m.styles.Info.Render("  Commands:"))
-	s.WriteString("\n")
-	s.WriteString(m.styles.Normal.Render("    • /s specify - Create detailed specifications"))
-	s.WriteString("\n")
-	s.WriteString(m.styles.Normal.Render("    • /s implement - Implement from specifications"))
-	s.WriteString("\n\n")
+	// Display installed commands
+	commands := m.installer.GetInstalledCommands()
+	if len(commands) > 0 {
+		sort.Strings(commands)
+		s.WriteString(m.styles.Info.Render("  Commands:"))
+		s.WriteString("\n")
+		for _, cmd := range commands {
+			s.WriteString(m.styles.Normal.Render("    • " + cmd))
+			s.WriteString("\n")
+		}
+		s.WriteString("\n")
+	}
 
-	s.WriteString(m.styles.Info.Render("  Agents:"))
-	s.WriteString("\n")
-	s.WriteString(m.styles.Normal.Render("    • the-chief - Routes any new request to the right specialist"))
-	s.WriteString("\n")
-	s.WriteString(m.styles.Normal.Render("    • the-architect - Deep technical design decisions"))
-	s.WriteString("\n")
-	s.WriteString(m.styles.Normal.Render("    • the-business-analyst - Clarifies vague requirements"))
-	s.WriteString("\n")
-	s.WriteString(m.styles.Normal.Render("    • the-data-engineer - Database optimization & data modeling"))
-	s.WriteString("\n")
-	s.WriteString(m.styles.Normal.Render("    • the-developer - Implements features with TDD"))
-	s.WriteString("\n")
-	s.WriteString(m.styles.Normal.Render("    • the-devops-engineer - CI/CD & infrastructure automation"))
-	s.WriteString("\n")
-	s.WriteString(m.styles.Normal.Render("    • the-product-manager - Creates PRDs & user stories"))
-	s.WriteString("\n")
-	s.WriteString(m.styles.Normal.Render("    • the-project-manager - Task coordination & tracking"))
-	s.WriteString("\n")
-	s.WriteString(m.styles.Normal.Render("    • the-security-engineer - Security assessments & compliance"))
-	s.WriteString("\n")
-	s.WriteString(m.styles.Normal.Render("    • the-site-reliability-engineer - Debugs errors & incidents"))
-	s.WriteString("\n")
-	s.WriteString(m.styles.Normal.Render("    • the-technical-writer - API docs & user guides"))
-	s.WriteString("\n")
-	s.WriteString(m.styles.Normal.Render("    • the-tester - Comprehensive testing & QA"))
+	// Display installed agents
+	agents := m.installer.GetInstalledAgents()
+	if len(agents) > 0 {
+		sort.Strings(agents)
+		s.WriteString(m.styles.Info.Render("  Agents:"))
+		s.WriteString("\n")
+		for _, agent := range agents {
+			s.WriteString(m.styles.Normal.Render("    • " + agent))
+			s.WriteString("\n")
+		}
+		s.WriteString("\n")
+	}
+
+	// Add repository link
+	s.WriteString(m.styles.Info.Render("See https://github.com/rsmdt/the-startup for details"))
 	s.WriteString("\n")
 
 	return s.String()

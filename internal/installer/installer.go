@@ -586,6 +586,69 @@ func (i *Installer) installBinary() error {
 	return i.copyCurrentExecutable(binDir)
 }
 
+// GetInstalledAgents returns the list of installed agent files
+func (i *Installer) GetInstalledAgents() []string {
+	var agents []string
+	
+	// If specific files were selected, filter for agents
+	if len(i.selectedFiles) > 0 {
+		for _, file := range i.selectedFiles {
+			if strings.HasPrefix(file, "agents/") && strings.HasSuffix(file, ".md") {
+				// Extract agent name from path (e.g., "agents/the-architect.md" -> "the-architect")
+				name := filepath.Base(file)
+				name = strings.TrimSuffix(name, ".md")
+				agents = append(agents, name)
+			}
+		}
+	} else {
+		// Get all agent files from embedded FS
+		pattern := "assets/agents/*.md"
+		files, _ := fs.Glob(i.agentFiles, pattern)
+		for _, file := range files {
+			name := filepath.Base(file)
+			name = strings.TrimSuffix(name, ".md")
+			agents = append(agents, name)
+		}
+	}
+	
+	return agents
+}
+
+// GetInstalledCommands returns the list of installed command files
+func (i *Installer) GetInstalledCommands() []string {
+	var commands []string
+	
+	// If specific files were selected, filter for commands
+	if len(i.selectedFiles) > 0 {
+		for _, file := range i.selectedFiles {
+			if strings.HasPrefix(file, "commands/") && strings.HasSuffix(file, ".md") {
+				// Extract command path (e.g., "commands/s/specify.md" -> "/s:specify")
+				relPath := strings.TrimPrefix(file, "commands/")
+				relPath = strings.TrimSuffix(relPath, ".md")
+				// Convert path separators to colons
+				parts := strings.Split(relPath, "/")
+				command := "/" + strings.Join(parts, ":")
+				commands = append(commands, command)
+			}
+		}
+	} else {
+		// Get all command files from embedded FS
+		pattern := "assets/commands/**/*.md"
+		files, _ := fs.Glob(i.commandFiles, pattern)
+		for _, file := range files {
+			// Extract command path (e.g., "assets/commands/s/specify.md" -> "/s:specify")
+			relPath := strings.TrimPrefix(file, "assets/commands/")
+			relPath = strings.TrimSuffix(relPath, ".md")
+			// Convert path separators to colons
+			parts := strings.Split(relPath, "/")
+			command := "/" + strings.Join(parts, ":")
+			commands = append(commands, command)
+		}
+	}
+	
+	return commands
+}
+
 // replacePlaceholders replaces template variables with actual paths
 func (i *Installer) replacePlaceholders(data []byte) []byte {
 	// Replace {{STARTUP_PATH}} with the installation path
