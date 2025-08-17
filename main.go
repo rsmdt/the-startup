@@ -27,6 +27,9 @@ var commandFiles embed.FS
 //go:embed assets/templates/*
 var templateFiles embed.FS
 
+//go:embed assets/rules/*.md
+var rulesFiles embed.FS
+
 //go:embed assets/settings.json
 var settingsTemplate embed.FS
 
@@ -40,7 +43,7 @@ workflows with specialized AI agents, hooks, and commands.`,
 	}
 
 	// Add commands
-	rootCmd.AddCommand(cmd.NewInstallCommand(&agentFiles, &commandFiles, &templateFiles, &settingsTemplate))
+	rootCmd.AddCommand(cmd.NewInstallCommand(&agentFiles, &commandFiles, &templateFiles, &rulesFiles, &settingsTemplate))
 	rootCmd.AddCommand(cmd.NewUpdateCommand())
 	rootCmd.AddCommand(cmd.NewValidateCommand())
 	rootCmd.AddCommand(cmd.NewHooksCommand())

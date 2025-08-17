@@ -13,7 +13,7 @@ var testAssets embed.FS
 // TestMainModelConsolidatedIntegration tests the new consolidated MainModel
 func TestMainModelConsolidatedIntegration(t *testing.T) {
 	// Create MainModel
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 
 	// Should start with StartupPath state
 	if model.state != StateStartupPath {
@@ -56,7 +56,7 @@ func TestMainModelConsolidatedIntegration(t *testing.T) {
 
 // TestMainModelFileSelectionWithHuh tests the file selection with integrated huh confirmation
 func TestMainModelFileSelectionWithHuh(t *testing.T) {
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 
 	// Navigate through proper flow to file selection
 	model.startupPath = "~/.config/the-startup"
@@ -91,7 +91,7 @@ func TestMainModelFileSelectionWithHuh(t *testing.T) {
 
 // TestMainModelConsolidation tests that the consolidated model works correctly
 func TestMainModelConsolidation(t *testing.T) {
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 
 	// Test that all required fields are properly initialized
 	if model.installer == nil {

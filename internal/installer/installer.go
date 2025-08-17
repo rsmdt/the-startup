@@ -20,6 +20,7 @@ type Installer struct {
 	agentFiles    *embed.FS
 	commandFiles  *embed.FS
 	templateFiles *embed.FS
+	rulesFiles    *embed.FS
 	settingsFile  *embed.FS
 
 	installPath   string
@@ -31,7 +32,7 @@ type Installer struct {
 }
 
 // New creates a new installer
-func New(agents, commands, templates, settings *embed.FS) *Installer {
+func New(agents, commands, templates, rules, settings *embed.FS) *Installer {
 	homeDir, _ := os.UserHomeDir()
 
 	// Default to project-local .the-startup directory
@@ -41,11 +42,12 @@ func New(agents, commands, templates, settings *embed.FS) *Installer {
 		agentFiles:    agents,
 		commandFiles:  commands,
 		templateFiles: templates,
+		rulesFiles:    rules,
 		settingsFile:  settings,
 		installPath:   installPath,
 		claudePath:    filepath.Join(homeDir, ".claude"),
 		tool:          "claude-code",
-		components:    []string{"agents", "commands", "templates"}, // hooks removed - handled separately as binary
+		components:    []string{"agents", "commands", "templates", "rules"},
 	}
 }
 
@@ -126,6 +128,10 @@ func (i *Installer) checkFileExistsInClaude(componentPath string) bool {
 		return false
 	case "templates":
 		// Templates go to STARTUP_PATH/templates
+		// This shouldn't be checked as part of .claude files
+		return false
+	case "rules":
+		// Rules go to STARTUP_PATH/rules
 		// This shouldn't be checked as part of .claude files
 		return false
 	default:
@@ -257,7 +263,42 @@ func (i *Installer) installComponentToClaude(component string) error {
 				return err
 			}
 
-			if err := os.WriteFile(destPath, data, 0644); err != nil {
+			// Apply placeholder replacement to all template files
+			content := i.replacePlaceholders(data)
+
+			if err := os.WriteFile(destPath, content, 0644); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	// Special handling for rules - install to STARTUP_PATH instead of CLAUDE_PATH
+	if component == "rules" {
+		rulesPath := filepath.Join(i.installPath, "rules")
+		if err := os.MkdirAll(rulesPath, 0755); err != nil {
+			return fmt.Errorf("failed to create rules directory: %w", err)
+		}
+
+		// Copy rules files to STARTUP_PATH/rules
+		files, err := fs.Glob(i.rulesFiles, "assets/rules/*.md")
+		if err != nil {
+			return err
+		}
+
+		for _, file := range files {
+			fileName := filepath.Base(file)
+			destPath := filepath.Join(rulesPath, fileName)
+
+			data, err := i.rulesFiles.ReadFile(file)
+			if err != nil {
+				return err
+			}
+
+			// Replace placeholders in rules files
+			content := i.replacePlaceholders(data)
+
+			if err := os.WriteFile(destPath, content, 0644); err != nil {
 				return err
 			}
 		}
@@ -345,7 +386,7 @@ func (i *Installer) copyFile(sourceFS *embed.FS, sourcePath, destDir string) err
 
 	// Extract the relative path from the source, removing the "assets/component/" prefix
 	// This works for any nested structure: assets/agents/sub/file.md, assets/commands/a/b/c/file.md, etc.
-	prefixes := []string{"assets/agents/", "assets/commands/", "assets/hooks/", "assets/templates/"}
+	prefixes := []string{"assets/agents/", "assets/commands/", "assets/hooks/", "assets/templates/", "assets/rules/"}
 	relPath := sourcePath
 	for _, prefix := range prefixes {
 		if strings.HasPrefix(sourcePath, prefix) {
@@ -649,16 +690,25 @@ func (i *Installer) GetInstalledCommands() []string {
 	return commands
 }
 
-// replacePlaceholders replaces template variables with actual paths
+// replacePlaceholders replaces template variables with actual paths.
+// This function is called for ALL asset files (agents, commands, templates, rules)
+// during installation to ensure placeholders work across all content types.
+// 
+// Supported placeholders:
+//   - {{STARTUP_PATH}}: The user-selected installation directory (e.g., ~/.the-startup)
+//   - {{CLAUDE_PATH}}: The Claude configuration directory (e.g., ~/.claude)
+//
+// This generic approach ensures that any future agents, commands, or other assets
+// can use these placeholders without requiring code changes.
 func (i *Installer) replacePlaceholders(data []byte) []byte {
 	// Replace {{STARTUP_PATH}} with the installation path
 	data = bytes.ReplaceAll(data, []byte("{{STARTUP_PATH}}"), []byte(i.installPath))
 
-	// Keep {{INSTALL_PATH}} for backward compatibility (same as STARTUP_PATH)
-	data = bytes.ReplaceAll(data, []byte("{{INSTALL_PATH}}"), []byte(i.installPath))
-
 	// Replace {{CLAUDE_PATH}} with ~/.claude
 	data = bytes.ReplaceAll(data, []byte("{{CLAUDE_PATH}}"), []byte(i.claudePath))
+
+	// Future placeholders can be added here without modifying the calling code
+	// Example: data = bytes.ReplaceAll(data, []byte("{{USER_HOME}}"), []byte(os.UserHomeDir()))
 
 	return data
 }

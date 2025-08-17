@@ -6,7 +6,7 @@ import (
 )
 
 func TestFileSelectionViewHasBanner(t *testing.T) {
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 
 	// Navigate to file selection
 	model.startupPath = "~/.config/the-startup"

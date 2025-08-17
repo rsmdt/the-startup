@@ -14,7 +14,7 @@ func containsString(s, substr string) bool {
 
 func TestNewMainModel(t *testing.T) {
 	// Test that NewMainModel creates a valid model
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 
 	if model == nil {
 		t.Fatal("NewMainModel returned nil")
@@ -34,7 +34,7 @@ func TestNewMainModel(t *testing.T) {
 }
 
 func TestMainModelInit(t *testing.T) {
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 
 	// Init should return nil for consolidated model
 	cmd := model.Init()
@@ -44,7 +44,7 @@ func TestMainModelInit(t *testing.T) {
 }
 
 func TestMainModelDirectStates(t *testing.T) {
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 
 	// Test that we start with StartupPath
 	if model.state != StateStartupPath {
@@ -70,7 +70,7 @@ func TestMainModelDirectStates(t *testing.T) {
 }
 
 func TestMainModelKeyHandling(t *testing.T) {
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 
 	// Test ESC key - should quit from tool selection
 	escMsg := tea.KeyMsg{Type: tea.KeyEsc}
@@ -83,7 +83,7 @@ func TestMainModelKeyHandling(t *testing.T) {
 }
 
 func TestMainModelFileSelectionIntegration(t *testing.T) {
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 
 	// Navigate through proper flow to file selection
 	model.startupPath = "~/.config/the-startup"
@@ -132,7 +132,7 @@ func TestMainModelFileSelectionIntegration(t *testing.T) {
 }
 
 func TestMainModelHuhIntegration(t *testing.T) {
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 
 	// Setup file selection state
 	model.startupPath = "~/.config/the-startup"
@@ -157,7 +157,7 @@ func TestMainModelHuhIntegration(t *testing.T) {
 }
 
 func TestMainModelChoicesInitialization(t *testing.T) {
-	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets)
+	model := NewMainModel(&testAssets, &testAssets, &testAssets, &testAssets, &testAssets)
 
 	// Test that startup path model is initialized
 	// (textInput is a struct, not a pointer, so we just verify the model exists)

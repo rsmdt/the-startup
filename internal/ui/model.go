@@ -17,6 +17,7 @@ type MainModel struct {
 	agentFiles    *embed.FS
 	commandFiles  *embed.FS
 	templateFiles *embed.FS
+	rulesFiles    *embed.FS
 
 	// User selections (shared state)
 	startupPath   string
@@ -36,8 +37,8 @@ type MainModel struct {
 }
 
 // NewMainModel creates a new main model with composed sub-models
-func NewMainModel(agents, commands, templates, settings *embed.FS) *MainModel {
-	installerInstance := installer.New(agents, commands, templates, settings)
+func NewMainModel(agents, commands, templates, rules, settings *embed.FS) *MainModel {
+	installerInstance := installer.New(agents, commands, templates, rules, settings)
 
 	m := &MainModel{
 		state:            StateStartupPath, // Start with startup path selection
@@ -45,6 +46,7 @@ func NewMainModel(agents, commands, templates, settings *embed.FS) *MainModel {
 		agentFiles:       agents,
 		commandFiles:     commands,
 		templateFiles:    templates,
+		rulesFiles:       rules,
 		width:            80,
 		height:           24,
 		startupPathModel: NewStartupPathModel(),
@@ -238,8 +240,8 @@ func (m *MainModel) getAllAvailableFiles() []string {
 }
 
 // RunMainInstaller starts the installation UI using the MainModel
-func RunMainInstaller(agents, commands, templates, settings *embed.FS) error {
-	model := NewMainModel(agents, commands, templates, settings)
+func RunMainInstaller(agents, commands, templates, rules, settings *embed.FS) error {
+	model := NewMainModel(agents, commands, templates, rules, settings)
 
 	program := tea.NewProgram(model)
 
