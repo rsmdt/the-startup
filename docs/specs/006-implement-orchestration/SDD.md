@@ -14,10 +14,10 @@ This document outlines the technical design for enhancing the `/s:implement` com
 
 ## Non-Goals
 
-- State persistence mechanisms (Git provides natural state through PLAN.md checkboxes)
+- Complex state management beyond review cycles (Git provides natural state through PLAN.md checkboxes)
 - Rollback strategies (Git handles version control)
 - Static reviewer mappings (all selection is dynamic)
-- Complex error recovery (simple retry/skip/abort is sufficient)
+- Complex error recovery beyond timeouts (simple retry/skip/abort is sufficient)
 
 ## Technical Architecture
 
@@ -48,6 +48,84 @@ This document outlines the technical design for enhancing the `/s:implement` com
         ├── Determine if revision needed
         ├── Re-delegate with feedback
         └── Update PLAN.md checkboxes
+```
+
+### State Management
+
+#### Review Cycle Persistence
+
+The system maintains review cycle state in `.the-startup/review-cycles.json` to survive process restarts:
+
+```json
+{
+  "sessions": {
+    "session-id-123": {
+      "tasks": {
+        "task-hash-abc": {
+          "description": "Implement JWT authentication",
+          "current_cycle": 2,
+          "max_cycles": 3,
+          "implementer": "the-developer",
+          "reviewers": [
+            {
+              "agent": "the-security-engineer",
+              "cycle": 1,
+              "status": "NEEDS_REVISION",
+              "feedback": "Add rate limiting",
+              "timestamp": "2024-01-15T10:30:00Z"
+            },
+            {
+              "agent": "the-security-engineer",
+              "cycle": 2,
+              "status": "pending",
+              "timestamp": "2024-01-15T10:45:00Z"
+            }
+          ],
+          "pattern_tracking": {
+            "same_issue_count": 0,
+            "recurring_patterns": []
+          }
+        }
+      },
+      "global_patterns": {
+        "reviewer_failure_rates": {
+          "the-security-engineer": {
+            "total_reviews": 15,
+            "revisions_required": 12,
+            "failure_rate": 0.8
+          }
+        },
+        "common_issues": [
+          {
+            "pattern": "missing_rate_limiting",
+            "count": 5,
+            "suggested_reviewer": "the-architect"
+          }
+        ]
+      }
+    }
+  },
+  "updated_at": "2024-01-15T10:45:00Z"
+}
+```
+
+#### TodoWrite Integration
+
+When using TodoWrite, include review cycle metadata:
+
+```javascript
+todos: [
+  {
+    "id": "task-1",
+    "content": "Review implementation for security concerns",
+    "status": "in_progress",
+    "metadata": {
+      "review_cycle": "2/3",
+      "reviewer": "the-security-engineer",
+      "task_hash": "abc123"
+    }
+  }
+]
 ```
 
 ### Dynamic Review Selection Algorithm
@@ -96,15 +174,39 @@ Tasks in PLAN.md will support additional metadata:
 ```
 1. Agent completes implementation
 2. System analyzes output for review needs
-3. Dynamically selects appropriate reviewer
-4. Reviewer provides feedback:
+3. Check review history for patterns:
+   - If high failure rate with current reviewer type
+   - Suggest alternative reviewer
+4. Dynamically selects appropriate reviewer
+5. Start review with timeout (default: 5 minutes)
+6. Reviewer provides feedback:
    - APPROVED: Mark task complete, continue
    - NEEDS_REVISION: Specific feedback provided
-5. If revision needed:
+   - TIMEOUT: Apply default action (skip_with_warning)
+7. If revision needed:
+   - Update pattern tracking (same_issue_count)
    - Original agent receives feedback
    - Implements changes
    - Return to step 2
-6. Continue until approved or user intervenes
+8. Continue until approved, max cycles reached, or timeout
+9. Persist state to `.the-startup/review-cycles.json`
+```
+
+### User Escalation Timeout Configuration
+
+```json
+{
+  "escalation": {
+    "timeout_minutes": 5,
+    "default_action": "skip_with_warning",
+    "notification_method": "console",
+    "actions": [
+      "skip_with_warning",
+      "accept_as_is",
+      "abort_process"
+    ]
+  }
+}
 ```
 
 ## Implementation Patterns
@@ -160,21 +262,147 @@ After task completion:
    - What patterns were used?
    - What risks might exist?
    
-2. Select reviewer through reasoning:
+2. Check pattern history:
+   - Load `.the-startup/review-cycles.json`
+   - Check reviewer failure rates
+   - Identify recurring issues (same_issue_count)
+   - If failure_rate > 0.7 for intended reviewer:
+     * Suggest alternative reviewer
+     * Log pattern for future reference
+   
+3. Select reviewer through reasoning:
    "Given that this task involved [changes],
     and considering [risks/concerns],
+    and noting [historical patterns if any],
     the best agent to review this would be [agent]
     because of their expertise in [relevant area]."
     
-3. Invoke reviewer with context:
+4. Invoke reviewer with context:
    PROMPT: """
-   REVIEW REQUEST
+   REVIEW REQUEST [Cycle: {current}/{max}]
    Original Task: [task description]
    Implemented by: [agent]
    Changes Made: [summary]
    Focus Areas: [identified concerns]
+   Previous Issues: [if same_issue_count > 0]
    Please review for: [specific aspects]
    """
+```
+
+### Status Detection Patterns
+
+#### Fuzzy Approval Detection
+
+The system uses pattern matching to detect approval signals:
+
+```javascript
+const APPROVAL_PATTERNS = [
+  /^APPROVED$/i,
+  /^LOOKS\s+GOOD$/i,
+  /^LGTM$/i,
+  /^SHIP\s+IT$/i,
+  /^\+1$/,
+  /^READY\s+TO\s+(MERGE|SHIP)$/i,
+  /^ALL\s+GOOD$/i,
+  /^PASSED\s+REVIEW$/i,
+  /^✅/,
+  /^👍/
+];
+
+const REVISION_PATTERNS = [
+  /^NEEDS[\s_]REVISION$/i,
+  /^REQUIRES?\s+CHANGES?$/i,
+  /^NEEDS?\s+WORK$/i,
+  /^NOT\s+READY$/i,
+  /^-1$/,
+  /^BLOCKED$/i,
+  /^FIX\s+REQUIRED$/i,
+  /^❌/,
+  /^👎/
+];
+
+function detectReviewStatus(feedback) {
+  // Check first line or overall sentiment
+  const firstLine = feedback.split('\n')[0].trim();
+  
+  for (const pattern of APPROVAL_PATTERNS) {
+    if (pattern.test(firstLine)) {
+      return 'APPROVED';
+    }
+  }
+  
+  for (const pattern of REVISION_PATTERNS) {
+    if (pattern.test(firstLine)) {
+      return 'NEEDS_REVISION';
+    }
+  }
+  
+  // Analyze content for implicit signals
+  const lowerFeedback = feedback.toLowerCase();
+  const hasIssues = /\b(issue|problem|error|bug|wrong|incorrect|missing)\b/.test(lowerFeedback);
+  const hasApproval = /\b(good|great|excellent|perfect|works|correct)\b/.test(lowerFeedback);
+  
+  if (hasIssues && !hasApproval) return 'NEEDS_REVISION';
+  if (hasApproval && !hasIssues) return 'APPROVED';
+  
+  return 'UNCLEAR'; // Requires user clarification
+}
+```
+
+#### Pattern Tracking Logic
+
+```javascript
+function trackRecurringPatterns(taskHash, feedback, cycleData) {
+  const patterns = extractPatterns(feedback);
+  const tracking = cycleData.pattern_tracking;
+  
+  // Check if same issue appearing again
+  for (const pattern of patterns) {
+    if (tracking.recurring_patterns.includes(pattern)) {
+      tracking.same_issue_count++;
+      
+      // Suggest alternative reviewer after threshold
+      if (tracking.same_issue_count >= 2) {
+        return suggestAlternativeReviewer(pattern, cycleData);
+      }
+    } else {
+      tracking.recurring_patterns.push(pattern);
+    }
+  }
+  
+  return null; // No alternative needed yet
+}
+
+function suggestAlternativeReviewer(pattern, cycleData) {
+  // Map common patterns to specialized reviewers
+  const specializations = {
+    'rate_limiting': 'the-architect',
+    'authentication': 'the-security-engineer',
+    'performance': 'the-site-reliability-engineer',
+    'data_integrity': 'the-data-engineer',
+    'api_design': 'the-architect'
+  };
+  
+  // Find best alternative based on pattern
+  for (const [key, agent] of Object.entries(specializations)) {
+    if (pattern.includes(key) && agent !== cycleData.current_reviewer) {
+      return {
+        agent,
+        reason: `Recurring ${key} issues detected, switching to specialist`
+      };
+    }
+  }
+  
+  // Default to architect for persistent issues
+  if (cycleData.current_reviewer !== 'the-architect') {
+    return {
+      agent: 'the-architect',
+      reason: 'Escalating to architect after recurring issues'
+    };
+  }
+  
+  return null;
+}
 ```
 
 ## Data Flow
@@ -209,14 +437,48 @@ After task completion:
 - If repeated failures: Allow skip with user confirmation
 
 ### Review Cycle Limits
-- Maximum 3 review cycles per task
-- After 3 cycles, escalate to user for decision
-- User can: accept as-is, manually fix, or skip
+- Maximum 3 review cycles per task (configurable)
+- After 3 cycles OR timeout (5 minutes default):
+  - Escalate to user for decision
+  - Apply default action if no response
+- User options:
+  - accept as-is: Continue with current state
+  - manually fix: Pause for user intervention
+  - skip: Move to next task with warning
+  - abort: Stop entire process
+
+### Timeout Handling
+- Each review has a 5-minute timeout (configurable)
+- On timeout:
+  1. Check configured default_action
+  2. Log timeout event with context
+  3. Apply action (skip_with_warning by default)
+  4. Notify user via configured method
+  5. Continue process unless aborted
+
+### Pattern-Based Recovery
+- Track same_issue_count across cycles
+- After 2 occurrences of same issue:
+  1. Suggest alternative reviewer
+  2. Log pattern for future optimization
+  3. Update global failure rates
+- High failure rate (>70%) triggers:
+  1. Automatic reviewer switching
+  2. Pattern analysis for root cause
+  3. Recommendation for process improvement
 
 ### Recovery Strategy
-- No special state needed - PLAN.md checkboxes show progress
-- On restart, continue from first unchecked task
-- Context reloaded fresh each session
+- State persisted in `.the-startup/review-cycles.json`
+- On restart:
+  1. Load review cycle state from JSON
+  2. Check PLAN.md for checkbox status
+  3. Resume from last known state
+  4. Recover in-progress reviews
+- Context includes:
+  - Previous review feedback
+  - Cycle count (current/max)
+  - Pattern history
+  - Timeout status
 
 ## Security Considerations
 
