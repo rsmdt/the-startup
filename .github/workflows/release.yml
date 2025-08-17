@@ -109,7 +109,7 @@ jobs:
             
             ### Quick Install (recommended)
             ```bash
-            curl -LsSf https://raw.githubusercontent.com/the-startup/the-startup/main/install.sh | sh
+            curl -LsSf https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh | sh
             ```
             
             ### Manual Download

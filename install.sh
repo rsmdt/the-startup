@@ -5,7 +5,7 @@
 set -e
 
 # Configuration
-REPO_OWNER="the-startup"
+REPO_OWNER="rsmdt"
 REPO_NAME="the-startup"
 
 # Detect OS and architecture
