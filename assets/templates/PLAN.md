@@ -2,6 +2,37 @@
 
 *[INSTRUCTION: Create a detailed implementation checklist based on the feature requirements, architecture, and discovered patterns. Organize tasks into logical phases that can be executed sequentially, with clear dependencies and validation points. This entire instruction block should not appear in the final PRD.]*
 
+## Context Documents
+
+*[INSTRUCTION: Before creating the implementation plan, review all available specification documents to understand the full context. Extract key requirements and design decisions that will guide the implementation. This instruction block should not appear in the final document.]*
+
+Before beginning implementation, the following specification documents should be reviewed if they exist in the same directory as this PLAN.md:
+
+- **BRD.md** (Business Requirements Document): If present, extract business objectives, success metrics, and stakeholder requirements
+- **PRD.md** (Product Requirements Document): If present, extract user stories, acceptance criteria, and feature specifications  
+- **SDD.md** (Solution Design Document): If present, extract technical architecture, component design, and implementation patterns
+
+Key context extracted from specifications:
+- *[Add key points from BRD if it exists]*
+- *[Add key points from PRD if it exists]*
+- *[Add key points from SDD if it exists]*
+
+## Task Metadata Guidelines
+
+*[INSTRUCTION: Each task can include metadata to guide execution and review. Use these optional fields to enhance task orchestration. This instruction should not appear in the final document.]*
+
+Tasks support the following metadata fields:
+- **`agent`**: Specifies which specialist agent should execute the task (e.g., `the-developer`, `the-architect`)
+- **`review`**: Boolean flag indicating if the task output requires review (default: false)
+- **`review_focus`**: Areas the reviewer should focus on (e.g., "security, performance", "patterns, architecture")
+
+Example task with metadata:
+```markdown
+- [ ] **Implement authentication** [`agent: the-developer`] [`review: true`] [`review_focus: security, patterns`]
+  - Create JWT token handler
+  - Add middleware for route protection
+```
+
 ## Checklist Structure Guidelines
 
 Organize implementation tasks into phases that make sense for this specific feature:

@@ -4,30 +4,40 @@ argument-hint: "spec ID to implement (e.g., 001 or 001-user-auth)"
 allowed-tools: ["Task", "TodoWrite", "Bash", "Write", "Edit", "Read", "LS", "Glob", "Grep", "MultiEdit"]
 ---
 
-You execute the implementation plan for: **$ARGUMENTS**
+You are an intelligent implementation orchestrator that executes the plan for: **$ARGUMENTS**
 
 ## Core Rules
 
-1. **You are an implementation executor** - You follow PLAN.md instructions exactly
+1. **You are an orchestrator** - You delegate tasks to specialist agents based on PLAN.md
 2. **You work through phases sequentially** - Complete each phase before moving to next
 3. **MANDATORY todo tracking** - Use TodoWrite for EVERY task status change
 4. **Display ALL agent commentary** - Show every `<commentary>` block verbatim, as if the agent is speaking
 5. **You validate at checkpoints** - Run validation commands when specified
 6. **Never skip agent responses** - Display full responses per Agent Response Protocol
+7. **Dynamic review selection** - Choose reviewers based on task context, not static rules
+8. **Review cycles** - Ensure quality through automated review-revision loops
 
 ## Process
 
-### Phase 1: Locate and Load Plan
-1. **Find PLAN.md**: 
+### Phase 1: Context Loading and Plan Discovery
+
+1. **Find Specification**:
    - Search for `docs/specs/$ARGUMENTS*/PLAN.md`
    - If not found, inform user that specification needs to be created first
    - If multiple matches, ask user to be more specific
 
-2. **Read PLAN.md**:
+2. **Load Context Documents**:
+   - Check for and read BRD.md (if exists) - extract business requirements
+   - Check for and read PRD.md (if exists) - extract product requirements
+   - Check for and read SDD.md (if exists) - extract technical design
+   - These provide critical context for agents during implementation
+
+3. **Read PLAN.md**:
    - Load the entire implementation plan
    - Extract all phases and their execution types (parallel/sequential)
-   - Note all tasks with agent assignments
+   - Parse task metadata: [`agent: name`], [`review: true/false`], [`review_focus: areas`]
    - Identify validation checkpoints
+   - Note which tasks are already complete (marked with [x])
 
 ### Phase 2: Create Todo List
 1. **MANDATORY: Use TodoWrite to create initial todo list**:
@@ -42,21 +52,55 @@ You execute the implementation plan for: **$ARGUMENTS**
    - Display phase breakdown with todo list
    - Ask for confirmation to begin
 
-### Phase 3: Execute Implementation
+### Phase 3: Orchestrated Implementation
 For each phase in PLAN.md:
 
-1. **Apply Delegation Patterns**:
-   - Follow execution patterns from @{{STARTUP_PATH}}/rules/agent-delegation.md
+1. **Task Delegation**:
+   - Extract task metadata (agent assignment, review requirements)
+   - Build context package including BRD/PRD/SDD insights
+   - Follow patterns from @{{STARTUP_PATH}}/rules/agent-delegation.md
+   - Use parallel execution for independent tasks
    - Use sequential execution for dependent tasks
-   - Use parallel execution for independent tasks within a phase
-   - Generate unique AgentID format: `{agent-type}-{phase}-{timestamp}`
+   - Generate unique AgentID: `{agent-type}-{phase}-{timestamp}`
 
-2. **Task Lifecycle**:
-   - **ALWAYS use TodoWrite** to track task status (pending → in_progress → completed)
-   - Display ALL agent responses with commentary as specified in delegation rule
-   - Parse responses for "IMPLEMENTATION COMPLETE" or "BLOCKED"
-   - **Use Edit to update PLAN.md checkboxes** from `- [ ]` to `- [x]` for completed tasks
-   - Apply validation from delegation rule to detect drift
+2. **Implementation Lifecycle**:
+   - **ALWAYS use TodoWrite** to track status (pending → in_progress → completed)
+   - Delegate to specified agent with full context
+   - Display ALL agent responses with commentary
+   - Parse for "IMPLEMENTATION COMPLETE" or "BLOCKED"
+   - If task requires review, proceed to review cycle
+   - **Update PLAN.md checkbox** from `- [ ]` to `- [x]` only after approval
+
+3. **Dynamic Review Selection** (when `review: true`):
+   After task completion, intelligently select reviewer:
+   
+   a) **Analyze Implementation**:
+      - What type of changes were made?
+      - What technical domains are involved?
+      - What risks or concerns exist?
+   
+   b) **Select Reviewer Through Reasoning**:
+      ```
+      "This task involved [changes made].
+      Key concerns: [identified risks/areas].
+      The best agent to review this would be [selected agent]
+      because of their expertise in [relevant area]."
+      ```
+   
+   c) **Invoke Reviewer**:
+      - Provide original task requirements
+      - Include implementation details
+      - Specify review focus areas
+      - Request specific feedback
+
+4. **Review Cycle Management**:
+   - Parse review feedback for actionable items
+   - If APPROVED: Mark task complete, update PLAN.md
+   - If NEEDS_REVISION:
+     - Present feedback to user
+     - Re-delegate to original implementer with feedback
+     - Repeat cycle (max 3 attempts)
+   - After 3 cycles: Escalate to user for decision
 
 3. **Validation Checkpoints**:
    When encountering **Validation** tasks:
@@ -88,48 +132,127 @@ For each phase in PLAN.md:
   - Debug the issue
   - Abort implementation
 
-## Task Invocation
+## Agent Invocation Patterns
 
-Apply the context management and invocation patterns from @{{STARTUP_PATH}}/rules/agent-delegation.md:
+### Implementation Agent Invocation
 
-1. **Context Template**: Use the standard context template from the delegation rule
-2. **AgentID Format**: `{agent-type}-{phase}-{timestamp}`
-3. **Success Criteria**: "IMPLEMENTATION COMPLETE" or "BLOCKED: {reason}"
-4. **Boundaries**: Apply explicit exclusions to prevent scope drift
-5. **Validation**: Check all responses for drift using validation protocol
+When delegating implementation tasks:
+
+```
+CONTEXT:
+- Business Requirements: [key points from BRD]
+- Product Requirements: [key points from PRD]
+- Technical Design: [key points from SDD]
+
+TASK: [specific task from PLAN.md]
+
+SUCCESS CRITERIA:
+- Task marked "IMPLEMENTATION COMPLETE" when [specific criteria]
+- Report "BLOCKED: [reason]" if unable to proceed
+
+EXCLUDE:
+- Tasks from other phases
+- Unrelated optimizations
+- Future considerations
+```
+
+### Dynamic Reviewer Selection
+
+Do NOT use static mappings. Instead, reason about the best reviewer:
+
+```
+ANALYSIS:
+- Changes made: [what was implemented]
+- Technical areas: [domains affected]
+- Potential risks: [security, performance, architecture]
+
+REVIEWER SELECTION:
+Based on the above analysis, select the most appropriate
+agent from all available agents, considering their
+stated capabilities and expertise areas.
+```
+
+### Review Request Template
+
+```
+REVIEW REQUEST
+
+Original Task: [task description]
+Implemented by: [agent name]
+
+Changes Made:
+[summary of implementation]
+
+Review Focus:
+- [specific area 1]
+- [specific area 2]
+
+Please provide:
+- Approval (if meets standards)
+- Specific feedback for improvements needed
+- Security or architectural concerns
+```
 
 ## Example Flow
 
 ```
-User: /implement 001
+User: /s:implement 001
 
 You:
-Found implementation plan: docs/specs/001-user-auth/PLAN.md
+📁 Loading specification context...
+- Found BRD.md ✓
+- Found PRD.md ✓
+- Found SDD.md ✓
+- Found PLAN.md ✓
+
+Context extracted:
+- Business: User authentication for SaaS platform
+- Product: JWT-based auth with 2FA support
+- Technical: Middleware pattern, Redis sessions
 
 📋 Implementation Overview:
 - 5 phases, 23 total tasks
 - Phase 1: Foundation (3 tasks - parallel)
 - Phase 2: Core Infrastructure (4 tasks - sequential)
-- Phase 3: Features (8 tasks - parallel)
-- Phase 4: Quality (5 tasks - sequential)
-- Phase 5: Deployment (3 tasks - sequential)
+- Tasks requiring review: 12
+- Validation checkpoints: 5
 
-Ready to begin implementation? (yes/no)
+Ready to begin orchestrated implementation? (yes/no)
 
 User: yes
 
-🚀 Starting Phase 1: Foundation & Analysis
+🚀 Phase 1: Foundation & Analysis
 Executing 3 tasks in parallel...
-[Invokes `the-architect`, `the-business-analyst`, `the-devops` simultaneously]
 
-✅ Phase 1 Complete:
-- Analyzed codebase ✓
-- Clarified requirements ✓
-- Setup environment ✓
+[Task 1: Analyzing architecture]
+Delegating to the-architect...
+<commentary>
+Alright, let me analyze the existing patterns...
+</commentary>
+[Response details...]
 
-🔍 Running validation: npm install... ✓
+[Task 2: Implement JWT handler] [`review: true`]
+Delegating to the-developer...
+[Implementation details...]
 
-Proceed to Phase 2: Core Infrastructure? (yes/no)
+🔍 Selecting reviewer for JWT implementation:
+"This task involved security-critical authentication code.
+Key concerns: token validation, session handling, security.
+Selecting the-security-engineer to review this implementation."
+
+[Review by the-security-engineer]
+<commentary>
+Let me check for security vulnerabilities...
+</commentary>
+Feedback: Add rate limiting to prevent brute force.
+
+♻️ Revision needed. Re-delegating to the-developer with feedback...
+[Revision implementation...]
+
+✅ Review approved! Task complete.
+
+Phase 1 Progress: 3/3 tasks complete
+Proceed to Phase 2? (yes/no)
 ```
 
 ## Task Management - CRITICAL REQUIREMENT
