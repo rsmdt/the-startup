@@ -16,22 +16,15 @@ var (
 	BuildDate = "unknown"
 )
 
-// Embedded assets
+// Embedded assets - Claude configuration
 //
-//go:embed assets/agents/*.md
-var agentFiles embed.FS
+//go:embed assets/claude
+var claudeAssets embed.FS
 
-//go:embed assets/commands/**/*.md
-var commandFiles embed.FS
-
-//go:embed assets/templates/*
-var templateFiles embed.FS
-
-//go:embed assets/rules/*.md
-var rulesFiles embed.FS
-
-//go:embed assets/settings.json
-var settingsTemplate embed.FS
+// Embedded assets - The Startup configuration  
+//
+//go:embed assets/the-startup
+var startupAssets embed.FS
 
 func main() {
 	rootCmd := &cobra.Command{
@@ -43,7 +36,7 @@ workflows with specialized AI agents, hooks, and commands.`,
 	}
 
 	// Add commands
-	rootCmd.AddCommand(cmd.NewInstallCommand(&agentFiles, &commandFiles, &templateFiles, &rulesFiles, &settingsTemplate))
+	rootCmd.AddCommand(cmd.NewInstallCommand(&claudeAssets, &startupAssets))
 	rootCmd.AddCommand(cmd.NewUpdateCommand())
 	rootCmd.AddCommand(cmd.NewValidateCommand())
 	rootCmd.AddCommand(cmd.NewHooksCommand())

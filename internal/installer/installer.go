@@ -17,11 +17,8 @@ import (
 
 // Installer handles the installation process
 type Installer struct {
-	agentFiles    *embed.FS
-	commandFiles  *embed.FS
-	templateFiles *embed.FS
-	rulesFiles    *embed.FS
-	settingsFile  *embed.FS
+	claudeAssets  *embed.FS
+	startupAssets *embed.FS
 
 	installPath   string
 	claudePath    string
@@ -32,18 +29,15 @@ type Installer struct {
 }
 
 // New creates a new installer
-func New(agents, commands, templates, rules, settings *embed.FS) *Installer {
+func New(claudeAssets, startupAssets *embed.FS) *Installer {
 	homeDir, _ := os.UserHomeDir()
 
 	// Default to project-local .the-startup directory
 	installPath := ".the-startup"
 
 	return &Installer{
-		agentFiles:    agents,
-		commandFiles:  commands,
-		templateFiles: templates,
-		rulesFiles:    rules,
-		settingsFile:  settings,
+		claudeAssets:  claudeAssets,
+		startupAssets: startupAssets,
 		installPath:   installPath,
 		claudePath:    filepath.Join(homeDir, ".claude"),
 		tool:          "claude-code",
@@ -201,16 +195,21 @@ func (i *Installer) Install() error {
 
 	// Install components directly to Claude directory
 	if i.tool == "claude-code" {
-		for _, component := range i.components {
-			fmt.Printf("Installing %s...\n", component)
-
-			if err := i.installComponentToClaude(component); err != nil {
-				fmt.Printf("✗ Error installing %s: %v\n", component, err)
-				return fmt.Errorf("failed to install %s: %w", component, err)
-			}
-
-			fmt.Printf("✓ %s installed\n", component)
+		// Install Claude assets to CLAUDE_PATH
+		fmt.Println("Installing Claude assets...")
+		if err := i.installClaudeAssets(); err != nil {
+			fmt.Printf("✗ Error installing Claude assets: %v\n", err)
+			return fmt.Errorf("failed to install Claude assets: %w", err)
 		}
+		fmt.Println("✓ Claude assets installed")
+
+		// Install Startup assets to STARTUP_PATH
+		fmt.Println("Installing Startup assets...")
+		if err := i.installStartupAssets(); err != nil {
+			fmt.Printf("✗ Error installing Startup assets: %v\n", err)
+			return fmt.Errorf("failed to install Startup assets: %w", err)
+		}
+		fmt.Println("✓ Startup assets installed")
 
 		// Always install the binary to STARTUP_PATH/bin and configure hooks
 		fmt.Println("Installing the-startup binary...")
@@ -239,215 +238,137 @@ func (i *Installer) Install() error {
 	return nil
 }
 
-// installComponentToClaude installs a specific component directly to Claude directory
-func (i *Installer) installComponentToClaude(component string) error {
-	// Special handling for templates - install to STARTUP_PATH instead of CLAUDE_PATH
-	if component == "templates" {
-		templatePath := filepath.Join(i.installPath, "templates")
-		if err := os.MkdirAll(templatePath, 0755); err != nil {
-			return fmt.Errorf("failed to create template directory: %w", err)
-		}
-
-		// Copy template files to STARTUP_PATH/templates
-		files, err := fs.Glob(i.templateFiles, "assets/templates/*")
+// installClaudeAssets installs all assets from the claude directory to CLAUDE_PATH
+func (i *Installer) installClaudeAssets() error {
+	// Walk through all files in assets/claude and copy them to CLAUDE_PATH
+	return fs.WalkDir(i.claudeAssets, "assets/claude", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-
-		for _, file := range files {
-			fileName := filepath.Base(file)
-			destPath := filepath.Join(templatePath, fileName)
-
-			data, err := i.templateFiles.ReadFile(file)
-			if err != nil {
-				return err
-			}
-
-			// Apply placeholder replacement to all template files
-			content := i.replacePlaceholders(data)
-
-			if err := os.WriteFile(destPath, content, 0644); err != nil {
-				return err
-			}
+		
+		// Skip directories
+		if d.IsDir() {
+			return nil
 		}
-		return nil
-	}
-
-	// Special handling for rules - install to STARTUP_PATH instead of CLAUDE_PATH
-	if component == "rules" {
-		rulesPath := filepath.Join(i.installPath, "rules")
-		if err := os.MkdirAll(rulesPath, 0755); err != nil {
-			return fmt.Errorf("failed to create rules directory: %w", err)
-		}
-
-		// Copy rules files to STARTUP_PATH/rules
-		files, err := fs.Glob(i.rulesFiles, "assets/rules/*.md")
-		if err != nil {
-			return err
-		}
-
-		for _, file := range files {
-			fileName := filepath.Base(file)
-			destPath := filepath.Join(rulesPath, fileName)
-
-			data, err := i.rulesFiles.ReadFile(file)
-			if err != nil {
-				return err
-			}
-
-			// Replace placeholders in rules files
-			content := i.replacePlaceholders(data)
-
-			if err := os.WriteFile(destPath, content, 0644); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-
-	// Create component directory in Claude path
-	componentPath := filepath.Join(i.claudePath, component)
-	if err := os.MkdirAll(componentPath, 0755); err != nil {
-		return err
-	}
-
-	// Skip hooks component - it's now handled separately
-	if component == "hooks" {
-		return nil
-	}
-
-	// For other components, use the original logic
-	var sourceFS *embed.FS
-	var pattern string
-
-	switch component {
-	case "agents":
-		sourceFS = i.agentFiles
-		// Try nested first, fall back to flat structure
-		pattern = "assets/agents/**/*.md"
-		if files, _ := fs.Glob(sourceFS, pattern); len(files) == 0 {
-			pattern = "assets/agents/*.md"
-		}
-	case "commands":
-		sourceFS = i.commandFiles
-		pattern = "assets/commands/**/*.md"
-	default:
-		return fmt.Errorf("unknown component: %s", component)
-	}
-
-	// Copy files
-	files, err := fs.Glob(sourceFS, pattern)
-	if err != nil {
-		return err
-	}
-
-	for _, file := range files {
-		// If specific files are selected, check if this file should be installed
-		if len(i.selectedFiles) > 0 {
-			// Extract relative path from the source file
-			// Remove the "assets/" prefix to get the component-relative path
-			relPath := strings.TrimPrefix(file, "assets/")
-
-			shouldInstall := false
+		
+		// Get relative path from assets/claude
+		relPath := strings.TrimPrefix(path, "assets/claude/")
+		
+		// Check if this file should be installed based on selected files
+		if i.selectedFiles != nil && len(i.selectedFiles) > 0 {
+			found := false
 			for _, selected := range i.selectedFiles {
 				if selected == relPath {
-					shouldInstall = true
+					found = true
 					break
 				}
 			}
-			if !shouldInstall {
-				continue // Skip this file
+			if !found {
+				return nil // Skip this file
 			}
 		}
-
-		if err := i.copyFile(sourceFS, file, componentPath); err != nil {
-			return fmt.Errorf("failed to copy %s: %w", file, err)
+		
+		// Create destination path in CLAUDE_PATH
+		destPath := filepath.Join(i.claudePath, relPath)
+		
+		// Create destination directory if needed
+		destDir := filepath.Dir(destPath)
+		if err := os.MkdirAll(destDir, 0755); err != nil {
+			return fmt.Errorf("failed to create directory %s: %w", destDir, err)
 		}
-	}
-
-	return nil
+		
+		// Read file content
+		data, err := i.claudeAssets.ReadFile(path)
+		if err != nil {
+			return fmt.Errorf("failed to read %s: %w", path, err)
+		}
+		
+		// Apply placeholder replacement for settings.json
+		if filepath.Base(path) == "settings.json" {
+			data = i.replacePlaceholders(data)
+		}
+		
+		// Write file to destination
+		if err := os.WriteFile(destPath, data, 0644); err != nil {
+			return fmt.Errorf("failed to write %s: %w", destPath, err)
+		}
+		
+		return nil
+	})
 }
 
-// copyFile copies a single file from embed.FS to disk
-func (i *Installer) copyFile(sourceFS *embed.FS, sourcePath, destDir string) error {
-	// Read source file
-	data, err := sourceFS.ReadFile(sourcePath)
-	if err != nil {
-		return err
-	}
-
-	// Replace placeholders in .md files
-	if strings.HasSuffix(sourcePath, ".md") {
+// installStartupAssets installs all assets from the-startup directory to STARTUP_PATH
+func (i *Installer) installStartupAssets() error {
+	// Walk through all files in assets/the-startup and copy them to STARTUP_PATH
+	return fs.WalkDir(i.startupAssets, "assets/the-startup", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		
+		// Skip directories
+		if d.IsDir() {
+			return nil
+		}
+		
+		// Get relative path from assets/the-startup
+		relPath := strings.TrimPrefix(path, "assets/the-startup/")
+		
+		// Check if this file should be installed based on selected files
+		if i.selectedFiles != nil && len(i.selectedFiles) > 0 {
+			found := false
+			for _, selected := range i.selectedFiles {
+				if selected == relPath {
+					found = true
+					break
+				}
+			}
+			if !found {
+				return nil // Skip this file
+			}
+		}
+		
+		// Create destination path in STARTUP_PATH
+		destPath := filepath.Join(i.installPath, relPath)
+		
+		// Create destination directory if needed
+		destDir := filepath.Dir(destPath)
+		if err := os.MkdirAll(destDir, 0755); err != nil {
+			return fmt.Errorf("failed to create directory %s: %w", destDir, err)
+		}
+		
+		// Read file content
+		data, err := i.startupAssets.ReadFile(path)
+		if err != nil {
+			return fmt.Errorf("failed to read %s: %w", path, err)
+		}
+		
+		// Apply placeholder replacement for template files
 		data = i.replacePlaceholders(data)
-	}
-
-	// Determine destination path - dynamically preserve directory structure
-	var destPath string
-
-	// Extract the relative path from the source, removing the "assets/component/" prefix
-	// This works for any nested structure: assets/agents/sub/file.md, assets/commands/a/b/c/file.md, etc.
-	prefixes := []string{"assets/agents/", "assets/commands/", "assets/hooks/", "assets/templates/", "assets/rules/"}
-	relPath := sourcePath
-	for _, prefix := range prefixes {
-		if strings.HasPrefix(sourcePath, prefix) {
-			relPath = strings.TrimPrefix(sourcePath, prefix)
-			break
+		
+		// Write file to destination
+		if err := os.WriteFile(destPath, data, 0644); err != nil {
+			return fmt.Errorf("failed to write %s: %w", destPath, err)
 		}
-	}
-
-	// Build the full destination path
-	destPath = filepath.Join(destDir, relPath)
-
-	// Create any necessary parent directories
-	parentDir := filepath.Dir(destPath)
-	if err := os.MkdirAll(parentDir, 0755); err != nil {
-		return fmt.Errorf("failed to create directory %s: %w", parentDir, err)
-	}
-
-	// Write file
-	if err := os.WriteFile(destPath, data, 0644); err != nil {
-		return err
-	}
-
-	return nil
+		
+		return nil
+	})
 }
 
-// copyCurrentExecutable copies the current executable to the destination directory
-func (i *Installer) copyCurrentExecutable(destDir string) error {
-	// Get the path of the current executable
-	execPath, err := os.Executable()
-	if err != nil {
-		return fmt.Errorf("failed to get executable path: %w", err)
-	}
+// installComponentToClaude installs a specific component directly to Claude directory
+// DEPRECATED: This function is kept for backward compatibility with tests
+// New code should use installClaudeAssets and installStartupAssets instead
+func (i *Installer) installComponentToClaude(component string) error {
+	// This function is no longer used in production code
+	// It's kept only for test compatibility
+	return fmt.Errorf("installComponentToClaude is deprecated")
+}
 
-	// Open source file
-	src, err := os.Open(execPath)
-	if err != nil {
-		return fmt.Errorf("failed to open source executable: %w", err)
-	}
-	defer src.Close()
+// Deprecated functions below are kept for test compatibility
 
-	// Create destination path
-	destPath := filepath.Join(destDir, "the-startup")
-
-	// Create destination file
-	dst, err := os.Create(destPath)
-	if err != nil {
-		return fmt.Errorf("failed to create destination file: %w", err)
-	}
-	defer dst.Close()
-
-	// Copy file contents
-	if _, err := io.Copy(dst, src); err != nil {
-		return fmt.Errorf("failed to copy executable: %w", err)
-	}
-
-	// Make executable
-	if err := os.Chmod(destPath, 0755); err != nil {
-		return fmt.Errorf("failed to set executable permissions: %w", err)
-	}
-
-	return nil
+// copyFile copies a single file from embed.FS to disk (DEPRECATED)
+func (i *Installer) copyFile(sourceFS *embed.FS, sourcePath, destDir string) error {
+	// This function is no longer used in production code
+	return fmt.Errorf("copyFile is deprecated")
 }
 
 // configureHooks updates settings.json to include hooks and permissions
@@ -456,8 +377,8 @@ func (i *Installer) configureHooks() error {
 
 	// Read the template settings
 	var templateSettings map[string]interface{}
-	if i.settingsFile != nil {
-		templateData, err := i.settingsFile.ReadFile("assets/settings.json")
+	if i.claudeAssets != nil {
+		templateData, err := i.claudeAssets.ReadFile("assets/claude/settings.json")
 		if err == nil {
 			// Replace placeholders in template
 			templateData = i.replacePlaceholders(templateData)
@@ -627,6 +548,44 @@ func (i *Installer) installBinary() error {
 	return i.copyCurrentExecutable(binDir)
 }
 
+// copyCurrentExecutable copies the current executable to the destination directory
+func (i *Installer) copyCurrentExecutable(destDir string) error {
+	// Get the path of the current executable
+	execPath, err := os.Executable()
+	if err != nil {
+		return fmt.Errorf("failed to get executable path: %w", err)
+	}
+
+	// Open source file
+	src, err := os.Open(execPath)
+	if err != nil {
+		return fmt.Errorf("failed to open source executable: %w", err)
+	}
+	defer src.Close()
+
+	// Create destination path
+	destPath := filepath.Join(destDir, "the-startup")
+
+	// Create destination file
+	dst, err := os.Create(destPath)
+	if err != nil {
+		return fmt.Errorf("failed to create destination file: %w", err)
+	}
+	defer dst.Close()
+
+	// Copy the file
+	if _, err := io.Copy(dst, src); err != nil {
+		return fmt.Errorf("failed to copy executable: %w", err)
+	}
+
+	// Make it executable
+	if err := os.Chmod(destPath, 0755); err != nil {
+		return fmt.Errorf("failed to make file executable: %w", err)
+	}
+
+	return nil
+}
+
 // GetInstalledAgents returns the list of installed agent files
 func (i *Installer) GetInstalledAgents() []string {
 	var agents []string
@@ -643,8 +602,8 @@ func (i *Installer) GetInstalledAgents() []string {
 		}
 	} else {
 		// Get all agent files from embedded FS
-		pattern := "assets/agents/*.md"
-		files, _ := fs.Glob(i.agentFiles, pattern)
+		pattern := "assets/claude/agents/*.md"
+		files, _ := fs.Glob(i.claudeAssets, pattern)
 		for _, file := range files {
 			name := filepath.Base(file)
 			name = strings.TrimSuffix(name, ".md")
@@ -674,11 +633,11 @@ func (i *Installer) GetInstalledCommands() []string {
 		}
 	} else {
 		// Get all command files from embedded FS
-		pattern := "assets/commands/**/*.md"
-		files, _ := fs.Glob(i.commandFiles, pattern)
+		pattern := "assets/claude/commands/**/*.md"
+		files, _ := fs.Glob(i.claudeAssets, pattern)
 		for _, file := range files {
-			// Extract command path (e.g., "assets/commands/s/specify.md" -> "/s:specify")
-			relPath := strings.TrimPrefix(file, "assets/commands/")
+			// Extract command path (e.g., "assets/claude/commands/s/specify.md" -> "/s:specify")
+			relPath := strings.TrimPrefix(file, "assets/claude/commands/")
 			relPath = strings.TrimSuffix(relPath, ".md")
 			// Convert path separators to colons
 			parts := strings.Split(relPath, "/")

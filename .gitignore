@@ -1,13 +1,10 @@
 # Build artifacts
-bin/
-dist/
-the-startup
-the-startup-*
-*.exe
+/bin/
+/the-startup
+/the-startup-*
 
 # Test artifacts
 *.test
-.the-startup/
 *.out
 
 # Go workspace
@@ -27,6 +24,7 @@ Thumbs.db
 
 # Old/temporary directories
 .claude/
+.the-startup/
 
 # Logs
 *.log

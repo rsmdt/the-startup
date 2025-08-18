@@ -83,10 +83,6 @@ func (m CompleteModel) View() string {
 	s.WriteString(m.styles.Info.Render("  Startup files: " + displayStartupPath))
 	s.WriteString("\n\n")
 
-	// Available commands and agents
-	s.WriteString(m.styles.Normal.Render("Now available in Claude Code:"))
-	s.WriteString("\n\n")
-
 	// Display installed commands
 	commands := m.installer.GetInstalledCommands()
 	if len(commands) > 0 {

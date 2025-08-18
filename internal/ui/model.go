@@ -14,10 +14,8 @@ type MainModel struct {
 
 	// Dependencies
 	installer     *installer.Installer
-	agentFiles    *embed.FS
-	commandFiles  *embed.FS
-	templateFiles *embed.FS
-	rulesFiles    *embed.FS
+	claudeAssets  *embed.FS
+	startupAssets *embed.FS
 
 	// User selections (shared state)
 	startupPath   string
@@ -37,16 +35,14 @@ type MainModel struct {
 }
 
 // NewMainModel creates a new main model with composed sub-models
-func NewMainModel(agents, commands, templates, rules, settings *embed.FS) *MainModel {
-	installerInstance := installer.New(agents, commands, templates, rules, settings)
+func NewMainModel(claudeAssets, startupAssets *embed.FS) *MainModel {
+	installerInstance := installer.New(claudeAssets, startupAssets)
 
 	m := &MainModel{
 		state:            StateStartupPath, // Start with startup path selection
 		installer:        installerInstance,
-		agentFiles:       agents,
-		commandFiles:     commands,
-		templateFiles:    templates,
-		rulesFiles:       rules,
+		claudeAssets:     claudeAssets,
+		startupAssets:    startupAssets,
 		width:            80,
 		height:           24,
 		startupPathModel: NewStartupPathModel(),
@@ -178,9 +174,8 @@ func (m *MainModel) transitionToState(newState InstallerState) {
 			"claude-code", // Always use claude-code
 			m.claudePath,
 			m.installer,
-			m.agentFiles,
-			m.commandFiles,
-			m.templateFiles,
+			m.claudeAssets,
+			m.startupAssets,
 		)
 		m.selectedFiles = m.fileSelectionModel.selectedFiles
 
@@ -235,13 +230,13 @@ func (m *MainModel) getAllAvailableFiles() []string {
 		return m.fileSelectionModel.selectedFiles
 	}
 	// Create a temporary file selection model to get the files
-	tempModel := NewFileSelectionModel("claude-code", m.claudePath, m.installer, m.agentFiles, m.commandFiles, m.templateFiles)
+	tempModel := NewFileSelectionModel("claude-code", m.claudePath, m.installer, m.claudeAssets, m.startupAssets)
 	return tempModel.getAllAvailableFiles()
 }
 
 // RunMainInstaller starts the installation UI using the MainModel
-func RunMainInstaller(agents, commands, templates, rules, settings *embed.FS) error {
-	model := NewMainModel(agents, commands, templates, rules, settings)
+func RunMainInstaller(claudeAssets, startupAssets *embed.FS) error {
+	model := NewMainModel(claudeAssets, startupAssets)
 
 	program := tea.NewProgram(model)
 

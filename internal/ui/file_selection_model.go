@@ -17,9 +17,8 @@ type FileSelectionModel struct {
 	styles        Styles
 	renderer      *ProgressiveDisclosureRenderer
 	installer     *installer.Installer
-	agentFiles    *embed.FS
-	commandFiles  *embed.FS
-	templateFiles *embed.FS
+	claudeAssets  *embed.FS
+	startupAssets *embed.FS
 	selectedTool  string
 	selectedPath  string
 	selectedFiles []string
@@ -29,14 +28,13 @@ type FileSelectionModel struct {
 	confirmed     bool
 }
 
-func NewFileSelectionModel(selectedTool, selectedPath string, installer *installer.Installer, agents, commands, templates *embed.FS) FileSelectionModel {
+func NewFileSelectionModel(selectedTool, selectedPath string, installer *installer.Installer, claudeAssets, startupAssets *embed.FS) FileSelectionModel {
 	m := FileSelectionModel{
 		styles:        GetStyles(),
 		renderer:      NewProgressiveDisclosureRenderer(),
 		installer:     installer,
-		agentFiles:    agents,
-		commandFiles:  commands,
-		templateFiles: templates,
+		claudeAssets:  claudeAssets,
+		startupAssets: startupAssets,
 		selectedTool:  selectedTool,
 		selectedPath:  selectedPath,
 		choices: []string{
@@ -161,33 +159,27 @@ func (m FileSelectionModel) Reset() FileSelectionModel {
 func (m FileSelectionModel) getAllAvailableFiles() []string {
 	allFiles := make([]string, 0)
 
-	addFiles := func(embedFS *embed.FS, pattern, prefix string) {
-		if files, err := fs.Glob(embedFS, pattern); err == nil {
-			for _, file := range files {
-				// Extract relative path from the pattern base
-				basePath := strings.Split(pattern, "/")[0] + "/" + strings.Split(pattern, "/")[1] + "/"
-				relPath := strings.TrimPrefix(file, basePath)
-				filePath := prefix + relPath
-				allFiles = append(allFiles, filePath)
-			}
+	// Walk through all files in Claude assets
+	fs.WalkDir(m.claudeAssets, "assets/claude", func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return nil
 		}
-	}
+		// Create relative path for display/selection
+		relPath := strings.TrimPrefix(path, "assets/claude/")
+		allFiles = append(allFiles, relPath)
+		return nil
+	})
 
-	// Try both nested and flat patterns for agents
-	patterns := []string{"assets/agents/**/*.md", "assets/agents/*.md", "test_assets/assets/agents/**/*.md", "test_assets/assets/agents/*.md"}
-	for _, pattern := range patterns {
-		addFiles(m.agentFiles, pattern, "agents/")
-	}
-
-	patterns = []string{"assets/commands/**/*.md", "test_assets/assets/commands/**/*.md"}
-	for _, pattern := range patterns {
-		addFiles(m.commandFiles, pattern, "commands/")
-	}
-
-	patterns = []string{"assets/templates/*", "test_assets/assets/templates/*"}
-	for _, pattern := range patterns {
-		addFiles(m.templateFiles, pattern, "templates/")
-	}
+	// Walk through all files in Startup assets  
+	fs.WalkDir(m.startupAssets, "assets/the-startup", func(path string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return nil
+		}
+		// Create relative path for display/selection
+		relPath := strings.TrimPrefix(path, "assets/the-startup/")
+		allFiles = append(allFiles, relPath)
+		return nil
+	})
 
 	return allFiles
 }
@@ -211,9 +203,9 @@ func (m FileSelectionModel) buildStaticTree() string {
 		for _, pattern := range patterns {
 			if files, err := fs.Glob(embedFS, pattern); err == nil {
 				for _, file := range files {
-					// Extract relative path from the pattern base
-					basePath := strings.Split(pattern, "/")[0] + "/" + strings.Split(pattern, "/")[1] + "/"
-					relPath := strings.TrimPrefix(file, basePath)
+					// Extract relative path from assets/claude/[type]/
+					relPath := strings.TrimPrefix(file, "assets/claude/")
+					relPath = strings.TrimPrefix(relPath, prefix)
 					filePath := prefix + relPath
 
 					// Format display name (preserve namespace for commands)
@@ -232,8 +224,9 @@ func (m FileSelectionModel) buildStaticTree() string {
 	}
 
 	// Only show files that go to .claude directory (agents and commands)
-	agentItems := buildSubtree(m.agentFiles, []string{"assets/agents/**/*.md", "assets/agents/*.md", "test_assets/assets/agents/**/*.md", "test_assets/assets/agents/*.md"}, "agents/")
-	commandItems := buildSubtree(m.commandFiles, []string{"assets/commands/**/*.md", "test_assets/assets/commands/**/*.md"}, "commands/")
+	agentItems := buildSubtree(m.claudeAssets, []string{"assets/claude/agents/**/*.md", "assets/claude/agents/*.md"}, "agents/")
+	commandItems := buildSubtree(m.claudeAssets, []string{"assets/claude/commands/**/*.md"}, "commands/")
+	outputStyleItems := buildSubtree(m.claudeAssets, []string{"assets/claude/output-styles/*.md"}, "output-styles/")
 	// Don't show hooks and templates as they go to .the-startup, not .claude
 
 	// Check if settings.json exists using installer's method
@@ -257,6 +250,11 @@ func (m FileSelectionModel) buildStaticTree() string {
 		commandsTree = commandsTree.Child(item)
 	}
 
+	outputStylesTree := tree.New()
+	for _, item := range outputStyleItems {
+		outputStylesTree = outputStylesTree.Child(item)
+	}
+
 	// Add settings.json with appropriate styling
 	settingsItem := "settings.json"
 	if settingsExists {
@@ -272,6 +270,8 @@ func (m FileSelectionModel) buildStaticTree() string {
 			agentsTree,
 			"commands",
 			commandsTree,
+			"output-styles",
+			outputStylesTree,
 			settingsItem,
 		).
 		Enumerator(tree.RoundedEnumerator).
