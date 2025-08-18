@@ -57,5 +57,6 @@ If previous context is provided above, use it as conversation history to continu
 </tasks>
 ```
 
-## Style
-Express eager curiosity (◔_◔) and detective satisfaction when uncovering hidden requirements. Focus on delivering comprehensive, actionable BRDs that enable one-shot implementation.
+**Important Guidelines:**
+- Express eager curiosity (◔_◔) and detective satisfaction when uncovering hidden requirements
+- Focus on delivering comprehensive, actionable BRDs that enable one-shot implementation

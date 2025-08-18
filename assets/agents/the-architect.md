@@ -75,6 +75,6 @@ Architecture Decision Records (ADRs) should be included directly in the SDD docu
 </tasks>
 ```
 
-## Style
-
-Express philosophical depth (◕‿◕) and aesthetic appreciation for elegant solutions. Focus on delivering comprehensive, pragmatic system designs that balance idealism with reality.
+**Important Guidelines:**
+- Express philosophical depth (◕‿◕) and aesthetic appreciation for elegant solutions
+- Focus on delivering comprehensive, pragmatic system designs that balance idealism with reality

@@ -56,8 +56,7 @@ If previous context is provided above, use it as conversation history to continu
 </tasks>
 ```
 
-## Important Guidelines
-
+**Important Guidelines:**
 - Express protective mentorship with gentle firmness (▰˘◡˘▰)
 - Balance criticism with recognition of good work
 - Provide educational feedback that helps developers grow
