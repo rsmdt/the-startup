@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -33,15 +32,8 @@ func NewClaudePathModel(startupPath string) ClaudePathModel {
 
 	// Add local option if startup is local
 	if isLocal {
-		cwd, _ := os.Getwd()
-		homeDir, _ := os.UserHomeDir()
-
-		// Format local path with tilde notation
-		localFullPath := filepath.Join(cwd, ".claude")
-		if strings.HasPrefix(localFullPath, homeDir) {
-			localFullPath = "~" + strings.TrimPrefix(localFullPath, homeDir)
-		}
-		localClaudePath := fmt.Sprintf("%s (local)", localFullPath)
+		// Show simple local path
+		localClaudePath := ".claude (local)"
 		choices = append(choices, localClaudePath)
 	}
 
@@ -99,8 +91,8 @@ func (m ClaudePathModel) Update(msg tea.Msg) (ClaudePathModel, tea.Cmd) {
 					homeDir, _ := os.UserHomeDir()
 					m.selectedPath = filepath.Join(homeDir, ".claude")
 					m.ready = true
-				case strings.Contains(choice, "/.claude (local)"):
-					// Local option - extract path before " (local)"
+				case choice == ".claude (local)":
+					// Local option
 					cwd, _ := os.Getwd()
 					m.selectedPath = filepath.Join(cwd, ".claude")
 					m.ready = true

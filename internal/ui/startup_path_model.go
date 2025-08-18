@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -24,15 +23,8 @@ type StartupPathModel struct {
 }
 
 func NewStartupPathModel() StartupPathModel {
-	cwd, _ := os.Getwd()
-	homeDir, _ := os.UserHomeDir()
-
-	// Format local path with tilde notation
-	localFullPath := filepath.Join(cwd, ".the-startup")
-	if strings.HasPrefix(localFullPath, homeDir) {
-		localFullPath = "~" + strings.TrimPrefix(localFullPath, homeDir)
-	}
-	localPath := fmt.Sprintf("%s (local)", localFullPath)
+	// Show simple local path
+	localPath := ".the-startup (local)"
 
 	ti := textinput.New()
 	ti.Placeholder = "Enter custom path (Tab for autocomplete)"
@@ -89,7 +81,7 @@ func (m StartupPathModel) Update(msg tea.Msg) (StartupPathModel, tea.Cmd) {
 					homeDir, _ := os.UserHomeDir()
 					m.selectedPath = filepath.Join(homeDir, ".config", "the-startup")
 					m.ready = true
-				case strings.Contains(choice, "/.the-startup (local)"):
+				case choice == ".the-startup (local)":
 					// Local option
 					cwd, _ := os.Getwd()
 					m.selectedPath = filepath.Join(cwd, ".the-startup")

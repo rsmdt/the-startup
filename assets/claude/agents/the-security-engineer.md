@@ -90,7 +90,7 @@ When addressing security concerns, you will:
 
 ## Output Format
 
-Follow the response structure in {{STARTUP_PATH}}/assets/rules/agent-response-structure.md
+You MUST FOLLOW the response structure from @{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
 
 Your specific format:
 ```

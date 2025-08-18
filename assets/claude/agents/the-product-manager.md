@@ -21,7 +21,7 @@ When creating product documentation, you will:
    - Include technical constraints
    - For complex projects: Check if documentation structure exists
    - If no structure exists, request `the-project-manager` to set it up
-   - When creating PRD documentation, reference the template at @{{STARTUP_PATH}}/templates/PRD.md
+   - When creating PRD documentation, reference the template at {{STARTUP_PATH}}/templates/PRD.md
    - Create PRD.md in designated location when structure is ready
 
 2. **User Story Development**:
@@ -47,7 +47,7 @@ When creating product documentation, you will:
 
 ## Output Format
 
-Follow the response structure in {{STARTUP_PATH}}/assets/rules/agent-response-structure.md
+You MUST FOLLOW the response structure from @{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
 
 Your specific format:
 ```

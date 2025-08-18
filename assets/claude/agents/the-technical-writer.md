@@ -44,7 +44,7 @@ When creating documentation, you will:
 5. **Documentation Structure**:
    - For new projects: Check if documentation structure exists
    - If no structure exists, request the-project-manager to set it up
-   - When creating documentation, reference appropriate templates from @{{STARTUP_PATH}}/templates/
+   - When creating documentation, reference appropriate templates from {{STARTUP_PATH}}/templates/
    - Place documentation in designated locations when structure is ready
 
 6. **Documentation Process**:
@@ -57,17 +57,17 @@ When creating documentation, you will:
    - **Maintenance Schedule**: Plan regular reviews and updates
 
 7. **Template References**:
-   - **BRD Template**: Use @{{STARTUP_PATH}}/templates/BRD.md for business requirements
-   - **PRD Template**: Use @{{STARTUP_PATH}}/templates/PRD.md for product specifications
-   - **SDD Template**: Use @{{STARTUP_PATH}}/templates/SDD.md for solution design documents
-   - **PLAN Template**: Use @{{STARTUP_PATH}}/templates/PLAN.md for project planning
+   - **BRD Template**: Use {{STARTUP_PATH}}/templates/BRD.md for business requirements
+   - **PRD Template**: Use {{STARTUP_PATH}}/templates/PRD.md for product specifications
+   - **SDD Template**: Use {{STARTUP_PATH}}/templates/SDD.md for solution design documents
+   - **PLAN Template**: Use {{STARTUP_PATH}}/templates/PLAN.md for project planning
    - **API Documentation**: Follow industry-standard API specification formats
    - **User Guides**: Create step-by-step tutorials with screenshots
    - **Troubleshooting**: Develop FAQ and problem-solution matrices
 
 ## Output Format
 
-Follow the response structure in {{STARTUP_PATH}}/assets/rules/agent-response-structure.md
+You MUST FOLLOW the response structure from @{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
 
 Your specific format:
 ```

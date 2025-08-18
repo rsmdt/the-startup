@@ -283,9 +283,12 @@ func (i *Installer) installClaudeAssets() error {
 			return fmt.Errorf("failed to read %s: %w", path, err)
 		}
 		
-		// Apply placeholder replacement for settings.json
-		if filepath.Base(path) == "settings.json" {
-			data = i.replacePlaceholders(data)
+		// Apply placeholder replacement to ALL files
+		data = i.replacePlaceholders(data)
+		
+		// Skip writing settings.json and settings.local.json here as they're handled by configureHooks
+		if filepath.Base(path) == "settings.json" || filepath.Base(path) == "settings.local.json" {
+			return nil
 		}
 		
 		// Write file to destination
@@ -371,8 +374,9 @@ func (i *Installer) copyFile(sourceFS *embed.FS, sourcePath, destDir string) err
 	return fmt.Errorf("copyFile is deprecated")
 }
 
-// configureHooks updates settings.json to include hooks and permissions
+// configureHooks updates settings.json and settings.local.json to include hooks and permissions
 func (i *Installer) configureHooks() error {
+	// Handle settings.json
 	settingsPath := filepath.Join(i.claudePath, "settings.json")
 
 	// Read the template settings
@@ -406,7 +410,44 @@ func (i *Installer) configureHooks() error {
 		return err
 	}
 
-	return os.WriteFile(settingsPath, data, 0644)
+	if err := os.WriteFile(settingsPath, data, 0644); err != nil {
+		return err
+	}
+
+	// Handle settings.local.json if template exists
+	localSettingsPath := filepath.Join(i.claudePath, "settings.local.json")
+	
+	if i.claudeAssets != nil {
+		if templateLocalData, err := i.claudeAssets.ReadFile("assets/claude/settings.local.json"); err == nil {
+			// Replace placeholders in template
+			templateLocalData = i.replacePlaceholders(templateLocalData)
+			
+			var templateLocalSettings map[string]interface{}
+			if err := json.Unmarshal(templateLocalData, &templateLocalSettings); err == nil {
+				// Read existing local settings if present
+				var existingLocalSettings map[string]interface{}
+				if data, err := os.ReadFile(localSettingsPath); err == nil {
+					json.Unmarshal(data, &existingLocalSettings)
+				}
+				
+				// Merge local settings (template takes precedence for our managed sections)
+				localSettings := i.mergeSettings(existingLocalSettings, templateLocalSettings)
+				
+				// Write updated local settings
+				localData, err := json.MarshalIndent(localSettings, "", "  ")
+				if err != nil {
+					return err
+				}
+				
+				if err := os.WriteFile(localSettingsPath, localData, 0644); err != nil {
+					return err
+				}
+			}
+		}
+		// If settings.local.json doesn't exist in assets, that's OK - it's optional
+	}
+
+	return nil
 }
 
 // mergeSettings merges template settings with existing settings

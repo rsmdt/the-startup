@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -262,18 +263,33 @@ func (m FileSelectionModel) buildStaticTree() string {
 	} else {
 		settingsItem = itemStyle.Render("settings.json")
 	}
+	
+	// Build children list for the tree
+	children := []any{
+		"agents",
+		agentsTree,
+		"commands",
+		commandsTree,
+		"output-styles",
+		outputStylesTree,
+		settingsItem,
+	}
+	
+	// Add settings.local.json if it exists in assets
+	if _, err := m.claudeAssets.ReadFile("assets/claude/settings.local.json"); err == nil {
+		localSettingsPath := filepath.Join(claudePath, "settings.local.json")
+		localSettingsItem := "settings.local.json"
+		if _, err := os.Stat(localSettingsPath); err == nil {
+			localSettingsItem = updateStyle.Render("settings.local.json (will update)")
+		} else {
+			localSettingsItem = itemStyle.Render("settings.local.json")
+		}
+		children = append(children, localSettingsItem)
+	}
 
 	t := tree.
 		Root("⁜ "+displayPath).
-		Child(
-			"agents",
-			agentsTree,
-			"commands",
-			commandsTree,
-			"output-styles",
-			outputStylesTree,
-			settingsItem,
-		).
+		Child(children...).
 		Enumerator(tree.RoundedEnumerator).
 		EnumeratorStyle(enumeratorStyle).
 		RootStyle(rootStyle)
