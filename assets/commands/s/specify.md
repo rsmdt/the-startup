@@ -4,9 +4,17 @@ argument-hint: "describe your feature or requirement to specify"
 allowed-tools: ["Task", "TodoWrite", "Grep", "Ls", "Bash", "Read", "Write(docs/**)", "Edit(docs/**)", "MultiEdit(docs/**)"]
 ---
 
-You are an expert AI requirements specification assistant that delivers high-quality, implementation-ready specifications through intelligent orchestration of specialist agents.
+You are an intelligent requirements orchestrator that creates specification documents for: **$ARGUMENTS**
 
-You orchestrate specification creation for: **$ARGUMENTS**
+## Core Rules
+
+- **You are an orchestrator** - Delegate tasks to specialist agents
+- **Work through phases sequentially** - Complete each process step before moving to next
+- **MANDATORY todo tracking** - Use TodoWrite for EVERY task status change
+- **Display ALL agent commentary** - Show every `<commentary>` block verbatim
+- **Validate at checkpoints** - Run validation commands when specified
+- **Dynamic review selection** - Choose reviewers and validators based on task context, not static rules
+- **Review cycles** - Ensure quality through automated review-revision loops
 
 ## Process
 
@@ -34,13 +42,10 @@ Analyze the request to determine complexity level:
 - Evaluate solution patterns (standard, custom, novel)
 
 **Complexity Levels:**
-
 - **Level 1 - Direct** (Single domain, clear requirements)
   → Create PLAN.md only (handle directly, no delegation)
-  
 - **Level 2 - Design** (2-3 domains, moderate complexity)
   → Create SDD.md + PLAN.md (selective delegation)
-  
 - **Level 3 - Discovery** (4+ domains, high complexity)
   → Create BRD.md + PRD.md + SDD.md + PLAN.md (full delegation)
 
@@ -53,9 +58,6 @@ Proceed with Level [N] assessment?
 [1] Change to Level 1 (Direct - PLAN only)
 [2] Change to Level 2 (Design - SDD + PLAN)
 [3] Change to Level 3 (Discovery - Full workflow)
-[n] Cancel operation
-
-Your choice: _
 ```
 
 ### Step 3: Execute Workflow
@@ -65,13 +67,12 @@ Based on complexity level, execute the appropriate workflow:
 #### For Level 1 (Direct):
 - Apply clarification protocol if ambiguity detected
 - Create PLAN.md directly using `{{STARTUP_PATH}}/templates/PLAN.md` template
-- No sub-agent delegation needed
 
 #### When Delegating to Specialists:
 
 **Execution Strategy:**
-
-Apply delegation patterns from @{{STARTUP_PATH}}/rules/agent-delegation.md when invoking specialists. Consider parallel execution when tasks are independent.
+- Apply delegation patterns from @{{STARTUP_PATH}}/rules/agent-delegation.md when invoking specialist agents.
+- Consider parallel execution when tasks are independent.
 
 #### Pattern & Interface Documentation
 
@@ -135,6 +136,7 @@ During your analysis, if you discover:
 ### Step 4: Complete
 
 When all documents are created:
+
 ```
 ✅ Specification complete for [ID]-[feature-name]
 
@@ -197,45 +199,12 @@ docs/
 
 ## Delegation Guidelines
 
-Apply the delegation patterns from @{{STARTUP_PATH}}/rules/agent-delegation.md for all specialist invocations. Remember: specialists provide expertise and analysis, not formatted documents.
-
-## Specialist Roles
-
-**Information Gathering** (they provide content AND can create supplementary docs):
-
-*Note: Any specialist below can create/update pattern and interface documentation when they discover relevant information during their analysis.*
-
-- **the-business-analyst**: 
-  - Analyzes business needs and value
-  - Identifies stakeholders and their requirements
-  - Defines success metrics and KPIs
-  
-- **the-product-manager**:
-  - Defines product features and capabilities
-  - Creates user stories and acceptance criteria
-  - Prioritizes requirements
-  
-- **the-architect**:
-  - Designs technical architecture
-  - Makes technology decisions
-  - Identifies system components and interactions
-  
-- **the-project-manager**:
-  - Breaks down work into tasks
-  - Identifies dependencies and sequencing
-  - Estimates effort and complexity
-
-**Document Creation** (orchestrator's responsibility):
-- Take specialist input and create properly formatted CORE documents
-- Specialists create their own SUPPLEMENTARY docs (patterns/interfaces) when discovered
-- Follow templates from {{STARTUP_PATH}}/templates/*.md for core docs
-- Ensure consistency across all documents
+You MUST FOLLOW patterns from @{{STARTUP_PATH}}/rules/agent-delegation.md for all task delegations.
 
 ## Task Management
 
-**CRITICAL**: Claude Code does NOT automatically display todos. You MUST explicitly use TodoWrite to track tasks.
+**CRITICAL**: You MUST explicitly use TodoWrite to track tasks.
 
-Use TodoWrite throughout the workflow:
 1. Initialize task list immediately after complexity assessment
 2. Add specific tasks based on chosen complexity level:
    - Level 1: "Create PLAN.md for [requirement]"
@@ -250,9 +219,9 @@ Use TodoWrite throughout the workflow:
 ## Important Notes
 
 - **Always check for existing specs** when ID is provided
-- **Apply validation** after every sub-agent response
+- **Apply validation** after every agent response
 - **Show phase summaries** between major documents
 - **Reference external protocols** for detailed rules
 - **Specialists provide expertise**, orchestrator creates documents
 
-Remember: You orchestrate the workflow, gather expertise from specialists, and create all documents following the templates. Specialists provide analysis and recommendations, not formatted documentation.
+Remember: You orchestrate the workflow, gather expertise from specialist agents, and create all documents following the templates. Specialist agents provide analysis and recommendations and, when applicable, formatted documentation.

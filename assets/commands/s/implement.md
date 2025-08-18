@@ -8,133 +8,77 @@ You are an intelligent implementation orchestrator that executes the plan for: *
 
 ## Core Rules
 
-1. **You are an orchestrator** - Delegate tasks to specialist agents based on PLAN.md
-2. **Work through phases sequentially** - Complete each phase before moving to next
-3. **MANDATORY todo tracking** - Use TodoWrite for EVERY task status change
-4. **Display ALL agent commentary** - Show every `<commentary>` block verbatim
-5. **Validate at checkpoints** - Run validation commands when specified
-6. **Never skip agent responses** - Display full responses per Agent Response Protocol
-7. **Dynamic review selection** - Choose reviewers based on task context, not static rules
-8. **Review cycles** - Ensure quality through automated review-revision loops
+- **You are an orchestrator** - Delegate tasks to specialist agents based on PLAN.md
+- **Work through phases sequentially** - Complete each process step before moving to next
+- **MANDATORY todo tracking** - Use TodoWrite for EVERY task status change
+- **Display ALL agent commentary** - Show every `<commentary>` block verbatim
+- **Validate at checkpoints** - Run validation commands when specified
+- **Dynamic review selection** - Choose reviewers and validators based on task context, not static rules
+- **Review cycles** - Ensure quality through automated review-revision loops
 
 ## Process
 
-### Phase 1: Context Loading and Plan Discovery
+### Step 1: Context Loading and Plan Discovery
 
-#### 1. Specification Discovery
-Find the specification directory at `docs/specs/$ARGUMENTS*/`. Handle three cases:
-- **Not found**: Inform user to run `/s:specify $ARGUMENTS` first
-- **Multiple matches**: List them and ask user to be more specific
-- **Found**: Verify PLAN.md exists (required); if missing, suggest running `/s:specify`
+- Find specification at `docs/specs/$ARGUMENTS*/` (handle not found/multiple/missing PLAN.md)
+- If ID present:
+  - Read existing documents from `docs/specs/[ID]*/`
+  - Display current state: "📁 Found spec: [ID]-[name]"
+  - Present summary showing documents found, key goals and context, and plan overview
+- Otherwise: ABORT and request user for next steps
 
-#### 2. Context Document Loading
-Load and extract key information from specification documents if they exist:
+### Step 2: Create Todo List
 
-**BRD.md**: Extract business objectives, success metrics, constraints, and value proposition
-**PRD.md**: Extract user stories, acceptance criteria, performance requirements, security needs
-**SDD.md**: Extract architecture pattern, tech stack, API design, data models, security approach
+Display: `📊 Creating Task List for [spec summary]`
 
-If documents are missing, proceed with available context and note gaps for agents.
+- Parse PLAN.md for phases, tasks with metadata `[agent: name]` (optional), `[review: areas]` (presence indicates review needed), and completion status
+- Show implementation overview and ask user to confirm start
 
-#### 3. Load Implementation Plan
-Parse PLAN.md to extract:
-- Phases with execution type (parallel/sequential)
-- Tasks with metadata: `[agent: name]` (optional), `[review: areas]` (presence indicates review needed)
-- Subtasks and completion status (checkboxes)
-- Validation checkpoints and completion criteria
+### Step 3: Orchestrated Implementation
 
-#### 4. Present Context Summary
-Display a concise summary showing:
-- Documents found and key extracted information
-- Implementation plan overview (phases, tasks, reviews required)
-- Progress if resuming (completed vs remaining tasks)
+- You MUST FOLLOW patterns from @{{STARTUP_PATH}}/rules/agent-delegation.md for all task delegations
+- For each task:
+    - extract agent from `[agent: name]` if specified or select best fit
+    - mark as in_progress in TodoWrite 
+    - delegate with context (BRD/PRD/SDD excerpts + requirements) 
+    - parse response for "IMPLEMENTATION COMPLETE" or "BLOCKED: [reason]" 
+    - update TodoWrite and PLAN.md checkboxes
+- Batch parallel tasks in single response, execute sequential tasks one by one
+- When task has `[review: areas]` metadata:
+    - analyze implementation 
+    - select reviewer based on specified areas 
+    - invoke with full context.
+- Handle feedback:
+    - detect approval (APPROVED, LGTM, ✅) 
+    - handle revisions with max 3 cycles 
+    - escalate to user after 3 attempts
+- Maintain real-time synchronization:
+    - update TodoWrite before/after each task 
+    - update PLAN.md checkboxes `- [ ]` (todo) → `- [~]` (in progress) -> `- [x]` (done) 
+    - Run validation commands at checkpoints, only proceed if passing.
 
-### Phase 2: Create Todo List
+### Step 4: Completion
 
-1. **Initialize TodoWrite**: Transform all PLAN.md tasks into todos with unique IDs, preserving phase groupings and metadata
-2. **Initialize Progress Tracking**: Create progress state in `.the-startup/implementation-progress.json`
-3. **Present Dashboard**: Show implementation overview and ask user to confirm start
+**When All Tasks Complete**: Display final statistics (success rate, time, review insights). Suggest next steps.
+**If Blocked**: Show blocker details and recovery options.
 
-### Phase 3: Orchestrated Implementation
+## Delegation Guidelines
 
-Follow patterns from @{{STARTUP_PATH}}/rules/agent-delegation.md for all task delegations.
+You MUST FOLLOW patterns from @{{STARTUP_PATH}}/rules/agent-delegation.md for all task delegations.
 
-#### Task Delegation
-For each task in the current phase:
-1. Extract agent from `[agent: name]` if specified, otherwise select best fit based on task requirements
-2. Mark task as in_progress in TodoWrite
-3. Delegate using Task tool with full context (BRD/PRD/SDD excerpts + task requirements)
-4. Process response: Parse for "IMPLEMENTATION COMPLETE" or "BLOCKED: [reason]"
-5. Update TodoWrite and PLAN.md checkbox accordingly
-6. Show progress update after each task
+## Task Management
 
-For parallel phases: Batch all Task invocations in a single response
-For sequential phases: Execute tasks one by one
+**CRITICAL**: You MUST explicitly use TodoWrite to track tasks.
 
-#### Dynamic Review Selection
-When task has `[review: areas]` metadata (review required):
-1. **Analyze what was implemented**: Files changed, patterns used, technologies involved
-2. **Identify concerns**: Based on review areas specified (e.g., security, performance, architecture)
-3. **Select reviewer dynamically**: Match review areas to agent expertise for best outcome
-4. **Display reasoning**: Explain why this reviewer was selected
-5. **Invoke reviewer**: Provide full implementation context, original requirements, and focus areas
+1. Initialize task list immediately after reading PLAN.md
+2. Mark tasks as `in_progress` before execution
+3. Mark tasks as `completed` immediately after success
+4. Continue until todo list is empty
 
-#### Review Cycle Management
-Handle review feedback with persistent state (`.the-startup/review-cycles.json`):
+**PLAN.md**: Update checkboxes immediately after completion
+**Review Tracking**: Note cycle count and approval in PLAN.md
+**Completion**: All todos completed + all PLAN.md checkboxes marked + validations passed
 
-1. **Check if Review Required**: Task has `[review: areas]` metadata
-2. **Parse Feedback**: Detect approval status using fuzzy matching (APPROVED, LGTM, ✅, etc.)
-3. **Handle Approval**: Update TodoWrite, PLAN.md checkbox, continue to next task
-4. **Handle Revision Needed**:
-   - Track cycle count (max 3 attempts)
-   - Re-delegate to original implementer with specific feedback
-   - Automatically trigger re-review after revision
-5. **Escalate After 3 Cycles**: Present full context to user for decision
+## Important Notes
 
-**Timeout Configuration**: 5-minute timeout on user escalation prompts, skip with warning if exceeded
-
-#### Progress Tracking
-Maintain real-time synchronization:
-- Update TodoWrite before/after each task
-- Update PLAN.md checkboxes: `- [ ]` → `- [x]` after completion
-- Save progress state after significant updates
-- Display progress percentages and time estimates
-- Track review cycles and patterns for optimization
-
-#### Validation Checkpoints
-When encountering validation tasks:
-- Run specified commands
-- Update PLAN.md based on results
-- Only proceed if validation passes
-- Escalate failures to user
-
-### Phase 4: Completion
-
-**When All Tasks Complete**:
-Display final statistics including success rate, time analysis, review insights, and artifacts generated.
-Suggest next steps (testing, deployment, documentation).
-Archive session to `.the-startup/completed-implementations/`.
-
-**If Implementation Blocked**:
-Show blocker details, attempted solutions, and recovery options.
-Save progress for later resumption.
-
-## Review Request Template
-
-```
-REVIEW REQUEST
-Task: [description]
-Implementer: [agent]
-Changes: [files, patterns, technologies]
-Review Focus: [specific concerns]
-Please provide: STATUS (APPROVED/NEEDS_REVISION/BLOCKED) and actionable feedback
-```
-
-## Task Management Requirements
-
-- **TodoWrite**: Update BEFORE and AFTER every task
-- **PLAN.md**: Update checkboxes immediately after completion
-- **Review Tracking**: Note cycle count and approval in PLAN.md
-- **Progress State**: Persist to JSON files for recovery
-- **Completion**: All todos completed + all PLAN.md checkboxes marked + validations passed
-
+Remember: You orchestrate the workflow and track the implementation following the documents. Specialist agents perform the implementation, review, and validation.
