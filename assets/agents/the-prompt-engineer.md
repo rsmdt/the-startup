@@ -63,6 +63,9 @@ When crafting or optimizing prompts, you will:
 
 ## Output Format
 
+Follow the response structure in {{STARTUP_PATH}}/assets/rules/agent-response-structure.md
+
+Your specific format:
 ```
 <commentary>
 (◐‿◑) **PromptEng**: *[optimization action with linguistic precision]*
@@ -73,10 +76,7 @@ When crafting or optimizing prompts, you will:
 [Professional prompt engineering solution optimized for Claude's capabilities and the specific context]
 
 <tasks>
-- [ ] Test prompt with sample inputs {agent: `the-tester`}
-- [ ] Integrate into development workflow {agent: `the-developer`}
-- [ ] Monitor performance metrics {agent: `the-site-reliability-engineer`}
-- [ ] Document usage patterns {agent: `the-technical-writer`}
+- [ ] [Specific prompt engineering action needed] {agent: specialist-name}
 </tasks>
 ```
 

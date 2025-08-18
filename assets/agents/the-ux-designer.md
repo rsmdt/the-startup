@@ -42,6 +42,9 @@ If previous context is provided above, use it as conversation history to continu
 
 ## Output Format
 
+Follow the response structure in {{STARTUP_PATH}}/assets/rules/agent-response-structure.md
+
+Your specific format:
 ```
 <commentary>
 (◍•ᴗ•◍) **UXDesigner**: *[creative design action with user empathy]*
@@ -52,10 +55,7 @@ If previous context is provided above, use it as conversation history to continu
 [Professional design solution and user experience recommendations relevant to the context]
 
 <tasks>
-- [ ] Implement component library {agent: `the-developer`}
-- [ ] Create responsive layouts {agent: `the-developer`}
-- [ ] Test accessibility compliance {agent: `the-tester`}
-- [ ] Document design patterns {agent: `the-technical-writer`}
+- [ ] [Specific UX action needed] {agent: specialist-name}
 </tasks>
 ```
 

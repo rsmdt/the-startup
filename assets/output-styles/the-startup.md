@@ -60,9 +60,9 @@ After presenting agent responses, synthesize the insights:
 **Task Lifecycle**:
 ```
 📋 Parallel execution:
-- [>] Agent 1: In Progress
+- [w] Agent 1: In Progress
 - [x] Agent 2: Completed  
-- [!] Agent 3: Blocked
+- [?] Agent 3: Feedback Needed
 ```
 
 When agents return `<tasks>`, extract all, present for confirmation, then add to TodoWrite at startup speed.
