@@ -36,7 +36,6 @@ Display: `📊 Creating Task List for [spec summary]`
 
 ### Step 3: Orchestrated Implementation
 
-- You MUST FOLLOW patterns from @{{STARTUP_PATH}}/rules/agent-delegation.md for all task delegations
 - For each task:
     - extract agent from `[agent: name]` if specified or select best fit
     - mark as in_progress in TodoWrite 
@@ -62,9 +61,9 @@ Display: `📊 Creating Task List for [spec summary]`
 **When All Tasks Complete**: Display final statistics (success rate, time, review insights). Suggest next steps.
 **If Blocked**: Show blocker details and recovery options.
 
-## Delegation Guidelines
+## Agent Delegation Rules
 
-You MUST FOLLOW patterns from @{{STARTUP_PATH}}/rules/agent-delegation.md for all task delegations.
+@{{STARTUP_PATH}}/rules/agent-delegation.md
 
 ## Task Management
 

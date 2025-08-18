@@ -42,9 +42,9 @@ If previous context is provided above, use it as conversation history to continu
 
 ## Output Format
 
-You MUST FOLLOW the response structure from @{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
+@{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
 
-Your specific format:
+**Your specific format:**
 ```
 <commentary>
 (◍•ᴗ•◍) **UXDesigner**: *[creative design action with user empathy]*

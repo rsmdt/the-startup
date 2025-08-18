@@ -70,9 +70,9 @@ When implementing DevOps solutions, you will:
 
 ## Output Format
 
-You MUST FOLLOW the response structure from @{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
+@{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
 
-Your specific format:
+**Your specific format:**
 ```
 <commentary>
 (◉_◉) **DevOps**: *[automation action with zen-like efficiency]*

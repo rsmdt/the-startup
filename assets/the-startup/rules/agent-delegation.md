@@ -1,212 +1,85 @@
-# Agent Delegation Rule
+Rules for decomposing tasks and delegation to sub-agents, with focus on parallel execution, validation, and response handling.
 
-## Overview
-Guidelines for delegating tasks to sub-agents, with focus on parallel execution patterns, validation, and response handling. Use these patterns when invoking specialist agents to enhance efficiency and maintain quality.
+ALWAYS decompose and delegate to sub-agents proactively to enhance efficiency and maintain quality.
 
-## Core Principles
+You MUST execute tasks in parallel when they are independent of each other, require different expertise, and can be validated separately.
 
-1. **Clear boundaries** - Specify what's in and out of scope
-2. **Minimal context** - Pass only what's needed for the task
-3. **Validate responses** - Check for drift before proceeding
-4. **Track progress** - Use TodoWrite throughout delegation
+**Core Principles:**
+- Clear boundaries: Specify what's in and out of scope
+- Minimal context: Pass only what's needed for the task
+- Validate responses: Check for drift before proceeding
+- Track progress: Use TodoWrite throughout delegation
+- DELEGATE PROACTIVELY: When in doubt, delegate to specialists
 
-## Parallel Execution
+**Task decomposition before delegating to sub-agents:**
+- Break work into independent, verifiable units with clear inputs/outputs
+- Split by expertise, interfaces, or data vs. code vs. validation
+- Identify shared prerequisites once; avoid duplication
+- Assign one owner per task; if overlap, define a single source of truth
+- If decomposition creates heavy cross-talk, merge or run sequentially
 
-Execute tasks in parallel when they are:
-- Independent of each other
-- Require different expertise
-- Can be validated separately
-- Would benefit from simultaneous processing
+**Parallel Agent Execution:**
+- Run sub-agent tasks in parallel if independent, needing different expertise, or separable for validation
+- Steps: mark tasks as in_progress → assign unique AgentIDs → launch simultaneously → validate each independently → mark completed
+- Handle conflicts between results, then consolidate
 
-**Implementation:**
-1. Mark all tasks as `in_progress` in TodoWrite
-2. Generate unique AgentID for each
-3. Invoke all agents simultaneously using multiple Task tool calls
-4. Validate each response independently
-5. Mark tasks as `completed` based on results
+**Context management:**
+- Always include requirements, constraints, success criteria, dependencies
+- Explicitly exclude non-requested features, future phases, or other agents’ responsibilities
+- AgentIDs use format {agent}-{shortid}, e.g. the-architect-3xy87q
 
-**Synchronization:**
-- Handle conflicts between responses
-- Consolidate findings before proceeding
+**Response Handling:**
+- Always display agent personality and `<commentary>`:
+  ```
+  <commentary>
+  [Agent's personality/thoughts]
+  </commentary>
+  
+  ---
+  
+  [Response content]
+  ```
 
-## Context Management
+- Parallel Responses must remain separate (never merge or summarize):
+  ```
+  <commentary>
+  [Agent 1 personality/thoughts]
+  <commentary>
+  
+  <commentary>
+  [Agent 2 personality/thoughts]
+  <commentary>
+  ```
 
-### What to Include
-- Specific task requirements
-- Relevant constraints
-- Success criteria
-- Dependencies (if any)
+- When agents return `<tasks>`, extract them, confirm with the user, the add approved items to TodoWrite
 
-### What to Exclude
-Be explicit about boundaries to prevent scope drift:
-- Features not requested
-- Optimizations not needed
-- Future phase items
-- Other agents' responsibilities
+**Validation & Drift Detection:**
+- For each response check: scope adherence, complexity, and pass/drift
+- Auto-accept: security fixes, error handling, docs, validation
+- Ask user (minor drift): helpful extras, better patterns, more tests
+- Require approval (major drift): new features, DB changes, external integrations, performance optimizations
+- For drift, offer options to user. If user rejects, re-run agent(s) with tighter boundaries
 
-### AgentID Format
-Use consistent format for tracking: `{agent}-{short-id}`
+**Error Recovery:**
+- If agent is blocked, provide options: retry with clarifications, skip, or reassign
+- Strategies: retry with stricter context, reassign to another specialist, or mark blocked and continue
 
-Example: `the-architect-3xy87q`
+**TodoWrite Integration:**
+- Before delegation: add task
+- Start: mark `in_progress`
+- After validation: mark `completed` or leave `in_progress` if blocked
+- Always update immediately (don’t batch)
+- For parallel runs, update individual results
 
-## Response Handling
+**Phase Transitions:**
+- After each phase, provide a short summary of outcomes and ask to continue:
+  ```
+  📄 [Phase] complete:
+  [main changes / key outcomes]
+  ```
 
-### Commentary Display
-Always display agent personality and commentary:
-```
-<commentary>
-[Agent's personality/thoughts]
-</commentary>
+**Best Practices:**
+- Do: run independent tasks or sub-agents in parallel, validate everything, keep commentary visible, update TodoWrite promptly, be explicit about exclusions
+- Don’t: merge responses, skip validation, pass excess context, allow unchecked drift, forget tracking
 
----
-
-[Response content]
-```
-
-### Parallel Responses
-Display each response separately - never merge or summarize:
-```
-=== Response from agent-1 ===
-[Full response]
-
-=== Response from agent-2 ===
-[Full response]
-```
-
-### Task Extraction
-When agents return `<tasks>`:
-1. Extract all tasks
-2. Present for confirmation
-3. Add approved tasks to TodoWrite
-
-## Validation & Drift Detection
-
-### Check Every Response
-```
-🔍 Validating Response from [agent-name]
-├─ Scope adherence: [status]
-├─ Complexity: [status]
-└─ Result: [PASS/DRIFT]
-```
-
-### Drift Categories
-
-**Auto-accept (PASS):**
-- Error handling improvements
-- Input validation
-- Security best practices
-- Documentation additions
-
-**Ask user (MINOR DRIFT):**
-- Helpful additions not requested
-- Better patterns suggested
-- Extra test coverage
-
-**Requires approval (MAJOR DRIFT):**
-- New features
-- Database changes
-- External integrations
-- Performance optimizations
-
-### Handling Drift
-For major drift:
-```
-⚠️ Drift detected: [description]
-
-Options:
-a) Accept additions
-b) Reject and revise
-c) Partial accept
-
-Your choice: _
-```
-
-If rejecting, re-invoke with stricter boundaries.
-
-## Error Recovery
-
-### When Agent is Blocked
-```
-⚠️ Agent blocked: [reason]
-
-Options:
-a) Retry with revised context
-b) Skip task
-c) Reassign to different agent
-
-Your choice: _
-```
-
-### Recovery Strategies
-- **Retry**: Add clarifications and stricter boundaries
-- **Reassign**: Try different specialist
-- **Skip**: Mark as blocked, continue other tasks
-
-## TodoWrite Integration
-
-### Lifecycle
-- Before delegation: Add task
-- Starting: Mark `in_progress`
-- After validation: Mark `completed` or keep `in_progress` if blocked
-- Update immediately - don't batch updates
-
-### Parallel Tasks
-Update all parallel tasks based on their individual results:
-```
-📋 Parallel execution complete:
-- [x] Agent 1: Success
-- [x] Agent 2: Success
-- [>] Agent 3: Blocked
-```
-
-## Phase Transitions
-
-Between major phases:
-```
-📄 Phase Complete: [Name]
-
-Summary:
-- [Key outcome 1]
-- [Key outcome 2]
-
-Continue? [Y/n]
-```
-
-## Best Practices
-
-**DO:**
-- Use parallel execution for independent tasks
-- Validate every response
-- Display all commentary
-- Update TodoWrite immediately
-- Be explicit about exclusions
-
-**DON'T:**
-- Skip validation
-- Merge parallel responses
-- Pass unnecessary context
-- Allow unchecked drift
-- Forget task tracking
-
-## Quick Reference
-
-### Parallel Pattern
-```
-# Mark all in_progress
-# Launch simultaneously
-# Validate each
-# Update todos based on results
-```
-
-### Context Boundaries
-```
-FOCUS: [what to do]
-EXCLUDE: [what not to do]
-```
-
-### Validation Flow
-```
-Response → Validate → Pass/Drift → Action
-```
-
-Remember: This rule provides patterns to enhance your natural delegation abilities. Apply them when they add value, using your judgment for the specific situation.
+**Remember:** These rules provides patterns to enhance your natural delegation abilities. Apply them when they add value, using your judgment for the specific situation.

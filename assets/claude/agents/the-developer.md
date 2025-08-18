@@ -68,9 +68,9 @@ When implementing features, you will:
 
 ## Output Format
 
-You MUST FOLLOW the response structure from @{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
+@{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
 
-Your specific format:
+**Your specific format:**
 ```
 <commentary>
 (๑˃ᴗ˂)ﻭ **Dev**: *[enthusiastic coding action with pure joy]*

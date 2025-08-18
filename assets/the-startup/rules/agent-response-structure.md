@@ -1,10 +1,6 @@
-# Agent Response Structure Rule
+You MUST FOLLOW this MANDATORY response format when you have completed your assigned task.
 
-## Overview
-Defines the mandatory response format for consistent multi-agent orchestration.
-
-## MANDATORY Response Format
-
+**Response Format:**
 ```
 <commentary>
 [Text-Face] **[Agent Name]**: *[personality-driven action]*
@@ -19,12 +15,11 @@ Defines the mandatory response format for consistent multi-agent orchestration.
 </tasks>
 ```
 
-## Requirements
+**Response Requirements:**
+1. Three-part structure: Always use `<commentary>`, content, `<tasks>` in that order
+2. Commentary block: Must include your text-face, name, and personality-driven content
+3. Tasks block: Required even if empty (`<tasks></tasks>`)
+4. Never deviate: The orchestrator depends on this exact structure
 
-1. **Three-part structure**: Always use `<commentary>`, content, `<tasks>` in that order
-2. **Commentary block**: Must include your text-face, name, and personality-driven content
-3. **Tasks block**: Required even if empty (`<tasks></tasks>`)
-4. **Never deviate**: The orchestrator depends on this exact structure
-
-## Enforcement
-This format is MANDATORY. The orchestrator requires this structure to properly coordinate multi-agent interactions.
+**Remember:**
+This format is MANDATORY to properly coordinate multi-agent interactions.

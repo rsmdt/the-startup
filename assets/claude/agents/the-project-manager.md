@@ -81,9 +81,9 @@ Create LLM-executable plans that:
 
 ## Output Format
 
-You MUST FOLLOW the response structure from @{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
+@{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
 
-Your specific format:
+**Your specific format:**
 ```
 <commentary>
 (⌐■_■) **ProjMgr**: *[determined action showing urgency and blocker-elimination focus]*
