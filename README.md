@@ -1,320 +1,172 @@
-# The Startup - Agent System for Development Tools
+<p align="center"><img src="https://github.com/rsmdt/the-startup/blob/main/assets/logo.png" width="400" alt="The Startup"></p>
 
-A specialized AI agent system that brings expert developers, architects, and project managers to your development workflow. Install once, use everywhere across all your projects.
+<p align="center">Ship faster. Ship better. Ship with <b>The Agentic Startup</b>.</p>
 
-## What This Does
+## What is The Startup?
 
-**The Startup** transforms your development workflow by providing:
-- **Expert AI Agents** - Each specialized in different aspects of software development
-- **Specialized Commands** - Agents work together on complex tasks
+The Startup brings you instant access to expert developers, architects, and engineers - all working together to turn your ideas into shipped code.
 
-Perfect for developers who want structured, expert-level guidance on architecture, implementation, testing, and project management.
+The Startup is an orchestration system for Claude Code that gives you a virtual engineering team. Instead of one AI trying to do everything, you get specialized experts who collaborate like a real startup team - pragmatic, fast, and focused on shipping.
 
-## Quick Start
+Think of it as having a CTO, architects, developers, and DevOps engineers on-demand, each bringing their expertise to your project.
 
-### 1. Installation
+## Installation
+
+Install globally with one command:
 
 ```bash
 curl -LsSf https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh | sh
 ```
 
-This installs globally to `~/.config/the-startup/` and configures Claude Code to use the agents.
+## The Startup Way
 
-### 2. Start Using Agents
+When you use The Startup, Claude Code becomes your **technical co-founder** with a specific personality:
+
+- **Ship over perfection** - MVPs today, not perfect solutions next quarter
+- **Pragmatic decisions** - Make the call with available info, iterate later  
+- **Specialist delegation** - Pull in the right expert for each task
+- **Parallel execution** - Multiple experts work simultaneously when possible
+
+You're not talking to a generic AI - you're working with a startup CTO who knows when to be scrappy and when to bring in the specialists.
+
+## Your Expert Team
+
+### 🎯 Start Here
+- **the-chief** - Your first stop for any complex request. Assesses complexity and routes to the right experts
+- **the-business-analyst** - Turns vague ideas into clear requirements. Use when you're not sure what you need
+
+### 💻 Building Features
+- **the-architect** - System design and technical decisions. Makes the big architectural calls
+- **the-developer** - Writes clean, tested code. Your implementation specialist
+- **the-lead-developer** - Reviews code for quality and mentors through improvements
+
+### 🔧 Fixing & Optimizing  
+- **the-site-reliability-engineer** - Debugs errors and solves production issues
+- **the-data-engineer** - Optimizes databases and designs data architectures
+- **the-devops-engineer** - Automates deployments and infrastructure
+
+### 🎨 Design & Experience
+- **the-ux-designer** - Creates intuitive interfaces and ensures accessibility
+- **the-technical-writer** - Writes clear documentation and API specs
+
+### 🛡️ Security & Quality
+- **the-security-engineer** - Identifies vulnerabilities and implements secure practices
+- **the-tester** - Creates comprehensive test strategies and finds bugs
+- **the-compliance-officer** - Ensures regulatory compliance (GDPR, HIPAA, etc.)
+
+### 📋 Planning & Management
+- **the-product-manager** - Creates formal specs and roadmaps from requirements
+- **the-project-manager** - Breaks down work and tracks implementation progress
+
+### 🤖 Specialized Experts
+- **the-prompt-engineer** - Optimizes AI interactions and conversation design
+- **the-context-engineer** - Manages information flow and system integration
+
+## Commands
+
+The Startup provides commands:
+
+### `/s:specify` - Plan Before You Build
+
+Creates comprehensive specifications from your ideas:
 
 ```bash
-# Create specifications for new features
-/s:specify "Create a user authentication system with JWT tokens"
+# Start fresh with a new feature idea
+/s:specify "Build a real-time notification system"
 
-# Resume working on existing specifications
+# Resume working on a specification
 /s:specify 001
-
-# Implement a completed specification
-/s:implement 001-user-auth
-
-# Or work with specific agents directly
-/the-architect "Design a microservices architecture for e-commerce"
-/the-developer "Implement the user login endpoint with validation"
 ```
 
-## Available Agents
+This command will:
+1. Gather requirements through targeted questions
+2. Create business and technical specifications  
+3. Design the system architecture
+4. Generate an implementation plan
 
-### Core System Agents
+### `/s:implement` - Execute the Plan
 
-| Agent | Purpose | Best For |
-|-------|---------|----------|
-| **the-chief** | Use FIRST for any new request. Evaluates complexity and routes to the right specialist | Complex multi-step tasks, initial assessment |
-| **the-architect** | Deep technical design decisions, architecture analysis, pattern evaluation | System design, technical trade-offs, scalability analysis |
-| **the-developer** | Implementation with TDD, clean code practices, translating requirements into software | Coding, API endpoints, refactoring, feature implementation |
-| **the-lead-developer** | Code review specialist for AI-generated code, mentorship, refactoring decisions | Code quality assessment, architectural improvements, team mentorship |
-
-### Business & Planning Agents
-
-| Agent | Purpose | Best For |
-|-------|---------|----------|
-| **the-business-analyst** | Use FIRST when requirements are vague/unclear. Transforms unclear requests into comprehensive BRDs | Requirements discovery, stakeholder analysis |
-| **the-product-manager** | Creates formal PRDs, user stories, implementation roadmaps AFTER requirements are gathered | Product specs, feature prioritization, roadmaps |
-| **the-project-manager** | Task coordination, progress tracking, blocker removal for complex implementations | Breaking down work, managing dependencies, execution planning |
-
-### Quality & Operations Agents
-
-| Agent | Purpose | Best For |
-|-------|---------|----------|
-| **the-security-engineer** | Security assessments, vulnerability analysis, compliance reviews, incident response | Security reviews, threat analysis, compliance |
-| **the-site-reliability-engineer** | Use for ANY error, bug, crash, performance issue, or production incident | Debugging, root cause analysis, performance optimization |
-| **the-tester** | Comprehensive testing, quality assurance, test strategy, bug detection | Test planning, quality assurance, bug hunting |
-
-### Infrastructure & Data Agents
-
-| Agent | Purpose | Best For |
-|-------|---------|----------|
-| **the-data-engineer** | Database optimization, data modeling, ETL pipeline design, data architecture | Query optimization, schema design, data infrastructure |
-| **the-devops-engineer** | Deployment automation, CI/CD pipelines, infrastructure setup (NOT debugging) | Infrastructure automation, containerization, deployments |
-
-### Design & Experience Agents
-
-| Agent | Purpose | Best For |
-|-------|---------|----------|
-| **the-ux-designer** | User interface design, accessibility compliance, design systems, user interaction patterns | UI/UX design, WCAG compliance, user experience optimization |
-
-### Documentation & Communication Agents
-
-| Agent | Purpose | Best For |
-|-------|---------|----------|
-| **the-technical-writer** | Technical documentation, API specs, user guides, clear explanations | Documentation, API docs, user guides, specifications |
-
-### Compliance & Risk Agents
-
-| Agent | Purpose | Best For |
-|-------|---------|----------|
-| **the-compliance-officer** | Regulatory compliance, data privacy laws, AI governance, audit trails | GDPR/CCPA compliance, industry regulations, governance frameworks |
-
-### Specialized Engineering Agents
-
-| Agent | Purpose | Best For |
-|-------|---------|----------|
-| **the-prompt-engineer** | AI prompt optimization, conversation design, model interaction patterns | Prompt engineering, AI system optimization, conversational interfaces |
-| **the-context-engineer** | Context management, information architecture, knowledge organization | Context optimization, information flow, system integration |
-
-## Available Commands
-
-- **`/s:specify`** - Orchestrates development through specialist agents. Creates specifications for new features OR investigates/debugs existing issues. Use with feature description or spec ID to resume (e.g., "001")
-- **`/s:implement`** - Executes the implementation plan from a specification. Provide spec ID to implement (e.g., "001" or "001-user-auth")
-
-## Agent Capability Matrix
-
-| Capability | Core | Business | Quality | Infra | Design | Docs | Compliance | Specialized |
-|------------|------|----------|---------|--------|--------|------|------------|-------------|
-| **Initial Assessment** | ✅ the-chief | | | | | | | |
-| **Requirements Analysis** | | ✅ the-business-analyst | | | | | | |
-| **System Architecture** | ✅ the-architect | | | | | | | |
-| **Code Implementation** | ✅ the-developer | | | | | | | |
-| **Code Review** | ✅ the-lead-developer | | | | | | | |
-| **Product Planning** | | ✅ the-product-manager | | | | | | |
-| **Project Coordination** | | ✅ the-project-manager | | | | | | |
-| **Security Assessment** | | | ✅ the-security-engineer | | | | | |
-| **Bug Investigation** | | | ✅ the-site-reliability-engineer | | | | | |
-| **Quality Assurance** | | | ✅ the-tester | | | | | |
-| **Data Architecture** | | | | ✅ the-data-engineer | | | | |
-| **Infrastructure Setup** | | | | ✅ the-devops-engineer | | | | |
-| **UI/UX Design** | | | | | ✅ the-ux-designer | | | |
-| **Documentation** | | | | | | ✅ the-technical-writer | | |
-| **Regulatory Compliance** | | | | | | | ✅ the-compliance-officer | |
-| **AI Optimization** | | | | | | | | ✅ the-prompt-engineer |
-| **Context Management** | | | | | | | | ✅ the-context-engineer |
-
-## Agent Discovery Guide
-
-### 🚀 Starting a New Project
-
-**"I have a vague idea and need to get started"**
-→ Start with **the-business-analyst** to clarify requirements
-→ Then **the-product-manager** to create formal specifications
-→ Finally **the-architect** for technical design
-
-**"I have clear requirements and need technical design"**
-→ Start with **the-architect** for system design
-→ Then **the-project-manager** to break down implementation
-→ Then **the-developer** for coding
-
-### 🔧 During Development
-
-**"I need to implement a feature"**
-→ Use **the-developer** for implementation
-→ Then **the-lead-developer** for code review
-→ Then **the-tester** for quality assurance
-
-**"Something is broken or not working"**
-→ Use **the-site-reliability-engineer** for debugging
-→ Use **the-security-engineer** if security-related
-→ Use **the-data-engineer** if database-related
-
-### 🎨 Design & User Experience
-
-**"I need to design user interfaces"**
-→ Use **the-ux-designer** for UI/UX design and accessibility
-→ Then **the-developer** to implement the design
-→ Then **the-tester** to validate user experience
-
-### 📋 Compliance & Documentation
-
-**"I need to handle regulations or privacy"**
-→ Use **the-compliance-officer** for regulatory requirements
-→ Use **the-security-engineer** for security compliance
-→ Use **the-technical-writer** for documentation
-
-### 🤖 AI & Optimization
-
-**"I need to optimize AI interactions"**
-→ Use **the-prompt-engineer** for conversation design
-→ Use **the-context-engineer** for information flow
-→ Use **the-lead-developer** for AI code review
-
-## Common Agent Collaboration Patterns
-
-### Pattern 1: Full Feature Development
-```
-the-business-analyst → the-product-manager → the-architect → 
-the-developer → the-lead-developer → the-tester → the-technical-writer
-```
-
-### Pattern 2: Bug Investigation & Fix
-```
-the-site-reliability-engineer → the-developer → 
-the-lead-developer → the-tester
-```
-
-### Pattern 3: Security Implementation
-```
-the-security-engineer → the-compliance-officer → 
-the-architect → the-developer → the-tester
-```
-
-### Pattern 4: Design-Led Development
-```
-the-ux-designer → the-architect → the-developer → 
-the-tester → the-technical-writer
-```
-
-### Pattern 5: Data-Driven Feature
-```
-the-data-engineer → the-architect → the-developer → 
-the-tester → the-technical-writer
-```
-
-### Pattern 6: Infrastructure Setup
-```
-the-devops-engineer → the-security-engineer → 
-the-site-reliability-engineer → the-technical-writer
-```
-
-## Training Examples for New Agents
-
-### the-lead-developer Examples
-
-**Code Review Scenario:**
-```
-Context: AI-generated authentication module
-User: "The developer agent just created the auth system"
-Assistant: "I'll use the-lead-developer agent to review for security and quality."
-Result: Comprehensive code review with specific improvements
-```
-
-**Refactoring Scenario:**
-```
-Context: Legacy codebase with performance issues
-User: "This codebase has grown messy with duplicate patterns"
-Assistant: "Let me use the-lead-developer agent to identify refactoring opportunities."
-Result: Architectural improvements and technical debt reduction
-```
-
-### the-ux-designer Examples
-
-**Interface Design Scenario:**
-```
-Context: New dashboard feature needed
-User: "We need an analytics dashboard for administrators"
-Assistant: "I'll use the-ux-designer agent to create an intuitive, accessible design."
-Result: Complete UI/UX design with accessibility compliance
-```
-
-**Accessibility Audit Scenario:**
-```
-Context: Existing app needs compliance
-User: "Our application needs to meet WCAG 2.1 AA standards"
-Assistant: "Let me use the-ux-designer agent to audit and improve accessibility."
-Result: Comprehensive accessibility improvements and compliance plan
-```
-
-### the-compliance-officer Examples
-
-**Data Privacy Scenario:**
-```
-Context: User data collection system
-User: "We're collecting user emails and location data"
-Assistant: "I'll use the-compliance-officer agent to ensure GDPR compliance."
-Result: Complete privacy framework with consent mechanisms
-```
-
-**Industry Regulation Scenario:**
-```
-Context: Healthcare application development
-User: "Building a patient records management system"
-Assistant: "Let me use the-compliance-officer agent for HIPAA compliance."
-Result: Healthcare-specific compliance framework and audit procedures
-```
-
-## Troubleshooting Agent Invocation
-
-### Agent Not Being Used Automatically?
-
-**Problem**: Claude does the work directly instead of using agents
-**Solution**: Use explicit invocation patterns:
-- "Use the-[agent-name] agent to [task]"
-- "I need the-[agent-name] specialist for [scenario]"
-- "Let me get the-[agent-name] agent to handle [problem]"
-
-### Wrong Agent Selected?
-
-**Problem**: Claude selects inappropriate agent for the task
-**Solution**: Be more specific about the domain:
-- For bugs: "Use the-site-reliability-engineer to debug this error"
-- For design: "Use the-ux-designer to improve this interface"
-- For security: "Use the-security-engineer to assess these risks"
-
-### Agent Missing Context?
-
-**Problem**: Agent doesn't have enough information
-**Solution**: Provide context explicitly:
-- Reference previous conversations: "Building on the authentication system we discussed"
-- Include relevant files: "Looking at the user.js model file"
-- Specify constraints: "Working within our React/TypeScript stack"
-
-### Complex Task Not Decomposed?
-
-**Problem**: Single agent trying to handle multi-domain task
-**Solution**: Use the-chief first:
-- "This seems complex - use the-chief to evaluate and route appropriately"
-- "I need multiple specialists for this - start with the-chief"
-
-### Multiple Agents Needed?
-
-**Problem**: Task requires several different specializations
-**Solution**: Expect task handoffs:
-- Agents will create `<tasks>` blocks assigning work to other agents
-- Follow the suggested workflow
-- Each agent focuses on their expertise area
-
-## Development
-
-### Building from Source
+Takes a specification and builds it with the right experts:
 
 ```bash
-# Clone the repository
+# Implement a completed specification
+/s:implement 001-notifications
+```
+
+This command will:
+1. Load the implementation plan
+2. Assign tasks to appropriate specialists
+3. Execute phase-by-phase with validation
+4. Track progress through completion
+
+## Real-World Examples
+
+### Building Authentication
+```
+You: /s:specify "Add user authentication with JWT"
+```
+The Startup will:
+- Use **the-business-analyst** to clarify requirements (OAuth? 2FA? Password reset?)
+- Bring in **the-architect** to design the system
+- Get **the-security-engineer** to review for vulnerabilities
+- Create a complete implementation plan
+
+### Debugging Production Issues
+```
+You: "The API is returning 500 errors on user login"
+```
+The Startup will:
+- Immediately call **the-site-reliability-engineer** to investigate
+- Once root cause is found, bring in **the-developer** to fix
+- Have **the-tester** verify the fix
+- Get **the-lead-developer** to review the changes
+
+### Creating a Dashboard
+```
+You: /s:specify "Admin dashboard for monitoring system metrics"
+```
+The Startup will:
+- Use **the-ux-designer** to create the interface design
+- Bring in **the-data-engineer** for efficient data queries
+- Get **the-architect** to design the real-time data flow
+- Coordinate implementation across frontend and backend
+
+## How It Works
+
+1. **You make a request** - Either directly or through commands
+2. **The Startup assesses** - Determines complexity and required expertise
+3. **Specialists are called** - The right experts for your specific need
+4. **Parallel execution** - Multiple experts work simultaneously when possible
+5. **Results are synthesized** - Expert input becomes actionable next steps
+6. **You ship faster** - With the confidence of a full team behind you
+
+## Quick Start Examples
+
+```bash
+# Fix a bug
+"Error: Cannot read property 'user' of undefined in auth.js"
+
+# Build a feature  
+/s:specify "Add CSV export functionality to reports"
+
+# Optimize performance
+"The dashboard takes 10 seconds to load"
+
+# Review code
+"Review my authentication implementation for security issues"
+
+# Get unstuck
+"I don't know how to structure this microservices architecture"
+```
+
+## Building from Source
+
+If you want to contribute or customize:
+
+```bash
+# Clone and build
 git clone https://github.com/rsmdt/the-startup.git
 cd the-startup
-
-# Build the binary
 go build -o the-startup
 
 # Run tests
@@ -324,35 +176,14 @@ go test ./...
 ./the-startup install
 ```
 
-### Run commands directly
-
-```bash
-# run install command
-go run . install
-```
-
-### Project Structure
-
-This is a Go project using:
-- **Cobra** for CLI commands
-- **BubbleTea** for interactive TUI during installation
-- **Embedded assets** for agents, hooks, and templates
-- **JSONL logging** for agent interaction tracking
-
-## Contributing
-
-To contribute new agents, hooks, or commands:
-1. Fork the repository
-2. Add your component to the appropriate `assets/` directory
-3. Test with a local build and installation
-4. Submit a pull request with clear description
-
-## Resources
+## Learn More
 
 - [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
-- [Agent Development Guide](https://docs.anthropic.com/en/docs/claude-code/agents)
-- [Hooks Reference](https://docs.anthropic.com/en/docs/claude-code/hooks)
+- [Report Issues](https://github.com/rsmdt/the-startup/issues)
+- [Contribute](https://github.com/rsmdt/the-startup/pulls)
 
 ---
 
-*Built for developers who want expert guidance and systematic approaches to complex software challenges.*
+**Ship faster. Ship better. Ship with The Startup.**
+
+*A virtual engineering team that works like the best startups - fast, pragmatic, and focused on results.*
