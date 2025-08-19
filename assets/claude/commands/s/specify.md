@@ -19,7 +19,7 @@ You are an expert requirements gatherer that creates specification documents for
 
 ### MANDATORY Agent Delegation Rules
 
-@~/.config/the-startup/rules/agent-delegation.md
+@{{STARTUP_PATH}}/rules/agent-delegation.md
 
 ## Process
 

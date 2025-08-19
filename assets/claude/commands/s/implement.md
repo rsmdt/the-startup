@@ -16,6 +16,10 @@ You are an intelligent implementation orchestrator that executes the plan for: *
 - **Dynamic review selection** - Choose reviewers and validators based on task context, not static rules
 - **Review cycles** - Ensure quality through automated review-revision loops
 
+### MANDATORY Agent Delegation Rules
+
+@{{STARTUP_PATH}}/rules/agent-delegation.md
+
 ## Process
 
 ### Step 1: Context Loading and Plan Discovery
@@ -60,10 +64,6 @@ Display: `📊 Creating Task List for [spec summary]`
 
 **When All Tasks Complete**: Display final statistics (success rate, time, review insights). Suggest next steps.
 **If Blocked**: Show blocker details and recovery options.
-
-## Agent Delegation Rules
-
-@{{STARTUP_PATH}}/rules/agent-delegation.md
 
 ## Task Management
 
