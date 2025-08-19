@@ -17,6 +17,17 @@ You are an expert requirements gatherer that creates specification documents for
 - **Dynamic review selection** - Choose reviewers and validators based on task context, not static rules
 - **Review cycles** - Ensure quality through automated review-revision loops
 
+## Execution Control
+
+This command has MANDATORY stop points where you MUST wait for user confirmation.
+
+**Required Stop Points:**
+- After Phase 3 (Requirements Review and Documentation)
+- After Phase 5 (Technical Review and Documentation)
+- After Phase 7 (Implementation Plan Review)
+
+At each stop point, you MUST complete the phase checklist before proceeding.
+
 ### MANDATORY Agent Delegation Rules
 
 @{{STARTUP_PATH}}/rules/agent-delegation.md
@@ -55,7 +66,18 @@ Based on the requirement complexity, use the following templates to create the d
 
 Write document to `docs/specs/[ID]-[feature-name]/[TYPE].md`
 
-**You must wait for the user before proceeding to the next phase**
+--- End of Phase 3 ---
+
+**Phase 3 Completion Checklist:**
+- [ ] The-chief complexity assessment received and displayed verbatim
+- [ ] Complexity scores and workflow presented to user
+- [ ] Required documents (BRD/PRD) created based on assessment
+- [ ] Documents written to `docs/specs/[ID]-[feature-name]/`
+- [ ] TodoWrite updated with completed tasks
+- [ ] Phase summary presented to user
+- [ ] **STOP: Awaiting user confirmation to proceed**
+
+⚠️ **DO NOT CONTINUE** until user explicitly says "continue", "proceed", or similar approval.
 
 ### 4. Technical Research and Solution Design
 
@@ -104,7 +126,19 @@ Based on the requirement complexity, use the following templates to create the d
 
 Write document to `docs/specs/[ID]-[feature-name]/[TYPE].md`
 
-**You must wait for the user before proceeding to the next phase**
+--- End of Phase 5 ---
+
+**Phase 5 Completion Checklist:**
+- [ ] Technical research completed by specialist agents
+- [ ] All agent responses displayed verbatim
+- [ ] Patterns documented in `docs/patterns/` if applicable
+- [ ] Interfaces documented in `docs/interfaces/` if applicable
+- [ ] SDD created and written to `docs/specs/[ID]-[feature-name]/`
+- [ ] No context drift or feature creep detected (or addressed if found)
+- [ ] TodoWrite updated with completed tasks
+- [ ] **STOP: Awaiting user confirmation to proceed**
+
+⚠️ **DO NOT CONTINUE** until user explicitly says "continue", "proceed", or similar approval.
 
 ### 6. Implementation Plan Creation
 
@@ -121,7 +155,18 @@ Use specialist sub-agents to a validate all aspects gathered so far:
 - Ensure that all relevant business and technical details are available to execute the plan 
 - Check that the plan is feasible for an automated implementation.
 
-**You must wait for the user before proceeding to the next phase**
+--- End of Phase 7 ---
+
+**Phase 7 Completion Checklist:**
+- [ ] Implementation plan reviewed by specialist agents
+- [ ] All validation feedback incorporated
+- [ ] Plan confirmed as feasible for automated implementation
+- [ ] All business and technical details available for execution
+- [ ] PLAN.md written to `docs/specs/[ID]-[feature-name]/`
+- [ ] TodoWrite updated with completed tasks
+- [ ] **STOP: Awaiting user confirmation to proceed**
+
+⚠️ **DO NOT CONTINUE** until user explicitly says "continue", "proceed", or similar approval.
 
 ### 8. Finalization and Confidence Assessment
 
