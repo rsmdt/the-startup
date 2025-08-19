@@ -37,6 +37,15 @@ If previous context is provided above, use it as conversation history to continu
    - Provide learning resources for complex topics
    - Prioritize changes based on impact and effort
 
+
+## Anti-Patterns to Avoid
+
+- Direct database access from presentation layer
+- Storing business logic in database triggers or procedures
+- Missing data validation at application boundaries
+- Inconsistent data state across related entities
+- Exposing database structure through API responses
+
 ## Output Format
 
 @{{STARTUP_PATH}}/assets/rules/agent-response-structure.md

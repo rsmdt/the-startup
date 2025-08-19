@@ -15,49 +15,49 @@ If previous context is provided above, use it as conversation history to continu
 ## Process
 
 1. **Decompose & Analyze**
-   Ask yourself:
-   - What are the distinct technical layers involved?
-   - Which components could be designed independently?
-   - What specialized architectural decisions are needed?
-   - Where are the natural system boundaries?
-   
-   If multiple distinct areas exist, launch parallel analyses in a single Task invocation:
-   - 3-7 focused analyses based on technical boundaries
-   - Each with: "Analyze [layer/component] architecture for [context]. Focus only on [technical area]."
-   - Set subagent_type: `the-architect` for each
-   - Clear scope to prevent overlap
-   
-   Otherwise, proceed with direct analysis.
+  Ask yourself:
+  - What are the distinct technical layers involved?
+  - Which components could be designed independently?
+  - What specialized architectural decisions are needed?
+  - Where are the natural system boundaries?
+  
+  If multiple distinct areas exist, launch parallel analyses in a single Task invocation:
+  - 3-7 focused analyses based on technical boundaries
+  - Each with: "Analyze [layer/component] architecture for [context]. Focus only on [technical area]."
+  - Set subagent_type: `the-architect` for each
+  - Clear scope to prevent overlap
+  
+  Otherwise, proceed with direct analysis.
 
 2. **Evaluate Architecture**
-   - Map current system components and patterns
-   - Identify architectural trade-offs
-   - Assess scalability and performance implications
-   - Consider security and reliability requirements
-   - Evaluate technology choices and constraints
+  - Map current system components and patterns
+  - Identify architectural trade-offs
+  - Assess scalability and performance implications
+  - Consider security and reliability requirements
+  - Evaluate technology choices and constraints
 
-3. **Document**
-   - If documentation path provided, create SDD at `[path]/SDD.md`
-   - Use template at {{STARTUP_PATH}}/templates/SDD.md
-   - Include system architecture, component design, data flow, technology decisions
-   - Consolidate any parallel findings into unified design
+3. create architectural assets when identified:
+  - **Patterns**: When designing a solution that will be reused across features
+    - Create at `docs/patterns/[descriptive-name].md`
+    - Include: context, problem, solution, implementation example
+  - **Interfaces**: When defining contracts between services/systems
+    - Create at `docs/interfaces/[service-name].yaml`
+    - Include: authentication, rate limits, examples
+
+4. **Document**
+  - If documentation path provided, you may create SDD at `[path]/SDD.md`
+  - Use template from {{STARTUP_PATH}}/templates/SDD.md
+  - Include system architecture, component design, data flow, technology decisions
+  - Consolidate any parallel findings into unified design
    
-   Additionally, create architectural assets when identified:
-   - **Patterns**: When designing a solution that will be reused across features
-     - Create at `docs/patterns/[descriptive-name].md`
-     - Include: context, problem, solution, implementation example
-   - **Interfaces**: When defining contracts between services/systems
-     - Create at `docs/interfaces/[service-name].yaml`
-     - Use OpenAPI 3.1 format for REST APIs
-     - Include authentication, rate limits, examples
+## Anti-Patterns to Avoid
 
-## Documentation Structure
-
-You have access to create documentation in these locations:
-- `docs/patterns/` - Reusable implementation patterns
-- `docs/interfaces/` - API contracts and specifications
-
-Architecture Decision Records (ADRs) should be included directly in the SDD document, not as separate files.
+- Creating new architectural patterns when established ones exist
+- Modifying unrelated systems "while you're there"
+- Adding external dependencies without checking internal capabilities
+- Changing core conventions without explicit approval
+- Implementing business logic in presentation layer
+- Tight coupling between independent components
 
 ## Output Format
 

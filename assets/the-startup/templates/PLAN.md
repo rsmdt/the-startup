@@ -4,89 +4,7 @@
 
 ## Context Documents
 
-*[INSTRUCTION: The orchestrator should automatically discover and ingest context from available specification documents. Use intelligent extraction to identify the most relevant information for implementation. Priority should be given to: 1) Technical requirements from SDD, 2) Feature specifications from PRD, 3) Business context from BRD. When documents are missing, note their absence but proceed with available context. This instruction block should not appear in the final document.]*
-
-### Automatic Context Discovery
-
-The orchestrator will search for and analyze the following documents in priority order:
-
-1. **Primary Specifications** (same directory as PLAN.md):
-   - **SDD.md** (Solution Design Document): Technical architecture, API contracts, data models, implementation patterns
-   - **PRD.md** (Product Requirements Document): User stories, acceptance criteria, UI/UX specifications, feature behavior
-   - **BRD.md** (Business Requirements Document): Business objectives, stakeholder needs, success metrics, constraints
-
-2. **Secondary Context** (if primary specs reference them):
-   - Related feature specifications in `../` or sibling directories
-   - Shared technical documentation in project root
-   - API documentation referenced by the SDD
-   - Design system documentation for UI components
-
-3. **Codebase Patterns** (discovered through analysis):
-   - Existing implementations of similar features
-   - Established patterns in the same module/package
-   - Test structures that reveal expected behavior
-   - Configuration files that define conventions
-
-### Intelligent Context Extraction
-
-*[ORCHESTRATOR: Extract and prioritize information based on relevance to implementation. Focus on concrete requirements over abstract concepts.]*
-
-#### High Priority Context (Must Extract):
-- **Technical Requirements**: API endpoints, data schemas, database models, service interfaces
-- **Acceptance Criteria**: Specific behavior requirements, validation rules, edge cases
-- **Integration Points**: Dependencies, external services, shared components
-- **Security Requirements**: Authentication needs, authorization rules, data protection requirements
-- **Performance Targets**: Response time requirements, scalability needs, resource constraints
-
-#### Medium Priority Context (Extract if Present):
-- **Business Rules**: Domain logic, calculation formulas, workflow sequences
-- **User Experience**: UI flows, interaction patterns, error handling requirements
-- **Non-functional Requirements**: Logging needs, monitoring points, audit requirements
-- **Migration Considerations**: Backward compatibility, data migration, deprecation plans
-
-#### Low Priority Context (Note if Relevant):
-- **Background Information**: Problem history, previous attempts, lessons learned
-- **Future Considerations**: Potential extensions, roadmap items, architectural evolution
-- **Stakeholder Context**: Team preferences, organizational standards, compliance needs
-
-### Context Synthesis
-
-*[ORCHESTRATOR: After discovery, synthesize the context into actionable implementation guidance. Handle missing documents gracefully.]*
-
-**Available Specifications:**
-- *[✓ or ✗ for each document type found]*
-- *[List actual file paths discovered]*
-
-**Key Implementation Requirements:**
-```markdown
-// Example format for extracted requirements
-From SDD.md:
-- REST API with /api/v1/feature endpoint
-- PostgreSQL schema with users and sessions tables
-- JWT authentication with 24-hour expiry
-- Rate limiting at 100 requests/minute per user
-
-From PRD.md:
-- Users must be able to login with email/password
-- Session timeout after 30 minutes of inactivity
-- Display friendly error messages for all failure cases
-- Support "Remember Me" for 30-day sessions
-
-From discovered patterns:
-- Project uses middleware pattern for auth (see: internal/middleware/auth.go)
-- Error responses follow ErrorResponse struct (see: internal/api/types.go)
-- Database migrations use golang-migrate (see: migrations/)
-```
-
-**Missing Context Handling:**
-- *[If SDD.md missing: Note that technical design decisions will be made based on existing patterns]*
-- *[If PRD.md missing: Note that implementation will follow standard UX patterns unless specified]*
-- *[If BRD.md missing: Note that business context is limited, focus on technical correctness]*
-
-**Implementation Priorities Based on Context:**
-1. *[Highest priority requirement or constraint]*
-2. *[Second priority]*
-3. *[Third priority]*
+*[INSTRUCTION: Automatically discover and ingest context from available specification documents. Use intelligent extraction to identify the most relevant information for implementation. Priority should be given to: 1) Technical requirements from SDD, 2) Feature specifications from PRD, 3) Business context from BRD. When documents are missing, note their absence but proceed with available context. This instruction block should not appear in the final document.]*
 
 ### Context Validation Checkpoints
 
@@ -106,7 +24,7 @@ Before proceeding with implementation, verify:
 Tasks support the following metadata fields for orchestration:
 
 #### Execution Control
-- **`agent`** (optional): Specifies which specialist agent should execute the task
+- **`agent`** (optional): Specifies which specialist sub-agent should execute the task
   - Only use when specific expertise is required
   - If omitted, orchestrator selects best agent based on task requirements
   - Examples: `the-architect` for design tasks, `the-security-engineer` for auth tasks
@@ -116,11 +34,8 @@ Tasks support the following metadata fields for orchestration:
   - Examples: `"security, authentication"`, `"performance, scalability"`, `"patterns, architecture"`
   - Multiple areas can be comma-separated
   - Omit entirely if no review needed
-  - Orchestrator selects reviewer based on specified areas
-  
-- **`reviewer`** (rare): Explicitly specify reviewing agent
-  - Only use when specific reviewer is mandatory
-  - Usually better to let orchestrator select based on review areas
+  - Can be empty to indicate automatic review area selection
+  - Reviewer specialist sub-agent is selected automatically
 
 #### Complexity and Risk Indicators
 - **`complexity`**: Task complexity level driving review decisions
@@ -136,10 +51,6 @@ Tasks support the following metadata fields for orchestration:
   - `critical`: Security, payments, data integrity
 
 #### Task Dependencies and Ordering
-- **`depends_on`**: Task IDs that must complete before this task
-  - Format: `"task-1, task-3"` or `"previous"` for immediate predecessor
-  - Orchestrator ensures proper execution order
-  
 - **`blocks`**: Task IDs that cannot start until this completes
   - Useful for identifying critical path items
   
@@ -153,77 +64,85 @@ Tasks support the following metadata fields for orchestration:
   - `manual`: Requires human verification
   - `automated`: Run automated validation scripts
   - `performance`: Execute performance benchmarks
-  
-- **`validation_cmd`**: Specific command to validate task completion
-  - Example: `"npm test auth.spec.js"`, `"go test ./internal/auth/..."`
 
-### Dynamic Review Selection Logic
+### Dynamic **Review** Selection Logic
 
-The orchestrator intelligently selects reviewers based on multiple factors:
+Intelligently select reviewer sub-agent based on multiple factors:
+- **Context-Based Selection**: Analyzes task content and metadata
+- **Expertise Matching**: Routes to agents with relevant expertise
+- **Risk Assessment**: Higher risk triggers stricter review
+- **Workload Balancing**: Distributes reviews across available agents
 
-1. **Context-Based Selection**: Analyzes task content and metadata
-2. **Expertise Matching**: Routes to agents with relevant expertise
-3. **Risk Assessment**: Higher risk triggers stricter review
-4. **Workload Balancing**: Distributes reviews across available agents
+
+### Dynamic **Validate** Logic
+
+Intelligently consider:
+- **Code Quality**: Linting, formatting, type checking
+- **Functionality**: All test scenarios pass, features work as specified
+- **Integration**: Component interactions, API contracts, data flow
+- **Performance**: Response times, resource usage, scalability
+- **Security**: Input validation, authorization, data protection
+- **Standards**: Code conventions, architectural patterns, best practices
 
 ### Metadata Examples
 
-#### Simple Task (No Review)
+Simple Task (No Review):
 ```markdown
-- [ ] **Update README documentation** [`complexity: low`]
-  - Add installation instructions
-  - Update API examples
+- [ ] **Phase 1:** Update README documentation [`complexity: low`]
+  - [ ] Add installation instructions
+  - [ ] Update API examples
   # Orchestrator will select appropriate agent
 ```
 
-#### Standard Development Task (With Review)
+Standard Development Task (With Review):
 ```markdown
-- [ ] **Implement user profile endpoint** [`review: database, error-handling`] [`complexity: medium`] [`validation: integration`]
-  - Create GET /api/users/:id endpoint
-  - Add database query with proper indexing
-  - Include error handling for missing users
+- [ ] **Phase 2:** Implement user profile endpoint [`complexity: medium`]
+  - [ ] Create GET /api/users/:id endpoint
+  - [ ] Add database query with proper indexing
+  - [ ] Include error handling for missing users
+  - [ ] **Validate** [specific validation command or check]
+  - [ ] **Review** [specific review agent and area]
   # Review required with focus on database and error handling
 ```
 
-#### Complex Task with Dependencies
+Complex Task with Dependencies:
 ```markdown
-- [ ] **Refactor authentication system** [`review: security, architecture`] [`complexity: high`] [`risk: critical`] [`depends_on: task-2, task-3`] [`validation: integration`]
-  - Design new JWT token structure
-  - Implement refresh token rotation
-  - Add rate limiting for login attempts
-  - Ensure backward compatibility
+- [ ] **Phase 3:** Refactor authentication system [`complexity: high`] [`risk: critical`]
+  - [ ] Design new JWT token structure
+  - [ ] Implement refresh token rotation
+  - [ ] Add rate limiting for login attempts
+  - [ ] Ensure backward compatibility
+  - [ ] **Validate** [specific validation command or check]
+  - [ ] **Review** [specific review agent and area]
   # Critical task with security review required
 ```
 
-#### Parallel Execution Example
+Complex Parallel Execution Example:
 ```markdown
-- [ ] **Frontend updates** [`agent: the-developer`] [`parallel: true`] [`complexity: medium`]
-  - Update login form validation
-  - Add loading states
-  
-- [ ] **Backend updates** [`agent: the-developer`] [`parallel: true`] [`complexity: medium`]
-  - Add input validation middleware
-  - Update error response format
+- [ ] **Phase 1:** Login Validation
+  - [ ] Frontend updates [`agent: the-developer`] [`parallel: true`] [`complexity: medium`]
+    - [ ] Update login form validation
+    - [ ] Add loading states
+    - [ ] **Validate** [specific validation command or check]
+    - [ ] **Review** [specific review agent and area]
+    
+  - [ ] Backend updates [`agent: the-developer`] [`parallel: true`] [`complexity: medium`]
+    - [ ] Add input validation middleware
+    - [ ] Update error response format
+    - [ ] **Validate** [specific validation command or check]
+    - [ ] **Review** [specific review agent and area]
 ```
 
-#### Payment Task (Critical Review)
+Payment Task (Critical Review)
 ```markdown
-- [ ] **Process payment integration** [`review: security, compliance, error-handling`] [`complexity: critical`] [`risk: critical`]
+- [ ] **Phase 1:** Process payment integration** [`review: security, compliance, error-handling`] [`complexity: critical`] [`risk: critical`]
   # Critical risk + payment context = mandatory security review
   # Orchestrator selects security-focused reviewer
-```
-
-#### Database Migration (Context-Aware Review)
-```markdown
-- [ ] **Database migration** [`review: data-integrity, rollback`] [`complexity: high`] [`validation: manual`] [`validation_cmd: "./scripts/verify-migration.sh"`]
-  # High complexity database work triggers review
-  # Focus on data integrity and rollback procedures
 ```
 
 ### Orchestration Behavior
 
 Based on metadata, the orchestrator will:
-
 1. **Route Tasks**: Send to specified agent or select based on content
 2. **Manage Dependencies**: Ensure proper execution order
 3. **Trigger Reviews**: Apply review logic based on metadata and context
@@ -233,22 +152,9 @@ Based on metadata, the orchestrator will:
 
 ### Best Practices
 
-1. **Let Orchestrator Choose Agents**: Only specify agent when specific expertise is mandatory
-2. **Simplify Review Metadata**: Use `[review: areas]` format - presence means review required
-3. **Be Explicit for Critical Tasks**: Always include review areas for security/payment tasks
-4. **Use Complexity Indicators**: Help orchestrator make intelligent decisions
-5. **Define Dependencies**: Prevent race conditions and ensure correct order
-6. **Specify Validation**: Include concrete validation steps for quality assurance
-
-### Backward Compatibility
-
-Tasks without metadata continue to work normally:
-```markdown
-- [ ] **Simple task without metadata**
-  - Orchestrator uses content analysis
-  - Applies default routing rules
-  - Reviews triggered by keyword detection (e.g., "security", "payment")
-```
+- Only specify agent when specific expertise is mandatory
+- Use Complexity Indicators to help make intelligent decisions
+- Always Specify Validation and Review for quality assurance
 
 ## Checklist Structure Guidelines
 
@@ -271,60 +177,15 @@ Include validation commands from the Project Commands section at appropriate che
 - [ ] [Specific task with clear completion criteria]
 - [ ] [Another related task]
 - [ ] **Validation**: [Specific validation command or check]
+- [ ] **Review**: [specific review agent and area]
 
-*[INSTRUCTION: The number and nature of phases should match the feature complexity. Simple features might need 2-3 phases, complex ones might need 5-7. Always include context file reading as an early task. Always end with integration testing and final validation. This note should not appear in the final PRD.]*
-
-## Validation Checklist
-
-*[INSTRUCTION: Define validation criteria to ensure the implementation meets all requirements. Use project-specific validation commands identified during research. This note should not appear in the final PRD.]*
-
-### Validation Areas to Consider:
-
-- **Code Quality**: Linting, formatting, type checking
-- **Functionality**: All test scenarios pass, features work as specified
-- **Integration**: Component interactions, API contracts, data flow
-- **Performance**: Response times, resource usage, scalability
-- **Security**: Input validation, authorization, data protection
-- **Standards**: Code conventions, architectural patterns, best practices
+*[INSTRUCTION: The number and nature of phases should match the feature complexity. Always include context file reading as Phase 1. Always end with integration testing and final validation. This note should not appear in the final PRD.]*
 
 Structure validation tasks based on available project commands and the feature's specific requirements.
 
 ## Anti-Patterns to Avoid
 
-### Architecture Anti-Patterns
-- ❌ Creating new architectural patterns when established ones exist
-- ❌ Modifying unrelated systems "while you're there"
-- ❌ Adding external dependencies without checking internal capabilities
-- ❌ Changing core conventions without explicit approval
-- ❌ Implementing business logic in presentation layer
-- ❌ Tight coupling between independent components
-
-### Integration Anti-Patterns
-- ❌ Hardcoding external service URLs or credentials
-- ❌ Ignoring rate limits and retry mechanisms for external services
-- ❌ Exposing internal data structures to external systems
-- ❌ Synchronous calls to external services in critical paths
-- ❌ Assuming external services are always available
-
-### Data Anti-Patterns
-- ❌ Direct database access from presentation layer
-- ❌ Storing business logic in database triggers or procedures
-- ❌ Missing data validation at application boundaries
-- ❌ Inconsistent data state across related entities
-- ❌ Exposing database structure through API responses
-
-### Testing Anti-Patterns
-- ❌ Testing implementation details instead of behavior
-- ❌ Skipping tests for "simple" functions
-- ❌ Not testing error conditions and edge cases
-- ❌ Over-mocking dependencies in integration tests
-- ❌ Writing tests that depend on specific execution order
-- ❌ Ignoring test failures or marking them as "flaky"
-
-### Process Anti-Patterns
-- ❌ Skipping validation steps to move faster
-- ❌ Implementing without understanding existing patterns
-- ❌ Making assumptions about user requirements
-- ❌ Continuing implementation when blocked on critical decisions
-- ❌ Deploying changes without proper testing
-- ❌ Ignoring performance implications until production
+- Skipping validation steps to move faster
+- Implementing without understanding existing patterns
+- Making assumptions about user requirements
+- Continuing implementation when blocked on critical decisions

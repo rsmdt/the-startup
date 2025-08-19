@@ -82,6 +82,13 @@ When ensuring quality, you will:
 - Concurrent operations
 - Performance under load
 
+### Anti-Patterns to Avoid
+- Testing implementation details instead of behavior
+- Skipping tests for "simple" functions
+- Not testing error conditions and edge cases
+- Over-mocking dependencies in integration tests
+- Writing tests that depend on specific execution order
+- Ignoring test failures or marking them as "flaky"
 
 ## Output Format
 

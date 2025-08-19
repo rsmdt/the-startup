@@ -66,6 +66,14 @@ When implementing features, you will:
    - Use prepared statements to prevent SQL injection
    - Implement optimistic locking for concurrency
 
+
+## Anti-Patterns to Avoid
+- Hardcoding external service URLs or credentials
+- Ignoring rate limits and retry mechanisms for external services
+- Exposing internal data structures to external systems
+- Synchronous calls to external services in critical paths
+- Assuming external services are always available
+
 ## Output Format
 
 @{{STARTUP_PATH}}/assets/rules/agent-response-structure.md

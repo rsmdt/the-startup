@@ -69,11 +69,3 @@
 | ID    | Risk                  | Impact            | Probability       | Mitigation Strategy   |
 |-------|-----------------------|-------------------|-------------------|-----------------------|
 | RI01  | [Risk description]    | [High/Med/Low]    | [High/Med/Low]    | [Strategy]            |
-
-## Constraints
-- **Budget:** [If applicable]
-- **Timeline:** [Business deadlines]
-- **Resources:** [Limitations]
-- **Regulatory:** [Compliance needs]
-- **Organizational:** [Coding standards, deployment restrictions]
-- **Security/Compliance:** [Auth requirements, data protection needs]
