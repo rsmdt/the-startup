@@ -423,11 +423,17 @@ func (i *Installer) configureHooks() error {
 			templateLocalData = i.replacePlaceholders(templateLocalData)
 			
 			var templateLocalSettings map[string]interface{}
-			if err := json.Unmarshal(templateLocalData, &templateLocalSettings); err == nil {
+			if err := json.Unmarshal(templateLocalData, &templateLocalSettings); err != nil {
+				// Log the error but continue - invalid JSON in template
+				fmt.Printf("Warning: Failed to parse settings.local.json template: %v\n", err)
+			} else {
 				// Read existing local settings if present
 				var existingLocalSettings map[string]interface{}
 				if data, err := os.ReadFile(localSettingsPath); err == nil {
-					json.Unmarshal(data, &existingLocalSettings)
+					if err := json.Unmarshal(data, &existingLocalSettings); err != nil {
+						fmt.Printf("Warning: Failed to parse existing settings.local.json: %v\n", err)
+						// Continue with just the template settings
+					}
 				}
 				
 				// Merge local settings (template takes precedence for our managed sections)
@@ -436,12 +442,14 @@ func (i *Installer) configureHooks() error {
 				// Write updated local settings
 				localData, err := json.MarshalIndent(localSettings, "", "  ")
 				if err != nil {
-					return err
+					return fmt.Errorf("failed to marshal settings.local.json: %w", err)
 				}
 				
 				if err := os.WriteFile(localSettingsPath, localData, 0644); err != nil {
-					return err
+					return fmt.Errorf("failed to write settings.local.json: %w", err)
 				}
+				
+				fmt.Println("✓ Settings.local.json configured")
 			}
 		}
 		// If settings.local.json doesn't exist in assets, that's OK - it's optional

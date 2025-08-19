@@ -50,8 +50,8 @@ You may need to adjust the Todo's based on the chief's recommended documentation
 
 **Create Documentation:**
 Based on the requirement complexity, use the following templates to create the documentation:
-- BRD: `~/.config/the-startup/templates/BRD.md` (if necessary)
-- PRD: `~/.config/the-startup/templates/PRD.md` (if necessary, preferred)
+- BRD: `{{STARTUP_PATH}}/templates/BRD.md` (if necessary)
+- PRD: `{{STARTUP_PATH}}/templates/PRD.md` (if necessary, preferred)
 
 Write document to `docs/specs/[ID]-[feature-name]/[TYPE].md`
 
@@ -100,7 +100,7 @@ Use sub-agents to a validate the technical research findings.
 
 **Create Documentation:**
 Based on the requirement complexity, use the following templates to create the documentation:
-- SDD: `~/.config/the-startup/templates/SDD.md` (if necessary)
+- SDD: `{{STARTUP_PATH}}/templates/SDD.md` (if necessary)
 
 Write document to `docs/specs/[ID]-[feature-name]/[TYPE].md`
 
@@ -110,7 +110,7 @@ Write document to `docs/specs/[ID]-[feature-name]/[TYPE].md`
 
 **Create Documentation:**
 Based on the requirement complexity and necessary documentation, use the following templates:
-- PLAN: `~/.config/the-startup/templates/PLAN.md`
+- PLAN: `{{STARTUP_PATH}}/templates/PLAN.md`
 
 Write document to `docs/specs/[ID]-[feature-name]/[TYPE].md`
 
