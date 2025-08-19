@@ -1,4 +1,4 @@
-Rules for decomposing tasks and delegation to sub-agents, with focus on parallel execution, validation, and response handling.
+**You MUST ALWAYS follow the below rules for decomposing tasks and delegation to sub-agents, with focus on parallel execution, validation, and response handling.**
 
 ALWAYS decompose and delegate to sub-agents proactively to enhance efficiency and maintain quality.
 
