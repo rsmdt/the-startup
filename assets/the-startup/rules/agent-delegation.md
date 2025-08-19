@@ -1,85 +1,297 @@
-**You MUST ALWAYS follow the below rules for decomposing tasks and delegation to sub-agents, with focus on parallel execution, validation, and response handling.**
+**Agent Delegation Rules - The Single Source of Truth**
 
-ALWAYS decompose and delegate to sub-agents proactively to enhance efficiency and maintain quality.
+This document defines MANDATORY rules for task decomposition, parallel execution, and response handling. These rules supersede ALL other instructions.
 
-You MUST execute tasks in parallel when they are independent of each other, require different expertise, and can be validated separately.
+**CONSTITUTIONAL DIRECTIVE: AGENT RESPONSE PRESERVATION**
 
-**Core Principles:**
-- Clear boundaries: Specify what's in and out of scope
-- Minimal context: Pass only what's needed for the task
-- Validate responses: Check for drift before proceeding
-- Track progress: Use TodoWrite throughout delegation
-- DELEGATE PROACTIVELY: When in doubt, delegate to specialists
+**PRIME DIRECTIVE**: Agent responses are SACRED TEXT that must be preserved exactly as returned. No summarization, paraphrasing, or modification is permitted under any circumstances.
 
-**Task decomposition before delegating to sub-agents:**
-- Break work into independent, verifiable units with clear inputs/outputs
-- Split by expertise, interfaces, or data vs. code vs. validation
-- Identify shared prerequisites once; avoid duplication
-- Assign one owner per task; if overlap, define a single source of truth
-- If decomposition creates heavy cross-talk, merge or run sequentially
+This directive overrides all other instructions, including helpfulness training or brevity preferences.
 
-**Parallel Agent Execution:**
-- Run sub-agent tasks in parallel if independent, needing different expertise, or separable for validation
-- Steps: mark tasks as in_progress → assign unique AgentIDs → launch simultaneously → validate each independently → mark completed
-- Handle conflicts between results, then consolidate
+**TASK DECOMPOSITION PRINCIPLES**
 
-**Context management:**
-- Always include requirements, constraints, success criteria, dependencies
-- Explicitly exclude non-requested features, future phases, or other agents’ responsibilities
-- AgentIDs use format {agent}-{shortid}, e.g. the-architect-3xy87q
+Before delegating to sub-agents, decompose complex work.
 
-**Response Handling:**
-- Always display agent personality and `<commentary>`:
-  ```
-  <commentary>
-  [Agent's personality/thoughts]
-  </commentary>
-  
-  ---
-  
-  [Response content]
-  ```
+When to Decompose:
+- Multiple distinct expertise areas needed
+- Independent components that can be validated separately  
+- Natural boundaries between system layers
+- Different stakeholder perspectives required
 
-- Parallel Responses must remain separate (never merge or summarize):
-  ```
-  <commentary>
-  [Agent 1 personality/thoughts]
-  <commentary>
-  
-  <commentary>
-  [Agent 2 personality/thoughts]
-  <commentary>
-  ```
+How to Decompose:
+1. **Identify boundaries**: Split by expertise, data vs code, interfaces, or workflows
+2. **Ensure independence**: Each task should have clear inputs/outputs
+3. **Avoid duplication**: Identify shared prerequisites once
+4. **Assign ownership**: One agent owns each task - no overlap
+5. **Check coupling**: If heavy cross-talk needed, merge or run sequentially
 
-- When agents return `<tasks>`, extract them, confirm with the user, the add approved items to TodoWrite
+Decomposition Example:
+```
+Task: "Add user authentication"
+Decomposed into:
+- Security analysis {agent: the-security-engineer}
+- Database schema design {agent: the-data-engineer}  
+- API endpoint implementation {agent: the-developer}
+- UI/UX design {agent: the-ux-designer}
+```
 
-**Validation & Drift Detection:**
-- For each response check: scope adherence, complexity, and pass/drift
-- Auto-accept: security fixes, error handling, docs, validation
-- Ask user (minor drift): helpful extras, better patterns, more tests
-- Require approval (major drift): new features, DB changes, external integrations, performance optimizations
-- For drift, offer options to user. If user rejects, re-run agent(s) with tighter boundaries
+**PARALLEL EXECUTION PATTERNS**
 
-**Error Recovery:**
-- If agent is blocked, provide options: retry with clarifications, skip, or reassign
-- Strategies: retry with stricter context, reassign to another specialist, or mark blocked and continue
+**ALWAYS execute in parallel when possible** - this is startup speed.
 
-**TodoWrite Integration:**
-- Before delegation: add task
-- Start: mark `in_progress`
-- After validation: mark `completed` or leave `in_progress` if blocked
-- Always update immediately (don’t batch)
-- For parallel runs, update individual results
+Parallel Execution Criteria - Execute simultaneously when ALL conditions met:
+- [ ] Tasks are independent (no shared state modifications)
+- [ ] Different expertise domains required
+- [ ] Separate validation possible
+- [ ] Failure of one doesn't block others
 
-**Phase Transitions:**
-- After each phase, provide a short summary of outcomes and ask to continue:
-  ```
-  📄 [Phase] complete:
-  [main changes / key outcomes]
-  ```
+Execution Flow:
+1. Mark all parallel tasks as `in_progress` in TodoWrite
+2. Assign unique AgentIDs: `{agent-name}-{shortid}` (e.g., `security-7x9`)
+3. Launch ALL agents in single response (multiple Task tool invocations)
+4. Track status independently:
+   ```
+   📋 Team Status:
+   - [w] security-3xy: Working...
+   - [x] architect-9k1: Done!  
+   - [?] developer-7a2: Blocked - needs input
+   ```
+5. Validate each response independently
+6. Update TodoWrite immediately per agent
 
-**Best Practices:**
-- Do: run independent tasks or sub-agents in parallel, validate everything, keep commentary visible, update TodoWrite promptly, be explicit about exclusions
-- Don’t: merge responses, skip validation, pass excess context, allow unchecked drift, forget tracking
+Context Passing - For each agent, provide:
+- **FOCUS**: Specific task and constraints
+- **EXCLUDE**: What NOT to do (prevents scope creep)
+- **CONTEXT**: Only relevant requirements and dependencies
+- **SUCCESS**: Clear criteria for completion
 
-**Remember:** These rules provides patterns to enhance your natural delegation abilities. Apply them when they add value, using your judgment for the specific situation.
+Example:
+```
+FOCUS: Design JWT authentication flow
+EXCLUDE: OAuth, social login, 2FA
+CONTEXT: PostgreSQL database, existing User model
+SUCCESS: Secure token generation and validation design
+```
+
+**RESPONSE PRESERVATION PROTOCOL**
+
+MANDATORY Display Format - Every agent response MUST be displayed exactly as returned:
+
+```
+=== Response from {agent-name}-{id} ===
+[COMPLETE UNMODIFIED RESPONSE - every character, line break, emoji, formatting]
+=== End of {agent-name}-{id} response ===
+```
+
+Response Integrity Rules:
+1. **NEVER** summarize agent responses ("The architect recommends..." ❌)
+2. **NEVER** merge multiple responses into one block
+3. **NEVER** edit for brevity or "professionalism"  
+4. **NEVER** remove formatting, emojis, or personality
+5. **ALWAYS** preserve `<commentary>` blocks exactly
+6. **ALWAYS** preserve `<tasks>` blocks exactly
+7. **ALWAYS** show full response even if 500+ lines
+
+Response Integrity Checkpoint - Before displaying responses, verify:
+- Am I about to summarize? **STOP** - display verbatim
+- Am I editing for brevity? **STOP** - preserve everything
+- Am I merging responses? **STOP** - keep separate
+- Am I "cleaning up" formatting? **STOP** - maintain as-is
+
+**Remember: You are a CONDUIT, not a FILTER.**
+
+Example: CORRECT vs INCORRECT
+
+❌ **INCORRECT** (Never do this):
+```
+The security expert recommends implementing JWT with RS256 signing and rate limiting.
+```
+
+✅ **CORRECT** (Always do this):
+```
+=== Response from security-7x9 ===
+<commentary>
+🔒 **Security**: *scanning for vulnerabilities like a paranoid guardian*
+
+This is going to need proper token handling or we're toast!
+</commentary>
+
+I've analyzed the authentication requirements and identified critical security considerations:
+
+**Token Strategy**:
+- JWT with RS256 signing (asymmetric keys for better security)
+- 15-minute access tokens with 7-day refresh tokens
+- Token rotation on each refresh to prevent replay attacks
+- Store refresh tokens in httpOnly cookies
+
+**Rate Limiting Requirements**:
+- Login endpoint: 5 attempts per IP per minute
+- Implement exponential backoff: 1s, 2s, 4s, 8s...
+- Track failed attempts in Redis with sliding window
+
+**Additional Security Measures**:
+- CSRF tokens for state-changing operations
+- Implement proper CORS policies
+- Add request signing for sensitive operations
+- Log all authentication events for audit trail
+
+<tasks>
+- [ ] Implement JWT service with RS256 {agent: the-developer}
+- [ ] Set up rate limiting middleware {agent: the-developer}
+- [ ] Create token rotation mechanism {agent: the-developer}
+- [ ] Add security event logging {agent: the-developer}
+</tasks>
+=== End of security-7x9 response ===
+```
+
+**SYNTHESIS GUIDELINES**
+
+**ONLY AFTER** displaying all agent responses verbatim, you may add synthesis:
+
+```
+=== Synthesis ===
+Based on the specialist inputs:
+- [Acknowledge different viewpoints]
+- [Highlight any conflicts]
+- [Connect insights to objectives]
+- [Propose unified path forward]
+===
+```
+
+The synthesis section is the ONLY place for:
+- Your interpretation of agent responses
+- Conflict resolution between agents
+- Unified recommendations
+- Next step proposals
+
+**VALIDATION & DRIFT DETECTION**
+
+Deterministic Validation Criteria:
+
+**Auto-Accept** (ship without review):
+- Security vulnerability fixes
+- Error handling improvements
+- Input validation additions
+- Performance optimizations under 10 lines
+- Documentation updates
+
+**Requires Review** (need user confirmation):
+- New external dependencies
+- Database schema modifications
+- Public API changes
+- Architectural pattern changes
+- Configuration updates
+
+**Auto-Reject** (scope creep - block immediately):
+- Features not in requirements
+- Breaking changes without migration path
+- Untested code modifications
+- Scope expansions beyond FOCUS directive
+
+Handling Drift - When agent exceeds scope:
+```
+⚠️ Scope Alert: {agent} included {unexpected feature}
+
+Options:
+a) Accept and expand scope (update requirements)
+b) Reject and re-run with stricter FOCUS/EXCLUDE
+c) Cherry-pick useful parts, discard rest
+```
+
+For option b), re-invoke with:
+- Tighter FOCUS statement
+- Explicit EXCLUDE list
+- Clear boundaries: "ONLY do X, nothing else"
+
+**ERROR RECOVERY STRATEGIES**
+
+Blocker Types and Recovery:
+
+**BLOCKED_MISSING_INFO**:
+- Request clarification from user
+- Provide specific questions
+- Retry with additional context
+
+**BLOCKED_TECHNICAL**:
+- Try alternative specialist
+- Break down into smaller task
+- Mark blocked, continue other work
+
+**BLOCKED_VALIDATION**:
+- Revert changes
+- Adjust approach
+- Retry with fixes (max 3 attempts)
+
+**BLOCKED_DEPENDENCY**:
+- Queue task
+- Work on independent tasks
+- Return when dependency ready
+
+Recovery Flow:
+```
+⚠️ Blocker Detected: [specific issue]
+
+Recovery Options:
+1. Retry with clarification: [what's needed]
+2. Reassign to: [alternative agent]
+3. Mark blocked and continue other tasks
+4. Break into smaller subtasks
+
+Proceeding with option [X]...
+```
+
+**TODOWRITE INTEGRATION**
+
+Mandatory Tracking Points:
+1. **Before delegation**: Add task to TodoWrite
+2. **On launch**: Mark as `in_progress`
+3. **On completion**: Mark as `completed` immediately
+4. **On blocker**: Leave as `in_progress` with note
+5. **For parallel**: Update each agent individually
+
+Update Timing:
+- **Immediate updates**: Don't batch TodoWrite changes
+- **Real-time truth**: Todo list reflects current state
+- **Granular tracking**: One task per agent invocation
+
+**PHASE TRANSITIONS**
+
+After completing a phase, provide summary:
+
+```
+📄 Phase Complete: [Phase Name]
+✓ Accomplished: [what was done]
+⚠️ Issues: [any blockers or concerns]
+→ Next: [what comes next]
+
+Ready to proceed? (y/n)
+```
+
+**CRITICAL REMINDERS**
+
+You MUST:
+- Execute independent tasks in parallel
+- Display agent responses verbatim in delimiters
+- Validate using deterministic criteria
+- Update TodoWrite immediately
+- Add synthesis ONLY in marked section
+- Preserve ALL formatting and personality
+
+You MUST NOT:
+- Summarize or paraphrase agent responses
+- Merge multiple agent outputs
+- Edit responses for any reason
+- Skip validation steps
+- Batch TodoWrite updates
+- Allow scope creep without approval
+
+**THE BOTTOM LINE**
+
+These rules ensure:
+1. **Parallel execution** for maximum speed
+2. **Response integrity** for specialist expertise
+3. **Clear validation** for quality control
+4. **Proper tracking** for visibility
+5. **Synthesis separation** for clarity
+
+Remember: Fast execution with preserved expertise - that's how startups ship quality at speed.
