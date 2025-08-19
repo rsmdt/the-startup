@@ -29,5 +29,9 @@
         ]
       }
     ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "{{STARTUP_PATH}}/bin/the-startup statusline"
   }
 }

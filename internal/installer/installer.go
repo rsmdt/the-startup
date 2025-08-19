@@ -474,25 +474,200 @@ func (i *Installer) mergeSettings(existing, template map[string]interface{}) map
 		result[k] = v
 	}
 
-	// Merge permissions
-	if templatePerms, ok := template["permissions"].(map[string]interface{}); ok {
-		if existingPerms, ok := existing["permissions"].(map[string]interface{}); ok {
-			// Merge additionalDirectories
-			if templateDirs, ok := templatePerms["additionalDirectories"].([]interface{}); ok {
-				existingPerms["additionalDirectories"] = templateDirs
-			}
-			result["permissions"] = existingPerms
+	// Now merge template settings into result
+	for key, templateValue := range template {
+		existingValue, exists := result[key]
+		
+		if !exists {
+			// Key doesn't exist in existing settings, add it
+			result[key] = templateValue
 		} else {
-			result["permissions"] = templatePerms
+			// Key exists, merge based on type
+			result[key] = i.mergeValues(existingValue, templateValue)
 		}
 	}
 
-	// Replace hooks entirely with our template (we manage these)
-	if templateHooks, ok := template["hooks"].(map[string]interface{}); ok {
-		result["hooks"] = templateHooks
-	}
-
 	return result
+}
+
+// mergeValues recursively merges two values
+func (i *Installer) mergeValues(existing, template interface{}) interface{} {
+	// If both are maps, merge them recursively
+	if existingMap, existingIsMap := existing.(map[string]interface{}); existingIsMap {
+		if templateMap, templateIsMap := template.(map[string]interface{}); templateIsMap {
+			merged := make(map[string]interface{})
+			
+			// Copy all existing entries
+			for k, v := range existingMap {
+				merged[k] = v
+			}
+			
+			// Merge in template entries
+			for k, templateVal := range templateMap {
+				if existingVal, exists := merged[k]; exists {
+					// Special handling for specific keys
+					if k == "hooks" || k == "additionalDirectories" {
+						// For these arrays, we want to deduplicate
+						merged[k] = i.mergeAndDeduplicate(existingVal, templateVal)
+					} else {
+						// Recursively merge for other keys
+						merged[k] = i.mergeValues(existingVal, templateVal)
+					}
+				} else {
+					// Add new key from template
+					merged[k] = templateVal
+				}
+			}
+			
+			return merged
+		}
+	}
+	
+	// If both are slices, merge them
+	if existingSlice, existingIsSlice := existing.([]interface{}); existingIsSlice {
+		if templateSlice, templateIsSlice := template.([]interface{}); templateIsSlice {
+			return i.mergeSlices(existingSlice, templateSlice)
+		}
+	}
+	
+	// For other types or mismatched types, template takes precedence
+	// This includes strings, numbers, booleans
+	return template
+}
+
+// mergeAndDeduplicate merges arrays and removes duplicates
+func (i *Installer) mergeAndDeduplicate(existing, template interface{}) interface{} {
+	// Handle hooks array (array of hook entries)
+	if existingSlice, existingIsSlice := existing.([]interface{}); existingIsSlice {
+		if templateSlice, templateIsSlice := template.([]interface{}); templateIsSlice {
+			// Check if this is a hooks array (has command field)
+			if len(templateSlice) > 0 {
+				if hookEntry, ok := templateSlice[0].(map[string]interface{}); ok {
+					if _, hasCommand := hookEntry["command"]; hasCommand {
+						// This is a hooks array, deduplicate by command
+						seen := make(map[string]bool)
+						var result []interface{}
+						
+						// Use template hooks (they have the right paths)
+						for _, item := range templateSlice {
+							if hook, ok := item.(map[string]interface{}); ok {
+								if cmd, hasCmd := hook["command"].(string); hasCmd {
+									if !seen[cmd] {
+										seen[cmd] = true
+										result = append(result, item)
+									}
+								}
+							}
+						}
+						
+						// Add any existing hooks that aren't in template
+						for _, item := range existingSlice {
+							if hook, ok := item.(map[string]interface{}); ok {
+								if cmd, hasCmd := hook["command"].(string); hasCmd {
+									// Only add if it's not a startup command (we manage those)
+									if !strings.Contains(cmd, "the-startup") && !seen[cmd] {
+										seen[cmd] = true
+										result = append(result, item)
+									}
+								}
+							}
+						}
+						
+						return result
+					}
+				}
+			}
+			
+			// For additionalDirectories or other string arrays
+			if len(templateSlice) > 0 {
+				if _, isString := templateSlice[0].(string); isString {
+					seen := make(map[string]bool)
+					var result []interface{}
+					
+					// Use template directories (they have the right paths)
+					for _, item := range templateSlice {
+						if str, ok := item.(string); ok {
+							if !seen[str] {
+								seen[str] = true
+								result = append(result, str)
+							}
+						}
+					}
+					
+					// Add any existing directories that aren't startup-related
+					for _, item := range existingSlice {
+						if str, ok := item.(string); ok {
+							// Only add if it's not a startup directory
+							if !strings.Contains(str, "the-startup") && !seen[str] {
+								seen[str] = true
+								result = append(result, str)
+							}
+						}
+					}
+					
+					return result
+				}
+			}
+		}
+	}
+	
+	// Fallback to template
+	return template
+}
+
+// mergeSlices merges two slices, typically used for hooks
+func (i *Installer) mergeSlices(existing, template []interface{}) []interface{} {
+	// For hooks arrays, we want to merge based on matcher
+	// Check if these are hook entries (have "matcher" field)
+	isHookArray := false
+	if len(template) > 0 {
+		if hookEntry, ok := template[0].(map[string]interface{}); ok {
+			if _, hasMatcher := hookEntry["matcher"]; hasMatcher {
+				isHookArray = true
+			}
+		}
+	}
+	
+	if isHookArray {
+		// Create a map of existing hooks by matcher
+		existingByMatcher := make(map[string]interface{})
+		for _, item := range existing {
+			if hookEntry, ok := item.(map[string]interface{}); ok {
+				if matcher, hasMatcher := hookEntry["matcher"].(string); hasMatcher {
+					existingByMatcher[matcher] = item
+				}
+			}
+		}
+		
+		// Merge template hooks
+		var result []interface{}
+		for _, templateItem := range template {
+			if templateHook, ok := templateItem.(map[string]interface{}); ok {
+				if matcher, hasMatcher := templateHook["matcher"].(string); hasMatcher {
+					if existingHook, exists := existingByMatcher[matcher]; exists {
+						// Merge the hooks for this matcher
+						merged := i.mergeValues(existingHook, templateItem)
+						result = append(result, merged)
+						delete(existingByMatcher, matcher)
+					} else {
+						// New matcher from template
+						result = append(result, templateItem)
+					}
+				}
+			}
+		}
+		
+		// Add remaining existing hooks that weren't in template
+		for _, item := range existingByMatcher {
+			result = append(result, item)
+		}
+		
+		return result
+	}
+	
+	// For non-hook arrays, just return template
+	// (we handle deduplication in mergeAndDeduplicate)
+	return template
 }
 
 // createDefaultSettings creates default settings if template is not available
@@ -528,6 +703,10 @@ func (i *Installer) createDefaultSettings() map[string]interface{} {
 					},
 				},
 			},
+		},
+		"statusLine": map[string]interface{}{
+			"type":    "command",
+			"command": fmt.Sprintf("%s statusline", binaryPath),
 		},
 	}
 }

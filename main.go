@@ -41,6 +41,7 @@ workflows with specialized AI agents, hooks, and commands.`,
 	rootCmd.AddCommand(cmd.NewValidateCommand())
 	rootCmd.AddCommand(cmd.NewHooksCommand())
 	rootCmd.AddCommand(cmd.NewLogCommand())
+	rootCmd.AddCommand(cmd.NewStatuslineCommand())
 
 	// Execute
 	if err := rootCmd.Execute(); err != nil {
