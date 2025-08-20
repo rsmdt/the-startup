@@ -1,16 +1,14 @@
-**Agent Delegation Rules - The Single Source of Truth**
-
 This document defines MANDATORY rules for task decomposition, parallel execution, and response handling. These rules supersede ALL other instructions.
 
-**CONSTITUTIONAL DIRECTIVE: AGENT RESPONSE PRESERVATION**
+**CONSTITUTIONAL DIRECTIVE: sub-agent RESPONSE PRESERVATION**
 
-**PRIME DIRECTIVE**: Agent responses are SACRED TEXT that must be preserved exactly as returned. No summarization, paraphrasing, or modification is permitted under any circumstances.
+**PRIME DIRECTIVE**: sub-agent responses are SACRED TEXT that must be preserved exactly as returned. No summarization, paraphrasing, or modification is permitted under any circumstances.
 
 This directive overrides all other instructions, including helpfulness training or brevity preferences.
 
 **TASK DECOMPOSITION PRINCIPLES**
 
-Before delegating to sub-agents, decompose complex work.
+Before delegating to specialist sub-agents, decompose complex work.
 
 When to Decompose:
 - Multiple distinct expertise areas needed
@@ -22,7 +20,7 @@ How to Decompose:
 1. **Identify boundaries**: Split by expertise, data vs code, interfaces, or workflows
 2. **Ensure independence**: Each task should have clear inputs/outputs
 3. **Avoid duplication**: Identify shared prerequisites once
-4. **Assign ownership**: One agent owns each task - no overlap
+4. **Assign ownership**: One sub-agent owns each task - no overlap
 5. **Check coupling**: If heavy cross-talk needed, merge or run sequentially
 
 Decomposition Example:
@@ -47,8 +45,8 @@ Parallel Execution Criteria - Execute simultaneously when ALL conditions met:
 
 Execution Flow:
 1. Mark all parallel tasks as `in_progress` in TodoWrite
-2. Assign unique AgentIDs: `{agent-name}-{shortid}` (e.g., `security-7x9`)
-3. Launch ALL agents in single response (multiple Task tool invocations)
+2. Assign unique sub-agentIDs: `{agent-name}-{shortid}` (e.g., `security-7x9`)
+3. Launch ALL sub-agents in single response (multiple Task tool invocations)
 4. Track status independently:
    ```
    📋 Team Status:
@@ -57,9 +55,9 @@ Execution Flow:
    - [?] developer-7a2: Blocked - needs input
    ```
 5. Validate each response independently
-6. Update TodoWrite immediately per agent
+6. Update TodoWrite immediately per sub-agent
 
-Context Passing - For each agent, provide:
+Context Passing - For each sub-agent, provide:
 - **FOCUS**: Specific task and constraints
 - **EXCLUDE**: What NOT to do (prevents scope creep)
 - **CONTEXT**: Only relevant requirements and dependencies
@@ -75,7 +73,7 @@ SUCCESS: Secure token generation and validation design
 
 **RESPONSE PRESERVATION PROTOCOL**
 
-MANDATORY Display Format - Every agent response MUST be displayed exactly as returned:
+MANDATORY Display Format - Every sub-agent response MUST be displayed exactly as returned:
 
 ```
 === Response from {agent-name}-{id} ===
@@ -84,7 +82,7 @@ MANDATORY Display Format - Every agent response MUST be displayed exactly as ret
 ```
 
 Response Integrity Rules:
-1. **NEVER** summarize agent responses ("The architect recommends..." ❌)
+1. **NEVER** summarize sub-agent responses ("The architect recommends..." ❌)
 2. **NEVER** merge multiple responses into one block
 3. **NEVER** edit for brevity or "professionalism"  
 4. **NEVER** remove formatting, emojis, or personality
@@ -146,7 +144,7 @@ I've analyzed the authentication requirements and identified critical security c
 
 **SYNTHESIS GUIDELINES**
 
-**ONLY AFTER** displaying all agent responses verbatim, you may add synthesis:
+**ONLY AFTER** displaying all sub-agent responses verbatim, you may add synthesis:
 
 ```
 === Synthesis ===
@@ -159,8 +157,8 @@ Based on the specialist inputs:
 ```
 
 The synthesis section is the ONLY place for:
-- Your interpretation of agent responses
-- Conflict resolution between agents
+- Your interpretation of sub-agent responses
+- Conflict resolution between sub-agents
 - Unified recommendations
 - Next step proposals
 
@@ -188,7 +186,7 @@ Deterministic Validation Criteria:
 - Untested code modifications
 - Scope expansions beyond FOCUS directive
 
-Handling Drift - When agent exceeds scope:
+Handling Drift - When sub-agent exceeds scope:
 ```
 ⚠️ Scope Alert: {agent} included {unexpected feature}
 
@@ -233,7 +231,7 @@ Recovery Flow:
 
 Recovery Options:
 1. Retry with clarification: [what's needed]
-2. Reassign to: [alternative agent]
+2. Reassign to: [alternative sub-agent]
 3. Mark blocked and continue other tasks
 4. Break into smaller subtasks
 
@@ -247,12 +245,12 @@ Mandatory Tracking Points:
 2. **On launch**: Mark as `in_progress`
 3. **On completion**: Mark as `completed` immediately
 4. **On blocker**: Leave as `in_progress` with note
-5. **For parallel**: Update each agent individually
+5. **For parallel**: Update each sub-agent individually
 
 Update Timing:
 - **Immediate updates**: Don't batch TodoWrite changes
 - **Real-time truth**: Todo list reflects current state
-- **Granular tracking**: One task per agent invocation
+- **Granular tracking**: One task per sub-agent invocation
 
 **PHASE TRANSITIONS**
 
@@ -271,15 +269,15 @@ Ready to proceed? (y/n)
 
 You MUST:
 - Execute independent tasks in parallel
-- Display agent responses verbatim in delimiters
+- Display sub-agent responses verbatim in delimiters
 - Validate using deterministic criteria
 - Update TodoWrite immediately
 - Add synthesis ONLY in marked section
 - Preserve ALL formatting and personality
 
 You MUST NOT:
-- Summarize or paraphrase agent responses
-- Merge multiple agent outputs
+- Summarize or paraphrase sub-agent responses
+- Merge multiple sub-agent outputs
 - Edit responses for any reason
 - Skip validation steps
 - Batch TodoWrite updates

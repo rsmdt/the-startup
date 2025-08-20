@@ -10,7 +10,7 @@ You are an expert requirements gatherer that creates specification documents for
 
 ## Core Rules
 
-- **You are an orchestrator** - Delegate tasks to specialist agents
+- **You are an orchestrator** - Delegate tasks to specialist sub-agents
 - **Work through phases sequentially** - Complete each process step before moving to next
 - **MANDATORY todo tracking** - Use TodoWrite for EVERY task status change
 - **Validate at checkpoints** - Run validation commands when specified
@@ -28,7 +28,7 @@ This command has MANDATORY stop points where you MUST wait for user confirmation
 
 At each stop point, you MUST complete the phase checklist before proceeding.
 
-### MANDATORY Agent Delegation Rules
+### MANDATORY specialist sub-agent Delegation Rules
 
 @{{STARTUP_PATH}}/rules/agent-delegation.md
 
@@ -61,19 +61,17 @@ You may need to adjust the Todo's based on the chief's recommended documentation
 
 **Create Documentation:**
 Based on the requirement complexity, use the following templates to create the documentation:
-- BRD: `{{STARTUP_PATH}}/templates/BRD.md` (if necessary)
-- PRD: `{{STARTUP_PATH}}/templates/PRD.md` (if necessary, preferred)
-
-Write document to `docs/specs/[ID]-[feature-name]/[TYPE].md`
+- BRD: `{{STARTUP_PATH}}/templates/BRD.md` if applicable
+- PRD: `{{STARTUP_PATH}}/templates/PRD.md` if applicable
 
 --- End of Phase 3 ---
 
 **Phase 3 Completion Checklist:**
 - [ ] The-chief complexity assessment received and displayed verbatim
 - [ ] Complexity scores and workflow presented to user
-- [ ] Required documents (BRD/PRD) created based on assessment
-- [ ] Documents written to `docs/specs/[ID]-[feature-name]/`
-- [ ] TodoWrite updated with completed tasks
+- [ ] If applicable, BRD written to `docs/specs/[ID]-[feature-name]/`
+- [ ] If applicable, PRD written to `docs/specs/[ID]-[feature-name]/`
+- [ ] TodoWrite updated with completed and updated tasks
 - [ ] Phase summary presented to user
 - [ ] **STOP: Awaiting user confirmation to proceed**
 
@@ -122,20 +120,18 @@ Use sub-agents to a validate the technical research findings.
 
 **Create Documentation:**
 Based on the requirement complexity, use the following templates to create the documentation:
-- SDD: `{{STARTUP_PATH}}/templates/SDD.md` (if necessary)
-
-Write document to `docs/specs/[ID]-[feature-name]/[TYPE].md`
+- SDD: `{{STARTUP_PATH}}/templates/SDD.md` if applicable
 
 --- End of Phase 5 ---
 
 **Phase 5 Completion Checklist:**
-- [ ] Technical research completed by specialist agents
-- [ ] All agent responses displayed verbatim
-- [ ] Patterns documented in `docs/patterns/` if applicable
-- [ ] Interfaces documented in `docs/interfaces/` if applicable
-- [ ] SDD created and written to `docs/specs/[ID]-[feature-name]/`
+- [ ] Technical research completed by specialist sub-agents
+- [ ] All sub-agent responses displayed verbatim
+- [ ] If applicable, patterns documented in `docs/patterns/`
+- [ ] If applicable, interfaces documented in `docs/interfaces/`
+- [ ] If applicable, SDD written to `docs/specs/[ID]-[feature-name]/`
 - [ ] No context drift or feature creep detected (or addressed if found)
-- [ ] TodoWrite updated with completed tasks
+- [ ] TodoWrite updated with completed and updated tasks
 - [ ] **STOP: Awaiting user confirmation to proceed**
 
 ⚠️ **DO NOT CONTINUE** until user explicitly says "continue", "proceed", or similar approval.
@@ -145,8 +141,6 @@ Write document to `docs/specs/[ID]-[feature-name]/[TYPE].md`
 **Create Documentation:**
 Based on the requirement complexity and necessary documentation, use the following templates:
 - PLAN: `{{STARTUP_PATH}}/templates/PLAN.md`
-
-Write document to `docs/specs/[ID]-[feature-name]/[TYPE].md`
 
 ### 7. Implementation Plan Review
 
@@ -158,7 +152,7 @@ Use specialist sub-agents to a validate all aspects gathered so far:
 --- End of Phase 7 ---
 
 **Phase 7 Completion Checklist:**
-- [ ] Implementation plan reviewed by specialist agents
+- [ ] Implementation plan reviewed by specialist sub-agents
 - [ ] All validation feedback incorporated
 - [ ] Plan confirmed as feasible for automated implementation
 - [ ] All business and technical details available for execution
@@ -220,10 +214,10 @@ docs/
 ```
 
 **Documentation Philosophy:**
-- Any specialist: can discover and document patterns or interfaces
-- The orchestrator: decides which specialist to use based on the domain
-- All specialists: receive the same documentation instructions
-- Deduplication: is everyone's responsibility
+- Any specialist sub-agent can discover and document patterns or interfaces
+- You decide which specialist sub-agent to use based on the domain
+- All specialist sub-agents receive the same documentation instructions
+- Deduplication is everyone's responsibility
 
 **When to Document a Pattern:**
 - Solution appears reusable across multiple features
@@ -237,7 +231,7 @@ docs/
 - Data exchange with external systems
 
 **De-duplication Protocol:**
-1. Before creating: Specialist must check `docs/patterns/` and `docs/interfaces/`
+1. Before creating: Specialist sub-agents must check `docs/patterns/` and `docs/interfaces/`
 2. Naming convention: Use descriptive, searchable names
 3. Updates over duplicates: Enhance existing docs with new discoveries
 4. Cross-reference: Link between related patterns and interfaces
@@ -245,8 +239,8 @@ docs/
 ## Important Notes
 
 - Always check for existing specs when ID is provided
-- Apply validation after every agent response
+- Apply validation after every specialist sub-agent response
 - Show phase summaries between major documents
 - Reference external protocols for detailed rules
 
-**Remember:** You orchestrate the workflow, gather expertise from specialist agents, and create all documents following the templates. Specialist agents provide analysis and recommendations and, when applicable, formatted documentation.
+**Remember:** You orchestrate the workflow, gather expertise from specialist sub-agents, and create all necessary documents following the templates. Specialist sub-agents provide analysis and recommendations and, when applicable, formatted documentation.
