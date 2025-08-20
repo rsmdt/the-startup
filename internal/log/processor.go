@@ -11,8 +11,8 @@ import (
 )
 
 var (
-	sessionIDRegex = regexp.MustCompile(`\bSessionId\s*:\s*([^\s,]+)`)
-	agentIDRegex   = regexp.MustCompile(`\bAgentId\s*:\s*([^\s,]+)`)
+	sessionIDRegex = regexp.MustCompile(`(?i)\bSessionId\s*:\s*([^\s,]+)`)
+	agentIDRegex   = regexp.MustCompile(`(?i)\bAgentId\s*:\s*([^\s,]+)`)
 )
 
 // ProcessToolCall reads JSON from stdin and processes it according to the hook logic
@@ -41,7 +41,12 @@ func ProcessToolCall(input io.Reader, isPostHook bool) (*HookData, error) {
 	// Extract session and agent IDs
 	sessionID := ExtractSessionID(prompt)
 
-	// If no session ID found in prompt, try to find latest session
+	// If no session ID found in prompt, use the one from JSON input as fallback
+	if sessionID == "" {
+		sessionID = hookInput.SessionID
+	}
+
+	// If still no session ID, try to find latest session
 	if sessionID == "" {
 		projectDir := GetProjectDir()
 		sessionID = FindLatestSession(projectDir)

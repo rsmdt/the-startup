@@ -160,27 +160,31 @@ func (m FileSelectionModel) Reset() FileSelectionModel {
 func (m FileSelectionModel) getAllAvailableFiles() []string {
 	allFiles := make([]string, 0)
 
-	// Walk through all files in Claude assets
-	fs.WalkDir(m.claudeAssets, "assets/claude", func(path string, d fs.DirEntry, err error) error {
-		if err != nil || d.IsDir() {
+	// Walk through all files in Claude assets (handle nil embed.FS gracefully)
+	if m.claudeAssets != nil {
+		fs.WalkDir(m.claudeAssets, "assets/claude", func(path string, d fs.DirEntry, err error) error {
+			if err != nil || d.IsDir() {
+				return nil
+			}
+			// Create relative path for display/selection
+			relPath := strings.TrimPrefix(path, "assets/claude/")
+			allFiles = append(allFiles, relPath)
 			return nil
-		}
-		// Create relative path for display/selection
-		relPath := strings.TrimPrefix(path, "assets/claude/")
-		allFiles = append(allFiles, relPath)
-		return nil
-	})
+		})
+	}
 
-	// Walk through all files in Startup assets  
-	fs.WalkDir(m.startupAssets, "assets/the-startup", func(path string, d fs.DirEntry, err error) error {
-		if err != nil || d.IsDir() {
+	// Walk through all files in Startup assets (handle nil embed.FS gracefully) 
+	if m.startupAssets != nil {
+		fs.WalkDir(m.startupAssets, "assets/the-startup", func(path string, d fs.DirEntry, err error) error {
+			if err != nil || d.IsDir() {
+				return nil
+			}
+			// Create relative path for display/selection
+			relPath := strings.TrimPrefix(path, "assets/the-startup/")
+			allFiles = append(allFiles, relPath)
 			return nil
-		}
-		// Create relative path for display/selection
-		relPath := strings.TrimPrefix(path, "assets/the-startup/")
-		allFiles = append(allFiles, relPath)
-		return nil
-	})
+		})
+	}
 
 	return allFiles
 }
@@ -201,6 +205,9 @@ func (m FileSelectionModel) buildStaticTree() string {
 
 	buildSubtree := func(embedFS *embed.FS, patterns []string, prefix string) []string {
 		var items []string
+		if embedFS == nil {
+			return items // Return empty slice if embed.FS is nil
+		}
 		for _, pattern := range patterns {
 			if files, err := fs.Glob(embedFS, pattern); err == nil {
 				for _, file := range files {
@@ -275,16 +282,18 @@ func (m FileSelectionModel) buildStaticTree() string {
 		settingsItem,
 	}
 	
-	// Add settings.local.json if it exists in assets
-	if _, err := m.claudeAssets.ReadFile("assets/claude/settings.local.json"); err == nil {
-		localSettingsPath := filepath.Join(claudePath, "settings.local.json")
-		localSettingsItem := "settings.local.json"
-		if _, err := os.Stat(localSettingsPath); err == nil {
-			localSettingsItem = updateStyle.Render("settings.local.json (will update)")
-		} else {
-			localSettingsItem = itemStyle.Render("settings.local.json")
+	// Add settings.local.json if it exists in assets (handle nil embed.FS gracefully)
+	if m.claudeAssets != nil {
+		if _, err := m.claudeAssets.ReadFile("assets/claude/settings.local.json"); err == nil {
+			localSettingsPath := filepath.Join(claudePath, "settings.local.json")
+			localSettingsItem := "settings.local.json"
+			if _, err := os.Stat(localSettingsPath); err == nil {
+				localSettingsItem = updateStyle.Render("settings.local.json (will update)")
+			} else {
+				localSettingsItem = itemStyle.Render("settings.local.json")
+			}
+			children = append(children, localSettingsItem)
 		}
-		children = append(children, localSettingsItem)
 	}
 
 	t := tree.

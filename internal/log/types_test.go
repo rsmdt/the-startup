@@ -77,102 +77,112 @@ func TestHookInputWithOutput(t *testing.T) {
 }
 
 func TestHookDataMarshaling(t *testing.T) {
-	// Test agent_start event
-	startData := HookData{
-		Event:       "agent_start",
-		AgentType:   "the-architect",
-		AgentID:     "arch-001",
-		Description: "Design the system architecture",
-		Instruction: "Please design a scalable architecture",
-		SessionID:   "dev-session-123",
-		Timestamp:   "2025-01-11T10:30:00.000Z",
+	// Test user role (PreToolUse)
+	userData := HookData{
+		Role:      "user",
+		Content:   "Please design a scalable architecture",
+		Timestamp: "2025-01-11T10:30:00.000Z",
+		SessionID: "dev-session-123", // Internal field, not serialized
+		AgentID:   "arch-001",         // Internal field, not serialized
 	}
 
-	jsonBytes, err := json.Marshal(startData)
+	jsonBytes, err := json.Marshal(userData)
 	if err != nil {
 		t.Fatalf("Failed to marshal HookData: %v", err)
 	}
 
+	// Verify JSON only contains serialized fields
+	var jsonMap map[string]interface{}
+	if err := json.Unmarshal(jsonBytes, &jsonMap); err != nil {
+		t.Fatalf("Failed to unmarshal to map: %v", err)
+	}
+
+	// Check that only role, content, and timestamp are in JSON
+	if role, exists := jsonMap["role"]; !exists || role != "user" {
+		t.Errorf("Expected role 'user' in JSON, got %v", role)
+	}
+	if content, exists := jsonMap["content"]; !exists || content != userData.Content {
+		t.Errorf("Expected content in JSON, got %v", content)
+	}
+	if timestamp, exists := jsonMap["timestamp"]; !exists || timestamp != userData.Timestamp {
+		t.Errorf("Expected timestamp in JSON, got %v", timestamp)
+	}
+
+	// SessionID and AgentID should NOT be in JSON (marked with json:"-")
+	if _, exists := jsonMap["session_id"]; exists {
+		t.Error("SessionID should not be serialized to JSON")
+	}
+	if _, exists := jsonMap["agent_id"]; exists {
+		t.Error("AgentID should not be serialized to JSON")
+	}
+}
+
+func TestHookDataAssistantRole(t *testing.T) {
+	// Test assistant role (PostToolUse)
+	assistantData := HookData{
+		Role:      "assistant",
+		Content:   "Successfully implemented the feature with tests",
+		Timestamp: "2025-01-11T10:35:00.000Z",
+		SessionID: "dev-session-123",
+		AgentID:   "dev-001",
+	}
+
+	jsonBytes, err := json.Marshal(assistantData)
+	if err != nil {
+		t.Fatalf("Failed to marshal HookData: %v", err)
+	}
+
+	// Unmarshal and verify
 	var unmarshaled HookData
 	if err := json.Unmarshal(jsonBytes, &unmarshaled); err != nil {
 		t.Fatalf("Failed to unmarshal HookData: %v", err)
 	}
 
-	// Verify all fields
-	if unmarshaled.Event != startData.Event {
-		t.Errorf("Event mismatch: expected %s, got %s", startData.Event, unmarshaled.Event)
+	if unmarshaled.Role != assistantData.Role {
+		t.Errorf("Role mismatch: expected %s, got %s", assistantData.Role, unmarshaled.Role)
 	}
-	if unmarshaled.AgentType != startData.AgentType {
-		t.Errorf("AgentType mismatch: expected %s, got %s", startData.AgentType, unmarshaled.AgentType)
+	if unmarshaled.Content != assistantData.Content {
+		t.Errorf("Content mismatch: expected %s, got %s", assistantData.Content, unmarshaled.Content)
 	}
-	if unmarshaled.Instruction != startData.Instruction {
-		t.Errorf("Instruction mismatch: expected %s, got %s", startData.Instruction, unmarshaled.Instruction)
-	}
-	if unmarshaled.SessionID != startData.SessionID {
-		t.Errorf("SessionID mismatch: expected %s, got %s", startData.SessionID, unmarshaled.SessionID)
+	if unmarshaled.Timestamp != assistantData.Timestamp {
+		t.Errorf("Timestamp mismatch: expected %s, got %s", assistantData.Timestamp, unmarshaled.Timestamp)
 	}
 }
 
-func TestHookDataAgentComplete(t *testing.T) {
-	// Test agent_complete event
-	completeData := HookData{
-		Event:         "agent_complete",
-		AgentType:     "the-developer",
-		AgentID:       "dev-001",
-		Description:   "Implement the feature",
-		OutputSummary: "Successfully implemented the feature with tests",
-		SessionID:     "dev-session-123",
-		Timestamp:     "2025-01-11T10:35:00.000Z",
-	}
-
-	jsonBytes, err := json.Marshal(completeData)
-	if err != nil {
-		t.Fatalf("Failed to marshal HookData: %v", err)
-	}
-
-	// Verify it contains the expected JSON fields
-	var jsonMap map[string]interface{}
-	if err := json.Unmarshal(jsonBytes, &jsonMap); err != nil {
-		t.Fatalf("Failed to unmarshal to map: %v", err)
-	}
-
-	// Should have output_summary but not instruction for complete events
-	if _, exists := jsonMap["output_summary"]; !exists {
-		t.Error("Expected output_summary field in agent_complete JSON")
-	}
-
-	// Instruction should be empty and omitted from JSON
-	if instruction, exists := jsonMap["instruction"]; exists && instruction != "" {
-		t.Error("Instruction should be omitted in agent_complete JSON")
-	}
-}
-
-func TestJSONOmitEmpty(t *testing.T) {
-	// Test that omitempty works correctly
+func TestHookDataInternalFields(t *testing.T) {
+	// Test that internal fields are preserved in struct but not serialized
 	data := HookData{
-		Event:     "agent_start",
-		AgentType: "the-tester",
+		Role:      "user",
+		Content:   "Test content",
 		Timestamp: "2025-01-11T10:40:00.000Z",
-		// OutputSummary intentionally empty - should be omitted
+		SessionID: "internal-session",
+		AgentID:   "internal-agent",
 	}
 
+	// Internal fields should be accessible on the struct
+	if data.SessionID != "internal-session" {
+		t.Errorf("SessionID should be accessible on struct")
+	}
+	if data.AgentID != "internal-agent" {
+		t.Errorf("AgentID should be accessible on struct")
+	}
+
+	// But not serialized to JSON
 	jsonBytes, err := json.Marshal(data)
 	if err != nil {
 		t.Fatalf("Failed to marshal HookData: %v", err)
 	}
 
-	var jsonMap map[string]interface{}
-	if err := json.Unmarshal(jsonBytes, &jsonMap); err != nil {
-		t.Fatalf("Failed to unmarshal to map: %v", err)
-	}
-
-	// OutputSummary should be omitted when empty
-	if _, exists := jsonMap["output_summary"]; exists {
-		t.Error("Empty output_summary should be omitted from JSON")
-	}
-
-	// But Event should always be present
-	if _, exists := jsonMap["event"]; !exists {
-		t.Error("Event field should always be present in JSON")
+	jsonStr := string(jsonBytes)
+	if contains := "internal-session"; contains != "" && len(jsonStr) > 0 {
+		// Check that internal fields are not in JSON
+		var jsonMap map[string]interface{}
+		json.Unmarshal(jsonBytes, &jsonMap)
+		if _, exists := jsonMap["SessionID"]; exists {
+			t.Error("SessionID should not appear in JSON")
+		}
+		if _, exists := jsonMap["AgentID"]; exists {
+			t.Error("AgentID should not appear in JSON")
+		}
 	}
 }

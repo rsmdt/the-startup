@@ -101,7 +101,10 @@ func TestWriteAgentContext(t *testing.T) {
 		var parsedData HookData
 		err = json.Unmarshal([]byte(jsonLine), &parsedData)
 		assert.NoError(t, err)
-		assert.Equal(t, *hookData, parsedData)
+		// SessionID and AgentID are not serialized (marked with json:"-")
+		assert.Equal(t, hookData.Role, parsedData.Role)
+		assert.Equal(t, hookData.Content, parsedData.Content)
+		assert.Equal(t, hookData.Timestamp, parsedData.Timestamp)
 	})
 
 	t.Run("Append operation", func(t *testing.T) {

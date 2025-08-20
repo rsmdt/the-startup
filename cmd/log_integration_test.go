@@ -48,13 +48,6 @@ func TestLogCommandIntegration(t *testing.T) {
 		t.Fatalf("Command execution failed: %v", err)
 	}
 
-	// Verify global log file was created
-	globalLogPath := filepath.Join(startupDir, "all-agent-instructions.jsonl")
-
-	if _, err := os.Stat(globalLogPath); os.IsNotExist(err) {
-		t.Errorf("Global log file was not created at %s", globalLogPath)
-	}
-
 	// Verify session log file was created
 	sessionLogPath := filepath.Join(startupDir, "dev-integration-test", "agent-instructions.jsonl")
 
@@ -62,14 +55,14 @@ func TestLogCommandIntegration(t *testing.T) {
 		t.Errorf("Session log file was not created at %s", sessionLogPath)
 	}
 
-	// Read and verify global log content
-	globalContent, err := os.ReadFile(globalLogPath)
+	// Read and verify session log content
+	sessionContent, err := os.ReadFile(sessionLogPath)
 	if err != nil {
-		t.Fatalf("Failed to read global log file: %v", err)
+		t.Fatalf("Failed to read session log file: %v", err)
 	}
 
 	var logEntry log.HookData
-	if err := json.Unmarshal([]byte(strings.TrimSpace(string(globalContent))), &logEntry); err != nil {
+	if err := json.Unmarshal([]byte(strings.TrimSpace(string(sessionContent))), &logEntry); err != nil {
 		t.Fatalf("Failed to parse log entry JSON: %v", err)
 	}
 
@@ -125,15 +118,15 @@ func TestLogCommandUserIntegration(t *testing.T) {
 		t.Fatalf("Command execution failed: %v", err)
 	}
 
-	// Read and verify global log content
-	globalLogPath := filepath.Join(tempDir, ".the-startup", "all-agent-instructions.jsonl")
-	globalContent, err := os.ReadFile(globalLogPath)
+	// Read and verify session log content
+	sessionLogPath := filepath.Join(tempDir, ".the-startup", "dev-user-test", "agent-instructions.jsonl")
+	sessionContent, err := os.ReadFile(sessionLogPath)
 	if err != nil {
-		t.Fatalf("Failed to read global log file: %v", err)
+		t.Fatalf("Failed to read session log file: %v", err)
 	}
 
 	var logEntry log.HookData
-	if err := json.Unmarshal([]byte(strings.TrimSpace(string(globalContent))), &logEntry); err != nil {
+	if err := json.Unmarshal([]byte(strings.TrimSpace(string(sessionContent))), &logEntry); err != nil {
 		t.Fatalf("Failed to parse log entry JSON: %v", err)
 	}
 
@@ -201,10 +194,10 @@ func TestLogCommandFlagValidation(t *testing.T) {
 			t.Fatalf("Command execution failed with short flag: %v", err)
 		}
 
-		// Verify log was created
-		globalLogPath := filepath.Join(tempDir, ".the-startup", "all-agent-instructions.jsonl")
-		if _, err := os.Stat(globalLogPath); os.IsNotExist(err) {
-			t.Error("Global log file was not created with short flag")
+		// Verify session log was created
+		sessionLogPath := filepath.Join(tempDir, ".the-startup", "dev-short-test", "agent-instructions.jsonl")
+		if _, err := os.Stat(sessionLogPath); os.IsNotExist(err) {
+			t.Error("Session log file was not created with short flag")
 		}
 	})
 
@@ -236,10 +229,10 @@ func TestLogCommandFlagValidation(t *testing.T) {
 			t.Fatalf("Command execution failed with short user flag: %v", err)
 		}
 
-		// Verify log was created
-		globalLogPath := filepath.Join(tempDir, ".the-startup", "all-agent-instructions.jsonl")
-		if _, err := os.Stat(globalLogPath); os.IsNotExist(err) {
-			t.Error("Global log file was not created with short user flag")
+		// Verify session log was created
+		sessionLogPath := filepath.Join(tempDir, ".the-startup", "dev-user-short-test", "agent-instructions.jsonl")
+		if _, err := os.Stat(sessionLogPath); os.IsNotExist(err) {
+			t.Error("Session log file was not created with short user flag")
 		}
 	})
 }
@@ -302,10 +295,15 @@ func TestLogCommandStdinProcessing(t *testing.T) {
 			t.Errorf("Expected silent exit for filtered tool, got error: %v", err)
 		}
 
-		// Verify no files were created
-		globalLogPath := filepath.Join(tempDir, ".the-startup", "all-agent-instructions.jsonl")
-		if _, err := os.Stat(globalLogPath); !os.IsNotExist(err) {
-			t.Error("Global log file should not be created for filtered tools")
+		// Verify no session directories were created (since tool was filtered)
+		entries, err := os.ReadDir(filepath.Join(tempDir, ".the-startup"))
+		if err == nil && len(entries) > 0 {
+			// Check if any session directories were created
+			for _, entry := range entries {
+				if entry.IsDir() && strings.HasPrefix(entry.Name(), "dev-") {
+					t.Error("No session directories should be created for filtered tools")
+				}
+			}
 		}
 	})
 
@@ -333,10 +331,15 @@ func TestLogCommandStdinProcessing(t *testing.T) {
 			t.Errorf("Expected silent exit for filtered subagent, got error: %v", err)
 		}
 
-		// Verify no files were created
-		globalLogPath := filepath.Join(tempDir, ".the-startup", "all-agent-instructions.jsonl")
-		if _, err := os.Stat(globalLogPath); !os.IsNotExist(err) {
-			t.Error("Global log file should not be created for filtered subagents")
+		// Verify no session directories were created (since subagent was filtered)
+		entries, err := os.ReadDir(filepath.Join(tempDir, ".the-startup"))
+		if err == nil && len(entries) > 0 {
+			// Check if any session directories were created
+			for _, entry := range entries {
+				if entry.IsDir() && strings.HasPrefix(entry.Name(), "dev-") {
+					t.Error("No session directories should be created for filtered subagents")
+				}
+			}
 		}
 	})
 
@@ -370,15 +373,15 @@ func TestLogCommandStdinProcessing(t *testing.T) {
 			t.Fatalf("Command execution failed with large JSON: %v", err)
 		}
 
-		// Read and verify truncation
-		globalLogPath := filepath.Join(tempDir, ".the-startup", "all-agent-instructions.jsonl")
-		globalContent, err := os.ReadFile(globalLogPath)
+		// Read and verify session log content
+		sessionLogPath := filepath.Join(tempDir, ".the-startup", "dev-large-test", "agent-instructions.jsonl")
+		sessionContent, err := os.ReadFile(sessionLogPath)
 		if err != nil {
-			t.Fatalf("Failed to read global log file: %v", err)
+			t.Fatalf("Failed to read session log file: %v", err)
 		}
 
 		var logEntry log.HookData
-		if err := json.Unmarshal([]byte(strings.TrimSpace(string(globalContent))), &logEntry); err != nil {
+		if err := json.Unmarshal([]byte(strings.TrimSpace(string(sessionContent))), &logEntry); err != nil {
 			t.Fatalf("Failed to parse log entry JSON: %v", err)
 		}
 
@@ -462,10 +465,10 @@ func TestLogCommandErrorHandling(t *testing.T) {
 			t.Fatalf("Command execution failed: %v", err)
 		}
 
-		// Should still create global log
-		globalLogPath := filepath.Join(tempDir, ".the-startup", "all-agent-instructions.jsonl")
-		if _, err := os.Stat(globalLogPath); os.IsNotExist(err) {
-			t.Error("Global log file should be created even without session ID")
+		// Should still create session log (with generated/fallback session ID)
+		sessionLogPath := filepath.Join(tempDir, ".the-startup", "dev-no-session-test", "agent-instructions.jsonl")
+		if _, err := os.Stat(sessionLogPath); os.IsNotExist(err) {
+			t.Error("Session log file should be created even without session ID in prompt")
 		}
 	})
 }

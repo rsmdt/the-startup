@@ -37,9 +37,6 @@ workflows with specialized AI agents, hooks, and commands.`,
 
 	// Add commands
 	rootCmd.AddCommand(cmd.NewInstallCommand(&claudeAssets, &startupAssets))
-	rootCmd.AddCommand(cmd.NewUpdateCommand())
-	rootCmd.AddCommand(cmd.NewValidateCommand())
-	rootCmd.AddCommand(cmd.NewHooksCommand())
 	rootCmd.AddCommand(cmd.NewLogCommand())
 	rootCmd.AddCommand(cmd.NewStatuslineCommand())
 

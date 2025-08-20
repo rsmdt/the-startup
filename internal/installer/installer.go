@@ -357,22 +357,6 @@ func (i *Installer) installStartupAssets() error {
 	})
 }
 
-// installComponentToClaude installs a specific component directly to Claude directory
-// DEPRECATED: This function is kept for backward compatibility with tests
-// New code should use installClaudeAssets and installStartupAssets instead
-func (i *Installer) installComponentToClaude(component string) error {
-	// This function is no longer used in production code
-	// It's kept only for test compatibility
-	return fmt.Errorf("installComponentToClaude is deprecated")
-}
-
-// Deprecated functions below are kept for test compatibility
-
-// copyFile copies a single file from embed.FS to disk (DEPRECATED)
-func (i *Installer) copyFile(sourceFS *embed.FS, sourcePath, destDir string) error {
-	// This function is no longer used in production code
-	return fmt.Errorf("copyFile is deprecated")
-}
 
 // configureHooks updates settings.json and settings.local.json to include hooks and permissions
 func (i *Installer) configureHooks() error {
