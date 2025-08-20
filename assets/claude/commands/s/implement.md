@@ -10,17 +10,20 @@ You are an intelligent implementation orchestrator that executes the plan for: *
 
 - **You are an orchestrator** - Delegate tasks to specialist agents based on PLAN.md
 - **Work through phases sequentially** - Complete each phase before moving to next
-- **MANDATORY todo tracking** - Use TodoWrite for EVERY task status change
+- **Real-time tracking** - Use TodoWrite for every task status change
 - **Display ALL agent commentary** - Show every `<commentary>` block verbatim
 - **Validate at checkpoints** - Run validation commands when specified
-- **Dynamic review selection** - Choose reviewers and validators based on task context, not static rules
-- **Review cycles** - Ensure quality through automated review-revision loops
 
-### MANDATORY Agent Delegation Rules
+### Execution Rules
+
+- This command has stop points where you MUST wait for user confirmation.
+- At each stop point, you MUST complete the phase checklist before proceeding.
+
+### Agent Delegation Rules
 
 @{{STARTUP_PATH}}/rules/agent-delegation.md
 
-## TodoWrite Management Strategy
+### TodoWrite Tool Rules
 
 **Phase Loading Protocol:**
 - NEVER load all tasks from PLAN.md at once - this causes cognitive overload
@@ -49,28 +52,28 @@ You are an intelligent implementation orchestrator that executes the plan for: *
 
 Display: `📊 Analyzing Implementation Plan`
 
-- Parse PLAN.md to identify all phases (look for **Phase X:** patterns)
-- Count total phases and tasks per phase
-- Display phase overview:
-  ```
-  Found X phases with Y total tasks:
-  - Phase 1: [Name] (N tasks)
-  - Phase 2: [Name] (N tasks)
-  ...
-  ```
-- Load ONLY Phase 1 tasks into TodoWrite
-- Present phase 1 overview and ask user to confirm start
+**MANDATORY Initialization Steps:**
+1. Parse PLAN.md to identify all phases (look for **Phase X:** patterns)
+2. Count total phases and tasks per phase
+3. If any tasks already marked `[x]` or `[~]`, report their status
+4. Display phase overview:
+   ```
+   Found X phases with Y total tasks:
+   - Phase 1: [Name] (N tasks, X completed)
+   - Phase 2: [Name] (N tasks, X completed)
+   ...
+   ```
+5. Load ONLY Phase 1 tasks into TodoWrite
+6. Present phase 1 overview and ask user to confirm start
 
---- End of Phase 2 ---
+--- End of Step 2 ---
 
-**Phase 2 Completion Checklist:**
+**Step 2 Completion Checklist:**
 - [ ] PLAN.md successfully loaded and parsed
 - [ ] All phases identified and counted
 - [ ] Phase 1 tasks loaded into TodoWrite
 - [ ] Implementation overview presented to user
 - [ ] **STOP: Awaiting user confirmation to start implementation**
-
-⚠️ **DO NOT CONTINUE** until user explicitly says "continue", "proceed", or similar approval.
 
 ### 3. Phase-by-Phase Implementation
 
@@ -100,40 +103,35 @@ For each phase in PLAN.md:
   SUCCESS: [Task completion criteria]
   ```
 - Track completion independently
-- Update TodoWrite and PLAN.md checkboxes as each completes
 
 **For Sequential Tasks:**
 - Execute one at a time
-- Mark as `in_progress` → delegate → mark `completed`
-- Update PLAN.md checkbox: `- [ ]` → `- [~]` → `- [x]`
+- Mark as `in_progress` in TodoWrite
+- Delegate to specialist agent
+- After completion, mark `completed` in TodoWrite
 
-**Review Handling (when `[review: areas]` present):**
-- After implementation, select reviewer based on areas
-- Pass full implementation + context
+**Review Handling:**
+- After implementation, select specialist reviewer agent
+- Pass implementation context
 - Handle feedback:
   - APPROVED/LGTM/✅ → proceed
   - Revision needed → implement changes (max 3 cycles)
   - After 3 cycles → escalate to user
 
-**Validation (when specified):**
-- Run validation commands from PLAN.md
+**Validation Handling:**
+- Run validation commands
 - Only proceed if validation passes
 - If fails → attempt fix → re-validate
 
-#### Phase Completion
+#### Phase Completion protocol
 
-**Phase Completion Checklist:**
-- [ ] All phase tasks marked complete in TodoWrite
-- [ ] All PLAN.md checkboxes updated for this phase
-- [ ] Validation commands passed (if specified)
-- [ ] Reviews completed and approved (if required)
-- [ ] Agent responses displayed verbatim per agent-delegation.md
-- [ ] Phase summary presented to user
-- [ ] **STOP: Ready to proceed to next phase?**
+1. Verify all TodoWrite tasks for this phase show 'completed'
+2. Update ALL PLAN.md checkboxes for this phase
+3. Run validation commands
+4. Generate phase summary
+5. **STOP: Await user confirmation before next phase**
 
-⚠️ **WAIT FOR USER** before proceeding to next phase. User must confirm continuation.
-
-**Phase Summary Format:**
+Phase Summary Format:
 ```
 ✅ Phase [X] Complete: [Phase Name]
 - Tasks completed: X/X
@@ -191,23 +189,23 @@ Awaiting your decision...
 ```
 📊 Overall Progress:
 Phase 1: ✅ Complete (5/5 tasks)
-Phase 2: 🔄 In Progress (3/7 tasks)  ← Current
+Phase 2: 🔄 In Progress (3/7 tasks)
 Phase 3: ⏳ Pending
 Phase 4: ⏳ Pending
 ```
 
-**PLAN.md Synchronization:**
-- Update checkboxes immediately after task completion
-- Add review notes inline when applicable
-- Mark blockers with ⚠️ symbol
-- Never modify task text, only checkboxes
+**PLAN.md Update Strategy**
+- Update PLAN.md checkboxes at phase completion
+- All checkboxes in a phase get updated together
 
 ## Important Notes
 
-- **Plan phase boundaries are mandatory stops** - always wait for user confirmation
-- **Display agent responses verbatim** - never summarize or paraphrase
-- **Respect parallel execution hints** - launch concurrent tasks when marked
-- **Accumulate context wisely** - pass relevant prior outputs to later phases
-- **Track everything in TodoWrite** - but only one plan phase at a time
+- **Phase boundaries are stops** - Always wait for user confirmation
+- **Display agent responses verbatim** - Never summarize or paraphrase
+- **Respect parallel execution hints** - Launch concurrent tasks or agents when marked
+- **Accumulate context wisely** - Pass relevant prior outputs to later phases
+- **Track in TodoWrite** - Real-time task tracking during execution
 
-Remember: You orchestrate the workflow by executing the PLAN.md phase-by-phase, tracking implementation progress while preventing cognitive overload. Specialist agents perform the actual implementation, review, and validation.
+**Remember:**
+- You orchestrate the workflow by executing PLAN.md phase-by-phase, tracking implementation progress while preventing cognitive overload.
+- Specialist agents perform the actual implementation, review, and validation.

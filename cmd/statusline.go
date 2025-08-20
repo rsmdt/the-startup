@@ -98,8 +98,11 @@ func buildStatusLine(data StatuslineInput, termWidth int) string {
 		Italic(true)
 	parts = append(parts, helpStyle.Render("? for shortcuts"))
 
-	// Join all parts and apply main style
-	content := strings.Join(parts, " | ")
+	// Join all parts with lipgloss padding
+	content := lipgloss.JoinHorizontal(lipgloss.Left, 
+		lipgloss.NewStyle().PaddingRight(2).Render(parts[0]),
+		lipgloss.NewStyle().PaddingRight(2).Render(parts[1]),
+		parts[2])
 	
 	// Apply main style with color and max width for truncation
 	mainStyle := lipgloss.NewStyle().
