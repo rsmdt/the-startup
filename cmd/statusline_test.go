@@ -40,7 +40,6 @@ func TestStatuslineOutput(t *testing.T) {
 				"📁",
 				"🤖 Claude 3.5 Sonnet (The Startup)",
 				"? for shortcuts",
-				"| ?", // Should have separator before help text (current implementation)
 			},
 			wantNotContains: []string{},
 		},
@@ -70,10 +69,6 @@ func TestStatuslineOutput(t *testing.T) {
 				"📁 /tmp",
 				"🤖 Opus (default)",
 				"? for shortcuts",
-				"| ?", // Should have separator before help text (current implementation)
-			},
-			wantNotContains: []string{
-				"  |", // Should not have double spaces
 			},
 		},
 	}

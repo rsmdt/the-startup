@@ -24,21 +24,13 @@ type ClaudePathModel struct {
 }
 
 func NewClaudePathModel(startupPath string) ClaudePathModel {
-	// Default choices - always show global first, then local if applicable
-	choices := []string{"~/.claude (recommended)"}
-
-	// Determine if startup path is local or global
-	isLocal := !strings.Contains(startupPath, ".config")
-
-	// Add local option if startup is local
-	if isLocal {
-		// Show simple local path
-		localClaudePath := ".claude (local)"
-		choices = append(choices, localClaudePath)
+	// Always show both recommended and local options
+	choices := []string{
+		"~/.claude (recommended)",
+		".claude (local)",
+		"Custom location",
+		"Cancel",
 	}
-
-	choices = append(choices, "Custom location")
-	choices = append(choices, "Cancel")
 
 	ti := textinput.New()
 	ti.Placeholder = "Enter custom path (Tab for autocomplete)"

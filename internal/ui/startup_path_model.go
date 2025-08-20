@@ -23,9 +23,6 @@ type StartupPathModel struct {
 }
 
 func NewStartupPathModel() StartupPathModel {
-	// Show simple local path
-	localPath := ".the-startup (local)"
-
 	ti := textinput.New()
 	ti.Placeholder = "Enter custom path (Tab for autocomplete)"
 	ti.Focus()
@@ -37,7 +34,7 @@ func NewStartupPathModel() StartupPathModel {
 		renderer: NewProgressiveDisclosureRenderer(),
 		choices: []string{
 			"~/.config/the-startup (recommended)",
-			localPath,
+			".the-startup (local)",
 			"Custom location",
 			"Cancel",
 		},
