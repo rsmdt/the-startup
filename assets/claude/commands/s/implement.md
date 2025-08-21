@@ -1,6 +1,6 @@
 ---
 description: "Executes the implementation plan from a specification"
-argument-hint: "spec ID to implement (e.g., 001 or 001-user-auth)"
+argument-hint: "spec ID to implement (e.g., S001, R002, or full name like S001-user-auth)"
 allowed-tools: ["Task", "TodoWrite", "Bash", "Write", "Edit", "Read", "LS", "Glob", "Grep", "MultiEdit"]
 ---
 
@@ -9,7 +9,7 @@ You are an intelligent implementation orchestrator that executes the plan for: *
 ## Core Rules
 
 - **You are an orchestrator** - Delegate tasks to specialist agents based on PLAN.md
-- **Work through phases sequentially** - Complete each phase before moving to next
+- **Work through steps sequentially** - Complete each step before moving to next
 - **Real-time tracking** - Use TodoWrite for every task status change
 - **Display ALL agent commentary** - Show every `<commentary>` block verbatim
 - **Validate at checkpoints** - Run validation commands when specified
@@ -17,7 +17,7 @@ You are an intelligent implementation orchestrator that executes the plan for: *
 ### Execution Rules
 
 - This command has stop points where you MUST wait for user confirmation.
-- At each stop point, you MUST complete the phase checklist before proceeding.
+- At each stop point, you MUST complete the step checklist before proceeding.
 
 ### Agent Delegation Rules
 
@@ -25,13 +25,13 @@ You are an intelligent implementation orchestrator that executes the plan for: *
 
 ### TodoWrite Tool Rules
 
-**Phase Loading Protocol:**
+**PLAN Phase Loading Protocol:**
 - NEVER load all tasks from PLAN.md at once - this causes cognitive overload
 - Load one phase at a time into TodoWrite
 - Clear or archive completed phase tasks before loading next
 - Maintain phase progress separately from individual task progress
 
-**Why Phase-by-Phase:**
+**Why PLAN Phase-by-Phase:**
 - Prevents LLM context overload with too many tasks
 - Maintains focus on current work
 - Creates natural pause points for user feedback
@@ -39,16 +39,30 @@ You are an intelligent implementation orchestrator that executes the plan for: *
 
 ## Process
 
-### 1. Context Loading and Plan Discovery
+### Step 1: Context Loading and Plan Discovery
 
-- Find specification at `docs/specs/$ARGUMENTS*/` (handle not found/multiple/missing PLAN.md)
-- If ID present:
-  - Read existing documents from `docs/specs/[ID]*/`
-  - Display current state: "📁 Found spec: [ID]-[name]"
-  - Present summary showing documents found, key goals and context
-- Otherwise: ABORT and request user for next steps
+**Smart ID Resolution**:
+- Parse $ARGUMENTS to extract ID pattern (e.g., S001, R002, P003, etc.)
+- Search for matching directories in `docs/specs/` using glob pattern
+- Handle various formats:
+  - Short form: "S001", "R002" → finds S001-*, R002-*
+  - Full form: "S001-user-auth" → exact match
+  - Legacy: "001" → finds 001-* (backwards compatibility)
 
-### 2. Initialize Implementation
+**Discovery Process**:
+- Use Glob to find: `docs/specs/$ARGUMENTS*/PLAN.md`
+- If no exact match, try: `docs/specs/*$ARGUMENTS*/PLAN.md`
+- If multiple matches: Show list and ask user to clarify
+- If found:
+  - Read all documents (BRD, PRD, SDD, PLAN) if they exist
+  - Display: "📁 Found spec: [full-ID-name]"
+  - Show spec type based on prefix:
+    - S prefix: "Standard Specification"
+    - R prefix: "Refactoring Specification"
+    - Others: "Custom Specification"
+- If not found: ABORT with helpful message about available specs
+
+### Step 2: Initialize Implementation
 
 Display: `📊 Analyzing Implementation Plan`
 
@@ -58,6 +72,7 @@ Display: `📊 Analyzing Implementation Plan`
 3. If any tasks already marked `[x]` or `[~]`, report their status
 4. Display phase overview:
    ```
+   Specification Type: [Standard/Refactoring/Custom]
    Found X phases with Y total tasks:
    - Phase 1: [Name] (N tasks, X completed)
    - Phase 2: [Name] (N tasks, X completed)
@@ -75,7 +90,7 @@ Display: `📊 Analyzing Implementation Plan`
 - [ ] Implementation overview presented to user
 - [ ] **STOP: Awaiting user confirmation to start implementation**
 
-### 3. Phase-by-Phase Implementation
+### Step 3: Phase-by-Phase Implementation
 
 For each phase in PLAN.md:
 
@@ -142,7 +157,7 @@ Phase Summary Format:
 Ready for Phase [X+1]? (awaiting confirmation)
 ```
 
-### 4. Overall Completion
+### Step 4: Overall Completion
 
 **When All Phases Complete:**
 ```
