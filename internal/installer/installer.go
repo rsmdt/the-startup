@@ -245,15 +245,15 @@ func (i *Installer) installClaudeAssets() error {
 		if err != nil {
 			return err
 		}
-		
+
 		// Skip directories
 		if d.IsDir() {
 			return nil
 		}
-		
+
 		// Get relative path from assets/claude
 		relPath := strings.TrimPrefix(path, "assets/claude/")
-		
+
 		// Check if this file should be installed based on selected files
 		if i.selectedFiles != nil && len(i.selectedFiles) > 0 {
 			found := false
@@ -267,35 +267,35 @@ func (i *Installer) installClaudeAssets() error {
 				return nil // Skip this file
 			}
 		}
-		
+
 		// Create destination path in CLAUDE_PATH
 		destPath := filepath.Join(i.claudePath, relPath)
-		
+
 		// Create destination directory if needed
 		destDir := filepath.Dir(destPath)
 		if err := os.MkdirAll(destDir, 0755); err != nil {
 			return fmt.Errorf("failed to create directory %s: %w", destDir, err)
 		}
-		
+
 		// Read file content
 		data, err := i.claudeAssets.ReadFile(path)
 		if err != nil {
 			return fmt.Errorf("failed to read %s: %w", path, err)
 		}
-		
+
 		// Apply placeholder replacement to ALL files
 		data = i.replacePlaceholders(data)
-		
+
 		// Skip writing settings.json and settings.local.json here as they're handled by configureHooks
 		if filepath.Base(path) == "settings.json" || filepath.Base(path) == "settings.local.json" {
 			return nil
 		}
-		
+
 		// Write file to destination
 		if err := os.WriteFile(destPath, data, 0644); err != nil {
 			return fmt.Errorf("failed to write %s: %w", destPath, err)
 		}
-		
+
 		return nil
 	})
 }
@@ -307,15 +307,15 @@ func (i *Installer) installStartupAssets() error {
 		if err != nil {
 			return err
 		}
-		
+
 		// Skip directories
 		if d.IsDir() {
 			return nil
 		}
-		
+
 		// Get relative path from assets/the-startup
 		relPath := strings.TrimPrefix(path, "assets/the-startup/")
-		
+
 		// Check if this file should be installed based on selected files
 		if i.selectedFiles != nil && len(i.selectedFiles) > 0 {
 			found := false
@@ -329,34 +329,33 @@ func (i *Installer) installStartupAssets() error {
 				return nil // Skip this file
 			}
 		}
-		
+
 		// Create destination path in STARTUP_PATH
 		destPath := filepath.Join(i.installPath, relPath)
-		
+
 		// Create destination directory if needed
 		destDir := filepath.Dir(destPath)
 		if err := os.MkdirAll(destDir, 0755); err != nil {
 			return fmt.Errorf("failed to create directory %s: %w", destDir, err)
 		}
-		
+
 		// Read file content
 		data, err := i.startupAssets.ReadFile(path)
 		if err != nil {
 			return fmt.Errorf("failed to read %s: %w", path, err)
 		}
-		
+
 		// Apply placeholder replacement for template files
 		data = i.replacePlaceholders(data)
-		
+
 		// Write file to destination
 		if err := os.WriteFile(destPath, data, 0644); err != nil {
 			return fmt.Errorf("failed to write %s: %w", destPath, err)
 		}
-		
+
 		return nil
 	})
 }
-
 
 // configureHooks updates settings.json and settings.local.json to include hooks and permissions
 func (i *Installer) configureHooks() error {
@@ -400,12 +399,12 @@ func (i *Installer) configureHooks() error {
 
 	// Handle settings.local.json if template exists
 	localSettingsPath := filepath.Join(i.claudePath, "settings.local.json")
-	
+
 	if i.claudeAssets != nil {
 		if templateLocalData, err := i.claudeAssets.ReadFile("assets/claude/settings.local.json"); err == nil {
 			// Replace placeholders in template
 			templateLocalData = i.replacePlaceholders(templateLocalData)
-			
+
 			var templateLocalSettings map[string]interface{}
 			if err := json.Unmarshal(templateLocalData, &templateLocalSettings); err != nil {
 				// Log the error but continue - invalid JSON in template
@@ -419,20 +418,20 @@ func (i *Installer) configureHooks() error {
 						// Continue with just the template settings
 					}
 				}
-				
+
 				// Merge local settings (template takes precedence for our managed sections)
 				localSettings := i.mergeSettings(existingLocalSettings, templateLocalSettings)
-				
+
 				// Write updated local settings
 				localData, err := json.MarshalIndent(localSettings, "", "  ")
 				if err != nil {
 					return fmt.Errorf("failed to marshal settings.local.json: %w", err)
 				}
-				
+
 				if err := os.WriteFile(localSettingsPath, localData, 0644); err != nil {
 					return fmt.Errorf("failed to write settings.local.json: %w", err)
 				}
-				
+
 				fmt.Println("✓ Settings.local.json configured")
 			}
 		}
@@ -461,7 +460,7 @@ func (i *Installer) mergeSettings(existing, template map[string]interface{}) map
 	// Now merge template settings into result
 	for key, templateValue := range template {
 		existingValue, exists := result[key]
-		
+
 		if !exists {
 			// Key doesn't exist in existing settings, add it
 			result[key] = templateValue
@@ -480,12 +479,12 @@ func (i *Installer) mergeValues(existing, template interface{}) interface{} {
 	if existingMap, existingIsMap := existing.(map[string]interface{}); existingIsMap {
 		if templateMap, templateIsMap := template.(map[string]interface{}); templateIsMap {
 			merged := make(map[string]interface{})
-			
+
 			// Copy all existing entries
 			for k, v := range existingMap {
 				merged[k] = v
 			}
-			
+
 			// Merge in template entries
 			for k, templateVal := range templateMap {
 				if existingVal, exists := merged[k]; exists {
@@ -502,18 +501,18 @@ func (i *Installer) mergeValues(existing, template interface{}) interface{} {
 					merged[k] = templateVal
 				}
 			}
-			
+
 			return merged
 		}
 	}
-	
+
 	// If both are slices, merge them
 	if existingSlice, existingIsSlice := existing.([]interface{}); existingIsSlice {
 		if templateSlice, templateIsSlice := template.([]interface{}); templateIsSlice {
 			return i.mergeSlices(existingSlice, templateSlice)
 		}
 	}
-	
+
 	// For other types or mismatched types, template takes precedence
 	// This includes strings, numbers, booleans
 	return template
@@ -531,7 +530,7 @@ func (i *Installer) mergeAndDeduplicate(existing, template interface{}) interfac
 						// This is a hooks array, deduplicate by command
 						seen := make(map[string]bool)
 						var result []interface{}
-						
+
 						// Use template hooks (they have the right paths)
 						for _, item := range templateSlice {
 							if hook, ok := item.(map[string]interface{}); ok {
@@ -543,7 +542,7 @@ func (i *Installer) mergeAndDeduplicate(existing, template interface{}) interfac
 								}
 							}
 						}
-						
+
 						// Add any existing hooks that aren't in template
 						for _, item := range existingSlice {
 							if hook, ok := item.(map[string]interface{}); ok {
@@ -556,18 +555,18 @@ func (i *Installer) mergeAndDeduplicate(existing, template interface{}) interfac
 								}
 							}
 						}
-						
+
 						return result
 					}
 				}
 			}
-			
+
 			// For additionalDirectories or other string arrays
 			if len(templateSlice) > 0 {
 				if _, isString := templateSlice[0].(string); isString {
 					seen := make(map[string]bool)
 					var result []interface{}
-					
+
 					// Use template directories (they have the right paths)
 					for _, item := range templateSlice {
 						if str, ok := item.(string); ok {
@@ -577,7 +576,7 @@ func (i *Installer) mergeAndDeduplicate(existing, template interface{}) interfac
 							}
 						}
 					}
-					
+
 					// Add any existing directories that aren't startup-related
 					for _, item := range existingSlice {
 						if str, ok := item.(string); ok {
@@ -588,13 +587,13 @@ func (i *Installer) mergeAndDeduplicate(existing, template interface{}) interfac
 							}
 						}
 					}
-					
+
 					return result
 				}
 			}
 		}
 	}
-	
+
 	// Fallback to template
 	return template
 }
@@ -611,7 +610,7 @@ func (i *Installer) mergeSlices(existing, template []interface{}) []interface{} 
 			}
 		}
 	}
-	
+
 	if isHookArray {
 		// Create a map of existing hooks by matcher
 		existingByMatcher := make(map[string]interface{})
@@ -622,7 +621,7 @@ func (i *Installer) mergeSlices(existing, template []interface{}) []interface{} 
 				}
 			}
 		}
-		
+
 		// Merge template hooks
 		var result []interface{}
 		for _, templateItem := range template {
@@ -640,15 +639,15 @@ func (i *Installer) mergeSlices(existing, template []interface{}) []interface{} 
 				}
 			}
 		}
-		
+
 		// Add remaining existing hooks that weren't in template
 		for _, item := range existingByMatcher {
 			result = append(result, item)
 		}
-		
+
 		return result
 	}
-	
+
 	// For non-hook arrays, just return template
 	// (we handle deduplication in mergeAndDeduplicate)
 	return template
@@ -801,7 +800,7 @@ func (i *Installer) copyCurrentExecutable(destDir string) error {
 // GetInstalledAgents returns the list of installed agent files
 func (i *Installer) GetInstalledAgents() []string {
 	var agents []string
-	
+
 	// If specific files were selected, filter for agents
 	if len(i.selectedFiles) > 0 {
 		for _, file := range i.selectedFiles {
@@ -822,14 +821,14 @@ func (i *Installer) GetInstalledAgents() []string {
 			agents = append(agents, name)
 		}
 	}
-	
+
 	return agents
 }
 
 // GetInstalledCommands returns the list of installed command files
 func (i *Installer) GetInstalledCommands() []string {
 	var commands []string
-	
+
 	// If specific files were selected, filter for commands
 	if len(i.selectedFiles) > 0 {
 		for _, file := range i.selectedFiles {
@@ -857,7 +856,7 @@ func (i *Installer) GetInstalledCommands() []string {
 			commands = append(commands, command)
 		}
 	}
-	
+
 	return commands
 }
 
@@ -867,19 +866,19 @@ func toTildePath(path string) string {
 	if err != nil {
 		return path // Return original if we can't get home dir
 	}
-	
+
 	// If path starts with home directory, replace it with ~
 	if strings.HasPrefix(path, homeDir) {
 		return "~" + strings.TrimPrefix(path, homeDir)
 	}
-	
+
 	return path
 }
 
 // replacePlaceholders replaces template variables with actual paths.
 // This function is called for ALL asset files (agents, commands, templates, rules)
 // during installation to ensure placeholders work across all content types.
-// 
+//
 // Supported placeholders:
 //   - {{STARTUP_PATH}}: The user-selected installation directory (e.g., ~/.the-startup)
 //   - {{CLAUDE_PATH}}: The Claude configuration directory (e.g., ~/.claude)
@@ -890,7 +889,7 @@ func (i *Installer) replacePlaceholders(data []byte) []byte {
 	// Convert paths to ~ format for better readability
 	startupPath := toTildePath(i.installPath)
 	claudePath := toTildePath(i.claudePath)
-	
+
 	// Replace {{STARTUP_PATH}} with the installation path (using ~ format)
 	data = bytes.ReplaceAll(data, []byte("{{STARTUP_PATH}}"), []byte(startupPath))
 

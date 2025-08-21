@@ -9,9 +9,9 @@ import (
 
 func TestStatuslineOutput(t *testing.T) {
 	tests := []struct {
-		name     string
-		input    StatuslineInput
-		wantContains []string
+		name            string
+		input           StatuslineInput
+		wantContains    []string
 		wantNotContains []string
 	}{
 		{
@@ -84,7 +84,7 @@ func TestStatuslineOutput(t *testing.T) {
 			// Run statusline command
 			input := bytes.NewReader(inputJSON)
 			output := &bytes.Buffer{}
-			
+
 			if err := runStatusline(input, output); err != nil {
 				t.Fatalf("runStatusline() error = %v", err)
 			}
@@ -144,7 +144,7 @@ func TestHomeDirectorySubstitution(t *testing.T) {
 			if strings.HasPrefix(result, homeDir) {
 				result = "~" + strings.TrimPrefix(result, homeDir)
 			}
-			
+
 			if result != tt.expected {
 				t.Errorf("Home substitution failed: got %q, want %q", result, tt.expected)
 			}
@@ -156,11 +156,11 @@ func TestTerminalWidthFallback(t *testing.T) {
 	// Test that getTermWidth returns a reasonable default
 	// This is hard to test directly, but we can verify it returns > 0
 	width := getTermWidth()
-	
+
 	if width <= 0 {
 		t.Errorf("getTermWidth() returned invalid width: %d", width)
 	}
-	
+
 	// Should return at least the default width
 	if width < 80 {
 		t.Errorf("getTermWidth() returned width less than minimum: %d", width)

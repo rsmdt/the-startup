@@ -21,7 +21,7 @@ var (
 //go:embed assets/claude
 var claudeAssets embed.FS
 
-// Embedded assets - The Startup configuration  
+// Embedded assets - The Startup configuration
 //
 //go:embed assets/the-startup
 var startupAssets embed.FS

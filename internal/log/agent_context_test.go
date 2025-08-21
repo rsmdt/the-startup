@@ -200,12 +200,12 @@ func TestReadAgentContextRaw(t *testing.T) {
 
 		// Test invalid maxLines - should default to 50
 		lines2, err2 := ReadAgentContextRaw(sessionID, "some-agent", 0)
-		assert.NoError(t, err2)    // Should not error but use default
-		assert.NotNil(t, lines2)   // Should return empty slice, not nil
+		assert.NoError(t, err2)  // Should not error but use default
+		assert.NotNil(t, lines2) // Should return empty slice, not nil
 
 		lines3, err3 := ReadAgentContextRaw(sessionID, "some-agent", 2000)
-		assert.NoError(t, err3)    // Should not error but use default
-		assert.NotNil(t, lines3)   // Should return empty slice, not nil
+		assert.NoError(t, err3)  // Should not error but use default
+		assert.NotNil(t, lines3) // Should return empty slice, not nil
 	})
 
 	t.Run("Corrupted JSONL handling", func(t *testing.T) {
@@ -253,7 +253,7 @@ func TestFindLatestSessionWithAgent(t *testing.T) {
 			require.NoError(t, os.MkdirAll(sessionDir, 0755))
 
 			agentFile := filepath.Join(sessionDir, agentID+".jsonl")
-			testData := fmt.Sprintf(`{"role":"user","content":"test content","timestamp":"2025-08-12T14:00:00.000Z"}`)  
+			testData := fmt.Sprintf(`{"role":"user","content":"test content","timestamp":"2025-08-12T14:00:00.000Z"}`)
 			require.NoError(t, os.WriteFile(agentFile, []byte(testData), 0644))
 
 			// Set specific modification times - make dev-20250812-150000 (index 1) the latest

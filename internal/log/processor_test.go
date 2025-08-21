@@ -343,7 +343,7 @@ func TestFileWriting(t *testing.T) {
 
 	sessionID := "test-session"
 	agentID := "test-agent"
-	
+
 	hookData := &HookData{
 		Role:      "user",
 		Content:   "Test task content",

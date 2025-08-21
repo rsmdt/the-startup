@@ -208,7 +208,7 @@ func TestIsInstalled(t *testing.T) {
 
 func TestToTildePath(t *testing.T) {
 	homeDir, _ := os.UserHomeDir()
-	
+
 	tests := []struct {
 		name     string
 		input    string
@@ -240,7 +240,7 @@ func TestToTildePath(t *testing.T) {
 			expected: "./the-startup",
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := toTildePath(tt.input)
@@ -253,7 +253,7 @@ func TestToTildePath(t *testing.T) {
 
 func TestReplacePlaceholders(t *testing.T) {
 	installer := New(&testAssets, &testAssets)
-	
+
 	// Test with paths in home directory (should use ~)
 	homeDir, _ := os.UserHomeDir()
 	installer.SetInstallPath(filepath.Join(homeDir, ".the-startup"))
@@ -300,7 +300,7 @@ func TestReplacePlaceholders(t *testing.T) {
 		installer.SetInstallPath("/opt/the-startup")
 		input := "Path: {{STARTUP_PATH}}/bin"
 		expected := "Path: /opt/the-startup/bin"
-		
+
 		result := installer.replacePlaceholders([]byte(input))
 		if string(result) != expected {
 			t.Errorf("Expected '%s', got '%s'", expected, string(result))
@@ -353,12 +353,12 @@ func TestInstallDirectoryCreation(t *testing.T) {
 
 	// This should create the directory structure
 	err := installer.Install()
-	
+
 	// If error is about missing assets, skip the test (expected in test environment)
 	if err != nil && strings.Contains(err.Error(), "open assets/claude: file does not exist") {
 		t.Skip("Skipping test - embedded assets not available in test environment")
 	}
-	
+
 	if err != nil {
 		t.Errorf("Expected Install to create directories, got error: %v", err)
 	}
@@ -573,12 +573,12 @@ func TestGoHooksIntegration(t *testing.T) {
 
 	// Install hooks component
 	err := installer.Install()
-	
+
 	// If error is about missing assets, skip the test (expected in test environment)
 	if err != nil && strings.Contains(err.Error(), "open assets/claude: file does not exist") {
 		t.Skip("Skipping test - embedded assets not available in test environment")
 	}
-	
+
 	if err != nil {
 		t.Errorf("Expected full installation to succeed, got error: %v", err)
 		return // Exit early if installation failed

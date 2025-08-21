@@ -99,16 +99,16 @@ func buildStatusLine(data StatuslineInput, termWidth int) string {
 	parts = append(parts, helpStyle.Render("? for shortcuts"))
 
 	// Join all parts with lipgloss padding
-	content := lipgloss.JoinHorizontal(lipgloss.Left, 
+	content := lipgloss.JoinHorizontal(lipgloss.Left,
 		lipgloss.NewStyle().PaddingRight(2).Render(parts[0]),
 		lipgloss.NewStyle().PaddingRight(2).Render(parts[1]),
 		parts[2])
-	
+
 	// Apply main style with color and max width for truncation
 	mainStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("#FAFAFA")).
 		MaxWidth(termWidth)
-	
+
 	return mainStyle.Render(content)
 }
 

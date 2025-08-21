@@ -173,7 +173,7 @@ func (m FileSelectionModel) getAllAvailableFiles() []string {
 		})
 	}
 
-	// Walk through all files in Startup assets (handle nil embed.FS gracefully) 
+	// Walk through all files in Startup assets (handle nil embed.FS gracefully)
 	if m.startupAssets != nil {
 		fs.WalkDir(m.startupAssets, "assets/the-startup", func(path string, d fs.DirEntry, err error) error {
 			if err != nil || d.IsDir() {
@@ -270,7 +270,7 @@ func (m FileSelectionModel) buildStaticTree() string {
 	} else {
 		settingsItem = itemStyle.Render("settings.json")
 	}
-	
+
 	// Build children list for the tree
 	children := []any{
 		"agents",
@@ -281,7 +281,7 @@ func (m FileSelectionModel) buildStaticTree() string {
 		outputStylesTree,
 		settingsItem,
 	}
-	
+
 	// Add settings.local.json if it exists in assets (handle nil embed.FS gracefully)
 	if m.claudeAssets != nil {
 		if _, err := m.claudeAssets.ReadFile("assets/claude/settings.local.json"); err == nil {
@@ -297,7 +297,7 @@ func (m FileSelectionModel) buildStaticTree() string {
 	}
 
 	t := tree.
-		Root("⁜ "+displayPath).
+		Root("⁜ " + displayPath).
 		Child(children...).
 		Enumerator(tree.RoundedEnumerator).
 		EnumeratorStyle(enumeratorStyle).

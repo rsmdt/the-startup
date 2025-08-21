@@ -83,7 +83,7 @@ func TestHookDataMarshaling(t *testing.T) {
 		Content:   "Please design a scalable architecture",
 		Timestamp: "2025-01-11T10:30:00.000Z",
 		SessionID: "dev-session-123", // Internal field, not serialized
-		AgentID:   "arch-001",         // Internal field, not serialized
+		AgentID:   "arch-001",        // Internal field, not serialized
 	}
 
 	jsonBytes, err := json.Marshal(userData)
