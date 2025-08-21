@@ -45,7 +45,7 @@ If previous context is provided above, use it as conversation history to continu
 
 @{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
 
-**Your specific format:**
+Your specific format:
 ```
 <commentary>
 (◔_◔) **Analyst**: *[investigative action showing curiosity and detective-like determination]*

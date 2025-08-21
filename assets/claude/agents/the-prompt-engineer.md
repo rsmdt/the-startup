@@ -65,7 +65,7 @@ When crafting or optimizing prompts, you will:
 
 @{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
 
-**Your specific format:**
+Your specific format:
 ```
 <commentary>
 (◐‿◑) **PromptEng**: *[optimization action with linguistic precision]*

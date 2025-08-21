@@ -1,32 +1,10 @@
-Use this format for the-chief invocation:
+Ask `the-chief` agent to assess the complexity of the work and recommend how to proceed.
 
-```
-Task: the-chief
-FOCUS: Assess complexity and recommend approach
-EXCLUDE: Implementation details, specific technical solutions
-CONTEXT: [relevant analysis results, requirements, or code assessment]
-SUCCESS: Clear complexity score and execution strategy recommendation
-```
+Provide the relevant context:
+- what needs to be done
+- the scope of changes
+- any constraints identified
 
-**DISPLAY PROTOCOL**
+The-chief will provide their assessment and recommendation. Follow their guidance on whether to proceed immediately or create a plan for later execution.
 
-Display the-chief's response VERBATIM in delimiters:
-```
-=== Response from the-chief ===
-[COMPLETE UNMODIFIED RESPONSE]
-=== End of the-chief response ===
-```
-
-After displaying, present routing decision based on complexity score.
-STOP and wait for user confirmation before proceeding.
-
-**ROUTING BASED ON COMPLEXITY**
-
-For Specifications:
-- Low (1-3): Minimal documentation
-- Medium (4-6): Standard documentation  
-- High (7-10): Comprehensive documentation
-
-For Refactoring:
-- Simple (1-3): Direct execution
-- Complex (4+): Create plan for /s:implement
+Wait for user confirmation after displaying assessment before proceeding.

@@ -92,7 +92,7 @@ When addressing security concerns, you will:
 
 @{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
 
-**Your specific format:**
+Your specific format:
 ```
 <commentary>
 (ಠ_ಠ) **Security**: *[paranoid security action with protective vigilance]*

@@ -1,289 +1,199 @@
 ---
 description: "Analyze code and plan or execute refactoring for better maintainability"
-argument-hint: "describe what code needs refactoring (file, module, or pattern)"
+argument-hint: "describe what code needs refactoring and why"
 allowed-tools: ["Task", "TodoWrite", "Grep", "Glob", "LS", "Bash", "Read", "Edit", "MultiEdit", "Write"]
 ---
 
-You are a refactoring analyst that identifies code improvements and either executes simple refactorings directly or creates comprehensive plans for complex refactorings using existing infrastructure.
+You are a refactoring orchestrator that follows industry best practices to improve code quality while preserving behavior.
 
 **Target:** $ARGUMENTS
 
-## Core Philosophy
-
-- **Behavior Preservation**: Functionality must remain identical
-- **Incremental Progress**: Small, safe refactoring steps
-- **Test Protection**: Tests must pass before, during, and after
-- **Smart Routing**: Simple changes execute directly, complex ones get planned
-
 ## Core Rules
 
-- **You are an orchestrator** - Delegate analysis to specialists
-- **Safety first** - Never refactor without test coverage
-- **Complexity-based routing** - Use the-chief to determine approach
-- **Reuse infrastructure** - Complex refactorings use `/s:implement`
-- **Track progress** - Use TodoWrite for task management
-- **Stop at checkpoints** - Wait for user confirmation at step boundaries
-- **NEVER commit changes** - The user will review and commit
+- **You are an orchestrator** - Delegate analysis to specialist agents
+- **Gather context first** - Understand the "why" before the "how"
+- **Verify safety** - Ensure validation mechanisms exist before changes
+- **Track everything** - Use TodoWrite for task management
 
-### Execution Rules
+### Process Rules
 
-- Simple refactorings (1-3) execute directly in this command
-- Complex refactorings (4+) create plans for `/s:implement`
-- Tests must pass before proceeding with any refactoring
-- Create backup branches for rollback capability
+- Always verify existing validation mechanisms
+- Create safety branches for rollback capability
 
 ### Agent Delegation Rules
 
 @{{STARTUP_PATH}}/rules/agent-delegation.md
 
+## Refactoring Philosophy
+
+Core Principles:
+- Behavior Preservation: External functionality must remain identical
+- Incremental Progress: Small, safe, verifiable steps
+- Continuous Validation: Verify correctness after each change
+- Clarity Over Cleverness: Optimize for readability and maintainability
+
+Best Practices:
+- Boy Scout Rule: Leave code cleaner than you found it
+- Single Responsibility: Each element should have one reason to change
+- DRY (Don't Repeat Yourself): Eliminate duplication thoughtfully
+- YAGNI (You Aren't Gonna Need It): Remove unnecessary complexity
+- Refactor in Green: Only refactor when tests are passing
+
 ## Process
 
-### Step 1: Code Analysis and Assessment
+### Step 1: Clarification and Context Gathering
 
-**Goal**: Understand the current state and determine refactoring approach.
+**Goal**: Understand the refactoring goals and constraints.
 
-1. **Locate Target Code**:
-   - If $ARGUMENTS is vague, use Grep/Glob to find relevant code
-   - Identify all files that will be affected
-   - Map dependencies and relationships
+You MUST ALWAYS ask the user for further details about the refactoring needs:
+- What specific problems are they trying to solve?
+- What quality attributes need improvement? (readability, performance, testability, etc.)
+- Are there any constraints or areas to avoid?
+- What validation mechanisms exist? (tests, linting, type checking, etc.)
 
-2. **Test Coverage Check** (CRITICAL):
-   ```bash
-   # Run existing tests to establish baseline
-   npm test || go test ./... || pytest
-   ```
-   - If tests fail: STOP - fix tests first
-   - If no tests exist: STOP - ask user about creating tests first
+Once you have clarity, proceed to analysis.
 
-3. **Launch Analysis Agents**:
-   ```
-   Task: the-lead-developer
-   FOCUS: Code quality assessment and refactoring opportunities
-   EXCLUDE: Performance optimization, new features
-   CONTEXT: [code location and current structure]
-   SUCCESS: Identified code smells and refactoring patterns
+--- End of Step Completion Checklist ---
+
+- [ ] Refactoring goals clarified with user
+- [ ] Constraints and boundaries understood
+- [ ] Validation mechanisms identified
+
+⚠️ **DO NOT CONTINUE** until user confirmation.
+
+### Step 2: Discovery and Code Analysis
+
+**Goal**: Understand current state and identify improvement opportunities.
+
+1. Locate Target Code:
+   - Use appropriate tools to find relevant code
+   - Identify affected files and dependencies
+   - Map component relationships
+
+2. Validation Check:
+   - Identify existing validation mechanisms
+   - Run available validation suite to establish baseline
+   - If validation fails: Present findings to user for decision
+   - If no validation exists: Warn user about risks
+
+3. Specialist Analysis:
+   Use appropriate specialist agents to analyze the code from multiple perspectives.
+
+   Let the agents identify:
+   - Code quality issues
+   - Architectural concerns
+   - Testing gaps
+   - Performance bottlenecks
+   - Security considerations
    
-   Task: the-tester
-   FOCUS: Test coverage and testability assessment
-   EXCLUDE: New test creation (unless critical)
-   CONTEXT: [existing test structure]
-   SUCCESS: Testing gaps and testability issues identified
-   ```
+   The specific agents will depend on the code being analyzed.
 
-4. **Complexity Assessment**:
-   ALWAYS use `the-chief` agent to assess refactoring complexity.
-
+4. Complexity Assessment:
    @{{STARTUP_PATH}}/rules/complexity-assessment.md
 
-5. **Synthesize Findings**:
-   - Code smells identified
-   - Refactoring opportunities catalogued
-   - Chief's complexity assessment presented
-   - Recommended approach based on complexity
+--- End of Step Completion Checklist ---
 
-**✅ CHECKPOINT - Step 1 Complete**
-```
---- End of Step 1: Analysis ---
+- [ ] Target code located and analyzed
+- [ ] Validation status checked
+- [ ] Specialist analysis completed
+- [ ] The-chief complexity assessment displayed verbatim
+- [ ] Refactoring opportunities identified
 
-**Analysis Summary:**
-- [ ] Current code analyzed
-- [ ] Tests passing
-- [ ] Code issues identified
-- [ ] The-chief complexity assessment received and displayed verbatim
-- [ ] Complexity scores and workflow presented to user
-- [ ] **STOP: Awaiting user confirmation**
+⚠️ **DO NOT CONTINUE** until user confirmation.
 
-Type "continue" to proceed with recommended approach.
-```
+### Step 3: Execute Based on Chief's Recommendation
 
-### Step 2A: Simple Refactoring Execution (Complexity 1-3)
+Based on what complexity assessment, proceed accordingly:
 
-**Goal**: Execute simple, localized refactorings directly.
+#### If complexity assessment suggests immediate execution
 
-**Examples**: Extract method, rename variable, inline function, remove duplication in single file
+**Goal**: Perform the refactoring now
 
-1. **Create Safety Branch**:
-   ```bash
-   git checkout -b refactor/[description]
-   git status
-   ```
+1. Plan Micro-Steps:
 
-2. **Load Tasks**:
-   - Create TodoWrite tasks for each refactoring
-   - Keep scope limited and focused
+   - Break refactoring into smallest possible changes
+   - Load tasks into TodoWrite
+   - Each step should be independently verifiable
 
-3. **Execute Refactorings**:
-   ```
-   Task: the-developer
-   FOCUS: [Specific simple refactoring]
-   EXCLUDE: Architecture changes, complex restructuring
-   CONTEXT: [Current code, refactoring technique]
-   SUCCESS: Refactoring complete, tests passing
-   ```
+2. Execute Refactoring:
 
-4. **Validate After Each Change**:
-   ```bash
-   npm test || go test ./... || pytest
-   ```
-   - If tests fail: STOP and rollback with `git checkout -- .`
+   - Use appropriate specialist agent to perform the refactoring.
+   - Focus on one improvement at a time.
+   - Preserve all existing behavior.
 
-5. **Track Progress**:
-   - Update TodoWrite as tasks complete
-   - Note which files were modified
+3. Review and Validate After Each Change:
 
-**✅ CHECKPOINT - Simple Refactoring Complete**
-```
---- Simple Refactoring Complete ---
+   - Use a different specialist agent to review the refactoring.
+   - Run validation suite after every modification.
+   - If validation fails: Stop and show user the issue.
 
-**Results:**
-- [ ] All refactorings executed
-- [ ] Tests passing
-- [ ] Files modified: [list]
+4. Summarize Refactoring Completion
 
-Branch: refactor/[description]
-Review with: git diff
-Commit when ready.
-```
+#### If complexity assessment suggests careful planning
 
-### Step 2B: Complex Refactoring Planning (Complexity 4+)
+**Goal**: Create comprehensive refactoring plan
 
-**Goal**: Create comprehensive specification and plan for `/s:implement`.
-
-**Examples**: Module restructuring, architectural changes, cross-cutting refactorings
-
-1. **Generate Specification ID**:
-   - Format: `R[3-digit-number]-[descriptive-name]`
-   - Example: `R001-user-service`
-   - Check for highest existing R-prefixed ID in `docs/specs/`
-
-2. **Create Refactoring Documentation**:
+1. Create Solution Design Documentation (if suggested by complexity assessment):
    
-   **Skip BRD**: Not applicable for refactoring
-   
-   **Create SDD** (if architectural changes):
-   ```
-   Task: the-architect
-   FOCUS: Document current vs. target architecture for refactoring
-   EXCLUDE: New features, external APIs
-   CONTEXT: [current structure, target improvements]
-   SUCCESS: SDD showing before/after design
-   
-   Template: {{STARTUP_PATH}}/templates/SDD.md
-   Output: docs/specs/R[ID]-[name]/SDD.md
-   ```
-   
-   **Create PLAN.md** (always):
-   ```
-   Task: the-lead-developer
-   FOCUS: Create phase-by-phase refactoring plan
-   EXCLUDE: New features, external changes
-   CONTEXT: [analysis results, refactoring techniques, validation points]
-   SUCCESS: PLAN.md with executable refactoring phases
-   
-   Template: {{STARTUP_PATH}}/templates/PLAN.md
-   Output: docs/specs/R[ID]-[name]/PLAN.md
-   ```
+   Use the following templates to create the documentation:
+   - Template: `{{STARTUP_PATH}}/templates/SDD.md`
+   - Output: `docs/refactorings/R[ID]-[name]/SDD.md`
 
-3. **Plan Contents Should Include**:
-   - Safety net establishment phase (test verification)
-   - Refactoring phases grouped logically
-   - Specific techniques for each task
-   - Validation points after each change
-   - Agent assignments for tasks
-   - Review gates where needed
+   Use specialist agent to create the documentation.
 
-**✅ CHECKPOINT - Planning Complete**
-```
---- Complex Refactoring Plan Created ---
+2. Create Implementation Plan:   
 
-**Specification Created:**
-- [ ] ID: R[ID]-[name]
-- [ ] SDD created (if applicable)
-- [ ] PLAN.md created with phases
-- [ ] Saved to: docs/specs/R[ID]-[name]/
+   Use the following templates to create the documentation:
+   - Template: `{{STARTUP_PATH}}/templates/PLAN.md`
+   - Output: `docs/refactorings/R[ID]-[name]/PLAN.md`
 
-Next step: /s:implement R[ID]
+   Use specialist agent to create phase-by-phase plan.
 
-This will execute your refactoring plan phase-by-phase with full validation.
-```
+3. Summarize Refactoring Plan Creation
 
-## Special Refactoring Patterns
+   - [ ] SDD: `docs/refactorings/R[ID]-[name]/SDD.md` (if applicable)
+   - [ ] PLAN: `docs/refactorings/R[ID]-[name]/PLAN.md`
 
-### Legacy Code Refactoring
+    Next: Use `/s:implement R[ID]` to execute the plan.
 
-When dealing with untested legacy code:
+## Refactoring Patterns
 
-1. **Characterization Tests First**: 
-   - Create tests that document current behavior
-   - Use golden master testing for complex outputs
-2. **Incremental Refactoring**:
-   - Small changes with continuous validation
-   - Build test coverage as you go
-
-### Performance-Critical Refactoring
+When working with legacy or untested code:
+1. Characterization First: Document current behavior
+2. Add Safety Net: Create tests that capture existing behavior
+3. Refactor Gradually: Small steps with continuous verification
+4. Build Coverage: Improve test coverage as you go
 
 When performance matters:
+1. Measure First: Establish performance baseline
+2. Refactor: Apply improvements
+3. Measure Again: Verify no regression
+4. Document: Note any performance trade-offs
 
-1. **Benchmark First**: Establish baseline
-2. **Refactor**: Apply changes
-3. **Benchmark Again**: Ensure no regression
+## Common Code Smells to Address
 
-## Common Refactoring Techniques
+Method-Level:
+- Long Method
+- Long Parameter List
+- Duplicate Code
+- Complex Conditionals
 
-**Simple (Direct Execution)**:
-- Extract Method/Function
-- Inline Method/Function
-- Rename Variable/Method
-- Remove Dead Code
-- Consolidate Duplicate Code (single file)
+Class-Level:
+- Large Class
+- Feature Envy
+- Data Clumps
+- Primitive Obsession
 
-**Complex (Requires Planning)**:
-- Extract Class/Module
-- Replace Conditional with Polymorphism
-- Replace Inheritance with Composition
-- Introduce Design Pattern
-- Break Circular Dependencies
-- Restructure Module Boundaries
+Architecture-Level:
+- Circular Dependencies
+- Inappropriate Intimacy
+- Middle Man
+- Shotgun Surgery
 
-## Error Recovery
+## Important Notes
 
-If refactoring fails:
+Remember Martin Fowler's definition: "Refactoring is a disciplined technique for restructuring an existing body of code, altering its internal structure without changing its external behavior."
 
-```bash
-# Revert all changes
-git checkout -- .
-git status  # Verify clean state
+The goal is better code structure, not different functionality. Every change must be justified by improved clarity, maintainability, or other quality attributes.
 
-# If needed, delete branch
-git checkout main
-git branch -D refactor/[branch]
-```
-
-## Command Workflow Summary
-
-1. **Analysis** → Identify issues + Chief complexity assessment
-2. **Decision Point**:
-   - **Simple (1-3)** → Execute immediately in this command
-   - **Complex (4+)** → Create plan for `/s:implement`
-3. **Execution**:
-   - Simple: Direct refactoring with validation
-   - Complex: Handoff to `/s:implement R[ID]`
-4. **Completion** → Changes ready for user review
-
-## Why This Design
-
-- **Reuses existing infrastructure**: `/s:implement` handles complex phase-based execution
-- **Avoids duplication**: No need for separate refactor-implement command
-- **Smart routing**: Simple stuff gets done fast, complex stuff gets proper planning
-- **Consistent patterns**: Uses same PLAN.md template and document structure
-- **User control**: All commits remain in user's hands
-
-## Final Notes
-
-The chief's complexity assessment ensures appropriate handling:
-- Simple refactorings execute immediately (no overhead)
-- Complex refactorings get proper planning and phase-based execution
-
-Remember: The goal is better code, not different code. Every change must be justified by improved clarity, maintainability, or structure.
-
-The best refactoring is invisible to users but obvious to developers.
+Quality is not negotiable - if you can't verify safety, don't refactor.

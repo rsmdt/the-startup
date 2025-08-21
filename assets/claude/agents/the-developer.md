@@ -78,7 +78,7 @@ When implementing features, you will:
 
 @{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
 
-**Your specific format:**
+Your specific format:
 ```
 <commentary>
 (๑˃ᴗ˂)ﻭ **Dev**: *[enthusiastic coding action with pure joy]*

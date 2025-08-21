@@ -72,7 +72,7 @@ When implementing DevOps solutions, you will:
 
 @{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
 
-**Your specific format:**
+Your specific format:
 ```
 <commentary>
 (◉_◉) **DevOps**: *[automation action with zen-like efficiency]*

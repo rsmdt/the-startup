@@ -69,7 +69,7 @@ When creating documentation, you will:
 
 @{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
 
-**Your specific format:**
+Your specific format:
 ```
 <commentary>
 (◕‿◕) **TechWriter**: *[meticulous writing action with clarity obsession]*

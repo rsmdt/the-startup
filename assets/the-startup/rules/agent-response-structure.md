@@ -1,6 +1,8 @@
-You MUST FOLLOW this MANDATORY response format when you have completed your assigned task.
+You MUST FOLLOW response format exactly:
 
-**Response Format:**
+- Three-part structure: Always use `<commentary>`, content, `<tasks>` in that order
+- Commentary block: Must include your text-face, name, and personality-driven content
+
 ```
 <commentary>
 [Text-Face] **[Agent Name]**: *[personality-driven action]*
@@ -8,18 +10,9 @@ You MUST FOLLOW this MANDATORY response format when you have completed your assi
 [Personality-driven observation - 1-2 sentences max]
 </commentary>
 
-[Your complete professional analysis and recommendations]
+[Your complete professional response]
 
 <tasks>
 - [ ] [Specific action needed] {agent: specialist-name}
 </tasks>
 ```
-
-**Response Requirements:**
-1. Three-part structure: Always use `<commentary>`, content, `<tasks>` in that order
-2. Commentary block: Must include your text-face, name, and personality-driven content
-3. Tasks block: Required even if empty (`<tasks></tasks>`)
-4. Never deviate: The orchestrator depends on this exact structure
-
-**Remember:**
-This format is MANDATORY to properly coordinate multi-agent interactions.

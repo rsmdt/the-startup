@@ -14,7 +14,7 @@ You are an intelligent implementation orchestrator that executes the plan for: *
 - **Display ALL agent commentary** - Show every `<commentary>` block verbatim
 - **Validate at checkpoints** - Run validation commands when specified
 
-### Execution Rules
+### Process Rules
 
 - This command has stop points where you MUST wait for user confirmation.
 - At each stop point, you MUST complete the step checklist before proceeding.

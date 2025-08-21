@@ -18,7 +18,7 @@ You are an expert requirements gatherer that creates specification documents for
 - **Dynamic review selection** - Choose reviewers and validators based on task context, not static rules
 - **Review cycles** - Ensure quality through automated review-revision loops
 
-### Execution Rules
+### Process Rules
 
 - This command has stop points where you MUST wait for user confirmation.
 - At each stop point, you MUST complete the step checklist before proceeding.
@@ -50,11 +50,9 @@ Once you have enough clarity, use specialist agents to analyze the feature reque
 ### Step 3: Requirements Review and Documentation
 
 **Review and Validate:**
-ALWAYS use `the-chief` agent for a complexity assessment.
-
 @{{STARTUP_PATH}}/rules/complexity-assessment.md
 
-Adjust the Todo's and documentation depth based on the chief's recommendations.
+Adjust the Todo's and documentation depth based on the recommendations.
 
 **Create Documentation:**
 Based on the requirement complexity, use the following templates to create the documentation:
