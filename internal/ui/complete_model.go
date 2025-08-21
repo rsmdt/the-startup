@@ -109,6 +109,19 @@ func (m CompleteModel) View() string {
 		s.WriteString("\n")
 	}
 
+	// Display removed files if any
+	removedFiles := m.installer.GetDeprecatedFilesList()
+	if len(removedFiles) > 0 {
+		sort.Strings(removedFiles)
+		s.WriteString(m.styles.Error.Render("  Removed deprecated files:"))
+		s.WriteString("\n")
+		for _, file := range removedFiles {
+			s.WriteString(m.styles.Normal.Render("    ✗ " + file))
+			s.WriteString("\n")
+		}
+		s.WriteString("\n")
+	}
+
 	// Add repository link
 	s.WriteString(m.styles.Info.Render("See https://github.com/rsmdt/the-startup for details"))
 	s.WriteString("\n")

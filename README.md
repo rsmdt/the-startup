@@ -31,36 +31,44 @@ You're not talking to a generic AI - you're working with a startup CTO who knows
 
 ## Your Expert Team
 
-### 🎯 Start Here
-- **the-chief** - Your first stop for any complex request. Assesses complexity and routes to the right experts
-- **the-business-analyst** - Turns vague ideas into clear requirements. Use when you're not sure what you need
+### 🚀 Leadership & Orchestration
+- [**the-chief**](assets/claude/agents/the-chief.md) ¯\\_(ツ)_/¯ - Routes requests based on complexity assessment
+- [**the-project-manager**](assets/claude/agents/the-project-manager.md) (⌐■_■) - Breaks down work, removes blockers, coordinates tasks
+- [**the-product-manager**](assets/claude/agents/the-product-manager.md) (＾-＾)ノ - Prioritizes features, creates user stories, defines metrics
 
-### 💻 Building Features
-- **the-architect** - System design and technical decisions. Makes the big architectural calls
-- **the-developer** - Writes clean, tested code. Your implementation specialist
-- **the-lead-developer** - Reviews code for quality and mentors through improvements
+### 🏗️ Architecture & Design
+- [**the-software-architect**](assets/claude/agents/the-software-architect.md) (⌐■_■) - System design, service boundaries, technical trade-offs
+- [**the-staff-engineer**](assets/claude/agents/the-staff-engineer.md) (⚡◡⚡) - Sets technical standards, defines patterns, mentors teams
+- [**the-business-analyst**](assets/claude/agents/the-business-analyst.md) (◔_◔) - Clarifies vague requirements through targeted questioning
 
-### 🔧 Fixing & Optimizing  
-- **the-site-reliability-engineer** - Debugs errors and solves production issues
-- **the-data-engineer** - Optimizes databases and designs data architectures
-- **the-devops-engineer** - Automates deployments and infrastructure
+### 💻 Engineering Team
+- [**the-lead-engineer**](assets/claude/agents/the-lead-engineer.md) (▰˘◡˘▰) - Reviews code, provides mentorship, ensures quality
+- [**the-frontend-engineer**](assets/claude/agents/the-frontend-engineer.md) (◕‿◕) - React/Vue/Angular, components, performance optimization
+- [**the-backend-engineer**](assets/claude/agents/the-backend-engineer.md) (⚙◡⚙) - APIs, services, business logic, database design
+- [**the-mobile-engineer**](assets/claude/agents/the-mobile-engineer.md) (📱◡📱) - iOS/Android, React Native, app store deployment
+- [**the-ml-engineer**](assets/claude/agents/the-ml-engineer.md) (🤖◡🤖) - Model integration, MLOps, inference optimization
+- [**the-developer**](assets/claude/agents/the-developer.md) 🚫 - *[DEPRECATED - Use specialized engineers above]*
 
-### 🎨 Design & Experience
-- **the-ux-designer** - Creates intuitive interfaces and ensures accessibility
-- **the-technical-writer** - Writes clear documentation and API specs
+### 🚦 Infrastructure & Operations
+- [**the-devops-engineer**](assets/claude/agents/the-devops-engineer.md) (◉_◉) - CI/CD pipelines, containerization, infrastructure as code
+- [**the-site-reliability-engineer**](assets/claude/agents/the-site-reliability-engineer.md) (╯°□°)╯ - Incident response, debugging, root cause analysis
+- [**the-data-engineer**](assets/claude/agents/the-data-engineer.md) (⊙_⊙) - Database optimization, ETL pipelines, query performance
+- [**the-performance-engineer**](assets/claude/agents/the-performance-engineer.md) (⚡◡⚡) - Core Web Vitals, bundle optimization, load times
 
-### 🛡️ Security & Quality
-- **the-security-engineer** - Identifies vulnerabilities and implements secure practices
-- **the-tester** - Creates comprehensive test strategies and finds bugs
-- **the-compliance-officer** - Ensures regulatory compliance (GDPR, HIPAA, etc.)
+### 🎨 Design & Documentation
+- [**the-ux-designer**](assets/claude/agents/the-ux-designer.md) (◍•ᴗ•◍) - User interfaces, accessibility, interaction patterns
+- [**the-principal-designer**](assets/claude/agents/the-principal-designer.md) (◉◡◉) - Design systems, design review, strategic vision
+- [**the-technical-writer**](assets/claude/agents/the-technical-writer.md) (◕‿◕) - API docs, user guides, system documentation
 
-### 📋 Planning & Management
-- **the-product-manager** - Creates formal specs and roadmaps from requirements
-- **the-project-manager** - Breaks down work and tracks implementation progress
+### 🛡️ Quality & Security
+- [**the-qa-lead**](assets/claude/agents/the-qa-lead.md) (✓◡✓) - Test strategy, risk prioritization, release decisions
+- [**the-qa-engineer**](assets/claude/agents/the-qa-engineer.md) (¬_¬) - Test implementation, automation, bug hunting
+- [**the-security-engineer**](assets/claude/agents/the-security-engineer.md) (ಠ_ಠ) - Vulnerability assessment, secure practices, incident response
+- [**the-compliance-officer**](assets/claude/agents/the-compliance-officer.md) (⚖◡⚖) - GDPR/HIPAA compliance, data privacy, audit trails
 
-### 🤖 Specialized Experts
-- **the-prompt-engineer** - Optimizes AI interactions and conversation design
-- **the-context-engineer** - Manages information flow and system integration
+### 🤖 AI & Specialized
+- [**the-prompt-engineer**](assets/claude/agents/the-prompt-engineer.md) (◐‿◑) - Claude prompt optimization, agent instructions
+- [**the-context-engineer**](assets/claude/agents/the-context-engineer.md) (ʘ_ʘ) - AI memory systems, context windows, inter-agent communication
 
 ## Commands
 
@@ -72,7 +80,7 @@ Creates comprehensive specifications from your ideas:
 
 ```bash
 # Start fresh with a new feature idea
-/s:specify "Build a real-time notification system"
+/s:specify Build a real-time notification system
 
 # Resume working on a specification
 /s:specify 001
@@ -99,15 +107,33 @@ This command will:
 3. Execute phase-by-phase with validation
 4. Track progress through completion
 
+### `/s:refactor` - Improve Code Quality
+
+Analyzes and refactors existing code for better maintainability:
+
+```bash
+# Refactor specific code or modules
+/s:refactor improve the authentication module for better testability
+
+# Refactor for specific goals
+/s:refactor reduce complexity in the payment processing logic
+```
+
+This command will:
+1. Analyze existing code structure and patterns
+2. Identify refactoring opportunities
+3. Preserve behavior while improving quality
+4. Apply industry best practices
+
 ## Real-World Examples
 
 ### Building Authentication
 ```
-You: /s:specify "Add user authentication with JWT"
+You: /s:specify Add user authentication with JWT
 ```
 The Startup will:
 - Use **the-business-analyst** to clarify requirements (OAuth? 2FA? Password reset?)
-- Bring in **the-architect** to design the system
+- Bring in **the-software-architect** to design the system
 - Get **the-security-engineer** to review for vulnerabilities
 - Create a complete implementation plan
 
@@ -117,19 +143,19 @@ You: "The API is returning 500 errors on user login"
 ```
 The Startup will:
 - Immediately call **the-site-reliability-engineer** to investigate
-- Once root cause is found, bring in **the-developer** to fix
-- Have **the-tester** verify the fix
-- Get **the-lead-developer** to review the changes
+- Once root cause is found, bring in **the-backend-engineer** to fix
+- Have **the-qa-engineer** verify the fix
+- Get **the-lead-engineer** to review the changes
 
 ### Creating a Dashboard
 ```
-You: /s:specify "Admin dashboard for monitoring system metrics"
+You: /s:specify Admin dashboard for monitoring system metrics
 ```
 The Startup will:
 - Use **the-ux-designer** to create the interface design
 - Bring in **the-data-engineer** for efficient data queries
-- Get **the-architect** to design the real-time data flow
-- Coordinate implementation across frontend and backend
+- Get **the-software-architect** to design the real-time data flow
+- Deploy **the-frontend-engineer** and **the-backend-engineer** for implementation
 
 ## How It Works
 

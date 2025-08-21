@@ -20,12 +20,14 @@ type Installer struct {
 	claudeAssets  *embed.FS
 	startupAssets *embed.FS
 
-	installPath   string
-	claudePath    string
-	tool          string
-	components    []string
-	selectedFiles []string // Specific files to install (optional)
-	lockFile      *config.LockFile
+	installPath     string
+	claudePath      string
+	tool            string
+	components      []string
+	selectedFiles   []string // Specific files to install (optional)
+	lockFile        *config.LockFile
+	existingLock    *config.LockFile // Previously installed files
+	deprecatedFiles []string          // Files to be removed
 }
 
 // New creates a new installer
@@ -186,11 +188,122 @@ func (i *Installer) IsInstalled() bool {
 	return false
 }
 
+// LoadExistingLockFile loads the previous installation's lock file if it exists
+func (i *Installer) LoadExistingLockFile() error {
+	lockFilePath := filepath.Join(i.installPath, "the-startup.lock")
+	
+	// Check if lock file exists
+	data, err := os.ReadFile(lockFilePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			// No existing installation, this is fine
+			return nil
+		}
+		return fmt.Errorf("failed to read lock file: %w", err)
+	}
+	
+	// Parse the lock file
+	var lockFile config.LockFile
+	if err := json.Unmarshal(data, &lockFile); err != nil {
+		return fmt.Errorf("failed to parse lock file: %w", err)
+	}
+	
+	i.existingLock = &lockFile
+	return nil
+}
+
+// GetDeprecatedFiles returns a list of files that were previously installed but are no longer in the embedded assets
+func (i *Installer) GetDeprecatedFiles() []string {
+	if i.existingLock == nil {
+		return nil
+	}
+	
+	// Build a set of current files from embedded assets
+	currentFiles := make(map[string]bool)
+	
+	// Add files from claude assets
+	if i.claudeAssets != nil {
+		fs.WalkDir(i.claudeAssets, "assets/claude", func(path string, d fs.DirEntry, err error) error {
+			if err != nil || d.IsDir() {
+				return nil
+			}
+			// Get relative path that would be in lock file
+			relPath := strings.TrimPrefix(path, "assets/claude/")
+			currentFiles[relPath] = true
+			return nil
+		})
+	}
+	
+	// Check which files from the lock file no longer exist in current assets
+	// The lock file only contains files WE installed, so anything in it is ours to manage
+	var deprecated []string
+	for filePath := range i.existingLock.Files {
+		// Skip non-claude files (like bin/the-startup, templates, etc)
+		if !strings.HasPrefix(filePath, "agents/") && !strings.HasPrefix(filePath, "commands/") {
+			continue
+		}
+		
+		// Check if this file still exists in current assets
+		if !currentFiles[filePath] {
+			deprecated = append(deprecated, filePath)
+		}
+	}
+	
+	i.deprecatedFiles = deprecated
+	return deprecated
+}
+
+// RemoveDeprecatedFiles removes files that are no longer part of the distribution
+func (i *Installer) RemoveDeprecatedFiles() error {
+	if len(i.deprecatedFiles) == 0 {
+		return nil
+	}
+	
+	fmt.Printf("Removing %d deprecated files...\n", len(i.deprecatedFiles))
+	
+	for _, relPath := range i.deprecatedFiles {
+		// Construct full path
+		fullPath := filepath.Join(i.claudePath, relPath)
+		
+		// Remove the file
+		if err := os.Remove(fullPath); err != nil {
+			// File might already be gone, that's ok
+			if !os.IsNotExist(err) {
+				fmt.Printf("  Warning: Failed to remove %s: %v\n", relPath, err)
+			}
+		} else {
+			fmt.Printf("  ✗ Removed: %s\n", relPath)
+		}
+	}
+	
+	fmt.Printf("✓ Deprecated files removed\n")
+	return nil
+}
+
 // Install performs the installation
 func (i *Installer) Install() error {
 	// Create installation directory for lock file
 	if err := os.MkdirAll(i.installPath, 0755); err != nil {
 		return fmt.Errorf("failed to create install directory: %w", err)
+	}
+
+	// Load existing lock file to detect deprecated files
+	if err := i.LoadExistingLockFile(); err != nil {
+		fmt.Printf("Warning: Failed to load existing lock file: %v\n", err)
+		// Continue anyway, this just means we won't remove deprecated files
+	}
+
+	// Detect deprecated files
+	if i.existingLock != nil {
+		i.GetDeprecatedFiles()
+	}
+
+	// Remove deprecated files first (before installing new ones)
+	if len(i.deprecatedFiles) > 0 {
+		if err := i.RemoveDeprecatedFiles(); err != nil {
+			fmt.Printf("Warning: Failed to remove some deprecated files: %v\n", err)
+			// Continue with installation
+		}
 	}
 
 	// Install components directly to Claude directory
@@ -706,27 +819,85 @@ func (i *Installer) createLockFile() error {
 		Files:       make(map[string]config.FileInfo),
 	}
 
-	// Record installed files from Claude directory
-	for _, component := range i.components {
-		componentPath := filepath.Join(i.claudePath, component)
-		err := filepath.Walk(componentPath, func(path string, info os.FileInfo, err error) error {
-			if err != nil || info.IsDir() {
+	// Record only the files WE installed from our embedded assets
+	// Walk through Claude assets and record what we actually installed
+	if i.claudeAssets != nil {
+		fs.WalkDir(i.claudeAssets, "assets/claude", func(path string, d fs.DirEntry, err error) error {
+			if err != nil || d.IsDir() {
 				return nil
 			}
-
-			relPath, _ := filepath.Rel(i.claudePath, path)
-			lockFile.Files[relPath] = config.FileInfo{
-				Size:         info.Size(),
-				LastModified: info.ModTime().Format(time.RFC3339),
+			
+			// Get relative path from assets/claude
+			relPath := strings.TrimPrefix(path, "assets/claude/")
+			
+			// Check if this file should be installed based on selected files
+			if i.selectedFiles != nil && len(i.selectedFiles) > 0 {
+				found := false
+				for _, selected := range i.selectedFiles {
+					if selected == relPath {
+						found = true
+						break
+					}
+				}
+				if !found {
+					return nil // Skip this file
+				}
 			}
+			
+			// Skip settings files as they're handled specially
+			if filepath.Base(path) == "settings.json" || filepath.Base(path) == "settings.local.json" {
+				return nil
+			}
+			
+			// Check if the file exists in the destination
+			destPath := filepath.Join(i.claudePath, relPath)
+			if info, err := os.Stat(destPath); err == nil {
+				lockFile.Files[relPath] = config.FileInfo{
+					Size:         info.Size(),
+					LastModified: info.ModTime().Format(time.RFC3339),
+				}
+			}
+			
 			return nil
 		})
-		if err != nil {
-			// Component might not exist if not selected, that's ok
-			if !os.IsNotExist(err) {
-				return err
+	}
+	
+	// Also record files from startup assets that go to STARTUP_PATH
+	if i.startupAssets != nil {
+		fs.WalkDir(i.startupAssets, "assets/the-startup", func(path string, d fs.DirEntry, err error) error {
+			if err != nil || d.IsDir() {
+				return nil
 			}
-		}
+			
+			// Get relative path from assets/the-startup
+			relPath := strings.TrimPrefix(path, "assets/the-startup/")
+			
+			// Check if this file should be installed based on selected files
+			if i.selectedFiles != nil && len(i.selectedFiles) > 0 {
+				found := false
+				for _, selected := range i.selectedFiles {
+					if selected == relPath {
+						found = true
+						break
+					}
+				}
+				if !found {
+					return nil // Skip this file
+				}
+			}
+			
+			// Check if the file exists in the destination
+			destPath := filepath.Join(i.installPath, relPath)
+			if info, err := os.Stat(destPath); err == nil {
+				// Store with a prefix to distinguish from Claude files
+				lockFile.Files["startup/"+relPath] = config.FileInfo{
+					Size:         info.Size(),
+					LastModified: info.ModTime().Format(time.RFC3339),
+				}
+			}
+			
+			return nil
+		})
 	}
 
 	// Record the binary in STARTUP_PATH/bin
@@ -823,6 +994,11 @@ func (i *Installer) GetInstalledAgents() []string {
 	}
 
 	return agents
+}
+
+// GetDeprecatedFilesList returns the list of deprecated files (for UI display)
+func (i *Installer) GetDeprecatedFilesList() []string {
+	return i.deprecatedFiles
 }
 
 // GetInstalledCommands returns the list of installed command files

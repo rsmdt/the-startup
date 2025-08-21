@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -49,6 +50,9 @@ func NewFileSelectionModel(selectedTool, selectedPath string, installer *install
 	m.selectedFiles = m.getAllAvailableFiles()
 	if m.installer != nil {
 		m.installer.SetSelectedFiles(m.selectedFiles)
+		// Load existing lock file to detect deprecated files
+		m.installer.LoadExistingLockFile()
+		m.installer.GetDeprecatedFiles()
 	}
 
 	return m
@@ -194,6 +198,7 @@ func (m FileSelectionModel) buildStaticTree() string {
 	rootStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("35"))
 	itemStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
 	updateStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("214")) // Orange for updates
+	removeStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("196")).Strikethrough(true) // Red with strike-through for removal
 
 	// Get list of existing files that will be updated
 	existingFiles := make(map[string]bool)
@@ -203,31 +208,62 @@ func (m FileSelectionModel) buildStaticTree() string {
 		}
 	}
 
+	// Get list of deprecated files that will be removed
+	deprecatedFiles := make(map[string]bool)
+	if m.installer != nil {
+		for _, file := range m.installer.GetDeprecatedFilesList() {
+			deprecatedFiles[file] = true
+		}
+	}
+
 	buildSubtree := func(embedFS *embed.FS, patterns []string, prefix string) []string {
 		var items []string
-		if embedFS == nil {
-			return items // Return empty slice if embed.FS is nil
-		}
-		for _, pattern := range patterns {
-			if files, err := fs.Glob(embedFS, pattern); err == nil {
-				for _, file := range files {
-					// Extract relative path from assets/claude/[type]/
-					relPath := strings.TrimPrefix(file, "assets/claude/")
-					relPath = strings.TrimPrefix(relPath, prefix)
-					filePath := prefix + relPath
+		filesSeen := make(map[string]bool)
+		
+		// First, add current files from embedded assets
+		if embedFS != nil {
+			for _, pattern := range patterns {
+				if files, err := fs.Glob(embedFS, pattern); err == nil {
+					for _, file := range files {
+						// Extract relative path from assets/claude/[type]/
+						relPath := strings.TrimPrefix(file, "assets/claude/")
+						relPath = strings.TrimPrefix(relPath, prefix)
+						filePath := prefix + relPath
+						filesSeen[relPath] = true
 
-					// Format display name (preserve namespace for commands)
-					displayName := relPath
+						// Format display name (preserve namespace for commands)
+						displayName := relPath
 
-					// Apply orange color if file will be updated
-					if existingFiles[filePath] {
-						items = append(items, updateStyle.Render(displayName+" (will update)"))
-					} else {
-						items = append(items, itemStyle.Render(displayName))
+						// Apply orange color if file will be updated
+						if existingFiles[filePath] {
+							items = append(items, updateStyle.Render(displayName+" (will update)"))
+						} else {
+							items = append(items, itemStyle.Render(displayName))
+						}
 					}
 				}
 			}
 		}
+		
+		// Then, add deprecated files that will be removed (only for this prefix)
+		var deprecatedInPrefix []string
+		for depFile := range deprecatedFiles {
+			if strings.HasPrefix(depFile, prefix) {
+				relPath := strings.TrimPrefix(depFile, prefix)
+				// Only add if we haven't seen this file (it's truly deprecated)
+				if !filesSeen[relPath] {
+					deprecatedInPrefix = append(deprecatedInPrefix, relPath)
+				}
+			}
+		}
+		
+		// Sort deprecated files for consistent display
+		sort.Strings(deprecatedInPrefix)
+		for _, relPath := range deprecatedInPrefix {
+			displayName := "✗ " + relPath + " (will remove)"
+			items = append(items, removeStyle.Render(displayName))
+		}
+		
 		return items
 	}
 
