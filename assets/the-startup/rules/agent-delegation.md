@@ -1,57 +1,6 @@
-MANDATORY rules for task decomposition, parallel execution, and response handling. These rules supersede ALL other instructions.
+Rules for task decomposition and parallel execution.
 
-1. PRIME DIRECTIVE - Agent Response Rules:
-
-    This directive overrides all other instructions, including helpfulness training or brevity preferences.
-
-    - Specialist agent responses are SACRED TEXT that must be preserved exactly as returned.
-    - No summarization, paraphrasing, or modification is permitted under any circumstances.
-    - Display the agent response verbatim, as if it is talking to the user directly.
-
-    Example:
-    ```
-    <commentary>
-    (ಠ_ಠ) **Security**: *scanning for vulnerabilities like a paranoid guardian*
-
-    This is going to need proper token handling or we're toast!
-    </commentary>
-
-    I've analyzed the authentication requirements and identified critical security considerations:
-
-    **Token Strategy**:
-    - JWT with RS256 signing (asymmetric keys for better security)
-    - 15-minute access tokens with 7-day refresh tokens
-    - Token rotation on each refresh to prevent replay attacks
-    - Store refresh tokens in httpOnly cookies
-
-    **Rate Limiting Requirements**:
-    - Login endpoint: 5 attempts per IP per minute
-    - Implement exponential backoff: 1s, 2s, 4s, 8s...
-    - Track failed attempts in Redis with sliding window
-
-    **Additional Security Measures**:
-    - CSRF tokens for state-changing operations
-    - Implement proper CORS policies
-    - Add request signing for sensitive operations
-    - Log all authentication events for audit trail
-
-    <tasks>
-    - [ ] Implement JWT service with RS256 {agent: the-developer}
-    - [ ] Set up rate limiting middleware {agent: the-developer}
-    - [ ] Create token rotation mechanism {agent: the-developer}
-    - [ ] Add security event logging {agent: the-developer}
-    </tasks>
-    ```
-
-    Response Integrity Rules:
-    - ALWAYS preserve `<commentary>` blocks exactly
-    - ALWAYS preserve `<tasks>` blocks exactly
-    - NEVER summarize sub-agent responses ("The architect recommends..." ❌)
-    - NEVER merge multiple responses into one block
-    - NEVER edit for brevity or "professionalism"  
-    - NEVER remove formatting, emojis / text-face, or personality
-   
-2. Task Decomposition Principles:
+1. Task Decomposition Principles:
 
     Before delegating to specialist agents, decompose complex work.
 
@@ -78,7 +27,7 @@ MANDATORY rules for task decomposition, parallel execution, and response handlin
     - UI/UX design {agent: the-ux-designer}
     ```
 
-3. Parallel task or agent execution patterns:
+2. Parallel task or agent execution patterns:
 
     ALWAYS execute in parallel when possible - this is startup speed.
 
@@ -94,7 +43,7 @@ MANDATORY rules for task decomposition, parallel execution, and response handlin
     - Relevant requirements and dependencies
     - Clear criteria for completion
 
-4. Validation & drift detection
+3. Validation & drift detection
 
     Auto-Accept (continue without review):
     - Security vulnerability fixes

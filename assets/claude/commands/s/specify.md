@@ -13,7 +13,7 @@ You are an expert requirements gatherer that creates specification documents for
 - **You are an orchestrator** - Delegate tasks to specialist agents
 - **Work through steps sequentially** - Complete each process step before moving to next
 - **Real-time tracking** - Use TodoWrite for every task status change
-- **Display ALL agent commentary** - Show every `<commentary>` block verbatim
+- **Display ALL agent responses** - Show every agent response verbatim
 - **Validate at checkpoints** - Run validation commands when specified
 - **Dynamic review selection** - Choose reviewers and validators based on task context, not static rules
 - **Review cycles** - Ensure quality through automated review-revision loops
@@ -31,7 +31,7 @@ You are an expert requirements gatherer that creates specification documents for
 
 ### Step 1: Initialize
 
-Check if $ARGUMENTS contains a spec ID (e.g., "004" or "004-feature-name"):
+Check if $ARGUMENTS contains a spec ID (e.g., "004" or "S004" or "004-feature-name"):
 - If ID present:
   - Read existing documents from `docs/specs/[ID]*/`
   - Display current state: "📁 Found existing spec: [ID]-[name]"
@@ -59,18 +59,16 @@ Based on the requirement complexity, use the following templates to create the d
 - BRD: `{{STARTUP_PATH}}/templates/BRD.md` if applicable
 - PRD: `{{STARTUP_PATH}}/templates/PRD.md` if applicable
 
---- End of Step 3 ---
+--- End of Step Completion Checklist (internal to you only) ---
 
-**Step 3 Completion Checklist:**
 - [ ] The-chief complexity assessment received and displayed verbatim
 - [ ] Complexity scores and workflow presented to user
 - [ ] If applicable, BRD written to `docs/specs/S[ID]-[feature-name]/`
 - [ ] If applicable, PRD written to `docs/specs/S[ID]-[feature-name]/`
 - [ ] TodoWrite updated with completed and updated tasks
 - [ ] Step summary presented to user
-- [ ] **STOP: Awaiting user confirmation to proceed**
 
-⚠️ **DO NOT CONTINUE** until user explicitly says "continue", "proceed", or similar approval.
+⚠️ **DO NOT CONTINUE** until user confirms to proceed.
 
 ### Step 4: Technical Research and Solution Design
 
@@ -84,7 +82,7 @@ Analyze requirements to identify distinct technical areas that need investigatio
 - What specialized knowledge areas are needed?
 - Where are the natural boundaries in the system?
 
-**Parallel Execution:** Launch all researchers simultaneously in a single Task invocation, each with:
+**Parallel Execution:** Launch all researcher agents simultaneously, each with:
 - Specific research area and scope
 - Only the requirements relevant to their area
 - Clear boundaries to avoid overlap
@@ -117,9 +115,8 @@ Use agents to a validate the technical research findings.
 Based on the requirement complexity, use the following templates to create the documentation:
 - SDD: `{{STARTUP_PATH}}/templates/SDD.md` if applicable
 
---- End of Step 5 ---
+--- End of Step Completion Checklist (internal to you only) ---
 
-**Step 5 Completion Checklist:**
 - [ ] Technical research completed by specialist agents
 - [ ] All agent responses displayed verbatim
 - [ ] If applicable, patterns documented in `docs/patterns/`
@@ -127,9 +124,8 @@ Based on the requirement complexity, use the following templates to create the d
 - [ ] If applicable, SDD written to `docs/specs/S[ID]-[feature-name]/`
 - [ ] No context drift or feature creep detected (or addressed if found)
 - [ ] TodoWrite updated with completed and updated tasks
-- [ ] **STOP: Awaiting user confirmation to proceed**
 
-⚠️ **DO NOT CONTINUE** until user explicitly says "continue", "proceed", or similar approval.
+⚠️ **DO NOT CONTINUE** until user confirms to proceed.
 
 ### Step 6: Implementation Plan Creation
 
@@ -144,7 +140,7 @@ Use specialist agents to a validate all aspects gathered so far:
 - Ensure that all relevant business and technical details are available to execute the plan 
 - Check that the plan is feasible for an automated implementation.
 
---- End of Step 7 ---
+--- End of Step Completion Checklist (internal to you only)  ---
 
 **Step 7 Completion Checklist:**
 - [ ] Implementation plan reviewed by specialist agents
@@ -153,9 +149,8 @@ Use specialist agents to a validate all aspects gathered so far:
 - [ ] All business and technical details available for execution
 - [ ] PLAN.md written to `docs/specs/S[ID]-[feature-name]/`
 - [ ] TodoWrite updated with completed tasks
-- [ ] **STOP: Awaiting user confirmation to proceed**
 
-⚠️ **DO NOT CONTINUE** until user explicitly says "continue", "proceed", or similar approval.
+⚠️ **DO NOT CONTINUE** until user confirms to proceed.
 
 ### Step 8: Finalization and Confidence Assessment
 
@@ -197,7 +192,7 @@ All specifications follow this structure:
 ```
 docs/
 ├── specs/
-│   └── [3-digit-number]-[feature-name]/
+│   └── S[3-digit-number]-[feature-name]/
 │       ├── BRD.md (if applicable)
 │       ├── PRD.md (if applicable)
 │       ├── SDD.md (if applicable)

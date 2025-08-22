@@ -129,7 +129,7 @@ This command will:
 
 ### Building Authentication
 ```
-You: /s:specify Add user authentication with JWT
+/s:specify Add user authentication with JWT
 ```
 The Startup will:
 - Use **the-business-analyst** to clarify requirements (OAuth? 2FA? Password reset?)
@@ -139,7 +139,7 @@ The Startup will:
 
 ### Debugging Production Issues
 ```
-You: "The API is returning 500 errors on user login"
+The API is returning 500 errors on user login
 ```
 The Startup will:
 - Immediately call **the-site-reliability-engineer** to investigate
@@ -149,7 +149,7 @@ The Startup will:
 
 ### Creating a Dashboard
 ```
-You: /s:specify Admin dashboard for monitoring system metrics
+/s:specify Admin dashboard for monitoring system metrics
 ```
 The Startup will:
 - Use **the-ux-designer** to create the interface design

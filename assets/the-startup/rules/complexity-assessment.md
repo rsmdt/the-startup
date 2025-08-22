@@ -5,6 +5,6 @@ Provide the relevant context:
 - the scope of changes
 - any constraints identified
 
-The-chief will provide their assessment and recommendation. Follow their guidance on whether to proceed immediately or create a plan for later execution.
+The chief will provide their assessment and recommendation. Follow their guidance on whether to proceed immediately or create a plan for later execution.
 
 Wait for user confirmation after displaying assessment before proceeding.
