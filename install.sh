@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 # The Startup - Installer Wrapper
 # Downloads and runs the Go binary installer
+#
+# Usage:
+#   curl -LsSf https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh | sh
+#   curl -LsSf https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh | sh -s -- --yes
+#   curl -LsSf https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh | sh -s -- --local
+#   curl -LsSf https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh | sh -s -- -ly
+#
+# All flags are passed through to the binary installer.
 
 set -e
 
@@ -53,7 +61,11 @@ fi
 chmod +x "$TEMP_FILE"
 
 # Run the installer
-echo "Starting installation..."
+if [ $# -gt 0 ]; then
+    echo "Starting installation with flags: $*"
+else
+    echo "Starting interactive installation..."
+fi
 "$TEMP_FILE" install "$@"
 
 # Cleanup is handled by trap

@@ -10,13 +10,22 @@ The Startup is an orchestration system for Claude Code that gives you a virtual 
 
 Think of it as having a CTO, architects, developers, and DevOps engineers on-demand, each bringing their expertise to your project.
 
-## Installation
+## Quick Start
 
-Install globally with one command:
+Install and start using The Startup:
 
 ```bash
+# Install (interactive)
 curl -LsSf https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh | sh
+
+# Plan a feature
+/s:specify "Add user authentication"
+
+# Build it 
+/s:implement 001-user-auth
 ```
+
+**More installation options**: See the [Installation & Uninstall](#installation--uninstall) section below.
 
 ## The Startup Way
 
@@ -185,6 +194,28 @@ The Startup will:
 "I don't know how to structure this microservices architecture"
 ```
 
+## Installation
+
+The Startup provides easy installation via script and clean uninstall capabilities.
+
+### Installation Options
+
+Install The Startup agents, commands, and configuration using the install script:
+
+```bash
+# Interactive installation (shows all options)
+curl -LsSf https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh | sh
+
+# Quick global installation (recommended paths, no prompts)
+curl -LsSf https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh | sh -s -- -y
+
+# Local installation (project-specific paths, with file selection)
+curl -LsSf https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh | sh -s -- -l
+
+# Quick local installation (project-specific, no prompts)
+curl -LsSf https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh | sh -s -- -ly
+```
+
 ## Building from Source
 
 If you want to contribute or customize:
@@ -198,8 +229,10 @@ go build -o the-startup
 # Run tests
 go test ./...
 
-# Install locally
-./the-startup install
+# Install from local binary (for development/offline use)
+./the-startup install              # Interactive
+./the-startup install -y           # Quick global
+./the-startup install -ly          # Quick local
 ```
 
 ## Learn More

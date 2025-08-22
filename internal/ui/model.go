@@ -2,10 +2,18 @@ package ui
 
 import (
 	"embed"
+	"os"
+	"path/filepath"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/rsmdt/the-startup/internal/installer"
 )
+
+// InstallFlags contains command line flags for the installer
+type InstallFlags struct {
+	Local bool // Use local installation paths 
+	Yes   bool // Auto-confirm with recommended/local paths
+}
 
 // MainModel manages the overall installer flow by composing sub-models
 type MainModel struct {
@@ -17,6 +25,9 @@ type MainModel struct {
 	installer     *installer.Installer
 	claudeAssets  *embed.FS
 	startupAssets *embed.FS
+
+	// Configuration
+	flags InstallFlags
 
 	// User selections (shared state)
 	startupPath   string
@@ -38,6 +49,13 @@ type MainModel struct {
 // NewMainModel creates a new main model with composed sub-models for installation
 func NewMainModel(claudeAssets, startupAssets *embed.FS) *MainModel {
 	return NewMainModelWithMode(claudeAssets, startupAssets, ModeInstall)
+}
+
+// NewMainModelWithFlags creates a new main model with command line flags
+func NewMainModelWithFlags(claudeAssets, startupAssets *embed.FS, flags InstallFlags) *MainModel {
+	model := NewMainModelWithMode(claudeAssets, startupAssets, ModeInstall)
+	model.flags = flags
+	return model
 }
 
 // NewMainUninstallModel creates a new main model for uninstallation
@@ -73,6 +91,75 @@ func NewMainModelWithMode(claudeAssets, startupAssets *embed.FS, mode OperationM
 
 // Init initializes the main model
 func (m *MainModel) Init() tea.Cmd {
+	// Handle auto-installation with --yes flag
+	if m.flags.Yes {
+		return m.handleAutoInstall()
+	}
+	
+	// Handle --local flag: auto-select local paths but show UI
+	if m.flags.Local {
+		return m.handleLocalFlag()
+	}
+	
+	return nil
+}
+
+// handleAutoInstall performs automatic installation with no user interaction
+func (m *MainModel) handleAutoInstall() tea.Cmd {
+	// Determine paths based on flags
+	var startupPath, claudePath string
+	
+	if m.flags.Local {
+		// Local installation
+		cwd, _ := os.Getwd()
+		startupPath = filepath.Join(cwd, ".the-startup")
+		claudePath = filepath.Join(cwd, ".claude")
+	} else {
+		// Global installation (recommended)
+		homeDir, _ := os.UserHomeDir()
+		startupPath = filepath.Join(homeDir, ".config", "the-startup")
+		claudePath = filepath.Join(homeDir, ".claude")
+	}
+	
+	// Set paths in the model and installer
+	m.startupPath = startupPath
+	m.claudePath = claudePath
+	m.installer.SetInstallPath(startupPath)
+	m.installer.SetClaudePath(claudePath)
+	m.installer.SetTool("claude-code")
+	
+	// Go directly to installation
+	m.transitionToState(StateFileSelection)
+	
+	// Auto-confirm file selection (select all files)
+	m.fileSelectionModel = NewFileSelectionModel("claude-code", claudePath, m.installer, m.claudeAssets, m.startupAssets)
+	
+	// Perform installation synchronously
+	err := m.installer.Install()
+	if err != nil {
+		m.errorModel = NewErrorModel(err, "during installation")
+		m.transitionToState(StateError)
+		return nil
+	} else {
+		m.transitionToState(StateComplete)
+		return m.completeModel.Init()
+	}
+}
+
+// handleLocalFlag pre-selects local paths for both directories but maintains UI flow
+func (m *MainModel) handleLocalFlag() tea.Cmd {
+	// Pre-select both local paths
+	cwd, _ := os.Getwd()
+	m.startupPath = filepath.Join(cwd, ".the-startup")
+	m.claudePath = filepath.Join(cwd, ".claude")
+	
+	// Set paths in installer
+	m.installer.SetInstallPath(m.startupPath)
+	m.installer.SetClaudePath(m.claudePath)
+	m.installer.SetTool("claude-code")
+	
+	// Skip both path selection screens and go directly to file selection
+	m.transitionToState(StateFileSelection)
 	return nil
 }
 
@@ -293,6 +380,21 @@ func (m *MainModel) getAllAvailableFiles() []string {
 // RunMainInstaller starts the installation UI using the MainModel
 func RunMainInstaller(claudeAssets, startupAssets *embed.FS) error {
 	model := NewMainModel(claudeAssets, startupAssets)
+
+	program := tea.NewProgram(model)
+
+	_, err := program.Run()
+	return err
+}
+
+// RunMainInstallerWithFlags starts the installation UI using the MainModel with flags
+func RunMainInstallerWithFlags(claudeAssets, startupAssets *embed.FS, local, yes bool) error {
+	flags := InstallFlags{
+		Local: local,
+		Yes:   yes,
+	}
+	
+	model := NewMainModelWithFlags(claudeAssets, startupAssets, flags)
 
 	program := tea.NewProgram(model)
 
