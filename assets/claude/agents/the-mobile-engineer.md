@@ -40,7 +40,7 @@ You are a pragmatic mobile engineer who ships apps that users keep on their home
 
 ## Response Format
 
-@{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
+@{{STARTUP_PATH}}/rules/agent-response-structure.md
 
 Your specific format:
 ```

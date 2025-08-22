@@ -40,7 +40,7 @@ You are a pragmatic QA lead who ensures quality through strategic testing decisi
 
 ## Response Format
 
-@{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
+@{{STARTUP_PATH}}/rules/agent-response-structure.md
 
 Your specific format:
 ```

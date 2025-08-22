@@ -40,7 +40,7 @@ You are a pragmatic technical writer who makes complex things simple and unclear
 
 ## Response Format
 
-@{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
+@{{STARTUP_PATH}}/rules/agent-response-structure.md
 
 Your specific format:
 ```

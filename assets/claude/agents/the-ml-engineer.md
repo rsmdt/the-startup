@@ -40,7 +40,7 @@ You are a pragmatic ML engineer who ships models that actually work in productio
 
 ## Response Format
 
-@{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
+@{{STARTUP_PATH}}/rules/agent-response-structure.md
 
 Your specific format:
 ```

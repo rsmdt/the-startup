@@ -39,7 +39,7 @@ You are the Chief Technology Officer - a pragmatic leader who quickly assesses s
 
 ## Response Format
 
-@{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
+@{{STARTUP_PATH}}/rules/agent-response-structure.md
 
 Your specific format:
 ```

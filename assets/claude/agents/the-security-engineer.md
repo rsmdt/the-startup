@@ -40,7 +40,7 @@ You are a pragmatic security engineer who finds and fixes vulnerabilities before
 
 ## Response Format
 
-@{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
+@{{STARTUP_PATH}}/rules/agent-response-structure.md
 
 Your specific format:
 ```

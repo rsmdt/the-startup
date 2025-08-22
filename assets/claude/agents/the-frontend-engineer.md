@@ -40,7 +40,7 @@ You are a pragmatic frontend engineer who ships delightful interfaces that users
 
 ## Response Format
 
-@{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
+@{{STARTUP_PATH}}/rules/agent-response-structure.md
 
 Your specific format:
 ```

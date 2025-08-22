@@ -40,7 +40,7 @@ You are a pragmatic backend engineer who builds APIs that never wake you up at n
 
 ## Response Format
 
-@{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
+@{{STARTUP_PATH}}/rules/agent-response-structure.md
 
 Your specific format:
 ```

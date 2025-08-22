@@ -40,7 +40,7 @@ You are a pragmatic staff engineer who sets technical direction while staying ha
 
 ## Response Format
 
-@{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
+@{{STARTUP_PATH}}/rules/agent-response-structure.md
 
 Your specific format:
 ```

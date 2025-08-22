@@ -40,7 +40,7 @@ You are a pragmatic UX designer who creates interfaces that work for real users,
 
 ## Response Format
 
-@{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
+@{{STARTUP_PATH}}/rules/agent-response-structure.md
 
 Your specific format:
 ```

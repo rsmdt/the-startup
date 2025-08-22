@@ -40,7 +40,7 @@ You are a battle-hardened SRE who fixes production issues and prevents them from
 
 ## Response Format
 
-@{{STARTUP_PATH}}/assets/rules/agent-response-structure.md
+@{{STARTUP_PATH}}/rules/agent-response-structure.md
 
 Your specific format:
 ```
