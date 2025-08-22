@@ -21,9 +21,14 @@ type ClaudePathModel struct {
 	textInput       textinput.Model
 	suggestions     []string
 	suggestionIndex int
+	mode            OperationMode
 }
 
 func NewClaudePathModel(startupPath string) ClaudePathModel {
+	return NewClaudePathModelWithMode(startupPath, ModeInstall)
+}
+
+func NewClaudePathModelWithMode(startupPath string, mode OperationMode) ClaudePathModel {
 	// Always show both recommended and local options
 	choices := []string{
 		"~/.claude (recommended)",
@@ -49,6 +54,7 @@ func NewClaudePathModel(startupPath string) ClaudePathModel {
 		textInput:       ti,
 		suggestions:     []string{},
 		suggestionIndex: -1,
+		mode:            mode,
 	}
 }
 
@@ -217,10 +223,14 @@ func (m ClaudePathModel) View() string {
 	if strings.HasPrefix(m.startupPath, homeDir) {
 		displayStartupPath = "~" + strings.TrimPrefix(m.startupPath, homeDir)
 	}
-	s.WriteString(m.renderer.RenderSelections("", displayStartupPath, 0))
+	s.WriteString(m.renderer.RenderSelectionsWithMode("", displayStartupPath, 0, m.mode))
 
 	s.WriteString(m.renderer.RenderTitle("Select .claude directory location"))
-	s.WriteString(m.styles.Info.Render("This is where agents and commands will be installed for Claude Code"))
+	if m.mode == ModeUninstall {
+		s.WriteString(m.styles.Warning.Render("This is where agents and commands are installed for Claude Code"))
+	} else {
+		s.WriteString(m.styles.Info.Render("This is where agents and commands will be installed for Claude Code"))
+	}
 	s.WriteString("\n\n")
 
 	if m.inputMode {
@@ -271,5 +281,6 @@ func (m ClaudePathModel) Reset() ClaudePathModel {
 	m.textInput.SetValue("")
 	m.suggestions = []string{}
 	m.suggestionIndex = -1
+	// Preserve mode and startupPath when resetting
 	return m
 }

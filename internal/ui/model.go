@@ -11,6 +11,7 @@ import (
 type MainModel struct {
 	// State management
 	state InstallerState
+	mode  OperationMode
 
 	// Dependencies
 	installer     *installer.Installer
@@ -34,18 +35,36 @@ type MainModel struct {
 	height int
 }
 
-// NewMainModel creates a new main model with composed sub-models
+// NewMainModel creates a new main model with composed sub-models for installation
 func NewMainModel(claudeAssets, startupAssets *embed.FS) *MainModel {
+	return NewMainModelWithMode(claudeAssets, startupAssets, ModeInstall)
+}
+
+// NewMainUninstallModel creates a new main model for uninstallation
+func NewMainUninstallModel(claudeAssets, startupAssets *embed.FS) *MainModel {
+	return NewMainModelWithMode(claudeAssets, startupAssets, ModeUninstall)
+}
+
+// NewMainModelWithMode creates a new main model with composed sub-models for specified mode
+func NewMainModelWithMode(claudeAssets, startupAssets *embed.FS, mode OperationMode) *MainModel {
 	installerInstance := installer.New(claudeAssets, startupAssets)
 
+	var initialState InstallerState
+	if mode == ModeUninstall {
+		initialState = StateUninstallStartupPath
+	} else {
+		initialState = StateStartupPath
+	}
+
 	m := &MainModel{
-		state:            StateStartupPath, // Start with startup path selection
+		state:            initialState,
+		mode:             mode,
 		installer:        installerInstance,
 		claudeAssets:     claudeAssets,
 		startupAssets:    startupAssets,
 		width:            80,
 		height:           24,
-		startupPathModel: NewStartupPathModel(),
+		startupPathModel: NewStartupPathModelWithMode(mode),
 		errorModel:       NewErrorModel(nil, ""),
 	}
 
@@ -63,7 +82,7 @@ func (m *MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	if keyMsg, ok := msg.(tea.KeyMsg); ok {
 		switch keyMsg.String() {
 		case "ctrl+c", "q":
-			if m.state == StateStartupPath {
+			if m.state == StateStartupPath || m.state == StateUninstallStartupPath {
 				return m, tea.Quit
 			}
 			// In other states, treat as ESC (go back)
@@ -83,7 +102,7 @@ func (m *MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	// Delegate to appropriate sub-model based on state
 	switch m.state {
-	case StateStartupPath:
+	case StateStartupPath, StateUninstallStartupPath:
 		newModel, cmd := m.startupPathModel.Update(msg)
 		m.startupPathModel = newModel
 		if m.startupPathModel.Ready() {
@@ -93,11 +112,15 @@ func (m *MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.startupPath = path
 			m.installer.SetInstallPath(path)
-			m.transitionToState(StateClaudePath)
+			if m.mode == ModeUninstall {
+				m.transitionToState(StateUninstallClaudePath)
+			} else {
+				m.transitionToState(StateClaudePath)
+			}
 		}
 		return m, cmd
 
-	case StateClaudePath:
+	case StateClaudePath, StateUninstallClaudePath:
 		newModel, cmd := m.claudePathModel.Update(msg)
 		m.claudePathModel = newModel
 		if m.claudePathModel.Ready() {
@@ -112,32 +135,52 @@ func (m *MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.installer.SetClaudePath(path)
 			}
 			m.installer.SetTool("claude-code") // Always use claude-code
-			m.transitionToState(StateFileSelection)
-		}
-		return m, cmd
-
-	case StateFileSelection:
-		newModel, cmd := m.fileSelectionModel.Update(msg)
-		m.fileSelectionModel = newModel
-		if m.fileSelectionModel.Ready() {
-			if m.fileSelectionModel.Confirmed() {
-				// Perform installation synchronously
-				err := m.installer.Install()
-				if err != nil {
-					m.errorModel = NewErrorModel(err, "during installation")
-					m.transitionToState(StateError)
-				} else {
-					m.transitionToState(StateComplete)
-					// Return the Init command from the CompleteModel to start the auto-exit timer
-					return m, m.completeModel.Init()
-				}
+			if m.mode == ModeUninstall {
+				m.transitionToState(StateUninstallFileSelection)
 			} else {
-				m.transitionToState(StateClaudePath)
+				m.transitionToState(StateFileSelection)
 			}
 		}
 		return m, cmd
 
-	case StateComplete:
+	case StateFileSelection, StateUninstallFileSelection:
+		newModel, cmd := m.fileSelectionModel.Update(msg)
+		m.fileSelectionModel = newModel
+		if m.fileSelectionModel.Ready() {
+			if m.fileSelectionModel.Confirmed() {
+				if m.mode == ModeUninstall {
+					// Perform uninstallation synchronously
+					err := m.performUninstall()
+					if err != nil {
+						m.errorModel = NewErrorModel(err, "during uninstallation")
+						m.transitionToState(StateError)
+					} else {
+						m.transitionToState(StateUninstallComplete)
+						return m, m.completeModel.Init()
+					}
+				} else {
+					// Perform installation synchronously
+					err := m.installer.Install()
+					if err != nil {
+						m.errorModel = NewErrorModel(err, "during installation")
+						m.transitionToState(StateError)
+					} else {
+						m.transitionToState(StateComplete)
+						// Return the Init command from the CompleteModel to start the auto-exit timer
+						return m, m.completeModel.Init()
+					}
+				}
+			} else {
+				if m.mode == ModeUninstall {
+					m.transitionToState(StateUninstallClaudePath)
+				} else {
+					m.transitionToState(StateClaudePath)
+				}
+			}
+		}
+		return m, cmd
+
+	case StateComplete, StateUninstallComplete:
 		newModel, cmd := m.completeModel.Update(msg)
 		m.completeModel = newModel
 		if m.completeModel.Ready() {
@@ -149,7 +192,11 @@ func (m *MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		newModel, cmd := m.errorModel.Update(msg)
 		m.errorModel = newModel
 		if m.errorModel.Ready() {
-			m.transitionToState(StateStartupPath)
+			if m.mode == ModeUninstall {
+				m.transitionToState(StateUninstallStartupPath)
+			} else {
+				m.transitionToState(StateStartupPath)
+			}
 		}
 		return m, cmd
 	}
@@ -163,24 +210,25 @@ func (m *MainModel) transitionToState(newState InstallerState) {
 
 	// Initialize or reset sub-models as needed
 	switch newState {
-	case StateStartupPath:
+	case StateStartupPath, StateUninstallStartupPath:
 		m.startupPathModel = m.startupPathModel.Reset()
 
-	case StateClaudePath:
-		m.claudePathModel = NewClaudePathModel(m.startupPath)
+	case StateClaudePath, StateUninstallClaudePath:
+		m.claudePathModel = NewClaudePathModelWithMode(m.startupPath, m.mode)
 
-	case StateFileSelection:
-		m.fileSelectionModel = NewFileSelectionModel(
+	case StateFileSelection, StateUninstallFileSelection:
+		m.fileSelectionModel = NewFileSelectionModelWithMode(
 			"claude-code", // Always use claude-code
 			m.claudePath,
 			m.installer,
 			m.claudeAssets,
 			m.startupAssets,
+			m.mode,
 		)
 		m.selectedFiles = m.fileSelectionModel.selectedFiles
 
-	case StateComplete:
-		m.completeModel = NewCompleteModel("claude-code", m.installer)
+	case StateComplete, StateUninstallComplete:
+		m.completeModel = NewCompleteModelWithMode("claude-code", m.installer, m.mode)
 
 	case StateError:
 		// Error model is set before transition
@@ -190,13 +238,13 @@ func (m *MainModel) transitionToState(newState InstallerState) {
 // View delegates rendering to the appropriate sub-model
 func (m *MainModel) View() string {
 	switch m.state {
-	case StateStartupPath:
+	case StateStartupPath, StateUninstallStartupPath:
 		return m.startupPathModel.View()
-	case StateClaudePath:
+	case StateClaudePath, StateUninstallClaudePath:
 		return m.claudePathModel.View()
-	case StateFileSelection:
+	case StateFileSelection, StateUninstallFileSelection:
 		return m.fileSelectionModel.View()
-	case StateComplete:
+	case StateComplete, StateUninstallComplete:
 		return m.completeModel.View()
 	case StateError:
 		return m.errorModel.View()
@@ -208,16 +256,24 @@ func (m *MainModel) View() string {
 // handleBack processes back navigation (ESC key)
 func (m *MainModel) handleBack() (tea.Model, tea.Cmd) {
 	switch m.state {
-	case StateStartupPath:
+	case StateStartupPath, StateUninstallStartupPath:
 		return m, tea.Quit
 	case StateClaudePath:
 		m.transitionToState(StateStartupPath)
+	case StateUninstallClaudePath:
+		m.transitionToState(StateUninstallStartupPath)
 	case StateFileSelection:
 		m.transitionToState(StateClaudePath)
-	case StateComplete:
+	case StateUninstallFileSelection:
+		m.transitionToState(StateUninstallClaudePath)
+	case StateComplete, StateUninstallComplete:
 		return m, tea.Quit
 	case StateError:
-		m.transitionToState(StateStartupPath)
+		if m.mode == ModeUninstall {
+			m.transitionToState(StateUninstallStartupPath)
+		} else {
+			m.transitionToState(StateStartupPath)
+		}
 	default:
 		return m, nil
 	}
@@ -237,6 +293,16 @@ func (m *MainModel) getAllAvailableFiles() []string {
 // RunMainInstaller starts the installation UI using the MainModel
 func RunMainInstaller(claudeAssets, startupAssets *embed.FS) error {
 	model := NewMainModel(claudeAssets, startupAssets)
+
+	program := tea.NewProgram(model)
+
+	_, err := program.Run()
+	return err
+}
+
+// RunMainUninstaller starts the uninstallation UI using the MainModel
+func RunMainUninstaller(claudeAssets, startupAssets *embed.FS) error {
+	model := NewMainUninstallModel(claudeAssets, startupAssets)
 
 	program := tea.NewProgram(model)
 

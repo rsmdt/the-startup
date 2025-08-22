@@ -20,9 +20,14 @@ type StartupPathModel struct {
 	textInput       textinput.Model
 	suggestions     []string
 	suggestionIndex int
+	mode            OperationMode
 }
 
 func NewStartupPathModel() StartupPathModel {
+	return NewStartupPathModelWithMode(ModeInstall)
+}
+
+func NewStartupPathModelWithMode(mode OperationMode) StartupPathModel {
 	ti := textinput.New()
 	ti.Placeholder = "Enter custom path (Tab for autocomplete)"
 	ti.Focus()
@@ -44,6 +49,7 @@ func NewStartupPathModel() StartupPathModel {
 		textInput:       ti,
 		suggestions:     []string{},
 		suggestionIndex: -1,
+		mode:            mode,
 	}
 }
 
@@ -206,8 +212,13 @@ func (m StartupPathModel) View() string {
 	s.WriteString(m.styles.Title.Render(AppBanner))
 	s.WriteString("\n\n")
 
-	s.WriteString(m.renderer.RenderTitle("Select .the-startup installation location"))
-	s.WriteString(m.styles.Info.Render("This is where The Startup's binary and templates will be installed"))
+	if m.mode == ModeUninstall {
+		s.WriteString(m.renderer.RenderTitle("Select .the-startup installation location"))
+		s.WriteString(m.styles.Warning.Render("This is where The Startup's binary and templates are installed"))
+	} else {
+		s.WriteString(m.renderer.RenderTitle("Select .the-startup installation location"))
+		s.WriteString(m.styles.Info.Render("This is where The Startup's binary and templates will be installed"))
+	}
 	s.WriteString("\n\n")
 
 	if m.inputMode {
@@ -258,5 +269,6 @@ func (m StartupPathModel) Reset() StartupPathModel {
 	m.textInput.SetValue("")
 	m.suggestions = []string{}
 	m.suggestionIndex = -1
+	// Preserve mode when resetting
 	return m
 }

@@ -14,17 +14,23 @@ type CompleteModel struct {
 	installer    *installer.Installer
 	selectedTool string
 	ready        bool
+	mode         OperationMode
 }
 
 // autoExitMsg is sent after a delay to automatically exit
 type autoExitMsg struct{}
 
 func NewCompleteModel(selectedTool string, installer *installer.Installer) CompleteModel {
+	return NewCompleteModelWithMode(selectedTool, installer, ModeInstall)
+}
+
+func NewCompleteModelWithMode(selectedTool string, installer *installer.Installer, mode OperationMode) CompleteModel {
 	return CompleteModel{
 		styles:       GetStyles(),
 		installer:    installer,
 		selectedTool: selectedTool,
 		ready:        false,
+		mode:         mode,
 	}
 }
 
@@ -55,7 +61,11 @@ func (m CompleteModel) View() string {
 	s.WriteString("\n\n")
 
 	// Success message
-	s.WriteString(m.styles.Success.Render("✅ Installation Complete!"))
+	if m.mode == ModeUninstall {
+		s.WriteString(m.styles.Success.Render("✅ Uninstallation Complete!"))
+	} else {
+		s.WriteString(m.styles.Success.Render("✅ Installation Complete!"))
+	}
 	s.WriteString("\n\n")
 
 	// Installation locations
@@ -76,34 +86,59 @@ func (m CompleteModel) View() string {
 		}
 	}
 
-	s.WriteString(m.styles.Normal.Render("Installation locations:"))
-	s.WriteString("\n")
-	s.WriteString(m.styles.Info.Render("  Claude files: " + displayClaudePath))
-	s.WriteString("\n")
-	s.WriteString(m.styles.Info.Render("  Startup files: " + displayStartupPath))
-	s.WriteString("\n\n")
+	if m.mode == ModeUninstall {
+		s.WriteString(m.styles.Normal.Render("Uninstallation locations:"))
+		s.WriteString("\n")
+		s.WriteString(m.styles.Warning.Render("  Claude files: " + displayClaudePath))
+		s.WriteString("\n")
+		s.WriteString(m.styles.Warning.Render("  Startup files: " + displayStartupPath))
+		s.WriteString("\n\n")
+	} else {
+		s.WriteString(m.styles.Normal.Render("Installation locations:"))
+		s.WriteString("\n")
+		s.WriteString(m.styles.Info.Render("  Claude files: " + displayClaudePath))
+		s.WriteString("\n")
+		s.WriteString(m.styles.Info.Render("  Startup files: " + displayStartupPath))
+		s.WriteString("\n\n")
+	}
 
-	// Display installed commands
+	// Display commands (installed or removed)
 	commands := m.installer.GetInstalledCommands()
 	if len(commands) > 0 {
 		sort.Strings(commands)
-		s.WriteString(m.styles.Info.Render("  Commands:"))
+		if m.mode == ModeUninstall {
+			s.WriteString(m.styles.Warning.Render("  Commands removed:"))
+		} else {
+			s.WriteString(m.styles.Info.Render("  Commands:"))
+		}
 		s.WriteString("\n")
 		for _, cmd := range commands {
-			s.WriteString(m.styles.Normal.Render("    • " + cmd))
+			if m.mode == ModeUninstall {
+				s.WriteString(m.styles.Normal.Render("    ✗ " + cmd))
+			} else {
+				s.WriteString(m.styles.Normal.Render("    • " + cmd))
+			}
 			s.WriteString("\n")
 		}
 		s.WriteString("\n")
 	}
 
-	// Display installed agents
+	// Display agents (installed or removed)
 	agents := m.installer.GetInstalledAgents()
 	if len(agents) > 0 {
 		sort.Strings(agents)
-		s.WriteString(m.styles.Info.Render("  Agents:"))
+		if m.mode == ModeUninstall {
+			s.WriteString(m.styles.Warning.Render("  Agents removed:"))
+		} else {
+			s.WriteString(m.styles.Info.Render("  Agents:"))
+		}
 		s.WriteString("\n")
 		for _, agent := range agents {
-			s.WriteString(m.styles.Normal.Render("    • " + agent))
+			if m.mode == ModeUninstall {
+				s.WriteString(m.styles.Normal.Render("    ✗ " + agent))
+			} else {
+				s.WriteString(m.styles.Normal.Render("    • " + agent))
+			}
 			s.WriteString("\n")
 		}
 		s.WriteString("\n")

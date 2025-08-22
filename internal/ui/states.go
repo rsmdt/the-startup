@@ -7,20 +7,72 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-// InstallerState represents the current state of the installer
+/*
+State Machine Architecture
+
+This package implements a dual-workflow state machine supporting both install and uninstall operations:
+
+Install Workflow:
+  StateStartupPath → StateClaudePath → StateFileSelection → StateComplete
+                ↓         ↓                ↓
+            StateError ← StateError ← StateError
+
+Uninstall Workflow:
+  StateUninstallStartupPath → StateUninstallClaudePath → StateUninstallFileSelection → StateUninstallComplete
+                         ↓                          ↓                            ↓
+                     StateError ← StateError ← StateError
+
+Navigation:
+- ESC key allows backward navigation in both workflows
+- Error states can return to appropriate starting points
+- Both workflows support quit from initial states
+
+The MainModel orchestrates the state machine using OperationMode to determine workflow behavior.
+Sub-models handle individual state UI rendering and user interaction with mode-specific adaptations.
+*/
+
+// InstallerState represents the current state of the installer or uninstaller
 type InstallerState int
 
 const (
+	// Install workflow states
 	StateStartupPath InstallerState = iota
 	StateClaudePath
 	StateFileSelection
 	StateComplete
 	StateError
+
+	// Uninstall workflow states
+	StateUninstallStartupPath
+	StateUninstallClaudePath
+	StateUninstallFileSelection
+	StateUninstallComplete
 )
+
+// OperationMode determines whether we're installing or uninstalling
+type OperationMode int
+
+const (
+	ModeInstall OperationMode = iota
+	ModeUninstall
+)
+
+// String returns the string representation of the operation mode
+func (m OperationMode) String() string {
+	switch m {
+	case ModeInstall:
+		return "Install"
+	case ModeUninstall:
+		return "Uninstall"
+	default:
+		return "Unknown"
+	}
+}
 
 // String returns the string representation of the state
 func (s InstallerState) String() string {
 	switch s {
+	// Install workflow states
 	case StateStartupPath:
 		return "Startup Path Selection"
 	case StateClaudePath:
@@ -31,6 +83,16 @@ func (s InstallerState) String() string {
 		return "Complete"
 	case StateError:
 		return "Error"
+	
+	// Uninstall workflow states
+	case StateUninstallStartupPath:
+		return "Uninstall Startup Path Selection"
+	case StateUninstallClaudePath:
+		return "Uninstall Claude Path Selection"
+	case StateUninstallFileSelection:
+		return "Uninstall File Selection"
+	case StateUninstallComplete:
+		return "Uninstall Complete"
 	default:
 		return "Unknown"
 	}
@@ -44,18 +106,31 @@ type StateTransition struct {
 
 // ValidTransitions defines allowed state transitions
 var ValidTransitions = map[StateTransition]bool{
-	// Forward transitions
+	// Install workflow - Forward transitions
 	{StateStartupPath, StateClaudePath}:   true,
 	{StateClaudePath, StateFileSelection}: true,
 	{StateFileSelection, StateComplete}:   true,
 	{StateFileSelection, StateError}:      true,
 
-	// Backward transitions (ESC)
+	// Install workflow - Backward transitions (ESC)
 	{StateClaudePath, StateStartupPath}:   true,
 	{StateFileSelection, StateClaudePath}: true,
 
-	// Error recovery
-	{StateError, StateStartupPath}: true,
+	// Uninstall workflow - Forward transitions
+	{StateUninstallStartupPath, StateUninstallClaudePath}:   true,
+	{StateUninstallClaudePath, StateUninstallFileSelection}: true,
+	{StateUninstallFileSelection, StateUninstallComplete}:   true,
+	{StateUninstallStartupPath, StateError}:                 true,
+	{StateUninstallClaudePath, StateError}:                  true,
+	{StateUninstallFileSelection, StateError}:               true,
+
+	// Uninstall workflow - Backward transitions (ESC)
+	{StateUninstallClaudePath, StateUninstallStartupPath}:     true,
+	{StateUninstallFileSelection, StateUninstallClaudePath}:   true,
+
+	// Error recovery - can return to appropriate starting points
+	{StateError, StateStartupPath}:             true,
+	{StateError, StateUninstallStartupPath}:    true,
 }
 
 // IsValidTransition checks if a state transition is allowed
@@ -80,7 +155,16 @@ func (p *ProgressiveDisclosureRenderer) RenderSelections(
 	tool, path string,
 	filesCount int,
 ) string {
-	if tool == "" {
+	return p.RenderSelectionsWithMode(tool, path, filesCount, ModeInstall)
+}
+
+// RenderSelectionsWithMode creates the progressive disclosure header with operation mode
+func (p *ProgressiveDisclosureRenderer) RenderSelectionsWithMode(
+	tool, path string,
+	filesCount int,
+	mode OperationMode,
+) string {
+	if tool == "" && path == "" {
 		return ""
 	}
 
@@ -105,7 +189,11 @@ func (p *ProgressiveDisclosureRenderer) RenderSelections(
 
 	// Files selection
 	if filesCount > 0 {
-		sections = append(sections, fmt.Sprintf("Files: %d selected", filesCount))
+		if mode == ModeUninstall {
+			sections = append(sections, fmt.Sprintf("Files: %d to remove", filesCount))
+		} else {
+			sections = append(sections, fmt.Sprintf("Files: %d selected", filesCount))
+		}
 	}
 
 	if len(sections) == 0 {
@@ -115,12 +203,19 @@ func (p *ProgressiveDisclosureRenderer) RenderSelections(
 	// Create bordered box with selections
 	content := strings.Join(sections, " • ")
 
+	var title string
+	if mode == ModeUninstall {
+		title = "The (Agentic) Startup Uninstallation"
+	} else {
+		title = "The (Agentic) Startup Installation"
+	}
+
 	return lipgloss.NewStyle().
 		Border(lipgloss.RoundedBorder()).
 		BorderForeground(p.styles.Info.GetForeground()).
 		Padding(0, 1).
 		MarginBottom(1).
-		Render("The (Agentic) Startup Installation\n"+content) + "\n"
+		Render(title+"\n"+content) + "\n"
 }
 
 // RenderTitle creates a consistent title bar
@@ -232,4 +327,61 @@ func (p *ProgressiveDisclosureRenderer) RenderInstallationSummary(
 	}
 
 	return summary.String() + "\n"
+}
+
+// RenderUninstallSummary creates a summary of what will be removed
+func (p *ProgressiveDisclosureRenderer) RenderUninstallSummary(
+	installPath, claudePath string,
+	filesToRemove []string,
+	componentsToRemove map[string][]string,
+) string {
+	var summary strings.Builder
+
+	summary.WriteString(p.styles.Warning.Render("🗑️  Uninstall Preview"))
+	summary.WriteString("\n\n")
+
+	// Installation paths
+	summary.WriteString(fmt.Sprintf("Installation Path: %s\n", installPath))
+	summary.WriteString(fmt.Sprintf("Claude Path: %s\n", claudePath))
+	summary.WriteString(fmt.Sprintf("Total files to remove: %d\n", len(filesToRemove)))
+
+	// Group files by component
+	summary.WriteString("\n")
+	for _, component := range []string{"agents", "commands", "output-styles", "templates", "rules", "bin"} {
+		if componentFiles, ok := componentsToRemove[component]; ok && len(componentFiles) > 0 {
+			summary.WriteString(fmt.Sprintf("%s/ (%d files)\n", component, len(componentFiles)))
+			for i, file := range componentFiles {
+				if i < 3 { // Show first 3 files
+					summary.WriteString(fmt.Sprintf("  • %s\n", file))
+				} else if i == 3 && len(componentFiles) > 3 {
+					summary.WriteString(fmt.Sprintf("  ... and %d more\n", len(componentFiles)-3))
+					break
+				}
+			}
+		}
+	}
+
+	return summary.String() + "\n"
+}
+
+// RenderUninstallWarning creates a warning about destructive operations
+func (p *ProgressiveDisclosureRenderer) RenderUninstallWarning() string {
+	warning := p.styles.Error.Render("⚠️  WARNING: This action cannot be undone!")
+	explanation := p.styles.Normal.Render("This will permanently remove all The (Agentic) Startup files from your system.\nYour Claude configuration will be updated to remove hooks and settings.\nYou can reinstall later, but any customizations will be lost.")
+	
+	return fmt.Sprintf("%s\n\n%s\n", warning, explanation)
+}
+
+// RenderUninstallHeader creates the uninstall workflow header
+func (p *ProgressiveDisclosureRenderer) RenderUninstallHeader(currentSelections string) string {
+	if currentSelections == "" {
+		currentSelections = "Uninstalling The (Agentic) Startup"
+	}
+
+	return lipgloss.NewStyle().
+		Border(lipgloss.RoundedBorder()).
+		BorderForeground(p.styles.Warning.GetForeground()).
+		Padding(0, 1).
+		MarginBottom(1).
+		Render(currentSelections) + "\n"
 }

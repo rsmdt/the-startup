@@ -2,7 +2,9 @@ package installer
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"embed"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -807,6 +809,22 @@ func (i *Installer) createDefaultSettings() map[string]interface{} {
 	}
 }
 
+// calculateFileChecksum computes the SHA256 checksum of a file
+func (i *Installer) calculateFileChecksum(filePath string) (string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	hasher := sha256.New()
+	if _, err := io.Copy(hasher, file); err != nil {
+		return "", err
+	}
+
+	return hex.EncodeToString(hasher.Sum(nil)), nil
+}
+
 // createLockFile creates the lock file
 func (i *Installer) createLockFile() error {
 	lockFile := &config.LockFile{
@@ -852,9 +870,18 @@ func (i *Installer) createLockFile() error {
 			// Check if the file exists in the destination
 			destPath := filepath.Join(i.claudePath, relPath)
 			if info, err := os.Stat(destPath); err == nil {
+				// Calculate checksum for installed file
+				checksum, checksumErr := i.calculateFileChecksum(destPath)
+				if checksumErr != nil {
+					// Log warning but don't fail - checksum is for integrity checking
+					fmt.Printf("Warning: Failed to calculate checksum for %s: %v\n", relPath, checksumErr)
+					checksum = "" // Empty checksum means no verification possible
+				}
+				
 				lockFile.Files[relPath] = config.FileInfo{
 					Size:         info.Size(),
 					LastModified: info.ModTime().Format(time.RFC3339),
+					Checksum:     checksum,
 				}
 			}
 			
@@ -889,10 +916,19 @@ func (i *Installer) createLockFile() error {
 			// Check if the file exists in the destination
 			destPath := filepath.Join(i.installPath, relPath)
 			if info, err := os.Stat(destPath); err == nil {
+				// Calculate checksum for installed file
+				checksum, checksumErr := i.calculateFileChecksum(destPath)
+				if checksumErr != nil {
+					// Log warning but don't fail - checksum is for integrity checking
+					fmt.Printf("Warning: Failed to calculate checksum for startup/%s: %v\n", relPath, checksumErr)
+					checksum = "" // Empty checksum means no verification possible
+				}
+				
 				// Store with a prefix to distinguish from Claude files
 				lockFile.Files["startup/"+relPath] = config.FileInfo{
 					Size:         info.Size(),
 					LastModified: info.ModTime().Format(time.RFC3339),
+					Checksum:     checksum,
 				}
 			}
 			
@@ -903,10 +939,19 @@ func (i *Installer) createLockFile() error {
 	// Record the binary in STARTUP_PATH/bin
 	binPath := filepath.Join(i.installPath, "bin", "the-startup")
 	if info, err := os.Stat(binPath); err == nil {
+		// Calculate checksum for binary
+		checksum, checksumErr := i.calculateFileChecksum(binPath)
+		if checksumErr != nil {
+			// Log warning but don't fail - checksum is for integrity checking
+			fmt.Printf("Warning: Failed to calculate checksum for binary: %v\n", checksumErr)
+			checksum = "" // Empty checksum means no verification possible
+		}
+		
 		relPath := filepath.Join("bin", "the-startup")
 		lockFile.Files[relPath] = config.FileInfo{
 			Size:         info.Size(),
 			LastModified: info.ModTime().Format(time.RFC3339),
+			Checksum:     checksum,
 		}
 	}
 

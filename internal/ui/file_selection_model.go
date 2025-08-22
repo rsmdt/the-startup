@@ -2,6 +2,7 @@ package ui
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"io/fs"
 	"os"
@@ -28,9 +29,27 @@ type FileSelectionModel struct {
 	choices       []string
 	ready         bool
 	confirmed     bool
+	mode          OperationMode
 }
 
 func NewFileSelectionModel(selectedTool, selectedPath string, installer *installer.Installer, claudeAssets, startupAssets *embed.FS) FileSelectionModel {
+	return NewFileSelectionModelWithMode(selectedTool, selectedPath, installer, claudeAssets, startupAssets, ModeInstall)
+}
+
+func NewFileSelectionModelWithMode(selectedTool, selectedPath string, installer *installer.Installer, claudeAssets, startupAssets *embed.FS, mode OperationMode) FileSelectionModel {
+	var choices []string
+	if mode == ModeUninstall {
+		choices = []string{
+			"Yes, remove everything",
+			"No, keep everything as-is",
+		}
+	} else {
+		choices = []string{
+			"Yes, give me awesome",
+			"Huh? I did not sign up for this",
+		}
+	}
+
 	m := FileSelectionModel{
 		styles:        GetStyles(),
 		renderer:      NewProgressiveDisclosureRenderer(),
@@ -39,20 +58,27 @@ func NewFileSelectionModel(selectedTool, selectedPath string, installer *install
 		startupAssets: startupAssets,
 		selectedTool:  selectedTool,
 		selectedPath:  selectedPath,
-		choices: []string{
-			"Yes, give me awesome",
-			"Huh? I did not sign up for this",
-		},
-		cursor: 0,
-		ready:  false,
+		choices:       choices,
+		cursor:        0,
+		ready:         false,
+		mode:          mode,
 	}
 
-	m.selectedFiles = m.getAllAvailableFiles()
-	if m.installer != nil {
-		m.installer.SetSelectedFiles(m.selectedFiles)
-		// Load existing lock file to detect deprecated files
-		m.installer.LoadExistingLockFile()
-		m.installer.GetDeprecatedFiles()
+	if mode == ModeUninstall {
+		// Load files from lockfile for uninstall
+		m.selectedFiles = m.getFilesFromLockfile()
+		// Update choices if no files found
+		if len(m.selectedFiles) == 0 {
+			m.choices = []string{"Go back to path selection"}
+		}
+	} else {
+		m.selectedFiles = m.getAllAvailableFiles()
+		if m.installer != nil {
+			m.installer.SetSelectedFiles(m.selectedFiles)
+			// Load existing lock file to detect deprecated files
+			m.installer.LoadExistingLockFile()
+			m.installer.GetDeprecatedFiles()
+		}
 	}
 
 	return m
@@ -77,8 +103,13 @@ func (m FileSelectionModel) Update(msg tea.Msg) (FileSelectionModel, tea.Cmd) {
 		case "enter":
 			if m.cursor < len(m.choices) {
 				choice := m.choices[m.cursor]
-				if choice == "Yes, give me awesome" {
+				if (m.mode == ModeUninstall && choice == "Yes, remove everything") ||
+				   (m.mode == ModeInstall && choice == "Yes, give me awesome") {
 					m.confirmed = true
+					m.ready = true
+				} else if m.mode == ModeUninstall && choice == "Go back to path selection" {
+					// Special case for when no files found - signal to go back
+					m.confirmed = false
 					m.ready = true
 				} else {
 					m.confirmed = false
@@ -111,26 +142,67 @@ func (m FileSelectionModel) View() string {
 		}
 	}
 
-	s.WriteString(m.styles.Info.Render("Installation Paths:"))
-	s.WriteString("\n")
-	s.WriteString(m.styles.Normal.Render(fmt.Sprintf("  Startup: %s", startupPath)))
-	s.WriteString("\n")
-	s.WriteString(m.styles.Normal.Render(fmt.Sprintf("  Claude:  %s", claudePath)))
-	s.WriteString("\n\n")
+	if m.mode == ModeUninstall {
+		s.WriteString(m.styles.Warning.Render("Uninstallation Paths:"))
+		s.WriteString("\n")
+		s.WriteString(m.styles.Normal.Render(fmt.Sprintf("  Startup: %s", startupPath)))
+		s.WriteString("\n")
+		s.WriteString(m.styles.Normal.Render(fmt.Sprintf("  Claude:  %s", claudePath)))
+		s.WriteString("\n\n")
 
-	s.WriteString(m.renderer.RenderTitle("Files to be installed to .claude"))
+		// Check if we have any files to remove
+		if len(m.selectedFiles) == 0 {
+			s.WriteString(m.renderer.RenderTitle("No Installation Found"))
+			s.WriteString(m.styles.Warning.Render("No installation found - nothing to uninstall"))
+			s.WriteString("\n\n")
+			s.WriteString(m.styles.Help.Render("The lockfile does not exist or no tracked files were found."))
+			s.WriteString("\n")
+			s.WriteString(m.styles.Help.Render("This could mean:"))
+			s.WriteString("\n")
+			s.WriteString(m.styles.Help.Render("  • The (Agentic) Startup is not installed in this location"))
+			s.WriteString("\n")
+			s.WriteString(m.styles.Help.Render("  • Files have already been manually removed"))
+			s.WriteString("\n")
+			s.WriteString(m.styles.Help.Render("  • Installation was corrupted"))
+			s.WriteString("\n\n")
+			s.WriteString(m.styles.Info.Render("Please select different paths or use install mode to set up The (Agentic) Startup."))
+			s.WriteString("\n\n")
+		} else {
+			s.WriteString(m.renderer.RenderTitle("Files to be removed"))
+			s.WriteString(m.styles.Warning.Render(fmt.Sprintf("%d files will be removed:", len(m.selectedFiles))))
+			s.WriteString("\n\n")
 
-	s.WriteString(m.styles.Info.Render("The following files will be installed to your Claude directory:"))
-	s.WriteString("\n\n")
+			s.WriteString(m.buildStaticTree())
+			s.WriteString("\n")
+		}
 
-	s.WriteString(m.buildStaticTree())
-	s.WriteString("\n")
+		s.WriteString("\n\n")
+		s.WriteString(m.styles.Title.Render("Ready to uninstall?"))
+		s.WriteString("\n")
+		s.WriteString(m.styles.Warning.Render("This will remove The (Agentic) Startup from the selected directories."))
+		s.WriteString("\n\n")
+	} else {
+		s.WriteString(m.styles.Info.Render("Installation Paths:"))
+		s.WriteString("\n")
+		s.WriteString(m.styles.Normal.Render(fmt.Sprintf("  Startup: %s", startupPath)))
+		s.WriteString("\n")
+		s.WriteString(m.styles.Normal.Render(fmt.Sprintf("  Claude:  %s", claudePath)))
+		s.WriteString("\n\n")
 
-	s.WriteString("\n\n")
-	s.WriteString(m.styles.Title.Render("Ready to install?"))
-	s.WriteString("\n")
-	s.WriteString(m.styles.Info.Render("This will install The (Agentic) Startup to the selected directories."))
-	s.WriteString("\n\n")
+		s.WriteString(m.renderer.RenderTitle("Files to be installed to .claude"))
+
+		s.WriteString(m.styles.Info.Render("The following files will be installed to your Claude directory:"))
+		s.WriteString("\n\n")
+
+		s.WriteString(m.buildStaticTree())
+		s.WriteString("\n")
+
+		s.WriteString("\n\n")
+		s.WriteString(m.styles.Title.Render("Ready to install?"))
+		s.WriteString("\n")
+		s.WriteString(m.styles.Info.Render("This will install The (Agentic) Startup to the selected directories."))
+		s.WriteString("\n\n")
+	}
 
 	for i, option := range m.choices {
 		if i == m.cursor {
@@ -199,6 +271,96 @@ func (m FileSelectionModel) buildStaticTree() string {
 	itemStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
 	updateStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("214")) // Orange for updates
 	removeStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("196")).Strikethrough(true) // Red with strike-through for removal
+
+	// For uninstall mode, show the actual files that will be removed in tree structure
+	if m.mode == ModeUninstall {
+		// Organize files by category for tree display
+		claudeFiles := make(map[string][]string)
+		startupFiles := make(map[string][]string)
+		
+		for _, filePath := range m.selectedFiles {
+			if strings.Contains(filePath, m.installer.GetInstallPath()) {
+				// Startup files
+				relPath := strings.TrimPrefix(filePath, m.installer.GetInstallPath()+"/")
+				if strings.HasPrefix(relPath, "templates/") {
+					startupFiles["templates"] = append(startupFiles["templates"], strings.TrimPrefix(relPath, "templates/"))
+				} else if strings.HasPrefix(relPath, "rules/") {
+					startupFiles["rules"] = append(startupFiles["rules"], strings.TrimPrefix(relPath, "rules/"))
+				} else if strings.HasPrefix(relPath, "bin/") {
+					startupFiles["bin"] = append(startupFiles["bin"], strings.TrimPrefix(relPath, "bin/"))
+				} else {
+					startupFiles["other"] = append(startupFiles["other"], relPath)
+				}
+			} else if strings.Contains(filePath, m.installer.GetClaudePath()) {
+				// Claude files
+				relPath := strings.TrimPrefix(filePath, m.installer.GetClaudePath()+"/")
+				if strings.HasPrefix(relPath, "agents/") {
+					claudeFiles["agents"] = append(claudeFiles["agents"], strings.TrimPrefix(relPath, "agents/"))
+				} else if strings.HasPrefix(relPath, "commands/") {
+					claudeFiles["commands"] = append(claudeFiles["commands"], strings.TrimPrefix(relPath, "commands/"))
+				} else if strings.HasPrefix(relPath, "output-styles/") {
+					claudeFiles["output-styles"] = append(claudeFiles["output-styles"], strings.TrimPrefix(relPath, "output-styles/"))
+				} else {
+					claudeFiles["other"] = append(claudeFiles["other"], relPath)
+				}
+			}
+		}
+
+		// Build tree structure with proper children format
+		var children []any
+		
+		// Add Claude files section
+		if len(claudeFiles) > 0 {
+			children = append(children, ".claude/")
+			
+			// Sort categories for consistent display
+			categories := []string{"agents", "commands", "output-styles", "other"}
+			for _, category := range categories {
+				if files, exists := claudeFiles[category]; exists && len(files) > 0 {
+					children = append(children, "  "+category+"/")
+					categoryTree := tree.New()
+					sort.Strings(files)
+					for _, file := range files {
+						categoryTree = categoryTree.Child(removeStyle.Render("✗ " + file))
+					}
+					children = append(children, categoryTree)
+				}
+			}
+		}
+
+		// Add startup files section
+		if len(startupFiles) > 0 {
+			children = append(children, ".the-startup/")
+			
+			// Sort categories for consistent display
+			categories := []string{"templates", "rules", "bin", "other"}
+			for _, category := range categories {
+				if files, exists := startupFiles[category]; exists && len(files) > 0 {
+					if category == "other" && len(files) == 1 && files[0] == "the-startup.lock" {
+						// Show lockfile directly under startup
+						children = append(children, removeStyle.Render("✗ " + files[0]))
+					} else {
+						children = append(children, "  "+category+"/")
+						categoryTree := tree.New()
+						sort.Strings(files)
+						for _, file := range files {
+							categoryTree = categoryTree.Child(removeStyle.Render("✗ " + file))
+						}
+						children = append(children, categoryTree)
+					}
+				}
+			}
+		}
+		
+		// Build final tree
+		t := tree.Root("Files to be removed").
+			Child(children...).
+			Enumerator(tree.RoundedEnumerator).
+			EnumeratorStyle(enumeratorStyle).
+			RootStyle(rootStyle)
+
+		return t.String()
+	}
 
 	// Get list of existing files that will be updated
 	existingFiles := make(map[string]bool)
@@ -340,4 +502,77 @@ func (m FileSelectionModel) buildStaticTree() string {
 		RootStyle(rootStyle)
 
 	return t.String()
+}
+
+// getFilesFromLockfile reads the lockfile to get the list of installed files for uninstall
+// It validates that files actually exist on disk and handles missing lockfile gracefully
+func (m FileSelectionModel) getFilesFromLockfile() []string {
+	// Get paths from installer (set by the path selection steps)
+	if m.installer == nil {
+		return []string{}
+	}
+	
+	startupPath := m.installer.GetInstallPath()
+	claudePath := m.installer.GetClaudePath()
+	
+	// Try to read lockfile from the selected startup path
+	lockfilePath := filepath.Join(startupPath, "the-startup.lock")
+	if _, err := os.Stat(lockfilePath); err != nil {
+		// Lockfile doesn't exist - nothing to uninstall
+		return []string{}
+	}
+	
+	// Read and parse lockfile
+	lockfileData, err := os.ReadFile(lockfilePath)
+	if err != nil {
+		return []string{}
+	}
+	
+	var lockFile map[string]interface{}
+	if err := json.Unmarshal(lockfileData, &lockFile); err != nil {
+		return []string{}
+	}
+	
+	// Extract files from lockfile
+	filesInterface, ok := lockFile["files"]
+	if !ok {
+		return []string{}
+	}
+	
+	filesMap, ok := filesInterface.(map[string]interface{})
+	if !ok {
+		return []string{}
+	}
+	
+	var existingFiles []string
+	
+	// Check each file in lockfile to see if it still exists
+	for lockfilePath := range filesMap {
+		var fullPath string
+		
+		// Determine full path based on file type
+		if strings.HasPrefix(lockfilePath, "startup/") {
+			// Startup files go to install path
+			relPath := strings.TrimPrefix(lockfilePath, "startup/")
+			fullPath = filepath.Join(startupPath, relPath)
+		} else if strings.HasPrefix(lockfilePath, "bin/") {
+			// Binary files go to install path
+			fullPath = filepath.Join(startupPath, lockfilePath)
+		} else {
+			// Claude files (agents, commands, output-styles) go to claude path
+			fullPath = filepath.Join(claudePath, lockfilePath)
+		}
+		
+		// Only include files that actually exist on disk
+		if _, err := os.Stat(fullPath); err == nil {
+			existingFiles = append(existingFiles, fullPath)
+		}
+	}
+	
+	// Also check for lockfile itself
+	if _, err := os.Stat(lockfilePath); err == nil {
+		existingFiles = append(existingFiles, lockfilePath)
+	}
+	
+	return existingFiles
 }

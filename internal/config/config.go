@@ -15,4 +15,5 @@ type LockFile struct {
 type FileInfo struct {
 	Size         int64  `json:"size"`
 	LastModified string `json:"last_modified"`
+	Checksum     string `json:"checksum"` // SHA256 hash for integrity verification
 }
