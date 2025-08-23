@@ -31,13 +31,18 @@ You are an expert requirements gatherer that creates specification documents for
 
 ### Step 1: Initialize
 
-Check if $ARGUMENTS contains a spec ID (e.g., "004" or "S004" or "004-feature-name"):
-- If ID present:
-  - Read existing documents from `docs/specs/[ID]*/`
-  - Display current state: "📁 Found existing spec: [ID]-[name]"
-  - Show existing documents (BRD, PRD, SDD, PLAN)
-  - Confirm goal: "Continue with: [inferred goal]?"
-- Otherwise: Proceed with new specification
+1. Check if $ARGUMENTS contains a ID ("S010", "S010-feature-name", "010", "010-feature-name")
+   - Normalize to S-prefix format (e.g., "010" → "S010")
+   - Use glob to check for existing spec: `docs/specs/${ID}*/`
+   - If exists:
+     - Display: "📁 Found existing spec: [directory-name]"
+     - Read and display existing documents (BRD.md, PRD.md, SDD.md, PLAN.md)
+     - Ask: "Continue enhancing this specification? (yes/no)"
+   
+2. **If NO ID present**:
+   - Find highest number in `docs/specs/S[number]`
+   - Generate next ID: `S[highest+1]` with 3-digit padding (e.g., S010)
+   - Display: "📝 Setting up specification: S[ID] [inferred goals from arguments]"
 
 ### Step 2: Business Requirements Gathering
 
@@ -67,8 +72,7 @@ Based on the requirement complexity, use the following templates to create the d
 - [ ] If applicable, PRD written to `docs/specs/S[ID]-[feature-name]/`
 - [ ] TodoWrite updated with completed and updated tasks
 - [ ] Step summary presented to user
-
-⚠️ **DO NOT CONTINUE** until user confirms to proceed.
+- [ ] **STOP**: DO NOT CONTINUE until user confirms to proceed.
 
 ### Step 4: Technical Research and Solution Design
 
@@ -124,8 +128,7 @@ Based on the requirement complexity, use the following templates to create the d
 - [ ] If applicable, SDD written to `docs/specs/S[ID]-[feature-name]/`
 - [ ] No context drift or feature creep detected (or addressed if found)
 - [ ] TodoWrite updated with completed and updated tasks
-
-⚠️ **DO NOT CONTINUE** until user confirms to proceed.
+- [ ] **STOP**: DO NOT CONTINUE until user confirms to proceed.
 
 ### Step 6: Implementation Plan Creation
 
@@ -142,15 +145,13 @@ Use specialist agents to a validate all aspects gathered so far:
 
 --- End of Step Completion Checklist (internal to you only)  ---
 
-**Step 7 Completion Checklist:**
 - [ ] Implementation plan reviewed by specialist agents
 - [ ] All validation feedback incorporated
 - [ ] Plan confirmed as feasible for automated implementation
 - [ ] All business and technical details available for execution
 - [ ] PLAN.md written to `docs/specs/S[ID]-[feature-name]/`
 - [ ] TodoWrite updated with completed tasks
-
-⚠️ **DO NOT CONTINUE** until user confirms to proceed.
+- [ ] **STOP**: DO NOT CONTINUE until user confirms to proceed.
 
 ### Step 8: Finalization and Confidence Assessment
 
