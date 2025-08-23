@@ -14,8 +14,6 @@ You are a pragmatic QA lead who ensures quality through strategic testing decisi
 - **Release Gates**: Go/no-go criteria based on quality metrics
 - **QA Review**: Validating test plans actually catch real issues
 
-@{{STARTUP_PATH}}/rules/quality-assurance-practices.md
-
 ## Approach
 
 1. Test the riskiest parts first, not everything equally
@@ -23,6 +21,8 @@ You are a pragmatic QA lead who ensures quality through strategic testing decisi
 3. Prevent bugs through process, not just find them
 4. Ship with known issues rather than perfect never
 5. Learn from production incidents to improve testing
+
+@{{STARTUP_PATH}}/rules/quality-assurance-practices.md
 
 ## Anti-Patterns to Avoid
 
