@@ -98,11 +98,15 @@ Creates comprehensive specifications from your ideas:
 /s:specify 001
 ```
 
-This command will:
-1. Gather requirements through targeted questions
-2. Create business and technical specifications  
-3. Design the system architecture
-4. Generate an implementation plan
+#### Workflow
+```mermaid
+flowchart TD
+    A[Your Feature Idea] --> B[Initialize & Check Existing Specs]
+    B --> C[Requirements Gathering<br/>📄 BRD.md, PRD.md if needed]
+    C --> D[Technical Research<br/>📄 SDD.md if needed<br/>📋 docs/patterns/, interfaces/]
+    D --> E[Implementation Planning<br/>📄 PLAN.md]
+    E --> F[🚀 Ready for /s:implement S001]
+```
 
 ### `/s:implement` - Execute the Plan
 
@@ -113,11 +117,13 @@ Takes a specification and builds it with the right experts:
 /s:implement 001
 ```
 
-This command will:
-1. Load the implementation plan
-2. Assign tasks to appropriate specialists
-3. Execute phase-by-phase with validation
-4. Track progress through completion
+#### Workflow
+```mermaid
+flowchart TD
+    A[📄 PLAN.md] --> B[Load & Initialize Plan]
+    B --> C[Phase-by-Phase Execution<br/>Review & Validate Each Phase]
+    C --> D[✅ Implementation Complete]
+```
 
 ### `/s:refactor` - Improve Code Quality
 
@@ -131,11 +137,17 @@ Analyzes and refactors existing code for better maintainability:
 /s:refactor reduce complexity in the payment processing logic
 ```
 
-This command will:
-1. Analyze existing code structure and patterns
-2. Identify refactoring opportunities
-3. Preserve behavior while improving quality
-4. Apply industry best practices
+#### Workflow
+```mermaid
+flowchart TD
+    A[Refactoring Request] --> B[Clarify Goals & Analyze Code]
+    B --> C{Complexity Level}
+    C -->|Simple| D[Execute Safe Refactoring<br/>Validate Each Change]
+    C -->|Complex| E[Create Refactoring Plan<br/>📄 SDD.md, PLAN.md]
+    
+    D --> F[✅ Refactoring Complete]
+    E --> G[🚀 Ready for /s:implement]
+```
 
 ## Real-World Examples
 
