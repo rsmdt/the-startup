@@ -1,18 +1,18 @@
-<p align="center"><img src="https://github.com/rsmdt/the-startup/blob/main/assets/logo.png" width="400" alt="The Startup"></p>
+<p align="center"><img src="https://github.com/rsmdt/the-startup/blob/main/assets/logo.png" width="400" alt="The Agentic Startup"></p>
 
 <p align="center">Ship faster. Ship better. Ship with <b>The Agentic Startup</b>.</p>
 
-## What is The Startup?
+## What is The Agentic Startup?
 
-The Startup brings you instant access to expert developers, architects, and engineers - all working together to turn your ideas into shipped code.
+The Agentic Startup brings you instant access to expert developers, architects, and engineers - all working together to turn your ideas into shipped code.
 
-The Startup is an orchestration system for Claude Code that gives you a virtual engineering team. Instead of one AI trying to do everything, you get specialized experts who collaborate like a real startup team - pragmatic, fast, and focused on shipping.
+The Agentic Startup is an orchestration system for Claude Code that gives you a virtual engineering team. Instead of one AI trying to do everything, you get specialized experts who collaborate like a real startup team - pragmatic, fast, and focused on shipping.
 
 Think of it as having a CTO, architects, developers, and DevOps engineers on-demand, each bringing their expertise to your project.
 
 ## Quick Start
 
-Install and start using The Startup:
+Install and start using The Agentic Startup:
 
 ```bash
 # Install (interactive)
@@ -25,18 +25,23 @@ curl -LsSf https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh |
 /s:implement 001-user-auth
 ```
 
-**More installation options**: See the [Installation & Uninstall](#installation--uninstall) section below.
+**More installation options**: See the [Installation](#installation) section below.
 
-## The Startup Way
+## The Agentic Startup Way
 
-When you use The Startup, Claude Code becomes your **technical co-founder** with a specific personality:
+**Think twice, ship once.** The Agentic Startup philosophy: proper planning accelerates delivery more than jumping straight into code.
 
-- **Ship over perfection** - MVPs today, not perfect solutions next quarter
-- **Pragmatic decisions** - Make the call with available info, iterate later  
+### Core Philosophy
+
+- **Humans decide, AI executes** - Critical decisions stay with you; AI handles implementation details
 - **Specialist delegation** - Pull in the right expert for each task
+- **Documentation drives clarity** - Specs prevent miscommunication and scope creep
 - **Parallel execution** - Multiple experts work simultaneously when possible
+- **Review everything** - No AI decision goes unreviewed; you stay in control
 
-You're not talking to a generic AI - you're working with a startup CTO who knows when to be scrappy and when to bring in the specialists.
+When you use The Agentic Startup, Claude Code becomes your **technical co-founder** that gathers context first, consults specialists, generates reviewable documentation, then implements with confidence.
+
+You're getting access to a team that knows successful products come from understanding the problem deeply before writing the first line.
 
 ## Your Expert Team
 
@@ -81,8 +86,6 @@ You're not talking to a generic AI - you're working with a startup CTO who knows
 
 ## Commands
 
-The Startup provides commands:
-
 ### `/s:specify` - Plan Before You Build
 
 Creates comprehensive specifications from your ideas:
@@ -107,7 +110,7 @@ Takes a specification and builds it with the right experts:
 
 ```bash
 # Implement a completed specification
-/s:implement 001-notifications
+/s:implement 001
 ```
 
 This command will:
@@ -140,7 +143,7 @@ This command will:
 ```
 /s:specify Add user authentication with JWT
 ```
-The Startup will:
+The Agentic Startup will:
 - Use **the-business-analyst** to clarify requirements (OAuth? 2FA? Password reset?)
 - Bring in **the-software-architect** to design the system
 - Get **the-security-engineer** to review for vulnerabilities
@@ -150,7 +153,7 @@ The Startup will:
 ```
 The API is returning 500 errors on user login
 ```
-The Startup will:
+The Agentic Startup will:
 - Immediately call **the-site-reliability-engineer** to investigate
 - Once root cause is found, bring in **the-backend-engineer** to fix
 - Have **the-qa-engineer** verify the fix
@@ -160,7 +163,7 @@ The Startup will:
 ```
 /s:specify Admin dashboard for monitoring system metrics
 ```
-The Startup will:
+The Agentic Startup will:
 - Use **the-ux-designer** to create the interface design
 - Bring in **the-data-engineer** for efficient data queries
 - Get **the-software-architect** to design the real-time data flow
@@ -169,7 +172,7 @@ The Startup will:
 ## How It Works
 
 1. **You make a request** - Either directly or through commands
-2. **The Startup assesses** - Determines complexity and required expertise
+2. **The Agentic Startup assesses** - Determines complexity and required expertise
 3. **Specialists are called** - The right experts for your specific need
 4. **Parallel execution** - Multiple experts work simultaneously when possible
 5. **Results are synthesized** - Expert input becomes actionable next steps
@@ -196,11 +199,11 @@ The Startup will:
 
 ## Installation
 
-The Startup provides easy installation via script and clean uninstall capabilities.
+The Agentic Startup provides easy installation via script capabilities.
 
 ### Installation Options
 
-Install The Startup agents, commands, and configuration using the install script:
+Install The Agentic Startup commands, agents, and configuration using the install script:
 
 ```bash
 # Interactive installation (shows all options)
@@ -243,6 +246,4 @@ go test ./...
 
 ---
 
-**Ship faster. Ship better. Ship with The Startup.**
-
-*A virtual engineering team that works like the best startups - fast, pragmatic, and focused on results.*
+**Ship faster. Ship better. Ship with The Agentic Startup.**

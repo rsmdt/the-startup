@@ -31,18 +31,17 @@ You are an expert requirements gatherer that creates specification documents for
 
 ### Step 1: Initialize
 
-1. Check if $ARGUMENTS contains a ID ("S010", "S010-feature-name", "010", "010-feature-name")
-   - Normalize to S-prefix format (e.g., "010" → "S010")
-   - Use glob to check for existing spec: `docs/specs/${ID}*/`
+1. Check if $ARGUMENTS contains a ID ("010", "010-feature-name", "010", "010-feature-name")
+   - Use glob to check for existing spec: `docs/specs/[ID]*/`
    - If exists:
      - Display: "📁 Found existing spec: [directory-name]"
      - Read and display existing documents (BRD.md, PRD.md, SDD.md, PLAN.md)
      - Ask: "Continue enhancing this specification? (yes/no)"
    
 2. **If NO ID present**:
-   - Find highest number in `docs/specs/S[number]`
-   - Generate next ID: `S[highest+1]` with 3-digit padding (e.g., S010)
-   - Display: "📝 Setting up specification: S[ID] [inferred goals from arguments]"
+   - Find highest number in `docs/specs/[3-digit-number]`
+   - Generate next ID: `[highest+1]` with 3-digit padding (e.g., 010)
+   - Display: "📝 Setting up specification: [ID] [inferred goals from arguments]"
 
 ### Step 2: Business Requirements Gathering
 
@@ -68,8 +67,8 @@ Based on the requirement complexity, use the following templates to create the d
 
 - [ ] The-chief complexity assessment received and displayed verbatim
 - [ ] Complexity scores and workflow presented to user
-- [ ] If applicable, BRD written to `docs/specs/S[ID]-[feature-name]/`
-- [ ] If applicable, PRD written to `docs/specs/S[ID]-[feature-name]/`
+- [ ] If applicable, BRD written to `docs/specs/[ID]-[feature-name]/`
+- [ ] If applicable, PRD written to `docs/specs/[ID]-[feature-name]/`
 - [ ] TodoWrite updated with completed and updated tasks
 - [ ] Step summary presented to user
 - [ ] **STOP**: DO NOT CONTINUE until user confirms to proceed.
@@ -125,7 +124,7 @@ Based on the requirement complexity, use the following templates to create the d
 - [ ] All agent responses displayed verbatim
 - [ ] If applicable, patterns documented in `docs/patterns/`
 - [ ] If applicable, interfaces documented in `docs/interfaces/`
-- [ ] If applicable, SDD written to `docs/specs/S[ID]-[feature-name]/`
+- [ ] If applicable, SDD written to `docs/specs/[ID]-[feature-name]/`
 - [ ] No context drift or feature creep detected (or addressed if found)
 - [ ] TodoWrite updated with completed and updated tasks
 - [ ] **STOP**: DO NOT CONTINUE until user confirms to proceed.
@@ -149,7 +148,7 @@ Use specialist agents to a validate all aspects gathered so far:
 - [ ] All validation feedback incorporated
 - [ ] Plan confirmed as feasible for automated implementation
 - [ ] All business and technical details available for execution
-- [ ] PLAN.md written to `docs/specs/S[ID]-[feature-name]/`
+- [ ] PLAN.md written to `docs/specs/[ID]-[feature-name]/`
 - [ ] TodoWrite updated with completed tasks
 - [ ] **STOP**: DO NOT CONTINUE until user confirms to proceed.
 
@@ -161,10 +160,10 @@ When all documents are created:
 ## Specification summary for S[ID]-[feature-name]
 
 Core Documents:
-- BRD: docs/specs/S[ID]-[feature-name]/BRD.md (if applicable)
-- PRD: docs/specs/S[ID]-[feature-name]/PRD.md (if applicable)
-- SDD: docs/specs/S[ID]-[feature-name]/SDD.md (if applicable)
-- PLAN: docs/specs/S[ID]-[feature-name]/PLAN.md
+- BRD: docs/specs/[ID]-[feature-name]/BRD.md (if applicable)
+- PRD: docs/specs/[ID]-[feature-name]/PRD.md (if applicable)
+- SDD: docs/specs/[ID]-[feature-name]/SDD.md (if applicable)
+- PLAN: docs/specs/[ID]-[feature-name]/PLAN.md
 
 Supplementary Documentation:
 - Patterns: [List any created/updated in docs/patterns/]

@@ -41,7 +41,7 @@ You are an intelligent implementation orchestrator that executes the plan for: *
 
 ### Step 1: Plan Discovery
 
-If $ARGUMENTS contains a ID ("S010", "S010-feature-name", "R010"):
+If $ARGUMENTS contains a ID ("010", "010-feature-name", "010"):
 - Use glob to check for existing spec: `docs/**/${ID}*/`
 - If exists:
     - Display: "📁 Found: [directory]"
