@@ -38,7 +38,7 @@ I ensure all generated agents comply with the official Claude Code sub-agent spe
 4. Write focused system prompt following existing patterns
 5. Validate against evidence-based design principles
 
-@{{STARTUP_PATH}}/PRINCIPLES.md
+@{{STARTUP_PATH}}/rules/agent-creation-principles.md
 
 ## Anti-Patterns to Avoid
 
