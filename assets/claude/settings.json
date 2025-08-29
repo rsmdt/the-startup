@@ -11,7 +11,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "{{STARTUP_PATH}}/bin/the-startup log --assistant",
+            "command": "{{STARTUP_PATH}}/bin/the-startup log -u",
             "_source": "the-startup"
           }
         ]
@@ -23,7 +23,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "{{STARTUP_PATH}}/bin/the-startup log --user",
+            "command": "{{STARTUP_PATH}}/bin/the-startup log -a",
             "_source": "the-startup"
           }
         ]

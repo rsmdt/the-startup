@@ -43,6 +43,50 @@ When you use The Agentic Startup, Claude Code becomes your **technical co-founde
 
 You're getting access to a team that knows successful products come from understanding the problem deeply before writing the first line.
 
+### Agent Design Philosophy
+
+**Activity-Based Specialization Over Role-Based Organization**
+
+The Agentic Startup uses an evidence-based approach to AI agent design, informed by cutting-edge research and proven patterns from leading frameworks.
+
+#### Research Foundation
+
+**Task specialization consistently outperforms role-based organization for LLM agents:**
+
+- **Performance Impact**: Studies show 2.86% to 21.88% accuracy improvement with specialized agents vs single broad agents ([Multi-Agent Collaboration Mechanisms: A Survey of LLMs, 2025](https://arxiv.org/html/2501.06322v1))
+- **Industry Consensus**: Leading frameworks (CrewAI, Microsoft AutoGen, LangGraph) unanimously organize agents by **capability** rather than traditional job titles
+- **Domain Specialization**: Research defines effective LLM specialization as "customizing agents according to specific task contextual data, augmented by domain-specific knowledge" ([Practical Considerations for Agentic LLM Systems, 2024](https://arxiv.org/html/2412.04093v1))
+
+#### Proven Patterns from Leading Frameworks
+
+**CrewAI** (32,000+ GitHub stars): Uses expertise-based agents like "Senior Market Analyst" and "Data Researcher" - **no backend/frontend engineer distinctions**
+
+**Microsoft AutoGen**: Organizes by domain knowledge ("math expert", "chemistry expert") with generic assistants coordinating specialized tools
+
+**LangGraph**: Employs functional roles with capability-driven specialization through custom tools and focused prompts
+
+**Industry Trend**: 2024-2025 shift from general chatbots to special-purpose, task-focused agents with sparse expert models
+
+#### Why This Matters
+
+Traditional engineering boundaries (backend/frontend/mobile) are **artificial constraints** for LLM performance:
+
+- **Modern development is full-stack** - API design requires understanding both client and server concerns
+- **LLMs excel with focused context** - Task-specific agents outperform role-based generalists  
+- **Parallel execution improves** - Multiple specialized agents can work simultaneously on related activities
+- **Reduced cognitive load** - Agents receive only relevant context for their specific expertise
+
+#### Our Implementation
+
+The Agentic Startup evolves toward activity-based specialization:
+
+**Current**: Role-based agents (the-backend-engineer, the-frontend-engineer, the-qa-engineer)
+**Future**: Activity-based specialization (the-developer/api-design, the-developer/component-architecture, the-developer/testing-strategy)
+
+While preserving truly domain-specific expertise (mobile, security, UX) where specialization provides genuine value.
+
+**Evidence-driven design. Research-backed performance. Real results.**
+
 ## Your Expert Team
 
 ### 🚀 Leadership & Orchestration

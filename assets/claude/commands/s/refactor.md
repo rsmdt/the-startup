@@ -51,12 +51,11 @@ You MUST ALWAYS ask the user for further details about the refactoring needs:
 - Are there any constraints or areas to avoid?
 - What validation mechanisms exist? (tests, linting, type checking, etc.)
 
---- End of Step Completion Checklist (internal to you only) ---
-
-- [ ] Refactoring goals clarified with user
-- [ ] Constraints and boundaries understood
-- [ ] Validation mechanisms identified
-- [ ] **STOP**: DO NOT CONTINUE until user confirms to proceed.
+**Verification Checklist**:
+1. Refactoring goals clarified with user
+2. Constraints and boundaries understood
+3. Validation mechanisms identified
+4. **STOP**: DO NOT CONTINUE until user confirms to proceed.
 
 ### Step 2: Discovery and Code Analysis
 
@@ -88,14 +87,13 @@ You MUST ALWAYS ask the user for further details about the refactoring needs:
 4. Complexity Assessment:
    @{{STARTUP_PATH}}/rules/complexity-assessment.md
 
---- End of Step Completion Checklist (internal to you only) ---
-
-- [ ] Target code located and analyzed
-- [ ] Validation status checked
-- [ ] Specialist analysis completed
-- [ ] `the-chief` complexity assessment displayed
-- [ ] Refactoring opportunities identified
-- [ ] **STOP**: DO NOT CONTINUE until user confirms to proceed.
+**Verification Checklist**:
+1. Target code located and analyzed
+2. Validation status checked
+3. Specialist analysis completed
+4. `the-chief` complexity assessment displayed
+5. Refactoring opportunities identified
+6. **STOP**: DO NOT CONTINUE until user confirms to proceed.
 
 ### Step 3: Execute Based on Chief's Recommendation
 

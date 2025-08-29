@@ -25,6 +25,16 @@ func TestExtractAgentIDFromPrompt(t *testing.T) {
 			expected: "test-agent",
 		},
 		{
+			name:     "nested agent ID",
+			prompt:   "AgentId: the-architect/system-design\nSome content",
+			expected: "the-architect/system-design",
+		},
+		{
+			name:     "nested with underscores and hyphens",
+			prompt:   "AgentId: the-backend_engineer/api-design\nSome content",
+			expected: "the-backend_engineer/api-design",
+		},
+		{
 			name:     "no agent ID",
 			prompt:   "Some content without agent ID",
 			expected: "",
@@ -33,6 +43,21 @@ func TestExtractAgentIDFromPrompt(t *testing.T) {
 			name:     "invalid characters",
 			prompt:   "AgentId: test@agent\nSome content",
 			expected: "", // @ is not allowed
+		},
+		{
+			name:     "too many nesting levels",
+			prompt:   "AgentId: the-architect/system/design\nSome content",
+			expected: "", // Max depth is 2
+		},
+		{
+			name:     "invalid nested - slash at start",
+			prompt:   "AgentId: /system-design\nSome content",
+			expected: "", // Must not start with slash
+		},
+		{
+			name:     "invalid nested - slash at end",
+			prompt:   "AgentId: the-architect/\nSome content",
+			expected: "", // Must not end with slash
 		},
 	}
 
@@ -48,18 +73,47 @@ func TestExtractAgentIDFromPrompt(t *testing.T) {
 
 // TestGenerateAgentID tests basic ID generation
 func TestGenerateAgentID(t *testing.T) {
-	// Just verify it generates something in the expected format
-	id := GenerateAgentID("session-123", "the-architect", "some prompt")
-
-	// Should be format: {8-char-id}-{agent-type}
-	if !strings.HasSuffix(id, "-the-architect") {
-		t.Errorf("Generated ID should end with agent type: %s", id)
+	tests := []struct {
+		name         string
+		agentType    string
+		expectedEnd  string
+		description  string
+	}{
+		{
+			name:        "flat agent type",
+			agentType:   "the-architect",
+			expectedEnd: "-the-architect",
+			description: "Should generate ID with flat agent type",
+		},
+		{
+			name:        "nested agent type",
+			agentType:   "the-architect/system-design",
+			expectedEnd: "-the-architect-system-design", // Slashes replaced with hyphens for filesystem
+			description: "Should generate ID with nested agent type (slashes to hyphens)",
+		},
+		{
+			name:        "nested with underscores",
+			agentType:   "the-backend_engineer/api-design",
+			expectedEnd: "-the-backend_engineer-api-design",
+			description: "Should handle underscores in nested type",
+		},
 	}
 
-	// Should have an 8-character prefix
-	parts := strings.SplitN(id, "-", 2)
-	if len(parts[0]) != 8 {
-		t.Errorf("ID prefix should be 8 characters, got %d: %s", len(parts[0]), parts[0])
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			id := GenerateAgentID("session-123", tt.agentType, "some prompt")
+
+			// Should be format: {8-char-id}-{agent-type}
+			if !strings.HasSuffix(id, tt.expectedEnd) {
+				t.Errorf("%s: generated ID should end with %s, got %s", tt.description, tt.expectedEnd, id)
+			}
+
+			// Should have an 8-character prefix
+			parts := strings.SplitN(id, "-", 2)
+			if len(parts[0]) != 8 {
+				t.Errorf("ID prefix should be 8 characters, got %d: %s", len(parts[0]), parts[0])
+			}
+		})
 	}
 }
 

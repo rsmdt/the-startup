@@ -609,3 +609,111 @@ func TestGoHooksIntegration(t *testing.T) {
 		t.Errorf("Expected lock file to be created at %s, but file doesn't exist: %v", lockFilePath, err)
 	}
 }
+
+// TestNestedAgentDirectorySupport tests that agents can be discovered in nested directories
+func TestNestedAgentDirectorySupport(t *testing.T) {
+	// Create a temporary test directory structure
+	tmpDir := t.TempDir()
+	claudePath := filepath.Join(tmpDir, ".claude")
+	
+	// Create nested agent directories
+	agentDirs := []string{
+		filepath.Join(claudePath, "agents"),                     // Flat structure
+		filepath.Join(claudePath, "agents", "backend"),         // Nested: backend domain
+		filepath.Join(claudePath, "agents", "frontend"),        // Nested: frontend domain
+		filepath.Join(claudePath, "agents", "infrastructure"), // Nested: infrastructure domain
+	}
+	
+	for _, dir := range agentDirs {
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			t.Fatalf("Failed to create directory %s: %v", dir, err)
+		}
+	}
+	
+	// Create test agent files with proper naming convention
+	testAgents := map[string]string{
+		filepath.Join(claudePath, "agents", "the-architect.md"):                              "Flat structure agent",
+		filepath.Join(claudePath, "agents", "backend", "the-api-specialist.md"):             "Backend domain agent",
+		filepath.Join(claudePath, "agents", "backend", "the-database-expert.md"):            "Backend domain agent 2",
+		filepath.Join(claudePath, "agents", "frontend", "the-react-specialist.md"):          "Frontend domain agent",
+		filepath.Join(claudePath, "agents", "infrastructure", "the-kubernetes-expert.md"):   "Infrastructure agent",
+		// Invalid naming - should be ignored
+		filepath.Join(claudePath, "agents", "backend", "api-specialist.md"):                 "Invalid: missing 'the-' prefix",
+		filepath.Join(claudePath, "agents", "not-an-agent.txt"):                            "Invalid: not markdown",
+	}
+	
+	for path, content := range testAgents {
+		if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+			t.Fatalf("Failed to create test file %s: %v", path, err)
+		}
+	}
+	
+	// Create installer and set paths
+	installer := New(nil, nil)
+	installer.SetClaudePath(claudePath)
+	installer.SetInstallPath(tmpDir)
+	
+	// Test IsInstalled - should detect agents in nested directories
+	if !installer.IsInstalled() {
+		t.Error("Expected IsInstalled to return true when agents exist in nested directories")
+	}
+	
+	// Verify that invalid agents are not detected
+	// Remove all valid agents and keep only invalid ones
+	for path := range testAgents {
+		if strings.Contains(path, "the-") && strings.HasSuffix(path, ".md") {
+			os.Remove(path)
+		}
+	}
+	
+	if installer.IsInstalled() {
+		t.Error("Expected IsInstalled to return false when only invalid agents exist")
+	}
+}
+
+// TestGetInstalledAgentsWithNestedStructure tests agent discovery in nested directories
+func TestGetInstalledAgentsWithNestedStructure(t *testing.T) {
+	// This test requires actual embedded filesystem with nested structure
+	// We'll simulate it by setting selectedFiles with nested paths
+	installer := New(nil, nil)
+	
+	nestedFiles := []string{
+		"agents/the-architect.md",
+		"agents/backend/the-api-specialist.md",
+		"agents/backend/the-database-expert.md",
+		"agents/frontend/the-react-specialist.md",
+		"agents/infrastructure/the-kubernetes-expert.md",
+		"agents/invalid-agent.md",  // Should be filtered out
+		"agents/backend/api-guru.md", // Should be filtered out (no "the-" prefix)
+	}
+	
+	installer.SetSelectedFiles(nestedFiles)
+	
+	agents := installer.GetInstalledAgents()
+	
+	// Expected agents (only those with "the-" prefix)
+	expectedAgents := map[string]bool{
+		"the-architect":        true,
+		"the-api-specialist":   true,
+		"the-database-expert":  true,
+		"the-react-specialist": true,
+		"the-kubernetes-expert": true,
+	}
+	
+	if len(agents) != len(expectedAgents) {
+		t.Errorf("Expected %d agents, got %d", len(expectedAgents), len(agents))
+	}
+	
+	for _, agent := range agents {
+		if !expectedAgents[agent] {
+			t.Errorf("Unexpected agent: %s", agent)
+		}
+		delete(expectedAgents, agent)
+	}
+	
+	if len(expectedAgents) > 0 {
+		for agent := range expectedAgents {
+			t.Errorf("Missing expected agent: %s", agent)
+		}
+	}
+}

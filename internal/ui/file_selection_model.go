@@ -378,33 +378,47 @@ func (m FileSelectionModel) buildStaticTree() string {
 		}
 	}
 
-	buildSubtree := func(embedFS *embed.FS, patterns []string, prefix string) []string {
+	buildSubtree := func(embedFS *embed.FS, basePath string, prefix string) []string {
 		var items []string
 		filesSeen := make(map[string]bool)
 		
-		// First, add current files from embedded assets
+		// First, add current files from embedded assets using WalkDir for recursive discovery
 		if embedFS != nil {
-			for _, pattern := range patterns {
-				if files, err := fs.Glob(embedFS, pattern); err == nil {
-					for _, file := range files {
-						// Extract relative path from assets/claude/[type]/
-						relPath := strings.TrimPrefix(file, "assets/claude/")
-						relPath = strings.TrimPrefix(relPath, prefix)
-						filePath := prefix + relPath
-						filesSeen[relPath] = true
-
-						// Format display name (preserve namespace for commands)
-						displayName := relPath
-
-						// Apply orange color if file will be updated
-						if existingFiles[filePath] {
-							items = append(items, updateStyle.Render(displayName+" (will update)"))
-						} else {
-							items = append(items, itemStyle.Render(displayName))
-						}
+			fs.WalkDir(embedFS, basePath, func(path string, d fs.DirEntry, err error) error {
+				if err != nil || d.IsDir() {
+					return nil
+				}
+				
+				// Only process markdown files
+				if !strings.HasSuffix(path, ".md") {
+					return nil
+				}
+				
+				// For agents, validate naming convention
+				if prefix == "agents/" {
+					name := filepath.Base(path)
+					name = strings.TrimSuffix(name, ".md")
+					if !strings.HasPrefix(name, "the-") {
+						return nil // Skip agents that don't follow naming convention
 					}
 				}
-			}
+				
+				// Extract relative path from assets/claude/[type]/
+				relPath := strings.TrimPrefix(path, basePath+"/")
+				filePath := prefix + relPath
+				filesSeen[relPath] = true
+
+				// Format display name (preserve full path structure)
+				displayName := relPath
+
+				// Apply orange color if file will be updated
+				if existingFiles[filePath] {
+					items = append(items, updateStyle.Render(displayName+" (will update)"))
+				} else {
+					items = append(items, itemStyle.Render(displayName))
+				}
+				return nil
+			})
 		}
 		
 		// Then, add deprecated files that will be removed (only for this prefix)
@@ -430,9 +444,9 @@ func (m FileSelectionModel) buildStaticTree() string {
 	}
 
 	// Only show files that go to .claude directory (agents and commands)
-	agentItems := buildSubtree(m.claudeAssets, []string{"assets/claude/agents/**/*.md", "assets/claude/agents/*.md"}, "agents/")
-	commandItems := buildSubtree(m.claudeAssets, []string{"assets/claude/commands/**/*.md"}, "commands/")
-	outputStyleItems := buildSubtree(m.claudeAssets, []string{"assets/claude/output-styles/*.md"}, "output-styles/")
+	agentItems := buildSubtree(m.claudeAssets, "assets/claude/agents", "agents/")
+	commandItems := buildSubtree(m.claudeAssets, "assets/claude/commands", "commands/")
+	outputStyleItems := buildSubtree(m.claudeAssets, "assets/claude/output-styles", "output-styles/")
 	// Don't show hooks and templates as they go to .the-startup, not .claude
 
 	// Check if settings.json exists using installer's method

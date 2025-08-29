@@ -67,8 +67,9 @@ func ExtractAgentIDFromPrompt(prompt string) string {
 
 // isValidAgentID validates agent ID format according to specification:
 // - Length: 2-64 characters
-// - Characters: alphanumeric, hyphens, underscores
+// - Characters: alphanumeric, hyphens, underscores, forward slash for nesting
 // - Must start and end with alphanumeric characters
+// - Supports nested format: "domain/specialization" (e.g., "the-architect/system-design")
 func isValidAgentID(id string) bool {
 	// Check length requirements
 	if len(id) < 2 || len(id) > 64 {
@@ -80,10 +81,31 @@ func isValidAgentID(id string) bool {
 		return false
 	}
 
-	// Check all characters are valid (alphanumeric, hyphen, or underscore)
-	for _, char := range id {
-		if !isAlphanumeric(byte(char)) && char != '-' && char != '_' {
+	// Split by forward slash to check nested structure
+	parts := strings.Split(id, "/")
+	
+	// Maximum nesting depth of 2 (domain/specialization)
+	if len(parts) > 2 {
+		return false
+	}
+
+	// Validate each part separately
+	for _, part := range parts {
+		// Each part must have at least 2 characters
+		if len(part) < 2 {
 			return false
+		}
+		
+		// Each part must start and end with alphanumeric
+		if !isAlphanumeric(part[0]) || !isAlphanumeric(part[len(part)-1]) {
+			return false
+		}
+		
+		// Check all characters in the part are valid (alphanumeric, hyphen, or underscore)
+		for _, char := range part {
+			if !isAlphanumeric(byte(char)) && char != '-' && char != '_' {
+				return false
+			}
 		}
 	}
 
@@ -111,12 +133,13 @@ func isAlphanumeric(b byte) bool {
 }
 
 // GenerateAgentID generates a simple AgentID with format "{shortId}-{agentType}"
-// Example: "ppYh6tV7-the-architect"
+// Example: "ppYh6tV7-the-architect" or "ppYh6tV7-the-architect/system-design"
 //
 // The function generates:
 // - An 8-character alphanumeric shortId
-// - Format: "{shortId}-{agentType}"
+// - Format: "{shortId}-{agentType}" where agentType can include nested paths
 // - Returns a valid AgentID that is easy to read and type
+// - Supports nested agent types like "the-architect/system-design"
 func GenerateAgentID(sessionID, agentType, promptExcerpt string) string {
 	// Handle empty or invalid agent type
 	if agentType == "" {
@@ -126,8 +149,12 @@ func GenerateAgentID(sessionID, agentType, promptExcerpt string) string {
 	// Generate 8-character alphanumeric shortId
 	shortId := generateShortId()
 
+	// Replace forward slashes with hyphens for file system compatibility
+	// but preserve the nested structure for display/logging
+	safeAgentType := strings.ReplaceAll(agentType, "/", "-")
+
 	// Format: "{shortId}-{agentType}"
-	baseID := fmt.Sprintf("%s-%s", shortId, agentType)
+	baseID := fmt.Sprintf("%s-%s", shortId, safeAgentType)
 
 	return baseID
 }

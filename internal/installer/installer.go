@@ -178,12 +178,21 @@ func (i *Installer) IsInstalled() bool {
 	// Also check if any claude files exist
 	claudeAgentsPath := filepath.Join(i.claudePath, "agents")
 	if _, err := os.Stat(claudeAgentsPath); err == nil {
-		// Check if any of our agents exist
-		entries, _ := os.ReadDir(claudeAgentsPath)
-		for _, entry := range entries {
-			if strings.HasPrefix(entry.Name(), "the-") {
-				return true
+		// Check if any of our agents exist (recursively)
+		found := false
+		filepath.WalkDir(claudeAgentsPath, func(path string, d fs.DirEntry, err error) error {
+			if err != nil || d.IsDir() {
+				return nil
 			}
+			// Check for agent naming convention
+			if strings.HasPrefix(d.Name(), "the-") && strings.HasSuffix(d.Name(), ".md") {
+				found = true
+				return fs.SkipAll // Stop walking once we find one
+			}
+			return nil
+		})
+		if found {
+			return true
 		}
 	}
 
@@ -1021,20 +1030,36 @@ func (i *Installer) GetInstalledAgents() []string {
 	if len(i.selectedFiles) > 0 {
 		for _, file := range i.selectedFiles {
 			if strings.HasPrefix(file, "agents/") && strings.HasSuffix(file, ".md") {
-				// Extract agent name from path (e.g., "agents/the-architect.md" -> "the-architect")
+				// Extract agent name from path
+				// Supports both flat (agents/the-architect.md) and nested (agents/backend/the-api-specialist.md)
 				name := filepath.Base(file)
 				name = strings.TrimSuffix(name, ".md")
-				agents = append(agents, name)
+				// Validate agent naming convention
+				if strings.HasPrefix(name, "the-") {
+					agents = append(agents, name)
+				}
 			}
 		}
 	} else {
-		// Get all agent files from embedded FS
-		pattern := "assets/claude/agents/*.md"
-		files, _ := fs.Glob(i.claudeAssets, pattern)
-		for _, file := range files {
-			name := filepath.Base(file)
-			name = strings.TrimSuffix(name, ".md")
-			agents = append(agents, name)
+		// Recursively get all agent files from embedded FS
+		// This uses WalkDir to find agents in nested directories
+		if i.claudeAssets != nil {
+			fs.WalkDir(i.claudeAssets, "assets/claude/agents", func(path string, d fs.DirEntry, err error) error {
+				if err != nil || d.IsDir() {
+					return nil
+				}
+				
+				// Check if it's a markdown file
+				if strings.HasSuffix(path, ".md") {
+					name := filepath.Base(path)
+					name = strings.TrimSuffix(name, ".md")
+					// Validate agent naming convention
+					if strings.HasPrefix(name, "the-") {
+						agents = append(agents, name)
+					}
+				}
+				return nil
+			})
 		}
 	}
 
@@ -1064,17 +1089,25 @@ func (i *Installer) GetInstalledCommands() []string {
 			}
 		}
 	} else {
-		// Get all command files from embedded FS
-		pattern := "assets/claude/commands/**/*.md"
-		files, _ := fs.Glob(i.claudeAssets, pattern)
-		for _, file := range files {
-			// Extract command path (e.g., "assets/claude/commands/s/specify.md" -> "/s:specify")
-			relPath := strings.TrimPrefix(file, "assets/claude/commands/")
-			relPath = strings.TrimSuffix(relPath, ".md")
-			// Convert path separators to colons
-			parts := strings.Split(relPath, "/")
-			command := "/" + strings.Join(parts, ":")
-			commands = append(commands, command)
+		// Recursively get all command files from embedded FS
+		if i.claudeAssets != nil {
+			fs.WalkDir(i.claudeAssets, "assets/claude/commands", func(path string, d fs.DirEntry, err error) error {
+				if err != nil || d.IsDir() {
+					return nil
+				}
+				
+				// Check if it's a markdown file
+				if strings.HasSuffix(path, ".md") {
+					// Extract command path (e.g., "assets/claude/commands/s/specify.md" -> "/s:specify")
+					relPath := strings.TrimPrefix(path, "assets/claude/commands/")
+					relPath = strings.TrimSuffix(relPath, ".md")
+					// Convert path separators to colons
+					parts := strings.Split(relPath, "/")
+					command := "/" + strings.Join(parts, ":")
+					commands = append(commands, command)
+				}
+				return nil
+			})
 		}
 	}
 

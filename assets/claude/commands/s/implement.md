@@ -58,7 +58,6 @@ If $ARGUMENTS is a file or directory ("path/to/directory", "path/to/file.md")
 
 Display: `📊 Analyzing Implementation Plan`
 
-**MANDATORY Initialization Steps:**
 1. Read the plan to identify all phases (look for **Phase X:** patterns)
 2. Count total phases and tasks per phase
 3. If any tasks already marked `[x]` or `[~]`, report their status
@@ -73,13 +72,12 @@ Display: `📊 Analyzing Implementation Plan`
 5. Load ONLY Phase 1 tasks into TodoWrite
 6. Present phase 1 overview and ask user to confirm start
 
---- End of Step Completion Checklist (internal to you only) ---
-
-- [ ] Plan successfully loaded and parsed
-- [ ] All phases identified and counted
-- [ ] Phase 1 tasks loaded into TodoWrite
-- [ ] Implementation overview presented to user
-- [ ] **STOP**: DO NOT CONTINUE until user confirms to proceed.
+**Verification Checklist**:
+1. Plan successfully loaded and parsed
+2. All phases identified and counted
+3. Phase 1 tasks loaded into TodoWrite
+4. Implementation overview presented to user
+5. **STOP**: DO NOT CONTINUE until user confirms to proceed.
 
 ### Step 3: Phase-by-Phase Implementation
 

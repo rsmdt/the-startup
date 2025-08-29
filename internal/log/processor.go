@@ -75,6 +75,7 @@ func ProcessToolCall(input io.Reader, isPostHook bool) (*HookData, error) {
 
 // ShouldProcess determines if a hook should process this tool call
 // Only processes Task tools with subagent_type starting with "the-"
+// Supports nested agent types like "the-architect/system-design"
 func ShouldProcess(toolName string, toolInput map[string]interface{}) bool {
 	// Check if this is a Task tool call
 	if toolName != "Task" {
@@ -87,8 +88,15 @@ func ShouldProcess(toolName string, toolInput map[string]interface{}) bool {
 		return false
 	}
 
+	// Handle nested agent types by checking the base part
+	// For "the-architect/system-design", check if "the-architect" starts with "the-"
+	basePart := subagentType
+	if slashIdx := strings.Index(subagentType, "/"); slashIdx != -1 {
+		basePart = subagentType[:slashIdx]
+	}
+
 	// Only process agents starting with "the-"
-	return strings.HasPrefix(subagentType, "the-")
+	return strings.HasPrefix(basePart, "the-")
 }
 
 // ExtractSessionID extracts session ID from prompt using regex

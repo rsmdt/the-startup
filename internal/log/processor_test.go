@@ -52,6 +52,35 @@ func TestProcessToolCall(t *testing.T) {
 			},
 		},
 		{
+			name: "PreToolUse with nested agent",
+			jsonInput: `{
+				"tool_name":"Task",
+				"tool_input":{
+					"subagent_type":"the-architect/system-design",
+					"description":"Design system architecture",
+					"prompt":"SessionId: dev-456 AgentId: arch-sys-001\nPlease design the system architecture"
+				},
+				"session_id":"dev-456",
+				"hook_event_name":"PreToolUse"
+			}`,
+			isPostHook: false,
+			expectNil:  false,
+			validateFn: func(t *testing.T, data *HookData) {
+				if data.Role != "user" {
+					t.Errorf("Expected role 'user', got %q", data.Role)
+				}
+				if data.AgentID != "arch-sys-001" {
+					t.Errorf("Expected agent_id 'arch-sys-001', got %q", data.AgentID)
+				}
+				if data.SessionID != "dev-456" {
+					t.Errorf("Expected session_id 'dev-456', got %q", data.SessionID)
+				}
+				if data.Content == "" {
+					t.Error("Expected content to be set for PreToolUse")
+				}
+			},
+		},
+		{
 			name: "PostToolUse with output",
 			jsonInput: `{
 				"tool_name":"Task",
@@ -247,6 +276,30 @@ func TestShouldProcess(t *testing.T) {
 			toolName:      "task",
 			toolInput:     map[string]interface{}{"subagent_type": "the-test"},
 			shouldProcess: false,
+		},
+		{
+			name:          "Nested agent with the- prefix",
+			toolName:      "Task",
+			toolInput:     map[string]interface{}{"subagent_type": "the-architect/system-design"},
+			shouldProcess: true,
+		},
+		{
+			name:          "Nested agent without the- prefix",
+			toolName:      "Task",
+			toolInput:     map[string]interface{}{"subagent_type": "architect/system-design"},
+			shouldProcess: false,
+		},
+		{
+			name:          "Deeply nested agent with the- prefix",
+			toolName:      "Task",
+			toolInput:     map[string]interface{}{"subagent_type": "the-backend-engineer/api-design"},
+			shouldProcess: true,
+		},
+		{
+			name:          "Nested agent with special chars",
+			toolName:      "Task",
+			toolInput:     map[string]interface{}{"subagent_type": "the-ml_engineer/model-training"},
+			shouldProcess: true,
 		},
 	}
 

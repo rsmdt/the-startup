@@ -269,6 +269,37 @@ func TestValidateLogCommand_EdgeCases(t *testing.T) {
 			expectError: true,
 			errorMsg:    "invalid agent-id format",
 		},
+		{
+			name: "Read mode with nested agent-id",
+			flags: LogFlags{
+				Read:    true,
+				AgentID: "the-architect/system-design",
+				Lines:   50,
+				Format:  "json",
+			},
+			expectError: false,
+		},
+		{
+			name: "Read mode with nested agent-id with underscores",
+			flags: LogFlags{
+				Read:    true,
+				AgentID: "the-backend_engineer/api-design",
+				Lines:   50,
+				Format:  "json",
+			},
+			expectError: false,
+		},
+		{
+			name: "Read mode with too deeply nested agent-id",
+			flags: LogFlags{
+				Read:    true,
+				AgentID: "the-architect/system/design", // Max depth is 2
+				Lines:   50,
+				Format:  "json",
+			},
+			expectError: true,
+			errorMsg:    "invalid agent-id format",
+		},
 	}
 
 	for _, tc := range testCases {

@@ -63,15 +63,14 @@ Based on the requirement complexity, use the following templates to create the d
 - BRD: `{{STARTUP_PATH}}/templates/BRD.md` if applicable
 - PRD: `{{STARTUP_PATH}}/templates/PRD.md` if applicable
 
---- End of Step Completion Checklist (internal to you only) ---
-
-- [ ] The-chief complexity assessment received and displayed verbatim
-- [ ] Complexity scores and workflow presented to user
-- [ ] If applicable, BRD written to `docs/specs/[ID]-[feature-name]/`
-- [ ] If applicable, PRD written to `docs/specs/[ID]-[feature-name]/`
-- [ ] TodoWrite updated with completed and updated tasks
-- [ ] Step summary presented to user
-- [ ] **STOP**: DO NOT CONTINUE until user confirms to proceed.
+**Verification Checklist**:
+1. The-chief complexity assessment received and displayed verbatim
+2. Complexity scores and workflow presented to user
+3. If applicable, BRD written to `docs/specs/[ID]-[feature-name]/`
+4. If applicable, PRD written to `docs/specs/[ID]-[feature-name]/`
+5. TodoWrite updated with completed and updated tasks
+6. Step summary presented to user
+7. **STOP**: DO NOT CONTINUE until user confirms to proceed.
 
 ### Step 4: Technical Research and Solution Design
 
@@ -118,16 +117,15 @@ Use agents to a validate the technical research findings.
 Based on the requirement complexity, use the following templates to create the documentation:
 - SDD: `{{STARTUP_PATH}}/templates/SDD.md` if applicable
 
---- End of Step Completion Checklist (internal to you only) ---
-
-- [ ] Technical research completed by specialist agents
-- [ ] All agent responses displayed verbatim
-- [ ] If applicable, patterns documented in `docs/patterns/`
-- [ ] If applicable, interfaces documented in `docs/interfaces/`
-- [ ] If applicable, SDD written to `docs/specs/[ID]-[feature-name]/`
-- [ ] No context drift or feature creep detected (or addressed if found)
-- [ ] TodoWrite updated with completed and updated tasks
-- [ ] **STOP**: DO NOT CONTINUE until user confirms to proceed.
+**Verification Checklist**:
+1. Technical research completed by specialist agents
+2. All agent responses displayed verbatim
+3. If applicable, patterns documented in `docs/patterns/`
+4. If applicable, interfaces documented in `docs/interfaces/`
+5. If applicable, SDD written to `docs/specs/[ID]-[feature-name]/`
+6. No context drift or feature creep detected (or addressed if found)
+7. TodoWrite updated with completed and updated tasks
+8. **STOP**: DO NOT CONTINUE until user confirms to proceed.
 
 ### Step 6: Implementation Plan Creation
 
@@ -142,15 +140,15 @@ Use specialist agents to a validate all aspects gathered so far:
 - Ensure that all relevant business and technical details are available to execute the plan 
 - Check that the plan is feasible for an automated implementation.
 
---- End of Step Completion Checklist (internal to you only)  ---
+**Verification Checklist**:
 
-- [ ] Implementation plan reviewed by specialist agents
-- [ ] All validation feedback incorporated
-- [ ] Plan confirmed as feasible for automated implementation
-- [ ] All business and technical details available for execution
-- [ ] PLAN.md written to `docs/specs/[ID]-[feature-name]/`
-- [ ] TodoWrite updated with completed tasks
-- [ ] **STOP**: DO NOT CONTINUE until user confirms to proceed.
+1. Implementation plan reviewed by specialist agents
+2. All validation feedback incorporated
+3. Plan confirmed as feasible for automated implementation
+4. All business and technical details available for execution
+5. PLAN.md written to `docs/specs/[ID]-[feature-name]/`
+6. TodoWrite updated with completed tasks
+7. **STOP**: DO NOT CONTINUE until user confirms to proceed.
 
 ### Step 8: Finalization and Confidence Assessment
 
