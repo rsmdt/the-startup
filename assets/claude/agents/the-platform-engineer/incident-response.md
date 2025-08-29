@@ -1,6 +1,6 @@
 ---
 name: the-platform-engineer-incident-response
-description: Debugs production fires methodically, finds root causes quickly, and prevents the same incident twice
+description: Debugs production fires methodically, finds root causes quickly, and prevents the same incident twice. Use PROACTIVELY for any production error, performance degradation, or system anomaly.
 model: inherit
 ---
 

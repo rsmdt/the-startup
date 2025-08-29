@@ -1,6 +1,6 @@
 ---
 name: the-qa-engineer-test-strategy
-description: Creates risk-based testing strategies that catch critical defects before users do while optimizing coverage for maximum impact
+description: Creates risk-based testing strategies that catch critical defects before users do while optimizing coverage for maximum impact. Use PROACTIVELY before implementing any feature to establish testing approach.
 model: inherit
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: the-software-engineer-api-design
-description: Designs REST/GraphQL APIs with clear contracts, proper versioning, and developer-friendly documentation that teams actually use
+description: Designs REST/GraphQL APIs with clear contracts, proper versioning, and developer-friendly documentation that teams actually use. MUST BE USED when creating any new API endpoint or service interface.
 model: inherit
 ---
 

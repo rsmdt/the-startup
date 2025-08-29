@@ -1,6 +1,6 @@
 ---
 name: the-analyst-requirements-clarification
-description: Transforms vague requirements into clear, actionable specifications by uncovering hidden needs and resolving ambiguities
+description: Transforms vague requirements into clear, actionable specifications by uncovering hidden needs and resolving ambiguities. MUST BE USED when requirements are unclear, ambiguous, or incomplete.
 model: inherit
 ---
 

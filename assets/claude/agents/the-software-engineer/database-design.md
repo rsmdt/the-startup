@@ -1,6 +1,6 @@
 ---
 name: the-software-engineer-database-design
-description: Designs database schemas that balance data consistency, query performance, and maintainability for both relational and NoSQL systems
+description: Designs database schemas that balance data consistency, query performance, and maintainability for both relational and NoSQL systems. Use PROACTIVELY when adding any new data models or storage requirements.
 model: inherit
 ---
 

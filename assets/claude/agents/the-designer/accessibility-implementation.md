@@ -1,6 +1,6 @@
 ---
 name: the-designer-accessibility-implementation
-description: Ensures WCAG 2.1 AA compliance and inclusive design practices that make products usable by everyone including those with disabilities
+description: Ensures WCAG 2.1 AA compliance and inclusive design practices that make products usable by everyone including those with disabilities. MUST BE USED when creating any user interface or interactive component.
 model: inherit
 ---
 

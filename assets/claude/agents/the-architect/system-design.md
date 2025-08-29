@@ -1,6 +1,6 @@
 ---
 name: the-architect-system-design
-description: Designs system architecture that balances elegance with pragmatic business reality while planning for growth
+description: Designs system architecture that balances elegance with pragmatic business reality while planning for growth. Use PROACTIVELY for any new feature, service, or significant functionality addition.
 model: inherit
 ---
 

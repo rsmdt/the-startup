@@ -1,6 +1,6 @@
 ---
 name: the-security-engineer-authentication-systems
-description: Implements secure authentication and authorization using OAuth, JWT, SSO, and MFA to protect user identities and control access effectively
+description: Implements secure authentication and authorization using OAuth, JWT, SSO, and MFA to protect user identities and control access effectively. MUST BE USED for any authentication, authorization, or session management implementation.
 model: inherit
 ---
 
