@@ -378,69 +378,193 @@ func (m FileSelectionModel) buildStaticTree() string {
 		}
 	}
 
-	buildSubtree := func(embedFS *embed.FS, basePath string, prefix string) []string {
-		var items []string
+	buildSubtree := func(embedFS *embed.FS, basePath string, prefix string) []any {
 		filesSeen := make(map[string]bool)
+		
+		// Build a hierarchical structure for files
+		type fileNode struct {
+			name     string
+			children map[string]*fileNode
+			isFile   bool
+			fullPath string
+			exists   bool
+		}
+		
+		root := &fileNode{
+			children: make(map[string]*fileNode),
+		}
 		
 		// First, add current files from embedded assets using WalkDir for recursive discovery
 		if embedFS != nil {
 			fs.WalkDir(embedFS, basePath, func(path string, d fs.DirEntry, err error) error {
-				if err != nil || d.IsDir() {
+				if err != nil {
 					return nil
 				}
 				
-				// Only process markdown files
-				if !strings.HasSuffix(path, ".md") {
+				// Skip the base directory itself
+				if path == basePath {
 					return nil
 				}
 				
-				// For agents, validate naming convention
-				if prefix == "agents/" {
-					name := filepath.Base(path)
-					name = strings.TrimSuffix(name, ".md")
-					if !strings.HasPrefix(name, "the-") {
-						return nil // Skip agents that don't follow naming convention
-					}
+				// For files, only process markdown files
+				if !d.IsDir() && !strings.HasSuffix(path, ".md") && !strings.HasSuffix(path, ".json") {
+					return nil
 				}
 				
 				// Extract relative path from assets/claude/[type]/
 				relPath := strings.TrimPrefix(path, basePath+"/")
-				filePath := prefix + relPath
-				filesSeen[relPath] = true
-
-				// Format display name (preserve full path structure)
-				displayName := relPath
-
-				// Apply orange color if file will be updated
-				if existingFiles[filePath] {
-					items = append(items, updateStyle.Render(displayName+" (will update)"))
-				} else {
-					items = append(items, itemStyle.Render(displayName))
+				
+				// For agents, validate naming convention
+				// Agents at root level should start with "the-", but nested agents don't need to
+				if prefix == "agents/" && !d.IsDir() {
+					// Check if it's a root-level agent (no directory separator in path)
+					if !strings.Contains(relPath, "/") {
+						name := filepath.Base(path)
+						name = strings.TrimSuffix(name, ".md")
+						if !strings.HasPrefix(name, "the-") {
+							return nil // Skip root agents that don't follow naming convention
+						}
+					}
+					// Nested agents don't need "the-" prefix
 				}
+				filePath := prefix + relPath
+				
+				if !d.IsDir() {
+					filesSeen[relPath] = true
+				}
+				
+				// Build the tree structure
+				parts := strings.Split(relPath, "/")
+				current := root
+				
+				for i, part := range parts {
+					if _, exists := current.children[part]; !exists {
+						current.children[part] = &fileNode{
+							name:     part,
+							children: make(map[string]*fileNode),
+							isFile:   i == len(parts)-1 && !d.IsDir(),
+							fullPath: filePath,
+							exists:   existingFiles[filePath],
+						}
+					}
+					current = current.children[part]
+				}
+				
 				return nil
 			})
 		}
 		
 		// Then, add deprecated files that will be removed (only for this prefix)
-		var deprecatedInPrefix []string
 		for depFile := range deprecatedFiles {
 			if strings.HasPrefix(depFile, prefix) {
 				relPath := strings.TrimPrefix(depFile, prefix)
 				// Only add if we haven't seen this file (it's truly deprecated)
 				if !filesSeen[relPath] {
-					deprecatedInPrefix = append(deprecatedInPrefix, relPath)
+					// Build the tree structure for deprecated files
+					parts := strings.Split(relPath, "/")
+					current := root
+					
+					for i, part := range parts {
+						if _, exists := current.children[part]; !exists {
+							current.children[part] = &fileNode{
+								name:     part,
+								children: make(map[string]*fileNode),
+								isFile:   i == len(parts)-1,
+								fullPath: depFile,
+								exists:   false, // Deprecated files don't exist in new structure
+							}
+						}
+						current = current.children[part]
+					}
 				}
 			}
 		}
 		
-		// Sort deprecated files for consistent display
-		sort.Strings(deprecatedInPrefix)
-		for _, relPath := range deprecatedInPrefix {
-			displayName := "✗ " + relPath + " (will remove)"
-			items = append(items, removeStyle.Render(displayName))
+		// Convert the tree structure to lipgloss tree items
+		var buildTreeItems func(node *fileNode, depth int) []any
+		buildTreeItems = func(node *fileNode, depth int) []any {
+			var items []any
+			
+			// Sort children for consistent display
+			var sortedKeys []string
+			for k := range node.children {
+				sortedKeys = append(sortedKeys, k)
+			}
+			sort.Strings(sortedKeys)
+			
+			for _, key := range sortedKeys {
+				child := node.children[key]
+				
+				if child.isFile {
+					// It's a file - remove .md extension for display
+					displayName := strings.TrimSuffix(child.name, ".md")
+					displayName = strings.TrimSuffix(displayName, ".json")
+					
+					// For commands, format as /s:command
+					if prefix == "commands/" && strings.Contains(child.fullPath, "/s/") {
+						// Convert s/specify.md to /s:specify
+						displayName = "/s:" + displayName
+					}
+					
+					// Check if it's deprecated (not in filesSeen)
+					if !filesSeen[strings.TrimPrefix(child.fullPath, prefix)] && deprecatedFiles[child.fullPath] {
+						displayName = "✗ " + displayName + " (will remove)"
+						items = append(items, removeStyle.Render(displayName))
+					} else if child.exists {
+						items = append(items, updateStyle.Render(displayName+" (will update)"))
+					} else {
+						items = append(items, itemStyle.Render(displayName))
+					}
+				} else {
+					// It's a directory
+					
+					// For agents prefix, show condensed format with activity count
+					if prefix == "agents/" {
+						// Count the .md files for specialized activities
+						fileCount := 0
+						for _, grandchild := range child.children {
+							if grandchild.isFile && strings.HasSuffix(grandchild.name, ".md") {
+								fileCount++
+							}
+						}
+						
+						// Format: "the-analyst (5 specialized activities)"
+						displayName := child.name
+						if fileCount > 0 {
+							activityLabel := "specialized activity"
+							if fileCount > 1 {
+								activityLabel = "specialized activities"
+							}
+							displayName = fmt.Sprintf("%s (%d %s)", child.name, fileCount, activityLabel)
+						}
+						
+						// Don't expand agent directories, just show the count
+						items = append(items, itemStyle.Render(displayName))
+					} else if prefix == "commands/" && child.name == "s" {
+						// For commands/s directory, expand but format files specially
+						dirItems := buildTreeItems(child, depth+1)
+						// Add the command items directly without showing "s/" directory
+						items = append(items, dirItems...)
+					} else {
+						// For other directories, expand normally
+						dirItems := buildTreeItems(child, depth+1)
+						if len(dirItems) > 0 {
+							// Create a subtree for this directory
+							dirTree := tree.New()
+							for _, item := range dirItems {
+								dirTree = dirTree.Child(item)
+							}
+							items = append(items, child.name+"/")
+							items = append(items, dirTree)
+						}
+					}
+				}
+			}
+			
+			return items
 		}
 		
-		return items
+		return buildTreeItems(root, 0)
 	}
 
 	// Only show files that go to .claude directory (agents and commands)
@@ -459,22 +583,6 @@ func (m FileSelectionModel) buildStaticTree() string {
 		displayPath = strings.Replace(claudePath, os.Getenv("HOME"), "~", 1)
 	}
 
-	// Build the tree with colored items
-	agentsTree := tree.New()
-	for _, item := range agentItems {
-		agentsTree = agentsTree.Child(item)
-	}
-
-	commandsTree := tree.New()
-	for _, item := range commandItems {
-		commandsTree = commandsTree.Child(item)
-	}
-
-	outputStylesTree := tree.New()
-	for _, item := range outputStyleItems {
-		outputStylesTree = outputStylesTree.Child(item)
-	}
-
 	// Add settings.json with appropriate styling
 	settingsItem := "settings.json"
 	if settingsExists {
@@ -483,16 +591,41 @@ func (m FileSelectionModel) buildStaticTree() string {
 		settingsItem = itemStyle.Render("settings.json")
 	}
 
-	// Build children list for the tree
-	children := []any{
-		"agents",
-		agentsTree,
-		"commands",
-		commandsTree,
-		"output-styles",
-		outputStylesTree,
-		settingsItem,
+	// Build children list for the tree with proper nesting
+	children := []any{}
+	
+	// Add agents folder with its items as a subtree
+	if len(agentItems) > 0 {
+		agentsTree := tree.New()
+		for _, item := range agentItems {
+			agentsTree = agentsTree.Child(item)
+		}
+		children = append(children, "agents/")
+		children = append(children, agentsTree)
 	}
+	
+	// Add commands folder with its items as a subtree
+	if len(commandItems) > 0 {
+		commandsTree := tree.New()
+		for _, item := range commandItems {
+			commandsTree = commandsTree.Child(item)
+		}
+		children = append(children, "commands/")
+		children = append(children, commandsTree)
+	}
+	
+	// Add output-styles folder with its items as a subtree
+	if len(outputStyleItems) > 0 {
+		outputStylesTree := tree.New()
+		for _, item := range outputStyleItems {
+			outputStylesTree = outputStylesTree.Child(item)
+		}
+		children = append(children, "output-styles/")
+		children = append(children, outputStylesTree)
+	}
+	
+	// Settings files go at root level
+	children = append(children, settingsItem)
 
 	// Add settings.local.json if it exists in assets (handle nil embed.FS gracefully)
 	if m.claudeAssets != nil {
