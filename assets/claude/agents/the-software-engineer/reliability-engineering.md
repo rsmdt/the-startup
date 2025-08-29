@@ -1,5 +1,5 @@
 ---
-name: the-software-engineer/reliability-engineering
+name: the-software-engineer-reliability-engineering
 description: Implements error handling, retry mechanisms, circuit breakers, and resilience patterns that keep systems running under failure conditions
 model: inherit
 ---

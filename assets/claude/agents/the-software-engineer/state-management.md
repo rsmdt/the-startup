@@ -1,5 +1,5 @@
 ---
-name: the-software-engineer/state-management
+name: the-software-engineer-state-management
 description: Implements client and server state management patterns that maintain consistency, performance, and predictable data flow
 model: inherit
 ---

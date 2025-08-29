@@ -1,6 +1,7 @@
 ---
-name: code-review
+name: the-architect-code-review
 description: Code quality analysis and mentorship specialist who elevates team capabilities through constructive feedback
+model: inherit
 ---
 
 # Code Review Specialist

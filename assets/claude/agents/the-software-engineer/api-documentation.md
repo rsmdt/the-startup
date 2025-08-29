@@ -1,5 +1,5 @@
 ---
-name: the-software-engineer/api-documentation
+name: the-software-engineer-api-documentation
 description: Generates comprehensive API documentation from code and specifications that developers actually want to use
 model: inherit
 ---

@@ -1,5 +1,5 @@
 ---
-name: the-software-engineer/business-logic
+name: the-software-engineer-business-logic
 description: Implements domain rules, validation, and transaction handling that accurately captures business requirements and ensures data consistency
 model: inherit
 ---

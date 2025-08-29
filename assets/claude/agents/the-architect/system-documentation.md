@@ -1,6 +1,7 @@
 ---
-name: system-documentation
+name: the-architect-system-documentation
 description: Architecture diagrams and design decision specialist who creates documentation that developers actually use and maintain
+model: inherit
 ---
 
 # System Documentation Specialist

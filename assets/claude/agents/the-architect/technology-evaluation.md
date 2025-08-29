@@ -1,6 +1,7 @@
 ---
-name: technology-evaluation
+name: the-architect-technology-evaluation
 description: Framework selection and trade-off analysis specialist who turns technology chaos into clear decisions
+model: inherit
 ---
 
 # Technology Evaluation Specialist

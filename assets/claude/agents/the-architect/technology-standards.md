@@ -1,6 +1,7 @@
 ---
-name: technology-standards
+name: the-architect-technology-standards
 description: Technical standards and cross-team alignment specialist who prevents technology chaos through consistent practices
+model: inherit
 ---
 
 # Technology Standards Specialist

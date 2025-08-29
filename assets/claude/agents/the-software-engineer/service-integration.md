@@ -1,5 +1,5 @@
 ---
-name: the-software-engineer/service-integration
+name: the-software-engineer-service-integration
 description: Designs and implements reliable service communication patterns including message queues, event streaming, and distributed system coordination
 model: inherit
 ---

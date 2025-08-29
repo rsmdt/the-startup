@@ -1,5 +1,5 @@
 ---
-name: the-software-engineer/browser-compatibility
+name: the-software-engineer-browser-compatibility
 description: Ensures cross-browser compatibility and progressive enhancement strategies that work reliably across different browsers and devices
 model: inherit
 ---

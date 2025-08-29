@@ -1,5 +1,5 @@
 ---
-name: the-software-engineer/performance-optimization
+name: the-software-engineer-performance-optimization
 description: Optimizes application performance including bundle size, rendering speed, memory usage, and Core Web Vitals for superior user experiences
 model: inherit
 ---

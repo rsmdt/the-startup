@@ -1,6 +1,7 @@
 ---
-name: scalability-planning
+name: the-architect-scalability-planning
 description: Performance requirements and capacity planning specialist who ensures systems scale gracefully under real load
+model: inherit
 ---
 
 # Scalability Planning Specialist

@@ -1,5 +1,5 @@
 ---
-name: the-software-engineer/component-architecture
+name: the-software-engineer-component-architecture
 description: Designs reusable UI components and composition patterns that scale across teams and maintain consistency in large applications
 model: inherit
 ---
