@@ -184,15 +184,23 @@ Creates comprehensive specifications with built-in quality gates:
 - 🛑 Phase boundaries - User approval required at each major step
 - ⚡ Parallel research - Multiple specialists investigate simultaneously
 
-#### Workflow
+<details>
+<summary>#### Workflow</summary>
+
 ```mermaid
 flowchart TD
-    A[Your Feature Idea] --> B[Initialize & Check Existing Specs]
-    B --> C[Requirements Gathering<br/>📄 BRD.md, PRD.md if needed<br/>🛑 STOP for review]
-    C --> D[Technical Research<br/>📄 SDD.md if needed<br/>📋 docs/patterns/, interfaces/<br/>🛑 STOP for review]
-    D --> E[Implementation Planning<br/>📄 PLAN.md<br/>🛑 STOP for review]
-    E --> F[🚀 Ready for /s:implement S001]
+    A([Your Feature Idea]) --> |initialize| B{Check<br>Existing}
+    B --> |exists| C[Review and Refine]
+    C --> END[🚀 Ready for /s:implement S001]
+
+    B --> |new| D[📄 **Requirements Gathering**<br/>Create *BRD.md*, *PRD.md* if needed]
+    D --> E[📄 **Technical Research**<br/>Create *SDD.md* if needed, document patterns, interfaces]
+    E --> F[📄 **Implementation Planning**<br/>Create *PLAN.md*]
+
+    F --> END[🚀 Ready for /s:implement S001]
 ```
+
+</details>
 
 ### `/s:implement` - Execute the Plan
 
@@ -220,17 +228,23 @@ Takes an implementation plan (PLAN.md) and executes it phase-by-phase with exper
 - 🛑 Phase boundaries - Mandatory stops between phases for review
 - 🔍 Automatic validation - Tests run after each change
 
-#### Workflow
+<details>
+<summary>#### Workflow</summary>
+
 ```mermaid
 flowchart TD
-    A[📄 PLAN.md] --> B[Load & Initialize Plan<br/>🛑 STOP for approval]
-    B --> C[Phase 1 Execution<br/>⚡ Parallel tasks<br/>✓ Validation]
-    C --> D[🛑 Phase Complete - STOP]
-    D --> E[Phase 2 Execution<br/>⚡ Parallel tasks<br/>✓ Validation]
-    E --> F[🛑 Phase Complete - STOP]
-    F --> G[Continue Phases...]
-    G --> H[✅ Implementation Complete]
+    A([📄 *PLAN.md*]) --> |load| B[**Initialize Plan**<br/>Parse phases & tasks]
+    B --> |approve| C{Phases<br>Remaining?}
+    
+    C --> |yes| D[**Execute Phase N**<br/>⚡ *Parallel agent execution*<br/>✓ *Run tests after each task*]
+    D --> |validate| E[**Phase Review**<br/>Check test results<br/>Review changes]
+    E --> |continue| C
+    
+    C --> |no| F[**Final Validation**<br/>Run full test suite<br/>Verify all requirements]
+    F --> END[✅ **Implementation Complete**]
 ```
+
+</details>
 
 ### `/s:refactor` - Improve Code Quality
 
@@ -260,17 +274,23 @@ Analyzes code and performs refactoring based on complexity assessment:
 - 🔀 Complexity routing - Automatic decision between immediate or planned execution
 - 🛑 Safety checkpoints - User approval at critical decision points
 
-#### Workflow
+<details>
+<summary>#### Workflow</summary>
+
 ```mermaid
 flowchart TD
-    A[Refactoring Request] --> B[Clarify Goals & Analyze Code<br/>🛑 STOP for approval]
-    B --> C{the-chief Assessment}
-    C -->|Simple| D[Execute Safe Refactoring<br/>✓ Test each change<br/>🔍 Review by specialist]
-    C -->|Complex| E[Create Refactoring Plan<br/>📄 SDD.md, PLAN.md<br/>🛑 STOP for review]
+    A([Refactoring Request]) --> |analyze| B[**Goal Clarification**<br/>Define objectives<br/>Analyze codebase]
+    B --> |assess| C{**Complexity<br>Check**}
     
-    D --> F[✅ Refactoring Complete]
-    E --> G[🚀 Ready for /s:implement]
+    C --> |simple| D[**Direct Refactoring**<br/>✓ *Run tests first*<br/>🔧 *Apply changes*<br/>✓ *Validate each step*]
+    D --> |review| E[**Specialist Review**<br/>Code quality check<br/>Performance impact]
+    E --> DONE[✅ **Refactoring Complete**]
+    
+    C --> |complex| F[**Create Specification**<br/>📄 *Generate SDD.md*<br/>📄 *Generate PLAN.md*<br/>Document approach]
+    F --> |defer| G[🚀 **Ready for /s:implement**<br/>Execute via planned phases]
 ```
+
+</details>
 
 ## 🎯 The Startup Output Style
 
