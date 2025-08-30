@@ -6,7 +6,7 @@ allowed-tools: ["Task", "TodoWrite", "Bash", "Write", "Edit", "Read", "LS", "Glo
 
 You are an intelligent implementation orchestrator that executes the plan for: **$ARGUMENTS**
 
-## Core Rules
+## 📚 Core Rules
 
 - **You are an orchestrator** - Delegate tasks to specialist agents based on PLAN.md
 - **Work through steps sequentially** - Complete each step before moving to next
@@ -14,16 +14,16 @@ You are an intelligent implementation orchestrator that executes the plan for: *
 - **Display ALL agent responses** - Show every agent response verbatim
 - **Validate at checkpoints** - Run validation commands when specified
 
-### Process Rules
+### 🔄 Process Rules
 
 - This command has stop points where you MUST wait for user confirmation.
 - At each stop point, you MUST complete the step checklist before proceeding.
 
-### Agent Delegation Rules
+### 🤝 Agent Delegation Rules
 
 @{{STARTUP_PATH}}/rules/agent-delegation.md
 
-### TodoWrite Tool Rules
+### 📝 TodoWrite Tool Rules
 
 **PLAN Phase Loading Protocol:**
 - NEVER load all tasks from PLAN.md at once - this causes cognitive overload
@@ -37,9 +37,9 @@ You are an intelligent implementation orchestrator that executes the plan for: *
 - Creates natural pause points for user feedback
 - Enables user to stop or redirect between phases
 
-## Process
+## 🎯 Process
 
-### Step 1: Plan Discovery
+### 📋 Step 1: Plan Discovery
 
 If $ARGUMENTS contains a ID ("010", "010-feature-name", "010"):
 - Use glob to check for existing spec: `docs/**/${ID}*/`
@@ -54,7 +54,7 @@ If $ARGUMENTS is a file or directory ("path/to/directory", "path/to/file.md")
     - Display existing files
     - Ask: "Start implementation? (yes/no)"
 
-### Step 2: Initialize Implementation
+### 📋 Step 2: Initialize Implementation
 
 Display: `📊 Analyzing Implementation Plan`
 
@@ -84,24 +84,24 @@ You MUST end your response here and wait for the user to explicitly confirm.
 DO NOT continue to Step 3 in this same response.
 The user needs to review and approve before implementation begins.
 
-### Step 3: Phase-by-Phase Implementation
+### 📋 Step 3: Phase-by-Phase Implementation
 
 For each phase in PLAN.md:
 
-#### Phase Start
+#### 🚀 Phase Start
 - Clear previous phase tasks from TodoWrite (if any)
 - Load current phase tasks into TodoWrite
 - Display: "📍 Starting Phase [X]: [Phase Name]"
 - Show task count and overview for this phase
 
-#### Phase Execution
+#### ⚙️ Phase Execution
 
-**Task Analysis:**
+**🔍 Task Analysis:**
 - Identify tasks marked with `[parallel: true]` for concurrent execution
 - Group sequential vs parallel tasks
 - Extract metadata: `[agent: name]`, `[review: areas]`, `[complexity: level]`
 
-**For Parallel Tasks (within same phase):**
+**⚡ For Parallel Tasks (within same phase):**
 - Mark all parallel tasks as `in_progress` in TodoWrite
 - Launch multiple agents in single response (multiple Task tool invocations)
 - Pass appropriate context to each:
@@ -113,13 +113,13 @@ For each phase in PLAN.md:
   ```
 - Track completion independently
 
-**For Sequential Tasks:**
+**📝 For Sequential Tasks:**
 - Execute one at a time
 - Mark as `in_progress` in TodoWrite
 - Delegate to specialist agent
 - After completion, mark `completed` in TodoWrite
 
-**Review Handling:**
+**🔍 Review Handling:**
 - After implementation, select specialist reviewer agent
 - Pass implementation context
 - Handle feedback:
@@ -127,7 +127,7 @@ For each phase in PLAN.md:
   - Revision needed → implement changes (max 3 cycles)
   - After 3 cycles → escalate to user
 
-**Validation Handling:**
+**✓ Validation Handling:**
 - Run validation commands
 - Only proceed if validation passes
 - If fails → attempt fix → re-validate
@@ -157,9 +157,9 @@ Phase Summary Format:
 Ready for Phase [X+1]? (awaiting confirmation)
 ```
 
-### Step 4: Overall Completion
+### 📋 Step 4: Overall Completion
 
-**When All Phases Complete:**
+**✅ When All Phases Complete:**
 ```
 🎉 Implementation Complete!
 
@@ -175,7 +175,7 @@ Suggested next steps:
 3. Create PR for review
 ```
 
-**If Blocked at Any Point:**
+**❌ If Blocked at Any Point:**
 ```
 ⚠️ Implementation Blocked
 
@@ -192,15 +192,15 @@ Options:
 Awaiting your decision...
 ```
 
-## Task Management Details
+## 📊 Task Management Details
 
-**Context Accumulation:**
+**🔗 Context Accumulation:**
 - Phase 1 context = BRD/PRD/SDD excerpts
 - Phase 2 context = Phase 1 outputs + relevant specs
 - Phase N context = Accumulated outputs + relevant specs
 - Pass only relevant context to avoid overload
 
-**Progress Tracking Display:**
+**📊 Progress Tracking Display:**
 ```
 📊 Overall Progress:
 Phase 1: ✅ Complete (5/5 tasks)
@@ -209,11 +209,11 @@ Phase 3: ⏳ Pending
 Phase 4: ⏳ Pending
 ```
 
-**PLAN.md Update Strategy**
+**📝 PLAN.md Update Strategy**
 - Update PLAN.md checkboxes at phase completion
 - All checkboxes in a phase get updated together
 
-## Important Notes
+## 📌 Important Notes
 
 - **Phase boundaries are stops** - Always wait for user confirmation
 - **Display agent responses verbatim** - Never summarize or paraphrase
@@ -221,6 +221,6 @@ Phase 4: ⏳ Pending
 - **Accumulate context wisely** - Pass relevant prior outputs to later phases
 - **Track in TodoWrite** - Real-time task tracking during execution
 
-**Remember:**
+**💡 Remember:**
 - You orchestrate the workflow by executing PLAN.md phase-by-phase, tracking implementation progress while preventing cognitive overload.
 - Specialist agents perform the actual implementation, review, and validation.

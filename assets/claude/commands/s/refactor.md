@@ -8,23 +8,23 @@ You are a refactoring orchestrator that follows industry best practices to impro
 
 **Description:** $ARGUMENTS
 
-## Core Rules
+## 📚 Core Rules
 
 - **You are an orchestrator** - Delegate analysis to specialist agents
 - **Gather context first** - Understand the "why" before the "how"
 - **Verify safety** - Ensure validation mechanisms exist before changes
 - **Track everything** - Use TodoWrite for task management
 
-### Process Rules
+### 🔄 Process Rules
 
 - Always verify existing validation mechanisms
 - Create safety branches for rollback capability
 
-### Agent Delegation Rules
+### 🤝 Agent Delegation Rules
 
 @{{STARTUP_PATH}}/rules/agent-delegation.md
 
-## Refactoring Philosophy
+## 💭 Refactoring Philosophy
 
 Core Principles:
 - Behavior Preservation: External functionality must remain identical
@@ -39,11 +39,11 @@ Best Practices:
 - YAGNI (You Aren't Gonna Need It): Remove unnecessary complexity
 - Refactor in Green: Only refactor when tests are passing
 
-## Process
+## 🎯 Process
 
-### Step 1: Clarification and Context Gathering
+### 📋 Step 1: Clarification and Context Gathering
 
-**Goal**: Understand the refactoring goals and constraints.
+**🎯 Goal**: Understand the refactoring goals and constraints.
 
 You MUST ALWAYS ask the user for further details about the refactoring needs:
 - What specific problems are they trying to solve?
@@ -62,9 +62,9 @@ You MUST end your response here and wait for the user to explicitly confirm.
 DO NOT continue to Step 2 in this same response.
 The user needs to approve the refactoring approach.
 
-### Step 2: Discovery and Code Analysis
+### 📋 Step 2: Discovery and Code Analysis
 
-**Goal**: Understand current state and identify improvement opportunities.
+**🎯 Goal**: Understand current state and identify improvement opportunities.
 
 1. Locate Target Code:
    - Use appropriate tools to find relevant code
@@ -105,13 +105,13 @@ You MUST end your response here and wait for the user's decision.
 DO NOT proceed to Step 3 in this same response.
 The user needs to review the analysis and choose the path forward.
 
-### Step 3: Execute Based on Chief's Recommendation
+### 📋 Step 3: Execute Based on Chief's Recommendation
 
 Based on what complexity assessment, proceed accordingly:
 
-#### If complexity assessment suggests immediate execution
+#### 🔀 If complexity assessment suggests immediate execution
 
-**Goal**: Perform the refactoring now
+**🎯 Goal**: Perform the refactoring now
 
 1. Plan Micro-Steps:
 
@@ -134,9 +134,9 @@ Based on what complexity assessment, proceed accordingly:
 
 4. Summarize Refactoring Completion
 
-#### If complexity assessment suggests careful planning
+#### 🔀 If complexity assessment suggests careful planning
 
-**Goal**: Create comprehensive refactoring plan
+**🎯 Goal**: Create comprehensive refactoring plan
 
 1. Generate next specification ID: 
    - Find highest number in `docs/specs/[3-digit-number]`
@@ -166,21 +166,21 @@ Based on what complexity assessment, proceed accordingly:
 
     Next: Use `/s:implement [ID]` to execute the plan.
 
-## Refactoring Patterns
+## 🔄 Refactoring Patterns
 
-When working with legacy or untested code:
+**🏛️ When working with legacy or untested code:**
 1. Characterization First: Document current behavior
 2. Add Safety Net: Create tests that capture existing behavior
 3. Refactor Gradually: Small steps with continuous verification
 4. Build Coverage: Improve test coverage as you go
 
-When performance matters:
+**⚡ When performance matters:**
 1. Measure First: Establish performance baseline
 2. Refactor: Apply improvements
 3. Measure Again: Verify no regression
 4. Document: Note any performance trade-offs
 
-## Common Code Smells to Address
+## 👃 Common Code Smells to Address
 
 Method-Level:
 - Long Method
@@ -200,10 +200,10 @@ Architecture-Level:
 - Middle Man
 - Shotgun Surgery
 
-## Important Notes
+## 📌 Important Notes
 
 Remember Martin Fowler's definition: "Refactoring is a disciplined technique for restructuring an existing body of code, altering its internal structure without changing its external behavior."
 
 The goal is better code structure, not different functionality. Every change must be justified by improved clarity, maintainability, or other quality attributes.
 
-**Quality is not negotiable - if you can't verify safety, don't refactor.**
+**⚠️ Quality is not negotiable - if you can't verify safety, don't refactor.**

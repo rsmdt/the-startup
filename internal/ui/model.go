@@ -315,7 +315,7 @@ func (m *MainModel) transitionToState(newState InstallerState) {
 		m.selectedFiles = m.fileSelectionModel.selectedFiles
 
 	case StateComplete, StateUninstallComplete:
-		m.completeModel = NewCompleteModelWithMode("claude-code", m.installer, m.mode)
+		m.completeModel = NewCompleteModelWithAssets("claude-code", m.installer, m.mode, m.claudeAssets, m.startupAssets, m.selectedFiles)
 
 	case StateError:
 		// Error model is set before transition
