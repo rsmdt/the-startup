@@ -4,32 +4,6 @@
       "{{STARTUP_PATH}}"
     ]
   },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Task",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "{{STARTUP_PATH}}/bin/the-startup log -u",
-            "_source": "the-startup"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "Task",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "{{STARTUP_PATH}}/bin/the-startup log -a",
-            "_source": "the-startup"
-          }
-        ]
-      }
-    ]
-  },
   "statusLine": {
     "type": "command",
     "command": "{{STARTUP_PATH}}/bin/the-startup statusline"
