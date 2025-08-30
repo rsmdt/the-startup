@@ -10,28 +10,9 @@ The Agentic Startup is an orchestration system for Claude Code that gives you a 
 
 Think of it as having a CTO, architects, developers, and DevOps engineers on-demand, each bringing their expertise to your project.
 
-## Quick Start
-
-Install and start using The Agentic Startup:
-
-```bash
-# Install (interactive)
-curl -LsSf https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh | sh
-
-# Plan a feature
-/s:specify "Add user authentication"
-
-# Build it 
-/s:implement 001-user-auth
-```
-
-**More installation options**: See the [Installation](#installation) section below.
-
-## The Agentic Startup Way
-
-**Think twice, ship once.** The Agentic Startup philosophy: proper planning accelerates delivery more than jumping straight into code.
-
 ### Core Philosophy
+
+**Think twice, ship once.** Proper planning accelerates delivery more than jumping straight into code.
 
 - **Humans decide, AI executes** - Critical decisions stay with you; AI handles implementation details
 - **Specialist delegation** - Pull in the right expert for each task
@@ -41,98 +22,146 @@ curl -LsSf https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh |
 
 When you use The Agentic Startup, Claude Code becomes your **technical co-founder** that gathers context first, consults specialists, generates reviewable documentation, then implements with confidence.
 
-You're getting access to a team that knows successful products come from understanding the problem deeply before writing the first line.
-
-### Agent Design Philosophy
-
-**Activity-Based Specialization Over Role-Based Organization**
-
-The Agentic Startup uses an evidence-based approach to AI agent design, informed by cutting-edge research and proven patterns from leading frameworks.
-
-#### Research Foundation
+### Research Foundation
 
 **Task specialization consistently outperforms role-based organization for LLM agents:**
 
-- **Performance Impact**: Studies show 2.86% to 21.88% accuracy improvement with specialized agents vs single broad agents ([Multi-Agent Collaboration Mechanisms: A Survey of LLMs, 2025](https://arxiv.org/html/2501.06322v1))
-- **Industry Consensus**: Leading frameworks (CrewAI, Microsoft AutoGen, LangGraph) unanimously organize agents by **capability** rather than traditional job titles
-- **Domain Specialization**: Research defines effective LLM specialization as "customizing agents according to specific task contextual data, augmented by domain-specific knowledge" ([Practical Considerations for Agentic LLM Systems, 2024](https://arxiv.org/html/2412.04093v1))
+- **Performance Impact**: Studies show 2.86% to 21.88% accuracy improvement with specialized agents vs single broad agents ([Multi-Agent Collaboration, 2025](https://arxiv.org/html/2501.06322v1))
+- **Industry Consensus**: Leading frameworks (CrewAI, Microsoft AutoGen, LangGraph) organize agents by **capability** rather than traditional job titles
+- **Domain Specialization**: Effective LLM specialization customizes agents according to specific task contextual data ([Agentic LLM Systems, 2024](https://arxiv.org/html/2412.04093v1))
 
-#### Proven Patterns from Leading Frameworks
+## Quick Start
 
-**CrewAI** (32,000+ GitHub stars): Uses expertise-based agents like "Senior Market Analyst" and "Data Researcher" - **no backend/frontend engineer distinctions**
+Install and start using The Agentic Startup:
 
-**Microsoft AutoGen**: Organizes by domain knowledge ("math expert", "chemistry expert") with generic assistants coordinating specialized tools
+```bash
+# Install (interactive)
+curl -LsSf https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh | sh
 
-**LangGraph**: Employs functional roles with capability-driven specialization through custom tools and focused prompts
+# Activate The Agentic Startup output style for the full experience
+/output-style The Startup
 
-**Industry Trend**: 2024-2025 shift from general chatbots to special-purpose, task-focused agents with sparse expert models
+# Plan a feature
+/s:specify "Add user authentication"
 
-#### Why This Matters
+# Build it 
+/s:implement 001-user-auth
+```
 
-Traditional engineering boundaries (backend/frontend/mobile) are **artificial constraints** for LLM performance:
+### Note about available MCP
 
-- **Modern development is full-stack** - API design requires understanding both client and server concerns
-- **LLMs excel with focused context** - Task-specific agents outperform role-based generalists  
-- **Parallel execution improves** - Multiple specialized agents can work simultaneously on related activities
-- **Reduced cognitive load** - Agents receive only relevant context for their specific expertise
+The Agentic Startup tries to be unbiased about which MCP you may have installed, as this is a fast changing topic. However, we recommend that you have at least [`sequentialthunking`](https://github.com/modelcontextprotocol/servers/blob/main/src/sequentialthinking/README.md) installed.
 
-#### Our Implementation
+**More installation options**: See the [Installation](#installation) section below.
 
-The Agentic Startup evolves toward activity-based specialization:
+## Your Expert Team - Activity-Based Specialists
 
-**Current**: Role-based agents (the-backend-engineer, the-frontend-engineer, the-qa-engineer)
-**Future**: Activity-based specialization (the-developer/api-design, the-developer/component-architecture, the-developer/testing-strategy)
+The Agentic Startup uses **activity-based agents** that focus on WHAT they do, not WHO they are. Traditional engineering boundaries (backend/frontend) are artificial constraints that reduce LLM performance. Instead, our agents:
 
-While preserving truly domain-specific expertise (mobile, security, UX) where specialization provides genuine value.
+- **Focus on activities** - Agents specialize in `api-design` or `component-architecture`, not arbitrary roles
+- **Adapt to your stack** - Automatically detect and apply React/Vue/Angular patterns, REST/GraphQL APIs, PostgreSQL/MongoDB optimizations
+- **Execute in parallel** - Multiple specialists work simultaneously on related activities
+- **Preserve real expertise** - Keep domain specialization (mobile, security, UX) where it genuinely adds value
 
-**Evidence-driven design. Research-backed performance. Real results.**
+Each agent receives only relevant context for their specific expertise, reducing cognitive load and improving accuracy.
 
-## Your Expert Team
+### 🎯 Orchestration & Strategy
+- **the-chief** - Eliminates bottlenecks through smart routing and complexity assessment
+- **the-analyst** - Transforms vague requirements into actionable specifications
+  - `requirements-clarification` - Uncovers hidden needs and resolves ambiguities
+  - `requirements-documentation` - Creates comprehensive BRDs and PRDs
+  - `feature-prioritization` - Data-driven feature prioritization
+  - `solution-research` - Researches proven approaches and patterns
+  - `project-coordination` - Breaks down complex projects into tasks
 
-### 🚀 Leadership & Orchestration
-- [**the-chief**](assets/claude/agents/the-chief.md) ¯\\_(ツ)_/¯ - Routes requests based on complexity assessment
-- [**the-project-manager**](assets/claude/agents/the-project-manager.md) (⌐■_■) - Breaks down work, removes blockers, coordinates tasks
-- [**the-product-manager**](assets/claude/agents/the-product-manager.md) (＾-＾)ノ - Prioritizes features, creates user stories, defines metrics
+### 🏗️ Architecture & System Design  
+- **the-architect** - Balances elegance with pragmatic business reality
+  - `system-design` - Designs scalable system architectures
+  - `system-documentation` - Creates architecture diagrams and decisions
+  - `architecture-review` - Validates design patterns and compliance
+  - `code-review` - Elevates team capabilities through feedback
+  - `scalability-planning` - Ensures systems scale gracefully
+  - `technology-evaluation` - Makes framework and tool decisions
+  - `technology-standards` - Prevents technology chaos through standards
 
-### 🏗️ Architecture & Design
-- [**the-software-architect**](assets/claude/agents/the-software-architect.md) (⌐■_■) - System design, service boundaries, technical trade-offs
-- [**the-staff-engineer**](assets/claude/agents/the-staff-engineer.md) (⚡◡⚡) - Sets technical standards, defines patterns, mentors teams
-- [**the-business-analyst**](assets/claude/agents/the-business-analyst.md) (◔_◔) - Clarifies vague requirements through targeted questioning
+### 💻 Software Engineering
+- **the-software-engineer** - Ships features that actually work
+  - `api-design` - REST/GraphQL APIs with clear contracts
+  - `api-documentation` - Comprehensive API documentation
+  - `database-design` - Balanced schemas for any database
+  - `service-integration` - Reliable service communication patterns
+  - `component-architecture` - Reusable UI components
+  - `business-logic` - Domain rules and validation
+  - `reliability-engineering` - Error handling and resilience
+  - `performance-optimization` - Bundle size and Core Web Vitals
+  - `state-management` - Client and server state patterns
+  - `browser-compatibility` - Cross-browser support
 
-### 💻 Engineering Team
-- [**the-lead-engineer**](assets/claude/agents/the-lead-engineer.md) (▰˘◡˘▰) - Reviews code, provides mentorship, ensures quality
-- [**the-frontend-engineer**](assets/claude/agents/the-frontend-engineer.md) (◕‿◕) - React/Vue/Angular, components, performance optimization
-- [**the-backend-engineer**](assets/claude/agents/the-backend-engineer.md) (⚙◡⚙) - APIs, services, business logic, database design
-- [**the-mobile-engineer**](assets/claude/agents/the-mobile-engineer.md) (📱◡📱) - iOS/Android, React Native, app store deployment
-- [**the-ml-engineer**](assets/claude/agents/the-ml-engineer.md) (🤖◡🤖) - Model integration, MLOps, inference optimization
-- [**the-developer**](assets/claude/agents/the-developer.md) 🚫 - *[DEPRECATED - Use specialized engineers above]*
+### 🔧 Platform & Infrastructure
+- **the-platform-engineer** - Makes systems that don't wake you at 3am
+  - `system-performance` - Handles 10x load without 10x cost
+  - `observability` - Monitoring that catches problems early
+  - `containerization` - Consistent deployment everywhere
+  - `pipeline-engineering` - Reliable data processing
+  - `ci-cd-automation` - Safe deployments at scale
+  - `deployment-strategies` - Progressive rollouts
+  - `incident-response` - Production fire debugging
+  - `infrastructure-as-code` - Reproducible infrastructure
+  - `storage-architecture` - Scalable storage solutions
+  - `query-optimization` - Fast database queries
+  - `data-modeling` - Balanced data models
 
-### 🚦 Infrastructure & Operations
-- [**the-devops-engineer**](assets/claude/agents/the-devops-engineer.md) (◉_◉) - CI/CD pipelines, containerization, infrastructure as code
-- [**the-site-reliability-engineer**](assets/claude/agents/the-site-reliability-engineer.md) (╯°□°)╯ - Incident response, debugging, root cause analysis
-- [**the-data-engineer**](assets/claude/agents/the-data-engineer.md) (⊙_⊙) - Database optimization, ETL pipelines, query performance
-- [**the-performance-engineer**](assets/claude/agents/the-performance-engineer.md) (⚡◡⚡) - Core Web Vitals, bundle optimization, load times
+### 🎨 Design & User Experience
+- **the-designer** - Creates products people actually want to use
+  - `accessibility-implementation` - WCAG 2.1 AA compliance
+  - `user-research` - Real user needs, not assumptions
+  - `interaction-design` - Minimal friction user flows
+  - `visual-design` - Brand-enhancing UI aesthetics
+  - `design-systems` - Consistent component libraries
+  - `information-architecture` - Intuitive content hierarchies
 
-### 🎨 Design & Documentation
-- [**the-ux-designer**](assets/claude/agents/the-ux-designer.md) (◍•ᴗ•◍) - User interfaces, accessibility, interaction patterns
-- [**the-principal-designer**](assets/claude/agents/the-principal-designer.md) (◉◡◉) - Design systems, design review, strategic vision
-- [**the-technical-writer**](assets/claude/agents/the-technical-writer.md) (◕‿◕) - API docs, user guides, system documentation
+### 🧪 Quality Assurance
+- **the-qa-engineer** - Catches bugs before users do
+  - `test-strategy` - Risk-based testing approaches
+  - `test-implementation` - Comprehensive test suites
+  - `exploratory-testing` - Creative defect discovery
+  - `performance-testing` - Load and stress validation
 
-### 🛡️ Quality & Security
-- [**the-qa-lead**](assets/claude/agents/the-qa-lead.md) (✓◡✓) - Test strategy, risk prioritization, release decisions
-- [**the-qa-engineer**](assets/claude/agents/the-qa-engineer.md) (¬_¬) - Test implementation, automation, bug hunting
-- [**the-security-engineer**](assets/claude/agents/the-security-engineer.md) (ಠ_ಠ) - Vulnerability assessment, secure practices, incident response
-- [**the-compliance-officer**](assets/claude/agents/the-compliance-officer.md) (⚖◡⚖) - GDPR/HIPAA compliance, data privacy, audit trails
+### 🔒 Security Engineering
+- **the-security-engineer** - Keeps the bad guys out
+  - `vulnerability-assessment` - OWASP-based security checks
+  - `authentication-systems` - OAuth, JWT, SSO, MFA
+  - `security-incident-response` - Rapid containment
+  - `compliance-audit` - GDPR, SOX, HIPAA compliance
+  - `data-protection` - Encryption and privacy controls
 
-### 🤖 AI & Specialized
-- [**the-prompt-engineer**](assets/claude/agents/the-prompt-engineer.md) (◐‿◑) - Claude prompt optimization, agent instructions
-- [**the-context-engineer**](assets/claude/agents/the-context-engineer.md) (ʘ_ʘ) - AI memory systems, context windows, inter-agent communication
+### 📱 Mobile Development
+- **the-mobile-engineer** - Ships apps users love
+  - `mobile-interface-design` - Platform-specific UI patterns
+  - `mobile-data-persistence` - Offline-first strategies
+  - `cross-platform-integration` - Native and hybrid bridges
+  - `mobile-deployment` - App store submissions
+  - `mobile-performance` - Battery and memory optimization
 
-## Commands
+### 🤖 Machine Learning
+- **the-ml-engineer** - Makes AI that actually ships
+  - `model-deployment` - Production-ready inference
+  - `ml-monitoring` - Drift detection systems
+  - `prompt-optimization` - LLM prompt engineering
+  - `mlops-automation` - Reproducible ML pipelines
+  - `context-management` - AI memory architectures
+  - `feature-engineering` - Model-ready data pipelines
+
+### 🛠️ Meta & Special Purpose
+- **the-meta-agent** - Creates new specialized agents based on PRINCIPLES.md
+
+## Slash Commands
+
+The Startup provides powerful slash commands that orchestrate your entire development workflow. Each command features built-in verification checkpoints and mandatory pause points to ensure quality at every step.
 
 ### `/s:specify` - Plan Before You Build
 
-Creates comprehensive specifications from your ideas:
+Creates comprehensive specifications with built-in quality gates:
 
 ```bash
 # Start fresh with a new feature idea
@@ -142,36 +171,70 @@ Creates comprehensive specifications from your ideas:
 /s:specify 001
 ```
 
+**Documents Created:**
+- `docs/specs/[id]-[short-name]/BRD.md` - Business Requirements Document capturing the "why" and business value
+- `docs/specs/[id]-[short-name]/PRD.md` - Product Requirements Document defining user-facing features and acceptance criteria
+- `docs/specs/[id]-[short-name]/SDD.md` - Solution Design Document detailing technical architecture and implementation approach
+- `docs/specs/[id]-[short-name]/PLAN.md` - Implementation Plan with phase-by-phase tasks ready for execution
+- `docs/patterns/` - Documents reusable patterns discovered during research (authentication flows, caching strategies, etc.)
+- `docs/interfaces/` - Documents external API contracts and integration specifications documented along the way
+
+**Key Features:**
+- 🤔 Self-verification checkpoints - "Ask yourself" prompts ensure thorough analysis
+- 🛑 Phase boundaries - User approval required at each major step
+- ⚡ Parallel research - Multiple specialists investigate simultaneously
+
 #### Workflow
 ```mermaid
 flowchart TD
     A[Your Feature Idea] --> B[Initialize & Check Existing Specs]
-    B --> C[Requirements Gathering<br/>📄 BRD.md, PRD.md if needed]
-    C --> D[Technical Research<br/>📄 SDD.md if needed<br/>📋 docs/patterns/, interfaces/]
-    D --> E[Implementation Planning<br/>📄 PLAN.md]
+    B --> C[Requirements Gathering<br/>📄 BRD.md, PRD.md if needed<br/>🛑 STOP for review]
+    C --> D[Technical Research<br/>📄 SDD.md if needed<br/>📋 docs/patterns/, interfaces/<br/>🛑 STOP for review]
+    D --> E[Implementation Planning<br/>📄 PLAN.md<br/>🛑 STOP for review]
     E --> F[🚀 Ready for /s:implement S001]
 ```
 
 ### `/s:implement` - Execute the Plan
 
-Takes a specification and builds it with the right experts:
+Takes an implementation plan (PLAN.md) and executes it phase-by-phase with expert delegation:
 
 ```bash
-# Implement a completed specification
+# Implement a completed specification (requires PLAN.md)
 /s:implement 001
+
+# Implement from a specific PLAN.md file
+/s:implement docs/specs/001-auth/PLAN.md
+
+# Use your own plan document
+/s:implement my-custom-plan.md
 ```
+
+**Requirements:**
+- Depends on a PLAN.md document (created by `/s:specify` or your own)
+- Plan must include phase markers and task lists for execution
+- Can use any properly formatted plan document, not just generated ones
+
+**Key Features:**
+- 📋 Phase-by-phase execution - One phase at a time to prevent overload
+- ⚡ Parallel task execution - Multiple agents work simultaneously within phases
+- 🛑 Phase boundaries - Mandatory stops between phases for review
+- 🔍 Automatic validation - Tests run after each change
 
 #### Workflow
 ```mermaid
 flowchart TD
-    A[📄 PLAN.md] --> B[Load & Initialize Plan]
-    B --> C[Phase-by-Phase Execution<br/>Review & Validate Each Phase]
-    C --> D[✅ Implementation Complete]
+    A[📄 PLAN.md] --> B[Load & Initialize Plan<br/>🛑 STOP for approval]
+    B --> C[Phase 1 Execution<br/>⚡ Parallel tasks<br/>✓ Validation]
+    C --> D[🛑 Phase Complete - STOP]
+    D --> E[Phase 2 Execution<br/>⚡ Parallel tasks<br/>✓ Validation]
+    E --> F[🛑 Phase Complete - STOP]
+    F --> G[Continue Phases...]
+    G --> H[✅ Implementation Complete]
 ```
 
 ### `/s:refactor` - Improve Code Quality
 
-Analyzes and refactors existing code for better maintainability:
+Analyzes code and performs refactoring based on complexity assessment:
 
 ```bash
 # Refactor specific code or modules
@@ -181,17 +244,55 @@ Analyzes and refactors existing code for better maintainability:
 /s:refactor reduce complexity in the payment processing logic
 ```
 
+**Complexity-Based Behavior:**
+- **Simple refactoring** → Executes immediately with validation at each step
+  - Method extraction, variable renaming, small scope changes
+  - Direct execution with continuous test validation
+  
+- **Complex refactoring** → Creates specification for later execution
+  - Architectural changes, cross-module refactoring, API redesigns
+  - Generates `SDD.md` and `PLAN.md` for review before execution
+  - Use `/s:implement` to execute the refactoring plan
+
+**Key Features:**
+- 🎯 Goal clarification - Ensures refactoring objectives are clear
+- 🔍 Validation-first - Tests must pass before and after changes
+- 🔀 Complexity routing - Automatic decision between immediate or planned execution
+- 🛑 Safety checkpoints - User approval at critical decision points
+
 #### Workflow
 ```mermaid
 flowchart TD
-    A[Refactoring Request] --> B[Clarify Goals & Analyze Code]
-    B --> C{Complexity Level}
-    C -->|Simple| D[Execute Safe Refactoring<br/>Validate Each Change]
-    C -->|Complex| E[Create Refactoring Plan<br/>📄 SDD.md, PLAN.md]
+    A[Refactoring Request] --> B[Clarify Goals & Analyze Code<br/>🛑 STOP for approval]
+    B --> C{the-chief Assessment}
+    C -->|Simple| D[Execute Safe Refactoring<br/>✓ Test each change<br/>🔍 Review by specialist]
+    C -->|Complex| E[Create Refactoring Plan<br/>📄 SDD.md, PLAN.md<br/>🛑 STOP for review]
     
     D --> F[✅ Refactoring Complete]
     E --> G[🚀 Ready for /s:implement]
 ```
+
+## 🎯 The Startup Output Style
+
+For the most immersive experience, activate **The Startup** output style to transform Claude into your high-energy technical co-founder.
+
+```bash
+/output-style The Startup
+```
+
+**What you get:**
+- 🚀 Startup energy - "Let's ship this NOW!" enthusiasm in every response
+- ⚡ Parallel execution - Launches multiple agents simultaneously, no blocking
+- 📊 Task tracking - Uses TodoWrite obsessively for progress visibility
+- 🎉 Victory celebrations - Acknowledges every shipped feature
+
+**Example transformation:**
+```
+Standard: "I'll help you implement authentication..."
+The Agentic Startup: "🚀 TIME TO SHIP! Launching the security squad in parallel!"
+```
+
+The style is included at `assets/claude/output-styles/the-startup.md` and makes every session feel like you're building the next unicorn.
 
 ## Real-World Examples
 
@@ -199,31 +300,35 @@ flowchart TD
 ```
 /s:specify Add user authentication with JWT
 ```
-The Agentic Startup will:
-- Use **the-business-analyst** to clarify requirements (OAuth? 2FA? Password reset?)
-- Bring in **the-software-architect** to design the system
-- Get **the-security-engineer** to review for vulnerabilities
-- Create a complete implementation plan
+The Agentic Startup orchestrates:
+1. **the-analyst** `requirements-clarification` - Uncovers auth needs (OAuth? 2FA? Password reset?)
+2. **the-architect** `system-design` - Designs the auth architecture
+3. **the-security-engineer** `authentication-systems` - Specifies security requirements
+4. **the-software-engineer** `api-design` - Creates JWT endpoints (adapts to Express/Django/FastAPI)
+5. **the-software-engineer** `component-architecture` - Builds login UI (React/Vue/Angular patterns)
+6. **the-security-engineer** `vulnerability-assessment` - Validates the implementation
 
 ### Debugging Production Issues
 ```
 The API is returning 500 errors on user login
 ```
-The Agentic Startup will:
-- Immediately call **the-site-reliability-engineer** to investigate
-- Once root cause is found, bring in **the-backend-engineer** to fix
-- Have **the-qa-engineer** verify the fix
-- Get **the-lead-engineer** to review the changes
+The Agentic Startup responds:
+1. **the-platform-engineer** `incident-response` - Immediate investigation
+2. **the-software-engineer** `api-design` or `database-design` - Fix root cause
+3. **the-architect** `code-review` - Verify the fix
+4. **the-security-engineer** `vulnerability-assessment` - Security validation if auth-related
 
 ### Creating a Dashboard
 ```
 /s:specify Admin dashboard for monitoring system metrics
 ```
-The Agentic Startup will:
-- Use **the-ux-designer** to create the interface design
-- Bring in **the-data-engineer** for efficient data queries
-- Get **the-software-architect** to design the real-time data flow
-- Deploy **the-frontend-engineer** and **the-backend-engineer** for implementation
+The Agentic Startup orchestrates:
+1. **the-designer** `user-research` - Understand admin needs
+2. **the-designer** `interaction-design` - Create the interface design
+3. **the-platform-engineer** `query-optimization` - Efficient metrics queries
+4. **the-architect** `system-design` - Design real-time data flow
+5. **the-software-engineer** `component-architecture` - Build UI (React/Vue/Angular)
+6. **the-software-engineer** `api-design` - Create metrics API (Express/Django/FastAPI)
 
 ## How It Works
 
@@ -294,11 +399,27 @@ go test ./...
 ./the-startup install -ly          # Quick local
 ```
 
+## Disclaimer
+
+While The Agentic Startup aims to enhance Claude Code with specialized agents and structured workflows, be aware of some limitations:
+
+### Command & Documentation Behavior
+- **Slash commands** sometimes are not recognized or executed properly despite correct setup, requiring retry
+- **Subagents** sometimes do not follow their custom instructions and instead generate generic prompts, breaking intended behavior
+- Your **CLAUDE.md** may affect slash command or subagent behaviour
+- Your **Installed MCPs** may affect behaviour and implementation.
+
+### Best Practices
+- **Restart** Claude Code between major tasks to free resources
+- **Verify** generated code and documentation before committing
+
 ## Learn More
 
 - [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
-- [Report Issues](https://github.com/rsmdt/the-startup/issues)
-- [Contribute](https://github.com/rsmdt/the-startup/pulls)
+- [Claude Code Slash Commands](https://docs.anthropic.com/en/docs/claude-code/slash-commands)
+- [Claude Code Subagents](https://docs.anthropic.com/en/docs/claude-code/sub-agents)
+- [Claude Code Statusline](https://docs.anthropic.com/en/docs/claude-code/statusline)
+- [Claude Code Output Styles](https://docs.anthropic.com/en/docs/claude-code/output-styles)
 
 ---
 
