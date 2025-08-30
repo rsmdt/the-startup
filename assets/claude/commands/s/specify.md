@@ -63,14 +63,19 @@ Based on the requirement complexity, use the following templates to create the d
 - BRD: `{{STARTUP_PATH}}/templates/BRD.md` if applicable
 - PRD: `{{STARTUP_PATH}}/templates/PRD.md` if applicable
 
-**Verification Checklist**:
-1. The-chief complexity assessment received and displayed verbatim
-2. Complexity scores and workflow presented to user
-3. If applicable, BRD written to `docs/specs/[ID]-[feature-name]/`
-4. If applicable, PRD written to `docs/specs/[ID]-[feature-name]/`
-5. TodoWrite updated with completed and updated tasks
-6. Step summary presented to user
-7. **STOP**: DO NOT CONTINUE until user confirms to proceed.
+**🤔 Ask yourself before proceeding:**
+1. Have I received and displayed the-chief's complexity assessment VERBATIM?
+2. Did I present the complexity scores and recommended workflow to the user?
+3. If applicable, did I write the BRD to `docs/specs/[ID]-[feature-name]/`?
+4. If applicable, did I write the PRD to `docs/specs/[ID]-[feature-name]/`?
+5. Have I updated TodoWrite with all completed tasks?
+6. Did I present a clear step summary to the user?
+7. Am I about to STOP and wait for user confirmation?
+
+**🛑 STOP - MANDATORY CHECKPOINT**
+You MUST end your response here and wait for the user to explicitly confirm.
+DO NOT continue to Step 4 in this same response.
+The user needs to review the requirements documentation before technical research begins.
 
 ### Step 4: Technical Research and Solution Design
 
@@ -117,15 +122,20 @@ Use agents to a validate the technical research findings.
 Based on the requirement complexity, use the following templates to create the documentation:
 - SDD: `{{STARTUP_PATH}}/templates/SDD.md` if applicable
 
-**Verification Checklist**:
-1. Technical research completed by specialist agents
-2. All agent responses displayed verbatim
-3. If applicable, patterns documented in `docs/patterns/`
-4. If applicable, interfaces documented in `docs/interfaces/`
-5. If applicable, SDD written to `docs/specs/[ID]-[feature-name]/`
-6. No context drift or feature creep detected (or addressed if found)
-7. TodoWrite updated with completed and updated tasks
-8. **STOP**: DO NOT CONTINUE until user confirms to proceed.
+**🤔 Ask yourself before proceeding:**
+1. Have specialist agents completed ALL technical research?
+2. Did I display EVERY agent response verbatim (no summarizing)?
+3. If patterns were discovered, are they documented in `docs/patterns/`?
+4. If interfaces were identified, are they documented in `docs/interfaces/`?
+5. If applicable, is the SDD written to `docs/specs/[ID]-[feature-name]/`?
+6. Have I checked for context drift or feature creep and addressed any issues?
+7. Is TodoWrite updated with all completed tasks?
+8. Am I prepared to STOP and wait for user approval?
+
+**🛑 STOP - MANDATORY TECHNICAL REVIEW**
+You MUST end your response here and wait for the user to explicitly confirm.
+DO NOT continue to Step 6 in this same response.
+The user needs to review the technical design before planning begins.
 
 ### Step 6: Implementation Plan Creation
 
@@ -140,15 +150,19 @@ Use specialist agents to a validate all aspects gathered so far:
 - Ensure that all relevant business and technical details are available to execute the plan 
 - Check that the plan is feasible for an automated implementation.
 
-**Verification Checklist**:
+**🤔 Ask yourself before proceeding:**
+1. Have specialist agents reviewed the implementation plan?
+2. Did I incorporate ALL validation feedback into the plan?
+3. Is the plan confirmed as feasible for automated implementation?
+4. Are ALL business and technical details available for execution?
+5. Have I written PLAN.md to `docs/specs/[ID]-[feature-name]/`?
+6. Is TodoWrite updated with all completed tasks?
+7. Am I about to STOP and await final user confirmation?
 
-1. Implementation plan reviewed by specialist agents
-2. All validation feedback incorporated
-3. Plan confirmed as feasible for automated implementation
-4. All business and technical details available for execution
-5. PLAN.md written to `docs/specs/[ID]-[feature-name]/`
-6. TodoWrite updated with completed tasks
-7. **STOP**: DO NOT CONTINUE until user confirms to proceed.
+**🛑 STOP - FINAL CHECKPOINT**
+You MUST end your response here and wait for the user to explicitly confirm.
+DO NOT continue to Step 8 in this same response.
+The user needs to approve the implementation plan before finalization.
 
 ### Step 8: Finalization and Confidence Assessment
 

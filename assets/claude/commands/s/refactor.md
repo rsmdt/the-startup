@@ -51,11 +51,16 @@ You MUST ALWAYS ask the user for further details about the refactoring needs:
 - Are there any constraints or areas to avoid?
 - What validation mechanisms exist? (tests, linting, type checking, etc.)
 
-**Verification Checklist**:
-1. Refactoring goals clarified with user
-2. Constraints and boundaries understood
-3. Validation mechanisms identified
-4. **STOP**: DO NOT CONTINUE until user confirms to proceed.
+**🤔 Ask yourself before proceeding:**
+1. Have I explicitly asked the user about their refactoring goals and received clear answers?
+2. Do I understand ALL constraints and boundaries for this refactoring?
+3. Have I identified what validation mechanisms exist (tests, linting, type checking)?
+4. Am I about to STOP and wait for user confirmation?
+
+**🛑 STOP - MANDATORY PAUSE**
+You MUST end your response here and wait for the user to explicitly confirm.
+DO NOT continue to Step 2 in this same response.
+The user needs to approve the refactoring approach.
 
 ### Step 2: Discovery and Code Analysis
 
@@ -87,13 +92,18 @@ You MUST ALWAYS ask the user for further details about the refactoring needs:
 4. Complexity Assessment:
    @{{STARTUP_PATH}}/rules/complexity-assessment.md
 
-**Verification Checklist**:
-1. Target code located and analyzed
-2. Validation status checked
-3. Specialist analysis completed
-4. `the-chief` complexity assessment displayed
-5. Refactoring opportunities identified
-6. **STOP**: DO NOT CONTINUE until user confirms to proceed.
+**🤔 Ask yourself before proceeding:**
+1. Have I located and thoroughly analyzed the target code?
+2. Did I check the current validation status (tests passing/failing)?
+3. Have I received and displayed ALL specialist agent analyses?
+4. Did I display the `the-chief` complexity assessment verbatim?
+5. Have I clearly identified specific refactoring opportunities?
+6. Am I prepared to STOP and await user direction?
+
+**🛑 STOP - MANDATORY DECISION POINT**
+You MUST end your response here and wait for the user's decision.
+DO NOT proceed to Step 3 in this same response.
+The user needs to review the analysis and choose the path forward.
 
 ### Step 3: Execute Based on Chief's Recommendation
 

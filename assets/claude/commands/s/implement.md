@@ -72,12 +72,17 @@ Display: `📊 Analyzing Implementation Plan`
 5. Load ONLY Phase 1 tasks into TodoWrite
 6. Present phase 1 overview and ask user to confirm start
 
-**Verification Checklist**:
-1. Plan successfully loaded and parsed
-2. All phases identified and counted
-3. Phase 1 tasks loaded into TodoWrite
-4. Implementation overview presented to user
-5. **STOP**: DO NOT CONTINUE until user confirms to proceed.
+**🤔 Ask yourself before proceeding:**
+1. Have I successfully loaded and parsed the PLAN.md file?
+2. Did I identify ALL phases and count the tasks in each one?
+3. Are Phase 1 tasks (and ONLY Phase 1) now loaded into TodoWrite?
+4. Have I presented a clear implementation overview to the user?
+5. Am I about to wait for explicit user confirmation?
+
+**🛑 STOP - MANDATORY PAUSE**
+You MUST end your response here and wait for the user to explicitly confirm.
+DO NOT continue to Step 3 in this same response.
+The user needs to review and approve before implementation begins.
 
 ### Step 3: Phase-by-Phase Implementation
 
@@ -127,13 +132,19 @@ For each phase in PLAN.md:
 - Only proceed if validation passes
 - If fails → attempt fix → re-validate
 
-#### Phase Completion protocol
+#### Phase Completion Protocol
 
-1. Verify all TodoWrite tasks for this phase show 'completed'
-2. Update ALL PLAN.md checkboxes for this phase
-3. Run validation commands
-4. Generate phase summary
-5. **STOP**: DO NOT CONTINUE until user confirms to proceed.
+**🤔 Ask yourself before marking phase complete:**
+1. Are ALL TodoWrite tasks for this phase showing 'completed' status?
+2. Have I updated every single checkbox in PLAN.md for this phase?
+3. Did I run all validation commands and did they pass?
+4. Have I generated a comprehensive phase summary?
+5. Am I prepared to STOP and wait for user confirmation?
+
+**🛑 STOP - MANDATORY PHASE BOUNDARY**
+You MUST end your response after presenting the phase summary.
+DO NOT proceed to the next phase in this same response.
+Each phase requires explicit user approval to continue.
 
 Phase Summary Format:
 ```
