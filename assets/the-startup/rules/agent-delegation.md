@@ -2,7 +2,10 @@ Rules for task decomposition and parallel execution.
 
 1. Task Decomposition Principles:
 
-    Before delegating to specialist agents, decompose complex work by ACTIVITIES.
+    Decompose complex work by ACTIVITIES (what needs doing), not roles.
+    
+    ✅ DO: "Build API endpoints", "Create UI components", "Add security layer"  
+    ❌ DON'T: "Backend engineer do X", "Frontend do Y"
 
     When to Decompose:
     - Multiple distinct activities needed
@@ -10,109 +13,99 @@ Rules for task decomposition and parallel execution.
     - Natural boundaries between system layers
     - Different stakeholder perspectives required
      
-    How to Decompose:
-    1. Identify activities: What needs to be DONE (not who does it)
-    2. Ensure independence: Each task should have clear inputs/outputs
-    3. Avoid duplication: Identify shared prerequisites once
-    4. Express as capabilities: Use activity descriptions, not agent names
-    5. Check coupling: If heavy cross-talk needed, merge or run sequentially
-
-    Decomposition Example:
+    Example:
     ```
     Task: "Add user authentication"
-    Decomposed into:
-    - Analyze security requirements for auth system
-    - Design database schema for users and sessions
-    - Design API endpoints for authentication
-    - Create login/register UI components
+    → Analyze security requirements
+    → Design database schema  
+    → Create API endpoints
+    → Build login/register UI
     ```
 
     The system automatically matches activities to specialized agents.
 
-2. Parallel task or agent execution patterns:
+2. Parallel Execution Patterns:
 
-    ALWAYS execute in parallel when possible - this is startup speed.
+    DEFAULT: Always execute in parallel unless tasks depend on each other.
 
-    Parallel Execution Criteria:
-    - Are all tasks independent (no shared state modifications)?
-    - Do different activities require different expertise?
-    - Is separate validation possible?
-    - Will failure of one block others?
+    Parallel Checklist:
+    ✅ Independent tasks (no shared state)
+    ✅ Different expertise required
+    ✅ Separate validation possible
+    ✅ Won't block each other
 
-    Context Isolation Pattern (FOCUS/EXCLUDE):
+    The FOCUS/EXCLUDE Pattern (Required):
     ```
-    FOCUS: [Specific activity and constraints]
+    FOCUS: [What to do - 2-3 sentences max]
     EXCLUDE: [What NOT to do - prevents scope creep]
-    CONTEXT: [Only relevant requirements and dependencies]
-    SUCCESS: [Clear criteria for completion]
+    CONTEXT: [Only relevant files/requirements]
+    SUCCESS: [Measurable completion criteria]
     ```
 
-    Parallel Execution Example:
+    Example:
     ```python
-    # Launch multiple specialized agents simultaneously
-    Task(subagent_type="specialized-agent-1", prompt="FOCUS: API design...")
-    Task(subagent_type="specialized-agent-2", prompt="FOCUS: Database schema...")
-    Task(subagent_type="specialized-agent-3", prompt="FOCUS: Security review...")
+    # Launch simultaneously
+    Task(subagent_type="the-backend-engineer", prompt="FOCUS: Build user API...")
+    Task(subagent_type="the-software-engineer-database-design", prompt="FOCUS: Design schema...")
+    Task(subagent_type="the-security-engineer-authentication-systems", prompt="FOCUS: Review auth...")
     ```
 
     Result Aggregation:
-    - Display each agent response verbatim in delimiters
-    - Synthesize findings AFTER showing all responses
-    - Identify conflicts or dependencies between results
-    - Create unified next steps from multiple perspectives
+    - Display each agent response verbatim
+    - Synthesize findings after all responses
+    - Identify conflicts between results
+    - Create unified next steps
 
-3. Validation & drift detection
+3. Validation & Scope Control:
 
-    Auto-Accept (continue without review):
+    🟢 Auto-Accept (ship it):
     - Security vulnerability fixes
     - Error handling improvements
     - Input validation additions
     - Performance optimizations under 10 lines
     - Documentation updates
     
-    Requires Review (need user confirmation):
+    🟡 Requires Review (user confirms):
     - New external dependencies
     - Database schema modifications
     - Public API changes
     - Architectural pattern changes
     - Configuration updates
     
-    Auto-Reject (scope creep - block immediately):
+    🔴 Auto-Reject (scope creep):
     - Features not in requirements
-    - Breaking changes without migration path
+    - Breaking changes without migration
     - Untested code modifications
     - Scope expansions beyond FOCUS directive
     
-    Example - Handling Drift when specialist agent exceeds scope:
+    When agents drift:
     ```
-    ⚠️ Scope Alert: {agent} included {unexpected feature}
-    
+    ⚠️ Scope Alert: Agent added [unexpected feature]
     Options:
-    1. Accept and expand scope (update requirements)
-    2. Reject and re-run with stricter boundaries
-    3. Cherry-pick useful parts, discard rest
+    1. Accept and update requirements
+    2. Reject and retry with stricter FOCUS
+    3. Cherry-pick useful parts
     ```
 
-4. Failure Handling & Graceful Degradation
+4. Failure Recovery:
 
-    When Parallel Execution Fails:
-    - If one agent fails, others continue independently
-    - Collect all successful results before retrying failures
-    - Fall back to sequential execution if coordination issues arise
-    - Escalate to user if critical path blocked
-
-    Fallback Patterns:
+    Fallback Chain:
     ```
-    Try: Parallel execution of 4 specialized agents
-    If coordination issues: Sequential execution with context passing
-    If specialist unavailable: Route to broader domain agent
-    If all else fails: Escalate to user with clear options
+    1. Parallel specialists (default)
+       ↓ if coordination issues
+    2. Sequential with context passing
+       ↓ if specialist fails
+    3. Broader domain agent
+       ↓ if still stuck
+    4. DIY (do it yourself)
+       ↓ if blocked
+    5. Escalate to user with options
     ```
 
-    Recovery Strategies:
-    - Retry with refined FOCUS/EXCLUDE directives
-    - Break down task into smaller activities
-    - Use alternative specialized agents
-    - Provide partial results with clear gaps identified
+    Recovery Tactics:
+    - Refine FOCUS/EXCLUDE and retry
+    - Break into smaller tasks
+    - Try alternative agents
+    - Ship partial results with gaps noted
 
-Remember: Fast execution with preserved expertise - that's how startups ship quality at speed.
+    Key Principle: One agent fails? Others continue. Collect successes before retrying failures.
