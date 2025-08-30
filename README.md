@@ -4,9 +4,7 @@
 
 ## What is The Agentic Startup?
 
-The Agentic Startup brings you instant access to expert developers, architects, and engineers - all working together to turn your ideas into shipped code.
-
-The Agentic Startup is an orchestration system for Claude Code that gives you a virtual engineering team. Instead of one AI trying to do everything, you get specialized experts who collaborate like a real startup team - pragmatic, fast, and focused on shipping.
+The Agentic Startup brings you instant access to expert developers, architects, and engineers - all working together to turn your ideas into shipped code. It is a system for [Claude Code](https://www.anthropic.com/claude-code) that gives you a virtual engineering team. Instead of one AI trying to do everything, you get specialized experts who collaborate like a real startup team - pragmatic, fast, and focused on shipping.
 
 Think of it as having a CTO, architects, developers, and DevOps engineers on-demand, each bringing their expertise to your project.
 
@@ -24,11 +22,11 @@ When you use The Agentic Startup, Claude Code becomes your **technical co-founde
 
 ### Research Foundation
 
-**Task specialization consistently outperforms role-based organization for LLM agents:**
+Task specialization consistently outperforms role-based organization for LLM agents:
 
-- **Performance Impact**: Studies show 2.86% to 21.88% accuracy improvement with specialized agents vs single broad agents ([Multi-Agent Collaboration, 2025](https://arxiv.org/html/2501.06322v1))
-- **Industry Consensus**: Leading frameworks (CrewAI, Microsoft AutoGen, LangGraph) organize agents by **capability** rather than traditional job titles
-- **Domain Specialization**: Effective LLM specialization customizes agents according to specific task contextual data ([Agentic LLM Systems, 2024](https://arxiv.org/html/2412.04093v1))
+- Performance Impact: Studies show 2.86% to 21.88% accuracy improvement with specialized agents vs single broad agents ([Multi-Agent Collaboration, 2025](https://arxiv.org/html/2501.06322v1))
+- Industry Consensus: Leading frameworks (CrewAI, Microsoft AutoGen, LangGraph) organize agents by **capability** rather than traditional job titles
+- Domain Specialization: Effective LLM specialization customizes agents according to specific task contextual data ([Agentic LLM Systems, 2024](https://arxiv.org/html/2412.04093v1))
 
 ## Quick Start
 
@@ -48,13 +46,9 @@ curl -LsSf https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh |
 /s:implement 001-user-auth
 ```
 
-### Note about available MCP
-
-The Agentic Startup tries to be unbiased about which MCP you may have installed, as this is a fast changing topic. However, we recommend that you have at least [`sequentialthunking`](https://github.com/modelcontextprotocol/servers/blob/main/src/sequentialthinking/README.md) installed.
-
 **More installation options**: See the [Installation](#installation) section below.
 
-## Your Expert Team - Activity-Based Specialists
+## Agents - Your Expert Team
 
 The Agentic Startup uses **activity-based agents** that focus on WHAT they do, not WHO they are. Traditional engineering boundaries (backend/frontend) are artificial constraints that reduce LLM performance. Instead, our agents:
 
@@ -65,95 +59,86 @@ The Agentic Startup uses **activity-based agents** that focus on WHAT they do, n
 
 Each agent receives only relevant context for their specific expertise, reducing cognitive load and improving accuracy.
 
-### 🎯 Orchestration & Strategy
-- **the-chief** - Eliminates bottlenecks through smart routing and complexity assessment
-- **the-analyst** - Transforms vague requirements into actionable specifications
-  - `requirements-clarification` - Uncovers hidden needs and resolves ambiguities
-  - `requirements-documentation` - Creates comprehensive BRDs and PRDs
-  - `feature-prioritization` - Data-driven feature prioritization
-  - `solution-research` - Researches proven approaches and patterns
-  - `project-coordination` - Breaks down complex projects into tasks
+**the-chief** - Eliminates bottlenecks through smart routing and complexity assessment
 
-### 🏗️ Architecture & System Design  
-- **the-architect** - Balances elegance with pragmatic business reality
-  - `system-design` - Designs scalable system architectures
-  - `system-documentation` - Creates architecture diagrams and decisions
-  - `architecture-review` - Validates design patterns and compliance
-  - `code-review` - Elevates team capabilities through feedback
-  - `scalability-planning` - Ensures systems scale gracefully
-  - `technology-evaluation` - Makes framework and tool decisions
-  - `technology-standards` - Prevents technology chaos through standards
+**the-analyst** - Transforms vague requirements into actionable specifications
+- `requirements-clarification` - Uncovers hidden needs and resolves ambiguities
+- `requirements-documentation` - Creates comprehensive BRDs and PRDs
+- `feature-prioritization` - Data-driven feature prioritization
+- `solution-research` - Researches proven approaches and patterns
+- `project-coordination` - Breaks down complex projects into tasks
 
-### 💻 Software Engineering
-- **the-software-engineer** - Ships features that actually work
-  - `api-design` - REST/GraphQL APIs with clear contracts
-  - `api-documentation` - Comprehensive API documentation
-  - `database-design` - Balanced schemas for any database
-  - `service-integration` - Reliable service communication patterns
-  - `component-architecture` - Reusable UI components
-  - `business-logic` - Domain rules and validation
-  - `reliability-engineering` - Error handling and resilience
-  - `performance-optimization` - Bundle size and Core Web Vitals
-  - `state-management` - Client and server state patterns
-  - `browser-compatibility` - Cross-browser support
+**the-architect** - Balances elegance with pragmatic business reality
+- `system-design` - Designs scalable system architectures
+- `system-documentation` - Creates architecture diagrams and decisions
+- `architecture-review` - Validates design patterns and compliance
+- `code-review` - Elevates team capabilities through feedback
+- `scalability-planning` - Ensures systems scale gracefully
+- `technology-evaluation` - Makes framework and tool decisions
+- `technology-standards` - Prevents technology chaos through standards
 
-### 🔧 Platform & Infrastructure
-- **the-platform-engineer** - Makes systems that don't wake you at 3am
-  - `system-performance` - Handles 10x load without 10x cost
-  - `observability` - Monitoring that catches problems early
-  - `containerization` - Consistent deployment everywhere
-  - `pipeline-engineering` - Reliable data processing
-  - `ci-cd-automation` - Safe deployments at scale
-  - `deployment-strategies` - Progressive rollouts
-  - `incident-response` - Production fire debugging
-  - `infrastructure-as-code` - Reproducible infrastructure
-  - `storage-architecture` - Scalable storage solutions
-  - `query-optimization` - Fast database queries
-  - `data-modeling` - Balanced data models
+**the-software-engineer** - Ships features that actually work
+- `api-design` - REST/GraphQL APIs with clear contracts
+- `api-documentation` - Comprehensive API documentation
+- `database-design` - Balanced schemas for any database
+- `service-integration` - Reliable service communication patterns
+- `component-architecture` - Reusable UI components
+- `business-logic` - Domain rules and validation
+- `reliability-engineering` - Error handling and resilience
+- `performance-optimization` - Bundle size and Core Web Vitals
+- `state-management` - Client and server state patterns
+- `browser-compatibility` - Cross-browser support
 
-### 🎨 Design & User Experience
-- **the-designer** - Creates products people actually want to use
-  - `accessibility-implementation` - WCAG 2.1 AA compliance
-  - `user-research` - Real user needs, not assumptions
-  - `interaction-design` - Minimal friction user flows
-  - `visual-design` - Brand-enhancing UI aesthetics
-  - `design-systems` - Consistent component libraries
-  - `information-architecture` - Intuitive content hierarchies
+**the-platform-engineer** - Makes systems that don't wake you at 3am
+- `system-performance` - Handles 10x load without 10x cost
+- `observability` - Monitoring that catches problems early
+- `containerization` - Consistent deployment everywhere
+- `pipeline-engineering` - Reliable data processing
+- `ci-cd-automation` - Safe deployments at scale
+- `deployment-strategies` - Progressive rollouts
+- `incident-response` - Production fire debugging
+- `infrastructure-as-code` - Reproducible infrastructure
+- `storage-architecture` - Scalable storage solutions
+- `query-optimization` - Fast database queries
+- `data-modeling` - Balanced data models
 
-### 🧪 Quality Assurance
-- **the-qa-engineer** - Catches bugs before users do
-  - `test-strategy` - Risk-based testing approaches
-  - `test-implementation` - Comprehensive test suites
-  - `exploratory-testing` - Creative defect discovery
-  - `performance-testing` - Load and stress validation
+**the-designer** - Creates products people actually want to use
+- `accessibility-implementation` - WCAG 2.1 AA compliance
+- `user-research` - Real user needs, not assumptions
+- `interaction-design` - Minimal friction user flows
+- `visual-design` - Brand-enhancing UI aesthetics
+- `design-systems` - Consistent component libraries
+- `information-architecture` - Intuitive content hierarchies
 
-### 🔒 Security Engineering
-- **the-security-engineer** - Keeps the bad guys out
-  - `vulnerability-assessment` - OWASP-based security checks
-  - `authentication-systems` - OAuth, JWT, SSO, MFA
-  - `security-incident-response` - Rapid containment
-  - `compliance-audit` - GDPR, SOX, HIPAA compliance
-  - `data-protection` - Encryption and privacy controls
+**the-qa-engineer** - Catches bugs before users do
+- `test-strategy` - Risk-based testing approaches
+- `test-implementation` - Comprehensive test suites
+- `exploratory-testing` - Creative defect discovery
+- `performance-testing` - Load and stress validation
 
-### 📱 Mobile Development
-- **the-mobile-engineer** - Ships apps users love
-  - `mobile-interface-design` - Platform-specific UI patterns
-  - `mobile-data-persistence` - Offline-first strategies
-  - `cross-platform-integration` - Native and hybrid bridges
-  - `mobile-deployment` - App store submissions
-  - `mobile-performance` - Battery and memory optimization
+**the-security-engineer** - Keeps the bad guys out
+- `vulnerability-assessment` - OWASP-based security checks
+- `authentication-systems` - OAuth, JWT, SSO, MFA
+- `security-incident-response` - Rapid containment
+- `compliance-audit` - GDPR, SOX, HIPAA compliance
+- `data-protection` - Encryption and privacy controls
 
-### 🤖 Machine Learning
-- **the-ml-engineer** - Makes AI that actually ships
-  - `model-deployment` - Production-ready inference
-  - `ml-monitoring` - Drift detection systems
-  - `prompt-optimization` - LLM prompt engineering
-  - `mlops-automation` - Reproducible ML pipelines
-  - `context-management` - AI memory architectures
-  - `feature-engineering` - Model-ready data pipelines
+**the-mobile-engineer** - Ships apps users love
+- `mobile-interface-design` - Platform-specific UI patterns
+- `mobile-data-persistence` - Offline-first strategies
+- `cross-platform-integration` - Native and hybrid bridges
+- `mobile-deployment` - App store submissions
+- `mobile-performance` - Battery and memory optimization
 
-### 🛠️ Meta & Special Purpose
-- **the-meta-agent** - Creates new specialized agents based on PRINCIPLES.md
+**the-ml-engineer** - Makes AI that actually ships
+- `model-deployment` - Production-ready inference
+- `ml-monitoring` - Drift detection systems
+- `prompt-optimization` - LLM prompt engineering
+- `mlops-automation` - Reproducible ML pipelines
+- `context-management` - AI memory architectures
+- `feature-engineering` - Model-ready data pipelines
+
+**the-meta-agent** - Creates new specialized agents
 
 ## Slash Commands
 
@@ -184,8 +169,10 @@ Creates comprehensive specifications with built-in quality gates:
 - 🛑 Phase boundaries - User approval required at each major step
 - ⚡ Parallel research - Multiple specialists investigate simultaneously
 
+#### Workflow
+
 <details>
-<summary>#### Workflow</summary>
+<summary>show details</summary>
 
 ```mermaid
 flowchart TD
@@ -228,8 +215,10 @@ Takes an implementation plan (PLAN.md) and executes it phase-by-phase with exper
 - 🛑 Phase boundaries - Mandatory stops between phases for review
 - 🔍 Automatic validation - Tests run after each change
 
+#### Workflow
+
 <details>
-<summary>#### Workflow</summary>
+<summary>show details</summary>
 
 ```mermaid
 flowchart TD
@@ -274,8 +263,10 @@ Analyzes code and performs refactoring based on complexity assessment:
 - 🔀 Complexity routing - Automatic decision between immediate or planned execution
 - 🛑 Safety checkpoints - User approval at critical decision points
 
+#### Workflow
+
 <details>
-<summary>#### Workflow</summary>
+<summary>show details</summary>
 
 ```mermaid
 flowchart TD
@@ -312,52 +303,7 @@ Standard: "I'll help you implement authentication..."
 The Agentic Startup: "🚀 TIME TO SHIP! Launching the security squad in parallel!"
 ```
 
-The style is included at `assets/claude/output-styles/the-startup.md` and makes every session feel like you're building the next unicorn.
-
-## Real-World Examples
-
-### Building Authentication
-```
-/s:specify Add user authentication with JWT
-```
-The Agentic Startup orchestrates:
-1. **the-analyst** `requirements-clarification` - Uncovers auth needs (OAuth? 2FA? Password reset?)
-2. **the-architect** `system-design` - Designs the auth architecture
-3. **the-security-engineer** `authentication-systems` - Specifies security requirements
-4. **the-software-engineer** `api-design` - Creates JWT endpoints (adapts to Express/Django/FastAPI)
-5. **the-software-engineer** `component-architecture` - Builds login UI (React/Vue/Angular patterns)
-6. **the-security-engineer** `vulnerability-assessment` - Validates the implementation
-
-### Debugging Production Issues
-```
-The API is returning 500 errors on user login
-```
-The Agentic Startup responds:
-1. **the-platform-engineer** `incident-response` - Immediate investigation
-2. **the-software-engineer** `api-design` or `database-design` - Fix root cause
-3. **the-architect** `code-review` - Verify the fix
-4. **the-security-engineer** `vulnerability-assessment` - Security validation if auth-related
-
-### Creating a Dashboard
-```
-/s:specify Admin dashboard for monitoring system metrics
-```
-The Agentic Startup orchestrates:
-1. **the-designer** `user-research` - Understand admin needs
-2. **the-designer** `interaction-design` - Create the interface design
-3. **the-platform-engineer** `query-optimization` - Efficient metrics queries
-4. **the-architect** `system-design` - Design real-time data flow
-5. **the-software-engineer** `component-architecture` - Build UI (React/Vue/Angular)
-6. **the-software-engineer** `api-design` - Create metrics API (Express/Django/FastAPI)
-
-## How It Works
-
-1. **You make a request** - Either directly or through commands
-2. **The Agentic Startup assesses** - Determines complexity and required expertise
-3. **Specialists are called** - The right experts for your specific need
-4. **Parallel execution** - Multiple experts work simultaneously when possible
-5. **Results are synthesized** - Expert input becomes actionable next steps
-6. **You ship faster** - With the confidence of a full team behind you
+The style makes every session feel like you're building the next unicorn.
 
 ## Quick Start Examples
 
@@ -382,10 +328,6 @@ The Agentic Startup orchestrates:
 
 The Agentic Startup provides easy installation via script capabilities.
 
-### Installation Options
-
-Install The Agentic Startup commands, agents, and configuration using the install script:
-
 ```bash
 # Interactive installation (shows all options)
 curl -LsSf https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh | sh
@@ -400,7 +342,7 @@ curl -LsSf https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh |
 curl -LsSf https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh | sh -s -- -ly
 ```
 
-## Building from Source
+### Building from Source
 
 If you want to contribute or customize:
 
@@ -432,6 +374,10 @@ While The Agentic Startup aims to enhance Claude Code with specialized agents an
 ### Best Practices
 - **Restart** Claude Code between major tasks to free resources
 - **Verify** generated code and documentation before committing
+
+### Note about available MCP
+
+The Agentic Startup tries to be unbiased about which MCP you may have installed, as this is a fast changing topic. However, we recommend that you have at least [`sequentialthunking`](https://github.com/modelcontextprotocol/servers/blob/main/src/sequentialthinking/README.md) installed.
 
 ## Learn More
 

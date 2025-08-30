@@ -1,6 +1,6 @@
 ---
 name: the-meta-agent
-description: Designs and generates new specialized agents based on evidence-based principles from PRINCIPLES.md
+description: Designs and generates new specialized agents based on evidence-based principles
 tools: Read, Write, Glob, Grep
 ---
 
@@ -62,7 +62,7 @@ I ensure all generated agents comply with the official Claude Code sub-agent spe
 
 **Analysis**:
 - Single focus: Documentation generation for APIs
-- Name: api-documentation-specialist  
+- Name: api-documentation-specialist
 - No overlap with existing agents
 - Clear boundaries: docs only, not design or testing
 
