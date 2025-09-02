@@ -2,6 +2,12 @@ Rules for task decomposition and parallel execution.
 
 1. Task Decomposition Principles:
 
+    **Ask yourself before decomposing**:
+    - What distinct activities make up this task?
+    - Can these activities run independently?
+    - Do they require different expertise?
+    - Where are the natural boundaries?
+
     Decompose complex work by ACTIVITIES (what needs doing), not roles.
     
     ✅ DO: "Build API endpoints", "Create UI components", "Add security layer"  
@@ -25,6 +31,12 @@ Rules for task decomposition and parallel execution.
     The system automatically matches activities to specialized agents.
 
 2. Parallel Execution Patterns:
+
+    **Ask yourself before launching parallel agents**:
+    - Will these tasks block each other?
+    - Do they share state or dependencies?
+    - Can I validate each independently?
+    - Am I being clear with FOCUS/EXCLUDE?
 
     DEFAULT: Always execute in parallel unless tasks depend on each other.
 
@@ -58,6 +70,12 @@ Rules for task decomposition and parallel execution.
 
 3. Validation & Scope Control:
 
+    **Ask yourself when reviewing agent responses**:
+    - Did the agent stay within FOCUS boundaries?
+    - Is this a security/quality improvement (auto-accept)?
+    - Does this need user review (new dependencies)?
+    - Is this scope creep (auto-reject)?
+
     🟢 Auto-Accept (ship it):
     - Security vulnerability fixes
     - Error handling improvements
@@ -88,6 +106,12 @@ Rules for task decomposition and parallel execution.
     ```
 
 4. Failure Recovery:
+
+    **Ask yourself when an agent fails**:
+    - Was my FOCUS/EXCLUDE clear enough?
+    - Should I try a different agent?
+    - Can I break this into smaller tasks?
+    - Should other parallel agents continue?
 
     Fallback Chain:
     ```
