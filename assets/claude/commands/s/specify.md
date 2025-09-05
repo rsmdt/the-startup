@@ -53,15 +53,54 @@ Maintain awareness of:
    - Display: "📝 Setting up specification: [ID] [inferred goals from arguments]"
 
 **📝 Process Tracking**: 
-After Discovery (Step 2), based on complexity assessment and user confirmation, certain documentation steps may be marked as skipped rather than executed. This allows for adaptive workflows where simple features don't require extensive documentation.
+After Research & Complexity Assessment (Step 3), based on complexity assessment and user confirmation, certain documentation steps may be marked as skipped rather than executed. This allows for adaptive workflows where simple features don't require extensive documentation.
 
-### 📋 Step 2: Discovery, Research & Complexity Assessment
+### 📋 Step 2: Initial Discovery
 
-**🎯 Goal**: Understand the feature landscape, assess complexity, and determine the appropriate documentation path.
+**🎯 Goal**: Understand WHAT the user wants to build and WHY, ensuring complete clarity before research begins.
 
 You MUST ALWAYS clarify details about the provided description with the user.
 
-**🔍 Market Research** - Once you have initial clarity, conduct comprehensive research:
+**🔍 Discovery Focus Areas**:
+- Clarify the user's vision and goals
+- Understand the core problem being solved
+- Define scope boundaries and must-have features
+- Identify critical success criteria
+- Understand target users and primary use cases
+- Clarify any ambiguous or incomplete requirements
+- Explore constraints (technical, business, timeline)
+
+**💬 Discovery Techniques**:
+- Ask open-ended questions to uncover hidden requirements
+- Use examples to validate understanding
+- Confirm priorities and trade-offs
+- Identify what's explicitly out of scope
+
+**📋 Discovery Output** - Present a clear summary of your understanding:
+- Core problem and solution vision
+- Key features and functionality
+- Target users and use cases
+- Success criteria
+- Scope boundaries
+- Any remaining questions or ambiguities
+
+**🤔 Ask yourself before proceeding**:
+1. Do I fully understand what the user wants to build?
+2. Have I clarified all ambiguous requirements?
+3. Are the scope boundaries clearly defined?
+4. Do I understand the success criteria?
+5. Have I confirmed my understanding with the user?
+6. Is TodoWrite updated with discovery findings?
+
+**🛑 STOP - DISCOVERY CHECKPOINT**
+You MUST end your response here and wait for the user to explicitly confirm.
+The user needs to validate that you correctly understand their requirements before research begins.
+
+### 📋 Step 3: Detailed Research & Complexity Assessment
+
+**🎯 Goal**: Research the feature landscape, assess complexity, and determine the appropriate documentation path.
+
+**🔍 Market Research** - Conduct comprehensive research based on the validated requirements:
 - Search for similar existing solutions and competitors
 - Identify industry best practices and standards
 - Find common implementation patterns and anti-patterns
@@ -72,14 +111,14 @@ You MUST ALWAYS clarify details about the provided description with the user.
 - Market research agents for competitor analysis
 - Technical research agents for implementation patterns
 - User experience agents for UI/UX best practices
-- Requirements analyst agents for scope assessment
+- Requirements analyst agents for scope refinement
 
 **📊 Complexity Assessment**:
 @{{STARTUP_PATH}}/rules/complexity-assessment.md
 
 Based on research and analysis, determine the workflow path.
 
-**📋 Discovery Summary** - Present a comprehensive discovery summary to the user that includes:
+**📋 Research Summary** - Present a comprehensive research summary to the user that includes:
 - Key findings from market research and competitor analysis
 - Relevant patterns, best practices, and potential differentiators discovered
 - Complexity assessment results with justification
@@ -96,29 +135,29 @@ Based on research and analysis, determine the workflow path.
 The summary must help the user understand the landscape, complexity, and recommended approach.
 
 **🤔 Ask yourself before proceeding**:
-1. Have I gathered enough context from the user?
-2. Have I completed comprehensive market research?
+1. Have I completed comprehensive market research?
+2. Have I identified relevant patterns and best practices?
 3. Have I run the complexity assessment?
 4. Have I determined the appropriate workflow path?
-5. Have I presented the discovery summary clearly?
+5. Have I presented the research summary clearly?
 6. Does the user understand and agree with the recommended path?
-7. Is TodoWrite updated with all discovery tasks?
+7. Is TodoWrite updated with all research tasks?
 
 **🛑 STOP - WORKFLOW DECISION POINT**
 You MUST end your response here and wait for the user to explicitly confirm.
 Based on the complexity assessment, the user needs to confirm the documentation path before proceeding.
 
-### 📋 Step 3: Requirements Documentation
+### 📋 Step 4: Requirements Documentation
 
 **🎯 Goal**: Define and document WHAT needs to be built based on business and user needs.
 
-Based on the user's decision from the Discovery phase, create the appropriate documentation.
+Based on the user's decision from the previous step, create the appropriate documentation.
 
 **📄 Create Documentation**:
 - Business Requirements Document: `docs/specs/[ID]-[feature-name]/BRD.md` (based on template `{{STARTUP_PATH}}/templates/BRD.md`)
 - Product Requirements Document: `docs/specs/[ID]-[feature-name]/PRD.md` (based on template `{{STARTUP_PATH}}/templates/PRD.md`)
 
-**📦 Note**: If the user decided in Step 2 that no formal requirements documentation is needed (e.g., for simple features), mark this step as "skipped" in TodoWrite and proceed to Step 4.
+**📦 Note**: If the user decided in Step 3 that no formal requirements documentation is needed (e.g., for simple features), mark this step as "skipped" in TodoWrite and proceed to Step 5.
 
 **🤔 Ask yourself before proceeding**:
 1. Have I followed the user's decision from the Discovery Step?
@@ -130,10 +169,10 @@ Based on the user's decision from the Discovery phase, create the appropriate do
 
 **🛑 STOP - REQUIREMENTS CHECKPOINT**
 You MUST end your response here and wait for the user to explicitly confirm.
-DO NOT continue to Step 4 in this same response.
+DO NOT continue to Step 5 in this same response.
 The user needs to review the requirements documentation (or confirm skipping) before technical research begins.
 
-### 📋 Step 4: Technical Specification
+### 📋 Step 5: Technical Specification
 
 **🎯 Goal**: Define and document HOW the solution will be built with technical architecture and design decisions.
 
@@ -190,10 +229,10 @@ Analyze requirements to identify distinct technical areas that need investigatio
 
 **🛑 STOP - TECHNICAL SPECIFICATION CHECKPOINT**
 You MUST end your response here and wait for the user to explicitly confirm.
-DO NOT continue to Step 5 in this same response.
+DO NOT continue to Step 6 in this same response.
 The user needs to review the technical specification before implementation planning begins.
 
-### 📋 Step 5: Implementation Planning
+### 📋 Step 6: Implementation Planning
 
 **🎯 Goal**: Create an actionable, validated plan that breaks down the work into executable tasks.
 
@@ -227,10 +266,10 @@ Use specialist agents to validate the implementation plan:
 
 **🛑 STOP - IMPLEMENTATION PLAN CHECKPOINT**
 You MUST end your response here and wait for the user to explicitly confirm.
-DO NOT continue to Step 6 in this same response.
+DO NOT continue to Step 7 in this same response.
 The user needs to approve the implementation plan before finalization.
 
-### 📋 Step 6: Finalization and Confidence Assessment
+### 📋 Step 7: Finalization and Confidence Assessment
 
 **🎯 Goal**: Summarize the specification, assess implementation readiness, and provide clear next steps.
 
@@ -247,7 +286,7 @@ The user needs to approve the implementation plan before finalization.
 - Next Steps: How to proceed (e.g., the `/s:implement [ID]` command)
 
 **🤔 Ask yourself before finalizing**:
-1. Is TodoWrite showing all 6 steps as completed or properly marked as skipped?
+1. Is TodoWrite showing all 7 steps as completed or properly marked as skipped?
 2. Have all created documents been validated and reviewed?
 3. Is the confidence assessment based on actual findings from the specification process?
 4. Would another agent be able to implement this specification successfully?
