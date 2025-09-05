@@ -2,126 +2,408 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"strings"
+	"time"
 
 	"github.com/rsmdt/the-startup/internal/log"
 	"github.com/spf13/cobra"
 )
 
-// NewLogCommand creates the log command for hook processing
+// NewLogCommand creates the log command for hook processing and metrics analysis
 func NewLogCommand() *cobra.Command {
-	var flags log.LogFlags
-
 	cmd := &cobra.Command{
 		Use:   "log",
-		Short: "Process hook data from Claude Code or read agent context",
-		Long: `Process JSON hook data from Claude Code via stdin or read agent context.
+		Short: "Process Claude Code hook data or analyze tool usage metrics",
+		Long: `Process JSON hook data from Claude Code via stdin or analyze collected metrics.
 
-Write modes:
-  --assistant: Process PreToolUse hooks (agent_start events)
-  --user:      Process PostToolUse hooks (agent_complete events)
+Default behavior (no subcommand):
+  Processes hook data from stdin and writes to metrics log files.
+  Automatically detects PreToolUse or PostToolUse events via hook_event_name field.
 
-Read mode:
-  --read:      Read agent context with specified agent-id
-  
 Examples:
-  # Process hook data
-  echo '{"tool_name":"Task","tool_input":{"subagent_type":"the-architect"}}' | the-startup log --assistant
+  # Process hook data from Claude Code
+  echo '{"hook_event_name":"PreToolUse","tool_name":"Bash"}' | the-startup log
   
-  # Read agent context  
-  the-startup log --read --agent-id arch-001 --lines 20 --format json
-
-This command reads JSON from stdin and writes JSONL logs to .the-startup/ directory.
-On any error, exits silently with code 0 unless DEBUG_HOOKS is set.`,
+  # View today's metrics summary
+  the-startup log summary
+  
+  # View metrics for specific tools
+  the-startup log tools --tool Bash --tool Read
+  
+  # Show errors from the last hour
+  the-startup log errors --since 1h`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// Validate flags using the new validation function
-			if err := log.ValidateLogCommand(flags); err != nil {
-				return err
+			// Default behavior: process hook from stdin
+			if err := log.ProcessHook(os.Stdin); err != nil {
+				// Silent failure for hook processing (exit code 0)
+				return nil
 			}
-
-			// Handle read mode
-			if flags.Read {
-				return handleReadMode(cmd, flags)
-			}
-
-			// Handle write modes (existing functionality)
-			return handleWriteMode(cmd, flags)
+			return nil
 		},
 		// Silent usage and errors to match hook behavior
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
 
-	// Add write mode flags
-	cmd.Flags().BoolVarP(&flags.Assistant, "assistant", "a", false, "Process PreToolUse hook (agent_start event)")
-	cmd.Flags().BoolVarP(&flags.User, "user", "u", false, "Process PostToolUse hook (agent_complete event)")
-
-	// Add read mode flags
-	cmd.Flags().BoolVarP(&flags.Read, "read", "r", false, "Read agent context (requires --agent-id)")
-	cmd.Flags().StringVarP(&flags.AgentID, "agent-id", "i", "", "Agent ID to read context for (required with --read)")
-	cmd.Flags().IntVar(&flags.Lines, "lines", 50, "Number of recent lines to return (1-1000, default 50)")
-	cmd.Flags().StringVar(&flags.Session, "session", "", "Specific session ID (optional, defaults to latest)")
-	cmd.Flags().StringVar(&flags.Format, "format", "json", "Output format: json or text (default json)")
-	cmd.Flags().BoolVar(&flags.IncludeMetadata, "include-metadata", false, "Include file metadata in output (default false)")
+	// Add subcommands
+	cmd.AddCommand(newSummaryCommand())
+	cmd.AddCommand(newToolsCommand())
+	cmd.AddCommand(newErrorsCommand())
+	cmd.AddCommand(newTimelineCommand())
 
 	return cmd
 }
 
-// handleReadMode processes the --read flag and outputs agent context
-func handleReadMode(cmd *cobra.Command, flags log.LogFlags) error {
-	query := log.ContextQuery{
-		AgentID:         flags.AgentID,
-		SessionID:       flags.Session,
-		MaxLines:        flags.Lines,
-		Format:          flags.Format,
-		IncludeMetadata: flags.IncludeMetadata,
+// newSummaryCommand creates the summary subcommand
+func newSummaryCommand() *cobra.Command {
+	var (
+		since   string
+		format  string
+		output  string
+		session string
+	)
+
+	cmd := &cobra.Command{
+		Use:   "summary",
+		Short: "Display metrics summary dashboard",
+		Long: `Display an aggregated summary of tool usage metrics.
+
+Shows overall statistics including:
+  - Total tool invocations
+  - Success/failure rates
+  - Most used tools
+  - Common errors
+  - Activity patterns`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// Parse time filter
+			filter, err := parseTimeFilter(since)
+			if err != nil {
+				return fmt.Errorf("invalid --since value: %w", err)
+			}
+
+			// Add session filter if provided
+			if session != "" {
+				filter.SessionIDs = []string{session}
+			}
+
+			// Stream metrics and aggregate
+			entries, err := log.StreamMetrics(*filter)
+			if err != nil {
+				return fmt.Errorf("failed to stream metrics: %w", err)
+			}
+
+			summary := log.AggregateMetrics(entries, filter)
+
+			// Configure display options
+			opts := log.DefaultDisplayOptions()
+			opts.Format = format
+			
+			// Handle output file
+			if output != "" && output != "-" {
+				file, err := os.Create(output)
+				if err != nil {
+					return fmt.Errorf("failed to create output file: %w", err)
+				}
+				defer file.Close()
+				opts.Output = file
+			}
+
+			// Display the summary
+			return log.DisplaySummary(summary, opts)
+		},
 	}
 
-	result, err := log.ReadContext(query)
-	if err != nil {
-		// Silent error handling for hook compatibility
-		log.DebugError(err)
-		return nil
-	}
+	cmd.Flags().StringVar(&since, "since", "7d", "Time range: today, yesterday, 1h, 24h, 7d, 30d, or YYYY-MM-DD")
+	cmd.Flags().StringVar(&format, "format", "terminal", "Output format: terminal, json, or csv")
+	cmd.Flags().StringVar(&output, "output", "-", "Output file (- for stdout)")
+	cmd.Flags().StringVar(&session, "session", "", "Filter by session ID")
 
-	// Output the result
-	fmt.Fprint(cmd.OutOrStdout(), result)
-	return nil
+	return cmd
 }
 
-// handleWriteMode processes the --assistant and --user flags (existing functionality)
-func handleWriteMode(cmd *cobra.Command, flags log.LogFlags) error {
-	// Determine hook type
-	isPostHook := flags.User
+// newToolsCommand creates the tools subcommand
+func newToolsCommand() *cobra.Command {
+	var (
+		since   string
+		format  string
+		output  string
+		tools   []string
+		session string
+		topN    int
+	)
 
-	// Process the tool call from stdin
-	hookData, err := log.ProcessToolCall(cmd.InOrStdin(), isPostHook)
-	if err != nil {
-		log.DebugError(err)
-		// Silent exit on errors (matches Python behavior)
-		return nil
+	cmd := &cobra.Command{
+		Use:   "tools",
+		Short: "Display detailed tool usage statistics",
+		Long: `Display detailed statistics for tool usage.
+
+Shows per-tool metrics including:
+  - Total invocations
+  - Success/failure counts
+  - Average, min, max execution times
+  - Error patterns`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// Parse time filter
+			filter, err := parseTimeFilter(since)
+			if err != nil {
+				return fmt.Errorf("invalid --since value: %w", err)
+			}
+
+			// Add tool filter if provided
+			if len(tools) > 0 {
+				filter.ToolNames = tools
+			}
+
+			// Add session filter if provided
+			if session != "" {
+				filter.SessionIDs = []string{session}
+			}
+
+			// Stream metrics and aggregate
+			entries, err := log.StreamMetrics(*filter)
+			if err != nil {
+				return fmt.Errorf("failed to stream metrics: %w", err)
+			}
+
+			summary := log.AggregateMetrics(entries, filter)
+
+			// Configure display options
+			opts := log.DefaultDisplayOptions()
+			opts.Format = format
+			opts.TopN = topN
+			
+			// Handle output file
+			if output != "" && output != "-" {
+				file, err := os.Create(output)
+				if err != nil {
+					return fmt.Errorf("failed to create output file: %w", err)
+				}
+				defer file.Close()
+				opts.Output = file
+			}
+
+			// Display the tools statistics
+			return log.DisplayTools(summary, opts)
+		},
 	}
 
-	// Skip processing if hookData is nil (filtered out)
-	if hookData == nil {
-		log.DebugLog("Tool call filtered out, skipping")
-		return nil
+	cmd.Flags().StringVar(&since, "since", "7d", "Time range: today, yesterday, 1h, 24h, 7d, 30d, or YYYY-MM-DD")
+	cmd.Flags().StringVar(&format, "format", "terminal", "Output format: terminal, json, or csv")
+	cmd.Flags().StringVar(&output, "output", "-", "Output file (- for stdout)")
+	cmd.Flags().StringArrayVar(&tools, "tool", nil, "Filter by tool name (can be specified multiple times)")
+	cmd.Flags().StringVar(&session, "session", "", "Filter by session ID")
+	cmd.Flags().IntVar(&topN, "top", 10, "Number of top tools to show")
+
+	return cmd
+}
+
+// newErrorsCommand creates the errors subcommand
+func newErrorsCommand() *cobra.Command {
+	var (
+		since   string
+		format  string
+		output  string
+		tool    string
+		session string
+		topN    int
+	)
+
+	cmd := &cobra.Command{
+		Use:   "errors",
+		Short: "Display error analysis and patterns",
+		Long: `Display analysis of tool execution errors.
+
+Shows error patterns including:
+  - Most common error types
+  - Error frequency
+  - Affected tools
+  - Error messages`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// Parse time filter
+			filter, err := parseTimeFilter(since)
+			if err != nil {
+				return fmt.Errorf("invalid --since value: %w", err)
+			}
+
+			// Add tool filter if provided
+			if tool != "" {
+				filter.ToolNames = []string{tool}
+			}
+
+			// Add session filter if provided
+			if session != "" {
+				filter.SessionIDs = []string{session}
+			}
+
+			// Only show failures
+			filter.FailuresOnly = true
+
+			// Stream metrics and aggregate
+			entries, err := log.StreamMetrics(*filter)
+			if err != nil {
+				return fmt.Errorf("failed to stream metrics: %w", err)
+			}
+
+			summary := log.AggregateMetrics(entries, filter)
+
+			// Configure display options
+			opts := log.DefaultDisplayOptions()
+			opts.Format = format
+			opts.TopN = topN
+			
+			// Handle output file
+			if output != "" && output != "-" {
+				file, err := os.Create(output)
+				if err != nil {
+					return fmt.Errorf("failed to create output file: %w", err)
+				}
+				defer file.Close()
+				opts.Output = file
+			}
+
+			// Display the error analysis
+			return log.DisplayErrors(summary, opts)
+		},
 	}
 
-	// Write to agent-specific context file (NEW)
-	if err := log.WriteAgentContext(hookData.SessionID, hookData.AgentID, hookData); err != nil {
-		log.DebugError(fmt.Errorf("failed to write agent context: %w", err))
-		// Continue even if agent context write fails
+	cmd.Flags().StringVar(&since, "since", "7d", "Time range: today, yesterday, 1h, 24h, 7d, 30d, or YYYY-MM-DD")
+	cmd.Flags().StringVar(&format, "format", "terminal", "Output format: terminal, json, or csv")
+	cmd.Flags().StringVar(&output, "output", "-", "Output file (- for stdout)")
+	cmd.Flags().StringVar(&tool, "tool", "", "Filter by specific tool")
+	cmd.Flags().StringVar(&session, "session", "", "Filter by session ID")
+	cmd.Flags().IntVar(&topN, "top", 10, "Number of top errors to show")
+
+	return cmd
+}
+
+// newTimelineCommand creates the timeline subcommand
+func newTimelineCommand() *cobra.Command {
+	var (
+		since   string
+		format  string
+		output  string
+		session string
+	)
+
+	cmd := &cobra.Command{
+		Use:   "timeline",
+		Short: "Display tool usage timeline and activity patterns",
+		Long: `Display hourly timeline of tool usage activity.
+
+Shows temporal patterns including:
+  - Hourly activity levels
+  - Tool invocations over time
+  - Success/failure trends
+  - Peak usage periods`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// Parse time filter
+			filter, err := parseTimeFilter(since)
+			if err != nil {
+				return fmt.Errorf("invalid --since value: %w", err)
+			}
+
+			// Add session filter if provided
+			if session != "" {
+				filter.SessionIDs = []string{session}
+			}
+
+			// Stream metrics and aggregate
+			entries, err := log.StreamMetrics(*filter)
+			if err != nil {
+				return fmt.Errorf("failed to stream metrics: %w", err)
+			}
+
+			summary := log.AggregateMetrics(entries, filter)
+
+			// Configure display options
+			opts := log.DefaultDisplayOptions()
+			opts.Format = format
+			
+			// Handle output file
+			if output != "" && output != "-" {
+				file, err := os.Create(output)
+				if err != nil {
+					return fmt.Errorf("failed to create output file: %w", err)
+				}
+				defer file.Close()
+				opts.Output = file
+			}
+
+			// Display the timeline
+			return log.DisplayTimeline(summary, opts)
+		},
 	}
 
-	// Note: Orchestrator routing removed - all agents get their own files based on AgentID
+	cmd.Flags().StringVar(&since, "since", "7d", "Time range: today, yesterday, 1h, 24h, 7d, 30d, or YYYY-MM-DD")
+	cmd.Flags().StringVar(&format, "format", "terminal", "Output format: terminal, json, or csv")
+	cmd.Flags().StringVar(&output, "output", "-", "Output file (- for stdout)")
+	cmd.Flags().StringVar(&session, "session", "", "Filter by session ID")
 
-	// Write to session log (for backward compatibility)
-	if err := log.WriteSessionLog(hookData.SessionID, hookData); err != nil {
-		log.DebugError(fmt.Errorf("failed to write session log: %w", err))
-		// Silent exit on errors
-		return nil
+	return cmd
+}
+
+// parseTimeFilter parses a time string into a MetricsFilter
+func parseTimeFilter(since string) (*log.MetricsFilter, error) {
+	now := time.Now()
+	var startTime, endTime time.Time
+
+	// Default to last 7 days if no filter is provided
+	if since == "" {
+		since = "7d"
 	}
 
-	log.DebugLog("Successfully processed %s role for agent %s", hookData.Role, hookData.AgentID)
-	return nil
+	switch strings.ToLower(since) {
+	case "today":
+		startTime = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+		endTime = now
+	case "yesterday":
+		yesterday := now.AddDate(0, 0, -1)
+		startTime = time.Date(yesterday.Year(), yesterday.Month(), yesterday.Day(), 0, 0, 0, 0, yesterday.Location())
+		endTime = time.Date(yesterday.Year(), yesterday.Month(), yesterday.Day(), 23, 59, 59, 999999999, yesterday.Location())
+	case "1h":
+		startTime = now.Add(-1 * time.Hour)
+		endTime = now
+	case "24h":
+		startTime = now.Add(-24 * time.Hour)
+		endTime = now
+	case "7d":
+		startTime = now.AddDate(0, 0, -7)
+		endTime = now
+	case "30d":
+		startTime = now.AddDate(0, 0, -30)
+		endTime = now
+	default:
+		// Try parsing as date (YYYY-MM-DD)
+		if t, err := time.Parse("2006-01-02", since); err == nil {
+			startTime = t
+			endTime = t.Add(24*time.Hour).Add(-time.Nanosecond)
+		} else {
+			// Try parsing as duration (e.g., "3h", "2d")
+			if strings.HasSuffix(since, "h") {
+				if hours, err := time.ParseDuration(since); err == nil {
+					startTime = now.Add(-hours)
+					endTime = now
+				} else {
+					return nil, fmt.Errorf("invalid duration: %s", since)
+				}
+			} else if strings.HasSuffix(since, "d") {
+				days := strings.TrimSuffix(since, "d")
+				var d int
+				if _, err := fmt.Sscanf(days, "%d", &d); err == nil {
+					startTime = now.AddDate(0, 0, -d)
+					endTime = now
+				} else {
+					return nil, fmt.Errorf("invalid duration: %s", since)
+				}
+			} else {
+				return nil, fmt.Errorf("unrecognized time format: %s", since)
+			}
+		}
+	}
+
+	return &log.MetricsFilter{
+		StartDate: startTime,
+		EndDate:   endTime,
+	}, nil
 }

@@ -343,6 +343,14 @@ func (i *Installer) Install() error {
 		}
 		fmt.Printf("✓ Binary installed to %s/bin\n", i.installPath)
 
+		// Create logs directory for metrics collection
+		logsDir := filepath.Join(i.installPath, "logs")
+		if err := os.MkdirAll(logsDir, 0755); err != nil {
+			fmt.Printf("✗ Error creating logs directory: %v\n", err)
+			return fmt.Errorf("failed to create logs directory: %w", err)
+		}
+		fmt.Printf("✓ Logs directory created at %s\n", logsDir)
+
 		// Configure hooks in settings.json
 		if err := i.configureHooks(); err != nil {
 			return fmt.Errorf("failed to configure hooks: %w", err)

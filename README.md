@@ -324,6 +324,78 @@ The style makes every session feel like you're building the next unicorn.
 "I don't know how to structure this microservices architecture"
 ```
 
+## Hooks - Track Your AI Team's Work
+
+The Agentic Startup automatically installs hooks that capture **every tool invocation** Claude Code makes, giving you complete visibility into your AI team's activity. No more wondering what Claude did or how long it took.
+
+### Automatic Metrics Collection
+
+Every time Claude uses a tool (Read, Write, Bash, etc.), The Startup captures:
+- **Tool usage patterns** - Which tools are used most frequently
+- **Success/failure rates** - Track reliability of different operations
+- **Performance metrics** - Execution time for each tool invocation
+- **Session tracking** - Group activities by Claude Code session
+- **Error patterns** - Identify common failure points
+
+All metrics are stored locally in daily JSONL files at `{{STARTUP_PATH}}/logs/` for privacy and performance.
+
+### Analyze Your Metrics
+
+View comprehensive analytics about your AI team's performance:
+
+```bash
+# View today's summary dashboard
+the-startup log summary
+
+# See metrics for the last 24 hours
+the-startup log summary --since 24h
+
+# Analyze specific tools
+the-startup log tools --tool Edit --tool Write
+
+# Review error patterns
+the-startup log errors --since 7d
+
+# Show activity timeline
+the-startup log timeline --since today
+```
+
+### Export Formats
+
+Export metrics for further analysis or reporting:
+
+```bash
+# Export as JSON for processing
+the-startup log summary --format json --output metrics.json
+
+# Generate CSV for spreadsheets
+the-startup log tools --format csv --output tool-usage.csv
+
+# Filter by session
+the-startup log summary --session "dev-abc123"
+```
+
+### Key Features
+
+- **Zero performance impact** - Hooks run asynchronously and fail silently
+- **Privacy-first** - All data stays local, no external services
+- **Automatic correlation** - Links PreToolUse and PostToolUse events
+- **Daily rotation** - Files organized by date for easy management
+- **Rich filtering** - Query by time, tool, session, or success status
+
+### How It Works
+
+1. **Automatic Setup** - Installation configures PreToolUse and PostToolUse hooks
+2. **Silent Collection** - Hooks process in background without disrupting work
+3. **Local Storage** - Metrics saved to `logs/YYYYMMDD.jsonl` files
+4. **On-Demand Analysis** - Run analysis commands whenever you need insights
+
+This metrics system helps you understand:
+- Which tools slow down your workflow
+- Where errors commonly occur
+- How different agents perform
+- Your most productive patterns
+
 ## Installation
 
 The Agentic Startup provides easy installation via script capabilities.
