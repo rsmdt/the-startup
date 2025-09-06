@@ -500,7 +500,7 @@ func TestCopyCurrentExecutable(t *testing.T) {
 
 // TestHooksComponentInstallsGoBinary removed - deprecated function no longer exists
 
-func TestConfigureHooksUsesGoCommands(t *testing.T) {
+func TestConfigureSettingsCreatesConfiguration(t *testing.T) {
 	tmpDir := setupTestDir(t)
 	installer := New(&testAssets, &testAssets)
 	installer.SetInstallPath(tmpDir)
@@ -509,13 +509,13 @@ func TestConfigureHooksUsesGoCommands(t *testing.T) {
 	// Create claude directory
 	os.MkdirAll(installer.claudePath, 0755)
 
-	// Configure hooks
-	err := installer.configureHooks()
+	// Configure settings
+	err := installer.configureSettings()
 	if err != nil {
-		t.Errorf("Expected configureHooks to succeed, got error: %v", err)
+		t.Errorf("Expected configureSettings to succeed, got error: %v", err)
 	}
 
-	// Check that settings.json was created with Go commands
+	// Check that settings.json was created with proper configuration
 	settingsPath := filepath.Join(installer.claudePath, "settings.json")
 	data, err := os.ReadFile(settingsPath)
 	if err != nil {
@@ -524,16 +524,13 @@ func TestConfigureHooksUsesGoCommands(t *testing.T) {
 
 	settingsContent := string(data)
 
-	// Verify Go hook commands are present with new path
-	expectedPreCommand := "/bin/the-startup log --assistant"
-	expectedPostCommand := "/bin/the-startup log --user"
-
-	if !strings.Contains(settingsContent, expectedPreCommand) {
-		t.Errorf("Expected settings.json to contain PreToolUse command '%s', but content was:\n%s", expectedPreCommand, settingsContent)
+	// Verify permissions and statusLine are present
+	if !strings.Contains(settingsContent, "permissions") {
+		t.Errorf("Expected settings.json to contain permissions section, but content was:\n%s", settingsContent)
 	}
 
-	if !strings.Contains(settingsContent, expectedPostCommand) {
-		t.Errorf("Expected settings.json to contain PostToolUse command '%s', but content was:\n%s", expectedPostCommand, settingsContent)
+	if !strings.Contains(settingsContent, "statusLine") {
+		t.Errorf("Expected settings.json to contain statusLine section, but content was:\n%s", settingsContent)
 	}
 
 }
@@ -563,15 +560,15 @@ func TestInstallerIntegration(t *testing.T) {
 }
 
 // Full integration test for Go hooks deployment
-func TestGoHooksIntegration(t *testing.T) {
+func TestSettingsIntegration(t *testing.T) {
 	tmpDir := setupTestDir(t)
 	installer := New(&testAssets, &testAssets)
 	installer.SetInstallPath(tmpDir)
 	installer.claudePath = filepath.Join(tmpDir, ".claude")
 	installer.SetTool("claude-code")
-	installer.SetComponents([]string{"hooks"})
+	installer.SetComponents([]string{"agents", "commands"})
 
-	// Install hooks component
+	// Install with settings configuration
 	err := installer.Install()
 
 	// If error is about missing assets, skip the test (expected in test environment)
@@ -590,7 +587,7 @@ func TestGoHooksIntegration(t *testing.T) {
 		t.Errorf("Expected Go binary to be deployed to %s, but file doesn't exist: %v", binaryPath, err)
 	}
 
-	// Verify settings.json was configured with Go commands
+	// Verify settings.json was configured properly
 	settingsPath := filepath.Join(tmpDir, ".claude", "settings.json")
 	data, err := os.ReadFile(settingsPath)
 	if err != nil {
@@ -598,9 +595,12 @@ func TestGoHooksIntegration(t *testing.T) {
 	}
 
 	settingsContent := string(data)
-	expectedCommand := "the-startup log --assistant"
-	if !strings.Contains(settingsContent, expectedCommand) {
-		t.Errorf("Expected settings.json to contain Go command '%s', but content was:\n%s", expectedCommand, settingsContent)
+	// Check for permissions and statusLine sections
+	if !strings.Contains(settingsContent, "permissions") {
+		t.Errorf("Expected settings.json to contain permissions section, but content was:\n%s", settingsContent)
+	}
+	if !strings.Contains(settingsContent, "statusLine") {
+		t.Errorf("Expected settings.json to contain statusLine section, but content was:\n%s", settingsContent)
 	}
 
 	// Verify lock file was created

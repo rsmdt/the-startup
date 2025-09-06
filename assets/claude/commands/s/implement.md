@@ -97,9 +97,9 @@ For each phase in PLAN.md:
 #### ⚙️ Phase Execution
 
 **🔍 Task Analysis:**
-- Identify tasks marked with `[parallel: true]` for concurrent execution
+- Extract task metadata: `[activity: areas]`, `[complexity: level]`
+- Identify tasks marked with `[parallel: true]` on the same indentation level for concurrent execution
 - Group sequential vs parallel tasks
-- Extract metadata: `[agent: name]`, `[review: areas]`, `[complexity: level]`
 
 **⚡ For Parallel Tasks (within same phase):**
 - Mark all parallel tasks as `in_progress` in TodoWrite
@@ -216,7 +216,6 @@ Phase 4: ⏳ Pending
 ## 📌 Important Notes
 
 - **Phase boundaries are stops** - Always wait for user confirmation
-- **Display agent responses verbatim** - Never summarize or paraphrase
 - **Respect parallel execution hints** - Launch concurrent tasks or agents when marked
 - **Accumulate context wisely** - Pass relevant prior outputs to later phases
 - **Track in TodoWrite** - Real-time task tracking during execution

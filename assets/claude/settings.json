@@ -7,29 +7,5 @@
   "statusLine": {
     "type": "command",
     "command": "{{STARTUP_PATH}}/bin/the-startup statusline"
-  },
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "{{STARTUP_PATH}}/bin/the-startup log"
-          }
-        ]
-      }
-    ],
-    "PostToolUse": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "{{STARTUP_PATH}}/bin/the-startup log"
-          }
-        ]
-      }
-    ]
   }
 }

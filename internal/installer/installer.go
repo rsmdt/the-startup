@@ -351,9 +351,9 @@ func (i *Installer) Install() error {
 		}
 		fmt.Printf("✓ Logs directory created at %s\n", logsDir)
 
-		// Configure hooks in settings.json
-		if err := i.configureHooks(); err != nil {
-			return fmt.Errorf("failed to configure hooks: %w", err)
+		// Configure settings.json
+		if err := i.configureSettings(); err != nil {
+			return fmt.Errorf("failed to configure settings: %w", err)
 		}
 	}
 
@@ -418,7 +418,7 @@ func (i *Installer) installClaudeAssets() error {
 		// Apply placeholder replacement to ALL files
 		data = i.replacePlaceholders(data)
 
-		// Skip writing settings.json and settings.local.json here as they're handled by configureHooks
+		// Skip writing settings.json and settings.local.json here as they're handled by configureSettings
 		if filepath.Base(path) == "settings.json" || filepath.Base(path) == "settings.local.json" {
 			return nil
 		}
@@ -489,8 +489,8 @@ func (i *Installer) installStartupAssets() error {
 	})
 }
 
-// configureHooks updates settings.json and settings.local.json to include hooks and permissions
-func (i *Installer) configureHooks() error {
+// configureSettings updates settings.json and settings.local.json to include permissions and statusLine
+func (i *Installer) configureSettings() error {
 	// Handle settings.json
 	settingsPath := filepath.Join(i.claudePath, "settings.json")
 
@@ -505,9 +505,17 @@ func (i *Installer) configureHooks() error {
 		}
 	}
 
-	// If template loading failed, fall back to hardcoded
+	// If template loading failed, fall back to minimal default
 	if templateSettings == nil {
-		templateSettings = i.createDefaultSettings()
+		templateSettings = map[string]interface{}{
+			"permissions": map[string]interface{}{
+				"additionalDirectories": []string{i.installPath},
+			},
+			"statusLine": map[string]interface{}{
+				"type":    "command",
+				"command": filepath.Join(i.installPath, "bin", "the-startup") + " statusline",
+			},
+		}
 	}
 
 	// Read existing settings if present
@@ -621,7 +629,7 @@ func (i *Installer) mergeValues(existing, template interface{}) interface{} {
 			for k, templateVal := range templateMap {
 				if existingVal, exists := merged[k]; exists {
 					// Special handling for specific keys
-					if k == "hooks" || k == "additionalDirectories" {
+					if k == "additionalDirectories" {
 						// For these arrays, we want to deduplicate
 						merged[k] = i.mergeAndDeduplicate(existingVal, templateVal)
 					} else {
@@ -652,47 +660,8 @@ func (i *Installer) mergeValues(existing, template interface{}) interface{} {
 
 // mergeAndDeduplicate merges arrays and removes duplicates
 func (i *Installer) mergeAndDeduplicate(existing, template interface{}) interface{} {
-	// Handle hooks array (array of hook entries)
 	if existingSlice, existingIsSlice := existing.([]interface{}); existingIsSlice {
 		if templateSlice, templateIsSlice := template.([]interface{}); templateIsSlice {
-			// Check if this is a hooks array (has command field)
-			if len(templateSlice) > 0 {
-				if hookEntry, ok := templateSlice[0].(map[string]interface{}); ok {
-					if _, hasCommand := hookEntry["command"]; hasCommand {
-						// This is a hooks array, deduplicate by command
-						seen := make(map[string]bool)
-						var result []interface{}
-
-						// Use template hooks (they have the right paths)
-						for _, item := range templateSlice {
-							if hook, ok := item.(map[string]interface{}); ok {
-								if cmd, hasCmd := hook["command"].(string); hasCmd {
-									if !seen[cmd] {
-										seen[cmd] = true
-										result = append(result, item)
-									}
-								}
-							}
-						}
-
-						// Add any existing hooks that aren't in template
-						for _, item := range existingSlice {
-							if hook, ok := item.(map[string]interface{}); ok {
-								if cmd, hasCmd := hook["command"].(string); hasCmd {
-									// Only add if it's not a startup command (we manage those)
-									if !strings.Contains(cmd, "the-startup") && !seen[cmd] {
-										seen[cmd] = true
-										result = append(result, item)
-									}
-								}
-							}
-						}
-
-						return result
-					}
-				}
-			}
-
 			// For additionalDirectories or other string arrays
 			if len(templateSlice) > 0 {
 				if _, isString := templateSlice[0].(string); isString {
@@ -730,101 +699,13 @@ func (i *Installer) mergeAndDeduplicate(existing, template interface{}) interfac
 	return template
 }
 
-// mergeSlices merges two slices, typically used for hooks
+// mergeSlices merges two slices
 func (i *Installer) mergeSlices(existing, template []interface{}) []interface{} {
-	// For hooks arrays, we want to merge based on matcher
-	// Check if these are hook entries (have "matcher" field)
-	isHookArray := false
-	if len(template) > 0 {
-		if hookEntry, ok := template[0].(map[string]interface{}); ok {
-			if _, hasMatcher := hookEntry["matcher"]; hasMatcher {
-				isHookArray = true
-			}
-		}
-	}
-
-	if isHookArray {
-		// Create a map of existing hooks by matcher
-		existingByMatcher := make(map[string]interface{})
-		for _, item := range existing {
-			if hookEntry, ok := item.(map[string]interface{}); ok {
-				if matcher, hasMatcher := hookEntry["matcher"].(string); hasMatcher {
-					existingByMatcher[matcher] = item
-				}
-			}
-		}
-
-		// Merge template hooks
-		var result []interface{}
-		for _, templateItem := range template {
-			if templateHook, ok := templateItem.(map[string]interface{}); ok {
-				if matcher, hasMatcher := templateHook["matcher"].(string); hasMatcher {
-					if existingHook, exists := existingByMatcher[matcher]; exists {
-						// Merge the hooks for this matcher
-						merged := i.mergeValues(existingHook, templateItem)
-						result = append(result, merged)
-						delete(existingByMatcher, matcher)
-					} else {
-						// New matcher from template
-						result = append(result, templateItem)
-					}
-				}
-			}
-		}
-
-		// Add remaining existing hooks that weren't in template
-		for _, item := range existingByMatcher {
-			result = append(result, item)
-		}
-
-		return result
-	}
-
-	// For non-hook arrays, just return template
+	// For arrays, just return template
 	// (we handle deduplication in mergeAndDeduplicate)
 	return template
 }
 
-// createDefaultSettings creates default settings if template is not available
-func (i *Installer) createDefaultSettings() map[string]interface{} {
-	// Use the binary path in STARTUP_PATH/bin
-	binaryPath := filepath.Join(i.installPath, "bin", "the-startup")
-	return map[string]interface{}{
-		"permissions": map[string]interface{}{
-			"additionalDirectories": []string{i.installPath},
-		},
-		"hooks": map[string]interface{}{
-			"PreToolUse": []map[string]interface{}{
-				{
-					"matcher": "Task",
-					"hooks": []map[string]interface{}{
-						{
-							"type":    "command",
-							"command": fmt.Sprintf("%s log --assistant", binaryPath),
-							"_source": "the-startup",
-						},
-					},
-				},
-			},
-			"PostToolUse": []map[string]interface{}{
-				{
-					"matcher": "Task",
-					"hooks": []map[string]interface{}{
-						{
-							"type":    "command",
-							"command": fmt.Sprintf("%s log --user", binaryPath),
-							"_source": "the-startup",
-						},
-					},
-				},
-			},
-		},
-		"statusLine": map[string]interface{}{
-			"type":    "command",
-			"command": fmt.Sprintf("%s statusline", binaryPath),
-		},
-	}
-}
 
 // calculateFileChecksum computes the SHA256 checksum of a file
 func (i *Installer) calculateFileChecksum(filePath string) (string, error) {
