@@ -1,7 +1,7 @@
 ---
 description: "Create a comprehensive specification from a brief description"
 argument-hint: "describe your feature or requirement to specify"
-allowed-tools: ["Task", "TodoWrite", "Grep", "Read", "Write(docs/**)", "Edit(docs/**)", "MultiEdit(docs/**)"]
+allowed-tools: ["Task", "TodoWrite", "Bash", "Grep", "Read", "Write(docs/**)", "Edit(docs/**)", "MultiEdit(docs/**)"]
 ---
 
 You are an expert requirements gatherer that creates specification documents for one-shot implementation by orchestrating specialized agents.
@@ -19,8 +19,11 @@ You are an expert requirements gatherer that creates specification documents for
 
 ### 🔄 Process Rules
 
-- This command has stop points where you MUST wait for user confirmation.
-- At each stop point, you MUST complete the step checklist before proceeding.
+- **Work iteratively** - Complete one main section at a time, based on the document's natural structure
+- **Present research before incorporating** - Show agent findings and get user validation before updating documents
+- **Wait for confirmation between iterations** - After each section, ask if you should continue
+- **Wait for confirmation between documents** - Never automatically proceed from PRD to SDD to PLAN
+- **Document patterns and interfaces as discovered** - Create documentation whenever relevant, not artificially constrained
 
 ### 🤝 Agent Delegation Rules
 
@@ -34,266 +37,211 @@ Maintain awareness of:
 - Patterns and interfaces discovered and documented
 - Which steps were executed vs. skipped based on complexity
 
+---
+
 ## 🎯 Process
 
 ### 📋 Step 1: Initialize
 
-**🎯 Goal**: Establish the specification identity and check for existing work to avoid duplication.
+**🎯 Goal**: Establish the specification identity and setup working directory.
 
-1. Check if $ARGUMENTS contains a ID ("010", "010-feature-name", "010", "010-feature-name")
-   - Check for existing spec: `./docs/specs/[ID]*/`
-   - If exists:
-     - Display: "📁 Found existing spec: [directory-name]"
-     - Read and display existing documents (BRD.md, PRD.md, SDD.md, PLAN.md)
-     - Ask: "Continue enhancing this specification? (yes/no)"
-   
-2. **If NO ID present**:
-   - Find highest number in `./docs/specs/[3-digit-number]*`
-   - Generate next ID: `[number+1]` with 3-digit padding (e.g., 010)
-   - Display: "📝 Setting up specification: [ID] [inferred goals from arguments]"
+Check if $ARGUMENTS contains an existing specification ID in the format "010" or "010-feature-name". If an ID is provided, run `{{STARTUP_PATH}}/bin/the-startup spec --read [ID]` to check for existing work. Parse the output to determine if the specification directory exists. If it does, display "📁 Found existing spec: [directory]" and ask the user whether to continue enhancing this specification.
 
-**📝 Process Tracking**: 
-After Research & Complexity Assessment (Step 3), based on complexity assessment and user confirmation, certain documentation steps may be marked as skipped rather than executed. This allows for adaptive workflows where simple features don't require extensive documentation.
-
-### 📋 Step 2: Initial Discovery
-
-**🎯 Goal**: Understand WHAT the user wants to build and WHY, ensuring complete clarity before research begins.
-
-You MUST ALWAYS clarify details about the provided description with the user.
-
-**🔍 Discovery Focus Areas**:
-- Clarify the user's vision and goals
-- Understand the core problem being solved
-- Define scope boundaries and must-have features
-- Identify critical success criteria
-- Understand target users and primary use cases
-- Clarify any ambiguous or incomplete requirements
-- Explore constraints (technical, business, timeline)
-
-**💬 Discovery Techniques**:
-- Ask open-ended questions to uncover hidden requirements
-- Use examples to validate understanding
-- Confirm priorities and trade-offs
-- Identify what's explicitly out of scope
-
-**📋 Discovery Output** - Present a clear summary of your understanding:
-- Core problem and solution vision
-- Key features and functionality
-- Target users and use cases
-- Success criteria
-- Scope boundaries
-- Any remaining questions or ambiguities
+If no ID is provided in the arguments or the directory doesn't exist, generate a descriptive name from the provided context (for example, "multi-tenancy" or "user-authentication"). Run `{{STARTUP_PATH}}/bin/the-startup spec [name]` to create a new specification directory. Parse the command output to capture the specification ID, directory path, and PRD location that will be used in subsequent steps. Display "📝 Creating new spec: [directory]" to confirm the creation.
 
 **🤔 Ask yourself before proceeding**:
-1. Do I fully understand what the user wants to build?
-2. Have I clarified all ambiguous requirements?
-3. Are the scope boundaries clearly defined?
-4. Do I understand the success criteria?
-5. Have I confirmed my understanding with the user?
-6. Is TodoWrite updated with discovery findings?
+1. Have I checked $ARGUMENTS for an existing specification ID?
+2. If an ID was found, have I verified whether the specification already exists?
+3. Have I successfully created or located the specification directory?
+4. Do I have the specification ID, directory path, and PRD path for the next steps?
+5. Have I clearly communicated to the user what was found or created?
 
-**🛑 STOP - DISCOVERY CHECKPOINT**
-You MUST end your response here and wait for the user to explicitly confirm.
-The user needs to validate that you correctly understand their requirements before research begins.
+### 📋 Step 2: Discovery & Requirements Specification
 
-### 📋 Step 3: Detailed Research & Complexity Assessment
+**🎯 Goal**: Iteratively refine the PRD through discovery until complete, focusing on WHAT needs to be built and WHY it matters.
 
-**🎯 Goal**: Research the feature landscape, assess complexity, and determine the appropriate documentation path.
+Load the PRD from the specification directory. If the PRD file doesn't exist yet, run `{{STARTUP_PATH}}/bin/the-startup spec [ID] --add PRD` to generate it from the template. Once created or located, thoroughly read the entire PRD to understand its structure, required sections, and identify all sections that require clarification.
 
-**🔍 Market Research** - Conduct comprehensive research based on the validated requirements:
-- Search for similar existing solutions and competitors
-- Identify industry best practices and standards
-- Find common implementation patterns and anti-patterns
-- Research pricing models and feature sets of similar products
-- Investigate technical approaches used by others
+**🔍 Iterative Discovery Loop**:
+- **Process the PRD sequentially using the Validation Checklist as your guide**. Address one checklist item at a time by completing all corresponding sections in the document before moving to the next item
+- **For EACH section, identify ALL research activities needed** based on what information is missing or unclear. Consider competitive landscape, user needs, market standards, edge cases, and success criteria
+- **ALWAYS launch multiple specialist agents in parallel** to investigate the identified research activities. Select agents based on the type of research needed (market analysis, user research, requirements clarification, etc.)
+- **After receiving user feedback, identify NEW research needs** based on their input and launch additional specialist agents to investigate any new questions or directions
+- **Present ALL agent findings to the user** including:
+  - Complete responses from each agent (not summaries)
+  - Conflicting information or recommendations
+  - Proposed requirements based on the research
+  - Questions that need user clarification
+- **Wait for user confirmation** before incorporating any findings into the PRD
 
-**⚡ Parallel Opportunity** - Launch multiple research agents simultaneously:
-- Market research agents for competitor analysis
-- Technical research agents for implementation patterns
-- User experience agents for UI/UX best practices
-- Requirements analyst agents for scope refinement
+**💾 Update the PRD each iteration**:
+- Base your content on the research findings gathered from specialist agents
+- Incorporate user feedback and any additional research conducted based on their input
+- Before adding inferred requirements or assumptions based on research, present them to the user for confirmation
+- Replace [NEEDS CLARIFICATION] markers with actual content only for sections related to the current checklist item
+- Leave all other sections' [NEEDS CLARIFICATION] markers untouched for future iterations
+- After updating, present what was added, what questions remain, and ask if you should continue
+- **WAIT for user response before continuing**
 
-**📊 Complexity Assessment**:
-@{{STARTUP_PATH}}/rules/complexity-assessment.md
+**🤔 Ask yourself each iteration**:
+1. Have I identified ALL research activities needed for this section?
+2. Have I launched parallel specialist agents to investigate?
+3. Have I presented COMPLETE agent responses to the user (not summaries)?
+4. Have I received user confirmation before updating the PRD?
+5. Have I updated only the current section in the PRD file?
+6. Have I avoided technical implementation details?
+7. Are there more [NEEDS CLARIFICATION] markers remaining in the PRD?
+8. If sections remain, should I continue to the next section or wait for user input?
+9. If PRD is complete, have I asked the user for confirmation to proceed to the SDD?
 
-Based on research and analysis, determine the workflow path.
+Continue the discovery loop until the PRD is complete and user has confirmed to proceed.
 
-**📋 Research Summary** - Present a comprehensive research summary to the user that includes:
-- Key findings from market research and competitor analysis
-- Relevant patterns, best practices, and potential differentiators discovered
-- Complexity assessment results with justification
-- Recommended documentation workflow based on the complexity assessment
-- Critical risks or challenges identified during research
-- Clear next steps based on the assessment
+**🔍 Final Validation**:
+Use specialist agents to validate the complete requirements specification for:
+- Completeness and clarity of requirements
+- Feasibility of the proposed features
+- Alignment with user needs and business goals
+- Identification of any missing edge cases
 
-**Workflow Recommendation**: Based on the complexity assessment, recommend which subsequent steps are necessary:
-- Lower complexity features may not need extensive business documentation
-- Higher complexity features benefit from comprehensive requirements and technical documentation
-- Consider the trade-off between documentation completeness and implementation speed
-- Some steps may be essential regardless of complexity (e.g., implementation planning)
+Once complete, present a summary of the requirements specification with key decisions identified. Ask: "The requirements specification is complete. Should I proceed to technical specification (SDD)?" and wait for user confirmation before proceeding.
 
-The summary must help the user understand the landscape, complexity, and recommended approach.
+### 📋 Step 3: Technical Specification
 
-**🤔 Ask yourself before proceeding**:
-1. Have I completed comprehensive market research?
-2. Have I identified relevant patterns and best practices?
-3. Have I run the complexity assessment?
-4. Have I determined the appropriate workflow path?
-5. Have I presented the research summary clearly?
-6. Does the user understand and agree with the recommended path?
-7. Is TodoWrite updated with all research tasks?
+**🎯 Goal**: Iteratively design and refine HOW the solution will be built through technical architecture and design decisions.
 
-**🛑 STOP - WORKFLOW DECISION POINT**
-You MUST end your response here and wait for the user to explicitly confirm.
-Based on the complexity assessment, the user needs to confirm the documentation path before proceeding.
+Load the SDD from the specification directory. If the SDD file doesn't exist yet, run `{{STARTUP_PATH}}/bin/the-startup spec [ID] --add SDD` to generate it from the template. Once created or located, thoroughly read the entire SDD to understand its structure, required sections, and identify all technical areas that need investigation. You MUST NEVER perform actual implementation or code changes. Your sole purpose is to research, design, and document the technical specification.
 
-### 📋 Step 4: Requirements Documentation
+**🔍 Iterative Technical Specification Loop**:
+- **Process the SDD sequentially using the Validation Checklist as your guide**. Address one checklist item at a time by completing all corresponding sections in the document before moving to the next item
+- **For EACH section, decompose into technical research activities** that require investigation. Consider architecture patterns, data models, interfaces, security implications, performance characteristics, and integration approaches
+- **When working on Implementation Context**, thoroughly analyze the codebase to discover all project-specific tooling and commands. The template sections will guide what to look for
+- **ALWAYS launch multiple specialist agents in parallel** for the identified activities. Select agents based on the technical domain (architecture, database, API design, security, performance, etc.)
+- **After receiving user feedback, identify NEW technical questions** raised by their input and launch additional specialist agents to investigate alternative approaches or deeper technical details
+- **Present ALL agent findings to the user** including:
+  - What each agent discovered (show their complete responses)
+  - Any conflicting recommendations between agents
+  - Proposed technical decisions based on consensus
+  - Patterns and interfaces that should be documented
+- **Create pattern and interface documentation** for EVERY reusable solution discovered:
+  - Check docs/patterns/* and docs/interfaces/* for existing documentation
+  - Create new pattern docs in docs/patterns/ when agents identify reusable solutions
+  - Create new interface docs in docs/interfaces/ when external integrations are designed
+  - Update existing docs with new discoveries
+  - Each pattern/interface MUST include: context, problem, solution, examples, when to use
 
-**🎯 Goal**: Define and document WHAT needs to be built based on business and user needs.
+**💾 Update the SDD each iteration**:
+- Base your design decisions on research findings gathered from specialist agents
+- Incorporate user feedback and any additional technical research conducted based on their input
+- Before committing to architectural decisions or technology choices, present them to the user for validation and feedback
+- Document only sections related to the current checklist item
+- Leave all other sections' [NEEDS CLARIFICATION] markers untouched for future iterations
+- After updating, present what was designed, what decisions were made, and ask if you should continue
+- **WAIT for user response before continuing**
 
-Based on the user's decision from the previous step, create the appropriate documentation.
+**🤔 Ask yourself each iteration**:
+1. Have I identified ALL technical activities that need research for this section?
+2. Have I launched parallel specialist agents to investigate these activities?
+3. Have I presented COMPLETE agent responses to the user (not summaries)?
+4. Have I created/updated pattern documentation for reusable solutions found?
+5. Have I created/updated interface documentation for external integrations?
+6. Have I filled in all subsections of the current section based on research?
+7. Have I updated only the current section in the SDD file?
+8. Are there more [NEEDS CLARIFICATION] markers remaining in the SDD?
+9. If sections remain, should I continue to the next section or wait for user input?
+10. If SDD is complete, have I asked the user for confirmation to proceed to the PLAN?
 
-**📄 Create Documentation**:
-- Business Requirements Document: `docs/specs/[ID]-[feature-name]/BRD.md` (based on template `{{STARTUP_PATH}}/templates/BRD.md`)
-- Product Requirements Document: `docs/specs/[ID]-[feature-name]/PRD.md` (based on template `{{STARTUP_PATH}}/templates/PRD.md`)
+Continue the technical specification loop until the SDD is complete and user has confirmed to proceed.
 
-**📦 Note**: If the user decided in Step 3 that no formal requirements documentation is needed (e.g., for simple features), mark this step as "skipped" in TodoWrite and proceed to Step 5.
-
-**🤔 Ask yourself before proceeding**:
-1. Have I followed the user's decision from the Discovery Step?
-2. If creating documentation: Did I write the necessary BRD and/or PRD?
-3. If skipping: Have I marked this step as skipped in TodoWrite?
-4. Have I updated TodoWrite with all completed tasks?
-5. Did I present a clear step summary to the user?
-6. Am I about to STOP and wait for user confirmation?
-
-**🛑 STOP - REQUIREMENTS CHECKPOINT**
-You MUST end your response here and wait for the user to explicitly confirm.
-DO NOT continue to Step 5 in this same response.
-The user needs to review the requirements documentation (or confirm skipping) before technical research begins.
-
-### 📋 Step 5: Technical Specification
-
-**🎯 Goal**: Define and document HOW the solution will be built with technical architecture and design decisions.
-
-Analyze requirements to identify distinct technical areas that need investigation. For each area, spawn focused specialist agents to research and design the technical solution. You MUST NEVER perform actual implementation or code changes. Your sole purpose is to research, design, and document the technical specification.
-
-**🔍 How to Decompose** - Ask yourself:
-- What are the distinct technical challenges in this feature?
-- Which parts could be built independently?
-- What specialized knowledge areas are needed?
-- Where are the natural boundaries in the system?
-
-**⚡ Parallel Execution** - Launch multiple research agents simultaneously, each with:
-- Specific research area and scope
-- Only the requirements relevant to their area
-- Clear boundaries to avoid overlap
-
-**📁 Pattern & Interface Documentation**:
-
-- Reusable Patterns:
-   - Check if similar patterns already exist in `docs/patterns/*`
-   - If exists: Update the existing documentation with new insights
-   - If new: Create `docs/patterns/[descriptive-kebab-case].md`
-   - Document: Context, problem, solution, examples, when to use
-
-- External Interfaces:
-   - Check if similar integrations already exist in `docs/interfaces/*`
-   - If exists: Update with additional details discovered
-   - If new: Create `docs/interfaces/[descriptive-kebab-case].md`
-   - Document: Endpoints, data formats, authentication, examples
-
-- Deduplication Protocol:
-   - Always search before creating new files
-   - Prefer updating existing docs over creating similar new ones
-   - Use clear, descriptive naming conventions
-
-**🔍 Review and Validate** - Use specialist agents to validate the technical design for:
+**🔍 Final Validation**:
+Use specialist agents to validate the complete technical design for:
 - Feasibility and scalability
 - Security considerations
 - Performance implications
-- Context drift or feature creep compared to business requirements
+- Alignment with business requirements (no context drift)
 
-**📄 Create Documentation** - Based on the technical complexity and design:
-- Solution Design Document: `docs/specs/[ID]-[feature-name]/SDD.md` (based on template `{{STARTUP_PATH}}/templates/SDD.md`, if technical context needed)
+Once complete, present a summary of the technical design with key architectural decisions. Ask: "The technical specification is complete. Should I proceed to implementation planning (PLAN)?" and wait for user confirmation before proceeding.
 
-**🤔 Ask yourself before proceeding**:
-1. Have specialist agents completed ALL technical research?
-2. Has the technical design been thoroughly validated?
-3. If patterns were discovered, are they documented in `docs/patterns/`?
-4. If interfaces were identified, are they documented in `docs/interfaces/`?
-5. If applicable, is the SDD written to `docs/specs/[ID]-[feature-name]/`?
-6. Have I checked for context drift or feature creep and addressed any issues?
-7. Is TodoWrite updated with all completed tasks?
-8. Am I prepared to STOP and wait for user approval?
+### 📋 Step 4: Implementation Planning
 
-**🛑 STOP - TECHNICAL SPECIFICATION CHECKPOINT**
-You MUST end your response here and wait for the user to explicitly confirm.
-DO NOT continue to Step 6 in this same response.
-The user needs to review the technical specification before implementation planning begins.
+**🎯 Goal**: Iteratively develop and refine an actionable plan that breaks down the work into executable tasks.
 
-### 📋 Step 6: Implementation Planning
+Load the PLAN from the specification directory. If the PLAN file doesn't exist yet, run `{{STARTUP_PATH}}/bin/the-startup spec [ID] --add PLAN` to generate it from the template. Once created or located, thoroughly read the entire PLAN to understand its structure, required sections, and identify all phases that need detailed planning.
 
-**🎯 Goal**: Create an actionable, validated plan that breaks down the work into executable tasks.
+**🔍 Iterative Planning Loop**:
+- **Process the PLAN sequentially using the Validation Checklist as your guide**. Address one checklist item at a time by completing all corresponding sections in the document before moving to the next item
+- **Decompose by implementation activities** identifying what needs to be done: creating database migrations, building API endpoints, implementing UI components, writing validation logic, setting up deployment pipelines, creating test suites
+- **Review through specialist agents** by launching multiple agents in parallel based on the activities identified, with each agent focused on reviewing specific implementation activities to identify missing steps, dependencies, validation needs, and potential risks
+- **Present planning insights to the user** showing what each agent identified, task sequencing recommendations, and risk factors. Wait for user confirmation before incorporating into the PLAN
+- **Refine based on feedback** incorporating agent suggestions while ensuring the plan remains focused on the agreed requirements
 
-Create a comprehensive implementation plan that breaks down the technical specification into executable tasks.
+**💾 Update the PLAN each iteration**:
+- Base your task breakdown on review findings gathered from specialist agents
+- **Ensure every phase traces back to PRD requirements and SDD design decisions**
+- Before finalizing task sequences or technology-specific implementation details, present them to the user for validation
+- Document only sections related to the current checklist item
+- Include specification alignment strategy and validation gates
+- Leave all other sections incomplete for future iterations
+- After updating, present what was planned, dependencies identified, and ask if you should continue
+- **WAIT for user response before continuing**
 
-**📝 Plan Development**:
-- Decompose the solution into clear, actionable tasks
-- Define dependencies and sequencing
-- Identify parallel execution opportunities
-- Specify validation criteria for each component
+**🤔 Ask yourself each iteration**:
+1. Have I detailed the tasks for the current phase?
+2. Does each task trace back to specification requirements?
+3. Have I presented the planning insights to the user?
+4. Have I updated only the current phase in the PLAN file?
+5. Have I identified dependencies and validation criteria for this phase?
+6. Have I included gates to verify specification alignment?
+7. Are there more phases to plan?
+8. If phases remain, should I continue to the next phase or wait for user input?
+9. If PLAN is complete, have I asked the user for confirmation to proceed to final assessment?
 
-**🔍 Review and Validate**:
-Use specialist agents to validate the implementation plan:
-- Ensure all business and technical requirements are addressed
-- Verify the plan is feasible for automated implementation
-- Check for missing dependencies or prerequisites
-- Validate task breakdown and sequencing
+Continue the planning loop until the PLAN is complete and user has confirmed to proceed.
 
-**📄 Create Documentation**:
-- Implementation Plan: `docs/specs/[ID]-[feature-name]/PLAN.md` (based on template `{{STARTUP_PATH}}/templates/PLAN.md`)
+**🔍 Final Validation**:
+Use specialist agents to validate the complete implementation plan for:
+- Coverage of all requirements (business and technical)
+- Feasibility for automated execution
+- Proper task sequencing and dependencies
+- Adequate validation and rollback procedures
 
-**🤔 Ask yourself before proceeding**:
-1. Have I created a comprehensive implementation plan?
-2. Have specialist agents reviewed and validated the plan?
-3. Did I incorporate ALL validation feedback?
-4. Is the plan confirmed as feasible for automated implementation?
-5. Are ALL business and technical details available for execution?
-6. Is the PLAN written to `docs/specs/[ID]-[feature-name]/`?
-7. Is TodoWrite updated with all completed tasks?
-8. Am I about to STOP and await final user confirmation?
+Once complete, present a summary of the implementation plan with key phases and execution strategy. Ask: "The implementation plan is complete. Should I proceed to final assessment?" and wait for user confirmation before proceeding.
 
-**🛑 STOP - IMPLEMENTATION PLAN CHECKPOINT**
-You MUST end your response here and wait for the user to explicitly confirm.
-DO NOT continue to Step 7 in this same response.
-The user needs to approve the implementation plan before finalization.
+### 📋 Step 5: Finalization and Confidence Assessment
 
-### 📋 Step 7: Finalization and Confidence Assessment
+**🎯 Goal**: Review all deliverables, assess implementation readiness, and provide clear next steps.
 
-**🎯 Goal**: Summarize the specification, assess implementation readiness, and provide clear next steps.
+Review all documents created in the specification directory. Read through the PRD, SDD, and PLAN to ensure completeness and consistency. Check any patterns or interfaces documented during the process.
 
-**📊 Final Summary**: Present a comprehensive summary that includes:
+**📊 Generate Final Assessment**:
+- Compile specification identity and all document paths
+- List supplementary documentation created
+- Calculate implementation confidence based on completeness
+- Identify success enablers and risk factors
+- Note any remaining information gaps
+- Formulate clear recommendation
 
-- Specification Identity: The ID and feature name
-- Documents Created: List all core documents (BRD, PRD, SDD, PLAN) that were created with their paths
-- Supplementary Documentation: Any patterns or interfaces documented during the process
-- Implementation Confidence: A percentage score with justification
-- Success Enablers: Factors that support successful one-shot implementation
-- Risk Assessment: Potential challenges or blockers identified
-- Information Gaps: Any missing details that could impact implementation
-- Clear Recommendation: Whether the specification is ready for implementation or needs clarification
-- Next Steps: How to proceed (e.g., the `/s:implement [ID]` command)
-
-**🤔 Ask yourself before finalizing**:
-1. Is TodoWrite showing all 7 steps as completed or properly marked as skipped?
+**🤔 Verify before finalizing**:
+1. Is TodoWrite showing all specification steps as completed or properly marked as skipped?
 2. Have all created documents been validated and reviewed?
 3. Is the confidence assessment based on actual findings from the specification process?
 4. Would another agent be able to implement this specification successfully?
 
+**📝 Present Final Summary** including:
+- Specification Identity: The ID and feature name
+- Documents Created: List all core documents (BRD, PRD, SDD, PLAN) with their paths
+- Supplementary Documentation: Patterns and interfaces documented
+- Implementation Confidence: Percentage score with justification
+- Success Enablers: Factors supporting successful implementation
+- Risk Assessment: Potential challenges or blockers
+- Information Gaps: Missing details that could impact implementation
+- Clear Recommendation: Ready for implementation or needs clarification
+- Next Steps: How to proceed (e.g., `/s:implement [ID]` command)
+
+---
+
 ## 📁 Document Structure
 
-All specifications follow this structure:
+All specifications and documentation MUST follow this exact structure:
 
 ```
 docs/
@@ -308,6 +256,20 @@ docs/
 └── interfaces/
     └── [interface-name].md
 ```
+
+**📝 Template Adherence Rules**:
+- Templates generated by `the-startup spec --add` define the COMPLETE document structure
+- ONLY replace [NEEDS CLARIFICATION] markers with actual content
+- NEVER add, remove, or reorganize sections in the templates
+- NEVER create new subsections or modify the template hierarchy
+- The template structure is the contract - follow it exactly
+
+**📂 Documentation Location Rules**:
+- Specification documents (BRD, PRD, SDD, PLAN) go ONLY in `docs/specs/[ID]-[feature]/`
+- Reusable patterns go ONLY in `docs/patterns/`
+- External integration specifications go ONLY in `docs/interfaces/`
+- ALL documentation MUST be placed in one of these three locations
+- No other directories should be created under `docs/`
 
 **💭 Documentation Philosophy**:
 - Any specialist agent can discover and document patterns or interfaces

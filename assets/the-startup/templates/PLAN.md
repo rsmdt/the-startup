@@ -1,55 +1,83 @@
 # Implementation Plan
 
-## Phase 1: Context Ingestion
+## Validation Checklist
+- [ ] Context Ingestion section complete with all required specs
+- [ ] Implementation phases logically organized
+- [ ] Each phase starts with test definition (TDD approach)
+- [ ] Dependencies between phases identified
+- [ ] Parallel execution marked where applicable
+- [ ] Multi-component coordination identified (if applicable)
+- [ ] Final validation phase included
+- [ ] No placeholder content remains
 
-*[INSTRUCTION: This phase is MANDATORY. No coding until all items are checked. This instruction should not appear in final document.]*
+---
 
-### Required Reading
-- [ ] **BRD**: `docs/specs/[ID]-[feature-name]/BRD.md` - Business Requirements (if exists)
-- [ ] **PRD**: `docs/specs/[ID]-[feature-name]/PRD.md` - Product Requirements (if exists)
-- [ ] **SDD**: `docs/specs/[ID]-[feature-name]/SDD.md` - Solution Design
+## Context Ingestion
+
+*GATE: You MUST fully read all files mentioned in this section before starting any implementation.*
+
+### Specification
+
+[NEEDS CLARIFICATION: Replace file location with actual path and add/remove files accordingly]
+- **PRD**: `docs/specs/[ID]-[feature-name]/PRD.md` - Product Requirements (if exists)
+- **SDD**: `docs/specs/[ID]-[feature-name]/SDD.md` - Solution Design
 
 ### Key Design Decisions
-*[Extract from SDD]*
-- [ ] [Critical decision 1]
-- [ ] [Critical decision 2]
 
-### Validation Gate
-**DO NOT PROCEED until all above items are checked**
+[NEEDS CLARIFICATION: Extract critical decisions from the SDD]
+- [Critical decision 1]
+- [Critical decision 2]
 
-## Phase Structure
+### Implementation Context
 
-*[INSTRUCTION: Phase 1 is always context ingestion. Subsequent phases should be adapted based on feature complexity. Always end with validation phase. This instruction should not appear in final document.]*
+[NEEDS CLARIFICATION: Extract actionable information from specs]
+- **Commands to run**: [Project-specific commands from SDD for testing, building, etc.]
+- **Patterns to follow**: [Links to relevant pattern docs]
+- **Interfaces to implement**: [Links to interface specifications]
 
-- [ ] **Phase X**: [Descriptive Phase Name]
-    - [ ] [Specific task with clear completion criteria] [activity: ...]
-    - [ ] [Another related task] [activity: ...]
-    - [ ] **Review** [specific review agent and area] [activity: ...]
-    - [ ] **Validate** [specific validation command or check] [activity: ...]
+---
 
-- [ ] **Phase Y**: [Phase with Parallel Tasks] [complexity: high]
-  - [ ] [Component/Module A] [`parallel: true`]
-    - [ ] [Specific implementation task] [activity: ...]
-    - [ ] [Related task for this component] [activity: ...]
-    - [ ] **Validate** [component-specific test command] [activity: ...]
-    - [ ] **Review** [if needed based on complexity] [activity: ...]
+## Implementation Phases
 
-  - [ ] [Component/Module B] [`parallel: true`]
-    - [ ] [Specific implementation task] [activity: ...]
-    - [ ] [Related task for this component] [activity: ...]
-    - [ ] **Validate** [component-specific test command] [activity: ...]
-    - [ ] **Review** [if needed based on complexity] [activity: ...]
+[NEEDS CLARIFICATION: Define implementation phases. Each phase is a logical unit of work following TDD principles.]
 
-**Final Phase: Validation & Cleanup**
-- [ ] Run full test suite [activity: ...]
-- [ ] Verify acceptance criteria [activity: ...]
-- [ ] Update documentation [activity: ...]
-- [ ] **Final Check**: [Build/deploy command] [activity: ...]
+- [ ] **Phase 1**: [What functionality this phase delivers]
+    # [Component/context notes]
+    - [ ] **Tests**: [What behavior needs to be tested] `[ref: PRD/SDD section]` `[activity: type]`
+    - [ ] **Implementation**: [What needs to be built to pass tests] `[activity: type]`
+    - [ ] **Implementation**: [Additional implementation if needed] `[activity: type]`
+    - [ ] **Validation**: [Run tests to verify green] `[activity: type]`
 
-## Optional Metadata
+- [ ] **Phase 2**: [What functionality this phase delivers]
+  # [Dependencies or parallel execution notes]
+  
+  - [ ] [Sub-phase/Component A] `[parallel: true]` `[component: name]`
+    - [ ] **Tests**: [What behavior needs to be tested] `[ref: PRD/SDD section]` `[activity: type]`
+    - [ ] **Implementation**: [What needs to be built] `[activity: type]`
+    - [ ] **Validation**: [Run tests to verify green] `[activity: type]`
+  
+  - [ ] [Sub-phase/Component B] `[parallel: true]` `[component: name]`
+    - [ ] **Tests**: [What behavior needs to be tested] `[ref: PRD/SDD section]` `[activity: type]`
+    - [ ] **Implementation**: [What needs to be built] `[activity: type]`
+    - [ ] **Validation**: [Run tests to verify green] `[activity: type]`
 
-*[INSTRUCTION: Use on tasks when coordination is critical. Do not add or invent additional metadata]*
+- [ ] **Integration & End-to-End Validation**
+    # Verify the complete feature works as designed
+    - [ ] All unit tests passing (per component if multi-component)
+    - [ ] Integration tests for component interactions
+    - [ ] End-to-end tests for complete user flows
+    - [ ] Performance tests meet requirements
+    - [ ] Security validation passes
+    - [ ] Acceptance criteria verified against PRD
+    - [ ] Test coverage meets standards
+    - [ ] Documentation updated for any API/interface changes
+    - [ ] Build and deployment verification
+    - [ ] All PRD requirements implemented
+    - [ ] Implementation follows SDD design
+
+## Metadata Reference
 
 - `[parallel: true]` - Tasks that can run concurrently
-- `[complexity: high/medium/low]` - Needs careful review
-- `[activity: api-design [, business-logic, ...]]` - Activity hint for agent selection
+- `[component: component-name]` - For multi-component features
+- `[ref: document/section]` - Links to specifications, patterns, or interfaces
+- `[activity: type]` - Activity hint for specialist agent selection

@@ -40,6 +40,7 @@ workflows with specialized AI agents, hooks, and commands.`,
 	rootCmd.AddCommand(cmd.NewUninstallCommand(&claudeAssets, &startupAssets))
 	rootCmd.AddCommand(cmd.NewStatsCommand())
 	rootCmd.AddCommand(cmd.NewStatuslineCommand())
+	rootCmd.AddCommand(cmd.NewSpecCommand(&startupAssets))
 
 	// Execute
 	if err := rootCmd.Execute(); err != nil {

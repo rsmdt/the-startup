@@ -1,89 +1,153 @@
 # Solution Design Document
 
+## Validation Checklist
+- [ ] Constraints documented (technical, organizational, security/compliance)
+- [ ] Implementation Context complete (required sources, boundaries, project commands)
+- [ ] Solution Strategy defined with rationale
+- [ ] Building Block View complete (components, directory map, interface specifications)
+- [ ] Runtime View documented (primary flow, error handling, complex logic)
+- [ ] Deployment View specified (environment, configuration, dependencies, performance)
+- [ ] Cross-Cutting Concepts addressed (patterns, interfaces, system-wide patterns, implementation patterns)
+- [ ] Architecture Decisions captured with trade-offs
+- [ ] Quality Requirements defined (performance, usability, security, reliability)
+- [ ] Risks and Technical Debt identified (known issues, technical debt, implementation gotchas)
+- [ ] Test Specifications complete (critical scenarios, coverage requirements)
+- [ ] No [NEEDS CLARIFICATION] markers remain
+
+---
+
 ## Constraints
 
-- [Technical, e.g. Language/framework requirements, performance targets]
-- [Organizational, e.g. Coding standards, deployment restrictions]
-- [Security/Compliance, e.g. Auth requirements, data protection needs]
+[NEEDS CLARIFICATION: What constraints limit the solution space?]
+- Technical: [Language/framework requirements, performance targets, browser support]
+- Organizational: [Coding standards, deployment restrictions, team capabilities]
+- Security/Compliance: [Auth requirements, data protection needs, regulatory compliance]
 
 ## Implementation Context
 
-*[INSTRUCTION: List source code files and external documentation needed to understand the existing implementation. This provides the bridge between constraints and solution strategy. Pattern and interface documentation belong in Cross-Cutting Concepts section. The document flows from problem → constraints → existing implementation → solution.]*
+### Required Context Sources
 
-### Source Code to Analyze
+[NEEDS CLARIFICATION: What existing code, documentation, and external resources must be understood before implementation? For multi-component features, organize by component.]
+
+**IMPORTANT**: Once sources are identified, the LLM must read and analyze ALL listed sources to understand constraints, patterns, and existing architecture.
+
 ```yaml
-# Core implementation files that must be understood
-- file: @src/components/critical/file.ts
-  relevance: CRITICAL
-  sections: [lines 50-100, function processOrder]
-  why: "Core business logic that must be preserved"
+# Component Context (repeat for each component involved)
+Component: [component-name]
+  Location: [path or repository]
   
-# Alternative: relative path format
-- file: @src/components/critical/file.ts
-  relevance: CRITICAL
-  sections: [lines 50-100, function processOrder]
-  why: "Core business logic that must be preserved"
+  # Source code files that must be understood
+  - file: src/components/placeholder/example.tsx
+    relevance: HIGH  # HIGH/MEDIUM/LOW
+    sections: [specific functions or line ranges if applicable]
+    why: "Explanation of why this file matters for the implementation"
+  
+  - file: @package.json
+    relevance: MEDIUM
+    why: "Dependencies and build scripts that constrain the solution"
 
-# Configuration and setup files
-- file: @package.json
+# Internal documentation and patterns
+- doc: docs/patterns/pattern-name.md
+  relevance: HIGH
+  why: "Existing pattern that must be followed"
+
+- doc: docs/interfaces/interface-name.md
   relevance: MEDIUM
-  why: "Dependencies and scripts that constrain solution"
-```
+  why: "External service integration requirements"
 
-### External Documentation
-```yaml
-# Third-party library docs and architectural context
+- doc: docs/architecture/decisions/adr-001.md
+  relevance: HIGH
+  why: "Previous architectural decisions that constrain approach"
+
+# External documentation and APIs
 - url: https://docs.library.com/api
   relevance: MEDIUM
-  why: "API constraints we must work within"
+  sections: [specific endpoints or features if applicable]
+  why: "Third-party API constraints and capabilities"
 
-- doc: @docs/architecture/decisions/adr-001.md
-  relevance: HIGH
-  why: "Previous decisions that constrain approach"
+- url: https://framework.dev/best-practices
+  relevance: LOW
+  why: "Framework conventions to follow"
 ```
 
 ### Implementation Boundaries
+
+[NEEDS CLARIFICATION: What are the boundaries for this implementation?]
 - **Must Preserve**: [Critical behavior/interfaces to maintain]
 - **Can Modify**: [Areas open for refactoring]
 - **Must Not Touch**: [Files/systems that are off-limits]
 
+### Cross-Component Boundaries (if applicable)
+[NEEDS CLARIFICATION: What are the boundaries between components/teams?]
+- **API Contracts**: [Which interfaces are public contracts that cannot break]
+- **Team Ownership**: [Which team owns which component]
+- **Shared Resources**: [Databases, queues, caches used by multiple components]
+- **Breaking Change Policy**: [How to handle changes that affect other components]
+
 ### Project Commands
 
-*[INSTRUCTION: These commands will be discovered during codebase analysis and populated by the create command. This note should not appear in the final PRD.]*
+[NEEDS CLARIFICATION: What are the project-specific commands for development, validation, and deployment? For multi-component features, organize commands by component. These commands must be discovered from package.json, Makefile, docker-compose.yml, or other build configuration files. Pay special attention to monorepo structures and database-specific testing tools.]
 
 ```bash
-# Environment Setup
-Install Dependencies: [project-specific install command]
-Environment Setup: [additional setup steps if needed]
-Start Development: [development server command]
+# Component: [component-name]
+Location: [path or repository]
 
-# Validation (run after each phase)
-Code Quality: [linting/formatting command] 
-Type Safety: [type checking command, if applicable]
-Run Tests: [test execution command]
-Build Project: [build/compile command]
+## Environment Setup
+Install Dependencies: [discovered from package.json, requirements.txt, go.mod, etc.]
+Environment Variables: [discovered from .env.example, config files]
+Start Development: [discovered from package.json scripts, Makefile targets]
 
-# Database (if applicable)
-Database Migration: [migration command]
-Database Seed: [test data setup command]
+# Testing Commands (CRITICAL - discover ALL testing approaches)
+Unit Tests: [e.g., npm test, go test, cargo test]
+Integration Tests: [e.g., npm run test:integration]
+Database Tests: [e.g., pgTap for PostgreSQL, database-specific test runners]
+E2E Tests: [e.g., npm run test:e2e, playwright test]
+Test Coverage: [e.g., npm run test:coverage]
+
+# Code Quality Commands
+Linting: [discovered from package.json, .eslintrc, etc.]
+Type Checking: [discovered from tsconfig.json, mypy.ini, etc.]
+Formatting: [discovered from .prettierrc, rustfmt.toml, etc.]
+
+# Build & Compilation
+Build Project: [discovered from build scripts]
+Watch Mode: [discovered from development scripts]
+
+# Database Operations (if applicable)
+Database Setup: [discovered from database scripts]
+Database Migration: [discovered from migration tools]
+Database Tests: [discovered from database test configuration]
+
+# Monorepo Commands (if applicable)
+Workspace Commands: [discovered from workspace configuration]
+Package-specific Commands: [discovered from individual package.json files]
+Cross-package Commands: [commands that affect multiple packages]
+Dependency Management: [how to update shared dependencies]
+Local Package Linking: [how packages reference each other locally]
+
+# Multi-Component Coordination (if applicable)
+Start All: [command to start all components]
+Run All Tests: [command to test across components]
+Build All: [command to build all components]
+Deploy All: [orchestrated deployment command]
 
 # Additional Project-Specific Commands
 [Any other relevant commands discovered in the codebase]
 ```
 
-*[INSTRUCTION: The execute command should run these validation commands after each implementation phase to ensure code quality and catch issues early. This note should not appear in the final PRD.]*
-
 ## Solution Strategy
 
-- [Architecture Pattern, e.g. Describe the approach (e.g., layered, modular, microservice)]
-- [Integration Approach, e.g. Describe how this feature integrates with the current system architecture]
-- [Justification, e.g. Brief rationale for why this approach fits given the constraints and scope]
-- ...
+[NEEDS CLARIFICATION: What is the high-level approach to solving this problem?]
+- Architecture Pattern: [Describe the approach (e.g., layered, modular, microservice)]
+- Integration Approach: [How this feature integrates with the current system]
+- Justification: [Why this approach fits given the constraints and scope]
+- Key Decisions: [Major technical decisions and their rationale]
 
 ## Building Block View
 
 ### Components
 
+[NEEDS CLARIFICATION: What are the main components and how do they interact? Create a component diagram showing the relationships]
 ```mermaid
 graph LR
     User --> Component
@@ -94,26 +158,31 @@ graph LR
 
 ### Directory Map
 
+[NEEDS CLARIFICATION: Where will new code be added and existing code modified? For multi-component features, provide directory structure for each component.]
+
+**Component**: [component-name]
 ```
 .
 ├── src/
 │   ├── feature_area/
-│   │   ├── main_component          # NEW: Primary feature logic
-│   │   ├── data_models            # MODIFY: Extend existing models
-│   │   ├── business_logic         # NEW: Core processing logic
-│   │   └── integration_layer      # NEW: External service connections
+│   │   ├── [discovered structure] # NEW/MODIFY: Description
+│   │   └── [discovered structure] # NEW/MODIFY: Description
 │   └── shared/
-│       ├── utilities              # MODIFY: Add shared functions
-│       └── types                  # NEW: Shared type definitions
+│       └── [discovered structure] # NEW/MODIFY: Description
 ```
 
-*[INSTRUCTION: Actual paths and file names will be determined based on project conventions discovered during implementation. This note should not appear in the final PRD.]*
+**Component**: [another-component-name] (if applicable)
+```
+.
+├── [discovered structure]
+│   └── [discovered structure]
+```
 
 ### Interface Specifications (Internal Changes Only)
 
-*[INSTRUCTION: Include this section only when the feature involves changes to data structures, internal APIs, or core application interfaces. This note should not appear in the final PRD.]*
-
 #### Data Storage Changes
+
+[NEEDS CLARIFICATION: Are database schema changes needed? If yes, specify tables, columns, and relationships. If no, remove this section]
 ```yaml
 # Database/storage schema modifications
 Table: primary_entity_table
@@ -128,6 +197,8 @@ Table: supporting_entity_table (NEW)
 ```
 
 #### Internal API Changes
+
+[NEEDS CLARIFICATION: What API endpoints are being added or modified? Specify methods, paths, request/response formats]
 ```yaml
 # Application endpoints being added/modified
 Endpoint: Feature Operation
@@ -147,6 +218,8 @@ Endpoint: Feature Operation
 ```
 
 #### Application Data Models
+
+[NEEDS CLARIFICATION: What data models/entities are being created or modified? Define fields and behaviors]
 ```pseudocode
 # Core business objects being modified/created
 ENTITY: PrimaryEntity (MODIFIED/NEW)
@@ -166,10 +239,18 @@ ENTITY: SupportingEntity (NEW)
 ```
 
 #### Integration Points
-```yaml
-# Where this feature connects to external systems
-# (Full specifications in docs/interfaces/)
 
+[NEEDS CLARIFICATION: What external systems does this feature connect to? For multi-component features, also document inter-component communication.]
+```yaml
+# Inter-Component Communication (between your components)
+From: [source-component]
+To: [target-component]
+  - protocol: [REST/GraphQL/gRPC/WebSocket/MessageQueue]
+  - doc: @docs/interfaces/internal-api.md
+  - endpoints: [specific endpoints or topics]
+  - data_flow: "Description of what data flows between components"
+
+# External System Integration (third-party services)
 External_Service_Name:
   - doc: @docs/interfaces/service-name.md
   - sections: [relevant_endpoints, data_formats]
@@ -179,6 +260,9 @@ External_Service_Name:
 
 ## Runtime View
 
+### Primary Flow
+
+[NEEDS CLARIFICATION: What is the main user action and how does the system respond? Document the step-by-step flow]
 #### Primary Flow: [Main User Action]
 1. User triggers [action]
 2. System validates [what]
@@ -199,11 +283,14 @@ PromoCodeController --> UI : Response
 ```
 
 ### Error Handling
-- Invalid input: [specific error message]
-- Network failure: [retry strategy]
-- Business rule violation: [user feedback]
+[NEEDS CLARIFICATION: How are different error types handled?]
+- Invalid input: [specific error message and user guidance]
+- Network failure: [retry strategy or fallback behavior]
+- Business rule violation: [user feedback and recovery options]
 
 ### Complex Logic (if applicable)
+
+[NEEDS CLARIFICATION: Is there complex algorithmic logic that needs documentation? If yes, detail the algorithm. If no, remove this section]
 ```
 ALGORITHM: Process Feature Request
 INPUT: user_request, current_state
@@ -222,16 +309,28 @@ OUTPUT: processed_result
 
 ## Deployment View
 
-- **Environment**: [Where this runs - client/server/edge]
+[NEEDS CLARIFICATION: What are the deployment requirements and considerations? For multi-application features, consider coordination and dependencies.]
+
+### Single Application Deployment
+- **Environment**: [Where this runs - client/server/edge/cloud]
 - **Configuration**: [Required env vars or settings]
 - **Dependencies**: [External services or APIs needed]
-- **Performance**: [Expected load, caching strategy]
+- **Performance**: [Expected load, response time targets, caching strategy]
+
+### Multi-Component Coordination (if applicable)
+
+[NEEDS CLARIFICATION: How do multiple components coordinate during deployment?]
+- **Deployment Order**: [Which components must deploy first?]
+- **Version Dependencies**: [Minimum versions required between components]
+- **Feature Flags**: [How to enable/disable features during rollout]
+- **Rollback Strategy**: [How to handle partial deployment failures]
+- **Data Migration Sequencing**: [Order of database changes across services]
 
 ## Cross-Cutting Concepts
 
-*[INSTRUCTION: Document concepts, patterns, and implementation approaches that span multiple components. This section ensures consistency and conceptual integrity across the system. Focus on "how things work" rather than "what exists" or "what's wrong".]*
-
 ### Pattern Documentation
+
+[NEEDS CLARIFICATION: What existing patterns will be used and what new patterns need to be created?]
 ```yaml
 # Existing patterns used in this feature
 - pattern: @docs/patterns/[pattern-name].md
@@ -245,6 +344,8 @@ OUTPUT: processed_result
 ```
 
 ### Interface Specifications
+
+[NEEDS CLARIFICATION: What external interfaces are involved and need documentation?]
 ```yaml
 # External interfaces this feature integrates with
 - interface: @docs/interfaces/[interface-name].md
@@ -258,31 +359,41 @@ OUTPUT: processed_result
 ```
 
 ### System-Wide Patterns
-- [Security: Authentication, authorization, encryption patterns used throughout]
-- [Error Handling: Global vs local strategies, error propagation patterns]
-- [Performance: Caching strategies, batching approaches, async patterns]
-- [i18n/L10n: Multi-language support patterns, localization approaches]
-- [Logging/Auditing: Observability patterns, audit trail implementation]
+
+[NEEDS CLARIFICATION: What system-wide patterns and concerns apply to this feature?]
+- Security: [Authentication, authorization, encryption patterns]
+- Error Handling: [Global vs local strategies, error propagation]
+- Performance: [Caching strategies, batching, async patterns]
+- i18n/L10n: [Multi-language support, localization approaches]
+- Logging/Auditing: [Observability patterns, audit trail implementation]
+
+### Multi-Component Patterns (if applicable)
+
+[NEEDS CLARIFICATION: What patterns apply across multiple components?]
+- **Communication Patterns**: [Sync vs async, event-driven, request-response]
+- **Data Consistency**: [Eventual consistency, distributed transactions, saga patterns]
+- **Shared Code**: [Shared libraries, monorepo packages, code generation]
+- **Service Discovery**: [How components find each other in different environments]
+- **Circuit Breakers**: [Handling failures between components]
+- **Distributed Tracing**: [Correlation IDs, trace propagation across services]
 
 ### Implementation Patterns
 
-*[INSTRUCTION: Include code patterns, conventions, and technical approaches that affect multiple parts of the system. This is where recurring implementation details belong when they represent patterns rather than problems.]*
-
 #### Code Patterns and Conventions
-[Document recurring code structures, naming conventions, and implementation approaches that ensure consistency]
+[NEEDS CLARIFICATION: What code patterns, naming conventions, and implementation approaches should be followed?]
 
 #### State Management Patterns
-[How state, refs, side effects, and data flow are managed across the application]
+[NEEDS CLARIFICATION: How is state, refs, side effects, and data flow managed across the application?]
 
 #### Performance Characteristics
-[System-wide performance strategies, optimization patterns, resource management approaches]
+[NEEDS CLARIFICATION: What are the system-wide performance strategies, optimization patterns, and resource management approaches?]
 
 #### Integration Patterns
-[Common approaches for external service integration, API communication patterns, event handling]
-
-*[INSTRUCTION: For each pattern, provide concrete examples from the codebase. Implementation specifics should follow established patterns in the codebase. The execute command will discover and apply appropriate patterns dynamically. This note should not appear in the final PRD.]*
+[NEEDS CLARIFICATION: What are the common approaches for external service integration, API communication, and event handling?]
 
 #### Component Structure Pattern
+
+[NEEDS CLARIFICATION: What component organization pattern should be followed?]
 ```pseudocode
 # Follow existing component organization in codebase
 COMPONENT: FeatureComponent(properties)
@@ -297,6 +408,8 @@ COMPONENT: FeatureComponent(properties)
 ```
 
 #### Data Processing Pattern
+
+[NEEDS CLARIFICATION: How should business logic flow be structured?]
 ```pseudocode
 # Business logic flow
 FUNCTION: process_feature_operation(input, context)
@@ -309,6 +422,8 @@ FUNCTION: process_feature_operation(input, context)
 ```
 
 #### Error Handling Pattern
+
+[NEEDS CLARIFICATION: How should errors be classified, logged, and handled?]
 ```pseudocode
 # Error management approach
 FUNCTION: handle_operation_errors(operation_result)
@@ -321,6 +436,8 @@ FUNCTION: handle_operation_errors(operation_result)
 ```
 
 #### Test Pattern
+
+[NEEDS CLARIFICATION: What testing approach should be used for behavior verification?]
 ```pseudocode
 # Testing approach for behavior verification
 TEST_SCENARIO: "Feature operates correctly under normal conditions"
@@ -335,12 +452,14 @@ TEST_SCENARIO: "Feature operates correctly under normal conditions"
 
 ### Integration Points
 
-- [Where this connects to existing system]
-- [Data flow in/out]
-- [Events triggered/consumed]
+[NEEDS CLARIFICATION: How does this feature integrate with the existing system?]
+- Connection Points: [Where this connects to existing system]
+- Data Flow: [What data flows in/out]
+- Events: [What events are triggered/consumed]
 
 ## Architecture Decisions
 
+[NEEDS CLARIFICATION: What key architecture decisions have been made and why?]
 1. **[Decision Name]**: [Choice made]
    - Rationale: [Why this over alternatives]
    - Trade-offs: [What we accept]
@@ -351,39 +470,43 @@ TEST_SCENARIO: "Feature operates correctly under normal conditions"
 
 ## Quality Requirements
 
-- [Performance: Specific, measurable targets that can be validated]
-- [Usability: User experience requirements]
-- [Security: Access control and data protection needs]
-- [Reliability: Error handling and recovery requirements]
+[NEEDS CLARIFICATION: What are the specific, measurable quality requirements?]
+- Performance: [Response time targets, throughput, resource limits]
+- Usability: [User experience requirements, accessibility standards]
+- Security: [Access control, data protection, audit requirements]
+- Reliability: [Uptime targets, error recovery, data integrity]
 
 ## Risks and Technical Debt
 
-*[INSTRUCTION: Document known issues, workarounds, technical compromises, and implementation challenges. This section makes problems visible to all stakeholders. Focus on current, concrete issues rather than theoretical risks.]*
-
 ### Known Technical Issues
+
+[NEEDS CLARIFICATION: What current bugs, limitations, or issues affect this feature?]
 - [Current bugs or limitations that affect the system]
-- [Performance bottlenecks and their specific locations (with line numbers if applicable)]
+- [Performance bottlenecks and their specific locations]
 - [Memory leaks or resource management problems]
 - [Integration issues with external systems]
 
 ### Technical Debt
-- [Code duplication that needs refactoring (specify locations)]
+
+[NEEDS CLARIFICATION: What technical debt exists that impacts this feature?]
+- [Code duplication that needs refactoring]
 - [Temporary workarounds that need proper solutions]
-- [Anti-patterns that exist but shouldn't be replicated]
-- [Architectural violations or deviations from established patterns]
+- [Anti-patterns that shouldn't be replicated]
+- [Architectural violations or deviations]
 
 ### Implementation Gotchas
+
+[NEEDS CLARIFICATION: What non-obvious issues might trip up implementation?]
 - [Non-obvious dependencies or side effects]
 - [Timing issues, race conditions, or synchronization problems]
 - [Configuration quirks or environment-specific issues]
 - [Known issues with third-party dependencies]
 
-*[INSTRUCTION: For each item, include: Description, Impact (what problems it causes), Location (file/line numbers if applicable), and Potential Solution if known. Prioritize by severity and impact on development/operations.]*
-
 ## Test Specifications
 
 ### Critical Test Scenarios
 
+[NEEDS CLARIFICATION: What are the critical test scenarios that must pass?]
 **Scenario 1: Primary Happy Path**
 ```gherkin
 Given: [System in valid initial state]
@@ -421,9 +544,11 @@ And: [No unexpected behavior occurs]
 ```
 
 ### Test Coverage Requirements
-- **Business Logic**: All decision paths, calculation formulas, validation rules
-- **User Interface**: All interaction flows, error states, loading states, accessibility  
-- **Integration Points**: External service calls, data persistence, event handling
-- **Edge Cases**: Boundary values, empty states, concurrent operations, system limits
-- **Performance**: Response times under expected load, resource usage
-- **Security**: Input validation, authorization checks, data protection
+
+[NEEDS CLARIFICATION: What aspects require test coverage?]
+- **Business Logic**: [All decision paths, calculations, validation rules]
+- **User Interface**: [All interaction flows, states, accessibility]  
+- **Integration Points**: [External service calls, data persistence]
+- **Edge Cases**: [Boundary values, empty states, concurrent operations]
+- **Performance**: [Response times under load, resource usage]
+- **Security**: [Input validation, authorization, data protection]
