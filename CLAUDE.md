@@ -4,6 +4,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Common Commands
 
+### Analytics
+```bash
+# View comprehensive stats for current project
+the-startup stats
+
+# View global stats across all projects
+the-startup stats -g
+
+# Filter by time and export formats
+the-startup stats --since 7d --format json
+the-startup stats tools --since 24h
+the-startup stats agents -g
+```
+
 ### Build and Run
 ```bash
 # Build the binary
@@ -11,11 +25,12 @@ go build -o the-startup
 
 # Run directly without building
 go run . install
-go run . log --assistant < input.json
-go run . log --user < input.json
+go run . stats
+go run . stats tools --since 7d
 
 # Run the compiled binary
 ./the-startup install
+./the-startup stats
 ./the-startup --help
 ```
 
@@ -28,7 +43,7 @@ go test ./...
 go test -v ./...
 
 # Run specific package tests
-go test ./internal/log/...
+go test ./internal/stats/...
 go test ./internal/ui/...
 go test ./internal/installer/...
 
@@ -59,8 +74,8 @@ The project follows a standard Go layout with clear separation of concerns:
 - **`main.go`**: Entry point that sets up Cobra commands and embeds asset files
 - **`cmd/`**: Command implementations using Cobra framework
   - `install.go`: Installation command that launches BubbleTea TUI
-  - `log.go`: Processes hook data from Claude Code via stdin
-  - `commands.go`: Other commands (update, validate, hooks)
+  - `stats.go`: Analyzes Claude Code's native JSONL logs for usage metrics
+  - `commands.go`: Other commands (update, validate)
   
 - **`internal/`**: Core application logic
   - `installer/`: Installation logic and file management
@@ -69,9 +84,9 @@ The project follows a standard Go layout with clear separation of concerns:
   - `ui/`: BubbleTea-based interactive TUI components
     - Composable model pattern with state machine
     - Separate models for each installation step
-  - `log/`: JSONL logging for agent interactions
-    - Processes PreToolUse and PostToolUse hook data
-    - Manages session-based and global log files
+  - `stats/`: Analytics engine for Claude Code logs
+    - Parses native JSONL logs from ~/.claude/projects/
+    - Provides tool, agent, command, and session analytics
   - `config/`: Configuration structures (lock files)
   - `assets/`: Embedded filesystem management
 
@@ -110,13 +125,14 @@ The installer uses a composable model pattern with clear state transitions:
 5. Settings.json is updated with hooks configuration
 6. Lock file is created to track installation
 
-### Hook Processing
+### Stats Command
 
-The `log` command processes Claude Code hook data:
-- Reads JSON from stdin (PreToolUse or PostToolUse events)
-- Filters for Task tool with specific subagent types
-- Writes JSONL logs to `.the-startup/<session-id>/agent-instructions.jsonl`
-- Maintains a global log at `.the-startup/all-agent-instructions.jsonl`
+The `stats` command provides comprehensive analytics:
+- Parses Claude Code's native JSONL logs directly
+- Supports multiple output formats (table, JSON, CSV)
+- Filters by time period with --since flag
+- Provides subcommands for tools, agents, commands, sessions
+- Works globally across all projects with -g flag
 
 ## Key Implementation Details
 
@@ -131,12 +147,12 @@ Templates use placeholders that are replaced during installation:
 - `{{CLAUDE_PATH}}`: Claude configuration directory
 
 ### Session Management
-Hook logging automatically detects Claude Code session IDs from:
-- `CLAUDE_SESSION_ID` environment variable
-- `claude_session_id` in JSON input
-- Falls back to finding latest `dev-*` directory
+Stats command automatically discovers Claude Code sessions from:
+- Project directories in `~/.claude/projects/`
+- Session logs within each project
+- Correlates events across multiple log files
 
 ### Error Handling
-- Hook commands exit silently (code 0) on errors to not disrupt Claude Code
-- Debug output available via `DEBUG_HOOKS=1` environment variable
+- Stats command gracefully handles missing or corrupted logs
+- Provides clear error messages for invalid time formats
 - Installation validates paths and provides clear error messages
