@@ -56,7 +56,7 @@ If no ID is provided in the arguments or the directory doesn't exist, generate a
 4. Do I have the specification ID, directory path, and PRD path for the next steps?
 5. Have I clearly communicated to the user what was found or created?
 
-### 📋 Step 2: Discovery & Requirements Specification
+### 📋 Step 2: Product Requirements
 
 **🎯 Goal**: Iteratively refine the PRD through discovery until complete, focusing on WHAT needs to be built and WHY it matters.
 
@@ -105,7 +105,7 @@ Use specialist agents to validate the complete requirements specification for:
 
 Once complete, present a summary of the requirements specification with key decisions identified. Ask: "The requirements specification is complete. Should I proceed to technical specification (SDD)?" and wait for user confirmation before proceeding.
 
-### 📋 Step 3: Technical Specification
+### 📋 Step 3: Solution Design
 
 **🎯 Goal**: Iteratively design and refine HOW the solution will be built through technical architecture and design decisions.
 
@@ -113,42 +113,35 @@ Load the SDD from the specification directory. If the SDD file doesn't exist yet
 
 **🔍 Iterative Technical Specification Loop**:
 - **Process the SDD sequentially using the Validation Checklist as your guide**. Address one checklist item at a time by completing all corresponding sections in the document before moving to the next item
-- **For EACH section, decompose into technical research activities** that require investigation. Consider architecture patterns, data models, interfaces, security implications, performance characteristics, and integration approaches
-- **When working on Implementation Context**, thoroughly analyze the codebase to discover all project-specific tooling and commands. The template sections will guide what to look for
-- **ALWAYS launch multiple specialist agents in parallel** for the identified activities. Select agents based on the technical domain (architecture, database, API design, security, performance, etc.)
-- **After receiving user feedback, identify NEW technical questions** raised by their input and launch additional specialist agents to investigate alternative approaches or deeper technical details
+- **For EACH section, identify ALL technical activities needed** based on what information is missing or unclear. Consider architecture patterns, data models, interfaces, security implications, performance characteristics, and integration approaches
+- **ALWAYS launch multiple specialist agents in parallel** to investigate the identified technical activities. Select agents based on the technical domain (architecture, database, API design, security, performance, etc.)
+- **After receiving user feedback, identify NEW technical questions** based on their input and launch additional specialist agents to investigate alternative approaches or deeper technical details
 - **Present ALL agent findings to the user** including:
-  - What each agent discovered (show their complete responses)
-  - Any conflicting recommendations between agents
-  - Proposed technical decisions based on consensus
-  - Patterns and interfaces that should be documented
-- **Create pattern and interface documentation** for EVERY reusable solution discovered:
-  - Check docs/patterns/* and docs/interfaces/* for existing documentation
-  - Create new pattern docs in docs/patterns/ when agents identify reusable solutions
-  - Create new interface docs in docs/interfaces/ when external integrations are designed
-  - Update existing docs with new discoveries
-  - Each pattern/interface MUST include: context, problem, solution, examples, when to use
+  - Complete responses from each agent (not summaries)
+  - Conflicting recommendations or approaches
+  - Proposed technical decisions based on the research
+  - Questions that need user clarification
+- **Wait for user confirmation** before incorporating any findings into the SDD
 
 **💾 Update the SDD each iteration**:
-- Base your design decisions on research findings gathered from specialist agents
+- Base your content on the research findings gathered from specialist agents
 - Incorporate user feedback and any additional technical research conducted based on their input
-- Before committing to architectural decisions or technology choices, present them to the user for validation and feedback
-- Document only sections related to the current checklist item
+- Before adding inferred technical decisions or assumptions based on research, present them to the user for confirmation
+- Replace [NEEDS CLARIFICATION] markers with actual content only for sections related to the current checklist item
 - Leave all other sections' [NEEDS CLARIFICATION] markers untouched for future iterations
-- After updating, present what was designed, what decisions were made, and ask if you should continue
+- After updating, present what was added, what questions remain, and ask if you should continue
 - **WAIT for user response before continuing**
 
 **🤔 Ask yourself each iteration**:
-1. Have I identified ALL technical activities that need research for this section?
-2. Have I launched parallel specialist agents to investigate these activities?
+1. Have I identified ALL technical activities needed for this section?
+2. Have I launched parallel specialist agents to investigate?
 3. Have I presented COMPLETE agent responses to the user (not summaries)?
-4. Have I created/updated pattern documentation for reusable solutions found?
-5. Have I created/updated interface documentation for external integrations?
-6. Have I filled in all subsections of the current section based on research?
-7. Have I updated only the current section in the SDD file?
-8. Are there more [NEEDS CLARIFICATION] markers remaining in the SDD?
-9. If sections remain, should I continue to the next section or wait for user input?
-10. If SDD is complete, have I asked the user for confirmation to proceed to the PLAN?
+4. Have I received user confirmation before updating the SDD?
+5. Have I updated only the current section in the SDD file?
+6. Have I avoided implementation code (only design and architecture)?
+7. Are there more [NEEDS CLARIFICATION] markers remaining in the SDD?
+8. If sections remain, should I continue to the next section or wait for user input?
+9. If SDD is complete, have I asked the user for confirmation to proceed to the PLAN?
 
 Continue the technical specification loop until the SDD is complete and user has confirmed to proceed.
 
@@ -161,7 +154,7 @@ Use specialist agents to validate the complete technical design for:
 
 Once complete, present a summary of the technical design with key architectural decisions. Ask: "The technical specification is complete. Should I proceed to implementation planning (PLAN)?" and wait for user confirmation before proceeding.
 
-### 📋 Step 4: Implementation Planning
+### 📋 Step 4: Implementation Plan
 
 **🎯 Goal**: Iteratively develop and refine an actionable plan that breaks down the work into executable tasks.
 
@@ -218,18 +211,29 @@ Review all documents created in the specification directory. Read through the PR
 - Calculate implementation confidence based on completeness
 - Identify success enablers and risk factors
 - Note any remaining information gaps
+- Check for context drift between documents
 - Formulate clear recommendation
+
+**🔍 Context Drift Check**:
+Compare the final PLAN against the original PRD and SDD to ensure:
+- All PRD requirements are addressed in the PLAN
+- PLAN follows the technical design from SDD
+- No scope creep occurred during specification
+- Implementation tasks align with original business goals
+- Technical decisions haven't diverged from requirements
 
 **🤔 Verify before finalizing**:
 1. Is TodoWrite showing all specification steps as completed or properly marked as skipped?
 2. Have all created documents been validated and reviewed?
 3. Is the confidence assessment based on actual findings from the specification process?
 4. Would another agent be able to implement this specification successfully?
+5. Has context drift been checked and any misalignments identified?
 
 **📝 Present Final Summary** including:
 - Specification Identity: The ID and feature name
 - Documents Created: List all core documents (BRD, PRD, SDD, PLAN) with their paths
 - Supplementary Documentation: Patterns and interfaces documented
+- Context Alignment: Confirmation that PLAN aligns with PRD/SDD (or list misalignments)
 - Implementation Confidence: Percentage score with justification
 - Success Enablers: Factors supporting successful implementation
 - Risk Assessment: Potential challenges or blockers
@@ -246,14 +250,13 @@ All specifications and documentation MUST follow this exact structure:
 ```
 docs/
 ├── specs/
-│   └── [3-digit-number]-[feature-name]/
-│       ├── BRD.md (if applicable)
-│       ├── PRD.md (if applicable)
-│       ├── SDD.md (if applicable)
-│       └── PLAN.md
-├── patterns/
+│   └── [3-digit-number]-[feature-name]/    # Specification documents
+│       ├── PRD.md                          # Product Requirements Documentation (if applicable)
+│       ├── SDD.md                          # Solution Design Documentation (if applicable)
+│       └── PLAN.md                         # Implementation Plan
+├── patterns/                               # Reusable code or behaviour patterns
 │   └── [pattern-name].md
-└── interfaces/
+└── interfaces/                             # External integration specifications or interfaces
     └── [interface-name].md
 ```
 
@@ -263,13 +266,6 @@ docs/
 - NEVER add, remove, or reorganize sections in the templates
 - NEVER create new subsections or modify the template hierarchy
 - The template structure is the contract - follow it exactly
-
-**📂 Documentation Location Rules**:
-- Specification documents (BRD, PRD, SDD, PLAN) go ONLY in `docs/specs/[ID]-[feature]/`
-- Reusable patterns go ONLY in `docs/patterns/`
-- External integration specifications go ONLY in `docs/interfaces/`
-- ALL documentation MUST be placed in one of these three locations
-- No other directories should be created under `docs/`
 
 **💭 Documentation Philosophy**:
 - Any specialist agent can discover and document patterns or interfaces

@@ -9,6 +9,7 @@
 - [ ] Deployment View specified (environment, configuration, dependencies, performance)
 - [ ] Cross-Cutting Concepts addressed (patterns, interfaces, system-wide patterns, implementation patterns)
 - [ ] Architecture Decisions captured with trade-offs
+- [ ] **All Architecture Decisions confirmed by user** (no pending confirmations)
 - [ ] Quality Requirements defined (performance, usability, security, reliability)
 - [ ] Risks and Technical Debt identified (known issues, technical debt, implementation gotchas)
 - [ ] Test Specifications complete (critical scenarios, coverage requirements)
@@ -25,27 +26,15 @@
 
 ## Implementation Context
 
+**IMPORTANT**: You MUST read and analyze ALL listed context sources to understand constraints, patterns, and existing architecture.
+
 ### Required Context Sources
 
-[NEEDS CLARIFICATION: What existing code, documentation, and external resources must be understood before implementation? For multi-component features, organize by component.]
+#### General Context
 
-**IMPORTANT**: Once sources are identified, the LLM must read and analyze ALL listed sources to understand constraints, patterns, and existing architecture.
+[NEEDS CLARIFICATION: What shared documentation, patterns, and external resources apply across all components?]
 
 ```yaml
-# Component Context (repeat for each component involved)
-Component: [component-name]
-  Location: [path or repository]
-  
-  # Source code files that must be understood
-  - file: src/components/placeholder/example.tsx
-    relevance: HIGH  # HIGH/MEDIUM/LOW
-    sections: [specific functions or line ranges if applicable]
-    why: "Explanation of why this file matters for the implementation"
-  
-  - file: @package.json
-    relevance: MEDIUM
-    why: "Dependencies and build scripts that constrain the solution"
-
 # Internal documentation and patterns
 - doc: docs/patterns/pattern-name.md
   relevance: HIGH
@@ -68,6 +57,37 @@ Component: [component-name]
 - url: https://framework.dev/best-practices
   relevance: LOW
   why: "Framework conventions to follow"
+```
+
+#### Component: [component-name]
+
+[NEEDS CLARIFICATION: What source code files and component-specific documentation must be understood for this component?]
+
+```yaml
+Location: [path or repository]
+
+# Source code files that must be understood
+- file: src/components/placeholder/example.tsx
+  relevance: HIGH  # HIGH/MEDIUM/LOW
+  sections: [specific functions or line ranges if applicable]
+  why: "Explanation of why this file matters for the implementation"
+
+- file: @package.json
+  relevance: MEDIUM
+  why: "Dependencies and build scripts that constrain the solution"
+```
+
+#### Component: [another-component-name] (if applicable)
+
+[NEEDS CLARIFICATION: What source code files and component-specific documentation must be understood for this component? Remove this entire section if no additional components.]
+
+```yaml
+Location: [path or repository]
+
+# Source code files that must be understood
+- file: [relevant source files]
+  relevance: [HIGH/MEDIUM/LOW]
+  why: "[Explanation]"
 ```
 
 ### Implementation Boundaries
@@ -269,17 +289,21 @@ External_Service_Name:
 3. Process executes [how]
 4. Result displays [where]
 
-```plantuml
-@startuml
-actor User
-User -> UI : Apply promo code
-UI -> PromoCodeController : POST /apply-code
-PromoCodeController -> PromoCodeValidator : validate(code)
-PromoCodeValidator --> PromoCodeController : ValidationResult
-PromoCodeController -> OrderDiscountService : applyDiscount()
-OrderDiscountService --> PromoCodeController : DiscountedOrder
-PromoCodeController --> UI : Response
-@enduml
+```mermaid
+sequenceDiagram
+    actor User
+    participant UI
+    participant PromoCodeController
+    participant PromoCodeValidator
+    participant OrderDiscountService
+    
+    User->>UI: Apply promo code
+    UI->>PromoCodeController: POST /apply-code
+    PromoCodeController->>PromoCodeValidator: validate(code)
+    PromoCodeValidator-->>PromoCodeController: ValidationResult
+    PromoCodeController->>OrderDiscountService: applyDiscount()
+    OrderDiscountService-->>PromoCodeController: DiscountedOrder
+    PromoCodeController-->>UI: Response
 ```
 
 ### Error Handling
@@ -459,14 +483,17 @@ TEST_SCENARIO: "Feature operates correctly under normal conditions"
 
 ## Architecture Decisions
 
-[NEEDS CLARIFICATION: What key architecture decisions have been made and why?]
-1. **[Decision Name]**: [Choice made]
-   - Rationale: [Why this over alternatives]
-   - Trade-offs: [What we accept]
+[NEEDS CLARIFICATION: What key architecture decisions need to be made? Each requires user confirmation.]
 
-2. **[Decision Name]**: [Choice made]
-   - Rationale: [Why this over alternatives]
-   - Trade-offs: [What we accept]
+- [ ] **[Decision Name]**: [Choice made]
+  - Rationale: [Why this over alternatives]
+  - Trade-offs: [What we accept]
+  - User confirmed: _Pending_
+
+- [ ] **[Decision Name]**: [Choice made]
+  - Rationale: [Why this over alternatives]
+  - Trade-offs: [What we accept]
+  - User confirmed: _Pending_
 
 ## Quality Requirements
 

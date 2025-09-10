@@ -7,6 +7,8 @@ Rules for task decomposition and parallel execution.
     - Can these activities run independently?
     - Do they require different expertise?
     - Where are the natural boundaries?
+    - What specific output format do I need from each agent?
+    - Have I provided enough detail for unambiguous execution?
 
     Decompose complex work by ACTIVITIES (what needs doing), not roles.
     
@@ -36,7 +38,8 @@ Rules for task decomposition and parallel execution.
     - Will these tasks block each other?
     - Do they share state or dependencies?
     - Can I validate each independently?
-    - Am I being clear with FOCUS/EXCLUDE?
+    - Am I providing exhaustive detail in FOCUS/EXCLUDE?
+    - Would another orchestrator understand exactly what's needed?
 
     DEFAULT: Always execute in parallel unless tasks depend on each other.
 
@@ -46,29 +49,64 @@ Rules for task decomposition and parallel execution.
     ✅ Separate validation possible
     ✅ Won't block each other
 
+    **Ask yourself before writing each prompt**:
+    - Have I described the complete task in FOCUS?
+    - Have I listed ALL things to avoid in EXCLUDE?
+    - Is the CONTEXT sufficient for independent execution?
+    - Will the OUTPUT format prevent ambiguity?
+    - Are SUCCESS criteria measurable and clear?
+    - Would another orchestrator get identical results?
+    
     The FOCUS/EXCLUDE Pattern (Required):
     ```
-    FOCUS: [What to do - 2-3 sentences max]
-    EXCLUDE: [What NOT to do - prevents scope creep]
-    CONTEXT: [Only relevant files/requirements]
+    FOCUS: [What to do - be comprehensive and specific]
+    EXCLUDE: [What NOT to do - be equally comprehensive]
+    CONTEXT: [All relevant background, constraints, and dependencies]
     SUCCESS: [Measurable completion criteria]
     ```
-
+    
+    Enhanced version (recommended for all agents):
+    ```
+    FOCUS: [What to do - provide complete task description with all details]
+    EXCLUDE: [What NOT to do - list all boundaries and restrictions]
+    CONTEXT: [Full background including prior work, current state, constraints]
+    OUTPUT: [EXACT format/structure expected with examples if helpful]
+           [If creating files: specify exact paths like docs/patterns/auth-pattern.md]
+    SUCCESS: [All completion criteria that must be met]
+    TERMINATION: [Explicit conditions for stopping]
+    ```
+    
     Example:
     ```python
     # Launch simultaneously
-    Task(subagent_type="the-backend-engineer", prompt="FOCUS: Build user API...")
-    Task(subagent_type="the-software-engineer-database-design", prompt="FOCUS: Design schema...")
-    Task(subagent_type="the-security-engineer-authentication-systems", prompt="FOCUS: Review auth...")
+    Task(subagent_type="api-specialist", prompt="FOCUS: Build user API...")
+    Task(subagent_type="database-specialist", prompt="FOCUS: Design schema...")
+    Task(subagent_type="security-specialist", prompt="FOCUS: Review auth...")
     ```
-
+    
     Result Aggregation:
     - Display each agent response verbatim
     - Synthesize findings after all responses
     - Identify conflicts between results
     - Create unified next steps
 
-3. Validation & Scope Control:
+
+
+3. File Creation Coordination:
+
+    **Ask yourself when agents will create files**:
+    - Have I specified exact file paths for each agent?
+    - Are all file paths unique (no collisions)?
+    - Do the paths follow project conventions?
+    - Will parallel agents overwrite each other?
+    
+    When multiple agents create documentation:
+    - Specify exact file paths in OUTPUT section
+    - Example: "Create pattern at docs/patterns/caching-strategy.md"
+    - Never let multiple agents write to same file path
+    - Use descriptive names to prevent accidental overlaps
+
+4. Validation & Scope Control:
 
     **Ask yourself when reviewing agent responses**:
     - Did the agent stay within FOCUS boundaries?
@@ -95,6 +133,15 @@ Rules for task decomposition and parallel execution.
     - Breaking changes without migration
     - Untested code modifications
     - Scope expansions beyond FOCUS directive
+    - Missing required OUTPUT format
+    - "While I'm here" additions
+    - Unrequested improvements
+    
+    **Ask yourself when agent response seems off**:
+    - Did I provide ambiguous instructions?
+    - Should I have been more explicit in EXCLUDE?
+    - Is this actually valuable despite being out of scope?
+    - Will stricter FOCUS help or just waste time?
     
     When agents drift:
     ```
@@ -105,7 +152,7 @@ Rules for task decomposition and parallel execution.
     3. Cherry-pick useful parts
     ```
 
-4. Failure Recovery:
+5. Failure Recovery:
 
     **Ask yourself when an agent fails**:
     - Was my FOCUS/EXCLUDE clear enough?
@@ -126,6 +173,12 @@ Rules for task decomposition and parallel execution.
     5. Escalate to user with options
     ```
 
+    **Ask yourself before retrying**:
+    - What specifically caused the failure?
+    - Would a different agent be better suited?
+    - Should this be multiple smaller tasks?
+    - Is partial success acceptable here?
+    
     Recovery Tactics:
     - Refine FOCUS/EXCLUDE and retry
     - Break into smaller tasks

@@ -39,52 +39,50 @@ You are an intelligent implementation orchestrator that executes the plan for: *
 
 ## 🎯 Process
 
-### 📋 Step 1: Plan Discovery
+### 📋 Step 1: Initialize and Analyze Plan
 
-If $ARGUMENTS contains a ID ("010", "010-feature-name", "010"):
-- Use glob to check for existing spec: `docs/**/${ID}*/`
-- If exists:
-    - Display: "📁 Found: [directory]"
-    - Display existing files (BRD.md, PRD.md, SDD.md, PLAN.md, ...)
-    - Ask: "Start implementation? (yes/no)"
+**🎯 Goal**: Validate specification exists, analyze the implementation plan, and prepare for execution.
 
-If $ARGUMENTS is a file or directory ("path/to/directory", "path/to/file.md")
-- If exists:
-    - Display: "📁 Found: [directory or file]"
-    - Display existing files
-    - Ask: "Start implementation? (yes/no)"
+Check if $ARGUMENTS contains a specification ID in the format "010" or "010-feature-name". Run `{{STARTUP_PATH}}/bin/the-startup spec --read [ID]` to check for existing specification. Parse the output to determine if the specification directory exists and contains required documents.
 
-### 📋 Step 2: Initialize Implementation
+If the specification doesn't exist:
+- Display "❌ Specification not found: [ID]"
+- Suggest: "Run /s:specify with your feature description to create the specification first."
+- Exit gracefully
 
-Display: `📊 Analyzing Implementation Plan`
+If the specification exists, display "📁 Found existing spec: [directory]" and list available documents (PRD.md, SDD.md, PLAN.md, etc.). Verify PLAN.md exists. If not, display error: "❌ No PLAN.md found. Run /s:specify first to create the implementation plan." and exit.
 
-1. Read the plan to identify all phases (look for **Phase X:** patterns)
-2. Count total phases and tasks per phase
-3. If any tasks already marked `[x]` or `[~]`, report their status
-4. Display phase overview:
-   ```
-   Specification Type: [Standard/Refactoring/Custom]
-   Found X phases with Y total tasks:
-   - Phase 1: [Name] (N tasks, X completed)
-   - Phase 2: [Name] (N tasks, X completed)
-   ...
-   ```
-5. Load ONLY Phase 1 tasks into TodoWrite
-6. Present phase 1 overview and ask user to confirm start
+If PLAN.md exists, display `📊 Analyzing Implementation Plan` and read the plan to identify all phases (look for **Phase X:** patterns). Count total phases and tasks per phase. If any tasks are already marked `[x]` or `[~]`, report their status. Load ONLY Phase 1 tasks into TodoWrite.
+
+Display comprehensive implementation overview:
+```
+📁 Specification: [directory]
+📊 Implementation Overview:
+
+Specification Type: [Standard/Refactoring/Custom]
+Found X phases with Y total tasks:
+- Phase 1: [Name] (N tasks, X completed)
+- Phase 2: [Name] (N tasks, X completed)
+...
+
+Ready to start Phase 1 implementation? (yes/no)
+```
 
 **🤔 Ask yourself before proceeding:**
-1. Have I successfully loaded and parsed the PLAN.md file?
-2. Did I identify ALL phases and count the tasks in each one?
-3. Are Phase 1 tasks (and ONLY Phase 1) now loaded into TodoWrite?
-4. Have I presented a clear implementation overview to the user?
-5. Am I about to wait for explicit user confirmation?
+1. Have I used `the-startup spec --read` to verify the specification exists?
+2. Does the specification directory contain a PLAN.md file?
+3. Have I successfully loaded and parsed the PLAN.md file?
+4. Did I identify ALL phases and count the tasks in each one?
+5. Are Phase 1 tasks (and ONLY Phase 1) now loaded into TodoWrite?
+6. Have I presented a complete overview to the user?
+7. Am I about to wait for explicit user confirmation?
 
 **🛑 STOP - MANDATORY PAUSE**
 You MUST end your response here and wait for the user to explicitly confirm.
-DO NOT continue to Step 3 in this same response.
+DO NOT continue to Step 2 in this same response.
 The user needs to review and approve before implementation begins.
 
-### 📋 Step 3: Phase-by-Phase Implementation
+### 📋 Step 2: Phase-by-Phase Implementation
 
 For each phase in PLAN.md:
 
@@ -157,7 +155,7 @@ Phase Summary Format:
 Ready for Phase [X+1]? (awaiting confirmation)
 ```
 
-### 📋 Step 4: Overall Completion
+### 📋 Step 3: Overall Completion
 
 **✅ When All Phases Complete:**
 ```
