@@ -77,10 +77,7 @@ Ready to start Phase 1 implementation? (yes/no)
 6. Have I presented a complete overview to the user?
 7. Am I about to wait for explicit user confirmation?
 
-**🛑 STOP - MANDATORY PAUSE**
-You MUST end your response here and wait for the user to explicitly confirm.
-DO NOT continue to Step 2 in this same response.
-The user needs to review and approve before implementation begins.
+Present the implementation overview and ask: "Ready to start Phase 1 implementation?" and wait for user confirmation before proceeding.
 
 ### 📋 Step 2: Phase-by-Phase Implementation
 
@@ -91,6 +88,13 @@ For each phase in PLAN.md:
 - Load current phase tasks into TodoWrite
 - Display: "📍 Starting Phase [X]: [Phase Name]"
 - Show task count and overview for this phase
+
+**📋 Pre-Implementation Review:**
+- Check for "Pre-implementation review" task in phase
+- If present, ensure SDD sections are understood
+- Extract "Required reading" from phase comments
+- Display: "⚠️ Specification Review Required: SDD Sections [X.Y, A.B, C.D]"
+- Confirm understanding of architecture decisions and constraints
 
 #### ⚙️ Phase Execution
 
@@ -107,21 +111,40 @@ For each phase in PLAN.md:
   FOCUS: [Specific task from PLAN.md]
   EXCLUDE: [Other tasks, future phases]
   CONTEXT: [Relevant BRD/PRD/SDD excerpts + prior phase outputs]
-  SUCCESS: [Task completion criteria]
+  SDD_REQUIREMENTS: [Exact SDD sections and line numbers for this task]
+  SPECIFICATION_CONSTRAINTS: [Must match interfaces, patterns, decisions]
+  SUCCESS: [Task completion criteria + specification compliance]
   ```
 - Track completion independently
 
 **📝 For Sequential Tasks:**
 - Execute one at a time
 - Mark as `in_progress` in TodoWrite
-- Delegate to specialist agent
+- Extract SDD references from task: `[ref: SDD/Section X.Y]`
+- Delegate to specialist agent with specification context:
+  ```
+  FOCUS: [Task description]
+  SDD_SECTION: [Relevant SDD section content]
+  MUST_IMPLEMENT: [Specific interfaces, patterns from SDD]
+  SPECIFICATION_CHECK: Ensure implementation matches SDD exactly
+  ```
 - After completion, mark `completed` in TodoWrite
 
 **🔍 Review Handling:**
 - After implementation, select specialist reviewer agent
-- Pass implementation context
+- Pass implementation context AND specification requirements:
+  ```
+  REVIEW_FOCUS: [Implementation to review]
+  SDD_COMPLIANCE: Check against SDD Section [X.Y]
+  VERIFY:
+    - Interface contracts match specification
+    - Business logic follows defined flows
+    - Architecture decisions are respected
+    - No unauthorized deviations
+  ```
 - Handle feedback:
   - APPROVED/LGTM/✅ → proceed
+  - Specification violation → must fix before proceeding
   - Revision needed → implement changes (max 3 cycles)
   - After 3 cycles → escalate to user
 
@@ -136,13 +159,20 @@ For each phase in PLAN.md:
 1. Are ALL TodoWrite tasks for this phase showing 'completed' status?
 2. Have I updated every single checkbox in PLAN.md for this phase?
 3. Did I run all validation commands and did they pass?
-4. Have I generated a comprehensive phase summary?
-5. Am I prepared to STOP and wait for user confirmation?
+4. **Have I verified specification compliance for every task?**
+5. **Did I complete the Post-Implementation Specification Compliance checks?**
+6. **Are there any deviations from the SDD that need documentation?**
+7. Have I generated a comprehensive phase summary?
+8. Am I prepared to present the summary and wait for user confirmation?
 
-**🛑 STOP - MANDATORY PHASE BOUNDARY**
-You MUST end your response after presenting the phase summary.
-DO NOT proceed to the next phase in this same response.
-Each phase requires explicit user approval to continue.
+**📋 Specification Compliance Summary:**
+Before presenting phase completion, verify:
+- All SDD requirements from this phase are implemented
+- No unauthorized deviations occurred
+- Interface contracts are satisfied
+- Architecture decisions were followed
+
+Present phase summary and ask: "Phase [X] is complete. Should I proceed to Phase [X+1]?" and wait for user confirmation before proceeding.
 
 Phase Summary Format:
 ```
@@ -152,7 +182,7 @@ Phase Summary Format:
 - Validations: ✓ Passed
 - Key outputs: [Brief list]
 
-Ready for Phase [X+1]? (awaiting confirmation)
+Should I proceed to Phase [X+1]?
 ```
 
 ### 📋 Step 3: Overall Completion

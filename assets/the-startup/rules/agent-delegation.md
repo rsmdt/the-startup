@@ -8,6 +8,7 @@ Rules for task decomposition and parallel execution.
     - Do they require different expertise?
     - Where are the natural boundaries?
     - What specific output format do I need from each agent?
+    - Which CLAUDE.md rules apply to each activity?
     - Have I provided enough detail for unambiguous execution?
 
     Decompose complex work by ACTIVITIES (what needs doing), not roles.
@@ -39,6 +40,7 @@ Rules for task decomposition and parallel execution.
     - Do they share state or dependencies?
     - Can I validate each independently?
     - Am I providing exhaustive detail in FOCUS/EXCLUDE?
+    - Have I included relevant CLAUDE.md rules for each agent's task?
     - Would another orchestrator understand exactly what's needed?
 
     DEFAULT: Always execute in parallel unless tasks depend on each other.
@@ -57,31 +59,65 @@ Rules for task decomposition and parallel execution.
     - Are SUCCESS criteria measurable and clear?
     - Would another orchestrator get identical results?
     
-    The FOCUS/EXCLUDE Pattern (Required):
+    The Agent Instruction Template:
     ```
-    FOCUS: [What to do - be comprehensive and specific]
-    EXCLUDE: [What NOT to do - be equally comprehensive]
-    CONTEXT: [All relevant background, constraints, and dependencies]
+    # Optional: Add DISCOVERY_FIRST if agent will create/modify files
+    DISCOVERY_FIRST: Before starting your task, understand the environment:
+        - [Appropriate discovery commands for the task type]
+        - [Identify existing patterns and conventions]
+    
+    FOCUS: [Complete task description with all details]
+    
+    EXCLUDE: [Task-specific things to avoid]
+        [Always include: Do not create new patterns when existing ones work]
+        [Always include: Do not duplicate existing work]
+    
+    CONTEXT: [Task background and constraints]
+        [Include relevant CLAUDE.md rules for this task]
+        [Always include: Follow discovered patterns exactly]
+    
+    OUTPUT: [Expected deliverables with exact paths if creating files]
+    
     SUCCESS: [Measurable completion criteria]
+        [Always include: Follows existing patterns]
+        [Always include: Integrates with existing system]
+    
+    TERMINATION: [When to stop - completed, blocked, or max 3 attempts]
     ```
     
-    Enhanced version (recommended for all agents):
-    ```
-    FOCUS: [What to do - provide complete task description with all details]
-    EXCLUDE: [What NOT to do - list all boundaries and restrictions]
-    CONTEXT: [Full background including prior work, current state, constraints]
-    OUTPUT: [EXACT format/structure expected with examples if helpful]
-           [If creating files: specify exact paths like docs/patterns/auth-pattern.md]
-    SUCCESS: [All completion criteria that must be met]
-    TERMINATION: [Explicit conditions for stopping]
-    ```
+    Key Principles for Using the Template:
+    - Add DISCOVERY_FIRST section when agent needs to understand existing code/docs
+    - Always include universal exclusions (no new patterns, no duplicates)
+    - Extract relevant CLAUDE.md rules based on task type
+    - Specify exact file paths in OUTPUT to prevent wrong placement
+    - Make SUCCESS criteria measurable and specific
     
-    Example:
-    ```python
-    # Launch simultaneously
-    Task(subagent_type="api-specialist", prompt="FOCUS: Build user API...")
-    Task(subagent_type="database-specialist", prompt="FOCUS: Design schema...")
-    Task(subagent_type="security-specialist", prompt="FOCUS: Review auth...")
+    Example Using the Template:
+    ```
+    Task(subagent_type="test-writer", prompt="""
+        DISCOVERY_FIRST: Before starting your task, understand the environment:
+        - find . -name "*test*" -o -name "*spec*" -type f | head -20
+        - Identify test framework and existing patterns
+        
+        FOCUS: Write comprehensive tests for the AuthenticationService class
+               covering all public methods and edge cases
+        
+        EXCLUDE: Integration tests, private method testing
+                Do not create new test frameworks when one exists
+                Do not duplicate existing test files
+        
+        CONTEXT: Testing auth service handling login, tokens, sessions.
+                TDD required, one behavior per test, mock externals only
+                Follow discovered test patterns exactly
+        
+        OUTPUT: Test file at [DISCOVERED_LOCATION]/AuthenticationService.test
+        
+        SUCCESS: All public methods tested, 90% coverage
+                Follows existing patterns
+                Integrates with existing test suite
+        
+        TERMINATION: Completed OR blocked by missing framework OR 3 attempts
+    """)
     ```
     
     Result Aggregation:
@@ -114,7 +150,7 @@ Rules for task decomposition and parallel execution.
     - Does this need user review (new dependencies)?
     - Is this scope creep (auto-reject)?
 
-    🟢 Auto-Accept (ship it):
+    🟢 Auto-Accept (continue):
     - Security vulnerability fixes
     - Error handling improvements
     - Input validation additions

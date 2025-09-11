@@ -1,8 +1,9 @@
 # Solution Design Document
 
 ## Validation Checklist
+- [ ] Quality Goals prioritized (top 3-5 architectural quality attributes)
 - [ ] Constraints documented (technical, organizational, security/compliance)
-- [ ] Implementation Context complete (required sources, boundaries, project commands)
+- [ ] Implementation Context complete (required sources, boundaries, external interfaces, project commands)
 - [ ] Solution Strategy defined with rationale
 - [ ] Building Block View complete (components, directory map, interface specifications)
 - [ ] Runtime View documented (primary flow, error handling, complex logic)
@@ -13,9 +14,29 @@
 - [ ] Quality Requirements defined (performance, usability, security, reliability)
 - [ ] Risks and Technical Debt identified (known issues, technical debt, implementation gotchas)
 - [ ] Test Specifications complete (critical scenarios, coverage requirements)
+- [ ] Glossary defined (domain and technical terms)
 - [ ] No [NEEDS CLARIFICATION] markers remain
 
 ---
+
+## Introduction and Goals
+
+### Quality Goals
+
+[NEEDS CLARIFICATION: What are the top 3-5 quality attributes that are most critical for this feature's architecture? Prioritize from most to least important]
+
+The following quality goals shape the architectural decisions and implementation approach:
+
+| Priority | Quality Goal | Scenario/Metric |
+|----------|-------------|-----------------|
+| 1 | [Performance/Security/Reliability/etc.] | [Specific measurable target, e.g., "Response time < 200ms for 95% of requests"] |
+| 2 | [Quality Attribute] | [Specific measurable target or scenario] |
+| 3 | [Quality Attribute] | [Specific measurable target or scenario] |
+| 4 | [Quality Attribute] | [Specific measurable target or scenario] |
+| 5 | [Quality Attribute] | [Specific measurable target or scenario] |
+
+**Quality Goal Rationale**:
+[NEEDS CLARIFICATION: Brief explanation of why these specific quality goals were prioritized this way for this feature]
 
 ## Constraints
 
@@ -96,6 +117,100 @@ Location: [path or repository]
 - **Must Preserve**: [Critical behavior/interfaces to maintain]
 - **Can Modify**: [Areas open for refactoring]
 - **Must Not Touch**: [Files/systems that are off-limits]
+
+### External Interfaces
+
+[NEEDS CLARIFICATION: What are all the external communication partners and system boundaries?]
+
+#### System Context Diagram
+
+```mermaid
+graph TB
+    System[Your System]
+    
+    User1[User Type 1] --> System
+    User2[User Type 2] --> System
+    
+    System --> ExtAPI1[External API 1]
+    System --> ExtAPI2[External Service 2]
+    
+    ExtSystem[External System] --> System
+    System --> Database[(Database)]
+    System --> MessageQueue[Message Queue]
+```
+
+#### Interface Specifications
+
+```yaml
+# Inbound Interfaces (what calls this system)
+inbound:
+  - name: "User Web Interface"
+    type: HTTP/HTTPS
+    format: REST/GraphQL
+    authentication: [OAuth2/JWT/Session]
+    doc: @docs/interfaces/web-api.md
+    data_flow: "User actions and queries"
+    
+  - name: "Mobile App API"
+    type: HTTPS
+    format: REST
+    authentication: JWT
+    doc: @docs/interfaces/mobile-api.md
+    data_flow: "Mobile-specific operations"
+    
+  - name: "Webhook Receiver"
+    type: HTTPS
+    format: JSON
+    authentication: HMAC signature
+    doc: @docs/interfaces/webhook-spec.md
+    data_flow: "Event notifications from external systems"
+
+# Outbound Interfaces (what this system calls)
+outbound:
+  - name: "Payment Gateway"
+    type: HTTPS
+    format: REST
+    authentication: API Key
+    doc: @docs/interfaces/payment-gateway.md
+    data_flow: "Transaction processing"
+    criticality: HIGH
+    
+  - name: "Notification Service"
+    type: AMQP/HTTPS
+    format: JSON
+    authentication: Service Token
+    doc: @docs/interfaces/notification-service.md
+    data_flow: "User notifications"
+    criticality: MEDIUM
+    
+  - name: "Analytics Platform"
+    type: HTTPS
+    format: JSON
+    authentication: API Key
+    doc: @docs/interfaces/analytics.md
+    data_flow: "Event tracking"
+    criticality: LOW
+
+# Data Interfaces
+data:
+  - name: "Primary Database"
+    type: PostgreSQL/MySQL/MongoDB
+    connection: Connection Pool
+    doc: @docs/interfaces/database-schema.md
+    data_flow: "Application state persistence"
+    
+  - name: "Cache Layer"
+    type: Redis/Memcached
+    connection: Client Library
+    doc: @docs/interfaces/cache-strategy.md
+    data_flow: "Temporary data and sessions"
+    
+  - name: "File Storage"
+    type: S3/Azure Blob/GCS
+    connection: SDK
+    doc: @docs/interfaces/storage-api.md
+    data_flow: "Media and document storage"
+```
 
 ### Cross-Component Boundaries (if applicable)
 [NEEDS CLARIFICATION: What are the boundaries between components/teams?]
@@ -198,7 +313,34 @@ graph LR
 │   └── [discovered structure]
 ```
 
-### Interface Specifications (Internal Changes Only)
+### Interface Specifications
+
+**Note**: Interfaces can be documented by referencing external documentation files OR specified inline. Choose the approach that best fits your project's documentation structure.
+
+#### Interface Documentation References
+
+[NEEDS CLARIFICATION: What interface documentation already exists that should be referenced?]
+```yaml
+# Reference existing interface documentation
+interfaces:
+  - name: "User Authentication API"
+    doc: @docs/interfaces/auth-api.md
+    relevance: CRITICAL
+    sections: [authentication_flow, token_management]
+    why: "Core authentication flow must be followed"
+  
+  - name: "Payment Processing Interface"
+    doc: @docs/interfaces/payment-gateway.md
+    relevance: HIGH
+    sections: [transaction_processing, webhook_handling]
+    why: "Integration with payment provider constraints"
+    
+  - name: "Event Bus Interface"
+    doc: @docs/interfaces/event-bus.md (NEW)
+    relevance: MEDIUM
+    sections: [event_format, subscription_model]
+    why: "New event-driven communication pattern"
+```
 
 #### Data Storage Changes
 
@@ -214,6 +356,10 @@ Table: supporting_entity_table (NEW)
   id: primary_key
   related_id: foreign_key
   business_field: data_type, constraints
+  
+# Reference detailed schema documentation if available
+schema_doc: @docs/interfaces/database-schema.md
+migration_scripts: @migrations/v2.1.0/
 ```
 
 #### Internal API Changes
@@ -235,6 +381,10 @@ Endpoint: Feature Operation
       error_code: string
       message: string
       details: object (optional)
+  
+# Reference comprehensive API documentation if available
+api_doc: @docs/interfaces/internal-api.md
+openapi_spec: @specs/openapi.yaml
 ```
 
 #### Application Data Models
@@ -256,6 +406,9 @@ ENTITY: PrimaryEntity (MODIFIED/NEW)
 ENTITY: SupportingEntity (NEW)
   FIELDS: [field_definitions]
   BEHAVIORS: [method_definitions]
+  
+# Reference domain model documentation if available
+domain_doc: @docs/domain/entity-model.md
 ```
 
 #### Integration Points
@@ -276,6 +429,103 @@ External_Service_Name:
   - sections: [relevant_endpoints, data_formats]
   - integration: "Brief description of how systems connect"
   - critical_data: [data_elements_exchanged]
+```
+
+### Implementation Examples
+
+**Purpose**: Provide strategic code examples to clarify complex logic, critical algorithms, or integration patterns. These examples are for guidance, not prescriptive implementation.
+
+**Include examples for**:
+- Complex business logic that needs clarification
+- Critical algorithms or calculations
+- Non-obvious integration patterns
+- Security-sensitive implementations
+- Performance-critical sections
+
+[NEEDS CLARIFICATION: Are there complex areas that would benefit from code examples? If not, remove this section]
+
+#### Example: [Complex Business Logic Name]
+
+**Why this example**: [Explain why this specific example helps clarify the implementation]
+
+```typescript
+// Example: Discount calculation with multiple rules
+// This demonstrates the expected logic flow, not the exact implementation
+function calculateDiscount(order: Order, user: User): Discount {
+  // Business rule: VIP users get additional benefits
+  const baseDiscount = order.subtotal * getBaseDiscountRate(user.tier);
+  
+  // Complex rule: Stacking discounts with limits
+  const promotionalDiscount = Math.min(
+    order.promotions.reduce((sum, promo) => sum + promo.value, 0),
+    order.subtotal * MAX_PROMO_PERCENTAGE
+  );
+  
+  // Edge case: Never exceed maximum discount
+  return Math.min(
+    baseDiscount + promotionalDiscount,
+    order.subtotal * MAX_TOTAL_DISCOUNT
+  );
+}
+```
+
+#### Example: [Integration Pattern Name]
+
+**Why this example**: [Explain why this pattern is important to document]
+
+```python
+# Example: Retry pattern for external service integration
+# Shows expected error handling approach
+async def call_payment_service(transaction):
+    """
+    Demonstrates resilient integration pattern.
+    Actual implementation may use circuit breaker library.
+    """
+    for attempt in range(MAX_RETRIES):
+        try:
+            response = await payment_client.process(transaction)
+            if response.requires_3ds:
+                # Critical: Handle 3D Secure flow
+                return await handle_3ds_flow(response)
+            return response
+        except TransientError as e:
+            if attempt == MAX_RETRIES - 1:
+                # Final attempt failed, escalate
+                raise PaymentServiceUnavailable(e)
+            await exponential_backoff(attempt)
+        except PermanentError as e:
+            # Don't retry permanent failures
+            raise PaymentFailed(e)
+```
+
+#### Test Examples as Interface Documentation
+
+[NEEDS CLARIFICATION: Can unit tests serve as interface documentation?]
+
+```javascript
+// Example: Unit test as interface contract
+describe('PromoCodeValidator', () => {
+  it('should validate promo code format and availability', async () => {
+    // This test documents expected interface behavior
+    const validator = new PromoCodeValidator(mockRepository);
+    
+    // Valid code passes all checks
+    const validResult = await validator.validate('SUMMER2024');
+    expect(validResult).toEqual({
+      valid: true,
+      discount: { type: 'percentage', value: 20 },
+      restrictions: { minOrder: 50, maxUses: 1 }
+    });
+    
+    // Expired code returns specific error
+    const expiredResult = await validator.validate('EXPIRED2023');
+    expect(expiredResult).toEqual({
+      valid: false,
+      error: 'PROMO_EXPIRED',
+      message: 'This promotional code has expired'
+    });
+  });
+});
 ```
 
 ## Runtime View
@@ -333,7 +583,7 @@ OUTPUT: processed_result
 
 ## Deployment View
 
-[NEEDS CLARIFICATION: What are the deployment requirements and considerations? For multi-application features, consider coordination and dependencies.]
+[NEEDS CLARIFICATION: What are the deployment requirements and considerations? For multi-application features, consider coordination and dependencies. If there is no change to existing deployment, them remove sub-sections and just comment it as "no change"]
 
 ### Single Application Deployment
 - **Environment**: [Where this runs - client/server/edge/cloud]
@@ -579,3 +829,28 @@ And: [No unexpected behavior occurs]
 - **Edge Cases**: [Boundary values, empty states, concurrent operations]
 - **Performance**: [Response times under load, resource usage]
 - **Security**: [Input validation, authorization, data protection]
+
+## Glossary
+
+[NEEDS CLARIFICATION: Define domain-specific and technical terms used throughout this document]
+
+### Domain Terms
+
+| Term | Definition | Context |
+|------|------------|---------|
+| [Domain Term] | [Clear, concise definition] | [Where/how it's used in this feature] |
+| [Business Concept] | [Explanation in plain language] | [Relevance to the implementation] |
+
+### Technical Terms
+
+| Term | Definition | Context |
+|------|------------|---------|
+| [Technical Term] | [Technical definition] | [How it applies to this solution] |
+| [Acronym/Abbreviation] | [Full form and explanation] | [Usage in the architecture] |
+
+### API/Interface Terms
+
+| Term | Definition | Context |
+|------|------------|---------|
+| [API Term] | [Specific meaning in this context] | [Related endpoints or operations] |
+| [Protocol/Format] | [Technical specification] | [Where used in integrations] |
