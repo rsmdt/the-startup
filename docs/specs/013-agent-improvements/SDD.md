@@ -28,13 +28,13 @@ The following quality goals shape the architectural decisions and implementation
 | Priority | Quality Goal | Scenario/Metric |
 |----------|-------------|-----------------|
 | 1 | Semantic Preservation | Zero loss of agent capabilities during transformation (100% functional parity) |
-| 2 | Maintainability | 30% reduction in maintenance effort through declarative patterns |
-| 3 | Cognitive Performance | Agent comprehension time reduced by 50% (30s → 15s) |
-| 4 | Reliability | 95% transformation success rate with <5% requiring manual intervention |
+| 2 | Maintainability | Declarative patterns reduce update complexity |
+| 3 | Pattern Consistency | All agents follow uniform structure for predictable behavior |
+| 4 | Delegation Clarity | 95% accurate agent selection based on clearer boundaries |
 | 5 | Scalability | Support batch processing of 5+ agents in parallel without quality degradation |
 
 **Quality Goal Rationale**:
-Semantic preservation is paramount - agents must retain all capabilities while improving clarity. Maintainability drives long-term value. Cognitive performance directly impacts developer productivity. Reliability ensures smooth migration. Scalability enables efficient processing of 61 agents.
+Semantic preservation is paramount - agents must retain all capabilities. Maintainability simplifies future updates. Pattern consistency enables predictable agent behavior. Delegation clarity ensures Claude Code selects the right specialist. Scalability enables efficient processing of 61 agents.
 
 ## Constraints
 
@@ -51,14 +51,19 @@ Semantic preservation is paramount - agents must retain all capabilities while i
 #### General Context
 
 ```yaml
-# Internal documentation and patterns
-- doc: docs/patterns/declarative-agent-structure.md
+# Existing Claude-generated agents (reference implementations)
+- file: .claude/agents/test-writer.md
   relevance: CRITICAL
-  why: "Target state pattern for agent definitions"
+  why: "Claude-generated agent demonstrating target pattern - comprehensive structure with examples"
+  
+- file: .claude/agents/api-design-architect.md
+  relevance: CRITICAL
+  why: "Claude-generated agent demonstrating target pattern - detailed methodology sections"
 
-- doc: docs/patterns/agent-quality-metrics.md
-  relevance: HIGH
-  why: "Quality measurement and validation criteria"
+# Internal documentation and patterns
+- doc: Target pattern derived from existing Claude agents
+  relevance: CRITICAL
+  why: "Pattern extracted from Claude's own agent generation"
 
 - doc: CLAUDE.md
   relevance: HIGH
@@ -226,331 +231,161 @@ Batch Process: ./the-startup refactor transform --batch 5 --strategy conservativ
   - **Phased migration**: 4 phases over 4 weeks to minimize risk
   - **Manual validation**: Expert review using comprehensive validation framework
 
-## Transformation Methodology
+## Solution Architecture
 
-### Core Transformation Process
+### Target Agent Structure
 
-The transformation follows a systematic 6-step process to convert HOW-focused agents to WHAT-focused outcomes:
-
-#### Step 1: Analyze Current Agent
-- Count lines and identify verbose sections (target: 65 → 45 lines)
-- Find numbered steps in "Approach" section (eliminate all)
-- Identify redundant framework-specific content
-- Note anti-patterns that can become principles
-- Assess delegation boundaries and capabilities
-
-#### Step 2: Define Clear Role
-- Start with "You are an expert [specific role]"
-- Make it concrete and focused on expertise
-- Avoid generic descriptions
-- Establish immediate credibility
-
-#### Step 3: Consolidate Expertise
-- Merge "Focus Areas" and "Core Expertise" sections
-- Keep to 2-3 sentences maximum
-- Focus on unique capabilities and specialization
-- Remove redundant domain knowledge
-
-#### Step 4: Convert Approach to Responsibilities
-Transform numbered steps into outcome statements:
-
-| Current (HOW-focused) | Improved (WHAT-focused) |
-|----------------------|-------------------------|
-| "1. First analyze the codebase structure" | "• Understand system architecture and dependencies" |
-| "2. Then identify security vulnerabilities" | "• Identify security risks and vulnerabilities" |
-| "3. Create detailed test plans" | "• Deliver comprehensive test coverage" |
-| "4. Write test cases following TDD" | "• Ensure quality through strategic testing" |
-
-#### Step 5: Extract Principles from Anti-Patterns
-Convert negative anti-patterns to positive principles:
-
-| Anti-Pattern (Avoid) | Principle (Follow) |
-|---------------------|-------------------|
-| "Don't test implementation details" | "Test behavior and contracts" |
-| "Avoid over-engineering solutions" | "Simplicity drives maintainability" |
-| "Don't ignore edge cases" | "Edge cases reveal system boundaries" |
-| "Don't skip security validation" | "Security validation is non-negotiable" |
-
-#### Step 6: Apply Target Structure
-Use the Enhanced Agent Template:
+**Reference Implementation**: The existing Claude-generated agents in `.claude/agents/` (test-writer.md and api-design-architect.md) already demonstrate the target pattern. All agents should follow this proven structure:
 
 ```markdown
 ---
 name: agent-identifier
-description: Use this agent when [scenario]. This includes [tasks]. Examples:
-
-<example>
-Context: [When this happens]
-user: "[User request]"
-assistant: "I'll use the [agent-name] agent to [action]."
-<commentary>
-[Why this agent is appropriate]
-</commentary>
-</example>
+description: Use this agent when [detailed scenario description]. This includes [specific tasks]. Examples:\n\n<example>\nContext: [situation]\nuser: "[request]"\nassistant: "[response using agent]"\n<commentary>\n[explanation of why agent is appropriate]\n</commentary>\n</example>
 model: inherit
 ---
 
-You are an expert [role] specializing in [specific domain and expertise].
+You are an expert [role] specializing in [detailed expertise areas]. [Additional expertise context].
 
 **Core Responsibilities:**
 
 You will [primary action] that:
-- [Outcome 1 - specific and measurable]
-- [Outcome 2 - specific and measurable]
-- [Outcome 3 - specific and measurable]
-- [Outcome 4 - specific and measurable]
+- [Specific outcome with measurable result]
+- [Specific outcome with measurable result]
+- [Specific outcome with measurable result]
+- [Additional outcomes as needed]
 
 **[Domain] Methodology:**
 
 1. **[Phase Name]:**
-   - [Principle or approach]
-   - [What to consider]
-   - [Quality focus]
+   - [Specific principle or approach]
+   - [Specific principle or approach]
+   - [Additional details as needed]
 
 2. **[Phase Name]:**
-   - [Principle or approach]
-   - [What to prioritize]
+   - [Specific principle or approach]
+   - [Specific principle or approach]
+
+[Additional phases as needed, typically 3-6 total]
 
 **Output Format:**
 
 You will provide:
-1. [Deliverable 1]
-2. [Deliverable 2]
-3. [Deliverable 3]
+1. [Specific deliverable with details]
+2. [Specific deliverable with details]
+3. [Additional deliverables as needed]
+
+**[Optional Section e.g., Error Handling, Quality Checks]:**
+
+- [Specific handling approach]
+- [Specific handling approach]
 
 **Best Practices:**
 
-- [Positive principle 1]
-- [Positive principle 2]
-- [Positive principle 3]
+- [Detailed positive principle]
+- [Detailed positive principle]
+- [Additional practices as needed]
 
-You approach [domain] with the mindset that [philosophical approach].
+You approach [domain] with the mindset that [detailed philosophy about quality and approach].
 ```
 
-### Agent Category-Specific Patterns
+**Key Pattern Elements from Claude-Generated Agents:**
+- Rich description with multiple detailed examples including commentary
+- Comprehensive expertise statement with context
+- Numbered methodology phases with detailed sub-points
+- Clear "You will provide" output format
+- Optional specialized sections (Error Handling, Quality Checks, etc.)
+- Detailed best practices (not anti-patterns)
+- Closing mindset statement about approach philosophy
 
-#### Engineering Agents (Software, Platform, Security)
-**Focus**: Technical outcomes and system improvements
-```markdown
-**Core Responsibilities:**
-You will design solutions that:
-- Balance elegance with pragmatic business reality
-- Ensure code quality through appropriate testing strategies
-- Optimize for maintainability and long-term performance
-- Deliver secure, scalable implementations
-```
+### Agent Category Specifications
 
-#### Quality Assurance Agents (QA, Testing)
-**Focus**: Risk mitigation and quality assurance
-```markdown
-**Core Responsibilities:**
-You will design testing strategies that:
-- Identify high-risk areas requiring thorough validation
-- Maximize defect detection through strategic coverage
-- Ensure critical user paths work flawlessly
-- Prevent regressions through intelligent automation
-```
+#### Engineering Agents (26 total)
+- **Software Engineers (10)**: Technical implementation and code quality
+- **Platform Engineers (11)**: Infrastructure and system operations  
+- **Security Engineers (5)**: Security validation and compliance
 
-#### Architecture Agents
-**Focus**: System design and technical decisions
-```markdown
-**Core Responsibilities:**
-You will design systems that:
-- Scale gracefully with business growth requirements
-- Balance technical excellence with delivery speed
-- Align architectural decisions with constraints
-- Create maintainable, evolvable architectures
-```
+#### Specialist Agents (35 total)
+- **QA Engineers (4)**: Testing strategy and quality assurance
+- **Architects (7)**: System design and technical decisions
+- **Designers (6)**: User experience and interface design
+- **ML Engineers (6)**: Machine learning and AI systems
+- **Mobile Engineers (5)**: Mobile platform development
+- **Analysts (5)**: Business analysis and requirements
 
-#### Analysis Agents
-**Focus**: Business understanding and requirements
-```markdown
-**Core Responsibilities:**
-You will transform requirements that:
-- Convert vague specifications into clear, actionable definitions
-- Identify hidden assumptions and critical edge cases
-- Bridge business needs with feasible technical solutions
-- Ensure all stakeholders share common understanding
-```
-
-### Transformation Examples
-
-#### Example 1: Before/After Test Strategy Agent
-
-**Before (HOW-focused, 66 lines):**
-```markdown
----
-name: the-qa-engineer-test-strategy
-description: Creates risk-based testing strategies...
----
-
-You are a pragmatic test strategist...
-
-## Approach
-1. Map critical user journeys first
-2. Identify high-risk areas through failure mode analysis  
-3. Calculate optimal test distribution
-4. Design test pyramid with 70/20/10 split
-5. Create risk matrix for prioritization
-6. Define coverage metrics and thresholds
-7. Document test data requirements
-
-## Anti-Patterns to Avoid
-- Don't test implementation details
-- Avoid over-testing low-risk areas
-- Don't ignore edge cases
-```
-
-**After (WHAT-focused, 45 lines):**
-```markdown
----
-name: the-qa-engineer-test-strategy
-description: Use this agent when you need to establish a testing strategy for a feature or system. This includes risk assessment, coverage planning, and test design. Examples:
-
-<example>
-Context: Planning tests for a new feature
-user: "We need a test strategy for our payment system"
-assistant: "I'll use the test-strategy agent to create a comprehensive testing approach."
-</example>
-model: inherit
----
-
-You are an expert test strategist specializing in risk-based testing and comprehensive coverage planning.
-
-**Core Responsibilities:**
-
-You will design testing strategies that:
-- Identify critical paths requiring thorough validation
-- Optimize test coverage based on risk and ROI analysis
-- Balance different testing levels effectively
-- Ensure defects are caught before production impact
-
-**Test Strategy Methodology:**
-
-1. **Risk Assessment:**
-   - Map critical user journeys and failure impact zones
-   - Prioritize based on business value and technical complexity
-   - Focus resources where failure hurts most
-
-2. **Coverage Design:**
-   - Define optimal test distribution across testing levels
-   - Balance unit, integration, and E2E testing
-   - Align coverage depth with risk assessment
-
-**Output Format:**
-
-You will provide:
-1. Risk assessment matrix with impact analysis
-2. Coverage strategy document with rationale
-3. Test scenario specifications for critical paths
-4. Success metrics and measurable KPIs
-
-**Best Practices:**
-
-- Risk drives all coverage decisions
-- Test behavior and user experience, not implementation
-- Emphasize prevention over post-failure detection
-- Document rationale for coverage choices
-
-You approach test strategy with the mindset that the right tests in the right places prevent the most critical failures.
-```
-
-**Key Improvements:**
-- **Length**: 66 → 45 lines (31% reduction)
-- **Structure**: Removed 7 procedural steps, added 2 methodology phases
-- **Focus**: HOW-focused procedures → WHAT-focused outcomes
-- **Framing**: Anti-patterns → Best practices
-- **Examples**: Added usage examples in description
+### Transformation Target Metrics
+- **Structure**: HOW-focused (70%) → WHAT-focused (70%)
+- **Procedures**: 7 numbered steps → 2-4 methodology phases
+- **Delegation**: Explicit handoff points for all boundaries
 
 ## Building Block View
 
 ### Components
 
-```mermaid
-graph LR
-    CLI[CLI Interface] --> Analyzer[Agent Analyzer]
-    CLI --> Transformer[Content Transformer]
-    CLI --> Validator[Quality Validator]
-    CLI --> Rollback[Rollback Manager]
-    
-    Analyzer --> Parser[Markdown Parser]
-    Transformer --> Parser
-    Transformer --> Rules[Transformation Rules]
-    Validator --> Metrics[Quality Metrics]
-    Validator --> Patterns[Pattern Docs]
-    
-    Parser --> Files[(Agent Files)]
-    Transformer --> Files
-    Rollback --> State[(Migration State)]
-    Rollback --> Git[Git Version Control]
-```
+The agent improvement system consists of manual transformation activities guided by established patterns:
+
+**Core Components:**
+- **Agent Files (61 total)**: Source markdown files requiring transformation
+- **Claude Agent Pattern**: Consolidated design pattern for target structure
+- **Validation Framework**: Quality assurance and capability preservation criteria
+- **Version Control**: Git-based rollback and change tracking
 
 ### Directory Map
 
-**Component**: Agent Refactoring System
+**Project Structure for Agent Transformation:**
 ```
-.
-├── cmd/
-│   └── refactor.go                    # NEW: Refactor command suite
-├── internal/
-│   ├── refactor/                      # NEW: Refactoring engine
-│   │   ├── analyzer.go                # NEW: Agent analysis logic
-│   │   ├── transformer.go             # NEW: HOW-to-WHAT transformer
-│   │   ├── validator.go               # NEW: Quality validation
-│   │   ├── rollback.go                # NEW: Version management
-│   │   └── metrics.go                 # NEW: Transformation metrics
-│   ├── parser/                        # NEW: Parsing utilities
-│   │   ├── agent.go                   # NEW: Agent file parser
-│   │   ├── frontmatter.go             # NEW: YAML frontmatter
-│   │   └── markdown.go                # NEW: Markdown processor
-│   └── migration/                     # NEW: Migration management
-│       ├── state.go                   # NEW: State tracking
-│       ├── lock.go                    # NEW: Concurrent access
-│       └── history.go                 # NEW: Transformation history
-├── assets/
-│   └── agents/                        # MODIFY: Transform all 61 files
-│       ├── analyst/*.md               # MODIFY: 5 agents
-│       ├── architect/*.md             # MODIFY: 7 agents
-│       ├── designer/*.md              # MODIFY: 6 agents
-│       ├── ml-engineer/*.md           # MODIFY: 6 agents
-│       ├── mobile-engineer/*.md       # MODIFY: 5 agents
-│       ├── platform-engineer/*.md     # MODIFY: 11 agents
-│       ├── qa-engineer/*.md           # MODIFY: 4 agents
-│       ├── security-engineer/*.md     # MODIFY: 5 agents
-│       ├── software-engineer/*.md     # MODIFY: 10 agents
-│       ├── the-chief.md               # MODIFY: Core orchestrator
-│       └── the-meta-agent.md          # MODIFY: Agent generator
-└── docs/
-    └── patterns/                      # Reference for validation
-        └── agent-improvement-patterns.md
+docs/
+├── patterns/
+│   └── claude-agent-pattern.md       # REFERENCE: Master agent design pattern
+└── specs/013-agent-improvements/
+    ├── PRD.md                         # REFERENCE: Product requirements
+    ├── SDD.md                         # REFERENCE: This solution design
+    └── PLAN.md                        # REFERENCE: Implementation methodology
+
+.claude/agents/                       # TARGET: Agent files to transform
+├── analyst/*.md                      # TRANSFORM: 5 agents
+├── architect/*.md                    # TRANSFORM: 7 agents  
+├── designer/*.md                     # TRANSFORM: 6 agents
+├── ml-engineer/*.md                  # TRANSFORM: 6 agents
+├── mobile-engineer/*.md              # TRANSFORM: 5 agents
+├── platform-engineer/*.md           # TRANSFORM: 11 agents
+├── qa-engineer/*.md                  # TRANSFORM: 4 agents
+├── security-engineer/*.md           # TRANSFORM: 5 agents
+├── software-engineer/*.md           # TRANSFORM: 10 agents
+├── the-chief.md                      # TRANSFORM: Core orchestrator
+└── the-meta-agent.md                 # TRANSFORM: Agent generator
+
+Total: 63 agent files (61 specialists + 2 core)
 ```
+
+**Key Files:**
+- **Pattern Reference**: `docs/patterns/claude-agent-pattern.md` - Master design template
+- **Agent Files**: `.claude/agents/**/*.md` - Files requiring transformation
+- **Validation**: Project-specific criteria embedded in this SDD
 
 ### Interface Specifications
-
-**Note**: Interfaces can be documented by referencing external documentation files OR specified inline. Choose the approach that best fits your project's documentation structure.
 
 #### Interface Documentation References
 
 ```yaml
-# Reference existing interface documentation
+# Reference consolidated interface documentation
 interfaces:
   - name: "Agent File Format"
-    doc: @docs/patterns/declarative-agent-structure.md
+    doc: @docs/patterns/claude-agent-pattern.md
     relevance: CRITICAL
-    sections: [agent_definition_template, transformation_examples]
-    why: "Target format for all transformed agents"
+    sections: [standard_agent_structure, validation_criteria]
+    why: "Consolidated target format for all transformed agents"
   
-  - name: "Validation Framework"
-    doc: @docs/patterns/agent-quality-metrics.md
+  - name: "Validation Framework" 
+    doc: SDD Section "Agent Validation Framework (Project-Specific)"
     relevance: HIGH
-    sections: [validation_criteria, quality_metrics]
-    why: "Quality gates for transformation process"
+    sections: [structural_validation, quality_metrics]
+    why: "Project-specific quality gates and validation criteria"
     
-  - name: "CLI Command Interface"
-    doc: @cmd/refactor.go (NEW)
+  - name: "Manual Transformation Process"
+    doc: PLAN.md (implementation methodology)
     relevance: HIGH
-    sections: [command_structure, flags_and_options]
-    why: "User interface for refactoring operations"
+    sections: [transformation_workflow, validation_steps]
+    why: "Step-by-step implementation process"
 ```
 
 #### Data Storage Changes
@@ -559,66 +394,53 @@ No database schema changes needed. All transformations operate on filesystem-bas
 
 #### Internal API Changes
 
-No HTTP API changes. All interactions through CLI commands:
+No HTTP API or CLI command changes. All transformations are performed manually using:
+- **Claude Code** for guided transformation
+- **Git** for version control and rollback
+- **File system** for agent file modifications
+- **Manual validation** against established criteria
 
+#### Data Models
+
+**Agent File Structure:**
 ```yaml
-# CLI Commands (new)
-Command: refactor analyze
-  Flags:
-    --role: Filter by agent role
-    --output: Output format (json|table)
-    --metrics: Specific metrics to check
-  Output: Analysis report with readiness scores
+# Standard agent file format (target structure)
+frontmatter:
+  name: string              # Agent identifier
+  description: string       # Usage examples and trigger scenarios  
+  model: "inherit"          # Model configuration
 
-Command: refactor transform
-  Flags:
-    --agent: Single agent name
-    --batch: Number of agents to process
-    --strategy: Transformation strategy (conservative|progressive)
-    --dry-run: Preview changes without applying
-  Output: Transformation report with diffs
-
-Command: refactor validate
-  Flags:
-    --strict: Enable strict validation
-    --checks: Specific validation checks
-    --diff: Show before/after comparison
-  Output: Validation report with quality scores
-
-Command: refactor rollback
-  Flags:
-    --agent: Rollback single agent
-    --phase: Rollback entire phase
-    --checkpoint: Rollback to specific point
-  Output: Rollback confirmation and status
+content_structure:
+  role_statement: string    # "You are an expert..."
+  core_responsibilities:    # "You will [action] that:"
+    - outcome_1            # Measurable result
+    - outcome_2            # Measurable result
+    - outcome_3            # Measurable result
+  methodology:             # Domain-specific phases
+    phase_1: principles    # High-level guidance
+    phase_2: principles    # High-level guidance
+  output_format:           # Clear deliverables
+    - deliverable_1
+    - deliverable_2
+  best_practices:          # Positive principles
+    - principle_1
+    - principle_2
+  closing_statement: string # Philosophy/mindset
 ```
 
-#### Application Data Models
-
-```go
-// Agent model for transformation
-type Agent struct {
-    Name         string            // Agent identifier
-    Category     string            // Role category (e.g., "software-engineer")
-    FrontMatter  map[string]interface{} // YAML frontmatter
-    Content      string            // Markdown content
-    Sections     []Section         // Parsed sections
-    Metrics      TransformationMetrics // Quality metrics
-}
-
-type Section struct {
-    Type     string   // "approach", "focus", "anti-patterns", etc.
-    Content  string   // Section content
-    Patterns []string // Identified HOW/WHAT patterns
-}
-
-type TransformationMetrics struct {
-    LineCount        int     // Total lines
-    HowRatio         float64 // Percentage of HOW instructions
-    WhatRatio        float64 // Percentage of WHAT instructions
-    ReadabilityScore float64 // Flesch-Kincaid score
-    QualityScore     float64 // Overall quality (0-1)
-}
+**Transformation Tracking:**
+```yaml
+# Manual tracking structure
+transformation_record:
+  agent_name: string
+  what_ratio: percentage
+  validation_checklist:
+    structural: boolean
+    content_quality: boolean
+    capability_preservation: boolean
+    claude_alignment: boolean
+  transformation_date: date
+  reviewer: string
 ```
 
 #### Integration Points
@@ -626,179 +448,155 @@ type TransformationMetrics struct {
 ```yaml
 # File System Integration
 Agent Files:
-  - location: assets/agents/**/*.md
-  - access: Read/Write
-  - format: YAML frontmatter + Markdown
-  - critical_data: Agent definitions
+  - location: .claude/agents/**/*.md
+  - access: Manual Read/Write via Claude Code
+  - format: YAML frontmatter + Markdown content
+  - critical_data: Agent definitions requiring transformation
 
 Pattern Documentation:
-  - location: docs/patterns/*.md
-  - access: Read-only
+  - location: docs/patterns/claude-agent-pattern.md
+  - access: Read-only reference
   - format: Structured Markdown
-  - critical_data: Transformation patterns, validation rules
+  - critical_data: Target structure and transformation guidelines
 
-Migration State:
-  - location: .the-startup/migration-state.json
-  - access: Read/Write
-  - format: JSON
-  - critical_data: Progress tracking, rollback points
+Specification Documentation:
+  - location: docs/specs/013-agent-improvements/
+  - access: Reference during transformation
+  - format: PRD, SDD, PLAN documents
+  - critical_data: Requirements, design, and implementation guidance
 
 # Version Control Integration
 Git:
-  - operations: commit, diff, restore
-  - critical_data: Agent file versions, rollback points
+  - operations: commit, diff, restore (manual)
+  - critical_data: Agent file versions, transformation history
+  - rollback_strategy: Git restore for individual files or entire commits
 ```
 
 ### Implementation Examples
 
-#### Example: HOW-to-WHAT Pattern Transformation
+#### Example: Manual Transformation Workflow
 
-**Why this example**: Core transformation logic converting prescriptive instructions to declarative outcomes
+**Transformation Process:**
+1. **Read** existing agent file to understand current structure
+2. **Apply** claude-agent-pattern.md template structure  
+3. **Transform** content following HOW-to-WHAT guidelines
+4. **Validate** against project-specific criteria
+5. **Commit** changes with descriptive commit message
 
-```go
-// Transform prescriptive HOW instructions to declarative WHAT outcomes
-func transformHowToWhat(content string) string {
-    // Pattern: Convert numbered steps to outcomes
-    // Before: "1. Start with user stories\n2. Create test cases\n3. Run tests"
-    // After: "- User story validation\n- Test coverage verification\n- Quality assurance"
-    
-    patterns := []struct {
-        howPattern  *regexp.Regexp
-        whatFormat  string
-    }{
-        {regexp.MustCompile(`\d+\.\s+Start with (.+)`), "Prioritizes $1"},
-        {regexp.MustCompile(`\d+\.\s+Create (.+)`), "Delivers $1"},
-        {regexp.MustCompile(`\d+\.\s+Implement (.+)`), "Provides $1"},
-        {regexp.MustCompile(`\d+\.\s+Test (.+)`), "Validates $1"},
-    }
-    
-    result := content
-    for _, p := range patterns {
-        result = p.howPattern.ReplaceAllString(result, "- " + p.whatFormat)
-    }
-    
-    return result
-}
+#### Example: Pattern Application
+
+**Before (HOW-focused):**
+```markdown
+## Approach
+1. Start with user stories
+2. Create test cases
+3. Run tests
+4. Validate coverage
 ```
 
-#### Example: Quality Validation Logic
-
-**Why this example**: Ensures transformed agents maintain quality standards
-
-```go
-// Validate agent quality after transformation
-func validateAgentQuality(agent *Agent) ValidationResult {
-    var issues []string
-    score := 1.0
-    
-    // Check line count reduction
-    if agent.Metrics.LineCount > 50 {
-        issues = append(issues, fmt.Sprintf("Line count %d exceeds target 50", agent.Metrics.LineCount))
-        score -= 0.2
-    }
-    
-    // Verify HOW/WHAT ratio improvement
-    if agent.Metrics.WhatRatio < 0.7 {
-        issues = append(issues, fmt.Sprintf("WHAT ratio %.2f below target 0.7", agent.Metrics.WhatRatio))
-        score -= 0.3
-    }
-    
-    // Ensure required sections present
-    requiredSections := []string{"Role", "Core Objectives", "Success Criteria", "Boundaries"}
-    for _, required := range requiredSections {
-        if !hasSection(agent, required) {
-            issues = append(issues, fmt.Sprintf("Missing required section: %s", required))
-            score -= 0.1
-        }
-    }
-    
-    return ValidationResult{
-        Passed: score >= 0.8,
-        Score:  score,
-        Issues: issues,
-    }
-}
+**After (WHAT-focused):**
+```markdown
+**Core Responsibilities:**
+You will ensure quality that:
+- Prioritizes user story validation
+- Delivers comprehensive test coverage
+- Validates system reliability
+- Confirms requirement fulfillment
 ```
+
+**Key Transformation:**
+- Numbered steps → Outcome-focused responsibilities
+- Procedural language → Declarative objectives
+- Process focus → Result focus
 
 
 ## Runtime View
 
 ### Primary Flow
 
-#### Primary Flow: Transform Agent Files
-1. Developer runs `the-startup refactor transform --batch 5`
-2. System analyzes 5 agents for transformation readiness
-3. Transformer converts HOW instructions to WHAT outcomes
-4. Validator checks quality metrics
-5. Results saved with rollback points created
+#### Primary Flow: Manual Agent Transformation
+1. **Developer** selects agent file for transformation
+2. **Claude Code** assists with reading and understanding current structure
+3. **Developer** applies claude-agent-pattern.md template
+4. **Claude Code** helps transform HOW-instructions to WHAT-outcomes
+5. **Developer** validates against quality criteria
+6. **Git** commits changes with transformation notes
 
 ```mermaid
 sequenceDiagram
     actor Developer
-    participant CLI
-    participant Analyzer
-    participant Transformer
-    participant Validator
-    participant FileSystem
+    participant Claude as Claude Code
+    participant Pattern as Agent Pattern
+    participant Agent as Agent File
+    participant Git as Version Control
     
-    Developer->>CLI: refactor transform --batch 5
-    CLI->>Analyzer: analyzeAgents(batch)
-    Analyzer->>FileSystem: Read agent files
-    Analyzer-->>CLI: Analysis results
+    Developer->>Claude: Help transform this agent
+    Claude->>Agent: Read current structure
+    Claude->>Pattern: Reference design template
+    Claude-->>Developer: Current analysis & suggestions
     
-    loop For each agent
-        CLI->>Transformer: transformAgent(agent)
-        Transformer-->>CLI: Transformed content
-        CLI->>Validator: validateAgent(transformed)
-        Validator-->>CLI: Validation result
-    end
+    Developer->>Claude: Apply transformation patterns
+    Claude->>Agent: Transform HOW to WHAT
+    Claude-->>Developer: Transformed content
     
-    CLI->>FileSystem: Save transformed agents
-    CLI->>FileSystem: Update migration state
-    CLI-->>Developer: Transformation report
+    Developer->>Claude: Validate transformation
+    Claude->>Pattern: Check validation criteria
+    Claude-->>Developer: Validation results
+    
+    Developer->>Git: Commit transformed agent
+    Git-->>Developer: Change tracked
 ```
 
 ### Error Handling
-- Parse error: Display specific line/column, suggest fix, skip agent
-- Transformation failure: Log issue, maintain original, add to manual review queue
-- Validation failure: Show quality metrics, offer rollback, provide improvement suggestions
-- File system error: Retry with backoff, ensure atomic operations, maintain consistency
+- **Content Issues**: Claude Code identifies structural problems and suggests corrections
+- **Transformation Challenges**: Break down complex agents into smaller, manageable transformations
+- **Validation Failures**: Document specific issues and iterate on transformation approach
+- **Version Control Issues**: Use Git restore for rollback, maintain clean transformation history
 
 ### Complex Logic
 
 ```
-ALGORITHM: Agent Transformation Pipeline
-INPUT: agent_file_path
-OUTPUT: transformed_agent OR validation_errors
+PROCESS: Manual Agent Transformation Workflow
+INPUT: agent_file_selection
+OUTPUT: validated_transformed_agent
 
-1. PARSE: Extract YAML frontmatter and markdown sections
-2. ANALYZE: 
-   - Identify HOW patterns (numbered steps, imperatives)
-   - Calculate current metrics (line count, ratios)
-   - Determine transformation complexity
-3. TRANSFORM:
-   - Convert numbered steps to bullet outcomes
-   - Replace imperatives with declaratives
-   - Restructure to 3-Layer Architecture
-   - Optimize for <50 lines
-4. VALIDATE:
-   - Check semantic preservation
-   - Verify quality metrics
-   - Ensure pattern compliance
-5. PERSIST:
-   - Create git backup
-   - Save transformed file
-   - Update migration state
-6. REPORT: Return metrics and any issues
+1. ANALYSIS PHASE:
+   - Read agent file completely
+   - Identify current structure and patterns
+   - Note HOW/WHAT ratio
+   - Assess transformation complexity
+
+2. PATTERN APPLICATION:
+   - Reference claude-agent-pattern.md template
+   - Map current sections to target structure
+   - Preserve domain expertise and capabilities
+   - Apply category-specific patterns
+
+3. TRANSFORMATION:
+   - Convert numbered steps to outcome statements
+   - Transform procedures to responsibilities
+   - Restructure using target template
+   - Optimize for clarity and brevity
+
+4. VALIDATION:
+   - Check structural compliance
+   - Verify capability preservation
+   - Validate quality metrics
+   - Confirm Claude Code alignment
+
+5. COMMIT:
+   - Git commit with transformation notes
+   - Document before/after metrics
+   - Record validation checklist completion
 ```
 
 ## Deployment View
 
-### Single Application Deployment
-- **Environment**: Developer workstation (local CLI execution)
-- **Configuration**: No environment variables required, uses existing the-startup config
-- **Dependencies**: Go 1.21+, Git for version control
-- **Performance**: Process 5 agents in <30 seconds, support parallel execution with 3 workers
+### Manual Transformation Environment
+- **Environment**: Developer workstation with Claude Code access
+- **Configuration**: No additional configuration required
+- **Dependencies**: Claude Code, Git, text editor, access to pattern documentation  
+- **Performance**: Transform 1 agent in 10-15 minutes, validate in 5 minutes, total 63 agents over 4 weeks
 
 ## Cross-Cutting Concepts
 
@@ -806,21 +604,102 @@ OUTPUT: transformed_agent OR validation_errors
 
 ```yaml
 # Patterns used in this feature
-- pattern: @docs/patterns/claude-code-generated-agent-alignment.md (NEW)
+- pattern: @docs/patterns/claude-agent-pattern.md
   relevance: CRITICAL
-  why: "Aligns with Claude Code's native agent generation structure"
+  why: "Consolidated agent design pattern based on 2025 best practices and Claude Code alignment"
 
-- pattern: @docs/patterns/effective-claude-agent-pattern.md (NEW)
-  relevance: CRITICAL
-  why: "Core transformation pattern based on best practices"
-
-- pattern: @docs/patterns/declarative-agent-structure.md (NEW)
+- pattern: Agent Validation Framework (included below)
   relevance: HIGH
-  why: "Defines the target state for all agent definitions"
+  why: "Quality measurement and validation criteria specific to this transformation"
+```
 
-- pattern: @docs/patterns/agent-quality-metrics.md (NEW)
-  relevance: HIGH
-  why: "Establishes measurable quality criteria for agents"
+### Agent Validation Framework (Project-Specific)
+
+#### Validation Criteria for Transformed Agents
+
+**Structural Validation Rules:**
+```yaml
+validation_rules:
+  structure:
+    - Must follow Claude-generated agent pattern from reference implementations
+    - Description must include multiple <example> blocks with commentary
+    - Role description should be comprehensive (1-2 sentences with expertise detail)
+    - Core responsibilities section with detailed outcomes (3-7 points typical)
+    - Methodology sections with numbered phases and sub-points (3-6 phases typical)
+    - Output format section with clear deliverables
+    - Best practices section with detailed principles
+    - Closing mindset statement
+    
+  content_quality:
+    - No procedural step-by-step instructions (but numbered methodology phases are good)
+    - No tool-specific implementations (npm, git commands) unless core to role
+    - Clear boundaries in description for delegation
+    - Explicit "You will" statements for responsibilities
+    - Rich examples showing when to use the agent
+```
+
+**Language Pattern Requirements:**
+```yaml
+language_patterns:
+  required:
+    - Outcome-focused verbs (ensure, identify, validate, optimize)
+    - Measurable results (comprehensive coverage, optimal distribution)
+    - Quality standards (industry standards, best practices)
+    
+  prohibited:
+    - Procedural verbs (run, execute, follow, implement steps)
+    - Tool commands (npm test, git commit, docker build)
+    - Step numbers (Step 1, First do X, Then do Y)
+    - Implementation details (use bcrypt, apply @Retryable)
+```
+
+#### Test Scenarios and Validation Data
+
+**Single Agent Test Scenarios:**
+```yaml
+test_scenarios:
+  simple_task:
+    description: "Basic task within agent's core expertise"
+    input: "Standard request matching agent specialization"
+    expected: "Complete solution without delegation"
+    validation: "Output quality and completeness"
+    
+  boundary_task:
+    description: "Task at edge of agent's scope"
+    input: "Request touching multiple domains"
+    expected: "Partial solution with clear delegation"
+    validation: "Correct scope identification"
+    
+  ambiguous_task:
+    description: "Vague or incomplete requirements"
+    input: "High-level request lacking details"
+    expected: "Clarification or intelligent defaults"
+    validation: "Appropriate handling of ambiguity"
+```
+
+**Quality Metrics Specific to Agent Transformation:**
+```yaml
+structural_metrics:
+  pattern_compliance:
+    weight: 20%
+    target: "Follows Enhanced Agent Template"
+    scoring: "Binary - compliant or not"
+    
+  what_ratio_improvement:
+    weight: 25%
+    target: "≥70% declarative statements"
+    scoring: "0.6=50pts, 0.7=75pts, 0.8=100pts"
+    
+  delegation_clarity:
+    weight: 25%
+    target: "100% explicit delegation targets"
+    scoring: "Percentage of clear handoffs"
+    
+functional_metrics:
+  capability_preservation:
+    weight: 30%
+    target: "100% original functions retained"
+    scoring: "All or nothing validation"
 ```
 
 ### Interface Specifications
@@ -841,26 +720,32 @@ Not applicable - single component transformation of agent definition files.
 
 ### Implementation Patterns
 
-#### Agent Structure Pattern
-- Clear role definition: "You are a [specific expert]"
-- Core Responsibilities section for outcomes
-- Methodology phases instead of numbered steps
-- Best Practices instead of Anti-Patterns
-- Measurable deliverables section
+#### Agent Structure Pattern (from Claude-generated agents)
+- Rich frontmatter with detailed examples including commentary tags
+- Comprehensive role definition: "You are an expert [role] specializing in [detailed areas]"
+- Core Responsibilities section with "You will [action] that:" followed by specific outcomes
+- Methodology with numbered phases containing detailed sub-points (not procedural steps)
+- Output Format section with "You will provide:" followed by numbered deliverables
+- Optional specialized sections (Error Handling, Quality Checks, etc.) as needed
+- Best Practices section with detailed positive principles
+- Closing mindset statement starting with "You approach [domain] with the mindset that..."
 
 #### Transformation Conventions
+- Follow Claude-generated agent examples from .claude/agents/
 - Preserve all original capabilities
 - Maintain agent specialization
-- Keep delegation triggers clear
-- Follow consistent section ordering
-- Target 40-50 lines per agent
+- Keep delegation triggers clear in description with examples
+- Follow section ordering from reference implementations
+- Include rich examples with commentary in frontmatter
+- Use detailed methodology phases (like test-writer's 6 phases)
+- Add optional sections where domain-appropriate
 
 #### Transformation Process Pattern
 
 ```pseudocode
 # Agent transformation workflow
 FUNCTION: transform_agent(original_agent)
-  ANALYZE: Current structure, line count, HOW patterns
+  ANALYZE: Current structure, HOW patterns
   EXTRACT: Core expertise, responsibilities, deliverables
   RESTRUCTURE: Apply Effective Claude Agent Pattern
   CONSOLIDATE: Merge redundant sections
@@ -891,7 +776,6 @@ TEST_SCENARIO: "Agent transformation preserves capabilities"
   VERIFY: 
     All original functions remain
     Delegation triggers preserved
-    Comprehension time < 15 seconds
     Pattern compliance achieved
 ```
 
@@ -901,101 +785,20 @@ TEST_SCENARIO: "Agent transformation preserves capabilities"
 - Data Flow: Markdown files read and transformed manually
 - Compatibility: Maintains Claude Code invocation patterns
 
-## Implementation Phases
-
-### Phase 1: High-Impact Agents (Week 1)
-**Target**: Most frequently used agents for immediate benefit
-
-**Priority Agents (4 agents):**
-- `the-chief` - Core orchestrator (critical for all delegation)
-- `the-software-engineer-api-design` - High usage frequency
-- `the-architect-system-design` - Critical for new features
-- `the-qa-engineer-test-strategy` - Quality gatekeeper
-
-**Success Criteria:**
-- All 4 agents transformed following new pattern
-- Delegation success rate ≥95% (baseline: 85%)
-- Comprehension time ≤15 seconds per agent
-- Zero capability loss verified through testing
-
-### Phase 2: Category Completion (Week 2)
-**Target**: Complete full categories for consistency
-
-**Category Focus (19 agents):**
-- Software Engineer agents (10 total)
-- QA Engineer agents (4 total)  
-- Security Engineer agents (5 total)
-
-**Success Criteria:**
-- Consistent patterns within each category
-- Cross-agent delegation paths clear
-- Category-specific methodology validated
-- Performance improvements measurable
-
-### Phase 3: Remaining Specialists (Week 3)
-**Target**: Complete transformation of all remaining agents
-
-**Remaining Categories (38 agents):**
-- Platform Engineers (11 agents)
-- Architects (7 agents, minus system-design from Phase 1)
-- Designers (6 agents)
-- ML Engineers (6 agents)
-- Mobile Engineers (5 agents)
-- Analysts (5 agents)
-
-**Success Criteria:**
-- All 61 agents following consistent pattern
-- Complete validation framework applied
-- Integration testing across all categories
-- Documentation updated
-
-### Phase 4: Validation & Optimization (Week 4)
-**Target**: Comprehensive validation and refinement
-
-**Validation Activities:**
-- End-to-end delegation scenario testing
-- Performance benchmark comparison
-- User experience evaluation
-- Edge case validation
-- Regression testing
-
-**Optimization Activities:**
-- Refine agents based on real usage patterns
-- Address any delegation failures
-- Optimize for specific use cases
-- Document lessons learned
-
-### Implementation Roadmap
-
-```mermaid
-gantt
-    title Agent Improvement Implementation
-    dateFormat  YYYY-MM-DD
-    section Phase 1
-    High-Impact Agents    :active, p1, 2024-09-12, 7d
-    section Phase 2
-    Category Completion   :p2, after p1, 7d
-    section Phase 3
-    Remaining Specialists :p3, after p2, 7d
-    section Phase 4
-    Validation & Optimization :p4, after p3, 7d
-```
 
 ## Validation Framework
 
 ### Pre-Transformation Baseline
 **Establish Current State Metrics:**
-- Average agent line count: 65 lines
 - HOW/WHAT ratio: 70/30
 - Delegation success rate: 85%
-- Average comprehension time: 30 seconds
 - Numbered procedural steps: 7 per agent
+- Pattern consistency: Varies by agent
 
 ### Transformation Validation Checklist
 
 #### Structural Validation
 For each transformed agent, verify:
-- [ ] **Line Count**: ≤50 lines (target: 45 lines)
 - [ ] **Role Definition**: Opens with "You are an expert [specific role]"
 - [ ] **Structure Compliance**: Follows Enhanced Agent Template
 - [ ] **No Procedural Steps**: Zero numbered step-by-step instructions
@@ -1026,10 +829,10 @@ For each transformed agent, verify:
 #### Quantitative Metrics (70% of score)
 ```yaml
 structural_metrics:
-  line_count_reduction:
+  pattern_compliance:
     weight: 20%
-    target: "≥30% reduction (65→45 lines)"
-    scoring: "Linear scale 0-100 points"
+    target: "Follows Enhanced Agent Template"
+    scoring: "Binary - compliant or not"
     
   what_ratio_improvement:
     weight: 25%
@@ -1050,18 +853,14 @@ functional_metrics:
 
 #### Qualitative Metrics (30% of score)
 ```yaml
-expert_review:
-  comprehension_speed:
-    measurement: "Time to understand agent purpose"
-    target: "≤15 seconds (50% improvement)"
-    
-  professional_clarity:
-    measurement: "Confidence in agent capabilities"
-    target: "≥8/10 reviewer rating"
-    
+functional_review:
   delegation_confidence:
-    measurement: "Routing decision certainty"
+    measurement: "Routing decision accuracy"
     target: "≥95% correct routing in scenarios"
+    
+  capability_completeness:
+    measurement: "All original functions preserved"
+    target: "100% capability retention"
 ```
 
 ### Validation Process Workflow
@@ -1076,17 +875,12 @@ Each phase must pass validation before proceeding:
 
 #### Validation Methods
 
-**Automated Checks:**
-- Line count validation
+**Validation Checks:**
 - Structure pattern matching
 - WHAT/HOW ratio analysis
 - Required section presence
-
-**Expert Review:**
-- Domain expertise assessment
-- Clarity and comprehension evaluation
-- Professional tone validation
 - Capability completeness review
+- Delegation boundary verification
 
 **Integration Testing:**
 - Delegation scenario execution
@@ -1098,16 +892,14 @@ Each phase must pass validation before proceeding:
 
 ### Mandatory Success Conditions
 - **Zero Capability Loss**: 100% of original agent functions preserved
-- **Comprehension Improvement**: ≥50% reduction in understanding time
 - **Delegation Success**: ≥95% correct routing decisions
 - **Structure Consistency**: All agents follow Enhanced Agent Template
-- **Line Count Reduction**: ≥30% average reduction (65→45 lines)
+- **WHAT-focused Content**: ≥70% declarative statements
 
 ### Target Performance Metrics
-- **Task Completion Speed**: 25% faster execution
-- **Maintenance Effort**: 40% reduction in update effort
-- **Cognitive Load**: 50% reduction in mental processing
-- **Quality Score**: ≥85% on comprehensive validation framework
+- **Pattern Compliance**: ≥85% adherence to template structure
+- **Delegation Accuracy**: ≥95% correct agent selection
+- **Capability Coverage**: 100% original functions preserved
 
 ### Failure Conditions
 - Any loss of core agent functionality
@@ -1169,8 +961,8 @@ Each phase must pass validation before proceeding:
 
 ## Quality Requirements
 
-- Performance: Agent comprehension time <15 seconds (50% reduction from current 30s), delegation decision time <5 seconds
-- Usability: Agents understandable by new developers within first reading, clear expertise boundaries for routing
+- Performance: Delegation accuracy ≥95%, consistent response patterns across agents
+- Usability: Clear expertise boundaries for accurate routing decisions
 - Security: No exposure of implementation details, maintain FOCUS/EXCLUDE security patterns, preserve permission boundaries
 - Reliability: Zero loss of agent capabilities during transformation, 95% delegation success rate (from current 85%)
 
@@ -1178,8 +970,8 @@ Each phase must pass validation before proceeding:
 
 ### Known Technical Issues
 
-- Current agents average 65 lines causing cognitive overload
-- 70% HOW-focused instructions limiting agent adaptability
+- Current agents use procedural HOW-focused instructions (70%)
+- Verbose framework-specific sections across multiple agents
 - Redundant framework-specific sections across multiple agents
 - Inconsistent structure making maintenance difficult
 
@@ -1206,7 +998,7 @@ Each phase must pass validation before proceeding:
 Given: An existing agent with 65+ lines and numbered steps
 And: The Effective Claude Agent Pattern is applied
 When: The agent is transformed following the pattern
-Then: Agent is reduced to <50 lines
+Then: Agent follows Enhanced Agent Template
 And: All capabilities are preserved
 And: Structure follows Core Responsibilities format
 ```
@@ -1229,13 +1021,13 @@ And: No loss of domain expertise
 And: Delegation triggers remain clear
 ```
 
-**Scenario 4: Comprehension Speed**
+**Scenario 4: Pattern Consistency**
 ```gherkin
-Given: A developer reading a transformed agent
-When: Understanding agent capabilities
-Then: Comprehension achieved in <15 seconds
-And: Role and responsibilities are immediately clear
-And: No ambiguity about agent expertise
+Given: Multiple transformed agents
+When: Comparing structure and format
+Then: All follow Enhanced Agent Template
+And: Consistent section organization
+And: Uniform delegation patterns
 ```
 
 ### Test Coverage Requirements
@@ -1243,8 +1035,7 @@ And: No ambiguity about agent expertise
 - **Pattern Compliance**: All agents follow Effective Claude Agent Pattern structure
 - **Capability Coverage**: Every original function preserved in transformed version  
 - **Delegation Success**: Agent selection accuracy >95% for common tasks
-- **Comprehension Testing**: New developers understand agents within 15 seconds
-- **Quality Metrics**: Line count <50, no numbered steps, clear responsibilities
+- **Quality Metrics**: No numbered steps, clear responsibilities, pattern compliance
 - **Security Preservation**: FOCUS/EXCLUDE patterns maintained, no implementation exposure
 
 ## Glossary
@@ -1268,7 +1059,7 @@ And: No ambiguity about agent expertise
 | MCP | Model Context Protocol for AI-system integration | Future compatibility consideration |
 | Declarative | Describing desired outcomes rather than procedures | Core transformation approach |
 | Pattern | Reusable solution structure for common problems | Basis for agent transformation |
-| Cognitive Load | Mental effort required to understand information | Key metric for improvement |
+| Pattern Consistency | Uniform structure across all agents | Key metric for improvement |
 
 ### Pattern Terms
 
