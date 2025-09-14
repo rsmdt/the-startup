@@ -55,16 +55,26 @@ Maintain awareness of:
 
 **🎯 Goal**: Establish the specification identity and setup working directory.
 
-Check if $ARGUMENTS contains an existing specification ID in the format "010" or "010-feature-name". If an ID is provided, run `{{STARTUP_PATH}}/bin/the-startup spec --read [ID]` to check for existing work. Parse the output to determine if the specification directory exists. If it does, display "📁 Found existing spec: [directory]" and ask the user whether to continue enhancing this specification.
+Check if $ARGUMENTS contains an existing specification ID in the format "010" or "010-feature-name". If an ID is provided, run `{{STARTUP_PATH}}/bin/the-startup spec --read [ID]` to check for existing work. Parse the output to determine if the specification directory exists.
+
+If the specification directory exists, check which documents exist (PRD.md, SDD.md, PLAN.md). Display "📁 Found existing spec: [directory]" and based on the most advanced complete document, suggest where to continue:
+- If PLAN exists: "PLAN found. Continue to Step 5 (Finalization)?"
+- If SDD exists but PLAN doesn't: "SDD found. Continue to Step 4 (Implementation Plan)?"
+- If PRD exists but SDD doesn't: "PRD found. Continue to Step 3 (Solution Design)?"
+- If no documents exist: "Directory exists but no documents found. Start from Step 2 (PRD)?"
+
+Ask the user to confirm the suggested starting point.
 
 If no ID is provided in the arguments or the directory doesn't exist, generate a descriptive name from the provided context (for example, "multi-tenancy" or "user-authentication"). Run `{{STARTUP_PATH}}/bin/the-startup spec [name]` to create a new specification directory. Parse the command output to capture the specification ID, directory path, and PRD location that will be used in subsequent steps. Display "📝 Creating new spec: [directory]" to confirm the creation.
 
 **🤔 Ask yourself before proceeding**:
 1. Have I checked $ARGUMENTS for an existing specification ID?
-2. If an ID was found, have I verified whether the specification already exists?
-3. Have I successfully created or located the specification directory?
-4. Do I have the specification ID, directory path, and PRD path for the next steps?
-5. Have I clearly communicated to the user what was found or created?
+2. If an ID was found, have I performed document status analysis for existing files?
+3. If existing documents were found, have I presented appropriate continuation options to the user?
+4. Have I provided dependency validation warnings if user choices could impact document quality?
+5. Have I successfully created or located the specification directory?
+6. Do I have the specification ID, directory path, and clear user intent for the next steps?
+7. Have I clearly communicated to the user what was found or created?
 
 ### 📋 Step 2: Product Requirements Documentation
 
