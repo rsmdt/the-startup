@@ -752,6 +752,22 @@ func generateSparkline(value, max, width int) string {
 	return sparkline.String()
 }
 
+// FormatAgentLeaderboard creates an agent usage leaderboard following tool leaderboard pattern
+func (d *DisplayFormatter) FormatAgentLeaderboard(agentStats map[string]*GlobalAgentStats, limit int) string {
+	if agentStats == nil || len(agentStats) == 0 {
+		return ""
+	}
+
+	switch d.outputFormat {
+	case "json":
+		return d.formatAgentLeaderboardJSON(agentStats, limit)
+	case "csv":
+		return d.formatAgentLeaderboardCSV(agentStats, limit)
+	default:
+		return d.formatAgentLeaderboardTable(agentStats, limit)
+	}
+}
+
 // CommandLeaderboard formats a leaderboard for commands (used by agents)
 func (d *DisplayFormatter) FormatCommandLeaderboard(commands map[string]int) string {
 	if commands == nil || len(commands) == 0 {
@@ -880,7 +896,193 @@ func (d *DisplayFormatter) formatCommandLeaderboardCSV(commands map[string]int) 
 			fmt.Sprintf("%d", entry.count),
 		})
 	}
-	
+
+	w.Flush()
+	return buf.String()
+}
+
+// Agent leaderboard formatting methods
+
+func (d *DisplayFormatter) formatAgentLeaderboardTable(agentStats map[string]*GlobalAgentStats, limit int) string {
+	var buf bytes.Buffer
+
+	// Sort agents by total invocations
+	type agentEntry struct {
+		name  string
+		stats *GlobalAgentStats
+	}
+
+	entries := make([]agentEntry, 0, len(agentStats))
+	for name, stats := range agentStats {
+		// Skip nil stats
+		if stats == nil {
+			continue
+		}
+		entries = append(entries, agentEntry{name, stats})
+	}
+
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].stats.Count > entries[j].stats.Count
+	})
+
+	// Apply limit
+	if limit > 0 && limit < len(entries) {
+		entries = entries[:limit]
+	}
+
+	// Calculate total for percentages
+	totalInvocations := 0
+	for _, e := range entries {
+		totalInvocations += e.stats.Count
+	}
+
+	// Header
+	fmt.Fprintln(&buf, "╔════════════════════════════════════════════════════════════════╗")
+	fmt.Fprintln(&buf, "║                   AGENT USAGE LEADERBOARD                     ║")
+	fmt.Fprintln(&buf, "╚════════════════════════════════════════════════════════════════╝")
+	fmt.Fprintln(&buf)
+
+	w := tabwriter.NewWriter(&buf, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "Rank\tAgent\tTotal Invocations\t%\tSuccess Rate\tAvg Duration\tSparkline")
+	fmt.Fprintln(w, "────\t─────\t─────────────────\t─\t────────────\t────────────\t─────────")
+
+	for i, entry := range entries {
+		percentage := float64(entry.stats.Count) * 100 / float64(totalInvocations)
+		successRate := float64(entry.stats.SuccessCount) / float64(entry.stats.Count)
+		if entry.stats.Count == 0 {
+			successRate = 0
+		}
+
+		sparkline := generateSparkline(entry.stats.Count, entries[0].stats.Count, 10)
+
+		fmt.Fprintf(w, "%d\t%s\t%d\t%.1f%%\t%.1f%%\t%.0fms\t%s\n",
+			i+1,
+			entry.name,
+			entry.stats.Count,
+			percentage,
+			successRate*100,
+			entry.stats.Mean(),
+			sparkline)
+	}
+
+	w.Flush()
+	return buf.String()
+}
+
+func (d *DisplayFormatter) formatAgentLeaderboardJSON(agentStats map[string]*GlobalAgentStats, limit int) string {
+	// Define local types for JSON output
+	type agentStatsForJSON struct {
+		Count            int     `json:"count"`
+		SuccessCount     int     `json:"success_count"`
+		FailureCount     int     `json:"failure_count"`
+		SuccessRate      float64 `json:"success_rate"`
+		TotalDurationMs  int64   `json:"total_duration_ms"`
+		AvgDurationMs    float64 `json:"avg_duration_ms"`
+	}
+
+	// Convert to sorted slice
+	type agentEntry struct {
+		Rank  int                `json:"rank"`
+		Name  string             `json:"name"`
+		Stats *agentStatsForJSON `json:"stats"`
+	}
+
+	entries := make([]agentEntry, 0, len(agentStats))
+	for name, stats := range agentStats {
+		if stats == nil {
+			continue
+		}
+
+		successRate := float64(stats.SuccessCount) / float64(stats.Count)
+		if stats.Count == 0 {
+			successRate = 0
+		}
+
+		entries = append(entries, agentEntry{
+			Name: name,
+			Stats: &agentStatsForJSON{
+				Count:           stats.Count,
+				SuccessCount:    stats.SuccessCount,
+				FailureCount:    stats.FailureCount,
+				SuccessRate:     successRate,
+				TotalDurationMs: stats.TotalDurationMs,
+				AvgDurationMs:   stats.Mean(),
+			},
+		})
+	}
+
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].Stats.Count > entries[j].Stats.Count
+	})
+
+	// Apply limit and set ranks
+	if limit > 0 && limit < len(entries) {
+		entries = entries[:limit]
+	}
+
+	for i := range entries {
+		entries[i].Rank = i + 1
+	}
+
+	data, err := json.MarshalIndent(map[string]interface{}{
+		"leaderboard":  entries,
+		"total_agents": len(agentStats),
+		"showing":      len(entries),
+	}, "", "  ")
+
+	if err != nil {
+		return fmt.Sprintf("Error formatting JSON: %v", err)
+	}
+	return string(data)
+}
+
+func (d *DisplayFormatter) formatAgentLeaderboardCSV(agentStats map[string]*GlobalAgentStats, limit int) string {
+	var buf bytes.Buffer
+	w := csv.NewWriter(&buf)
+
+	// Sort agents
+	type agentEntry struct {
+		name  string
+		stats *GlobalAgentStats
+	}
+
+	entries := make([]agentEntry, 0, len(agentStats))
+	for name, stats := range agentStats {
+		if stats == nil {
+			continue
+		}
+		entries = append(entries, agentEntry{name, stats})
+	}
+
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].stats.Count > entries[j].stats.Count
+	})
+
+	// Apply limit
+	if limit > 0 && limit < len(entries) {
+		entries = entries[:limit]
+	}
+
+	// Headers
+	w.Write([]string{"Rank", "Agent", "Total Invocations", "Success Rate", "Avg Duration (ms)", "Total Duration (ms)"})
+
+	// Data rows
+	for i, entry := range entries {
+		successRate := float64(entry.stats.SuccessCount) / float64(entry.stats.Count)
+		if entry.stats.Count == 0 {
+			successRate = 0
+		}
+
+		w.Write([]string{
+			fmt.Sprintf("%d", i+1),
+			entry.name,
+			fmt.Sprintf("%d", entry.stats.Count),
+			fmt.Sprintf("%.2f", successRate),
+			fmt.Sprintf("%.0f", entry.stats.Mean()),
+			fmt.Sprintf("%d", entry.stats.TotalDurationMs),
+		})
+	}
+
 	w.Flush()
 	return buf.String()
 }

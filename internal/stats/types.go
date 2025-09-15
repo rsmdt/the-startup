@@ -59,6 +59,10 @@ type UserMessage struct {
 	Result    json.RawMessage `json:"result,omitempty"`      // Tool execution result
 	Error     *string         `json:"error,omitempty"`       // Tool execution error
 	
+	// Agent detection (populated during processing)
+	DetectedAgent       string  `json:"detected_agent,omitempty"`
+	DetectionConfidence float64 `json:"detection_confidence,omitempty"`
+
 	// Metadata
 	IsToolResult bool      `json:"is_tool_result,omitempty"`
 	Timestamp    time.Time `json:"timestamp"`
@@ -80,7 +84,11 @@ type AssistantMessage struct {
 	Model        string `json:"model,omitempty"`
 	InputTokens  int    `json:"input_tokens,omitempty"`
 	OutputTokens int    `json:"output_tokens,omitempty"`
-	
+
+	// Agent detection (populated during processing)
+	DetectedAgent       string  `json:"detected_agent,omitempty"`
+	DetectionConfidence float64 `json:"detection_confidence,omitempty"`
+
 	// Metadata
 	ModelID    string    `json:"model_id,omitempty"`
 	Timestamp  time.Time `json:"timestamp"`
@@ -107,7 +115,12 @@ type SystemMessage struct {
 	Event     string          `json:"event"`            // Event type
 	Message   string          `json:"message"`          // System message
 	Metadata  json.RawMessage `json:"metadata"`         // Additional event data
-	Timestamp time.Time       `json:"timestamp"`
+
+	// Agent detection (populated during processing)
+	DetectedAgent       string  `json:"detected_agent,omitempty"`
+	DetectionConfidence float64 `json:"detection_confidence,omitempty"`
+
+	Timestamp time.Time `json:"timestamp"`
 }
 
 // SummaryMessage represents session summaries and statistics
@@ -133,6 +146,14 @@ type ToolError struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
 	Details string `json:"details,omitempty"`
+}
+
+// Error implements the error interface for ToolError
+func (e *ToolError) Error() string {
+	if e.Details != "" {
+		return e.Code + ": " + e.Message + " - " + e.Details
+	}
+	return e.Code + ": " + e.Message
 }
 
 // Common tool parameter structures

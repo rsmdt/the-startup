@@ -251,6 +251,16 @@ func (p *JSONLParser) parseEntry(line []byte, lineNum int, opts ParseOptions) (*
 								if output, ok := block["output"].(string); ok {
 									userMsg.Output = output
 								}
+								// Extract result field for Task tool results
+								if result, ok := block["result"]; ok {
+									if resultBytes, err := json.Marshal(result); err == nil {
+										userMsg.Result = resultBytes
+									}
+								}
+								// Extract tool_name if present
+								if toolName, ok := block["tool_name"].(string); ok {
+									userMsg.ToolName = toolName
+								}
 								if isError, ok := block["is_error"].(bool); ok && isError {
 									errorMsg := "Tool execution failed"
 									userMsg.Error = &errorMsg
@@ -260,8 +270,14 @@ func (p *JSONLParser) parseEntry(line []byte, lineNum int, opts ParseOptions) (*
 					}
 				}
 			}
-			
+
 			entry.User = &userMsg
+
+			// Detect agent usage for user messages (e.g., Tool results with subagent_type)
+			if agent, confidence := DetectAgent(*entry); agent != "" {
+				entry.User.DetectedAgent = agent
+				entry.User.DetectionConfidence = confidence
+			}
 		}
 
 	case "assistant":
@@ -336,8 +352,14 @@ func (p *JSONLParser) parseEntry(line []byte, lineNum int, opts ParseOptions) (*
 			if assistantMsg.Text != "" {
 				p.extractCommands(&assistantMsg)
 			}
-			
+
 			entry.Assistant = &assistantMsg
+
+			// Detect agent usage after entry is fully populated
+			if agent, confidence := DetectAgent(*entry); agent != "" {
+				entry.Assistant.DetectedAgent = agent
+				entry.Assistant.DetectionConfidence = confidence
+			}
 		}
 
 	case "system":
@@ -365,8 +387,14 @@ func (p *JSONLParser) parseEntry(line []byte, lineNum int, opts ParseOptions) (*
 				if err := json.Unmarshal(msg.Content, &contentStr); err == nil {
 					systemMsg.Text = contentStr
 				}
-				
+
 				entry.System = &systemMsg
+
+				// Detect agent usage for system messages
+				if agent, confidence := DetectAgent(*entry); agent != "" {
+					entry.System.DetectedAgent = agent
+					entry.System.DetectionConfidence = confidence
+				}
 			}
 		}
 
