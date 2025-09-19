@@ -36,28 +36,28 @@ If implementation cannot follow specification exactly:
 
 ---
 
-## Context Ingestion
+## Context Priming
 
 *GATE: You MUST fully read all files mentioned in this section before starting any implementation.*
 
-### Specification
+**Specification**:
 
 [NEEDS CLARIFICATION: Replace file location with actual path and add/remove files accordingly]
-- **PRD**: `docs/specs/[ID]-[feature-name]/PRD.md` - Product Requirements (if exists)
-- **SDD**: `docs/specs/[ID]-[feature-name]/SDD.md` - Solution Design
+- `docs/specs/[ID]-[feature-name]/PRD.md` - Product Requirements (if exists)
+- `docs/specs/[ID]-[feature-name]/SDD.md` - Solution Design
 
-### Key Design Decisions
+**Key Design Decisions**:
 
 [NEEDS CLARIFICATION: Extract critical decisions from the SDD]
 - [Critical decision 1]
 - [Critical decision 2]
 
-### Implementation Context
+**Implementation Context**:
 
 [NEEDS CLARIFICATION: Extract actionable information from specs]
-- **Commands to run**: [Project-specific commands from SDD for testing, building, etc.]
-- **Patterns to follow**: [Links to relevant pattern docs]
-- **Interfaces to implement**: [Links to interface specifications]
+- Commands to run: [Project-specific commands from SDD for testing, building, etc.]
+- Patterns to follow: [Links to relevant pattern docs]
+- Interfaces to implement: [Links to interface specifications]
 
 ---
 
@@ -67,7 +67,7 @@ If implementation cannot follow specification exactly:
 
 - [ ] **Phase 1**: [What functionality this phase delivers]
 
-    - [ ] **Load Context**: [What detailed sections are relevant for this phase frmo the specification]
+    - [ ] **Prime Context**: [What detailed sections are relevant for this phase frmo the specification]
         - [ ] [Read interface contracts] `[ref: file; lines: 1-10]`
     - [ ] **Write Tests**: [What behavior needs to be tested]
         - [ ] [Specific test case to verify specific behaviour] `[ref: file; lines: 123]` `[activity: type]`
@@ -82,7 +82,7 @@ If implementation cannot follow specification exactly:
 - [ ] **Phase 2**: [What functionality this phase delivers]
 
     - [ ] [Sub-phase/Component A] `[parallel: true]` `[component: name]`
-        - [ ] **Load Context**: [What detailed sections are relevant for this phase frmo the specification]
+        - [ ] **Prime Context**: [What detailed sections are relevant for this phase frmo the specification]
         - [ ] **Write Tests**: [What behavior needs to be tested]
         - [ ] **Implement**: [What needs to be built to pass tests]
         - [ ] **Validate**: [Verify that implementation is according to quality gates]

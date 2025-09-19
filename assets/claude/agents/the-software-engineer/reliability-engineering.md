@@ -85,7 +85,7 @@ You will provide:
 - Test failure scenarios regularly through chaos engineering
 - Monitor leading indicators that predict failures before they occur
 - Document recovery procedures and practice them regularly
-- Design monitoring infrastructure that survives when primary systems fail
+- Design monitoring systems that remain operational even when primary systems fail
 - Establish clear ownership and escalation paths for incidents
 - Build confidence through progressive rollouts and feature flags
 

@@ -19,25 +19,6 @@
 
 ---
 
-## Introduction and Goals
-
-### Quality Goals
-
-[NEEDS CLARIFICATION: What are the top 3-5 quality attributes that are most critical for this feature's architecture? Prioritize from most to least important]
-
-The following quality goals shape the architectural decisions and implementation approach:
-
-| Priority | Quality Goal | Scenario/Metric |
-|----------|-------------|-----------------|
-| 1 | [Performance/Security/Reliability/etc.] | [Specific measurable target, e.g., "Response time < 200ms for 95% of requests"] |
-| 2 | [Quality Attribute] | [Specific measurable target or scenario] |
-| 3 | [Quality Attribute] | [Specific measurable target or scenario] |
-| 4 | [Quality Attribute] | [Specific measurable target or scenario] |
-| 5 | [Quality Attribute] | [Specific measurable target or scenario] |
-
-**Quality Goal Rationale**:
-[NEEDS CLARIFICATION: Brief explanation of why these specific quality goals were prioritized this way for this feature]
-
 ## Constraints
 
 [NEEDS CLARIFICATION: What constraints limit the solution space?]
