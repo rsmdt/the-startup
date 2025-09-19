@@ -286,6 +286,73 @@ flowchart TD
 
 </details>
 
+### `/s:analyze` - Discover and Document System Patterns
+
+Systematically discovers and documents business rules, technical patterns, and system interfaces through iterative analysis:
+
+```bash
+# Analyze business domain and rules
+/s:analyze the user authentication business rules and validation workflows
+
+# Analyze technical architecture and patterns
+/s:analyze the microservices communication patterns and error handling
+
+# Analyze security patterns and vulnerabilities
+/s:analyze the API authentication and authorization mechanisms
+
+# Analyze performance patterns and bottlenecks
+/s:analyze the database query patterns and caching strategies
+
+# Analyze integration patterns and APIs
+/s:analyze the payment gateway integration and webhook handling
+
+# Analyze data modeling and storage
+/s:analyze the user data schema and relationship patterns
+```
+
+**Documents Created:**
+- `docs/domain/` - Business rules, domain logic, workflows, and business patterns
+- `docs/patterns/` - Technical code patterns, architectural solutions, design patterns
+- `docs/interfaces/` - External API contracts, service integrations, data exchange patterns
+
+**Key Specialization Areas:**
+
+**Business Analysis** - Focuses on domain logic and business value:
+- Business rules, validation logic, workflow patterns
+- Domain models, business processes, compliance requirements
+- User journeys, business constraints, approval workflows
+
+**Technical Analysis** - Focuses on code architecture and implementation:
+- Design patterns, architectural patterns, code structure
+- Component relationships, dependency patterns, module organization
+- Error handling, logging, monitoring patterns
+
+**Key Features:**
+- 🔍 Iterative discovery - Execute discovery → documentation → review cycles
+- 📚 Pattern documentation - Captures reusable architectural solutions
+- 🔄 Real-time tracking - TodoWrite for cycle and task management
+- 🛑 User-directed cycles - Pauses between cycles for direction
+
+#### Workflow
+
+<details>
+<summary>show details</summary>
+
+```mermaid
+flowchart TD
+    A([Analysis Request]) --> |initialize| B[**Scope Definition**<br/>Clarify analysis area<br/>Set cycle plan]
+    B --> |start cycle| C[**Discovery Phase**<br/>⚡ *Specialist analysis*<br/>🔍 *Pattern identification*]
+    C --> |document| D[**Documentation Phase**<br/>📄 *Create domain docs*<br/>📄 *Create pattern docs*<br/>📄 *Create interface docs*]
+    D --> |review| E[**Review & Validation**<br/>Check completeness<br/>Identify gaps]
+    E --> |continue?| F{More Cycles<br>Needed?}
+
+    F --> |yes| C
+    F --> |no| G[**Final Summary**<br/>📊 *Analysis report*<br/>🎯 *Recommendations*<br/>📋 *Next steps*]
+    G --> END[✅ **Analysis Complete**]
+```
+
+</details>
+
 ## 🎯 The Startup Output Style
 
 For the most immersive experience, activate **The Startup** output style to transform Claude into your high-energy technical co-founder.
