@@ -75,7 +75,7 @@ func TestMainModelFileSelectionWithHuh(t *testing.T) {
 	}
 
 	// Should have confirmation choices in the file selection model
-	if len(model.fileSelectionModel.choices) != 2 {
+	if len(model.fileSelectionModel.GetChoices()) != 2 {
 		t.Error("Expected confirmation choices to be set")
 	}
 

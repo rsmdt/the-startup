@@ -3,14 +3,13 @@ package ui
 import (
 	"embed"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
-	"github.com/charmbracelet/lipgloss/tree"
 	"github.com/rsmdt/the-startup/internal/installer"
 )
 
@@ -89,39 +88,12 @@ func (m CompleteModel) View() string {
 	}
 	s.WriteString("\n\n")
 
-	// Installation locations
+	// Use standardized path renderer for consistency
 	claudePath := m.installer.GetClaudePath()
 	startupPath := m.installer.GetInstallPath()
 
-	// Simplify paths for display
-	displayClaudePath := claudePath
-	displayStartupPath := startupPath
-
-	home := os.Getenv("HOME")
-	if home != "" {
-		if strings.HasPrefix(claudePath, home) {
-			displayClaudePath = strings.Replace(claudePath, home, "~", 1)
-		}
-		if strings.HasPrefix(startupPath, home) {
-			displayStartupPath = strings.Replace(startupPath, home, "~", 1)
-		}
-	}
-
-	if m.mode == ModeUninstall {
-		s.WriteString(m.styles.Normal.Render("Uninstallation locations:"))
-		s.WriteString("\n")
-		s.WriteString(m.styles.Warning.Render("  Claude files: " + displayClaudePath))
-		s.WriteString("\n")
-		s.WriteString(m.styles.Warning.Render("  Startup files: " + displayStartupPath))
-		s.WriteString("\n\n")
-	} else {
-		s.WriteString(m.styles.Normal.Render("Installation locations:"))
-		s.WriteString("\n")
-		s.WriteString(m.styles.Info.Render("  Claude files: " + displayClaudePath))
-		s.WriteString("\n")
-		s.WriteString(m.styles.Info.Render("  Startup files: " + displayStartupPath))
-		s.WriteString("\n\n")
-	}
+	renderer := NewProgressiveDisclosureRenderer()
+	s.WriteString(renderer.RenderSelectedPaths(claudePath, startupPath, m.mode))
 
 	// Display the tree of installed/removed files - same as during selection
 	if m.mode == ModeUninstall {
@@ -162,219 +134,252 @@ func (m CompleteModel) Ready() bool {
 
 // buildCompletionTree builds the same tree structure shown during file selection
 func (m CompleteModel) buildCompletionTree() string {
-	enumeratorStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("63")).MarginRight(1)
-	rootStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("35"))
-	itemStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("212"))
-	updateStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("214")) // Orange for updates
-	
-	// For install mode, build the tree showing what was installed
-	buildSubtree := func(embedFS *embed.FS, basePath string, prefix string) []any {
-		filesSeen := make(map[string]bool)
-		
-		// Build a hierarchical structure for files
-		type fileNode struct {
-			name     string
-			children map[string]*fileNode
-			isFile   bool
-			fullPath string
-			exists   bool
-		}
-		
-		root := &fileNode{
-			children: make(map[string]*fileNode),
-		}
-		
-		// Add files from selectedFiles list that match this prefix
-		for _, file := range m.selectedFiles {
-			if strings.HasPrefix(file, prefix) {
-				relPath := strings.TrimPrefix(file, prefix)
-				filesSeen[relPath] = true
-				
-				// Build the tree structure
-				parts := strings.Split(relPath, "/")
-				current := root
-				
-				for i, part := range parts {
-					if _, exists := current.children[part]; !exists {
-						current.children[part] = &fileNode{
-							name:     part,
-							children: make(map[string]*fileNode),
-							isFile:   i == len(parts)-1,
-							fullPath: file,
-							exists:   false, // For completion, we show them as new
-						}
-					}
-					current = current.children[part]
-				}
-			}
-		}
-		
-		// Convert the tree structure to lipgloss tree items
-		var buildTreeItems func(node *fileNode, depth int) []any
-		buildTreeItems = func(node *fileNode, depth int) []any {
-			var items []any
-			
-			// Sort children for consistent display
-			var sortedKeys []string
-			for k := range node.children {
-				sortedKeys = append(sortedKeys, k)
-			}
-			sort.Strings(sortedKeys)
-			
-			for _, key := range sortedKeys {
-				child := node.children[key]
-				
-				if child.isFile {
-					// It's a file - remove .md extension for display
-					displayName := strings.TrimSuffix(child.name, ".md")
-					displayName = strings.TrimSuffix(displayName, ".json")
-					
-					// For commands, format as /s:command
-					if prefix == "commands/" && strings.Contains(child.fullPath, "/s/") {
-						// Convert s/specify.md to /s:specify
-						displayName = "/s:" + displayName
-					}
-					
-					if m.mode == ModeUninstall {
-						items = append(items, itemStyle.Render("✗ " + displayName))
-					} else {
-						items = append(items, itemStyle.Render(displayName))
-					}
-				} else {
-					// It's a directory
-					
-					// For agents prefix, show condensed format with activity count
-					if prefix == "agents/" {
-						// Count the .md files for specialized activities
-						fileCount := 0
-						for _, grandchild := range child.children {
-							if grandchild.isFile && strings.HasSuffix(grandchild.name, ".md") {
-								fileCount++
-							}
-						}
-						
-						// Format: "the-analyst (5 specialized activities)"
-						displayName := child.name
-						if fileCount > 0 {
-							activityLabel := "specialized activity"
-							if fileCount > 1 {
-								activityLabel = "specialized activities"
-							}
-							displayName = fmt.Sprintf("%s (%d %s)", child.name, fileCount, activityLabel)
-						}
-						
-						// Don't expand agent directories, just show the count
-						items = append(items, itemStyle.Render(displayName))
-					} else if prefix == "commands/" && child.name == "s" {
-						// For commands/s directory, expand but format files specially
-						dirItems := buildTreeItems(child, depth+1)
-						// Add the command items directly without showing "s/" directory
-						items = append(items, dirItems...)
-					} else {
-						// For other directories, expand normally
-						dirItems := buildTreeItems(child, depth+1)
-						if len(dirItems) > 0 {
-							// Create a subtree for this directory
-							dirTree := tree.New()
-							for _, item := range dirItems {
-								dirTree = dirTree.Child(item)
-							}
-							items = append(items, child.name+"/")
-							items = append(items, dirTree)
-						}
-					}
-				}
-			}
-			
-			return items
-		}
-		
-		return buildTreeItems(root, 0)
-	}
-	
-	// Build trees for each category
-	agentItems := buildSubtree(m.claudeAssets, "assets/claude/agents", "agents/")
-	commandItems := buildSubtree(m.claudeAssets, "assets/claude/commands", "commands/")
-	outputStyleItems := buildSubtree(m.claudeAssets, "assets/claude/output-styles", "output-styles/")
-	
-	// Check if settings.json was updated
-	settingsExists := m.installer.CheckSettingsExists()
-	
+	var s strings.Builder
+
+	// Use themed styles for consistency (matching selection views)
+	styles := GetStyles()
+	rootStyle := styles.Title
+	normalStyle := styles.Normal     // Default text color (light gray)
+	updateStyle := styles.Warning    // Orange/Peach for update indicators
+
 	claudePath := m.installer.GetClaudePath()
 	displayPath := claudePath
 	if strings.HasPrefix(claudePath, os.Getenv("HOME")) {
 		displayPath = strings.Replace(claudePath, os.Getenv("HOME"), "~", 1)
 	}
-	
-	// Add settings.json with appropriate styling
-	settingsItem := "settings.json"
-	if m.mode == ModeUninstall {
-		settingsItem = itemStyle.Render("✗ settings.json")
-	} else if settingsExists {
-		settingsItem = updateStyle.Render("settings.json (updated)")
-	} else {
-		settingsItem = itemStyle.Render("settings.json")
-	}
-	
-	// Build children list for the tree with proper nesting
-	children := []any{}
-	
-	// Add agents folder with its items as a subtree
-	if len(agentItems) > 0 {
-		agentsTree := tree.New()
-		for _, item := range agentItems {
-			agentsTree = agentsTree.Child(item)
-		}
-		children = append(children, "agents/")
-		children = append(children, agentsTree)
-	}
-	
-	// Add commands folder with its items as a subtree
-	if len(commandItems) > 0 {
-		commandsTree := tree.New()
-		for _, item := range commandItems {
-			commandsTree = commandsTree.Child(item)
-		}
-		children = append(children, "commands/")
-		children = append(children, commandsTree)
-	}
-	
-	// Add output-styles folder with its items as a subtree
-	if len(outputStyleItems) > 0 {
-		outputStylesTree := tree.New()
-		for _, item := range outputStyleItems {
-			outputStylesTree = outputStylesTree.Child(item)
-		}
-		children = append(children, "output-styles/")
-		children = append(children, outputStylesTree)
-	}
-	
-	// Settings files go at root level
-	children = append(children, settingsItem)
-	
-	// Add settings.local.json if it exists in selected files
+
+	// Check if settings.json was updated
+	settingsExists := m.installer.CheckSettingsExists()
+
+	// Root path
+	s.WriteString(rootStyle.Render("⁜ " + displayPath))
+	s.WriteString("\n")
+
+	// Claude section with checkmark (always selected in completion)
+	s.WriteString(normalStyle.Render("✓ .claude/"))
+	s.WriteString("\n")
+
+	// Check if we have agents files
+	hasAgents := false
 	for _, file := range m.selectedFiles {
-		if file == "settings.local.json" {
-			localSettingsPath := filepath.Join(claudePath, "settings.local.json")
-			localSettingsItem := "settings.local.json"
-			if m.mode == ModeUninstall {
-				localSettingsItem = itemStyle.Render("✗ settings.local.json")
-			} else if _, err := os.Stat(localSettingsPath); err == nil {
-				localSettingsItem = updateStyle.Render("settings.local.json (updated)")
-			} else {
-				localSettingsItem = itemStyle.Render("settings.local.json")
-			}
-			children = append(children, localSettingsItem)
+		if strings.HasPrefix(file, "agents/") {
+			hasAgents = true
 			break
 		}
 	}
-	
-	t := tree.
-		Root("⁜ " + displayPath).
-		Child(children...).
-		Enumerator(tree.RoundedEnumerator).
-		EnumeratorStyle(enumeratorStyle).
-		RootStyle(rootStyle)
-	
-	return t.String()
+
+	// Check if we have commands files
+	hasCommands := false
+	for _, file := range m.selectedFiles {
+		if strings.HasPrefix(file, "commands/") {
+			hasCommands = true
+			break
+		}
+	}
+
+	// Check if we have output-styles files
+	hasOutputStyles := false
+	for _, file := range m.selectedFiles {
+		if strings.HasPrefix(file, "output-styles/") {
+			hasOutputStyles = true
+			break
+		}
+	}
+
+	// Check if we have settings files
+	hasSettings := false
+	for _, file := range m.selectedFiles {
+		if file == "settings.json" || file == "settings.local.json" {
+			hasSettings = true
+			break
+		}
+	}
+
+	// Agents subsection
+	if hasAgents {
+		s.WriteString(normalStyle.Render("✓ ├── agents/"))
+		s.WriteString("\n")
+
+		// Group and display agent files
+		agentFiles := make(map[string]bool)
+
+		// Process agent files based on debug output format
+		for _, file := range m.selectedFiles {
+			if strings.HasPrefix(file, "agents/") {
+				relPath := strings.TrimPrefix(file, "agents/")
+
+				if strings.HasSuffix(relPath, ".md") {
+					// It's a direct .md file (like "the-chief.md", "the-meta-agent.md")
+					agentName := strings.TrimSuffix(relPath, ".md")
+					agentFiles[agentName] = true
+				} else if !strings.Contains(relPath, "/") {
+					// It's a bare directory name (like "the-analyst", "the-designer")
+					// Count specialized activities by checking the embedded filesystem
+					fileCount := 0
+					if m.claudeAssets != nil {
+						agentPath := "assets/claude/agents/" + relPath
+						fs.WalkDir(m.claudeAssets, agentPath, func(path string, d fs.DirEntry, err error) error {
+							if err == nil && !d.IsDir() && strings.HasSuffix(path, ".md") {
+								fileCount++
+							}
+							return nil
+						})
+					}
+
+					if fileCount > 0 {
+						activityLabel := "specialized activity"
+						if fileCount > 1 {
+							activityLabel = "specialized activities"
+						}
+						displayName := fmt.Sprintf("%s (%d %s)", relPath, fileCount, activityLabel)
+						agentFiles[displayName] = true
+					} else {
+						// If no specialized activities found, just show the agent name
+						agentFiles[relPath] = true
+					}
+				}
+			}
+		}
+
+		// Sort and display agent files
+		var agentNames []string
+		for name := range agentFiles {
+			agentNames = append(agentNames, name)
+		}
+		sort.Strings(agentNames)
+
+		for _, name := range agentNames {
+			if m.mode == ModeUninstall {
+				s.WriteString(normalStyle.Render("✗ │   ├── " + name))
+			} else {
+				s.WriteString(normalStyle.Render("✓ │   ├── " + name))
+			}
+			s.WriteString("\n")
+		}
+	}
+
+	// Commands subsection
+	if hasCommands {
+		commandsBranch := "├── "
+		if !hasOutputStyles && !hasSettings {
+			commandsBranch = "└── "
+		}
+		s.WriteString(normalStyle.Render("✓ " + commandsBranch + "commands/"))
+		s.WriteString("\n")
+
+		// Group and display command files
+		commandFiles := make([]string, 0)
+		for _, file := range m.selectedFiles {
+			if strings.HasPrefix(file, "commands/") {
+				// Extract relative path
+				relPath := strings.TrimPrefix(file, "commands/")
+
+				// Format display name
+				displayName := strings.TrimSuffix(filepath.Base(relPath), ".md")
+
+				// Special formatting for s/ commands
+				if strings.Contains(relPath, "/s/") {
+					displayName = "/s:" + displayName
+				}
+
+				commandFiles = append(commandFiles, displayName)
+			}
+		}
+
+		// Sort and display command files
+		sort.Strings(commandFiles)
+
+		for _, name := range commandFiles {
+			treeBranch := "│   ├── "
+			if !hasOutputStyles && !hasSettings {
+				treeBranch = "    ├── "
+			}
+			if m.mode == ModeUninstall {
+				s.WriteString(normalStyle.Render("✗ " + treeBranch + name))
+			} else {
+				s.WriteString(normalStyle.Render("✓ " + treeBranch + name))
+			}
+			s.WriteString("\n")
+		}
+	}
+
+	// Output-styles subsection
+	if hasOutputStyles {
+		outputStylesBranch := "├── "
+		if !hasSettings {
+			outputStylesBranch = "└── "
+		}
+		s.WriteString(normalStyle.Render("✓ " + outputStylesBranch + "output-styles/"))
+		s.WriteString("\n")
+
+		// Group and display output-style files
+		outputStyleFiles := make([]string, 0)
+		for _, file := range m.selectedFiles {
+			if strings.HasPrefix(file, "output-styles/") {
+				// Extract relative path
+				relPath := strings.TrimPrefix(file, "output-styles/")
+
+				// Format display name
+				displayName := strings.TrimSuffix(filepath.Base(relPath), ".json")
+				displayName = strings.TrimSuffix(displayName, ".md")
+
+				outputStyleFiles = append(outputStyleFiles, displayName)
+			}
+		}
+
+		// Sort and display output-style files
+		sort.Strings(outputStyleFiles)
+
+		for _, name := range outputStyleFiles {
+			treeBranch := "│   ├── "
+			if !hasSettings {
+				treeBranch = "    ├── "
+			}
+			if m.mode == ModeUninstall {
+				s.WriteString(normalStyle.Render("✗ " + treeBranch + name))
+			} else {
+				s.WriteString(normalStyle.Render("✓ " + treeBranch + name))
+			}
+			s.WriteString("\n")
+		}
+	}
+
+	// Settings files
+	if hasSettings {
+		for _, file := range m.selectedFiles {
+			if file == "settings.json" {
+				var settingsLine string
+				if m.mode == ModeUninstall {
+					settingsLine = "✗ └── settings.json"
+				} else if settingsExists {
+					settingsLine = "✓ └── " + updateStyle.Render("settings.json (updated)")
+				} else {
+					settingsLine = "✓ └── settings.json"
+				}
+				s.WriteString(normalStyle.Render(settingsLine))
+				s.WriteString("\n")
+				break
+			}
+		}
+
+		// Handle settings.local.json if it exists
+		for _, file := range m.selectedFiles {
+			if file == "settings.local.json" {
+				localSettingsPath := filepath.Join(claudePath, "settings.local.json")
+				var localSettingsLine string
+				if m.mode == ModeUninstall {
+					localSettingsLine = "✗ └── settings.local.json"
+				} else if _, err := os.Stat(localSettingsPath); err == nil {
+					localSettingsLine = "✓ └── " + updateStyle.Render("settings.local.json (updated)")
+				} else {
+					localSettingsLine = "✓ └── settings.local.json"
+				}
+				s.WriteString(normalStyle.Render(localSettingsLine))
+				s.WriteString("\n")
+				break
+			}
+		}
+	}
+
+	return s.String()
 }

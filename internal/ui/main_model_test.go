@@ -102,7 +102,7 @@ func TestMainModelFileSelectionIntegration(t *testing.T) {
 	}
 
 	// Should have confirmation choices initialized in file selection model
-	if len(model.fileSelectionModel.choices) != 2 {
+	if len(model.fileSelectionModel.GetChoices()) != 2 {
 		t.Error("Expected confirmation choices to be initialized in file selection state")
 	}
 
@@ -124,17 +124,14 @@ func TestMainModelFileSelectionIntegration(t *testing.T) {
 		t.Log("Note: View doesn't contain 'commands' folder, expected with nil assets")
 	}
 
-	// Verify confirmation options are shown
-	if !strings.Contains(view, "Yes, give me awesome") {
-		t.Error("Expected view to contain confirmation option 'Yes, give me awesome'")
-	}
-	if !strings.Contains(view, "Huh? I did not sign up for this") {
-		t.Error("Expected view to contain confirmation option 'Huh? I did not sign up for this'")
+	// Verify enhanced interactive selection interface is shown for install mode
+	if !strings.Contains(view, "Interactive Component Selection") && !strings.Contains(view, "Press Enter to customize") {
+		t.Error("Expected view to contain enhanced interactive selection interface")
 	}
 
-	// Verify the ready to install prompt
-	if !strings.Contains(view, "Ready to install?") {
-		t.Error("Expected view to contain 'Ready to install?' prompt")
+	// For install mode, we should see the enhanced selection prompt
+	if !strings.Contains(view, "Enter to continue") || !strings.Contains(view, "Esc to go back") {
+		t.Error("Expected view to contain enhanced selection navigation help")
 	}
 }
 
@@ -158,7 +155,7 @@ func TestMainModelHuhIntegration(t *testing.T) {
 	}
 
 	// Confirmation choices should be initialized in file selection model
-	if len(model.fileSelectionModel.choices) != 2 {
+	if len(model.fileSelectionModel.GetChoices()) != 2 {
 		t.Error("Expected confirmation choices to be initialized")
 	}
 }
@@ -175,7 +172,7 @@ func TestMainModelChoicesInitialization(t *testing.T) {
 		"Yes, give me awesome",
 		"Huh? I did not sign up for this",
 	}
-	if len(model.fileSelectionModel.choices) != len(expectedFileChoices) {
-		t.Errorf("Expected %d choices for file selection, got %d", len(expectedFileChoices), len(model.fileSelectionModel.choices))
+	if len(model.fileSelectionModel.GetChoices()) != len(expectedFileChoices) {
+		t.Errorf("Expected %d choices for file selection, got %d", len(expectedFileChoices), len(model.fileSelectionModel.GetChoices()))
 	}
 }

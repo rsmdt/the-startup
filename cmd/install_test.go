@@ -48,8 +48,8 @@ func TestInstallCommandFlags(t *testing.T) {
 			t.Errorf("Expected command use to be 'install', got '%s'", installCmd.Use)
 		}
 		
-		if installCmd.Short != "Install The Startup agent system" {
-			t.Errorf("Expected short description to be 'Install The Startup agent system', got '%s'", installCmd.Short)
+		if installCmd.Short != "Install The Startup agent system with interactive component selection" {
+			t.Errorf("Expected short description to be 'Install The Startup agent system with interactive component selection', got '%s'", installCmd.Short)
 		}
 	})
 
