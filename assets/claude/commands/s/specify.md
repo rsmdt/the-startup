@@ -177,7 +177,7 @@ Compare the final PLAN against the original PRD and SDD to ensure:
 
 **📝 Present Final Summary** including:
 - Specification Identity: The ID and feature name
-- Documents Created: List all core documents (BRD, PRD, SDD, PLAN) with their paths
+- Documents Created: List all core documents (PRD, SDD, PLAN) with their paths
 - Supplementary Documentation: Patterns and interfaces documented
 - Context Alignment: Confirmation that PLAN aligns with PRD/SDD (or list misalignments)
 - Implementation Confidence: Percentage score with justification

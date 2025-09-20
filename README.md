@@ -66,7 +66,7 @@ Each agent receives only relevant context for their specific expertise, reducing
 
 **the-analyst** - Transforms vague requirements into actionable specifications
 - `requirements-clarification` - Uncovers hidden needs and resolves ambiguities
-- `requirements-documentation` - Creates comprehensive BRDs and PRDs
+- `requirements-documentation` - Creates comprehensive PRDs and requirements specifications
 - `feature-prioritization` - Data-driven feature prioritization
 - `solution-research` - Researches proven approaches and patterns
 - `project-coordination` - Breaks down complex projects into tasks
@@ -160,7 +160,6 @@ Creates comprehensive specifications with built-in quality gates:
 ```
 
 **Documents Created:**
-- `docs/specs/[id]-[short-name]/BRD.md` - Business Requirements Document capturing the "why" and business value
 - `docs/specs/[id]-[short-name]/PRD.md` - Product Requirements Document defining user-facing features and acceptance criteria
 - `docs/specs/[id]-[short-name]/SDD.md` - Solution Design Document detailing technical architecture and implementation approach
 - `docs/specs/[id]-[short-name]/PLAN.md` - Implementation Plan with phase-by-phase tasks ready for execution
@@ -183,7 +182,7 @@ flowchart TD
     B --> |exists| C[Review and Refine]
     C --> END[🚀 Ready for /s:implement S001]
 
-    B --> |new| D[📄 **Requirements Gathering**<br/>Create *BRD.md*, *PRD.md* if needed]
+    B --> |new| D[📄 **Requirements Gathering**<br/>Create *PRD.md* if needed]
     D --> E[📄 **Technical Research**<br/>Create *SDD.md* if needed, document patterns, interfaces]
     E --> F[📄 **Implementation Planning**<br/>Create *PLAN.md*]
 
