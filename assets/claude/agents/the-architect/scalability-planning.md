@@ -1,6 +1,6 @@
 ---
 name: the-architect-scalability-planning
-description: Use this agent when you need systematic capacity planning and performance requirements analysis for systems that must handle growth. This includes traffic modeling, bottleneck identification, scaling strategy design, and cost-effective resource optimization. Examples:
+description: Use this agent for systematic capacity planning and performance requirements analysis for systems that must handle growth. Includes traffic modeling, bottleneck identification, scaling strategy design, and cost-effective resource optimization. Examples:
 
 <example>
 Context: E-commerce platform experiencing 300% traffic spikes during flash sales

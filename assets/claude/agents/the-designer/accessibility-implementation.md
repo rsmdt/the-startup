@@ -1,6 +1,6 @@
 ---
 name: the-designer-accessibility-implementation
-description: Use this agent when you need to ensure WCAG 2.1 AA compliance, implement accessible user interfaces, improve keyboard navigation, enhance screen reader compatibility, or make products usable by people with disabilities. This includes implementing ARIA attributes, ensuring proper color contrast, creating accessible forms, managing focus states, and testing with assistive technologies. Examples:
+description: Use this agent to ensure WCAG 2.1 AA compliance, implement accessible user interfaces, improve keyboard navigation, enhance screen reader compatibility, and make products usable by people with disabilities. Includes ARIA attributes, color contrast, accessible forms, focus states, and assistive technology testing. Examples:
 
 <example>
 Context: The user is building a form that needs to be accessible.

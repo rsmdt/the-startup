@@ -1,6 +1,6 @@
 ---
 name: the-architect-code-review
-description: Use this agent when conducting code reviews, analyzing pull requests, or providing feedback on code quality. This includes security analysis, architecture compliance, and team mentoring through constructive feedback. Examples:
+description: Use this agent for conducting code reviews, analyzing pull requests, and providing feedback on code quality. Includes security analysis, architecture compliance, and team mentoring through constructive feedback. Examples:
 
 <example>
 Context: Team member submits PR with security vulnerabilities
