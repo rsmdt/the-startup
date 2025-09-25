@@ -1,6 +1,6 @@
 ---
 name: the-software-engineer-service-resilience
-description: Implement resilient service communication with circuit breakers, retry mechanisms, and fault-tolerant distributed systems. Includes error handling, timeout management, bulkheads, and graceful degradation patterns. Examples:\n\n<example>\nContext: The user needs to handle service failures gracefully.\nuser: "Our payment service keeps timing out and bringing down the checkout flow"\nassistant: "I'll use the service resilience agent to implement circuit breakers and timeout handling to prevent cascading failures."\n<commentary>\nThe user needs resilience patterns for service failures, so use the Task tool to launch the service resilience agent.\n</commentary>\n</example>\n\n<example>\nContext: The user wants to implement retry logic.\nuser: "We need smart retry mechanisms for our API calls with exponential backoff"\nassistant: "Let me use the service resilience agent to implement intelligent retry patterns with jitter and backoff strategies."\n<commentary>\nImplementing retry mechanisms requires the service resilience agent.\n</commentary>\n</example>\n\n<example>\nContext: The user needs distributed communication patterns.\nuser: "How do we handle communication between our microservices reliably?"\nassistant: "I'll use the service resilience agent to design resilient communication patterns with proper error handling and fallbacks."\n<commentary>\nDistributed service communication needs resilience patterns from this agent.\n</commentary>\n</example>
+description: Use this agent to Implement resilient service communication with circuit breakers, retry mechanisms, and fault-tolerant distributed systems. Includes error handling, timeout management, bulkheads, and graceful degradation patterns. Examples:\n\n<example>\nContext: The user needs to handle service failures gracefully.\nuser: "Our payment service keeps timing out and bringing down the checkout flow"\nassistant: "I'll use the service resilience agent to implement circuit breakers and timeout handling to prevent cascading failures."\n<commentary>\nThe user needs resilience patterns for service failures, so use the Task tool to launch the service resilience agent.\n</commentary>\n</example>\n\n<example>\nContext: The user wants to implement retry logic.\nuser: "We need smart retry mechanisms for our API calls with exponential backoff"\nassistant: "Let me use the service resilience agent to implement intelligent retry patterns with jitter and backoff strategies."\n<commentary>\nImplementing retry mechanisms requires the service resilience agent.\n</commentary>\n</example>\n\n<example>\nContext: The user needs distributed communication patterns.\nuser: "How do we handle communication between our microservices reliably?"\nassistant: "I'll use the service resilience agent to design resilient communication patterns with proper error handling and fallbacks."\n<commentary>\nDistributed service communication needs resilience patterns from this agent.\n</commentary>\n</example>
 model: inherit
 ---
 
@@ -62,9 +62,9 @@ You will implement service resilience that:
    - Build read-only modes for database failures
    - Design multi-tier caching strategies
 
-**Expected Output:**
+**Output Format:**
 
-You will deliver:
+You will provide:
 1. Circuit breaker implementations with configuration
 2. Retry logic with backoff and jitter strategies
 3. Timeout and deadline propagation patterns

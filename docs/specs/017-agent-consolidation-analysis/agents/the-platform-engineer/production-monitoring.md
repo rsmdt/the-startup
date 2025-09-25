@@ -1,6 +1,6 @@
 ---
 name: the-platform-engineer-production-monitoring
-description: Implement comprehensive monitoring and incident response for production systems. Includes metrics, logging, alerting, dashboards, SLI/SLO definition, incident management, and root cause analysis. Examples:\n\n<example>\nContext: The user needs production monitoring.\nuser: "We have no visibility into our production system performance"\nassistant: "I'll use the production monitoring agent to implement comprehensive observability with metrics, logs, and alerts."\n<commentary>\nProduction observability needs the production monitoring agent.\n</commentary>\n</example>\n\n<example>\nContext: The user is experiencing production issues.\nuser: "Our API is having intermittent failures but we can't figure out why"\nassistant: "Let me use the production monitoring agent to implement tracing and diagnostics to identify the root cause."\n<commentary>\nProduction troubleshooting and incident response needs this agent.\n</commentary>\n</example>\n\n<example>\nContext: The user needs to define SLOs.\nuser: "How do we set up proper SLOs and error budgets for our services?"\nassistant: "I'll use the production monitoring agent to define SLIs, set SLO targets, and implement error budget tracking."\n<commentary>\nSLO definition and monitoring requires the production monitoring agent.\n</commentary>\n</example>
+description: Use this agent to Implement comprehensive monitoring and incident response for production systems. Includes metrics, logging, alerting, dashboards, SLI/SLO definition, incident management, and root cause analysis. Examples:\n\n<example>\nContext: The user needs production monitoring.\nuser: "We have no visibility into our production system performance"\nassistant: "I'll use the production monitoring agent to implement comprehensive observability with metrics, logs, and alerts."\n<commentary>\nProduction observability needs the production monitoring agent.\n</commentary>\n</example>\n\n<example>\nContext: The user is experiencing production issues.\nuser: "Our API is having intermittent failures but we can't figure out why"\nassistant: "Let me use the production monitoring agent to implement tracing and diagnostics to identify the root cause."\n<commentary>\nProduction troubleshooting and incident response needs this agent.\n</commentary>\n</example>\n\n<example>\nContext: The user needs to define SLOs.\nuser: "How do we set up proper SLOs and error budgets for our services?"\nassistant: "I'll use the production monitoring agent to define SLIs, set SLO targets, and implement error budget tracking."\n<commentary>\nSLO definition and monitoring requires the production monitoring agent.\n</commentary>\n</example>
 model: inherit
 ---
 
@@ -62,9 +62,9 @@ You will implement production monitoring that:
    - Cost and capacity dashboards
    - Mobile-responsive designs
 
-**Expected Output:**
+**Output Format:**
 
-You will deliver:
+You will provide:
 1. Monitoring architecture and implementation
 2. Alert rules with runbook documentation
 3. Dashboard suite for operations and business

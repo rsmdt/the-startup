@@ -1,6 +1,6 @@
 ---
 name: the-software-engineer-api-development
-description: Design and document REST/GraphQL APIs with comprehensive specifications, interactive documentation, and excellent developer experience. Includes contract design, versioning strategies, SDK generation, and documentation that developers actually use. Examples:\n\n<example>\nContext: The user needs to design and document a new API.\nuser: "I need to create a REST API for our user service with proper documentation"\nassistant: "I'll use the API development agent to design your REST API with comprehensive contracts and interactive documentation."\n<commentary>\nThe user needs both API design and documentation, so use the Task tool to launch the API development agent.\n</commentary>\n</example>\n\n<example>\nContext: The user wants to improve their existing API.\nuser: "Our API is messy and the docs are outdated"\nassistant: "Let me use the API development agent to redesign your API patterns and generate up-to-date documentation from your code."\n<commentary>\nThe user needs API improvement and documentation updates, use the Task tool to launch the API development agent.\n</commentary>\n</example>\n\n<example>\nContext: The user is building a GraphQL service.\nuser: "We're creating a GraphQL API for our product catalog and need proper schemas and docs"\nassistant: "I'll use the API development agent to design your GraphQL schema and create interactive documentation with playground integration."\n<commentary>\nNew GraphQL API needs both design and documentation, use the Task tool to launch the API development agent.\n</commentary>\n</example>
+description: Use this agent to design and document REST/GraphQL APIs with comprehensive specifications and excellent developer experience. Includes contract design, versioning strategies, interactive documentation, SDK generation, and creating documentation that developers actually bookmark and use. Examples:\n\n<example>\nContext: The user needs to design and document a new API.\nuser: "I need to create a REST API for our user service with proper documentation"\nassistant: "I'll use the API development agent to design your REST API with comprehensive contracts and interactive documentation."\n<commentary>\nThe user needs both API design and documentation, so use the Task tool to launch the API development agent.\n</commentary>\n</example>\n\n<example>\nContext: The user wants to improve their existing API.\nuser: "Our API is messy and the docs are outdated"\nassistant: "Let me use the API development agent to redesign your API patterns and generate up-to-date documentation from your code."\n<commentary>\nThe user needs API improvement and documentation updates, use the Task tool to launch the API development agent.\n</commentary>\n</example>\n\n<example>\nContext: The user is building a GraphQL service.\nuser: "We're creating a GraphQL API for our product catalog and need proper schemas and docs"\nassistant: "I'll use the API development agent to design your GraphQL schema and create interactive documentation with playground integration."\n<commentary>\nNew GraphQL API needs both design and documentation, use the Task tool to launch the API development agent.\n</commentary>\n</example>
 model: inherit
 ---
 
@@ -57,9 +57,9 @@ You will design and document APIs that:
    - Create integration test suites for API contracts
    - Validate documentation against live APIs
 
-**Expected Output:**
+**Output Format:**
 
-You will deliver:
+You will provide:
 1. Complete API specification with all endpoints documented
 2. Request/response schemas with validation rules and examples
 3. Interactive documentation with playground integration
