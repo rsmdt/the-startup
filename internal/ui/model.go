@@ -37,7 +37,7 @@ type MainModel struct {
 	// Sub-models
 	startupPathModel   StartupPathModel
 	claudePathModel    ClaudePathModel
-	fileSelectionModel FileSelectionInterface
+	fileSelectionModel FileSelectionModel
 	completeModel      CompleteModel
 	errorModel         ErrorModel
 
@@ -71,7 +71,7 @@ func NewMainModelWithMode(claudeAssets, startupAssets *embed.FS, mode OperationM
 	if mode == ModeUninstall {
 		initialState = StateUninstallStartupPath
 	} else {
-		initialState = StateClaudePath
+		initialState = StateStartupPath
 	}
 
 	m := &MainModel{
@@ -82,7 +82,7 @@ func NewMainModelWithMode(claudeAssets, startupAssets *embed.FS, mode OperationM
 		startupAssets:    startupAssets,
 		width:            80,
 		height:           24,
-		claudePathModel:  NewClaudePathModelWithMode("", mode),
+		startupPathModel: NewStartupPathModelWithMode(mode),
 		errorModel:       NewErrorModel(nil, ""),
 	}
 
@@ -132,8 +132,7 @@ func (m *MainModel) handleAutoInstall() tea.Cmd {
 	m.transitionToState(StateFileSelection)
 	
 	// Auto-confirm file selection (select all files)
-	original := NewFileSelectionModel("claude-code", claudePath, m.installer, m.claudeAssets, m.startupAssets)
-	m.fileSelectionModel = FileSelectionWrapper{FileSelectionModel: original}
+	m.fileSelectionModel = NewFileSelectionModel("claude-code", claudePath, m.installer, m.claudeAssets, m.startupAssets)
 	
 	// Perform installation synchronously
 	err := m.installer.Install()
@@ -203,7 +202,7 @@ func (m *MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.mode == ModeUninstall {
 				m.transitionToState(StateUninstallClaudePath)
 			} else {
-				m.transitionToState(StateFileSelection)
+				m.transitionToState(StateClaudePath)
 			}
 		}
 		return m, cmd
@@ -226,7 +225,7 @@ func (m *MainModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.mode == ModeUninstall {
 				m.transitionToState(StateUninstallFileSelection)
 			} else {
-				m.transitionToState(StateStartupPath)
+				m.transitionToState(StateFileSelection)
 			}
 		}
 		return m, cmd
@@ -298,14 +297,14 @@ func (m *MainModel) transitionToState(newState InstallerState) {
 
 	// Initialize or reset sub-models as needed
 	switch newState {
-	case StateClaudePath, StateUninstallClaudePath:
-		m.claudePathModel = NewClaudePathModelWithMode("", m.mode)
-
 	case StateStartupPath, StateUninstallStartupPath:
-		m.startupPathModel = NewStartupPathModelWithMode(m.claudePath, m.mode)
+		m.startupPathModel = m.startupPathModel.Reset()
+
+	case StateClaudePath, StateUninstallClaudePath:
+		m.claudePathModel = NewClaudePathModelWithMode(m.startupPath, m.mode)
 
 	case StateFileSelection, StateUninstallFileSelection:
-		originalModel := NewFileSelectionModelWithMode(
+		m.fileSelectionModel = NewFileSelectionModelWithMode(
 			"claude-code", // Always use claude-code
 			m.claudePath,
 			m.installer,
@@ -313,19 +312,7 @@ func (m *MainModel) transitionToState(newState InstallerState) {
 			m.startupAssets,
 			m.mode,
 		)
-
-		if m.mode == ModeInstall {
-			// Use enhanced selection for install mode with all items pre-selected
-			enhanced := NewEnhancedFileSelectionModelFromExisting(originalModel)
-			// Store the enhanced model directly (implements FileSelectionInterface)
-			m.fileSelectionModel = enhanced
-			m.selectedFiles = enhanced.GetSelectedFiles()
-		} else {
-			// Use wrapper for uninstall mode
-			wrapper := FileSelectionWrapper{FileSelectionModel: originalModel}
-			m.fileSelectionModel = wrapper
-			m.selectedFiles = wrapper.GetSelectedFiles()
-		}
+		m.selectedFiles = m.fileSelectionModel.selectedFiles
 
 	case StateComplete, StateUninstallComplete:
 		m.completeModel = NewCompleteModelWithAssets("claude-code", m.installer, m.mode, m.claudeAssets, m.startupAssets, m.selectedFiles)
@@ -356,14 +343,14 @@ func (m *MainModel) View() string {
 // handleBack processes back navigation (ESC key)
 func (m *MainModel) handleBack() (tea.Model, tea.Cmd) {
 	switch m.state {
-	case StateClaudePath, StateUninstallStartupPath:
+	case StateStartupPath, StateUninstallStartupPath:
 		return m, tea.Quit
-	case StateStartupPath:
-		m.transitionToState(StateClaudePath)
+	case StateClaudePath:
+		m.transitionToState(StateStartupPath)
 	case StateUninstallClaudePath:
 		m.transitionToState(StateUninstallStartupPath)
 	case StateFileSelection:
-		m.transitionToState(StateStartupPath)
+		m.transitionToState(StateClaudePath)
 	case StateUninstallFileSelection:
 		m.transitionToState(StateUninstallClaudePath)
 	case StateComplete, StateUninstallComplete:
@@ -372,7 +359,7 @@ func (m *MainModel) handleBack() (tea.Model, tea.Cmd) {
 		if m.mode == ModeUninstall {
 			m.transitionToState(StateUninstallStartupPath)
 		} else {
-			m.transitionToState(StateClaudePath)
+			m.transitionToState(StateStartupPath)
 		}
 	default:
 		return m, nil
@@ -382,8 +369,8 @@ func (m *MainModel) handleBack() (tea.Model, tea.Cmd) {
 
 // getAllAvailableFiles returns all files that would be installed (for testing)
 func (m *MainModel) getAllAvailableFiles() []string {
-	if m.fileSelectionModel.GetSelectedFiles() != nil {
-		return m.fileSelectionModel.GetSelectedFiles()
+	if m.fileSelectionModel.selectedFiles != nil {
+		return m.fileSelectionModel.selectedFiles
 	}
 	// Create a temporary file selection model to get the files
 	tempModel := NewFileSelectionModel("claude-code", m.claudePath, m.installer, m.claudeAssets, m.startupAssets)

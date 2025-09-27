@@ -2,7 +2,6 @@ package ui
 
 import (
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -14,7 +13,7 @@ State Machine Architecture
 This package implements a dual-workflow state machine supporting both install and uninstall operations:
 
 Install Workflow:
-  StateClaudePath → StateStartupPath → StateFileSelection → StateComplete
+  StateStartupPath → StateClaudePath → StateFileSelection → StateComplete
                 ↓         ↓                ↓
             StateError ← StateError ← StateError
 
@@ -37,8 +36,8 @@ type InstallerState int
 
 const (
 	// Install workflow states
-	StateClaudePath InstallerState = iota
-	StateStartupPath
+	StateStartupPath InstallerState = iota
+	StateClaudePath
 	StateFileSelection
 	StateComplete
 	StateError
@@ -74,17 +73,17 @@ func (m OperationMode) String() string {
 func (s InstallerState) String() string {
 	switch s {
 	// Install workflow states
-	case StateClaudePath:
-		return "Claude Path Selection"
 	case StateStartupPath:
 		return "Startup Path Selection"
+	case StateClaudePath:
+		return "Claude Path Selection"
 	case StateFileSelection:
 		return "File Selection"
 	case StateComplete:
 		return "Complete"
 	case StateError:
 		return "Error"
-
+	
 	// Uninstall workflow states
 	case StateUninstallStartupPath:
 		return "Uninstall Startup Path Selection"
@@ -108,14 +107,14 @@ type StateTransition struct {
 // ValidTransitions defines allowed state transitions
 var ValidTransitions = map[StateTransition]bool{
 	// Install workflow - Forward transitions
-	{StateClaudePath, StateStartupPath}:   true,
-	{StateStartupPath, StateFileSelection}: true,
+	{StateStartupPath, StateClaudePath}:   true,
+	{StateClaudePath, StateFileSelection}: true,
 	{StateFileSelection, StateComplete}:   true,
 	{StateFileSelection, StateError}:      true,
 
 	// Install workflow - Backward transitions (ESC)
-	{StateStartupPath, StateClaudePath}:   true,
-	{StateFileSelection, StateStartupPath}: true,
+	{StateClaudePath, StateStartupPath}:   true,
+	{StateFileSelection, StateClaudePath}: true,
 
 	// Uninstall workflow - Forward transitions
 	{StateUninstallStartupPath, StateUninstallClaudePath}:   true,
@@ -130,7 +129,7 @@ var ValidTransitions = map[StateTransition]bool{
 	{StateUninstallFileSelection, StateUninstallClaudePath}:   true,
 
 	// Error recovery - can return to appropriate starting points
-	{StateError, StateClaudePath}:             true,
+	{StateError, StateStartupPath}:             true,
 	{StateError, StateUninstallStartupPath}:    true,
 }
 
@@ -385,44 +384,4 @@ func (p *ProgressiveDisclosureRenderer) RenderUninstallHeader(currentSelections 
 		Padding(0, 1).
 		MarginBottom(1).
 		Render(currentSelections) + "\n"
-}
-
-// RenderSelectedPaths creates a consistent display of selected paths across all screens
-func (p *ProgressiveDisclosureRenderer) RenderSelectedPaths(claudePath, startupPath string, mode OperationMode) string {
-	if claudePath == "" && startupPath == "" {
-		return ""
-	}
-
-	var s strings.Builder
-
-	// Title
-	if mode == ModeUninstall {
-		s.WriteString(p.styles.Warning.Render("📂 Selected Paths:"))
-	} else {
-		s.WriteString(p.styles.Info.Render("📂 Selected Paths:"))
-	}
-	s.WriteString("\n")
-
-	// Format paths consistently
-	home := os.Getenv("HOME")
-
-	if claudePath != "" {
-		displayPath := claudePath
-		if home != "" && strings.HasPrefix(claudePath, home) {
-			displayPath = "~" + strings.TrimPrefix(claudePath, home)
-		}
-		s.WriteString(p.styles.Normal.Render(fmt.Sprintf("  🔧 Claude:  %s", displayPath)))
-		s.WriteString("\n")
-	}
-
-	if startupPath != "" {
-		displayPath := startupPath
-		if home != "" && strings.HasPrefix(startupPath, home) {
-			displayPath = "~" + strings.TrimPrefix(startupPath, home)
-		}
-		s.WriteString(p.styles.Normal.Render(fmt.Sprintf("  🚀 Startup: %s", displayPath)))
-		s.WriteString("\n")
-	}
-
-	return s.String() + "\n"
 }

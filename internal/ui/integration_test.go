@@ -74,10 +74,11 @@ func TestMainModelFileSelectionWithHuh(t *testing.T) {
 		t.Error("Expected file selection view to have content")
 	}
 
-	// Should have confirmation choices in the file selection model
-	if len(model.fileSelectionModel.GetChoices()) != 2 {
-		t.Error("Expected confirmation choices to be set")
-	}
+	// Test removed - GetChoices was part of enhanced model that was reverted
+	// // Should have confirmation choices in the file selection model
+	// if len(model.fileSelectionModel.GetChoices()) != 2 {
+	// 	t.Error("Expected confirmation choices to be set")
+	// }
 
 	// State should still be FileSelection
 	if model.state != StateFileSelection {

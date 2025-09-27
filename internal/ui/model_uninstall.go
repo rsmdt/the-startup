@@ -9,7 +9,7 @@ import (
 // performUninstall removes the files that were selected for uninstall
 func (m *MainModel) performUninstall() error {
 	// Get the files to remove from the file selection model
-	filesToRemove := m.fileSelectionModel.GetSelectedFiles()
+	filesToRemove := m.fileSelectionModel.selectedFiles
 	
 	if len(filesToRemove) == 0 {
 		return fmt.Errorf("no files to remove")

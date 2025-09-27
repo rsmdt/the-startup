@@ -101,10 +101,11 @@ func TestMainModelFileSelectionIntegration(t *testing.T) {
 		}
 	}
 
-	// Should have confirmation choices initialized in file selection model
-	if len(model.fileSelectionModel.GetChoices()) != 2 {
-		t.Error("Expected confirmation choices to be initialized in file selection state")
-	}
+	// Test removed - GetChoices was part of enhanced model that was reverted
+	// // Should have confirmation choices initialized in file selection model
+	// if len(model.fileSelectionModel.GetChoices()) != 2 {
+	// 	t.Error("Expected confirmation choices to be initialized in file selection state")
+	// }
 
 	// Test view renders
 	view := model.View()
@@ -154,10 +155,11 @@ func TestMainModelHuhIntegration(t *testing.T) {
 		t.Errorf("Expected state to be StateFileSelection, got %v", model.state)
 	}
 
-	// Confirmation choices should be initialized in file selection model
-	if len(model.fileSelectionModel.GetChoices()) != 2 {
-		t.Error("Expected confirmation choices to be initialized")
-	}
+	// Test removed - GetChoices was part of enhanced model that was reverted
+	// // Confirmation choices should be initialized in file selection model
+	// if len(model.fileSelectionModel.GetChoices()) != 2 {
+	// 	t.Error("Expected confirmation choices to be initialized")
+	// }
 }
 
 func TestMainModelChoicesInitialization(t *testing.T) {
@@ -168,11 +170,12 @@ func TestMainModelChoicesInitialization(t *testing.T) {
 
 	// Test file selection choices - should have confirmation options
 	model.transitionToState(StateFileSelection)
-	expectedFileChoices := []string{
-		"Yes, give me awesome",
-		"Huh? I did not sign up for this",
-	}
-	if len(model.fileSelectionModel.GetChoices()) != len(expectedFileChoices) {
-		t.Errorf("Expected %d choices for file selection, got %d", len(expectedFileChoices), len(model.fileSelectionModel.GetChoices()))
-	}
+	// Test removed - GetChoices was part of enhanced model that was reverted
+	// expectedFileChoices := []string{
+	// 	"Yes, give me awesome",
+	// 	"Huh? I did not sign up for this",
+	// }
+	// if len(model.fileSelectionModel.GetChoices()) != len(expectedFileChoices) {
+	// 	t.Errorf("Expected %d choices for file selection, got %d", len(expectedFileChoices), len(model.fileSelectionModel.GetChoices()))
+	// }
 }

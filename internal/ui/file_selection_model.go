@@ -127,13 +127,29 @@ func (m FileSelectionModel) View() string {
 	s.WriteString(m.styles.Title.Render(AppBanner))
 	s.WriteString("\n\n")
 
-	// Show both paths using standardized renderer
+	// Show both paths in the header
 	startupPath := m.installer.GetInstallPath()
 	claudePath := m.installer.GetClaudePath()
 
-	s.WriteString(m.renderer.RenderSelectedPaths(claudePath, startupPath, m.mode))
+	// Format paths for display
+	home := os.Getenv("HOME")
+	if home != "" {
+		if strings.HasPrefix(startupPath, home) {
+			startupPath = "~" + strings.TrimPrefix(startupPath, home)
+		}
+		if strings.HasPrefix(claudePath, home) {
+			claudePath = "~" + strings.TrimPrefix(claudePath, home)
+		}
+	}
 
 	if m.mode == ModeUninstall {
+		s.WriteString(m.styles.Warning.Render("Uninstallation Paths:"))
+		s.WriteString("\n")
+		s.WriteString(m.styles.Normal.Render(fmt.Sprintf("  Startup: %s", startupPath)))
+		s.WriteString("\n")
+		s.WriteString(m.styles.Normal.Render(fmt.Sprintf("  Claude:  %s", claudePath)))
+		s.WriteString("\n\n")
+
 		// Check if we have any files to remove
 		if len(m.selectedFiles) == 0 {
 			s.WriteString(m.renderer.RenderTitle("No Installation Found"))
@@ -166,6 +182,13 @@ func (m FileSelectionModel) View() string {
 		s.WriteString(m.styles.Warning.Render("This will remove The (Agentic) Startup from the selected directories."))
 		s.WriteString("\n\n")
 	} else {
+		s.WriteString(m.styles.Info.Render("Installation Paths:"))
+		s.WriteString("\n")
+		s.WriteString(m.styles.Normal.Render(fmt.Sprintf("  Startup: %s", startupPath)))
+		s.WriteString("\n")
+		s.WriteString(m.styles.Normal.Render(fmt.Sprintf("  Claude:  %s", claudePath)))
+		s.WriteString("\n\n")
+
 		s.WriteString(m.renderer.RenderTitle("Files to be installed to .claude"))
 
 		s.WriteString(m.styles.Info.Render("The following files will be installed to your Claude directory:"))
