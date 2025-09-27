@@ -49,7 +49,7 @@ Track browser usage trends and adjust support strategies. Update polyfills and t
 ## Technical Expertise
 
 ### Detection & Polyfilling
-- **Feature Detection**: Modernizr configurations, native capability checks, CSS @supports queries
+- **Feature Detection**: Modernizr configurations, native capability checks, CSS `@supports` queries
 - **Polyfill Strategies**: Core-js selective imports, polyfill.io dynamic serving, custom micro-polyfills
 - **Build Configuration**: Babel preset-env with browserslist, PostCSS autoprefixer, differential serving
 
