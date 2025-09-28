@@ -217,16 +217,19 @@ func (m ClaudePathModel) View() string {
 	s.WriteString(m.styles.Title.Render(AppBanner))
 	s.WriteString("\n\n")
 
-	// Show previous selection using standardized renderer
-	s.WriteString(m.renderer.RenderSelectedPaths("", m.startupPath, m.mode))
+	// Show previous selection
+	displayStartupPath := m.startupPath
+	homeDir, _ := os.UserHomeDir()
+	if strings.HasPrefix(m.startupPath, homeDir) {
+		displayStartupPath = "~" + strings.TrimPrefix(m.startupPath, homeDir)
+	}
+	s.WriteString(m.renderer.RenderSelectionsWithMode("", displayStartupPath, 0, m.mode))
 
 	s.WriteString(m.renderer.RenderTitle("Select .claude directory location"))
 	if m.mode == ModeUninstall {
 		s.WriteString(m.styles.Warning.Render("This is where agents and commands are installed for Claude Code"))
 	} else {
 		s.WriteString(m.styles.Info.Render("This is where agents and commands will be installed for Claude Code"))
-		s.WriteString("\n\n")
-		s.WriteString(m.styles.Help.Render("💡 Don't worry - nothing will be installed until you review and confirm your selections"))
 	}
 	s.WriteString("\n\n")
 

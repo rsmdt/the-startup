@@ -14,7 +14,6 @@ type StartupPathModel struct {
 	renderer        *ProgressiveDisclosureRenderer
 	choices         []string
 	cursor          int
-	claudePath      string // Previously selected Claude path
 	selectedPath    string
 	ready           bool
 	inputMode       bool
@@ -25,10 +24,10 @@ type StartupPathModel struct {
 }
 
 func NewStartupPathModel() StartupPathModel {
-	return NewStartupPathModelWithMode("", ModeInstall)
+	return NewStartupPathModelWithMode(ModeInstall)
 }
 
-func NewStartupPathModelWithMode(claudePath string, mode OperationMode) StartupPathModel {
+func NewStartupPathModelWithMode(mode OperationMode) StartupPathModel {
 	ti := textinput.New()
 	ti.Placeholder = "Enter custom path (Tab for autocomplete)"
 	ti.Focus()
@@ -45,7 +44,6 @@ func NewStartupPathModelWithMode(claudePath string, mode OperationMode) StartupP
 			"Cancel",
 		},
 		cursor:          0,
-		claudePath:      claudePath,
 		ready:           false,
 		inputMode:       false,
 		textInput:       ti,
@@ -214,17 +212,12 @@ func (m StartupPathModel) View() string {
 	s.WriteString(m.styles.Title.Render(AppBanner))
 	s.WriteString("\n\n")
 
-	// Show selected paths (Claude path will be available since it's selected first)
-	s.WriteString(m.renderer.RenderSelectedPaths(m.claudePath, "", m.mode))
-
 	if m.mode == ModeUninstall {
 		s.WriteString(m.renderer.RenderTitle("Select .the-startup installation location"))
 		s.WriteString(m.styles.Warning.Render("This is where The Startup's binary and templates are installed"))
 	} else {
 		s.WriteString(m.renderer.RenderTitle("Select .the-startup installation location"))
 		s.WriteString(m.styles.Info.Render("This is where The Startup's binary and templates will be installed"))
-		s.WriteString("\n\n")
-		s.WriteString(m.styles.Help.Render("💡 Don't worry - nothing will be installed until you review and confirm your selections"))
 	}
 	s.WriteString("\n\n")
 

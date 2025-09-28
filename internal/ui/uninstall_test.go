@@ -114,8 +114,7 @@ func TestUninstallFlow(t *testing.T) {
 			installer: inst,
 			mode:      ModeUninstall,
 		}
-		original := NewFileSelectionModelWithMode("claude-code", claudePath, inst, nil, nil, ModeUninstall)
-		model.fileSelectionModel = FileSelectionWrapper{FileSelectionModel: original}
+		model.fileSelectionModel = NewFileSelectionModelWithMode("claude-code", claudePath, inst, nil, nil, ModeUninstall)
 
 		// Perform uninstall
 		err := model.performUninstall()

@@ -226,12 +226,13 @@ func (i *Installer) LoadExistingLockFile() error {
 // GetDeprecatedFiles returns a list of files that were previously installed but are no longer in the embedded assets
 func (i *Installer) GetDeprecatedFiles() []string {
 	if i.existingLock == nil {
+		// No previous installation to compare against
 		return nil
 	}
-	
+
 	// Build a set of current files from embedded assets
 	currentFiles := make(map[string]bool)
-	
+
 	// Add files from claude assets
 	if i.claudeAssets != nil {
 		fs.WalkDir(i.claudeAssets, "assets/claude", func(path string, d fs.DirEntry, err error) error {
@@ -244,22 +245,23 @@ func (i *Installer) GetDeprecatedFiles() []string {
 			return nil
 		})
 	}
-	
+
 	// Check which files from the lock file no longer exist in current assets
-	// The lock file only contains files WE installed, so anything in it is ours to manage
+	// The lock file contains ONLY files that WE installed, so anything in it
+	// that's no longer in our assets should be removed
 	var deprecated []string
 	for filePath := range i.existingLock.Files {
 		// Skip non-claude files (like bin/the-startup, templates, etc)
 		if !strings.HasPrefix(filePath, "agents/") && !strings.HasPrefix(filePath, "commands/") {
 			continue
 		}
-		
+
 		// Check if this file still exists in current assets
 		if !currentFiles[filePath] {
 			deprecated = append(deprecated, filePath)
 		}
 	}
-	
+
 	i.deprecatedFiles = deprecated
 	return deprecated
 }
