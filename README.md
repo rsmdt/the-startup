@@ -2,7 +2,9 @@
   <img src="https://github.com/rsmdt/the-startup/blob/main/assets/logo.png" width="300" alt="The Agentic Startup">
 </p>
 
-<h3 align="center">Ship faster. Ship better. Ship with <b>The Agentic Startup</b>.</h3>
+<p align="center">
+  Ship faster. Ship better. Ship with <b>The Agentic Startup</b>.
+</p>
 
 <p align="center">
   <a href="https://github.com/rsmdt/the-startup/releases/latest">
@@ -90,20 +92,20 @@ After installation, you have the following capabilities available:
 | [`/s:refactor`](#srefactor) | Improve code quality while preserving behavior |
 | [`/s:analyze`](#sanalyze) | Discover and document patterns, rules, and interfaces |
 
-**Specialized Agents**
+**Specialized Agents** (39 total activities)
 | Role | Activities | Specialized Actions |
 |------------|------------|-------------------|
-| [the-chief](docs/AGENTS.md#-the-chief) | 1 agent | Routes work, assesses complexity, enables parallel execution |
-| [the-analyst-*](docs/AGENTS.md#-the-analyst) | 5 agents | Clarifies requirements, prioritizes features, coordinates projects |
-| [the-architect-*](docs/AGENTS.md#️-the-architect) | 7 agents | Designs systems, reviews code, evaluates technology |
-| [the-software-engineer-*](docs/AGENTS.md#-the-software-engineer) | 10 agents | Builds APIs, components, handles state management |
-| [the-platform-engineer-*](docs/AGENTS.md#-the-platform-engineer) | 11 agents | Manages infrastructure, performance, deployments |
-| [the-designer-*](docs/AGENTS.md#-the-designer) | 6 agents | Creates UX/UI, ensures accessibility, conducts user research |
-| [the-qa-engineer-*](docs/AGENTS.md#-the-qa-engineer) | 4 agents | Tests thoroughly, finds bugs, validates performance |
-| [the-security-engineer-*](docs/AGENTS.md#-the-security-engineer) | 5 agents | Protects systems, implements auth, handles incidents |
-| [the-mobile-engineer-*](docs/AGENTS.md#-the-mobile-engineer) | 5 agents | Builds mobile apps, handles offline data, optimizes performance |
-| [the-ml-engineer-*](docs/AGENTS.md#-the-ml-engineer) | 6 agents | Deploys models, optimizes prompts, manages AI context |
-| [the-meta-agent](docs/AGENTS.md#-the-meta-agent) | 1 agent | Creates and refactors other agents |
+| [the-chief](docs/AGENTS.md#-the-chief) | 1 | Routes work, assesses complexity, enables parallel execution |
+| [the-analyst](docs/AGENTS.md#-the-analyst) | 3 | Clarifies requirements, prioritizes features, coordinates projects |
+| [the-architect](docs/AGENTS.md#️-the-architect) | 5 | Designs systems, reviews code, evaluates technology |
+| [the-software-engineer](docs/AGENTS.md#-the-software-engineer) | 5 | Builds APIs, components, handles state management |
+| [the-platform-engineer](docs/AGENTS.md#-the-platform-engineer) | 7 | Manages infrastructure, performance, deployments |
+| [the-designer](docs/AGENTS.md#-the-designer) | 4 | Creates UX/UI, ensures accessibility, conducts user research |
+| [the-qa-engineer](docs/AGENTS.md#-the-qa-engineer) | 3 | Tests thoroughly, finds bugs, validates performance |
+| [the-security-engineer](docs/AGENTS.md#-the-security-engineer) | 3 | Protects systems, implements auth, handles incidents |
+| [the-mobile-engineer](docs/AGENTS.md#-the-mobile-engineer) | 3 | Builds mobile apps, handles offline data, optimizes performance |
+| [the-ml-engineer](docs/AGENTS.md#-the-ml-engineer) | 4 | Deploys models, optimizes prompts, manages AI context |
+| [the-meta-agent](docs/AGENTS.md#-the-meta-agent) | 1 | Creates and refactors other agents |
 
 That's it! You now have a full engineering team at your command.
 
