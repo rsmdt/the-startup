@@ -10,6 +10,10 @@
   <a href="https://github.com/rsmdt/the-startup/releases/latest">
     <img alt="Release" src="https://github.com/rsmdt/the-startup/actions/workflows/release.yml/badge.svg" />
   </a>
+
+  <a href="https://github.com/hesreallyhim/awesome-claude-code">
+    <img alt="Mentioned in Awesome Claude Code" src="https://awesome.re/mentioned-badge.svg" />
+  </a>
 </p>
 
 ---
