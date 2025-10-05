@@ -50,7 +50,7 @@ func (d *LogDiscovery) FindLogFiles(projectPath string, options FilterOptions) (
 	
 	// Check if the directory exists
 	if _, err := os.Stat(claudeProjectsDir); os.IsNotExist(err) {
-		return nil, fmt.Errorf("Claude project directory does not exist: %s", claudeProjectsDir)
+		return nil, fmt.Errorf("claude project directory does not exist: %s", claudeProjectsDir)
 	}
 
 	// Find all JSONL files in the directory

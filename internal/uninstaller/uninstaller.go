@@ -1,7 +1,6 @@
 package uninstaller
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -295,127 +294,6 @@ func (u *Uninstaller) ValidatePaths(installPath, claudePath string) error {
 }
 
 // Helper methods
-
-// loadLockFile loads the lock file from the installation directory
-func (u *Uninstaller) loadLockFile(installPath string) (*config.LockFile, error) {
-	lockFilePath := filepath.Join(installPath, "the-startup.lock")
-
-	data, err := os.ReadFile(lockFilePath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read lock file: %w", err)
-	}
-
-	// Parse lock file using the same config package as installer
-	var lockFile config.LockFile
-	if err := json.Unmarshal(data, &lockFile); err != nil {
-		return nil, fmt.Errorf("failed to parse lock file: %w", err)
-	}
-
-	return &lockFile, nil
-}
-
-// identifyFilesToRemove builds the list of files that need to be removed
-func (u *Uninstaller) identifyFilesToRemove(plan *UninstallPlan) ([]string, int64, error) {
-	var files []string
-	var totalSize int64
-
-	// If we have a lock file, use it as the source of truth
-	if plan.LockFile != nil {
-		for filePath := range plan.LockFile.Files {
-			var fullPath string
-
-			// Handle different file types based on path prefix
-			if strings.HasPrefix(filePath, "startup/") {
-				// Startup files go to install path
-				relPath := strings.TrimPrefix(filePath, "startup/")
-				fullPath = filepath.Join(plan.InstallPath, relPath)
-			} else if strings.HasPrefix(filePath, "bin/") {
-				// Binary files go to install path
-				fullPath = filepath.Join(plan.InstallPath, filePath)
-			} else {
-				// Claude files (agents, commands) go to claude path
-				fullPath = filepath.Join(plan.ClaudePath, filePath)
-			}
-
-			// Verify file still exists before adding to removal list
-			if info, err := os.Stat(fullPath); err == nil {
-				files = append(files, fullPath)
-				totalSize += info.Size()
-			} else if u.verbose {
-				fmt.Printf("File already removed or moved: %s\n", fullPath)
-			}
-		}
-	} else {
-		// Fallback: scan for typical the-startup files
-		files, totalSize = u.discoverFilesWithoutLock(plan.InstallPath, plan.ClaudePath)
-	}
-
-	// Always try to remove the lock file itself
-	lockFilePath := filepath.Join(plan.InstallPath, "the-startup.lock")
-	if info, err := os.Stat(lockFilePath); err == nil {
-		files = append(files, lockFilePath)
-		totalSize += info.Size()
-	}
-
-	return files, totalSize, nil
-}
-
-// discoverFilesWithoutLock discovers files when no lock file is available
-func (u *Uninstaller) discoverFilesWithoutLock(installPath, claudePath string) ([]string, int64) {
-	var files []string
-	var totalSize int64
-
-	// Common patterns to look for
-	patterns := []struct {
-		basePath string
-		patterns []string
-	}{
-		{claudePath, []string{
-			"agents/the-*.md",
-			"commands/s/*.md",
-			"output-styles/*.md",
-		}},
-		{installPath, []string{
-			"bin/the-startup",
-			"rules/*.md",
-			"templates/*.md",
-		}},
-	}
-
-	for _, patternSet := range patterns {
-		for _, pattern := range patternSet.patterns {
-			fullPattern := filepath.Join(patternSet.basePath, pattern)
-			matches, _ := filepath.Glob(fullPattern)
-			for _, match := range matches {
-				if info, err := os.Stat(match); err == nil {
-					files = append(files, match)
-					totalSize += info.Size()
-				}
-			}
-		}
-	}
-
-	return files, totalSize
-}
-
-// identifySettingsToClean identifies settings that need to be cleaned
-func (u *Uninstaller) identifySettingsToClean(claudePath string) ([]string, error) {
-	var settings []string
-
-	// Settings files that might contain the-startup configuration
-	settingsFiles := []string{
-		filepath.Join(claudePath, "settings.json"),
-		filepath.Join(claudePath, "settings.local.json"),
-	}
-
-	for _, settingsFile := range settingsFiles {
-		if _, err := os.Stat(settingsFile); err == nil {
-			settings = append(settings, settingsFile)
-		}
-	}
-
-	return settings, nil
-}
 
 // displayPlanSummary shows what would be done without actually doing it
 func (u *Uninstaller) displayPlanSummary(plan *UninstallPlan) error {

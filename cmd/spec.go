@@ -88,30 +88,56 @@ func handleReadMode(specID string) error {
 	fmt.Printf("name = %q\n", name)
 	fmt.Printf("dir = %q\n", specDir)
 	fmt.Println()
-	fmt.Println("[files]")
-	
-	// Sort and output files
+
+	// Output spec files
+	fmt.Println("[spec]")
 	keys := make([]string, 0, len(files))
 	for k := range files {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
-	
+
 	for _, key := range keys {
 		fmt.Printf("%s = %q\n", key, files[key])
 	}
 
+	// Scan for quality gate files
+	gates := scanGateFiles()
+	if len(gates) > 0 {
+		fmt.Println()
+		fmt.Println("[gates]")
+
+		gateKeys := make([]string, 0, len(gates))
+		for k := range gates {
+			gateKeys = append(gateKeys, k)
+		}
+		sort.Strings(gateKeys)
+
+		for _, key := range gateKeys {
+			fmt.Printf("%s = %q\n", key, gates[key])
+		}
+	}
+
 	return nil
+}
+
+// Template type mapping: short name -> (filename, template file)
+var templateMapping = map[string]struct {
+	filename     string
+	templateFile string
+}{
+	"PRD":  {"product-requirements.md", "product-requirements"},
+	"SDD":  {"solution-design.md", "solution-design"},
+	"PLAN": {"implementation-plan.md", "implementation-plan"},
+	"BRD":  {"business-requirements.md", "business-requirements"},
 }
 
 // handleAddMode adds a template to an existing specification
 func handleAddMode(assets *embed.FS, specID, templateType string) error {
 	// Validate template type
 	templateType = strings.ToUpper(templateType)
-	validTemplates := map[string]bool{
-		"PRD": true, "SDD": true, "PLAN": true, "BRD": true,
-	}
-	if !validTemplates[templateType] {
+	tmpl, valid := templateMapping[templateType]
+	if !valid {
 		return fmt.Errorf("invalid template type: %s (valid: PRD, SDD, PLAN, BRD)", templateType)
 	}
 
@@ -148,24 +174,24 @@ func handleAddMode(assets *embed.FS, specID, templateType string) error {
 		return fmt.Errorf("failed to create spec directory: %w", err)
 	}
 
-	// Copy template
-	destPath := filepath.Join(specDir, fmt.Sprintf("%s.md", templateType))
-	
+	// Copy template using new filename
+	destPath := filepath.Join(specDir, tmpl.filename)
+
 	// Check if file already exists
 	if _, err := os.Stat(destPath); err == nil {
 		return fmt.Errorf("file already exists: %s", destPath)
 	}
 
-	if err := copyTemplateFile(assets, templateType, destPath); err != nil {
+	if err := copyTemplateFile(assets, tmpl.templateFile, destPath); err != nil {
 		return fmt.Errorf("failed to copy template: %w", err)
 	}
 
-	// Output in TOML format with [files.new]
+	// Output in TOML format with [spec.new]
 	fmt.Printf("id = %q\n", id)
 	fmt.Printf("name = %q\n", name)
 	fmt.Printf("dir = %q\n", specDir)
 	fmt.Println()
-	fmt.Println("[files.new]")
+	fmt.Println("[spec.new]")
 	fmt.Printf("%s = %q\n", strings.ToLower(templateType), destPath)
 
 	return nil
@@ -198,9 +224,10 @@ func handleCreateMode(assets *embed.FS, description string) error {
 		return fmt.Errorf("failed to create spec directory: %w", err)
 	}
 
-	// Copy PRD template (without any modifications)
-	prdPath := filepath.Join(specDir, "PRD.md")
-	if err := copyTemplateFile(assets, "PRD", prdPath); err != nil {
+	// Copy PRD template (without any modifications) using new filename
+	tmpl := templateMapping["PRD"]
+	prdPath := filepath.Join(specDir, tmpl.filename)
+	if err := copyTemplateFile(assets, tmpl.templateFile, prdPath); err != nil {
 		return fmt.Errorf("failed to copy PRD template: %w", err)
 	}
 
@@ -209,7 +236,7 @@ func handleCreateMode(assets *embed.FS, description string) error {
 	fmt.Printf("name = %q\n", featureName)
 	fmt.Printf("dir = %q\n", specDir)
 	fmt.Println()
-	fmt.Println("[files]")
+	fmt.Println("[spec]")
 	fmt.Printf("prd = %q\n", prdPath)
 
 	return nil
@@ -277,30 +304,47 @@ func extractSpecName(dirName string) string {
 // scanSpecFiles scans a spec directory for documentation files
 func scanSpecFiles(specDir string) (map[string]string, error) {
 	files := make(map[string]string)
-	
-	// Check for each known template type
-	templates := []string{"PRD", "SDD", "PLAN", "BRD"}
-	for _, tmpl := range templates {
-		path := filepath.Join(specDir, fmt.Sprintf("%s.md", tmpl))
-		if _, err := os.Stat(path); err == nil {
-			files[strings.ToLower(tmpl)] = path
+
+	// Check for each known template type (new filenames first, then old for backward compatibility)
+	for shortName, tmpl := range templateMapping {
+		key := strings.ToLower(shortName)
+
+		// Try new filename first
+		newPath := filepath.Join(specDir, tmpl.filename)
+		if _, err := os.Stat(newPath); err == nil {
+			files[key] = newPath
+			continue
+		}
+
+		// Fallback to old filename for backward compatibility
+		oldPath := filepath.Join(specDir, fmt.Sprintf("%s.md", shortName))
+		if _, err := os.Stat(oldPath); err == nil {
+			files[key] = oldPath
 		}
 	}
 
-	// Also check for other .md files
+	// Also check for other .md files (but skip ones we've already added)
 	entries, err := os.ReadDir(specDir)
 	if err != nil {
 		return files, err
 	}
 
+	// Track which files we've already added to avoid duplicates
+	addedFiles := make(map[string]bool)
+	for _, path := range files {
+		addedFiles[filepath.Base(path)] = true
+	}
+
 	for _, entry := range entries {
 		if !entry.IsDir() && strings.HasSuffix(entry.Name(), ".md") {
-			baseName := strings.TrimSuffix(entry.Name(), ".md")
-			// Skip if already added as standard template
-			lowerName := strings.ToLower(baseName)
-			if _, exists := files[lowerName]; !exists {
-				files[lowerName] = filepath.Join(specDir, entry.Name())
+			// Skip if we've already added this file
+			if addedFiles[entry.Name()] {
+				continue
 			}
+
+			baseName := strings.TrimSuffix(entry.Name(), ".md")
+			lowerName := strings.ToLower(baseName)
+			files[lowerName] = filepath.Join(specDir, entry.Name())
 		}
 	}
 
@@ -396,4 +440,24 @@ func copyTemplateFile(assets *embed.FS, templateName, destPath string) error {
 	}
 
 	return nil
+}
+
+// scanGateFiles scans the docs directory for quality gate files
+func scanGateFiles() map[string]string {
+	gates := make(map[string]string)
+
+	// Check for each known gate file
+	gateFiles := map[string]string{
+		"definition_of_ready":      "docs/definition-of-ready.md",
+		"definition_of_done":       "docs/definition-of-done.md",
+		"task_definition_of_done": "docs/task-definition-of-done.md",
+	}
+
+	for key, path := range gateFiles {
+		if _, err := os.Stat(path); err == nil {
+			gates[key] = path
+		}
+	}
+
+	return gates
 }

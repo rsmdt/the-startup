@@ -43,14 +43,21 @@ You are an intelligent implementation orchestrator that executes the plan for: *
 
 **🎯 Goal**: Validate specification exists, analyze the implementation plan, and prepare for execution.
 
-Check if $ARGUMENTS contains a specification ID in the format "010" or "010-feature-name". Run `{{STARTUP_PATH}}/bin/the-startup spec --read [ID]` to check for existing specification. Parse the output to determine if the specification directory exists and contains required documents.
+Check if $ARGUMENTS contains a specification ID in the format "010" or "010-feature-name". Run `{{STARTUP_PATH}}/bin/the-startup spec --read [ID]` to check for existing specification.
 
-If the specification doesn't exist:
+Parse the TOML output which contains:
+- Specification metadata: `id`, `name`, `dir`
+- `[spec]` section: Lists spec documents (prd, sdd, plan)
+- `[gates]` section: Lists quality gates (definition_of_ready, definition_of_done, task_definition_of_done) if they exist
+
+If the specification doesn't exist (error in output):
 - Display "❌ Specification not found: [ID]"
 - Suggest: "Run /s:specify with your feature description to create the specification first."
 - Exit gracefully
 
-If the specification exists, display "📁 Found existing spec: [directory]" and list available documents (PRD.md, SDD.md, PLAN.md, etc.). Verify PLAN.md exists. If not, display error: "❌ No PLAN.md found. Run /s:specify first to create the implementation plan." and exit.
+If the specification exists, display "📁 Found existing spec: [directory]" and list available documents from the `[spec]` section. Verify `plan` exists in the `[spec]` section. If not, display error: "❌ No PLAN.md found. Run /s:specify first to create the implementation plan." and exit.
+
+**Quality Gates**: If the `[gates]` section exists with `task_definition_of_done`, note it for task validation. If gates don't exist, proceed without validation.
 
 If PLAN.md exists, display `📊 Analyzing Implementation Plan` and read the plan to identify all phases (look for **Phase X:** patterns). Count total phases and tasks per phase. If any tasks are already marked `[x]` or `[~]`, report their status. Load ONLY Phase 1 tasks into TodoWrite.
 

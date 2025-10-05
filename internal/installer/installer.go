@@ -27,7 +27,6 @@ type Installer struct {
 	tool            string
 	components      []string
 	selectedFiles   []string // Specific files to install (optional)
-	lockFile        *config.LockFile
 	existingLock    *config.LockFile // Previously installed files
 	deprecatedFiles []string          // Files to be removed
 }
@@ -251,14 +250,37 @@ func (i *Installer) GetDeprecatedFiles() []string {
 	// that's no longer in our assets should be removed
 	var deprecated []string
 	for filePath := range i.existingLock.Files {
-		// Skip non-claude files (like bin/the-startup, templates, etc)
-		if !strings.HasPrefix(filePath, "agents/") && !strings.HasPrefix(filePath, "commands/") {
+		// Check claude files (agents, commands)
+		if strings.HasPrefix(filePath, "agents/") || strings.HasPrefix(filePath, "commands/") {
+			if !currentFiles[filePath] {
+				deprecated = append(deprecated, filePath)
+			}
 			continue
 		}
 
-		// Check if this file still exists in current assets
-		if !currentFiles[filePath] {
-			deprecated = append(deprecated, filePath)
+		// Check template files
+		if strings.HasPrefix(filePath, "templates/") {
+			// Extract just the relative path within templates
+			relPath := strings.TrimPrefix(filePath, "templates/")
+			assetPath := "assets/the-startup/templates/" + relPath
+
+			// Check if this template still exists in current assets
+			if _, err := i.startupAssets.ReadFile(assetPath); err != nil {
+				// Template no longer exists in assets, mark for deletion
+				deprecated = append(deprecated, filePath)
+			}
+			continue
+		}
+
+		// Check rule files
+		if strings.HasPrefix(filePath, "rules/") {
+			relPath := strings.TrimPrefix(filePath, "rules/")
+			assetPath := "assets/the-startup/rules/" + relPath
+
+			if _, err := i.startupAssets.ReadFile(assetPath); err != nil {
+				deprecated = append(deprecated, filePath)
+			}
+			continue
 		}
 	}
 
@@ -271,13 +293,25 @@ func (i *Installer) RemoveDeprecatedFiles() error {
 	if len(i.deprecatedFiles) == 0 {
 		return nil
 	}
-	
+
 	fmt.Printf("Removing %d deprecated files...\n", len(i.deprecatedFiles))
-	
+
 	for _, relPath := range i.deprecatedFiles {
-		// Construct full path
-		fullPath := filepath.Join(i.claudePath, relPath)
-		
+		var fullPath string
+
+		// Determine base path based on file type
+		if strings.HasPrefix(relPath, "agents/") || strings.HasPrefix(relPath, "commands/") {
+			// Claude files go to .claude directory
+			fullPath = filepath.Join(i.claudePath, relPath)
+		} else if strings.HasPrefix(relPath, "templates/") || strings.HasPrefix(relPath, "rules/") {
+			// Startup files go to installation directory
+			fullPath = filepath.Join(i.installPath, relPath)
+		} else {
+			// Unknown file type, skip
+			fmt.Printf("  Warning: Unknown file type: %s\n", relPath)
+			continue
+		}
+
 		// Remove the file
 		if err := os.Remove(fullPath); err != nil {
 			// File might already be gone, that's ok
@@ -288,7 +322,7 @@ func (i *Installer) RemoveDeprecatedFiles() error {
 			fmt.Printf("  ✗ Removed: %s\n", relPath)
 		}
 	}
-	
+
 	fmt.Printf("✓ Deprecated files removed\n")
 	return nil
 }
@@ -389,7 +423,7 @@ func (i *Installer) installClaudeAssets() error {
 		relPath := strings.TrimPrefix(path, "assets/claude/")
 
 		// Check if this file should be installed based on selected files
-		if i.selectedFiles != nil && len(i.selectedFiles) > 0 {
+		if len(i.selectedFiles) > 0 {
 			found := false
 			for _, selected := range i.selectedFiles {
 				if selected == relPath {
@@ -451,7 +485,7 @@ func (i *Installer) installStartupAssets() error {
 		relPath := strings.TrimPrefix(path, "assets/the-startup/")
 
 		// Check if this file should be installed based on selected files
-		if i.selectedFiles != nil && len(i.selectedFiles) > 0 {
+		if len(i.selectedFiles) > 0 {
 			found := false
 			for _, selected := range i.selectedFiles {
 				if selected == relPath {
@@ -749,7 +783,7 @@ func (i *Installer) createLockFile() error {
 			relPath := strings.TrimPrefix(path, "assets/claude/")
 			
 			// Check if this file should be installed based on selected files
-			if i.selectedFiles != nil && len(i.selectedFiles) > 0 {
+			if len(i.selectedFiles) > 0 {
 				found := false
 				for _, selected := range i.selectedFiles {
 					if selected == relPath {
@@ -800,7 +834,7 @@ func (i *Installer) createLockFile() error {
 			relPath := strings.TrimPrefix(path, "assets/the-startup/")
 			
 			// Check if this file should be installed based on selected files
-			if i.selectedFiles != nil && len(i.selectedFiles) > 0 {
+			if len(i.selectedFiles) > 0 {
 				found := false
 				for _, selected := range i.selectedFiles {
 					if selected == relPath {

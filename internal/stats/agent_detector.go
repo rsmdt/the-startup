@@ -2,7 +2,6 @@ package stats
 
 import (
 	"encoding/json"
-	"regexp"
 	"strings"
 )
 
@@ -19,16 +18,6 @@ type TaskParameters struct {
 	SubagentType string `json:"subagent_type"`
 }
 
-// Pre-compiled patterns for agent detection
-var (
-	// High confidence patterns (90-95%)
-	delegatingPattern = regexp.MustCompile(`(?i)delegating to ([\w-]+)`)
-	usingAgentPattern = regexp.MustCompile(`(?i)(?:using|use) (?:the-)?([\w-]+) agent`)
-
-	// Medium confidence patterns (75-85%)
-	consultingPattern = regexp.MustCompile(`(?i)consulting with ([\w]+) specialist`)
-	invokePattern     = regexp.MustCompile(`(?i)invoke ([\w-]+) for`)
-)
 
 // DetectAgent performs multi-method agent detection with confidence scoring
 func DetectAgent(entry ClaudeLogEntry) (string, float64) {
@@ -98,69 +87,6 @@ func extractSubagentType(params json.RawMessage) string {
 	return taskParams.SubagentType
 }
 
-// detectFromPatterns uses regex patterns to detect agent mentions
-func detectFromPatterns(entry ClaudeLogEntry) AgentDetection {
-	content := extractContent(entry)
-	if content == "" {
-		return AgentDetection{}
-	}
-
-	// High confidence patterns
-	if matches := delegatingPattern.FindStringSubmatch(content); len(matches) > 1 {
-		return AgentDetection{
-			Agent:      normalizeAgentName(matches[1]),
-			Confidence: 0.95,
-			Method:     "pattern",
-		}
-	}
-
-	if matches := usingAgentPattern.FindStringSubmatch(content); len(matches) > 1 {
-		return AgentDetection{
-			Agent:      normalizeAgentName(matches[1]),
-			Confidence: 0.90,
-			Method:     "pattern",
-		}
-	}
-
-	// Medium confidence patterns
-	if matches := consultingPattern.FindStringSubmatch(content); len(matches) > 1 {
-		return AgentDetection{
-			Agent:      normalizeAgentName(matches[1]),
-			Confidence: 0.75,
-			Method:     "pattern",
-		}
-	}
-
-	if matches := invokePattern.FindStringSubmatch(content); len(matches) > 1 {
-		return AgentDetection{
-			Agent:      normalizeAgentName(matches[1]),
-			Confidence: 0.80,
-			Method:     "pattern",
-		}
-	}
-
-	return AgentDetection{}
-}
-
-
-// extractContent extracts searchable content from log entry
-func extractContent(entry ClaudeLogEntry) string {
-	switch entry.Type {
-	case "assistant":
-		if entry.Assistant != nil {
-			return entry.Assistant.Text
-		}
-	case "system":
-		if entry.System != nil {
-			return entry.System.Message + " " + entry.System.Text
-		}
-	case "user":
-		if entry.User != nil {
-			return entry.User.Text
-		}
-	}
-	return ""
-}
 
 // normalizeAgentName just cleans up the agent name without being clever
 func normalizeAgentName(name string) string {

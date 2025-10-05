@@ -9,6 +9,8 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/rsmdt/the-startup/internal/uninstaller"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // RemovalPreviewModel displays detailed removal preview with file categorization
@@ -79,13 +81,13 @@ func (m *RemovalPreviewModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "up", "k":
-			m.viewport.LineUp(1)
+			m.viewport.ScrollUp(1)
 		case "down", "j":
-			m.viewport.LineDown(1)
+			m.viewport.ScrollDown(1)
 		case "pgup":
-			m.viewport.HalfViewUp()
+			m.viewport.HalfPageUp()
 		case "pgdown":
-			m.viewport.HalfViewDown()
+			m.viewport.HalfPageDown()
 		case "home":
 			m.viewport.GotoTop()
 		case "end":
@@ -320,7 +322,8 @@ func (m *RemovalPreviewModel) renderCategoryBreakdown() string {
 			prefix = m.styles.Cursor.Render("> ")
 		}
 		
-		categoryName := strings.Title(summary.Category.String())
+		caser := cases.Title(language.English)
+		categoryName := caser.String(summary.Category.String())
 		line := fmt.Sprintf("%s%s: %d files (%s)",
 			prefix,
 			categoryName,
@@ -363,7 +366,8 @@ func (m *RemovalPreviewModel) renderCategoryBreakdown() string {
 func (m *RemovalPreviewModel) renderDetailedView() string {
 	var s strings.Builder
 	
-	categoryName := strings.Title(m.selectedCategory.String())
+	caser := cases.Title(language.English)
+	categoryName := caser.String(m.selectedCategory.String())
 	s.WriteString(m.styles.Title.Render(fmt.Sprintf("📄 %s Files (Detailed)", categoryName)))
 	s.WriteString("\n")
 	

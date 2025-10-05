@@ -98,14 +98,14 @@ func TestWelfordAlgorithm_StreamingAccuracy(t *testing.T) {
 	mu := 50.0  // Target mean
 	sigma := 10.0 // Target std dev
 
-	rand.Seed(42) // For reproducibility
+	rng := rand.New(rand.NewSource(42)) // For reproducibility
 	var sum float64
 	var sumSq float64
 
 	for i := 0; i < n; i++ {
 		// Generate normal-ish distribution using Box-Muller
-		u1 := rand.Float64()
-		u2 := rand.Float64()
+		u1 := rng.Float64()
+		u2 := rng.Float64()
 		z := math.Sqrt(-2*math.Log(u1)) * math.Cos(2*math.Pi*u2)
 		value := mu + sigma*z
 

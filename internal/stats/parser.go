@@ -425,7 +425,7 @@ func (p *JSONLParser) parseEntry(line []byte, lineNum int, opts ParseOptions) (*
 
 // parseToolParameters parses tool-specific parameters
 func (p *JSONLParser) parseToolParameters(tool *ToolUse) {
-	if tool.Parameters == nil || len(tool.Parameters) == 0 {
+	if len(tool.Parameters) == 0 {
 		return
 	}
 

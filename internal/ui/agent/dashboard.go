@@ -921,33 +921,6 @@ func (m *DashboardModel) View() string {
 	return content.String()
 }
 
-// renderTimelinePanel renders the message timeline panel with enhanced styling (DEPRECATED - use renderTimelinePanelContent)
-func (m *DashboardModel) renderTimelinePanel(maxHeight int) string {
-	// Set the timeline component height
-	m.timeline.MaxHeight = maxHeight
-	m.timeline.MaxWidth = m.width - 8
-
-	// Get current project path for display
-	projectName := "the-startup" // Default
-	if cwd, err := os.Getwd(); err == nil {
-		projectName = filepath.Base(cwd)
-	}
-
-	// Timeline title with project name
-	titleText := fmt.Sprintf("📊 Message Timeline - Project: %s", projectName)
-	if m.focusedPanel == TimelinePanel {
-		titleText += " (Active)"
-	}
-
-	// Render the timeline
-	timelineContent := m.timeline.RenderTimeline(
-		m.focusedPanel == TimelinePanel,
-		titleText,
-	)
-
-	return timelineContent
-}
-
 // renderTimelinePanelContent renders just the timeline content without title (for btop-style borders)
 func (m *DashboardModel) renderTimelinePanelContent(maxHeight int) string {
 	// Set the timeline component height
@@ -997,70 +970,6 @@ func (m *DashboardModel) renderStatsPanelContent() string {
 	return content.String()
 }
 
-// renderStatsPanel renders the agent statistics panel with professional styling (DEPRECATED - use renderStatsPanelContent)
-func (m *DashboardModel) renderStatsPanel() string {
-	var content strings.Builder
-
-	// Enhanced panel title with focus indicator and stats summary
-	titleStyle := lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("205"))
-
-	if m.focusedPanel == StatsPanel {
-		titleStyle = titleStyle.Foreground(lipgloss.Color("46"))
-	}
-
-	totalAgents := len(m.agentStats)
-	titleText := fmt.Sprintf("📈 Agent Statistics (%d agents)", totalAgents)
-	if m.focusedPanel == StatsPanel {
-		titleText += " (Active)"
-	}
-
-	content.WriteString(titleStyle.Render(titleText) + "\n")
-
-	// Add sort status indicator
-	sortStatusStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("240")).
-		Italic(true)
-
-	sortStatus := fmt.Sprintf("Sorted by %s %s",
-		m.getSortColumnName(),
-		map[SortDirection]string{SortAscending: "(ascending)", SortDescending: "(descending)"}[m.sortDirection])
-	content.WriteString(sortStatusStyle.Render(sortStatus) + "\n\n")
-
-	// Create sort indicators map
-	sortIndicators := make(map[SortColumn]string)
-	sortIndicators[SortByCount] = m.getSortIndicator(SortByCount)
-	sortIndicators[SortBySuccessRate] = m.getSortIndicator(SortBySuccessRate)
-	sortIndicators[SortByDuration] = m.getSortIndicator(SortByDuration)
-
-	// Render leaderboard with enhanced styling
-	if len(m.agentStats) == 0 {
-		emptyStyle := lipgloss.NewStyle().
-			Foreground(lipgloss.Color("240")).
-			Italic(true).
-			Align(lipgloss.Center).
-			Border(lipgloss.RoundedBorder()).
-			BorderForeground(lipgloss.Color("240")).
-			Padding(2, 4).
-			Margin(1, 0)
-
-		content.WriteString(emptyStyle.Render("No agent data available\nRun some commands to see statistics"))
-	} else {
-		leaderboardContent := m.leaderboard.RenderAgentLeaderboardWithSort(
-			m.agentStats,
-			m.selectedStatsIndex,
-			m.focusedPanel == StatsPanel,
-			m.sortColumn,
-			m.sortDirection,
-			sortIndicators,
-		)
-		content.WriteString(leaderboardContent)
-	}
-
-	return content.String()
-}
-
 // renderDelegationPanel renders the delegation patterns panel
 func (m *DashboardModel) renderDelegationPanel() string {
 	// Enhanced delegation patterns section
@@ -1087,24 +996,6 @@ func (m *DashboardModel) renderCoOccurrencePanelContent() string {
 		m.coOccurrences,
 		m.selectedCoOccurrenceIndex,
 		m.focusedPanel == CoOccurrencePanel,
-	)
-
-	return coOccurrenceContent
-}
-
-// renderCoOccurrencePanel renders the co-occurrence patterns panel (DEPRECATED - use renderCoOccurrencePanelContent)
-func (m *DashboardModel) renderCoOccurrencePanel() string {
-	// Enhanced co-occurrence patterns section
-	coOccurrenceTitle := "🤝 Agent Collaboration Matrix"
-	if m.focusedPanel == CoOccurrencePanel {
-		coOccurrenceTitle += " (Active)"
-	}
-
-	coOccurrenceContent := m.coOccurrenceMatrixComponent.RenderCoOccurrenceMatrix(
-		m.coOccurrences,
-		m.selectedCoOccurrenceIndex,
-		m.focusedPanel == CoOccurrencePanel,
-		coOccurrenceTitle,
 	)
 
 	return coOccurrenceContent

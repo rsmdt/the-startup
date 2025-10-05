@@ -1,30 +1,31 @@
 # Solution Design Document
 
 ## Validation Checklist
-- [ ] Quality Goals prioritized (top 3-5 architectural quality attributes)
-- [ ] Constraints documented (technical, organizational, security/compliance)
-- [ ] Implementation Context complete (required sources, boundaries, external interfaces, project commands)
-- [ ] Solution Strategy defined with rationale
-- [ ] Building Block View complete (components, directory map, interface specifications)
-- [ ] Runtime View documented (primary flow, error handling, complex logic)
-- [ ] Deployment View specified (environment, configuration, dependencies, performance)
-- [ ] Cross-Cutting Concepts addressed (patterns, interfaces, system-wide patterns, implementation patterns)
-- [ ] Architecture Decisions captured with trade-offs
-- [ ] **All Architecture Decisions confirmed by user** (no pending confirmations)
-- [ ] Quality Requirements defined (performance, usability, security, reliability)
-- [ ] Risks and Technical Debt identified (known issues, technical debt, implementation gotchas)
-- [ ] Test Specifications complete (critical scenarios, coverage requirements)
-- [ ] Glossary defined (domain and technical terms)
+
+- [ ] All required sections are complete
 - [ ] No [NEEDS CLARIFICATION] markers remain
+- [ ] All context sources are listed with relevance ratings
+- [ ] Project commands are discovered from actual project files
+- [ ] Constraints → Strategy → Design → Implementation path is logical
+- [ ] Architecture pattern is clearly stated with rationale
+- [ ] Every component in diagram has directory mapping
+- [ ] Every interface has specification
+- [ ] Error handling covers all error types
+- [ ] Quality requirements are specific and measurable
+- [ ] Every quality requirement has test coverage
+- [ ] **All architecture decisions confirmed by user**
+- [ ] Component names consistent across diagrams
+- [ ] A developer could implement from this design
 
 ---
 
 ## Constraints
 
 [NEEDS CLARIFICATION: What constraints limit the solution space?]
-- Technical: [Language/framework requirements, performance targets, browser support]
-- Organizational: [Coding standards, deployment restrictions, team capabilities]
-- Security/Compliance: [Auth requirements, data protection needs, regulatory compliance]
+
+CON-1 [Language/framework requirements, performance targets, browser support]
+CON-2 [Coding standards, deployment restrictions, team capabilities]
+CON-3 [Auth requirements, data protection needs, regulatory compliance]
 
 ## Implementation Context
 
@@ -32,60 +33,49 @@
 
 ### Required Context Sources
 
-#### General Context
+[NEEDS CLARIFICATION: What documentation, patterns, and external resources apply?]
 
-[NEEDS CLARIFICATION: What shared documentation, patterns, and external resources apply across all components?]
+- ICO-1 [general application context]
+ ```yaml
+ # Internal documentation and patterns
+ - doc: docs/patterns/pattern-name.md
+   relevance: HIGH
+   why: "Existing pattern that must be followed"
 
+ - doc: docs/interfaces/interface-name.md
+   relevance: MEDIUM
+   why: "External service integration requirements"
+
+ - doc: docs/architecture/decisions/adr-001.md
+   relevance: HIGH
+   why: "Previous architectural decisions that constrain approach"
+
+ # External documentation and APIs
+ - url: https://docs.library.com/api
+   relevance: MEDIUM
+   sections: [specific endpoints or features if applicable]
+   why: "Third-party API constraints and capabilities"
+
+ - url: https://framework.dev/best-practices
+   relevance: LOW
+   why: "Framework conventions to follow"
+ ```
+
+- ICO-2 [component-name]: [location path or repository]
+ ```yaml
+ # Source code files that must be understood
+ - file: src/components/placeholder/example.tsx
+   relevance: HIGH  # HIGH/MEDIUM/LOW
+   sections: [specific functions or line ranges if applicable]
+   why: "Explanation of why this file matters for the implementation"
+ 
+ - file: @package.json
+   relevance: MEDIUM
+   why: "Dependencies and build scripts that constrain the solution"
+ ```
+
+- ICO-3 [another-component-name] (if applicable)
 ```yaml
-# Internal documentation and patterns
-- doc: docs/patterns/pattern-name.md
-  relevance: HIGH
-  why: "Existing pattern that must be followed"
-
-- doc: docs/interfaces/interface-name.md
-  relevance: MEDIUM
-  why: "External service integration requirements"
-
-- doc: docs/architecture/decisions/adr-001.md
-  relevance: HIGH
-  why: "Previous architectural decisions that constrain approach"
-
-# External documentation and APIs
-- url: https://docs.library.com/api
-  relevance: MEDIUM
-  sections: [specific endpoints or features if applicable]
-  why: "Third-party API constraints and capabilities"
-
-- url: https://framework.dev/best-practices
-  relevance: LOW
-  why: "Framework conventions to follow"
-```
-
-#### Component: [component-name]
-
-[NEEDS CLARIFICATION: What source code files and component-specific documentation must be understood for this component?]
-
-```yaml
-Location: [path or repository]
-
-# Source code files that must be understood
-- file: src/components/placeholder/example.tsx
-  relevance: HIGH  # HIGH/MEDIUM/LOW
-  sections: [specific functions or line ranges if applicable]
-  why: "Explanation of why this file matters for the implementation"
-
-- file: @package.json
-  relevance: MEDIUM
-  why: "Dependencies and build scripts that constrain the solution"
-```
-
-#### Component: [another-component-name] (if applicable)
-
-[NEEDS CLARIFICATION: What source code files and component-specific documentation must be understood for this component? Remove this entire section if no additional components.]
-
-```yaml
-Location: [path or repository]
-
 # Source code files that must be understood
 - file: [relevant source files]
   relevance: [HIGH/MEDIUM/LOW]
@@ -194,7 +184,9 @@ data:
 ```
 
 ### Cross-Component Boundaries (if applicable)
+
 [NEEDS CLARIFICATION: What are the boundaries between components/teams?]
+
 - **API Contracts**: [Which interfaces are public contracts that cannot break]
 - **Team Ownership**: [Which team owns which component]
 - **Shared Resources**: [Databases, queues, caches used by multiple components]
@@ -254,6 +246,7 @@ Deploy All: [orchestrated deployment command]
 ## Solution Strategy
 
 [NEEDS CLARIFICATION: What is the high-level approach to solving this problem?]
+
 - Architecture Pattern: [Describe the approach (e.g., layered, modular, microservice)]
 - Integration Approach: [How this feature integrates with the current system]
 - Justification: [Why this approach fits given the constraints and scope]
@@ -346,6 +339,7 @@ migration_scripts: @migrations/v2.1.0/
 #### Internal API Changes
 
 [NEEDS CLARIFICATION: What API endpoints are being added or modified? Specify methods, paths, request/response formats]
+
 ```yaml
 # Application endpoints being added/modified
 Endpoint: Feature Operation
@@ -371,6 +365,7 @@ openapi_spec: @specs/openapi.yaml
 #### Application Data Models
 
 [NEEDS CLARIFICATION: What data models/entities are being created or modified? Define fields and behaviors]
+
 ```pseudocode
 # Core business objects being modified/created
 ENTITY: PrimaryEntity (MODIFIED/NEW)
@@ -395,14 +390,15 @@ domain_doc: @docs/domain/entity-model.md
 #### Integration Points
 
 [NEEDS CLARIFICATION: What external systems does this feature connect to? For multi-component features, also document inter-component communication.]
+
 ```yaml
 # Inter-Component Communication (between your components)
-From: [source-component]
-To: [target-component]
-  - protocol: [REST/GraphQL/gRPC/WebSocket/MessageQueue]
-  - doc: @docs/interfaces/internal-api.md
-  - endpoints: [specific endpoints or topics]
-  - data_flow: "Description of what data flows between components"
+- from: [source-component]
+  to: [target-component]
+    - protocol: [REST/GraphQL/gRPC/WebSocket/MessageQueue]
+    - doc: @docs/interfaces/internal-api.md
+    - endpoints: [specific endpoints or topics]
+    - data_flow: "Description of what data flows between components"
 
 # External System Integration (third-party services)
 External_Service_Name:
@@ -514,6 +510,7 @@ describe('PromoCodeValidator', () => {
 ### Primary Flow
 
 [NEEDS CLARIFICATION: What is the main user action and how does the system respond? Document the step-by-step flow]
+
 #### Primary Flow: [Main User Action]
 1. User triggers [action]
 2. System validates [what]
@@ -538,7 +535,9 @@ sequenceDiagram
 ```
 
 ### Error Handling
+
 [NEEDS CLARIFICATION: How are different error types handled?]
+
 - Invalid input: [specific error message and user guidance]
 - Network failure: [retry strategy or fallback behavior]
 - Business rule violation: [user feedback and recovery options]
@@ -546,6 +545,7 @@ sequenceDiagram
 ### Complex Logic (if applicable)
 
 [NEEDS CLARIFICATION: Is there complex algorithmic logic that needs documentation? If yes, detail the algorithm. If no, remove this section]
+
 ```
 ALGORITHM: Process Feature Request
 INPUT: user_request, current_state
@@ -716,12 +716,12 @@ TEST_SCENARIO: "Feature operates correctly under normal conditions"
 
 [NEEDS CLARIFICATION: What key architecture decisions need to be made? Each requires user confirmation.]
 
-- [ ] **[Decision Name]**: [Choice made]
+- [ ] ADR-1 [Decision Name]: [Choice made]
   - Rationale: [Why this over alternatives]
   - Trade-offs: [What we accept]
   - User confirmed: _Pending_
 
-- [ ] **[Decision Name]**: [Choice made]
+- [ ] ADR-2 [Decision Name]: [Choice made]
   - Rationale: [Why this over alternatives]
   - Trade-offs: [What we accept]
   - User confirmed: _Pending_
@@ -810,6 +810,8 @@ And: [No unexpected behavior occurs]
 - **Edge Cases**: [Boundary values, empty states, concurrent operations]
 - **Performance**: [Response times under load, resource usage]
 - **Security**: [Input validation, authorization, data protection]
+
+---
 
 ## Glossary
 

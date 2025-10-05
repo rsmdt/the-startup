@@ -1,18 +1,20 @@
 # Product Requirements Document
 
 ## Validation Checklist
-- [ ] Product Overview complete (vision, problem, value proposition)
-- [ ] User Personas defined (at least primary persona)
-- [ ] User Journey Maps documented (at least primary journey)
-- [ ] Feature Requirements specified (must-have, should-have, could-have, won't-have)
-- [ ] Detailed Feature Specifications for complex features
-- [ ] Success Metrics defined with KPIs and tracking requirements
-- [ ] Constraints and Assumptions documented
-- [ ] Risks and Mitigations identified
-- [ ] Open Questions captured
-- [ ] Supporting Research completed (competitive analysis, user research, market data)
+
+- [ ] All required sections are complete
 - [ ] No [NEEDS CLARIFICATION] markers remain
+- [ ] Problem statement is specific and measurable
+- [ ] Problem is validated by evidence (not assumptions)
+- [ ] Context → Problem → Solution flow makes sense
+- [ ] Every persona has at least one user journey
+- [ ] All MoSCoW categories addressed (Must/Should/Could/Won't)
+- [ ] Every feature has testable acceptance criteria
+- [ ] Every metric has corresponding tracking events
+- [ ] No feature redundancy (check for duplicates)
+- [ ] No contradictions between sections
 - [ ] No technical implementation details included
+- [ ] A new team member could understand this PRD
 
 ---
 
@@ -108,6 +110,8 @@
 |-------|------------|---------|
 | [User action] | [What data to capture] | [Why we track this] |
 
+---
+
 ## Constraints and Assumptions
 
 ### Constraints [NEEDS CLARIFICATION: What are limiting factors]
@@ -133,6 +137,8 @@
 - [ ] [Question that needs stakeholder input]
 - [ ] [Decision that needs to be made]
 - [ ] [Information that needs to be gathered]
+
+---
 
 ## Supporting Research
 

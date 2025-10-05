@@ -237,7 +237,7 @@ func (p *ProgressiveDisclosureRenderer) RenderError(err error, context string) s
 func (p *ProgressiveDisclosureRenderer) GetChoiceStyle(isCursor bool, isSelected bool) lipgloss.Style {
 	if isCursor {
 		if isSelected {
-			return p.styles.CursorLine.Copy().Background(p.styles.Info.GetForeground())
+			return p.styles.CursorLine.Background(p.styles.Info.GetForeground())
 		}
 		return p.styles.CursorLine
 	}

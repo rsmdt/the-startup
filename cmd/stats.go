@@ -2,11 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"path/filepath"
-	"time"
 
 	"github.com/charmbracelet/bubbletea"
-	"github.com/rsmdt/the-startup/internal/stats"
 	"github.com/rsmdt/the-startup/internal/ui/agent"
 	"github.com/spf13/cobra"
 )
@@ -52,92 +49,3 @@ func runInteractiveDashboard() error {
 	return nil
 }
 
-// extractAgentAnalytics processes log entries to extract agent statistics and patterns
-func extractAgentAnalytics(entries []stats.ClaudeLogEntry) (
-	map[string]*stats.GlobalAgentStats,
-	[]stats.DelegationPattern,
-	[]stats.AgentCoOccurrence,
-	error,
-) {
-	// Create analyzers
-	agentAnalyzer := stats.NewAgentAnalyzer()
-	delegationAnalyzer := stats.NewDelegationAnalyzer()
-
-	// Process entries to detect agents and build patterns
-	sessionAgents := make(map[string][]string)
-
-	for _, entry := range entries {
-		// Detect agent in the entry using existing function
-		agentType, confidence := stats.DetectAgent(entry)
-
-		if agentType != "" && confidence > 0.5 { // Only process high confidence detections
-			// Create agent invocation
-			inv := stats.AgentInvocation{
-				AgentType:       agentType,
-				SessionID:       entry.SessionID,
-				Timestamp:       entry.Timestamp,
-				DurationMs:      1000, // Default duration, could be extracted from logs
-				Success:         true, // Simplified, could be improved with error detection
-				Confidence:      confidence,
-				DetectionMethod: "pattern_detection",
-			}
-
-			// Process with agent analyzer
-			agentAnalyzer.ProcessAgentInvocation(inv)
-
-			// Track session agents for delegation analysis
-			if sessionAgents[entry.SessionID] == nil {
-				sessionAgents[entry.SessionID] = []string{}
-			}
-			sessionAgents[entry.SessionID] = append(sessionAgents[entry.SessionID], agentType)
-		}
-	}
-
-	// Build delegation patterns from session agents
-	for sessionID, agents := range sessionAgents {
-		// Process agent transitions
-		for i := 0; i < len(agents)-1; i++ {
-			delegationAnalyzer.ProcessAgentTransition(
-				sessionID,
-				agents[i],
-				agents[i+1],
-				time.Now(), // Simplified timestamp
-			)
-		}
-
-		// Process co-occurrence patterns manually by creating transitions for all pairs
-		for i := 0; i < len(agents); i++ {
-			for j := i + 1; j < len(agents); j++ {
-				// Create bidirectional transitions for co-occurrence
-				delegationAnalyzer.ProcessAgentTransition(sessionID, agents[i], agents[j], time.Now())
-				delegationAnalyzer.ProcessAgentTransition(sessionID, agents[j], agents[i], time.Now())
-			}
-		}
-	}
-
-	// Get results
-	agentStats, err := agentAnalyzer.GetAllAgentStats()
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	delegationPatterns, err := delegationAnalyzer.GetTransitionPatterns()
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	coOccurrences, err := delegationAnalyzer.GetCoOccurrencePatterns()
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	return agentStats, delegationPatterns, coOccurrences, nil
-}
-
-// Helper function to get project name from path
-func getProjectName(projectPath string) string {
-	if projectPath == "" {
-		return "unknown"
-	}
-	return filepath.Base(projectPath)
-}

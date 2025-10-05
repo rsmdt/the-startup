@@ -75,7 +75,7 @@ func (d *DisplayFormatter) FormatSession(session *SessionStatistics) string {
 
 // FormatToolLeaderboard creates a tool usage leaderboard
 func (d *DisplayFormatter) FormatToolLeaderboard(toolStats map[string]*GlobalToolStats, limit int) string {
-	if toolStats == nil || len(toolStats) == 0 {
+	if len(toolStats) == 0 {
 		return ""
 	}
 
@@ -754,7 +754,7 @@ func generateSparkline(value, max, width int) string {
 
 // FormatAgentLeaderboard creates an agent usage leaderboard following tool leaderboard pattern
 func (d *DisplayFormatter) FormatAgentLeaderboard(agentStats map[string]*GlobalAgentStats, limit int) string {
-	if agentStats == nil || len(agentStats) == 0 {
+	if len(agentStats) == 0 {
 		return ""
 	}
 
@@ -770,7 +770,7 @@ func (d *DisplayFormatter) FormatAgentLeaderboard(agentStats map[string]*GlobalA
 
 // CommandLeaderboard formats a leaderboard for commands (used by agents)
 func (d *DisplayFormatter) FormatCommandLeaderboard(commands map[string]int) string {
-	if commands == nil || len(commands) == 0 {
+	if len(commands) == 0 {
 		return ""
 	}
 

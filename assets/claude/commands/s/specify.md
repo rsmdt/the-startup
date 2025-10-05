@@ -55,13 +55,20 @@ Maintain awareness of:
 
 **🎯 Goal**: Establish the specification identity and setup working directory.
 
-Check if $ARGUMENTS contains an existing specification ID in the format "010" or "010-feature-name". If an ID is provided, run `{{STARTUP_PATH}}/bin/the-startup spec --read [ID]` to check for existing work. Parse the output to determine if the specification directory exists.
+Check if $ARGUMENTS contains an existing specification ID in the format "010" or "010-feature-name". If an ID is provided, run `{{STARTUP_PATH}}/bin/the-startup spec --read [ID]` to check for existing work.
 
-If the specification directory exists, check which documents exist (PRD.md, SDD.md, PLAN.md). Display "📁 Found existing spec: [directory]" and based on the most advanced complete document, suggest where to continue:
-- If PLAN exists: "PLAN found. Continue to Step 5 (Finalization)?"
-- If SDD exists but PLAN doesn't: "SDD found. Continue to Step 4 (Implementation Plan)?"
-- If PRD exists but SDD doesn't: "PRD found. Continue to Step 3 (Solution Design)?"
-- If no documents exist: "Directory exists but no documents found. Start from Step 2 (PRD)?"
+Parse the TOML output which contains:
+- Specification metadata: `id`, `name`, `dir`
+- `[spec]` section: Lists spec documents (prd, sdd, plan)
+- `[gates]` section: Lists quality gates (definition_of_ready, definition_of_done, task_definition_of_done) if they exist
+
+If the specification directory exists, check which documents exist in the `[spec]` section. Display "📁 Found existing spec: [directory]" and based on the most advanced complete document, suggest where to continue:
+- If `plan` exists: "PLAN found. Continue to Step 5 (Finalization)?"
+- If `sdd` exists but `plan` doesn't: "SDD found. Continue to Step 4 (Implementation Plan)?"
+- If `prd` exists but `sdd` doesn't: "PRD found. Continue to Step 3 (Solution Design)?"
+- If no documents exist in `[spec]`: "Directory exists but no documents found. Start from Step 2 (PRD)?"
+
+**Quality Gates**: If the `[gates]` section exists with quality gate files, note them for validation use. Gates are optional - if they don't exist, proceed without validation.
 
 Ask the user to confirm the suggested starting point.
 
