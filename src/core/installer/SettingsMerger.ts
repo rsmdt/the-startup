@@ -332,4 +332,39 @@ export class SettingsMerger {
       // Log error but don't throw (original error is more important)
     }
   }
+
+  /**
+   * Removes hooks from Claude settings during uninstall.
+   *
+   * This method removes all hooks from settings.json that were added
+   * during installation. It preserves user's other settings.
+   *
+   * @param settingsPath - Absolute path to settings.json
+   * @returns Updated settings object (without hooks)
+   * @throws Error if settings file doesn't exist or is invalid JSON
+   */
+  async removeHooks(settingsPath: string): Promise<ClaudeSettings> {
+    const backupPath = this.generateBackupPath(settingsPath);
+    const settingsExisted = await this.createBackup(settingsPath, backupPath);
+
+    if (!settingsExisted) {
+      // No settings file exists, nothing to remove
+      return {};
+    }
+
+    try {
+      const settings = await this.readSettings(settingsPath);
+
+      // Remove hooks property entirely
+      const { hooks, ...settingsWithoutHooks } = settings;
+
+      await this.writeSettings(settingsPath, settingsWithoutHooks);
+      await this.cleanupBackup(backupPath, settingsExisted);
+
+      return settingsWithoutHooks;
+    } catch (error) {
+      await this.restoreBackup(settingsPath, backupPath, settingsExisted);
+      throw error;
+    }
+  }
 }

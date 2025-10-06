@@ -233,7 +233,7 @@ export class LockManager {
    * - .claude/commands/ -> commands
    * - .the-startup/templates/ -> templates
    * - .the-startup/rules/ -> rules
-   * - .the-startup/outputStyles/ -> outputStyles
+   * - .claude/output-styles/ -> outputStyles
    * - .the-startup/bin/ -> binary
    */
   private categorizeFiles(fileEntries: FileEntry[]): LockFile['files'] {
@@ -257,7 +257,7 @@ export class LockManager {
         categorized.templates.push(entry);
       } else if (normalizedPath.includes('/rules/')) {
         categorized.rules.push(entry);
-      } else if (normalizedPath.includes('/outputStyles/')) {
+      } else if (normalizedPath.includes('/output-styles/')) {
         categorized.outputStyles.push(entry);
       } else if (normalizedPath.includes('/bin/')) {
         categorized.binary = entry;

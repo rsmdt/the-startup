@@ -414,4 +414,118 @@ describe('SettingsMerger', () => {
       expect(content).toBe(JSON.stringify(existingSettings, null, 2));
     });
   });
+
+  describe('removeHooks', () => {
+    it('should remove all hooks from settings.json', async () => {
+      // Arrange
+      const existingSettings: ClaudeSettings = {
+        hooks: {
+          'user-prompt-submit': { command: 'test-hook' },
+          'another-hook': { command: 'another-command' },
+        },
+        otherSetting: 'value',
+      };
+      setMockFileContent(settingsPath, JSON.stringify(existingSettings, null, 2));
+
+      // Act
+      const result = await merger.removeHooks(settingsPath);
+
+      // Assert: Hooks removed, other settings preserved
+      expect(result.hooks).toBeUndefined();
+      expect(result.otherSetting).toBe('value');
+
+      // Verify file written
+      const content = getMockFileContent(settingsPath);
+      const parsed = JSON.parse(content);
+      expect(parsed.hooks).toBeUndefined();
+      expect(parsed.otherSetting).toBe('value');
+    });
+
+    it('should preserve other user settings when removing hooks', async () => {
+      // Arrange
+      const existingSettings: ClaudeSettings = {
+        hooks: {
+          'test-hook': { command: 'test' },
+        },
+        customSetting: 'custom-value',
+        anotherSetting: { nested: 'object' },
+      };
+      setMockFileContent(settingsPath, JSON.stringify(existingSettings, null, 2));
+
+      // Act
+      const result = await merger.removeHooks(settingsPath);
+
+      // Assert: All non-hook settings preserved
+      expect(result.hooks).toBeUndefined();
+      expect(result.customSetting).toBe('custom-value');
+      expect(result.anotherSetting).toEqual({ nested: 'object' });
+    });
+
+    it('should return empty object when settings file does not exist', async () => {
+      // Arrange: File doesn't exist
+      // No need to set content
+
+      // Act
+      const result = await merger.removeHooks(settingsPath);
+
+      // Assert
+      expect(result).toEqual({});
+    });
+
+    it('should create backup before removing hooks', async () => {
+      // Arrange
+      const existingSettings: ClaudeSettings = {
+        hooks: {
+          'test-hook': { command: 'test' },
+        },
+      };
+      setMockFileContent(settingsPath, JSON.stringify(existingSettings, null, 2));
+
+      // Act
+      await merger.removeHooks(settingsPath);
+
+      // Assert: Backup was created
+      const copyOps = getOperationsByName('copyFile');
+      expect(copyOps.length).toBeGreaterThan(0);
+      const firstCopy = copyOps[0];
+      expect(firstCopy).toBeDefined();
+      expect(firstCopy.args[0]).toBe(settingsPath);
+      expect(firstCopy.args[1]).toMatch(/\.backup-\d+$/);
+    });
+
+    it('should rollback on error', async () => {
+      // Arrange
+      const existingSettings: ClaudeSettings = {
+        hooks: {
+          'test-hook': { command: 'test' },
+        },
+      };
+      setMockFileContent(settingsPath, JSON.stringify(existingSettings, null, 2));
+
+      // Mock writeFile to fail
+      mockFs.writeFile.mockRejectedValueOnce(new Error('Write failed'));
+
+      // Act & Assert
+      await expect(merger.removeHooks(settingsPath)).rejects.toThrow();
+
+      // Verify original file restored
+      const content = getMockFileContent(settingsPath);
+      expect(content).toBe(JSON.stringify(existingSettings, null, 2));
+    });
+
+    it('should handle settings with no hooks gracefully', async () => {
+      // Arrange: Settings without hooks
+      const existingSettings: ClaudeSettings = {
+        customSetting: 'value',
+      };
+      setMockFileContent(settingsPath, JSON.stringify(existingSettings, null, 2));
+
+      // Act
+      const result = await merger.removeHooks(settingsPath);
+
+      // Assert: Should work without error
+      expect(result.hooks).toBeUndefined();
+      expect(result.customSetting).toBe('value');
+    });
+  });
 });
