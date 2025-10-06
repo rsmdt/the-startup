@@ -45,26 +45,31 @@ Think of it as having a CTO, architects, developers, and DevOps engineers on-dem
 ## ⚡ Quick Start
 
 ```bash
-# Install (2 minutes)
-curl -LsSf https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh | sh
+# Install with npx (no installation required!)
+npx the-agentic-startup install
 ```
 
 <details>
 <summary>See all install options</summary>
 
 ```bash
-curl -LsSf https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh | sh -s -- -h
+# Interactive installation (recommended)
+npx the-agentic-startup install
 
-# Install agents, hooks, and commands for development tools with an interactive TUI
-# 
-# Usage:
-#   the-startup install [flags]
-# 
-# Flags:
-#   -h, --help    help for install
-#   -l, --local   Use local installation paths for both directories (skip path selection screens)
-#   -y, --yes     Auto-confirm installation with recommended (global) paths
+# Quick install with defaults (local paths)
+npx the-agentic-startup install --local --yes
+
+# Or install globally for permanent access
+npm install -g the-agentic-startup
+the-agentic-startup install
+
+# See all available commands
+npx the-agentic-startup --help
 ```
+
+**Install Flags:**
+- `--local` - Use local installation paths (./.the-startup, ~/.claude)
+- `--yes` - Auto-confirm all prompts with recommended settings
 
 </details>
 

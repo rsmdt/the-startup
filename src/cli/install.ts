@@ -9,30 +9,7 @@ import type { InstallCommandOptions, InstallResult } from '../core/types/config.
 import { homedir } from 'os';
 import { resolve, join } from 'path';
 import { createInstallerFS, createSettingsMergerFS } from './fs-adapter.js';
-
-/**
- * Mock Asset Provider for development
- * In production, this would read from embedded assets
- */
-class MockAssetProvider {
-  getAssetFiles() {
-    return [
-      { category: 'agents' as const, sourcePath: 'assets/agents/example.md' },
-      { category: 'commands' as const, sourcePath: 'assets/commands/example.md' },
-      { category: 'templates' as const, sourcePath: 'assets/templates/example.md' },
-      { category: 'rules' as const, sourcePath: 'assets/rules/example.md' },
-      { category: 'outputStyles' as const, sourcePath: 'assets/output-styles/example.md' },
-    ];
-  }
-
-  getSettingsTemplate() {
-    return {
-      hooks: {
-        preRequest: ['{{STARTUP_PATH}}/bin/statusline.sh'],
-      },
-    };
-  }
-}
+import { createAssetProvider } from './asset-provider.js';
 
 /**
  * Install CLI Command
@@ -96,7 +73,7 @@ async function handleNonInteractiveInstall(
   const lockManager = new LockManager(lockFilePath);
   const settingsMergerFS = createSettingsMergerFS();
   const settingsMerger = new SettingsMerger(settingsMergerFS);
-  const assetProvider = new MockAssetProvider();
+  const assetProvider = createAssetProvider();
   const installerFS = createInstallerFS();
   const installer = new Installer(
     installerFS,
@@ -150,7 +127,7 @@ async function handleInteractiveInstall(
   const lockManager = new LockManager(lockFilePath);
   const settingsMergerFS = createSettingsMergerFS();
   const settingsMerger = new SettingsMerger(settingsMergerFS);
-  const assetProvider = new MockAssetProvider();
+  const assetProvider = createAssetProvider();
   const installerFS = createInstallerFS();
   const installer = new Installer(
     installerFS,

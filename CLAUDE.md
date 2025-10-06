@@ -4,135 +4,173 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Common Commands
 
-### Analytics
-```bash
-# View comprehensive stats for current project
-the-startup stats
-
-# View global stats across all projects
-the-startup stats -g
-
-# Filter by time and export formats
-the-startup stats --since 7d --format json
-the-startup stats tools --since 24h
-the-startup stats agents -g
-```
-
 ### Build and Run
 ```bash
-# Build the binary
-go build -o the-startup
+# Build the project
+npm run build
 
-# Run directly without building
-go run . install
-go run . stats
-go run . stats tools --since 7d
+# Run the built CLI directly
+node dist/index.js install
+node dist/index.js --help
 
-# Run the compiled binary
-./the-startup install
-./the-startup stats
-./the-startup --help
+# Or link globally for easier testing (simulates npx behavior)
+npm link
+the-agentic-startup install
+the-agentic-startup --help
+
+# Unlink when done testing
+npm unlink -g the-agentic-startup
+
+# Watch mode for development (rebuilds on file changes)
+npm run dev
+# Then in another terminal, run:
+node dist/index.js install
 ```
 
 ### Testing
 ```bash
 # Run all tests
-go test ./...
-
-# Run tests with verbose output
-go test -v ./...
-
-# Run specific package tests
-go test ./internal/stats/...
-go test ./internal/ui/...
-go test ./internal/installer/...
+npm test
 
 # Run tests with coverage
-go test -cover ./...
-go test -coverprofile=coverage.out ./...
-go tool cover -html=coverage.out
+npm run test:coverage
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run specific test file
+npm test tests/core/installer/Installer.test.ts
+
+# Run tests with UI (if available)
+npm run test:ui
 ```
 
 ### Development Workflow
 ```bash
 # Format code
-go fmt ./...
+npm run format
 
-# Check for issues
-go vet ./...
+# Lint code
+npm run lint
 
-# Update dependencies
-go mod tidy
+# Type check
+npm run typecheck
+
+# Clean build artifacts
+npm run clean
+
+# Full check (lint + typecheck + test)
+npm run check
 ```
 
 ## Architecture Overview
 
 ### Package Structure
 
-The project follows a standard Go layout with clear separation of concerns:
+The project follows a standard TypeScript/Node.js layout with clear separation of concerns:
 
-- **`main.go`**: Entry point that sets up Cobra commands and embeds asset files
-- **`cmd/`**: Command implementations using Cobra framework
-  - `install.go`: Installation command that launches BubbleTea TUI
-  - `stats.go`: Analyzes Claude Code's native JSONL logs for usage metrics
-  - `commands.go`: Other commands (update, validate)
-  
-- **`internal/`**: Core application logic
+- **`src/index.ts`**: Entry point that exports CLI runner
+- **`src/cli/`**: CLI command implementations using Commander.js
+  - `index.ts`: CLI setup with Commander.js, registers all commands
+  - `install.ts`: Installation command that launches Ink-based TUI
+  - `uninstall.ts`: Uninstall command with lock file reading
+  - `init.ts`: Initialize DOR/DOD/TASK-DOD templates
+  - `spec.ts`: Create numbered spec directories with TOML output
+  - `statusline.ts`: Cross-platform stdio passthrough to shell scripts
+
+- **`src/core/`**: Core business logic modules
   - `installer/`: Installation logic and file management
-    - Handles copying embedded assets to appropriate directories
-    - Manages lock files and configuration updates
-  - `ui/`: BubbleTea-based interactive TUI components
-    - Composable model pattern with state machine
-    - Separate models for each installation step
-  - `stats/`: Analytics engine for Claude Code logs
-    - Parses native JSONL logs from ~/.claude/projects/
-    - Provides tool, agent, command, and session analytics
-  - `config/`: Configuration structures (lock files)
-  - `assets/`: Embedded filesystem management
+    - `Installer.ts`: Main installer with rollback mechanism
+    - `LockManager.ts`: Lock file creation, reading, checksum management
+    - `SettingsMerger.ts`: Deep merge settings with backup/restore
+  - `init/`: Template initialization logic
+    - `Initializer.ts`: DOR/DOD/TASK-DOD template processing
+  - `spec/`: Specification directory management
+    - `SpecGenerator.ts`: Auto-incrementing IDs, TOML output, template generation
+  - `types/`: TypeScript type definitions
+    - `config.ts`: Configuration types for all commands
+    - `settings.ts`: Claude settings.json types
+    - `lock.ts`: Lock file format types with v1→v2 migration support
+
+- **`src/ui/`**: Ink-based interactive UI components (React)
+  - `install/`: Installation wizard components
+    - `InstallWizard.tsx`: Main wizard with state machine (6 states)
+    - `PathSelector.tsx`, `FileTree.tsx`, `Complete.tsx`: UI components
+  - `uninstall/`: Uninstall wizard
+    - `UninstallWizard.tsx`: Lock file reading and confirmation
+  - `shared/`: Reusable UI components
+    - `theme.ts`, `Spinner.tsx`, `ErrorDisplay.tsx`
+
+- **`tests/`**: Comprehensive test suite
+  - `core/`: Unit tests for all core modules
+  - `ui/`: UI component tests using ink-testing-library
+  - `integration/`: Integration tests for full workflows
+  - `infrastructure/`: Build and TypeScript tests
 
 ### Embedded Assets
 
-The application embeds all assets at compile time using Go's embed package:
-- `assets/agents/*.md`: Agent definitions
-- `assets/commands/**/*.md`: Command definitions with nested structure
-- `assets/templates/*`: Template files (BRD, PRD, SDD, PLAN)
-- `assets/settings.json`: Claude Code settings template
+The application includes all assets as separate files distributed with the npm package:
+- `assets/claude/agents/**/*.md`: Agent definitions (11 roles, 39 activities)
+- `assets/claude/commands/**/*.md`: Slash command definitions (5 commands)
+- `assets/the-startup/templates/*`: Template files (PRD, BRD, SDD, PLAN, DOR, DOD, TASK-DOD)
+- `assets/the-startup/rules/*`: Agent delegation and cycle pattern rules
+- `assets/claude/settings.json`: Claude Code settings template
+- `assets/claude/output-styles/the-startup.md`: Custom output style
 
+### UI Architecture (Ink/React)
 
-### UI Architecture (BubbleTea)
+The installer uses React components with Ink for terminal UI:
 
-The installer uses a composable model pattern with clear state transitions:
-
-1. **MainModel**: Orchestrates the overall flow by composing sub-models
+1. **InstallWizard**: Main component orchestrating installation flow
 2. **State Machine**: Manages transitions between installation steps
-   - StateStartupPath → StateClaudePath → StateFileSelection → StateComplete
-3. **Sub-models**: Each handles a specific step with its own Update/View logic
-   - StartupPathModel: Selects installation directory
-   - ClaudePathModel: Selects Claude configuration directory  
-   - FileSelectionModel: Interactive tree selector for choosing files
-   - CompleteModel: Shows installation success
-   - ErrorModel: Handles error display
+   - Intro → StartupPath → ClaudePath → FileSelection → Installing → Complete
+3. **React Components**: Each step is a separate React component
+   - PathSelector: Selects installation/Claude directories
+   - FileTree: Interactive tree selector with checkboxes
+   - Complete: Shows installation success summary
+   - ErrorDisplay: Handles error display with recovery options
 
 ### Installation Flow
 
-1. User runs `the-startup install`
-2. TUI launches with path selection
-3. Files are selected using tree navigation
+1. User runs `the-agentic-startup install` or `npm run dev install`
+2. Ink TUI launches with path selection
+3. Files are selected using interactive tree (or --yes flag for all)
 4. Assets are copied to:
    - `.claude/agents/` and `.claude/commands/`: Agent and command definitions
    - `.the-startup/templates/`: Template files
-   - `.the-startup/bin/`: The startup binary
-5. Settings.json is updated with hooks configuration
-6. Lock file is created to track installation
+   - `.the-startup/rules/`: Agent delegation rules
+5. Settings.json is merged with hooks (backup created)
+6. Lock file (v2 format) is created with checksums
+7. Rollback mechanism ensures clean state on any failure
 
-### Stats Command
+### Lock File Format
 
-The `stats` command provides comprehensive analytics:
-- Parses Claude Code's native JSONL logs directly
-- Supports multiple output formats (table, JSON, CSV)
-- Filters by time period with --since flag
-- Provides subcommands for tools, agents, commands, sessions
-- Works globally across all projects with -g flag
+The project supports two lock file versions with automatic migration:
+
+**v1 (deprecated)**: Flat map of files
+```json
+{
+  "version": "1.0.0",
+  "files": {
+    "agents/the-chief.md": { "size": 2048, "checksum": "sha256:..." }
+  }
+}
+```
+
+**v2 (current)**: Categorized arrays with metadata
+```json
+{
+  "version": "2.0.0",
+  "install_date": "2025-10-06T10:00:00Z",
+  "categories": {
+    "agents": [
+      { "path": "agents/the-chief.md", "size": 2048, "checksum": "sha256:..." }
+    ]
+  }
+}
+```
+
+Migration happens automatically on read via `LockManager.migrateLockFile()`.
 
 ## Key Implementation Details
 
@@ -140,19 +178,38 @@ The `stats` command provides comprehensive analytics:
 - Installation paths support `~` expansion for home directory
 - Project-local installation uses `.the-startup` directory
 - Claude configuration expected at `~/.claude`
+- All paths use `path.join()` for cross-platform compatibility
 
 ### Placeholder Replacement
 Templates use placeholders that are replaced during installation:
 - `{{STARTUP_PATH}}`: Installation directory path
 - `{{CLAUDE_PATH}}`: Claude configuration directory
 
-### Session Management
-Stats command automatically discovers Claude Code sessions from:
-- Project directories in `~/.claude/projects/`
-- Session logs within each project
-- Correlates events across multiple log files
+### Rollback Mechanism
+The installer implements atomic operations with full rollback:
+- Tracks all installed files during installation
+- Creates backup of settings.json before modification
+- On any failure: deletes all installed files, restores settings backup
+- Ensures system is in clean state after failed installation
 
 ### Error Handling
-- Stats command gracefully handles missing or corrupted logs
-- Provides clear error messages for invalid time formats
+- Custom error types with specific messages (ENOENT, EACCES, ENOSPC)
 - Installation validates paths and provides clear error messages
+- Settings merger handles JSON parse errors gracefully
+- Lock file migration handles both v1 and v2 formats
+
+### Testing Strategy
+- Unit tests for all core modules (Installer, LockManager, SettingsMerger, etc.)
+- Integration tests for full installation/uninstall workflows
+- UI tests using ink-testing-library for React components
+- Migration test from v1 to v2 lock file format
+- Infrastructure tests for build process and TypeScript compilation
+
+## Distribution
+
+The project is distributed as an npm package:
+- Published to npm registry
+- Installed globally: `npm install -g the-agentic-startup`
+- Or used via npx: `npx the-agentic-startup install`
+- Assets are included in the npm package (not embedded at build time)
+- Entry point: `dist/index.js` (built from TypeScript)

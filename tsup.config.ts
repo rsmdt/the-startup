@@ -4,8 +4,8 @@ export default defineConfig({
   // Entry point
   entry: ['src/index.ts'],
 
-  // Output formats (dual ESM/CJS)
-  format: ['esm', 'cjs'],
+  // Output formats (ESM only - CLI uses top-level await)
+  format: ['esm'],
 
   // Output directory
   outDir: 'dist',
@@ -31,24 +31,17 @@ export default defineConfig({
   // Target environment
   target: 'node18',
 
-  // Bundle dependencies (exclude peer dependencies)
-  noExternal: [
-    'chalk',
-    'commander',
-    'fs-extra',
-    'ink',
-    'inquirer',
-    'ora'
-  ],
-
   // Platform
   platform: 'node',
 
   // Treeshake
   treeshake: true,
 
-  // Bundle node_modules
+  // Bundle our code but keep dependencies external
   bundle: true,
+
+  // Mark all node_modules as external
+  noExternal: [],
 
   // Preserve binary permissions
   onSuccess: 'chmod +x dist/index.js'
