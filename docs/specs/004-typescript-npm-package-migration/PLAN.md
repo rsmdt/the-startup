@@ -227,74 +227,74 @@ If implementation cannot follow specification exactly:
             - [x] T002.4.6.1 Shared component tests pass `[activity: run-tests]`
             - [x] T002.4.6.2 Components follow Ink patterns `[ref: SDD; lines: 1073-1086]` `[activity: review-code]`
 
-- [ ] T003 Core Features & UI Components
+- [x] T003 Core Features & UI Components
 
-    - [ ] T003.1 Installer Core Implementation `[component: Installer]`
-        - [ ] T003.1.1 Prime Context
-            - [ ] T003.1.1.1 Read Installer interface `[ref: SDD; lines: 569-586]`
-            - [ ] T003.1.1.2 Read Install flow `[ref: SDD; lines: 677-718]`
-            - [ ] T003.1.1.3 Read Non-interactive flow `[ref: SDD; lines: 720-756]`
-        - [ ] T003.1.2 Write Tests
-            - [ ] T003.1.2.1 Test asset file copying to selected directories `[activity: test-execution]`
-            - [ ] T003.1.2.2 Test settings.json merge via SettingsMerger `[activity: test-execution]`
-            - [ ] T003.1.2.3 Test lock file creation via LockManager `[activity: test-execution]`
-            - [ ] T003.1.2.4 Test specific error: Invalid path with re-enter suggestion message `[ref: SDD; line: 900]` `[activity: test-execution]`
-            - [ ] T003.1.2.5 Test specific error: Permission denied with chmod/permissions suggestion `[ref: SDD; line: 901]` `[activity: test-execution]`
-            - [ ] T003.1.2.6 Test specific error: Disk full with space needed message `[ref: SDD; line: 922]` `[activity: test-execution]`
-            - [ ] T003.1.2.7 Test rollback on partial installation failure `[ref: SDD; line: 903]` `[activity: test-execution]`
-            - [ ] T003.1.2.8 Test progress indicators for long operations (>5s) `[ref: SDD; line: 1161]` `[activity: test-execution]`
-            - [ ] T003.1.2.9 Test case-sensitive vs case-insensitive path handling `[ref: SDD; lines: 37, 1189]` `[activity: test-execution]`
-        - [ ] T003.1.3 Implement src/core/installer/Installer.ts `[ref: SDD; lines: 569-586]` `[activity: domain-modeling]`
-        - [ ] T003.1.4 Validate
-            - [ ] T003.1.4.1 Installer tests pass with 90%+ coverage `[activity: run-tests]`
-            - [ ] T003.1.4.2 All error scenarios handled `[ref: SDD; lines: 899-921]` `[activity: business-acceptance]`
+    - [x] T003.1 Installer Core Implementation `[component: Installer]`
+        - [x] T003.1.1 Prime Context
+            - [x] T003.1.1.1 Read Installer interface `[ref: SDD; lines: 569-586]`
+            - [x] T003.1.1.2 Read Install flow `[ref: SDD; lines: 677-718]`
+            - [x] T003.1.1.3 Read Non-interactive flow `[ref: SDD; lines: 720-756]`
+        - [x] T003.1.2 Write Tests
+            - [x] T003.1.2.1 Test asset file copying to selected directories `[activity: test-execution]`
+            - [x] T003.1.2.2 Test settings.json merge via SettingsMerger `[activity: test-execution]`
+            - [x] T003.1.2.3 Test lock file creation via LockManager `[activity: test-execution]`
+            - [x] T003.1.2.4 Test specific error: Invalid path with re-enter suggestion message `[ref: SDD; line: 900]` `[activity: test-execution]`
+            - [x] T003.1.2.5 Test specific error: Permission denied with chmod/permissions suggestion `[ref: SDD; line: 901]` `[activity: test-execution]`
+            - [x] T003.1.2.6 Test specific error: Disk full with space needed message `[ref: SDD; line: 922]` `[activity: test-execution]`
+            - [x] T003.1.2.7 Test rollback on partial installation failure `[ref: SDD; line: 903]` `[activity: test-execution]`
+            - [x] T003.1.2.8 Test progress indicators for long operations (>5s) `[ref: SDD; line: 1161]` `[activity: test-execution]`
+            - [x] T003.1.2.9 Test case-sensitive vs case-insensitive path handling `[ref: SDD; lines: 37, 1189]` `[activity: test-execution]`
+        - [x] T003.1.3 Implement src/core/installer/Installer.ts `[ref: SDD; lines: 569-586]` `[activity: domain-modeling]`
+        - [x] T003.1.4 Validate
+            - [x] T003.1.4.1 Installer tests pass with 90%+ coverage `[activity: run-tests]`
+            - [x] T003.1.4.2 All error scenarios handled `[ref: SDD; lines: 899-921]` `[activity: business-acceptance]`
 
-    - [ ] T003.2 Initializer Implementation `[parallel: true]` `[component: Initializer]`
-        - [ ] T003.2.1 Prime Context
-            - [ ] T003.2.1.1 Read Init requirements `[ref: PRD; lines: 190-200]`
-            - [ ] T003.2.1.2 Read Init flow `[ref: SDD; lines: 822-868]`
-            - [ ] T003.2.1.3 Read Init interfaces `[ref: SDD; lines: 614-629]`
-        - [ ] T003.2.2 Write Tests
-            - [ ] T003.2.2.1 Test template copying to docs/ directory `[activity: test-execution]`
-            - [ ] T003.2.2.2 Test custom value replacement in templates `[activity: test-execution]`
-            - [ ] T003.2.2.3 Test --dry-run preview mode `[ref: PRD; line: 196]` `[activity: test-execution]`
-            - [ ] T003.2.2.4 Test --force overwrite mode `[ref: PRD; line: 197]` `[activity: test-execution]`
-            - [ ] T003.2.2.5 Test docs/ directory creation when missing `[activity: test-execution]`
-        - [ ] T003.2.3 Implement src/core/init/Initializer.ts `[ref: SDD; lines: 614-629]` `[activity: domain-modeling]`
-        - [ ] T003.2.4 Validate
-            - [ ] T003.2.4.1 Initializer tests pass with 90%+ coverage `[activity: run-tests]`
-            - [ ] T003.2.4.2 All PRD acceptance criteria met `[ref: PRD; lines: 192-199]` `[activity: business-acceptance]`
+    - [x] T003.2 Initializer Implementation `[parallel: true]` `[component: Initializer]`
+        - [x] T003.2.1 Prime Context
+            - [x] T003.2.1.1 Read Init requirements `[ref: PRD; lines: 190-200]`
+            - [x] T003.2.1.2 Read Init flow `[ref: SDD; lines: 822-868]`
+            - [x] T003.2.1.3 Read Init interfaces `[ref: SDD; lines: 614-629]`
+        - [x] T003.2.2 Write Tests
+            - [x] T003.2.2.1 Test template copying to docs/ directory `[activity: test-execution]`
+            - [x] T003.2.2.2 Test custom value replacement in templates `[activity: test-execution]`
+            - [x] T003.2.2.3 Test --dry-run preview mode `[ref: PRD; line: 196]` `[activity: test-execution]`
+            - [x] T003.2.2.4 Test --force overwrite mode `[ref: PRD; line: 197]` `[activity: test-execution]`
+            - [x] T003.2.2.5 Test docs/ directory creation when missing `[activity: test-execution]`
+        - [x] T003.2.3 Implement src/core/init/Initializer.ts `[ref: SDD; lines: 614-629]` `[activity: domain-modeling]`
+        - [x] T003.2.4 Validate
+            - [x] T003.2.4.1 Initializer tests pass with 90%+ coverage `[activity: run-tests]`
+            - [x] T003.2.4.2 All PRD acceptance criteria met `[ref: PRD; lines: 192-199]` `[activity: business-acceptance]`
 
-    - [ ] T003.3 SpecGenerator Implementation `[parallel: true]` `[component: SpecGenerator]`
-        - [ ] T003.3.1 Prime Context
-            - [ ] T003.3.1.1 Read Spec requirements `[ref: PRD; lines: 201-211]`
-            - [ ] T003.3.1.2 Read Spec flow `[ref: SDD; lines: 870-895]`
-            - [ ] T003.3.1.3 Read Spec interfaces `[ref: SDD; lines: 631-653]`
-        - [ ] T003.3.2 Write Tests
-            - [ ] T003.3.2.1 Test spec directory creation with auto-incrementing ID `[activity: test-execution]`
-            - [ ] T003.3.2.2 Test TOML output format for --read flag `[ref: PRD; line: 206]` `[activity: test-execution]`
-            - [ ] T003.3.2.3 Test template generation for --add flag `[ref: PRD; line: 205]` `[activity: test-execution]`
-            - [ ] T003.3.2.4 Test spec ID parsing from directory names `[activity: test-execution]`
-        - [ ] T003.3.3 Implement src/core/spec/SpecGenerator.ts `[ref: SDD; lines: 631-653]` `[activity: domain-modeling]`
-        - [ ] T003.3.4 Validate
-            - [ ] T003.3.4.1 SpecGenerator tests pass with 90%+ coverage `[activity: run-tests]`
-            - [ ] T003.3.4.2 TOML output format verified `[ref: PRD; line: 206]` `[activity: business-acceptance]`
+    - [x] T003.3 SpecGenerator Implementation `[parallel: true]` `[component: SpecGenerator]`
+        - [x] T003.3.1 Prime Context
+            - [x] T003.3.1.1 Read Spec requirements `[ref: PRD; lines: 201-211]`
+            - [x] T003.3.1.2 Read Spec flow `[ref: SDD; lines: 870-895]`
+            - [x] T003.3.1.3 Read Spec interfaces `[ref: SDD; lines: 631-653]`
+        - [x] T003.3.2 Write Tests
+            - [x] T003.3.2.1 Test spec directory creation with auto-incrementing ID `[activity: test-execution]`
+            - [x] T003.3.2.2 Test TOML output format for --read flag `[ref: PRD; line: 206]` `[activity: test-execution]`
+            - [x] T003.3.2.3 Test template generation for --add flag `[ref: PRD; line: 205]` `[activity: test-execution]`
+            - [x] T003.3.2.4 Test spec ID parsing from directory names `[activity: test-execution]`
+        - [x] T003.3.3 Implement src/core/spec/SpecGenerator.ts `[ref: SDD; lines: 631-653]` `[activity: domain-modeling]`
+        - [x] T003.3.4 Validate
+            - [x] T003.3.4.1 SpecGenerator tests pass with 90%+ coverage `[activity: run-tests]`
+            - [x] T003.3.4.2 TOML output format verified `[ref: PRD; line: 206]` `[activity: business-acceptance]`
 
-    - [ ] T003.4 UI Interactive Components `[parallel: true]` `[component: UI-Interactive]`
-        - [ ] T003.4.1 Prime Context
-            - [ ] T003.4.1.1 Read Install TUI requirements `[ref: PRD; lines: 162-175]`
-            - [ ] T003.4.1.2 Read Install flow detailed `[ref: PRD; lines: 285-307]`
-        - [ ] T003.4.2 Write Tests
-            - [ ] T003.4.2.1 Test PathSelector path validation `[activity: test-execution]`
-            - [ ] T003.4.2.2 Test FileTree keyboard navigation (arrows, vim bindings) `[ref: PRD; line: 169]` `[activity: test-execution]`
-            - [ ] T003.4.2.3 Test FileTree space/enter selection `[activity: test-execution]`
-            - [ ] T003.4.2.4 Test Complete screen displays success message `[activity: test-execution]`
-        - [ ] T003.4.3 Implement src/ui/install/PathSelector.tsx `[activity: component-development]`
-        - [ ] T003.4.4 Implement src/ui/install/FileTree.tsx `[activity: component-development]`
-        - [ ] T003.4.5 Implement src/ui/install/Complete.tsx `[activity: component-development]`
-        - [ ] T003.4.6 Validate
-            - [ ] T003.4.6.1 Interactive component tests pass `[activity: run-tests]`
-            - [ ] T003.4.6.2 Keyboard navigation works as specified `[ref: PRD; line: 169]` `[activity: business-acceptance]`
+    - [x] T003.4 UI Interactive Components `[parallel: true]` `[component: UI-Interactive]`
+        - [x] T003.4.1 Prime Context
+            - [x] T003.4.1.1 Read Install TUI requirements `[ref: PRD; lines: 162-175]`
+            - [x] T003.4.1.2 Read Install flow detailed `[ref: PRD; lines: 285-307]`
+        - [x] T003.4.2 Write Tests
+            - [x] T003.4.2.1 Test PathSelector path validation `[activity: test-execution]`
+            - [x] T003.4.2.2 Test FileTree keyboard navigation (arrows, vim bindings) `[ref: PRD; line: 169]` `[activity: test-execution]`
+            - [x] T003.4.2.3 Test FileTree space/enter selection `[activity: test-execution]`
+            - [x] T003.4.2.4 Test Complete screen displays success message `[activity: test-execution]`
+        - [x] T003.4.3 Implement src/ui/install/PathSelector.tsx `[activity: component-development]`
+        - [x] T003.4.4 Implement src/ui/install/FileTree.tsx `[activity: component-development]`
+        - [x] T003.4.5 Implement src/ui/install/Complete.tsx `[activity: component-development]`
+        - [x] T003.4.6 Validate
+            - [x] T003.4.6.1 Interactive component tests pass `[activity: run-tests]`
+            - [x] T003.4.6.2 Keyboard navigation works as specified `[ref: PRD; line: 169]` `[activity: business-acceptance]`
 
 - [ ] T004 UI Wizards
 

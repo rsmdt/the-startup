@@ -55,6 +55,7 @@
     "commander": "^12.1.0",
     "fs-extra": "^11.2.0",
     "ink": "^4.4.1",
+    "ink-text-input": "^5.0.1",
     "inquirer": "^10.2.2",
     "ora": "^8.1.0",
     "react": "^18.3.1"

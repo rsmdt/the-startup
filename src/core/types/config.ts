@@ -219,7 +219,7 @@ export interface SpecNumbering {
    *
    * Returns "001", "002", etc. (3-digit zero-padded).
    */
-  getNextSpecId(): string;
+  getNextSpecId(): Promise<string>;
 
   /**
    * Extract number from spec directory name.
