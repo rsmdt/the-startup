@@ -1,0 +1,33 @@
+{
+  "mcpServers": {},
+  "modelSettings": {
+    "defaultModel": "claude-sonnet-4-5",
+    "temperature": 0.7,
+    "maxTokens": 4096
+  },
+  "appearance": {
+    "theme": "dark",
+    "fontSize": 14
+  },
+  "editor": {
+    "tabSize": 2,
+    "insertSpaces": true
+  },
+  "hooks": {
+    "user-custom-validation": {
+      "command": "npm run validate",
+      "description": "Run custom validation before commit",
+      "continueOnError": false
+    },
+    "pre-commit-lint": {
+      "command": "npm run lint -- --fix",
+      "description": "Lint and auto-fix code",
+      "continueOnError": true
+    },
+    "check-types": {
+      "command": "npm run typecheck",
+      "description": "TypeScript type checking",
+      "continueOnError": false
+    }
+  }
+}

@@ -1,11 +1,19 @@
-# Build artifacts
-/bin/
+# Build artifacts (Go)
 /the-startup
 /the-startup-*
+
+# Build artifacts (TypeScript)
+dist/
+*.tsbuildinfo
 
 # Test artifacts
 *.test
 *.out
+coverage/
+.nyc_output/
+
+# Dependencies
+node_modules/
 
 # Go workspace
 go.work

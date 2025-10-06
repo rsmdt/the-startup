@@ -1,0 +1,19 @@
+{
+  "hooks": {
+    "startup-validate-dor": {
+      "command": "{{STARTUP_PATH}}/bin/the-startup validate dor",
+      "description": "Validate Definition of Ready before starting work",
+      "continueOnError": false
+    },
+    "startup-validate-dod": {
+      "command": "{{STARTUP_PATH}}/bin/the-startup validate dod",
+      "description": "Validate Definition of Done before completing task",
+      "continueOnError": false
+    },
+    "startup-update-statusline": {
+      "command": "{{CLAUDE_PATH}}/statusline.sh",
+      "description": "Update shell statusline with current context",
+      "continueOnError": true
+    }
+  }
+}
