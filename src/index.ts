@@ -1,17 +1,25 @@
+#!/usr/bin/env node
+
 /**
- * Main entry point for the-agentic-startup npm package
+ * Main CLI entry point for the-agentic-startup npm package
  *
  * This file serves as the CLI entry point when the package is invoked
  * via `npx the-agentic-startup` or after global installation.
  *
+ * Implements the complete CLI with all commands:
+ * - statusline: Cross-platform stdio passthrough
+ * - init: Initialize templates (DOR, DOD, TASK-DOD)
+ * - spec: Create numbered spec directories
+ * - install: Interactive/non-interactive installation
+ * - uninstall: Remove installed components
+ *
  * @ref SDD lines 473 - Main entry point
  */
 
-// Re-export types for programmatic usage
-export * from './core/types/lock.js';
-export * from './core/types/settings.js';
-export * from './core/types/config.js';
+import { runCLI } from './cli/index.js';
 
-// Entry point will be implemented in later phases
-// For now, this ensures the build pipeline works
-console.log('the-agentic-startup - TypeScript foundation established');
+// Run CLI and handle any uncaught errors
+runCLI().catch((error) => {
+  console.error('Fatal error:', error instanceof Error ? error.message : error);
+  process.exit(1);
+});
