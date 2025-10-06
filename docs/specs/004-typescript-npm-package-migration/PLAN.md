@@ -296,110 +296,110 @@ If implementation cannot follow specification exactly:
             - [x] T003.4.6.1 Interactive component tests pass `[activity: run-tests]`
             - [x] T003.4.6.2 Keyboard navigation works as specified `[ref: PRD; line: 169]` `[activity: business-acceptance]`
 
-- [ ] T004 UI Wizards
+- [x] T004 UI Wizards
 
-    - [ ] T004.1 InstallWizard Implementation `[parallel: true]` `[component: InstallWizard]`
-        - [ ] T004.1.1 Prime Context
-            - [ ] T004.1.1.1 Read Install wizard requirements `[ref: PRD; lines: 162-175]`
-            - [ ] T004.1.1.2 Read Install user flow `[ref: PRD; lines: 285-307]`
-            - [ ] T004.1.1.3 Read Install business rules `[ref: PRD; lines: 309-314]`
-        - [ ] T004.1.2 Write Tests
-            - [ ] T004.1.2.1 Test state transitions (Startup Path → Claude Path → File Selection → Complete) `[activity: test-execution]`
-            - [ ] T004.1.2.2 Test --local flag skips TUI, uses defaults `[ref: PRD; line: 172]` `[activity: test-execution]`
-            - [ ] T004.1.2.3 Test --yes flag auto-confirms prompts `[ref: PRD; line: 173]` `[activity: test-execution]`
-            - [ ] T004.1.2.4 Test error display and recovery `[ref: PRD; lines: 316-322]` `[activity: test-execution]`
-            - [ ] T004.1.2.5 Test Ctrl+C cancellation and rollback `[ref: PRD; line: 321]` `[activity: test-execution]`
-        - [ ] T004.1.3 Implement src/ui/install/InstallWizard.tsx `[ref: SDD; lines: 447]` `[activity: component-development]`
-        - [ ] T004.1.4 Validate
-            - [ ] T004.1.4.1 InstallWizard tests pass `[activity: run-tests]`
-            - [ ] T004.1.4.2 All edge cases handled `[ref: PRD; lines: 316-322]` `[activity: business-acceptance]`
-            - [ ] T004.1.4.3 Business rules enforced `[ref: PRD; lines: 309-314]` `[activity: business-acceptance]`
+    - [x] T004.1 InstallWizard Implementation `[parallel: true]` `[component: InstallWizard]`
+        - [x] T004.1.1 Prime Context
+            - [x] T004.1.1.1 Read Install wizard requirements `[ref: PRD; lines: 162-175]`
+            - [x] T004.1.1.2 Read Install user flow `[ref: PRD; lines: 285-307]`
+            - [x] T004.1.1.3 Read Install business rules `[ref: PRD; lines: 309-314]`
+        - [x] T004.1.2 Write Tests
+            - [x] T004.1.2.1 Test state transitions (Startup Path → Claude Path → File Selection → Complete) `[activity: test-execution]`
+            - [x] T004.1.2.2 Test --local flag skips TUI, uses defaults `[ref: PRD; line: 172]` `[activity: test-execution]`
+            - [x] T004.1.2.3 Test --yes flag auto-confirms prompts `[ref: PRD; line: 173]` `[activity: test-execution]`
+            - [x] T004.1.2.4 Test error display and recovery `[ref: PRD; lines: 316-322]` `[activity: test-execution]`
+            - [x] T004.1.2.5 Test Ctrl+C cancellation and rollback `[ref: PRD; line: 321]` `[activity: test-execution]`
+        - [x] T004.1.3 Implement src/ui/install/InstallWizard.tsx `[ref: SDD; lines: 447]` `[activity: component-development]`
+        - [x] T004.1.4 Validate
+            - [x] T004.1.4.1 InstallWizard tests pass `[activity: run-tests]`
+            - [x] T004.1.4.2 All edge cases handled `[ref: PRD; lines: 316-322]` `[activity: business-acceptance]`
+            - [x] T004.1.4.3 Business rules enforced `[ref: PRD; lines: 309-314]` `[activity: business-acceptance]`
 
-    - [ ] T004.2 UninstallWizard Implementation `[parallel: true]` `[component: UninstallWizard]`
-        - [ ] T004.2.1 Prime Context
-            - [ ] T004.2.1.1 Read Uninstall requirements `[ref: PRD; lines: 177-189]`
-            - [ ] T004.2.1.2 Read Uninstall flow `[ref: SDD; lines: 758-797]`
-        - [ ] T004.2.2 Write Tests
-            - [ ] T004.2.2.1 Test lock file reading and file list display `[activity: test-execution]`
-            - [ ] T004.2.2.2 Test confirmation prompt `[activity: test-execution]`
-            - [ ] T004.2.2.3 Test --keep-logs flag preserves logs directory `[ref: PRD; line: 186]` `[activity: test-execution]`
-            - [ ] T004.2.2.4 Test --keep-settings flag skips settings restoration `[ref: PRD; line: 187]` `[activity: test-execution]`
-            - [ ] T004.2.2.5 Test graceful handling of missing files `[ref: PRD; line: 188]` `[activity: test-execution]`
-        - [ ] T004.2.3 Implement src/ui/uninstall/UninstallWizard.tsx `[ref: SDD; lines: 450]` `[activity: component-development]`
-        - [ ] T004.2.4 Validate
-            - [ ] T004.2.4.1 UninstallWizard tests pass `[activity: run-tests]`
-            - [ ] T004.2.4.2 All PRD acceptance criteria met `[ref: PRD; lines: 179-188]` `[activity: business-acceptance]`
+    - [x] T004.2 UninstallWizard Implementation `[parallel: true]` `[component: UninstallWizard]`
+        - [x] T004.2.1 Prime Context
+            - [x] T004.2.1.1 Read Uninstall requirements `[ref: PRD; lines: 177-189]`
+            - [x] T004.2.1.2 Read Uninstall flow `[ref: SDD; lines: 758-797]`
+        - [x] T004.2.2 Write Tests
+            - [x] T004.2.2.1 Test lock file reading and file list display `[activity: test-execution]`
+            - [x] T004.2.2.2 Test confirmation prompt `[activity: test-execution]`
+            - [x] T004.2.2.3 Test --keep-logs flag preserves logs directory `[ref: PRD; line: 186]` `[activity: test-execution]`
+            - [x] T004.2.2.4 Test --keep-settings flag skips settings restoration `[ref: PRD; line: 187]` `[activity: test-execution]`
+            - [x] T004.2.2.5 Test graceful handling of missing files `[ref: PRD; line: 188]` `[activity: test-execution]`
+        - [x] T004.2.3 Implement src/ui/uninstall/UninstallWizard.tsx `[ref: SDD; lines: 450]` `[activity: component-development]`
+        - [x] T004.2.4 Validate
+            - [x] T004.2.4.1 UninstallWizard tests pass `[activity: run-tests]`
+            - [x] T004.2.4.2 All PRD acceptance criteria met `[ref: PRD; lines: 179-188]` `[activity: business-acceptance]`
 
-    - [ ] T004.3 Integration Test Harness `[component: Integration-Tests]`
-        - [ ] T004.3.1 Create tests/integration/install-flow.test.ts (full install cycle) `[activity: test-execution]`
-        - [ ] T004.3.2 Create tests/integration/uninstall-flow.test.ts (full uninstall cycle) `[activity: test-execution]`
-        - [ ] T004.3.3 Create tests/integration/reinstall-flow.test.ts (idempotent reinstall) `[activity: test-execution]`
-        - [ ] T004.3.4 Validate integration tests pass `[activity: run-tests]`
+    - [x] T004.3 Integration Test Harness `[component: Integration-Tests]`
+        - [x] T004.3.1 Create tests/integration/install-flow.test.ts (full install cycle) `[activity: test-execution]`
+        - [x] T004.3.2 Create tests/integration/uninstall-flow.test.ts (full uninstall cycle) `[activity: test-execution]`
+        - [x] T004.3.3 Create tests/integration/reinstall-flow.test.ts (idempotent reinstall) `[activity: test-execution]`
+        - [x] T004.3.4 Validate integration tests pass `[activity: run-tests]`
 
-    - [ ] T004.4 Go-to-npm Migration Testing `[component: Migration]`
-        - [ ] T004.4.1 Test upgrade from Go lock file (v1 string[]) to npm lock file (v2 with checksums) `[ref: SDD; lines: 49, 1116]` `[activity: test-execution]`
-        - [ ] T004.4.2 Test detection of existing Go binary installation (if present) `[activity: test-execution]`
-        - [ ] T004.4.3 Test settings.json preservation through Go→npm migration `[activity: test-execution]`
-        - [ ] T004.4.4 Test all 55 assets migrate correctly from Go to npm installation `[activity: test-execution]`
-        - [ ] T004.4.5 Validate migration guide instructions accuracy `[ref: PRD; line: 427]` `[activity: business-acceptance]`
+    - [x] T004.4 Go-to-npm Migration Testing `[component: Migration]`
+        - [x] T004.4.1 Test upgrade from Go lock file (v1 string[]) to npm lock file (v2 with checksums) `[ref: SDD; lines: 49, 1116]` `[activity: test-execution]`
+        - [x] T004.4.2 Test detection of existing Go binary installation (if present) `[activity: test-execution]`
+        - [x] T004.4.3 Test settings.json preservation through Go→npm migration `[activity: test-execution]`
+        - [x] T004.4.4 Test all 55 assets migrate correctly from Go to npm installation `[activity: test-execution]`
+        - [x] T004.4.5 Validate migration guide instructions accuracy `[ref: PRD; line: 427]` `[activity: business-acceptance]`
 
-- [ ] T005 CLI Commands
+- [x] T005 CLI Commands
 
-    - [ ] T005.1 Statusline CLI (Simplest) `[component: CLI-Statusline]`
-        - [ ] T005.1.1 Prime Context
-            - [ ] T005.1.1.1 Read Statusline requirements `[ref: PRD; lines: 213-223]`
-        - [ ] T005.1.2 Write Tests
-            - [ ] T005.1.2.1 Test CLI passes stdin to shell script `[activity: test-execution]`
-            - [ ] T005.1.2.2 Test package.json bin field maps to correct script per platform `[ref: PRD; line: 222]` `[activity: test-execution]`
-        - [ ] T005.1.3 Implement src/cli/statusline.ts `[ref: SDD; lines: 441]` `[activity: api-development]`
-        - [ ] T005.1.4 Validate
-            - [ ] T005.1.4.1 Statusline CLI tests pass `[activity: run-tests]`
-            - [ ] T005.1.4.2 Cross-platform bin mapping works `[activity: business-acceptance]`
+    - [x] T005.1 Statusline CLI (Simplest) `[component: CLI-Statusline]`
+        - [x] T005.1.1 Prime Context
+            - [x] T005.1.1.1 Read Statusline requirements `[ref: PRD; lines: 213-223]`
+        - [x] T005.1.2 Write Tests
+            - [x] T005.1.2.1 Test CLI passes stdin to shell script `[activity: test-execution]`
+            - [x] T005.1.2.2 Test package.json bin field maps to correct script per platform `[ref: PRD; line: 222]` `[activity: test-execution]`
+        - [x] T005.1.3 Implement src/cli/statusline.ts `[ref: SDD; lines: 441]` `[activity: api-development]`
+        - [x] T005.1.4 Validate
+            - [x] T005.1.4.1 Statusline CLI tests pass `[activity: run-tests]`
+            - [x] T005.1.4.2 Cross-platform bin mapping works `[activity: business-acceptance]`
 
-    - [ ] T005.2 Init and Spec CLIs `[parallel: true]`
-        - [ ] T005.2.1 Init CLI `[component: CLI-Init]`
-            - [ ] T005.2.1.1 Prime Context: Read Init requirements `[ref: PRD; lines: 190-200]`
-            - [ ] T005.2.1.2 Write Tests
-                - [ ] T005.2.1.2.1 Test Inquirer prompts launch correctly `[activity: test-execution]`
-                - [ ] T005.2.1.2.2 Test --dry-run and --force flags work `[activity: test-execution]`
-            - [ ] T005.2.1.3 Implement src/cli/init.ts `[ref: SDD; lines: 439]` `[activity: api-development]`
-            - [ ] T005.2.1.4 Validate Init CLI tests pass `[activity: run-tests]`
+    - [x] T005.2 Init and Spec CLIs `[parallel: true]`
+        - [x] T005.2.1 Init CLI `[component: CLI-Init]`
+            - [x] T005.2.1.1 Prime Context: Read Init requirements `[ref: PRD; lines: 190-200]`
+            - [x] T005.2.1.2 Write Tests
+                - [x] T005.2.1.2.1 Test Inquirer prompts launch correctly `[activity: test-execution]`
+                - [x] T005.2.1.2.2 Test --dry-run and --force flags work `[activity: test-execution]`
+            - [x] T005.2.1.3 Implement src/cli/init.ts `[ref: SDD; lines: 439]` `[activity: api-development]`
+            - [x] T005.2.1.4 Validate Init CLI tests pass `[activity: run-tests]`
 
-        - [ ] T005.2.2 Spec CLI `[parallel: true]` `[component: CLI-Spec]`
-            - [ ] T005.2.2.1 Prime Context: Read Spec requirements `[ref: PRD; lines: 201-211]`
-            - [ ] T005.2.2.2 Write Tests
-                - [ ] T005.2.2.2.1 Test spec creation with name argument `[activity: test-execution]`
-                - [ ] T005.2.2.2.2 Test --add and --read flags work `[activity: test-execution]`
-            - [ ] T005.2.2.3 Implement src/cli/spec.ts `[ref: SDD; lines: 440]` `[activity: api-development]`
-            - [ ] T005.2.2.4 Validate Spec CLI tests pass `[activity: run-tests]`
+        - [x] T005.2.2 Spec CLI `[parallel: true]` `[component: CLI-Spec]`
+            - [x] T005.2.2.1 Prime Context: Read Spec requirements `[ref: PRD; lines: 201-211]`
+            - [x] T005.2.2.2 Write Tests
+                - [x] T005.2.2.2.1 Test spec creation with name argument `[activity: test-execution]`
+                - [x] T005.2.2.2.2 Test --add and --read flags work `[activity: test-execution]`
+            - [x] T005.2.2.3 Implement src/cli/spec.ts `[ref: SDD; lines: 440]` `[activity: api-development]`
+            - [x] T005.2.2.4 Validate Spec CLI tests pass `[activity: run-tests]`
 
-    - [ ] T005.3 Install and Uninstall CLIs (Most Complex)
-        - [ ] T005.3.1 Install CLI `[component: CLI-Install]`
-            - [ ] T005.3.1.1 Prime Context
-                - [ ] T005.3.1.1.1 Read Install requirements `[ref: PRD; lines: 162-175]`
-                - [ ] T005.3.1.1.2 Read Install integration flow `[ref: SDD; lines: 677-718]`
-            - [ ] T005.3.1.2 Write Tests
-                - [ ] T005.3.1.2.1 Test TUI launch for interactive mode `[activity: test-execution]`
-                - [ ] T005.3.1.2.2 Test direct Installer call for --local mode `[activity: test-execution]`
-                - [ ] T005.3.1.2.3 Test flag combinations (--local --yes) `[activity: test-execution]`
-            - [ ] T005.3.1.3 Implement src/cli/install.ts `[ref: SDD; lines: 438]` `[activity: api-development]`
-            - [ ] T005.3.1.4 Validate Install CLI tests pass `[activity: run-tests]`
+    - [x] T005.3 Install and Uninstall CLIs (Most Complex)
+        - [x] T005.3.1 Install CLI `[component: CLI-Install]`
+            - [x] T005.3.1.1 Prime Context
+                - [x] T005.3.1.1.1 Read Install requirements `[ref: PRD; lines: 162-175]`
+                - [x] T005.3.1.1.2 Read Install integration flow `[ref: SDD; lines: 677-718]`
+            - [x] T005.3.1.2 Write Tests
+                - [x] T005.3.1.2.1 Test TUI launch for interactive mode `[activity: test-execution]`
+                - [x] T005.3.1.2.2 Test direct Installer call for --local mode `[activity: test-execution]`
+                - [x] T005.3.1.2.3 Test flag combinations (--local --yes) `[activity: test-execution]`
+            - [x] T005.3.1.3 Implement src/cli/install.ts `[ref: SDD; lines: 438]` `[activity: api-development]`
+            - [x] T005.3.1.4 Validate Install CLI tests pass `[activity: run-tests]`
 
-        - [ ] T005.3.2 Uninstall CLI `[component: CLI-Uninstall]`
-            - [ ] T005.3.2.1 Prime Context: Read Uninstall requirements `[ref: PRD; lines: 177-189]`
-            - [ ] T005.3.2.2 Write Tests
-                - [ ] T005.3.2.2.1 Test TUI launch with file list from lock `[activity: test-execution]`
-                - [ ] T005.3.2.2.2 Test --keep-logs and --keep-settings flags `[activity: test-execution]`
-            - [ ] T005.3.2.3 Implement src/cli/uninstall.ts `[ref: SDD; lines: 438]` `[activity: api-development]`
-            - [ ] T005.3.2.4 Validate Uninstall CLI tests pass `[activity: run-tests]`
+        - [x] T005.3.2 Uninstall CLI `[component: CLI-Uninstall]`
+            - [x] T005.3.2.1 Prime Context: Read Uninstall requirements `[ref: PRD; lines: 177-189]`
+            - [x] T005.3.2.2 Write Tests
+                - [x] T005.3.2.2.1 Test TUI launch with file list from lock `[activity: test-execution]`
+                - [x] T005.3.2.2.2 Test --keep-logs and --keep-settings flags `[activity: test-execution]`
+            - [x] T005.3.2.3 Implement src/cli/uninstall.ts `[ref: SDD; lines: 438]` `[activity: api-development]`
+            - [x] T005.3.2.4 Validate Uninstall CLI tests pass `[activity: run-tests]`
 
-    - [ ] T005.4 CLI Integration & Entry Points
-        - [ ] T005.4.1 Implement src/cli/index.ts (Commander setup, register all commands) `[ref: SDD; lines: 437]` `[activity: api-development]`
-        - [ ] T005.4.2 Implement src/index.ts (main entry point) `[ref: SDD; lines: 473]` `[activity: api-development]`
-        - [ ] T005.4.3 Implement src/lib/index.ts (public API exports) `[ref: SDD; lines: 471-472]` `[activity: api-development]`
-        - [ ] T005.4.4 Validate
-            - [ ] T005.4.4.1 All CLI commands discoverable via --help `[activity: run-tests]`
-            - [ ] T005.4.4.2 Entry point tests pass `[activity: run-tests]`
+    - [x] T005.4 CLI Integration & Entry Points
+        - [x] T005.4.1 Implement src/cli/index.ts (Commander setup, register all commands) `[ref: SDD; lines: 437]` `[activity: api-development]`
+        - [x] T005.4.2 Implement src/index.ts (main entry point) `[ref: SDD; lines: 473]` `[activity: api-development]`
+        - [x] T005.4.3 Implement src/lib/index.ts (public API exports) `[ref: SDD; lines: 471-472]` `[activity: api-development]`
+        - [x] T005.4.4 Validate
+            - [x] T005.4.4.1 All CLI commands discoverable via --help `[activity: run-tests]`
+            - [x] T005.4.4.2 Entry point tests pass `[activity: run-tests]`
 
 - [ ] T006 Integration & End-to-End Validation
     - [ ] T006.1 Unit Test Coverage
