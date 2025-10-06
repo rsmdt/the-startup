@@ -158,74 +158,74 @@ If implementation cannot follow specification exactly:
         - [x] T001.6.3 Verify dual module output (ESM + CJS + .d.ts) `[activity: run-tests]`
         - [x] T001.6.4 Verify strict TypeScript compilation (no implicit any) `[ref: SDD; line: 42]` `[activity: review-code]`
 
-- [ ] T002 Core Foundation & Shell Scripts
+- [x] T002 Core Foundation & Shell Scripts
 
-    - [ ] T002.1 LockManager Implementation `[parallel: true]` `[component: LockManager]`
-        - [ ] T002.1.1 Prime Context
-            - [ ] T002.1.1.1 Read Lock File algorithm `[ref: SDD; lines: 956-1023]`
-            - [ ] T002.1.1.2 Read Lock File structure `[ref: SDD; lines: 514-549]`
-        - [ ] T002.1.2 Write Tests
-            - [ ] T002.1.2.1 Test reading legacy lock file (string[] format) `[activity: test-execution]`
-            - [ ] T002.1.2.2 Test reading new lock file (FileEntry[] with checksums) `[activity: test-execution]`
-            - [ ] T002.1.2.3 Test auto-migration from v1 to v2 format `[activity: test-execution]`
-            - [ ] T002.1.2.4 Test writing lock file with SHA-256 checksums `[activity: test-execution]`
-            - [ ] T002.1.2.5 Test idempotent reinstall via checksum comparison `[activity: test-execution]`
-        - [ ] T002.1.3 Implement src/core/installer/LockManager.ts `[ref: SDD; lines: 956-1023]` `[activity: domain-modeling]`
-        - [ ] T002.1.4 Validate
-            - [ ] T002.1.4.1 LockManager tests pass with 90%+ coverage `[activity: run-tests]`
-            - [ ] T002.1.4.2 Backward compatibility verified `[ref: SDD; lines: 49, 1116]` `[activity: business-acceptance]`
+    - [x] T002.1 LockManager Implementation `[parallel: true]` `[component: LockManager]`
+        - [x] T002.1.1 Prime Context
+            - [x] T002.1.1.1 Read Lock File algorithm `[ref: SDD; lines: 956-1023]`
+            - [x] T002.1.1.2 Read Lock File structure `[ref: SDD; lines: 514-549]`
+        - [x] T002.1.2 Write Tests
+            - [x] T002.1.2.1 Test reading legacy lock file (string[] format) `[activity: test-execution]`
+            - [x] T002.1.2.2 Test reading new lock file (FileEntry[] with checksums) `[activity: test-execution]`
+            - [x] T002.1.2.3 Test auto-migration from v1 to v2 format `[activity: test-execution]`
+            - [x] T002.1.2.4 Test writing lock file with SHA-256 checksums `[activity: test-execution]`
+            - [x] T002.1.2.5 Test idempotent reinstall via checksum comparison `[activity: test-execution]`
+        - [x] T002.1.3 Implement src/core/installer/LockManager.ts `[ref: SDD; lines: 956-1023]` `[activity: domain-modeling]`
+        - [x] T002.1.4 Validate
+            - [x] T002.1.4.1 LockManager tests pass with 90%+ coverage `[activity: run-tests]`
+            - [x] T002.1.4.2 Backward compatibility verified `[ref: SDD; lines: 49, 1116]` `[activity: business-acceptance]`
 
-    - [ ] T002.2 SettingsMerger Implementation `[parallel: true]` `[component: SettingsMerger]`
-        - [ ] T002.2.1 Prime Context
-            - [ ] T002.2.1.1 Read Settings merge algorithm `[ref: SDD; lines: 923-954]`
-            - [ ] T002.2.1.2 Read Settings structure `[ref: SDD; lines: 551-567]`
-        - [ ] T002.2.2 Write Tests
-            - [ ] T002.2.2.1 Test deep merge preserves user hooks `[activity: test-execution]`
-            - [ ] T002.2.2.2 Test new hooks are added without overwriting `[activity: test-execution]`
-            - [ ] T002.2.2.3 Test placeholder replacement ({{STARTUP_PATH}}, {{CLAUDE_PATH}}) `[activity: test-execution]`
-            - [ ] T002.2.2.4 Test backup creation before modification `[activity: test-execution]`
-            - [ ] T002.2.2.5 Test rollback on merge failure `[activity: test-execution]`
-            - [ ] T002.2.2.6 Test settings.json creation from scratch (file doesn't exist) `[ref: SDD; line: 242]` `[activity: test-execution]`
-            - [ ] T002.2.2.7 Test JSON validation produces clear error messages `[ref: SDD; line: 1159]` `[activity: test-execution]`
-            - [ ] T002.2.2.8 Test placeholder replacement failure with clear error message `[ref: SDD; line: 904]` `[activity: test-execution]`
-        - [ ] T002.2.3 Implement src/core/installer/SettingsMerger.ts `[ref: SDD; lines: 923-954]` `[activity: domain-modeling]`
-        - [ ] T002.2.4 Validate
-            - [ ] T002.2.4.1 SettingsMerger tests pass with 90%+ coverage `[activity: run-tests]`
-            - [ ] T002.2.4.2 User data preservation verified `[ref: PRD; line: 245]` `[activity: business-acceptance]`
+    - [x] T002.2 SettingsMerger Implementation `[parallel: true]` `[component: SettingsMerger]`
+        - [x] T002.2.1 Prime Context
+            - [x] T002.2.1.1 Read Settings merge algorithm `[ref: SDD; lines: 923-954]`
+            - [x] T002.2.1.2 Read Settings structure `[ref: SDD; lines: 551-567]`
+        - [x] T002.2.2 Write Tests
+            - [x] T002.2.2.1 Test deep merge preserves user hooks `[activity: test-execution]`
+            - [x] T002.2.2.2 Test new hooks are added without overwriting `[activity: test-execution]`
+            - [x] T002.2.2.3 Test placeholder replacement ({{STARTUP_PATH}}, {{CLAUDE_PATH}}) `[activity: test-execution]`
+            - [x] T002.2.2.4 Test backup creation before modification `[activity: test-execution]`
+            - [x] T002.2.2.5 Test rollback on merge failure `[activity: test-execution]`
+            - [x] T002.2.2.6 Test settings.json creation from scratch (file doesn't exist) `[ref: SDD; line: 242]` `[activity: test-execution]`
+            - [x] T002.2.2.7 Test JSON validation produces clear error messages `[ref: SDD; line: 1159]` `[activity: test-execution]`
+            - [x] T002.2.2.8 Test placeholder replacement failure with clear error message `[ref: SDD; line: 904]` `[activity: test-execution]`
+        - [x] T002.2.3 Implement src/core/installer/SettingsMerger.ts `[ref: SDD; lines: 923-954]` `[activity: domain-modeling]`
+        - [x] T002.2.4 Validate
+            - [x] T002.2.4.1 SettingsMerger tests pass with 90%+ coverage `[activity: run-tests]`
+            - [x] T002.2.4.2 User data preservation verified `[ref: PRD; line: 245]` `[activity: business-acceptance]`
 
-    - [ ] T002.3 Shell Scripts Implementation `[parallel: true]` `[component: Statusline]`
-        - [ ] T002.3.1 Prime Context
-            - [ ] T002.3.1.1 Read Statusline requirements `[ref: PRD; lines: 213-223]`
-            - [ ] T002.3.1.2 Read Statusline flow `[ref: SDD; lines: 799-820]`
-        - [ ] T002.3.2 Write Tests
-            - [ ] T002.3.2.1 Test Unix script parses JSON from stdin `[activity: test-execution]`
-            - [ ] T002.3.2.2 Test Windows script parses JSON from stdin using ConvertFrom-Json `[ref: SDD; line: 1190]` `[activity: test-execution]`
-            - [ ] T002.3.2.3 Test execution time < 10ms (benchmark) `[ref: PRD; line: 219]` `[activity: performance-testing]`
-            - [ ] T002.3.2.4 Test git branch detection (happy path) `[activity: test-execution]`
-            - [ ] T002.3.2.5 Test graceful degradation when git missing `[activity: test-execution]`
-            - [ ] T002.3.2.6 Test exact Claude Code JSON input format with schema validation `[ref: SDD; lines: 218-222]` `[activity: test-execution]`
-            - [ ] T002.3.2.7 Test git fallback strategy (.git/HEAD read fails → git command) `[ref: SDD; lines: 235-240]` `[activity: test-execution]`
-            - [ ] T002.3.2.8 Test home directory expansion (~) on macOS, Linux, Windows `[ref: SDD; line: 1188]` `[activity: test-execution]`
-        - [ ] T002.3.3 Implement bin/statusline.sh (bash/zsh compatible) `[ref: PRD; line: 217]` `[activity: component-development]`
-        - [ ] T002.3.4 Implement bin/statusline.ps1 (PowerShell compatible) `[ref: PRD; line: 218]` `[activity: component-development]`
-        - [ ] T002.3.5 Validate
-            - [ ] T002.3.5.1 Shell script tests pass on all platforms `[activity: run-tests]`
-            - [ ] T002.3.5.2 Performance benchmark: < 10ms verified `[ref: SDD; line: 1153]` `[activity: performance-testing]`
+    - [x] T002.3 Shell Scripts Implementation `[parallel: true]` `[component: Statusline]`
+        - [x] T002.3.1 Prime Context
+            - [x] T002.3.1.1 Read Statusline requirements `[ref: PRD; lines: 213-223]`
+            - [x] T002.3.1.2 Read Statusline flow `[ref: SDD; lines: 799-820]`
+        - [x] T002.3.2 Write Tests
+            - [x] T002.3.2.1 Test Unix script parses JSON from stdin `[activity: test-execution]`
+            - [x] T002.3.2.2 Test Windows script parses JSON from stdin using ConvertFrom-Json `[ref: SDD; line: 1190]` `[activity: test-execution]`
+            - [x] T002.3.2.3 Test execution time < 10ms (benchmark) `[ref: PRD; line: 219]` `[activity: performance-testing]`
+            - [x] T002.3.2.4 Test git branch detection (happy path) `[activity: test-execution]`
+            - [x] T002.3.2.5 Test graceful degradation when git missing `[activity: test-execution]`
+            - [x] T002.3.2.6 Test exact Claude Code JSON input format with schema validation `[ref: SDD; lines: 218-222]` `[activity: test-execution]`
+            - [x] T002.3.2.7 Test git fallback strategy (.git/HEAD read fails → git command) `[ref: SDD; lines: 235-240]` `[activity: test-execution]`
+            - [x] T002.3.2.8 Test home directory expansion (~) on macOS, Linux, Windows `[ref: SDD; line: 1188]` `[activity: test-execution]`
+        - [x] T002.3.3 Implement bin/statusline.sh (bash/zsh compatible) `[ref: PRD; line: 217]` `[activity: component-development]`
+        - [x] T002.3.4 Implement bin/statusline.ps1 (PowerShell compatible) `[ref: PRD; line: 218]` `[activity: component-development]`
+        - [x] T002.3.5 Validate
+            - [x] T002.3.5.1 Shell script tests pass on all platforms `[activity: run-tests]`
+            - [x] T002.3.5.2 Performance benchmark: < 10ms verified `[ref: SDD; line: 1153]` `[activity: performance-testing]`
 
-    - [ ] T002.4 UI Shared Components `[parallel: true]` `[component: UI-Shared]`
-        - [ ] T002.4.1 Prime Context
-            - [ ] T002.4.1.1 Read Ink component pattern `[ref: SDD; lines: 1073-1086]`
-            - [ ] T002.4.1.2 Read UI theme structure `[ref: SDD; line: 454]`
-        - [ ] T002.4.2 Write Tests
-            - [ ] T002.4.2.1 Test Spinner renders correctly `[activity: test-execution]`
-            - [ ] T002.4.2.2 Test ErrorDisplay shows error message `[activity: test-execution]`
-            - [ ] T002.4.2.3 Test theme provides consistent colors `[activity: test-execution]`
-        - [ ] T002.4.3 Implement src/ui/shared/theme.ts (color scheme) `[ref: SDD; line: 454]` `[activity: component-development]`
-        - [ ] T002.4.4 Implement src/ui/shared/Spinner.tsx `[activity: component-development]`
-        - [ ] T002.4.5 Implement src/ui/shared/ErrorDisplay.tsx `[activity: component-development]`
-        - [ ] T002.4.6 Validate
-            - [ ] T002.4.6.1 Shared component tests pass `[activity: run-tests]`
-            - [ ] T002.4.6.2 Components follow Ink patterns `[ref: SDD; lines: 1073-1086]` `[activity: review-code]`
+    - [x] T002.4 UI Shared Components `[parallel: true]` `[component: UI-Shared]`
+        - [x] T002.4.1 Prime Context
+            - [x] T002.4.1.1 Read Ink component pattern `[ref: SDD; lines: 1073-1086]`
+            - [x] T002.4.1.2 Read UI theme structure `[ref: SDD; line: 454]`
+        - [x] T002.4.2 Write Tests
+            - [x] T002.4.2.1 Test Spinner renders correctly `[activity: test-execution]`
+            - [x] T002.4.2.2 Test ErrorDisplay shows error message `[activity: test-execution]`
+            - [x] T002.4.2.3 Test theme provides consistent colors `[activity: test-execution]`
+        - [x] T002.4.3 Implement src/ui/shared/theme.ts (color scheme) `[ref: SDD; line: 454]` `[activity: component-development]`
+        - [x] T002.4.4 Implement src/ui/shared/Spinner.tsx `[activity: component-development]`
+        - [x] T002.4.5 Implement src/ui/shared/ErrorDisplay.tsx `[activity: component-development]`
+        - [x] T002.4.6 Validate
+            - [x] T002.4.6.1 Shared component tests pass `[activity: run-tests]`
+            - [x] T002.4.6.2 Components follow Ink patterns `[ref: SDD; lines: 1073-1086]` `[activity: review-code]`
 
 - [ ] T003 Core Features & UI Components
 

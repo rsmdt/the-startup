@@ -68,6 +68,7 @@
     "@typescript-eslint/parser": "^8.19.1",
     "@vitest/coverage-v8": "^2.1.8",
     "eslint": "^9.18.0",
+    "ink-testing-library": "^4.0.0",
     "prettier": "^3.4.2",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",

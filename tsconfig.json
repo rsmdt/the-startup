@@ -16,6 +16,7 @@
 
     // Module Resolution
     "target": "ES2022",
+    "lib": ["ES2022"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
