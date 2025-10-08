@@ -24,6 +24,7 @@ interface FileSystem {
 interface AssetFile {
   category: 'agents' | 'commands' | 'templates' | 'rules' | 'outputStyles';
   sourcePath: string;
+  relativePath: string;  // Path relative to category root (preserves nested structure)
 }
 
 /**
@@ -227,31 +228,35 @@ export class Installer {
     const destPath = this.getDestinationPath(asset, startupPath, claudePath);
     const sourcePath = this.getSourcePath(asset);
 
+    // Ensure parent directory exists (for nested structures like agents/the-analyst/)
+    const destDir = destPath.substring(0, destPath.lastIndexOf('/'));
+    await this.fs.mkdir(destDir, { recursive: true });
+
     await this.fs.copyFile(sourcePath, destPath);
     this.installedFiles.push(destPath);
   }
 
   /**
    * Determines destination path for an asset file.
+   * Preserves nested directory structure using relativePath.
    */
   private getDestinationPath(
     asset: AssetFile,
     startupPath: string,
     claudePath: string
   ): string {
-    const fileName = asset.sourcePath.split('/').pop()!;
-
+    // Use relativePath to preserve nested structure (e.g., "the-analyst/requirements-analysis.md")
     switch (asset.category) {
       case 'agents':
-        return join(claudePath, 'agents', fileName);
+        return join(claudePath, 'agents', asset.relativePath);
       case 'commands':
-        return join(claudePath, 'commands', fileName);
+        return join(claudePath, 'commands', asset.relativePath);
       case 'templates':
-        return join(startupPath, 'templates', fileName);
+        return join(startupPath, 'templates', asset.relativePath);
       case 'rules':
-        return join(startupPath, 'rules', fileName);
+        return join(startupPath, 'rules', asset.relativePath);
       case 'outputStyles':
-        return join(claudePath, 'output-styles', fileName);
+        return join(claudePath, 'output-styles', asset.relativePath);
     }
   }
 

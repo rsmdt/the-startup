@@ -101,16 +101,19 @@ describe('Real Integration: Install Flow with Actual Files', () => {
     expect(existsSync(join(agentsDir, 'the-chief.md'))).toBe(true);
     expect(existsSync(join(agentsDir, 'the-meta-agent.md'))).toBe(true);
 
-    // Verify activity files exist (flattened structure as expected by Claude Code)
-    expect(existsSync(join(agentsDir, 'requirements-analysis.md'))).toBe(true);
-    expect(existsSync(join(agentsDir, 'system-architecture.md'))).toBe(true);
-    expect(existsSync(join(agentsDir, 'api-development.md'))).toBe(true);
+    // Verify activity files exist (nested structure preserving source layout)
+    expect(existsSync(join(agentsDir, 'the-analyst', 'requirements-analysis.md'))).toBe(true);
+    expect(existsSync(join(agentsDir, 'the-architect', 'system-architecture.md'))).toBe(true);
+    expect(existsSync(join(agentsDir, 'the-software-engineer', 'api-development.md'))).toBe(true);
 
-    // Verify commands directory (flattened structure)
+    // Verify commands directory (nested under s/ subdirectory)
     const commandsDir = join(claudePath, 'commands');
     expect(existsSync(commandsDir)).toBe(true);
 
-    const commandFiles = await readdir(commandsDir);
+    const commandsSDir = join(commandsDir, 's');
+    expect(existsSync(commandsSDir)).toBe(true);
+
+    const commandFiles = await readdir(commandsSDir);
     expect(commandFiles).toContain('specify.md');
     expect(commandFiles).toContain('implement.md');
     expect(commandFiles).toContain('analyze.md');
@@ -217,8 +220,8 @@ describe('Real Integration: Install Flow with Actual Files', () => {
     expect(chiefContent).toContain('Core Responsibilities');
     expect(chiefContent.length).toBeGreaterThan(1000); // Real agent files are substantial
 
-    // Read and verify activity file (api-development.md - flattened structure)
-    const apiDevPath = join(claudePath, 'agents', 'api-development.md');
+    // Read and verify activity file (api-development.md - nested structure)
+    const apiDevPath = join(claudePath, 'agents', 'the-software-engineer', 'api-development.md');
     expect(existsSync(apiDevPath)).toBe(true);
 
     const apiDevContent = readFileSync(apiDevPath, 'utf-8');

@@ -59,37 +59,37 @@ describe('Integration: Go-to-npm Migration', () => {
     assetProvider = {
       getAssetFiles: () => [
         // Agents (8 files to simulate subset)
-        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-analyst-requirements-analysis.md') },
-        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-architect-system-architecture.md') },
-        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-software-engineer-api-development.md') },
-        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-platform-engineer-deployment.md') },
-        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-security-engineer-assessment.md') },
-        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-test-engineer-test-execution.md') },
-        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-chief.md') },
-        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-product-owner-feature-definition.md') },
+        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-analyst-requirements-analysis.md'), relativePath: 'the-analyst-requirements-analysis.md' },
+        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-architect-system-architecture.md'), relativePath: 'the-architect-system-architecture.md' },
+        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-software-engineer-api-development.md'), relativePath: 'the-software-engineer-api-development.md' },
+        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-platform-engineer-deployment.md'), relativePath: 'the-platform-engineer-deployment.md' },
+        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-security-engineer-assessment.md'), relativePath: 'the-security-engineer-assessment.md' },
+        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-test-engineer-test-execution.md'), relativePath: 'the-test-engineer-test-execution.md' },
+        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-chief.md'), relativePath: 'the-chief.md' },
+        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-product-owner-feature-definition.md'), relativePath: 'the-product-owner-feature-definition.md' },
 
         // Commands (5 files)
-        { category: 'commands' as const, sourcePath: join(tempDir, 'mock-assets/commands/s-specify.md') },
-        { category: 'commands' as const, sourcePath: join(tempDir, 'mock-assets/commands/s-implement.md') },
-        { category: 'commands' as const, sourcePath: join(tempDir, 'mock-assets/commands/s-refactor.md') },
-        { category: 'commands' as const, sourcePath: join(tempDir, 'mock-assets/commands/s-analyze.md') },
-        { category: 'commands' as const, sourcePath: join(tempDir, 'mock-assets/commands/s-init.md') },
+        { category: 'commands' as const, sourcePath: join(tempDir, 'mock-assets/commands/s-specify.md'), relativePath: 's-specify.md' },
+        { category: 'commands' as const, sourcePath: join(tempDir, 'mock-assets/commands/s-implement.md'), relativePath: 's-implement.md' },
+        { category: 'commands' as const, sourcePath: join(tempDir, 'mock-assets/commands/s-refactor.md'), relativePath: 's-refactor.md' },
+        { category: 'commands' as const, sourcePath: join(tempDir, 'mock-assets/commands/s-analyze.md'), relativePath: 's-analyze.md' },
+        { category: 'commands' as const, sourcePath: join(tempDir, 'mock-assets/commands/s-init.md'), relativePath: 's-init.md' },
 
         // Templates (6 files)
-        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/SPEC.md') },
-        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/TASK-DOD.md') },
-        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/DOR.md') },
-        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/DOD.md') },
-        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/PRD.md') },
-        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/SDD.md') },
+        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/SPEC.md'), relativePath: 'SPEC.md' },
+        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/TASK-DOD.md'), relativePath: 'TASK-DOD.md' },
+        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/DOR.md'), relativePath: 'DOR.md' },
+        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/DOD.md'), relativePath: 'DOD.md' },
+        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/PRD.md'), relativePath: 'PRD.md' },
+        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/SDD.md'), relativePath: 'SDD.md' },
 
         // Rules (3 files)
-        { category: 'rules' as const, sourcePath: join(tempDir, 'mock-assets/rules/SCQA.md') },
-        { category: 'rules' as const, sourcePath: join(tempDir, 'mock-assets/rules/SOLID.md') },
-        { category: 'rules' as const, sourcePath: join(tempDir, 'mock-assets/rules/DDD.md') },
+        { category: 'rules' as const, sourcePath: join(tempDir, 'mock-assets/rules/SCQA.md'), relativePath: 'SCQA.md' },
+        { category: 'rules' as const, sourcePath: join(tempDir, 'mock-assets/rules/SOLID.md'), relativePath: 'SOLID.md' },
+        { category: 'rules' as const, sourcePath: join(tempDir, 'mock-assets/rules/DDD.md'), relativePath: 'DDD.md' },
 
         // Output styles (1 file)
-        { category: 'outputStyles' as const, sourcePath: join(tempDir, 'mock-assets/output-styles/the-startup.md') },
+        { category: 'outputStyles' as const, sourcePath: join(tempDir, 'mock-assets/output-styles/the-startup.md'), relativePath: 'the-startup.md' },
       ],
       getSettingsTemplate: () => ({
         'startup-validate-dor': {

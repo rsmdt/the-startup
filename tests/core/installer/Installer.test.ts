@@ -68,13 +68,14 @@ describe('Installer', () => {
     // Mock AssetProvider
     mockAssetProvider = {
       getAssetFiles: vi.fn().mockReturnValue([
-        { category: 'agents', sourcePath: 'claude/agents/the-chief.md' },
-        { category: 'commands', sourcePath: 'claude/commands/spec.md' },
-        { category: 'templates', sourcePath: 'the-startup/templates/PRD.md' },
-        { category: 'rules', sourcePath: 'the-startup/rules/SCQA.md' },
+        { category: 'agents', sourcePath: 'claude/agents/the-chief.md', relativePath: 'the-chief.md' },
+        { category: 'commands', sourcePath: 'claude/commands/spec.md', relativePath: 'spec.md' },
+        { category: 'templates', sourcePath: 'the-startup/templates/PRD.md', relativePath: 'PRD.md' },
+        { category: 'rules', sourcePath: 'the-startup/rules/SCQA.md', relativePath: 'SCQA.md' },
         {
           category: 'outputStyles',
           sourcePath: 'claude/output-styles/the-startup.md',
+          relativePath: 'the-startup.md',
         },
       ]),
       getSettingsTemplate: vi.fn().mockReturnValue({
@@ -148,7 +149,7 @@ describe('Installer', () => {
       };
 
       mockAssetProvider.getAssetFiles.mockReturnValue([
-        { category: 'agents', sourcePath: 'claude/agents/the-chief.md' },
+        { category: 'agents', sourcePath: 'claude/agents/the-chief.md', relativePath: 'the-chief.md' },
       ]);
 
       await installer.install(options);

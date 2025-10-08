@@ -70,14 +70,13 @@ describe('Complete', () => {
   });
 
   describe('Installed Files List', () => {
-    it('displays list of installed files', () => {
+    it('displays file count from summary', () => {
       const { lastFrame } = render(<Complete summary={sampleSummary} />);
       const output = lastFrame();
 
-      expect(output).toContain('specify.md');
-      expect(output).toContain('analyze.md');
-      expect(output).toContain('init.md');
-      expect(output).toContain('PRD.md');
+      // Should show file count but not individual file names
+      expect(output).toContain('4');
+      expect(output).toMatch(/file/i);
     });
 
     it('shows file count matches summary', () => {
@@ -88,12 +87,13 @@ describe('Complete', () => {
       expect(output).toContain('4');
     });
 
-    it('groups files by directory', () => {
+    it('displays installation paths', () => {
       const { lastFrame } = render(<Complete summary={sampleSummary} />);
       const output = lastFrame();
 
-      // Should show directory structure
-      expect(output).toMatch(/agents|commands|templates/i);
+      // Should show both paths
+      expect(output).toContain('.the-startup');
+      expect(output).toContain('.claude');
     });
   });
 
@@ -171,7 +171,7 @@ describe('Complete', () => {
       const output = lastFrame();
 
       expect(output).toContain('1');
-      expect(output).toContain('specify.md');
+      expect(output).toMatch(/file/i); // Shows "1 file" but not the filename
     });
 
     it('handles very long file paths', () => {
@@ -202,7 +202,9 @@ describe('Complete', () => {
       const { lastFrame } = render(<Complete summary={specialCharSummary} />);
       const output = lastFrame();
 
-      expect(output).toContain('file-with-special_chars@123.md');
+      // Should render successfully without showing individual file names
+      expect(output).toContain('1');
+      expect(output).toBeDefined();
     });
   });
 
@@ -216,13 +218,14 @@ describe('Complete', () => {
       expect(output.length).toBeGreaterThan(0);
     });
 
-    it('formats file list with proper indentation', () => {
+    it('formats summary with proper layout', () => {
       const { lastFrame } = render(<Complete summary={sampleSummary} />);
       const output = lastFrame();
 
-      // Should have some structure/indentation
+      // Should have structured output with key information
       expect(output).toBeDefined();
-      expect(output).toContain('specify.md');
+      expect(output).toContain('4');
+      expect(output).toMatch(/next steps/i);
     });
 
     it('displays summary information clearly', () => {
@@ -269,9 +272,10 @@ describe('Complete', () => {
       const { lastFrame } = render(<Complete summary={multiDirSummary} />);
       const output = lastFrame();
 
-      expect(output).toContain('file1.md');
-      expect(output).toContain('file2.md');
-      expect(output).toContain('file3.md');
+      // Shows total count and paths, but not individual file names
+      expect(output).toContain('3');
+      expect(output).toContain('.claude');
+      expect(output).toContain('.the-startup');
     });
   });
 });

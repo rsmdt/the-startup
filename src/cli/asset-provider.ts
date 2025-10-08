@@ -9,6 +9,7 @@ import { dirname } from 'path';
 export interface AssetFile {
   category: 'agents' | 'commands' | 'templates' | 'rules' | 'outputStyles';
   sourcePath: string;
+  relativePath: string;  // Path relative to category root (e.g., "the-analyst/requirements-analysis.md")
 }
 
 /**
@@ -78,9 +79,14 @@ export class FileSystemAssetProvider implements AssetProvider {
       try {
         const files = await this.scanDirectory(categoryPath, categoryPath);
         for (const file of files) {
+          // Compute relative path from category root
+          // E.g., /abs/path/assets/claude/agents/the-analyst/file.md -> the-analyst/file.md
+          const relativePath = file.replace(categoryPath + '/', '');
+
           assets.push({
             category,
             sourcePath: file,
+            relativePath,
           });
         }
       } catch (error) {

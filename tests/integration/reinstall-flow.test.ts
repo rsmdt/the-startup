@@ -61,10 +61,10 @@ describe('Integration: Reinstall Flow', () => {
 
     assetProvider = {
       getAssetFiles: () => [
-        { category: 'agents' as const, sourcePath: join(assetsDir, 'agents/specify.md') },
-        { category: 'agents' as const, sourcePath: join(assetsDir, 'agents/implement.md') },
-        { category: 'commands' as const, sourcePath: join(assetsDir, 'commands/s-specify.md') },
-        { category: 'templates' as const, sourcePath: join(assetsDir, 'templates/SPEC.md') },
+        { category: 'agents' as const, sourcePath: join(assetsDir, 'agents/specify.md'), relativePath: 'specify.md' },
+        { category: 'agents' as const, sourcePath: join(assetsDir, 'agents/implement.md'), relativePath: 'implement.md' },
+        { category: 'commands' as const, sourcePath: join(assetsDir, 'commands/s-specify.md'), relativePath: 's-specify.md' },
+        { category: 'templates' as const, sourcePath: join(assetsDir, 'templates/SPEC.md'), relativePath: 'SPEC.md' },
       ],
       getSettingsTemplate: () => ({
         hooks: {
@@ -459,11 +459,11 @@ describe('Integration: Reinstall Flow', () => {
 
     // Update asset provider to include new file
     assetProvider.getAssetFiles = () => [
-      { category: 'agents' as const, sourcePath: join(assetsDir, 'agents/specify.md') },
-      { category: 'agents' as const, sourcePath: join(assetsDir, 'agents/implement.md') },
-      { category: 'agents' as const, sourcePath: join(assetsDir, 'agents/refactor.md') }, // NEW
-      { category: 'commands' as const, sourcePath: join(assetsDir, 'commands/s-specify.md') },
-      { category: 'templates' as const, sourcePath: join(assetsDir, 'templates/SPEC.md') },
+      { category: 'agents' as const, sourcePath: join(assetsDir, 'agents/specify.md'), relativePath: 'specify.md' },
+      { category: 'agents' as const, sourcePath: join(assetsDir, 'agents/implement.md'), relativePath: 'implement.md' },
+      { category: 'agents' as const, sourcePath: join(assetsDir, 'agents/refactor.md'), relativePath: 'refactor.md' }, // NEW
+      { category: 'commands' as const, sourcePath: join(assetsDir, 'commands/s-specify.md'), relativePath: 's-specify.md' },
+      { category: 'templates' as const, sourcePath: join(assetsDir, 'templates/SPEC.md'), relativePath: 'SPEC.md' },
     ];
 
     // Reinstall with new file

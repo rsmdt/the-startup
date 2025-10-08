@@ -102,6 +102,8 @@ export const FinalConfirmation: FC<FinalConfirmationProps> = ({
       } else {
         onCancel();
       }
+    } else if (key.escape || key.backspace || key.delete) {
+      onCancel();
     }
   });
 
@@ -273,7 +275,7 @@ export const FinalConfirmation: FC<FinalConfirmationProps> = ({
       {/* Help text */}
       <Box marginTop={2}>
         <Text color={theme.colors.textMuted}>
-          Press Enter to confirm • Escape to go back
+          ↑↓ navigate • Enter: select • ESC: back • Ctrl-C: quit
         </Text>
       </Box>
     </Box>

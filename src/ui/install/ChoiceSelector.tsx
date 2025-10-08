@@ -43,6 +43,11 @@ export interface ChoiceSelectorProps {
    * Callback when user submits a selection
    */
   onSubmit: (value: string) => void;
+
+  /**
+   * Optional callback when user presses ESC to go back
+   */
+  onBack?: () => void;
 }
 
 /**
@@ -74,6 +79,7 @@ export const ChoiceSelector: FC<ChoiceSelectorProps> = ({
   subtitle,
   choices,
   onSubmit,
+  onBack,
 }) => {
   const [cursor, setCursor] = useState(0);
   const [inputMode, setInputMode] = useState(false);
@@ -94,6 +100,14 @@ export const ChoiceSelector: FC<ChoiceSelectorProps> = ({
       if (key.escape) {
         setInputMode(false);
         setCustomPath('');
+      }
+      return;
+    }
+
+    // ESC or Backspace to go back (if onBack callback provided)
+    if (key.escape || key.backspace || key.delete) {
+      if (onBack) {
+        onBack();
       }
       return;
     }
@@ -169,7 +183,7 @@ export const ChoiceSelector: FC<ChoiceSelectorProps> = ({
           {/* Help text */}
           <Box marginTop={2}>
             <Text color={theme.colors.textMuted}>
-              ↑↓ navigate • Enter: select • Escape: quit
+              ↑↓ navigate • Enter: select{onBack ? ' • ESC: back' : ''} • Ctrl-C: quit
             </Text>
           </Box>
         </Box>

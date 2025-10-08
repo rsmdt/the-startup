@@ -53,14 +53,14 @@ describe('Integration: Install Flow', () => {
     // Create mock asset provider with real file content
     assetProvider = {
       getAssetFiles: () => [
-        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/specify.md') },
-        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/implement.md') },
-        { category: 'commands' as const, sourcePath: join(tempDir, 'mock-assets/commands/s-specify.md') },
-        { category: 'commands' as const, sourcePath: join(tempDir, 'mock-assets/commands/s-implement.md') },
-        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/SPEC.md') },
-        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/TASK-DOD.md') },
-        { category: 'rules' as const, sourcePath: join(tempDir, 'mock-assets/rules/SCQA.md') },
-        { category: 'outputStyles' as const, sourcePath: join(tempDir, 'mock-assets/output-styles/json.md') },
+        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/specify.md'), relativePath: 'specify.md' },
+        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/implement.md'), relativePath: 'implement.md' },
+        { category: 'commands' as const, sourcePath: join(tempDir, 'mock-assets/commands/s-specify.md'), relativePath: 's-specify.md' },
+        { category: 'commands' as const, sourcePath: join(tempDir, 'mock-assets/commands/s-implement.md'), relativePath: 's-implement.md' },
+        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/SPEC.md'), relativePath: 'SPEC.md' },
+        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/TASK-DOD.md'), relativePath: 'TASK-DOD.md' },
+        { category: 'rules' as const, sourcePath: join(tempDir, 'mock-assets/rules/SCQA.md'), relativePath: 'SCQA.md' },
+        { category: 'outputStyles' as const, sourcePath: join(tempDir, 'mock-assets/output-styles/json.md'), relativePath: 'json.md' },
       ],
       getSettingsTemplate: () => ({
         hooks: {

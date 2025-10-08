@@ -1,7 +1,6 @@
 import { FC } from 'react';
 import { Box, Text } from 'ink';
 import { theme } from '../shared/theme';
-import { basename, dirname } from 'path';
 
 export interface InstallationSummary {
   /**
@@ -56,40 +55,6 @@ export interface CompleteProps {
 export const Complete: FC<CompleteProps> = ({ summary, message }) => {
   const defaultMessage = 'Installation completed successfully!';
 
-  // Group files by directory for better display
-  const groupFilesByDirectory = (files: string[]): Map<string, string[]> => {
-    const grouped = new Map<string, string[]>();
-
-    files.forEach((file) => {
-      const dir = dirname(file);
-      const fileName = basename(file);
-
-      if (!grouped.has(dir)) {
-        grouped.set(dir, []);
-      }
-
-      grouped.get(dir)?.push(fileName);
-    });
-
-    return grouped;
-  };
-
-  const groupedFiles = groupFilesByDirectory(summary.installedFiles);
-
-  // Get relative directory name for display
-  const getRelativeDirName = (fullPath: string): string => {
-    // Extract meaningful directory name relative to startup or claude path
-    if (fullPath.includes('.claude')) {
-      const parts = fullPath.split('.claude/')[1];
-      return parts ? `.claude/${parts}` : '.claude';
-    }
-    if (fullPath.includes('.the-startup')) {
-      const parts = fullPath.split('.the-startup/')[1];
-      return parts ? `.the-startup/${parts}` : '.the-startup';
-    }
-    return dirname(fullPath);
-  };
-
   return (
     <Box flexDirection="column" gap={1} paddingY={1}>
       {/* Success header */}
@@ -112,26 +77,6 @@ export const Complete: FC<CompleteProps> = ({ summary, message }) => {
         </Text>
       </Box>
 
-      {/* Installed files by directory */}
-      {summary.installedFiles.length > 0 && (
-        <Box flexDirection="column" gap={0} marginTop={1}>
-          <Text color={theme.colors.text} bold>
-            Installed Files:
-          </Text>
-          {Array.from(groupedFiles.entries()).map(([dir, files]) => (
-            <Box key={dir} flexDirection="column" gap={0} marginLeft={2}>
-              <Text color={theme.colors.info}>
-                {getRelativeDirName(dir)}
-              </Text>
-              {files.map((file) => (
-                <Box key={file} marginLeft={2}>
-                  <Text color={theme.colors.textMuted}>• {file}</Text>
-                </Box>
-              ))}
-            </Box>
-          ))}
-        </Box>
-      )}
 
       {/* Next steps */}
       <Box flexDirection="column" gap={0} marginTop={1}>
@@ -146,13 +91,6 @@ export const Complete: FC<CompleteProps> = ({ summary, message }) => {
         </Text>
         <Text color={theme.colors.text}>
           3. Check the templates in {summary.startupPath}/templates
-        </Text>
-      </Box>
-
-      {/* Footer */}
-      <Box marginTop={1}>
-        <Text color={theme.colors.textMuted}>
-          Press any key to exit...
         </Text>
       </Box>
     </Box>

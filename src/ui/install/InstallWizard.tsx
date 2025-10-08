@@ -150,6 +150,20 @@ export const InstallWizard: FC<InstallWizardProps> = ({
     }
   });
 
+  // Auto-exit after successful installation
+  useEffect(() => {
+    if (state === 'complete') {
+      // Give user 2 seconds to read the next steps, then exit
+      const timer = setTimeout(() => {
+        exit();
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+
+    return undefined;
+  }, [state, exit]);
+
   /**
    * Perform the actual installation
    */
@@ -310,6 +324,7 @@ export const InstallWizard: FC<InstallWizardProps> = ({
             subtitle="This is where Claude Code's agents and commands will be installed"
             choices={choices}
             onSubmit={handleClaudePathSubmit}
+            onBack={() => setState('startupPath')}
           />
         );
       }
