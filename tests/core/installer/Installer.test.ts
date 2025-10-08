@@ -59,7 +59,21 @@ describe('Installer', () => {
       mergeSettings: vi.fn().mockResolvedValue({
         hooks: {
           'user-prompt-submit': {
-            command: '/test/.the-startup/bin/statusline.sh',
+            command: '/test/.the-startup/bin/the-startup statusline',
+          },
+        },
+      }),
+      mergeFullSettings: vi.fn().mockResolvedValue({
+        permissions: {
+          additionalDirectories: ['/test/.the-startup'],
+        },
+        statusLine: {
+          type: 'command',
+          command: '/test/.the-startup/bin/the-startup statusline',
+        },
+        hooks: {
+          'user-prompt-submit': {
+            command: '/test/.the-startup/bin/the-startup statusline',
           },
         },
       }),
@@ -79,9 +93,16 @@ describe('Installer', () => {
         },
       ]),
       getSettingsTemplate: vi.fn().mockReturnValue({
+        permissions: {
+          additionalDirectories: ['{{STARTUP_PATH}}'],
+        },
+        statusLine: {
+          type: 'command',
+          command: '{{STARTUP_PATH}}/bin/the-startup statusline',
+        },
         hooks: {
           'user-prompt-submit': {
-            command: '{{STARTUP_PATH}}/bin/statusline.sh',
+            command: '{{STARTUP_PATH}}/bin/the-startup statusline',
           },
         },
       }),
@@ -157,14 +178,23 @@ describe('Installer', () => {
       expect(mockFs.copyFile).toHaveBeenCalledTimes(1);
     });
 
-    it('should merge settings.json with hooks', async () => {
+    it('should merge settings.json with complete configuration', async () => {
       await installer.install(defaultOptions);
 
-      expect(mockSettingsMerger.mergeSettings).toHaveBeenCalledWith(
+      expect(mockSettingsMerger.mergeFullSettings).toHaveBeenCalledWith(
         '/test/.claude/settings.json',
         {
-          'user-prompt-submit': {
-            command: '{{STARTUP_PATH}}/bin/statusline.sh',
+          permissions: {
+            additionalDirectories: ['{{STARTUP_PATH}}'],
+          },
+          statusLine: {
+            type: 'command',
+            command: '{{STARTUP_PATH}}/bin/the-startup statusline',
+          },
+          hooks: {
+            'user-prompt-submit': {
+              command: '{{STARTUP_PATH}}/bin/the-startup statusline',
+            },
           },
         },
         {
@@ -246,7 +276,7 @@ describe('Installer', () => {
     });
 
     it('should handle settings merge failure with rollback', async () => {
-      mockSettingsMerger.mergeSettings.mockRejectedValue(
+      mockSettingsMerger.mergeFullSettings.mockRejectedValue(
         new Error('Invalid JSON in settings file')
       );
 

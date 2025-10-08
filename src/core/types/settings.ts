@@ -24,6 +24,34 @@
  */
 export interface ClaudeSettings {
   /**
+   * Additional directories Claude Code can access.
+   *
+   * Allows Claude Code to read/write files outside default directories.
+   */
+  permissions?: {
+    additionalDirectories?: string[];
+  };
+
+  /**
+   * Status line configuration for terminal display.
+   *
+   * Configures what information is shown in the Claude Code status line.
+   */
+  statusLine?: {
+    /** Type of status line (e.g., "command") */
+    type?: string;
+
+    /**
+     * Command to execute to get status line content.
+     *
+     * May contain placeholders:
+     * - {{STARTUP_PATH}}: Installation directory
+     * - {{CLAUDE_PATH}}: Claude config directory
+     */
+    command?: string;
+  };
+
+  /**
    * Hook configurations for Claude Code events.
    *
    * Each hook is triggered by a specific Claude Code event

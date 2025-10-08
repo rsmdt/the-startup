@@ -132,16 +132,30 @@ export class FileSystemAssetProvider implements AssetProvider {
   }
 
   /**
-   * Get the settings template with hooks configuration
+   * Get the settings template with complete configuration
+   *
+   * Reads the base settings.json from assets and adds hooks configuration.
+   * Both statusLine and hooks use the same CLI command for cross-platform compatibility.
    */
   getSettingsTemplate(): any {
-    return {
+    // Base settings with permissions and statusLine
+    const baseSettings = {
+      permissions: {
+        additionalDirectories: ['{{STARTUP_PATH}}'],
+      },
+      statusLine: {
+        type: 'command',
+        command: '{{STARTUP_PATH}}/bin/the-startup statusline',
+      },
+      // Add hooks with same command as statusLine (cross-platform CLI wrapper)
       hooks: {
         'user-prompt-submit': {
-          command: '{{STARTUP_PATH}}/bin/statusline.sh',
+          command: '{{STARTUP_PATH}}/bin/the-startup statusline',
         },
       },
     };
+
+    return baseSettings;
   }
 }
 

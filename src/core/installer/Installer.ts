@@ -270,7 +270,7 @@ export class Installer {
   }
 
   /**
-   * Merges settings.json with hooks.
+   * Merges settings.json with complete configuration (permissions, statusLine, hooks).
    */
   private async mergeSettings(
     claudePath: string,
@@ -284,9 +284,10 @@ export class Installer {
       CLAUDE_PATH: claudePath,
     };
 
-    await this.settingsMerger.mergeSettings(
+    // Use mergeFullSettings to handle permissions, statusLine, and hooks
+    await this.settingsMerger.mergeFullSettings(
       settingsPath,
-      settingsTemplate.hooks, // Pass only the hooks object, not the whole template
+      settingsTemplate, // Pass the complete settings template
       placeholders
     );
   }

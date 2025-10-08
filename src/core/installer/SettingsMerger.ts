@@ -95,6 +95,45 @@ export class SettingsMerger {
   }
 
   /**
+   * Merges complete settings (permissions, statusLine, hooks) into existing Claude settings.
+   *
+   * This extends the hooks-only merge to handle full settings structure:
+   * - permissions.additionalDirectories: Appends if not already present
+   * - statusLine: Sets/overwrites with new value
+   * - hooks: Merges without overwriting existing hooks
+   *
+   * @param settingsPath - Absolute path to settings.json
+   * @param newSettings - Partial settings to merge (permissions, statusLine, hooks)
+   * @param placeholders - Values to replace placeholders with
+   * @returns Merged settings object
+   * @throws Error if JSON is invalid or write fails
+   */
+  async mergeFullSettings(
+    settingsPath: string,
+    newSettings: Partial<ClaudeSettings>,
+    placeholders: PlaceholderMap
+  ): Promise<ClaudeSettings> {
+    const backupPath = this.generateBackupPath(settingsPath);
+    const settingsExisted = await this.createBackup(settingsPath, backupPath);
+
+    try {
+      const finalSettings = await this.performFullMerge(
+        settingsPath,
+        newSettings,
+        placeholders
+      );
+
+      await this.writeSettings(settingsPath, finalSettings);
+      await this.cleanupBackup(backupPath, settingsExisted);
+
+      return finalSettings;
+    } catch (error) {
+      await this.restoreBackup(settingsPath, backupPath, settingsExisted);
+      throw error;
+    }
+  }
+
+  /**
    * Generates timestamped backup path.
    *
    * @param settingsPath - Original settings path
@@ -149,6 +188,67 @@ export class SettingsMerger {
     );
 
     return this.replacePlaceholders(mergedSettings, addedHooks, placeholders);
+  }
+
+  /**
+   * Performs full settings merge (permissions, statusLine, hooks).
+   *
+   * @param settingsPath - Settings file path
+   * @param newSettings - Partial settings to merge
+   * @param placeholders - Placeholder replacements
+   * @returns Merged settings
+   */
+  private async performFullMerge(
+    settingsPath: string,
+    newSettings: Partial<ClaudeSettings>,
+    placeholders: PlaceholderMap
+  ): Promise<ClaudeSettings> {
+    const userSettings = await this.readSettings(settingsPath);
+
+    // 1. Merge permissions.additionalDirectories
+    if (newSettings.permissions?.additionalDirectories) {
+      if (!userSettings.permissions) {
+        userSettings.permissions = { additionalDirectories: [] };
+      }
+      if (!userSettings.permissions.additionalDirectories) {
+        userSettings.permissions.additionalDirectories = [];
+      }
+
+      // Add new directories that don't already exist
+      for (const dir of newSettings.permissions.additionalDirectories) {
+        const replacedDir = this.replacePlaceholdersInString(dir, placeholders);
+        if (!userSettings.permissions.additionalDirectories.includes(replacedDir)) {
+          userSettings.permissions.additionalDirectories.push(replacedDir);
+        }
+      }
+    }
+
+    // 2. Set statusLine (overwrite if exists)
+    if (newSettings.statusLine) {
+      userSettings.statusLine = {
+        ...newSettings.statusLine,
+        command: this.replacePlaceholdersInString(
+          newSettings.statusLine.command || '',
+          placeholders
+        ),
+      };
+    }
+
+    // 3. Merge hooks (preserve existing)
+    if (newSettings.hooks) {
+      if (!userSettings.hooks) {
+        userSettings.hooks = {};
+      }
+
+      const { settings: mergedSettings, addedHooks } = this.mergeHooks(
+        userSettings,
+        newSettings.hooks
+      );
+
+      return this.replacePlaceholders(mergedSettings, addedHooks, placeholders);
+    }
+
+    return userSettings;
   }
 
   /**
@@ -315,6 +415,17 @@ export class SettingsMerger {
     result = result.replace(/\{\{CLAUDE_PATH\}\}/g, placeholders.CLAUDE_PATH);
 
     return result;
+  }
+
+  /**
+   * Alias for replaceInCommand - replaces placeholders in any string.
+   *
+   * @param str - String with placeholders
+   * @param placeholders - Replacement values
+   * @returns String with placeholders replaced
+   */
+  private replacePlaceholdersInString(str: string, placeholders: PlaceholderMap): string {
+    return this.replaceInCommand(str, placeholders);
   }
 
   /**
