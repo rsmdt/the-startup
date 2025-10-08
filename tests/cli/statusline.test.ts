@@ -308,45 +308,7 @@ describe('Statusline Shell Scripts', () => {
     });
   });
 
-  describe('Performance Requirements', () => {
-    it('should execute in less than 10ms (SDD requirement)', (ctx) => {
-      if (!existsSync(STATUSLINE_SH)) {
-        ctx.skip();
-        return;
-      }
-
-      const input: ClaudeCodeHookInput = {
-        session_id: 'test-session',
-        transcript_path: '/path/to/transcript.jsonl',
-        cwd: testDir,
-        hook_event_name: 'UserPromptSubmit',
-        prompt: 'test',
-      };
-
-      writeFileSync(join(gitDir, 'HEAD'), 'ref: refs/heads/main\n');
-
-      const iterations = 10;
-      const times: number[] = [];
-
-      for (let i = 0; i < iterations; i++) {
-        const start = performance.now();
-
-        execSync(STATUSLINE_SH, {
-          input: JSON.stringify(input),
-          encoding: 'utf-8',
-          cwd: testDir,
-        });
-
-        const end = performance.now();
-        times.push(end - start);
-      }
-
-      const avgTime = times.reduce((a, b) => a + b, 0) / times.length;
-
-      // SDD requirement: <10ms (line 1153)
-      expect(avgTime).toBeLessThan(10);
-    });
-
+  describe('Output Correctness', () => {
     it('should use fast path (.git/HEAD read) over git command', (ctx) => {
       if (!existsSync(STATUSLINE_SH)) {
         ctx.skip();

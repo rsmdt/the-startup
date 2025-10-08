@@ -1,13 +1,14 @@
 import { FC, useState, useEffect } from 'react';
 import { Box, Text, useInput, useApp } from 'ink';
-import { PathSelector } from './PathSelector';
-import { FileTree, TreeNode } from './FileTree';
+import { ChoiceSelector, Choice } from './ChoiceSelector';
+import { FinalConfirmation } from './FinalConfirmation';
 import { Complete, InstallationSummary } from './Complete';
 import type { InstallCommandOptions, InstallResult, InstallerOptions } from '../../core/types/config';
 import type { Installer } from '../../core/installer/Installer';
 import { theme } from '../shared/theme';
 import { homedir } from 'os';
-import { resolve } from 'path';
+import { resolve, join } from 'path';
+import { existsSync } from 'fs';
 
 /**
  * Wizard state machine
@@ -78,7 +79,7 @@ export const InstallWizard: FC<InstallWizardProps> = ({
   const [state, setState] = useState<WizardState>('startupPath');
   const [startupPath, setStartupPath] = useState<string>('');
   const [claudePath, setClaudePath] = useState<string>('');
-  const [selectedFiles, setSelectedFiles] = useState<InstallerOptions['selectedFiles']>({
+  const [selectedFiles] = useState<InstallerOptions['selectedFiles']>({
     agents: true,
     commands: true,
     templates: true,
@@ -94,53 +95,6 @@ export const InstallWizard: FC<InstallWizardProps> = ({
   } | null>(null);
 
   const { exit } = useApp();
-
-  // Default asset tree structure for file selection
-  const defaultAssetTree: TreeNode = {
-    name: 'Components',
-    type: 'directory',
-    selected: true,
-    expanded: true,
-    children: [
-      {
-        name: 'Agents',
-        type: 'directory',
-        selected: true,
-        expanded: false,
-        children: [],
-      },
-      {
-        name: 'Commands',
-        type: 'directory',
-        selected: true,
-        expanded: false,
-        children: [],
-      },
-      {
-        name: 'Templates',
-        type: 'directory',
-        selected: true,
-        expanded: false,
-        children: [],
-      },
-      {
-        name: 'Rules',
-        type: 'directory',
-        selected: true,
-        expanded: false,
-        children: [],
-      },
-      {
-        name: 'Output Styles',
-        type: 'directory',
-        selected: true,
-        expanded: false,
-        children: [],
-      },
-    ],
-  };
-
-  const [assetTree] = useState<TreeNode>(defaultAssetTree);
 
   // Handle --local flag: Skip TUI, use defaults
   useEffect(() => {
@@ -260,6 +214,10 @@ export const InstallWizard: FC<InstallWizardProps> = ({
    * Handle startup path submission
    */
   const handleStartupPathSubmit = (path: string) => {
+    if (path === 'CANCEL') {
+      exit();
+      return;
+    }
     setStartupPath(path);
     setState('claudePath');
   };
@@ -268,99 +226,110 @@ export const InstallWizard: FC<InstallWizardProps> = ({
    * Handle claude path submission
    */
   const handleClaudePathSubmit = (path: string) => {
+    if (path === 'CANCEL') {
+      exit();
+      return;
+    }
     setClaudePath(path);
     setState('fileSelection');
   };
 
   /**
-   * Handle file tree submission
+   * Handle final confirmation
    */
-  const handleFileTreeSubmit = (tree: TreeNode) => {
-    // Update selected files based on tree
-    const selections = extractSelections(tree);
-    setSelectedFiles(selections);
+  const handleConfirm = () => {
     setState('installing');
   };
 
   /**
-   * Extract file selections from tree
+   * Handle final cancellation (go back to claude path)
    */
-  const extractSelections = (tree: TreeNode): InstallerOptions['selectedFiles'] => {
-    const selections: InstallerOptions['selectedFiles'] = {
-      agents: false,
-      commands: false,
-      templates: false,
-      rules: false,
-      outputStyles: false,
-    };
-
-    if (!tree.children) {
-      return selections;
-    }
-
-    for (const child of tree.children) {
-      if (child.name === 'Agents') {
-        selections.agents = child.selected;
-      } else if (child.name === 'Commands') {
-        selections.commands = child.selected;
-      } else if (child.name === 'Templates') {
-        selections.templates = child.selected;
-      } else if (child.name === 'Rules') {
-        selections.rules = child.selected;
-      } else if (child.name === 'Output Styles') {
-        selections.outputStyles = child.selected;
-      }
-    }
-
-    return selections;
+  const handleCancelConfirmation = () => {
+    setState('claudePath');
   };
 
-  /**
-   * Validate path exists and is accessible
-   */
-  const validatePath = (_path: string) => {
-    // Basic validation - in production, would check fs access
-    return {
-      isValid: true,
-      message: '',
-    };
-  };
 
   /**
    * Render current state
    */
   const renderState = () => {
     switch (state) {
-      case 'startupPath':
+      case 'startupPath': {
+        const choices: Choice[] = [
+          {
+            label: '~/.config/the-startup (recommended)',
+            value: resolve(homedir(), '.config', 'the-startup'),
+          },
+          {
+            label: '.the-startup (local)',
+            value: resolve(process.cwd(), '.the-startup'),
+          },
+          {
+            label: 'Custom location',
+            value: 'CUSTOM',
+          },
+          {
+            label: 'Cancel',
+            value: 'CANCEL',
+          },
+        ];
+
         return (
-          <PathSelector
-            label="Installation directory"
-            defaultValue="~/.the-startup"
-            placeholder="Enter installation path..."
-            validator={validatePath}
+          <ChoiceSelector
+            title="Select .the-startup installation location"
+            subtitle="This is where The Startup's templates and rules will be installed"
+            choices={choices}
             onSubmit={handleStartupPathSubmit}
           />
         );
+      }
 
-      case 'claudePath':
+      case 'claudePath': {
+        const choices: Choice[] = [
+          {
+            label: '~/.claude (recommended)',
+            value: resolve(homedir(), '.claude'),
+          },
+          {
+            label: '.claude (local)',
+            value: resolve(process.cwd(), '.claude'),
+          },
+          {
+            label: 'Custom location',
+            value: 'CUSTOM',
+          },
+          {
+            label: 'Cancel',
+            value: 'CANCEL',
+          },
+        ];
+
         return (
-          <PathSelector
-            label="Claude configuration directory"
-            defaultValue="~/.claude"
-            placeholder="Enter Claude config path..."
-            validator={validatePath}
+          <ChoiceSelector
+            title="Select Claude configuration directory"
+            subtitle="This is where Claude Code's agents and commands will be installed"
+            choices={choices}
             onSubmit={handleClaudePathSubmit}
           />
         );
+      }
 
-      case 'fileSelection':
+      case 'fileSelection': {
+        const settingsPath = join(claudePath, 'settings.json');
+        const settingsExists = existsSync(settingsPath);
+
         return (
-          <FileTree
-            tree={assetTree}
-            title="Select components to install"
-            onSubmit={handleFileTreeSubmit}
+          <FinalConfirmation
+            startupPath={startupPath}
+            claudePath={claudePath}
+            files={[]} // Files list is now hardcoded in FinalConfirmation
+            settingsExists={settingsExists}
+            mode="install"
+            onConfirm={handleConfirm}
+            onCancel={handleCancelConfirmation}
           />
         );
+      }
 
       case 'installing':
         return (

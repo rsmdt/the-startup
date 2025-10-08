@@ -4,7 +4,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Common Commands
 
+### Development Mode (No Build Required)
+
+Run commands directly from TypeScript source using tsx:
+
+```bash
+# Run installer in development mode
+npm run dev:install
+
+# Run other commands
+npm run dev:uninstall
+npm run dev:init
+npm run dev:spec
+
+# Run with custom arguments
+npm run dev:run -- install --yes
+npm run dev:run -- spec "Add user authentication"
+
+# Or use tsx directly
+npx tsx src/index.ts install
+```
+
 ### Build and Run
+
 ```bash
 # Build the project
 npm run build
@@ -21,7 +43,7 @@ the-agentic-startup --help
 # Unlink when done testing
 npm unlink -g the-agentic-startup
 
-# Watch mode for development (rebuilds on file changes)
+# Watch mode (rebuilds on file changes)
 npm run dev
 # Then in another terminal, run:
 node dist/index.js install
@@ -95,27 +117,31 @@ The project follows a standard TypeScript/Node.js layout with clear separation o
 - **`src/ui/`**: Ink-based interactive UI components (React)
   - `install/`: Installation wizard components
     - `InstallWizard.tsx`: Main wizard with state machine (6 states)
-    - `PathSelector.tsx`, `FileTree.tsx`, `Complete.tsx`: UI components
+    - `ChoiceSelector.tsx`, `FinalConfirmation.tsx`, `Complete.tsx`: UI components
   - `uninstall/`: Uninstall wizard
     - `UninstallWizard.tsx`: Lock file reading and confirmation
   - `shared/`: Reusable UI components
-    - `theme.ts`, `Spinner.tsx`, `ErrorDisplay.tsx`
+    - `theme.ts`, `Spinner.tsx`, `ErrorDisplay.tsx`, `Banner.tsx`
 
 - **`tests/`**: Comprehensive test suite
   - `core/`: Unit tests for all core modules
   - `ui/`: UI component tests using ink-testing-library
   - `integration/`: Integration tests for full workflows
-  - `infrastructure/`: Build and TypeScript tests
+
+- **`docs/`**: Project documentation structure
+  - `domain/`: Business rules, workflows, and domain patterns
+  - `patterns/`: Technical patterns and architectural solutions
+  - `interfaces/`: API contracts and service integrations
+  - `specs/`: Feature specifications (PRD, SDD, PLAN documents)
 
 ### Embedded Assets
 
 The application includes all assets as separate files distributed with the npm package:
 - `assets/claude/agents/**/*.md`: Agent definitions (11 roles, 39 activities)
 - `assets/claude/commands/**/*.md`: Slash command definitions (5 commands)
+- `assets/claude/output-styles/the-startup.md`: Custom output style
 - `assets/the-startup/templates/*`: Template files (PRD, BRD, SDD, PLAN, DOR, DOD, TASK-DOD)
 - `assets/the-startup/rules/*`: Agent delegation and cycle pattern rules
-- `assets/claude/settings.json`: Claude Code settings template
-- `assets/claude/output-styles/the-startup.md`: Custom output style
 
 ### UI Architecture (Ink/React)
 
@@ -125,9 +151,10 @@ The installer uses React components with Ink for terminal UI:
 2. **State Machine**: Manages transitions between installation steps
    - Intro → StartupPath → ClaudePath → FileSelection → Installing → Complete
 3. **React Components**: Each step is a separate React component
-   - PathSelector: Selects installation/Claude directories
-   - FileTree: Interactive tree selector with checkboxes
+   - ChoiceSelector: Arrow key navigation menu for path selection
+   - FinalConfirmation: Final confirmation screen with file tree display
    - Complete: Shows installation success summary
+   - Banner: ASCII art banner display
    - ErrorDisplay: Handles error display with recovery options
 
 ### Installation Flow
@@ -203,7 +230,7 @@ The installer implements atomic operations with full rollback:
 - Integration tests for full installation/uninstall workflows
 - UI tests using ink-testing-library for React components
 - Migration test from v1 to v2 lock file format
-- Infrastructure tests for build process and TypeScript compilation
+- Real-file integration tests using actual assets for verification
 
 ## Distribution
 

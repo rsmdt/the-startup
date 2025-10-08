@@ -1,5 +1,5 @@
-import { readdir, stat } from 'fs/promises';
-import { join, relative } from 'path';
+import { readdir } from 'fs/promises';
+import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
@@ -33,14 +33,21 @@ export class FileSystemAssetProvider implements AssetProvider {
   private assetsRoot: string;
 
   constructor() {
-    // Get the directory of this file (src/cli/asset-provider.ts)
+    // Get the directory of this file
     const currentFile = fileURLToPath(import.meta.url);
     const currentDir = dirname(currentFile);
 
-    // In development: src/cli/asset-provider.ts -> ../../assets
-    // In production: dist/cli/asset-provider.js -> ../../assets
-    // Both resolve to the package root's assets/ directory
-    this.assetsRoot = join(currentDir, '..', '..', 'assets');
+    // Resolve to package root, then assets/
+    // In development (npm run dev): currentDir is src/cli/ -> go up 2 levels
+    // In tests: currentDir is src/cli/ -> go up 2 levels
+    // In production (bundled): currentDir is dist/ -> go up 1 level
+    //
+    // We detect which context we're in by checking if we're in 'src/' or 'dist/'
+    const isSourceContext = currentDir.includes('/src/');
+    const levelsUp = isSourceContext ? 2 : 1;
+
+    const packageRoot = join(currentDir, ...Array(levelsUp).fill('..'));
+    this.assetsRoot = join(packageRoot, 'assets');
   }
 
   /**
@@ -124,7 +131,9 @@ export class FileSystemAssetProvider implements AssetProvider {
   getSettingsTemplate(): any {
     return {
       hooks: {
-        'user-prompt-submit': ['{{STARTUP_PATH}}/bin/statusline.sh'],
+        'user-prompt-submit': {
+          command: '{{STARTUP_PATH}}/bin/statusline.sh',
+        },
       },
     };
   }

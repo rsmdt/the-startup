@@ -63,15 +63,10 @@ describe('Integration: Install Flow', () => {
         { category: 'outputStyles' as const, sourcePath: join(tempDir, 'mock-assets/output-styles/json.md') },
       ],
       getSettingsTemplate: () => ({
-        'startup-validate-dor': {
-          command: '{{STARTUP_PATH}}/bin/the-startup validate dor',
-          description: 'Validate Definition of Ready',
-          continueOnError: false,
-        },
-        'startup-validate-dod': {
-          command: '{{STARTUP_PATH}}/bin/the-startup validate dod',
-          description: 'Validate Definition of Done',
-          continueOnError: false,
+        hooks: {
+          'user-prompt-submit': {
+            command: '{{STARTUP_PATH}}/bin/statusline.sh',
+          },
         },
       }),
     };
@@ -243,9 +238,8 @@ describe('Integration: Install Flow', () => {
     const settings = JSON.parse(settingsContent);
 
     expect(settings.hooks).toBeDefined();
-    expect(settings.hooks['startup-validate-dor']).toBeDefined();
-    expect(settings.hooks['startup-validate-dor'].command).toBe(`${startupPath}/bin/the-startup validate dor`);
-    expect(settings.hooks['startup-validate-dod'].command).toBe(`${startupPath}/bin/the-startup validate dod`);
+    expect(settings.hooks['user-prompt-submit']).toBeDefined();
+    expect(settings.hooks['user-prompt-submit'].command).toBe(`${startupPath}/bin/statusline.sh`);
   });
 
   /**
@@ -272,9 +266,9 @@ describe('Integration: Install Flow', () => {
           description: 'User custom hook',
           continueOnError: false,
         },
-        'startup-validate-dor': {
+        'user-prompt-submit': {
           command: 'echo "User override"',
-          description: 'User-defined DOR validation',
+          description: 'User-defined override',
           continueOnError: true,
         },
       },
@@ -313,12 +307,8 @@ describe('Integration: Install Flow', () => {
     expect(settings.hooks['user-custom-hook']).toBeDefined();
     expect(settings.hooks['user-custom-hook'].command).toBe('echo "User hook"');
 
-    // User's override of startup-validate-dor should be preserved (NOT overwritten)
-    expect(settings.hooks['startup-validate-dor'].command).toBe('echo "User override"');
-
-    // New hook should be added
-    expect(settings.hooks['startup-validate-dod']).toBeDefined();
-    expect(settings.hooks['startup-validate-dod'].command).toBe(`${startupPath}/bin/the-startup validate dod`);
+    // User's override of user-prompt-submit should be preserved (NOT overwritten)
+    expect(settings.hooks['user-prompt-submit'].command).toBe('echo "User override"');
   });
 
   /**
@@ -474,8 +464,7 @@ describe('Integration: Install Flow', () => {
     expect(settingsContent).not.toContain('{{CLAUDE_PATH}}');
 
     // Verify actual paths are present
-    expect(settings.hooks['startup-validate-dor'].command).toContain(startupPath);
-    expect(settings.hooks['startup-validate-dod'].command).toContain(startupPath);
+    expect(settings.hooks['user-prompt-submit'].command).toContain(startupPath);
   });
 
   /**
@@ -547,8 +536,7 @@ describe('Integration: Install Flow', () => {
     expect(settings.hooks['existing-hook'].command).toBe('echo "Original"');
 
     // Startup hooks should not be present
-    expect(settings.hooks['startup-validate-dor']).toBeUndefined();
-    expect(settings.hooks['startup-validate-dod']).toBeUndefined();
+    expect(settings.hooks['user-prompt-submit']).toBeUndefined();
   });
 
   /**

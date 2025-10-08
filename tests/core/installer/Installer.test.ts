@@ -78,8 +78,10 @@ describe('Installer', () => {
         },
       ]),
       getSettingsTemplate: vi.fn().mockReturnValue({
-        'user-prompt-submit': {
-          command: '{{STARTUP_PATH}}/bin/statusline.sh',
+        hooks: {
+          'user-prompt-submit': {
+            command: '{{STARTUP_PATH}}/bin/statusline.sh',
+          },
         },
       }),
     };

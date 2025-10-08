@@ -12,9 +12,9 @@ describe('InstallWizard', () => {
       );
       const output = lastFrame();
 
-      // Should show startup path selector in initial state
-      expect(output).toContain('Installation directory');
-      expect(output).toContain('.the-startup');
+      // Should show startup path selector in initial state with new ChoiceSelector
+      expect(output).toContain('Select .the-startup installation location');
+      expect(output).toContain('~/.config/the-startup (recommended)');
     });
 
     it('transitions from Startup Path to Claude Path after submission', () => {
@@ -22,9 +22,9 @@ describe('InstallWizard', () => {
         <InstallWizard options={{}} onComplete={() => {}} />
       );
 
-      // Initial state should be Startup Path
+      // Initial state should be Startup Path with new ChoiceSelector
       const initialOutput = lastFrame();
-      expect(initialOutput).toContain('Installation directory');
+      expect(initialOutput).toContain('Select .the-startup installation location');
 
       // After submission, should transition to Claude Path
       // This test will fail until we implement state transitions
@@ -419,14 +419,15 @@ describe('InstallWizard', () => {
   });
 
   describe('Integration with Sub-components', () => {
-    it('renders PathSelector component for startup path', () => {
+    it('renders ChoiceSelector component for startup path', () => {
       const { lastFrame } = render(
         <InstallWizard options={{}} onComplete={() => {}} />
       );
       const output = lastFrame();
 
-      // Should use PathSelector component
-      expect(output).toContain('Installation directory');
+      // Should use ChoiceSelector component (not PathSelector)
+      expect(output).toContain('Select .the-startup installation location');
+      expect(output).toContain('~/.config/the-startup (recommended)');
     });
 
     it('renders PathSelector component for claude path', () => {

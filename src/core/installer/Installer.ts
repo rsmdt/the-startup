@@ -30,7 +30,7 @@ interface AssetFile {
  * Asset Provider Interface for accessing embedded assets
  */
 interface AssetProvider {
-  getAssetFiles(): AssetFile[];
+  getAssetFiles(): Promise<AssetFile[]>;
   getSettingsTemplate(): any;
 }
 
@@ -117,7 +117,7 @@ export class Installer {
       const claudePath = this.normalizePath(options.claudePath);
 
       // 2. Get selected assets
-      const assetFiles = this.getSelectedAssets(options.selectedFiles);
+      const assetFiles = await this.getSelectedAssets(options.selectedFiles);
       const totalSteps = assetFiles.length + 2; // +2 for settings and lock
       let currentStep = 0;
 
@@ -176,10 +176,10 @@ export class Installer {
   /**
    * Gets selected asset files based on user selections.
    */
-  private getSelectedAssets(
+  private async getSelectedAssets(
     selectedFiles: InstallerOptions['selectedFiles']
-  ): AssetFile[] {
-    const allAssets = this.assetProvider.getAssetFiles();
+  ): Promise<AssetFile[]> {
+    const allAssets = await this.assetProvider.getAssetFiles();
 
     return allAssets.filter((asset) => {
       return selectedFiles[asset.category] === true;
@@ -281,7 +281,7 @@ export class Installer {
 
     await this.settingsMerger.mergeSettings(
       settingsPath,
-      settingsTemplate,
+      settingsTemplate.hooks, // Pass only the hooks object, not the whole template
       placeholders
     );
   }
