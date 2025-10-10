@@ -35,8 +35,8 @@ import { createAssetProvider } from './asset-provider.js';
  */
 export async function installCommand(options: InstallCommandOptions): Promise<void> {
   try {
-    // Check for non-interactive mode (--local or --yes without TUI)
-    const isNonInteractive = options.local && options.yes;
+    // Check for non-interactive mode (--yes flag or --local with --yes)
+    const isNonInteractive = options.yes || (options.local && options.yes);
 
     if (isNonInteractive) {
       await handleNonInteractiveInstall(options);

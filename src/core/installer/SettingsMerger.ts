@@ -220,6 +220,9 @@ export class SettingsMerger {
     );
 
     // Generic deep merge - user settings win on conflicts
+    // NOTE: deepMerge(target, source) where source overwrites target for primitives
+    // To preserve user settings, we need: deepMerge(template, userSettings)
+    // This way userSettings (source) overwrites template (target)
     return deepMerge(processedNewSettings, userSettings);
   }
 
