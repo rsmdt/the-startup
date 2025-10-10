@@ -69,7 +69,7 @@ export interface InitCommandOptions {
  */
 export interface SpecCommandOptions {
   /** Generate template file in spec directory */
-  add?: 'PRD' | 'SDD' | 'PLAN' | 'BRD';
+  add?: 'product-requirements' | 'solution-design' | 'implementation-plan' | 'business-requirements';
 
   /** Output spec state in TOML format */
   read?: boolean;
@@ -176,7 +176,7 @@ export interface SpecOptions {
   name: string;
 
   /** Template to generate (from --add flag) */
-  template?: 'PRD' | 'SDD' | 'PLAN' | 'BRD';
+  template?: 'product-requirements' | 'solution-design' | 'implementation-plan' | 'business-requirements';
 
   /** Existing spec ID (e.g., "004") */
   specId?: string;

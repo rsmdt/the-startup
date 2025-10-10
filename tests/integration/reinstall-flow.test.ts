@@ -61,18 +61,12 @@ describe('Integration: Reinstall Flow', () => {
 
     assetProvider = {
       getAssetFiles: () => [
-        { category: 'agents' as const, sourcePath: join(assetsDir, 'agents/specify.md'), relativePath: 'specify.md' },
-        { category: 'agents' as const, sourcePath: join(assetsDir, 'agents/implement.md'), relativePath: 'implement.md' },
-        { category: 'commands' as const, sourcePath: join(assetsDir, 'commands/s-specify.md'), relativePath: 's-specify.md' },
-        { category: 'templates' as const, sourcePath: join(assetsDir, 'templates/SPEC.md'), relativePath: 'SPEC.md' },
+        { sourcePath: join(assetsDir, 'agents/specify.md'), relativePath: 'agents/specify.md', targetCategory: 'claude' as const, isJson: false },
+        { sourcePath: join(assetsDir, 'agents/implement.md'), relativePath: 'agents/implement.md', targetCategory: 'claude' as const, isJson: false },
+        { sourcePath: join(assetsDir, 'commands/s-specify.md'), relativePath: 'commands/s-specify.md', targetCategory: 'claude' as const, isJson: false },
+        { sourcePath: join(assetsDir, 'templates/SPEC.md'), relativePath: 'templates/SPEC.md', targetCategory: 'startup' as const, isJson: false },
+        { sourcePath: join(assetsDir, 'settings.json'), relativePath: 'settings.json', targetCategory: 'claude' as const, isJson: true },
       ],
-      getSettingsTemplate: () => ({
-        hooks: {
-          'startup-validate-dor': {
-            command: '{{STARTUP_PATH}}/bin/the-startup validate dor',
-          },
-        },
-      }),
     };
 
     installer = new Installer(
@@ -117,6 +111,17 @@ describe('Integration: Reinstall Flow', () => {
     await fs.writeFile(
       join(assetsDir, 'templates/SPEC.md'),
       '# Specification Template v1.0\nInitial version',
+      'utf-8'
+    );
+    await fs.writeFile(
+      join(assetsDir, 'settings.json'),
+      JSON.stringify({
+        hooks: {
+          'startup-validate-dor': {
+            command: '{{STARTUP_PATH}}/bin/the-startup validate dor',
+          },
+        },
+      }, null, 2),
       'utf-8'
     );
   }
@@ -459,11 +464,12 @@ describe('Integration: Reinstall Flow', () => {
 
     // Update asset provider to include new file
     assetProvider.getAssetFiles = () => [
-      { category: 'agents' as const, sourcePath: join(assetsDir, 'agents/specify.md'), relativePath: 'specify.md' },
-      { category: 'agents' as const, sourcePath: join(assetsDir, 'agents/implement.md'), relativePath: 'implement.md' },
-      { category: 'agents' as const, sourcePath: join(assetsDir, 'agents/refactor.md'), relativePath: 'refactor.md' }, // NEW
-      { category: 'commands' as const, sourcePath: join(assetsDir, 'commands/s-specify.md'), relativePath: 's-specify.md' },
-      { category: 'templates' as const, sourcePath: join(assetsDir, 'templates/SPEC.md'), relativePath: 'SPEC.md' },
+      { sourcePath: join(assetsDir, 'agents/specify.md'), relativePath: 'agents/specify.md', targetCategory: 'claude' as const, isJson: false },
+      { sourcePath: join(assetsDir, 'agents/implement.md'), relativePath: 'agents/implement.md', targetCategory: 'claude' as const, isJson: false },
+      { sourcePath: join(assetsDir, 'agents/refactor.md'), relativePath: 'agents/refactor.md', targetCategory: 'claude' as const, isJson: false }, // NEW
+      { sourcePath: join(assetsDir, 'commands/s-specify.md'), relativePath: 'commands/s-specify.md', targetCategory: 'claude' as const, isJson: false },
+      { sourcePath: join(assetsDir, 'templates/SPEC.md'), relativePath: 'templates/SPEC.md', targetCategory: 'startup' as const, isJson: false },
+      { sourcePath: join(assetsDir, 'settings.json'), relativePath: 'settings.json', targetCategory: 'claude' as const, isJson: true },
     ];
 
     // Reinstall with new file

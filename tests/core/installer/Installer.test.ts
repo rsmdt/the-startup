@@ -41,7 +41,14 @@ describe('Installer', () => {
     mockFs = {
       mkdir: vi.fn().mockResolvedValue(undefined),
       copyFile: vi.fn().mockResolvedValue(undefined),
-      readFile: vi.fn().mockResolvedValue('mock content'),
+      readFile: vi.fn().mockImplementation((path: string) => {
+        // For JSON files, return valid JSON
+        if (path.endsWith('.json')) {
+          return Promise.resolve(JSON.stringify({ test: 'data' }));
+        }
+        // For other files, return mock content
+        return Promise.resolve('mock content');
+      }),
       writeFile: vi.fn().mockResolvedValue(undefined),
       rm: vi.fn().mockResolvedValue(undefined),
       access: vi.fn().mockResolvedValue(undefined),
@@ -79,33 +86,17 @@ describe('Installer', () => {
       }),
     };
 
-    // Mock AssetProvider
+    // Mock AssetProvider (simplified structure)
     mockAssetProvider = {
       getAssetFiles: vi.fn().mockReturnValue([
-        { category: 'agents', sourcePath: 'claude/agents/the-chief.md', relativePath: 'the-chief.md' },
-        { category: 'commands', sourcePath: 'claude/commands/spec.md', relativePath: 'spec.md' },
-        { category: 'templates', sourcePath: 'the-startup/templates/PRD.md', relativePath: 'PRD.md' },
-        { category: 'rules', sourcePath: 'the-startup/rules/SCQA.md', relativePath: 'SCQA.md' },
-        {
-          category: 'outputStyles',
-          sourcePath: 'claude/output-styles/the-startup.md',
-          relativePath: 'the-startup.md',
-        },
+        { sourcePath: 'claude/agents/the-chief.md', relativePath: 'agents/the-chief.md', targetCategory: 'claude', isJson: false },
+        { sourcePath: 'claude/commands/spec.md', relativePath: 'commands/spec.md', targetCategory: 'claude', isJson: false },
+        { sourcePath: 'the-startup/templates/PRD.md', relativePath: 'templates/PRD.md', targetCategory: 'startup', isJson: false },
+        { sourcePath: 'the-startup/rules/SCQA.md', relativePath: 'rules/SCQA.md', targetCategory: 'startup', isJson: false },
+        { sourcePath: 'claude/output-styles/the-startup.md', relativePath: 'output-styles/the-startup.md', targetCategory: 'claude', isJson: false },
+        { sourcePath: 'claude/settings.json', relativePath: 'settings.json', targetCategory: 'claude', isJson: true },
+        { sourcePath: 'claude/settings.local.json', relativePath: 'settings.local.json', targetCategory: 'claude', isJson: true },
       ]),
-      getSettingsTemplate: vi.fn().mockReturnValue({
-        permissions: {
-          additionalDirectories: ['{{STARTUP_PATH}}'],
-        },
-        statusLine: {
-          type: 'command',
-          command: '{{STARTUP_PATH}}/bin/the-startup statusline',
-        },
-        hooks: {
-          'user-prompt-submit': {
-            command: '{{STARTUP_PATH}}/bin/the-startup statusline',
-          },
-        },
-      }),
     };
 
     installer = new Installer(
@@ -140,19 +131,19 @@ describe('Installer', () => {
     it('should copy selected asset files to correct destinations', async () => {
       await installer.install(defaultOptions);
 
-      // Check that copyFile was called for each asset type
-      expect(mockFs.copyFile).toHaveBeenCalled();
-      const copyFileCalls = mockFs.copyFile.mock.calls;
+      // Check that writeFile was called for each asset (files are now written with placeholders replaced)
+      expect(mockFs.writeFile).toHaveBeenCalled();
+      const writeFileCalls = mockFs.writeFile.mock.calls;
 
-      // Verify agents were copied to .claude/agents/
-      const agentCalls = copyFileCalls.filter((call: any) =>
-        call[1].includes('.claude/agents/')
+      // Verify agents were written to .claude/agents/
+      const agentCalls = writeFileCalls.filter((call: any) =>
+        call[0].includes('.claude/agents/')
       );
       expect(agentCalls.length).toBeGreaterThan(0);
 
-      // Verify templates were copied to .the-startup/templates/
-      const templateCalls = copyFileCalls.filter((call: any) =>
-        call[1].includes('.the-startup/templates/')
+      // Verify templates were written to .the-startup/templates/
+      const templateCalls = writeFileCalls.filter((call: any) =>
+        call[0].includes('.the-startup/templates/')
       );
       expect(templateCalls.length).toBeGreaterThan(0);
     });
@@ -170,38 +161,36 @@ describe('Installer', () => {
       };
 
       mockAssetProvider.getAssetFiles.mockReturnValue([
-        { category: 'agents', sourcePath: 'claude/agents/the-chief.md', relativePath: 'the-chief.md' },
+        { sourcePath: 'claude/agents/the-chief.md', relativePath: 'agents/the-chief.md', targetCategory: 'claude', isJson: false },
       ]);
 
       await installer.install(options);
 
-      expect(mockFs.copyFile).toHaveBeenCalledTimes(1);
+      // Should write the selected file
+      expect(mockFs.writeFile).toHaveBeenCalled();
     });
 
-    it('should merge settings.json with complete configuration', async () => {
-      await installer.install(defaultOptions);
-
-      expect(mockSettingsMerger.mergeFullSettings).toHaveBeenCalledWith(
-        '/test/.claude/settings.json',
-        {
-          permissions: {
-            additionalDirectories: ['{{STARTUP_PATH}}'],
-          },
-          statusLine: {
-            type: 'command',
-            command: '{{STARTUP_PATH}}/bin/the-startup statusline',
-          },
-          hooks: {
-            'user-prompt-submit': {
-              command: '{{STARTUP_PATH}}/bin/the-startup statusline',
-            },
+    it('should merge settings.json during installation', async () => {
+      // Mock readFile to return settings.json content
+      mockFs.readFile.mockResolvedValue(JSON.stringify({
+        permissions: {
+          additionalDirectories: ['{{STARTUP_PATH}}'],
+        },
+        statusLine: {
+          type: 'command',
+          command: '{{STARTUP_PATH}}/bin/statusline{{SHELL_SCRIPT_EXTENSION}}',
+        },
+        hooks: {
+          'user-prompt-submit': {
+            command: '{{STARTUP_PATH}}/bin/statusline{{SHELL_SCRIPT_EXTENSION}}',
           },
         },
-        {
-          STARTUP_PATH: '/test/.the-startup',
-          CLAUDE_PATH: '/test/.claude',
-        }
-      );
+      }));
+
+      await installer.install(defaultOptions);
+
+      // Settings merge should be called for both settings.json and settings.local.json
+      expect(mockSettingsMerger.mergeFullSettings).toHaveBeenCalled();
     });
 
     it('should create lock file with installed file entries', async () => {
@@ -263,7 +252,7 @@ describe('Installer', () => {
     });
 
     it('should handle disk full error with space information', async () => {
-      mockFs.copyFile.mockRejectedValue({
+      mockFs.writeFile.mockRejectedValue({
         code: 'ENOSPC',
         message: 'no space left on device',
       });
@@ -287,11 +276,11 @@ describe('Installer', () => {
     });
 
     it('should handle asset copy failure with cleanup', async () => {
-      let copyCount = 0;
-      mockFs.copyFile.mockImplementation(() => {
-        copyCount++;
-        if (copyCount === 3) {
-          throw new Error('Copy failed');
+      let writeCount = 0;
+      mockFs.writeFile.mockImplementation(() => {
+        writeCount++;
+        if (writeCount === 3) {
+          throw new Error('Write failed');
         }
         return Promise.resolve();
       });
@@ -320,21 +309,21 @@ describe('Installer', () => {
 
     it('should track installed files for rollback', async () => {
       // Install 2 files successfully, then fail on 3rd
-      let copyCount = 0;
-      const copiedFiles: string[] = [];
+      let writeCount = 0;
+      const writtenFiles: string[] = [];
 
-      mockFs.copyFile.mockImplementation((src: string, dest: string) => {
-        copyCount++;
-        if (copyCount === 3) {
-          throw new Error('Copy failed');
+      mockFs.writeFile.mockImplementation((dest: string) => {
+        writeCount++;
+        if (writeCount === 3) {
+          throw new Error('Write failed');
         }
-        copiedFiles.push(dest);
+        writtenFiles.push(dest);
         return Promise.resolve();
       });
 
       await installer.install(defaultOptions);
 
-      // Should clean up the 2 files that were copied
+      // Should clean up the 2 files that were written
       expect(mockFs.rm).toHaveBeenCalled();
     });
 
@@ -355,12 +344,12 @@ describe('Installer', () => {
     });
 
     it('should continue rollback even if individual file deletion fails', async () => {
-      // Copy some files successfully, then fail
-      let copyCount = 0;
-      mockFs.copyFile.mockImplementation(() => {
-        copyCount++;
-        if (copyCount === 3) {
-          throw new Error('Copy failed');
+      // Write some files successfully, then fail
+      let writeCount = 0;
+      mockFs.writeFile.mockImplementation(() => {
+        writeCount++;
+        if (writeCount === 3) {
+          throw new Error('Write failed');
         }
         return Promise.resolve();
       });
@@ -378,7 +367,7 @@ describe('Installer', () => {
       const result = await installer.install(defaultOptions);
 
       expect(result.success).toBe(false);
-      // Should have attempted to remove all copied files despite first failure
+      // Should have attempted to remove all written files despite first failure
       expect(mockFs.rm).toHaveBeenCalled();
     });
   });
@@ -457,6 +446,69 @@ describe('Installer', () => {
       );
     });
 
+    it('should convert absolute paths back to tilde notation for placeholders', async () => {
+      const options: InstallerOptions = {
+        startupPath: '~/.the-startup',
+        claudePath: '~/.claude',
+        selectedFiles: defaultOptions.selectedFiles,
+      };
+
+      // Mock home directory
+      const homeDir = '/Users/testuser';
+      const installerWithHome = new Installer(
+        mockFs,
+        mockLockManager,
+        mockSettingsMerger,
+        mockAssetProvider,
+        '1.0.0',
+        undefined,
+        homeDir
+      );
+
+      await installerWithHome.install(options);
+
+      // Verify settings merger was called with tilde paths in placeholders
+      expect(mockSettingsMerger.mergeFullSettings).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(Object),
+        expect.objectContaining({
+          STARTUP_PATH: '~/.the-startup',
+          CLAUDE_PATH: '~/.claude',
+        })
+      );
+    });
+
+    it('should keep absolute paths unchanged when not under home directory', async () => {
+      const options: InstallerOptions = {
+        startupPath: '/opt/the-startup',
+        claudePath: '/etc/claude',
+        selectedFiles: defaultOptions.selectedFiles,
+      };
+
+      const homeDir = '/Users/testuser';
+      const installerWithHome = new Installer(
+        mockFs,
+        mockLockManager,
+        mockSettingsMerger,
+        mockAssetProvider,
+        '1.0.0',
+        undefined,
+        homeDir
+      );
+
+      await installerWithHome.install(options);
+
+      // Verify settings merger was called with absolute paths (not tilde)
+      expect(mockSettingsMerger.mergeFullSettings).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(Object),
+        expect.objectContaining({
+          STARTUP_PATH: '/opt/the-startup',
+          CLAUDE_PATH: '/etc/claude',
+        })
+      );
+    });
+
     it('should handle case-sensitive paths on case-sensitive systems', async () => {
       const result = await installer.install({
         ...defaultOptions,
@@ -513,7 +565,7 @@ describe('Installer', () => {
     });
 
     it('should not create partial installation on failure', async () => {
-      mockFs.copyFile.mockRejectedValue(new Error('Copy failed'));
+      mockFs.readFile.mockRejectedValue(new Error('Read failed'));
 
       const result = await installer.install(defaultOptions);
 

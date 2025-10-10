@@ -1,15 +1,16 @@
-import { readdir } from 'fs/promises';
-import { join } from 'path';
+import { readdir, stat } from 'fs/promises';
+import { join, relative } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
 /**
- * Asset file representation
+ * Simplified asset file representation
  */
 export interface AssetFile {
-  category: 'agents' | 'commands' | 'templates' | 'rules' | 'outputStyles';
-  sourcePath: string;
-  relativePath: string;  // Path relative to category root (e.g., "the-analyst/requirements-analysis.md")
+  sourcePath: string;       // Absolute path in assets/ directory
+  relativePath: string;     // Path relative to category root (preserves structure)
+  targetCategory: 'claude' | 'startup';  // Whether to install to .claude/ or .the-startup/
+  isJson: boolean;          // Whether to merge (true) or overwrite (false)
 }
 
 /**
@@ -17,18 +18,23 @@ export interface AssetFile {
  */
 export interface AssetProvider {
   getAssetFiles(): Promise<AssetFile[]>;
-  getSettingsTemplate(): any;
   getAssetsRoot(): string;
 }
 
 /**
- * FileSystemAssetProvider - Reads assets from the file system
+ * Simplified FileSystemAssetProvider - Automatically scans assets/ directory
  *
- * This provider scans the assets/ directory to find all agent definitions,
- * commands, templates, rules, and output styles.
+ * Architecture:
+ * - Scans assets/claude/ and assets/the-startup/ recursively
+ * - Auto-detects .json files for merging
+ * - Filters OS-specific files (.sh on Unix, .ps1 on Windows)
+ * - No hardcoded categories or special template methods!
  *
- * Works in both development (npm run dev) and production (npx) by resolving
- * the package root from the current module location.
+ * File handling:
+ * - .json files: Marked for merge (isJson: true)
+ * - .sh files: Only included on non-Windows (OS filtering)
+ * - .ps1 files: Only included on Windows (OS filtering)
+ * - Everything else: Copied as-is
  */
 export class FileSystemAssetProvider implements AssetProvider {
   private assetsRoot: string;
@@ -39,11 +45,6 @@ export class FileSystemAssetProvider implements AssetProvider {
     const currentDir = dirname(currentFile);
 
     // Resolve to package root, then assets/
-    // In development (npm run dev): currentDir is src/cli/ -> go up 2 levels
-    // In tests: currentDir is src/cli/ -> go up 2 levels
-    // In production (bundled): currentDir is dist/ -> go up 1 level
-    //
-    // We detect which context we're in by checking if we're in 'src/' or 'dist/'
     const isSourceContext = currentDir.includes('/src/');
     const levelsUp = isSourceContext ? 2 : 1;
 
@@ -59,54 +60,88 @@ export class FileSystemAssetProvider implements AssetProvider {
   }
 
   /**
-   * Scan and return all asset files organized by category
+   * Scan and return all asset files with automatic discovery
+   *
+   * Scans:
+   * - assets/claude/ → Install to ~/.claude/
+   * - assets/the-startup/ → Install to .the-startup/
+   *
+   * Filters:
+   * - .sh files: Only on Unix/Mac
+   * - .ps1 files: Only on Windows
+   * - .json files: Marked for merging
    */
   async getAssetFiles(): Promise<AssetFile[]> {
     const assets: AssetFile[] = [];
+    const isWindows = process.platform === 'win32';
 
-    // Scan each asset category
-    const categories = [
-      { category: 'agents' as const, path: 'claude/agents' },
-      { category: 'commands' as const, path: 'claude/commands' },
-      { category: 'templates' as const, path: 'the-startup/templates' },
-      { category: 'rules' as const, path: 'the-startup/rules' },
-      { category: 'outputStyles' as const, path: 'claude/output-styles' },
-    ];
-
-    for (const { category, path } of categories) {
-      const categoryPath = join(this.assetsRoot, path);
-
-      try {
-        const files = await this.scanDirectory(categoryPath, categoryPath);
-        for (const file of files) {
-          // Compute relative path from category root
-          // E.g., /abs/path/assets/claude/agents/the-analyst/file.md -> the-analyst/file.md
-          const relativePath = file.replace(categoryPath + '/', '');
-
-          assets.push({
-            category,
-            sourcePath: file,
-            relativePath,
-          });
-        }
-      } catch (error) {
-        // Category directory might not exist, skip it
-        console.warn(`Warning: Could not scan ${path}:`, error instanceof Error ? error.message : error);
+    // Scan claude assets
+    const claudePath = join(this.assetsRoot, 'claude');
+    const claudeFiles = await this.scanDirectory(claudePath);
+    for (const file of claudeFiles) {
+      // Skip OS-specific files for wrong OS
+      if (!this.shouldIncludeFile(file, isWindows)) {
+        continue;
       }
+
+      assets.push({
+        sourcePath: file,
+        relativePath: relative(claudePath, file),
+        targetCategory: 'claude',
+        isJson: file.endsWith('.json'),
+      });
+    }
+
+    // Scan the-startup assets
+    const startupPath = join(this.assetsRoot, 'the-startup');
+    const startupFiles = await this.scanDirectory(startupPath);
+    for (const file of startupFiles) {
+      // Skip OS-specific files for wrong OS
+      if (!this.shouldIncludeFile(file, isWindows)) {
+        continue;
+      }
+
+      assets.push({
+        sourcePath: file,
+        relativePath: relative(startupPath, file),
+        targetCategory: 'startup',
+        isJson: file.endsWith('.json'),
+      });
     }
 
     return assets;
   }
 
   /**
+   * Determines if a file should be included based on OS
+   *
+   * @param filePath - Path to check
+   * @param isWindows - Whether running on Windows
+   * @returns True if file should be included
+   */
+  private shouldIncludeFile(filePath: string, isWindows: boolean): boolean {
+    // .sh files: Only on Unix/Mac
+    if (filePath.endsWith('.sh')) {
+      return !isWindows;
+    }
+
+    // .ps1 files: Only on Windows
+    if (filePath.endsWith('.ps1')) {
+      return isWindows;
+    }
+
+    // All other files: Always include
+    return true;
+  }
+
+  /**
    * Recursively scan a directory for all files
    *
    * @param dir - Directory to scan
-   * @param baseDir - Base directory for relative path calculation
-   * @returns Array of file paths relative to assets root
+   * @returns Array of absolute file paths
    */
-  private async scanDirectory(dir: string, baseDir: string): Promise<string[]> {
-    const files: string[] = [];
+  private async scanDirectory(dir: string): Promise<string[]> {
+    const files: string[]= [];
 
     try {
       const entries = await readdir(dir, { withFileTypes: true });
@@ -116,10 +151,10 @@ export class FileSystemAssetProvider implements AssetProvider {
 
         if (entry.isDirectory()) {
           // Recursively scan subdirectories
-          const subFiles = await this.scanDirectory(fullPath, baseDir);
+          const subFiles = await this.scanDirectory(fullPath);
           files.push(...subFiles);
         } else if (entry.isFile()) {
-          // Add file with path relative to base directory
+          // Add file
           files.push(fullPath);
         }
       }
@@ -129,33 +164,6 @@ export class FileSystemAssetProvider implements AssetProvider {
     }
 
     return files;
-  }
-
-  /**
-   * Get the settings template with complete configuration
-   *
-   * Reads the base settings.json from assets and adds hooks configuration.
-   * Both statusLine and hooks use the same CLI command for cross-platform compatibility.
-   */
-  getSettingsTemplate(): any {
-    // Base settings with permissions and statusLine
-    const baseSettings = {
-      permissions: {
-        additionalDirectories: ['{{STARTUP_PATH}}'],
-      },
-      statusLine: {
-        type: 'command',
-        command: '{{STARTUP_PATH}}/bin/the-startup statusline',
-      },
-      // Add hooks with same command as statusLine (cross-platform CLI wrapper)
-      hooks: {
-        'user-prompt-submit': {
-          command: '{{STARTUP_PATH}}/bin/the-startup statusline',
-        },
-      },
-    };
-
-    return baseSettings;
   }
 }
 

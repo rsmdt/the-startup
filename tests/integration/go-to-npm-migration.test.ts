@@ -59,50 +59,41 @@ describe('Integration: Go-to-npm Migration', () => {
     assetProvider = {
       getAssetFiles: () => [
         // Agents (8 files to simulate subset)
-        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-analyst-requirements-analysis.md'), relativePath: 'the-analyst-requirements-analysis.md' },
-        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-architect-system-architecture.md'), relativePath: 'the-architect-system-architecture.md' },
-        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-software-engineer-api-development.md'), relativePath: 'the-software-engineer-api-development.md' },
-        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-platform-engineer-deployment.md'), relativePath: 'the-platform-engineer-deployment.md' },
-        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-security-engineer-assessment.md'), relativePath: 'the-security-engineer-assessment.md' },
-        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-test-engineer-test-execution.md'), relativePath: 'the-test-engineer-test-execution.md' },
-        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-chief.md'), relativePath: 'the-chief.md' },
-        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/the-product-owner-feature-definition.md'), relativePath: 'the-product-owner-feature-definition.md' },
+        { sourcePath: join(tempDir, 'mock-assets/agents/the-analyst-requirements-analysis.md'), relativePath: 'agents/the-analyst-requirements-analysis.md', targetCategory: 'claude' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/agents/the-architect-system-architecture.md'), relativePath: 'agents/the-architect-system-architecture.md', targetCategory: 'claude' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/agents/the-software-engineer-api-development.md'), relativePath: 'agents/the-software-engineer-api-development.md', targetCategory: 'claude' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/agents/the-platform-engineer-deployment.md'), relativePath: 'agents/the-platform-engineer-deployment.md', targetCategory: 'claude' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/agents/the-security-engineer-assessment.md'), relativePath: 'agents/the-security-engineer-assessment.md', targetCategory: 'claude' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/agents/the-test-engineer-test-execution.md'), relativePath: 'agents/the-test-engineer-test-execution.md', targetCategory: 'claude' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/agents/the-chief.md'), relativePath: 'agents/the-chief.md', targetCategory: 'claude' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/agents/the-product-owner-feature-definition.md'), relativePath: 'agents/the-product-owner-feature-definition.md', targetCategory: 'claude' as const, isJson: false },
 
         // Commands (5 files)
-        { category: 'commands' as const, sourcePath: join(tempDir, 'mock-assets/commands/s-specify.md'), relativePath: 's-specify.md' },
-        { category: 'commands' as const, sourcePath: join(tempDir, 'mock-assets/commands/s-implement.md'), relativePath: 's-implement.md' },
-        { category: 'commands' as const, sourcePath: join(tempDir, 'mock-assets/commands/s-refactor.md'), relativePath: 's-refactor.md' },
-        { category: 'commands' as const, sourcePath: join(tempDir, 'mock-assets/commands/s-analyze.md'), relativePath: 's-analyze.md' },
-        { category: 'commands' as const, sourcePath: join(tempDir, 'mock-assets/commands/s-init.md'), relativePath: 's-init.md' },
+        { sourcePath: join(tempDir, 'mock-assets/commands/s-specify.md'), relativePath: 'commands/s-specify.md', targetCategory: 'claude' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/commands/s-implement.md'), relativePath: 'commands/s-implement.md', targetCategory: 'claude' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/commands/s-refactor.md'), relativePath: 'commands/s-refactor.md', targetCategory: 'claude' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/commands/s-analyze.md'), relativePath: 'commands/s-analyze.md', targetCategory: 'claude' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/commands/s-init.md'), relativePath: 'commands/s-init.md', targetCategory: 'claude' as const, isJson: false },
 
         // Templates (6 files)
-        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/SPEC.md'), relativePath: 'SPEC.md' },
-        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/TASK-DOD.md'), relativePath: 'TASK-DOD.md' },
-        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/DOR.md'), relativePath: 'DOR.md' },
-        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/DOD.md'), relativePath: 'DOD.md' },
-        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/PRD.md'), relativePath: 'PRD.md' },
-        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/SDD.md'), relativePath: 'SDD.md' },
+        { sourcePath: join(tempDir, 'mock-assets/templates/SPEC.md'), relativePath: 'templates/SPEC.md', targetCategory: 'startup' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/templates/TASK-DOD.md'), relativePath: 'templates/TASK-DOD.md', targetCategory: 'startup' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/templates/DOR.md'), relativePath: 'templates/DOR.md', targetCategory: 'startup' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/templates/DOD.md'), relativePath: 'templates/DOD.md', targetCategory: 'startup' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/templates/PRD.md'), relativePath: 'templates/PRD.md', targetCategory: 'startup' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/templates/SDD.md'), relativePath: 'templates/SDD.md', targetCategory: 'startup' as const, isJson: false },
 
         // Rules (3 files)
-        { category: 'rules' as const, sourcePath: join(tempDir, 'mock-assets/rules/SCQA.md'), relativePath: 'SCQA.md' },
-        { category: 'rules' as const, sourcePath: join(tempDir, 'mock-assets/rules/SOLID.md'), relativePath: 'SOLID.md' },
-        { category: 'rules' as const, sourcePath: join(tempDir, 'mock-assets/rules/DDD.md'), relativePath: 'DDD.md' },
+        { sourcePath: join(tempDir, 'mock-assets/rules/SCQA.md'), relativePath: 'rules/SCQA.md', targetCategory: 'startup' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/rules/SOLID.md'), relativePath: 'rules/SOLID.md', targetCategory: 'startup' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/rules/DDD.md'), relativePath: 'rules/DDD.md', targetCategory: 'startup' as const, isJson: false },
 
         // Output styles (1 file)
-        { category: 'outputStyles' as const, sourcePath: join(tempDir, 'mock-assets/output-styles/the-startup.md'), relativePath: 'the-startup.md' },
+        { sourcePath: join(tempDir, 'mock-assets/output-styles/the-startup.md'), relativePath: 'output-styles/the-startup.md', targetCategory: 'claude' as const, isJson: false },
+
+        // Settings (1 file)
+        { sourcePath: join(tempDir, 'mock-assets/settings.json'), relativePath: 'settings.json', targetCategory: 'claude' as const, isJson: true },
       ],
-      getSettingsTemplate: () => ({
-        'startup-validate-dor': {
-          command: '{{STARTUP_PATH}}/bin/the-startup validate dor',
-          description: 'Validate Definition of Ready',
-          continueOnError: false,
-        },
-        'startup-validate-dod': {
-          command: '{{STARTUP_PATH}}/bin/the-startup validate dod',
-          description: 'Validate Definition of Done',
-          continueOnError: false,
-        },
-      }),
     };
 
     // Create mock asset files
@@ -169,6 +160,24 @@ describe('Integration: Go-to-npm Migration', () => {
 
     // Create output style file
     await fs.writeFile(join(assetsDir, 'output-styles/the-startup.md'), '# The Startup Output Style\nFormat for The Startup.', 'utf-8');
+
+    // Create settings.json file
+    await fs.writeFile(
+      join(assetsDir, 'settings.json'),
+      JSON.stringify({
+        'startup-validate-dor': {
+          command: '{{STARTUP_PATH}}/bin/the-startup validate dor',
+          description: 'Validate Definition of Ready',
+          continueOnError: false,
+        },
+        'startup-validate-dod': {
+          command: '{{STARTUP_PATH}}/bin/the-startup validate dod',
+          description: 'Validate Definition of Done',
+          continueOnError: false,
+        },
+      }, null, 2),
+      'utf-8'
+    );
   }
 
   /**
@@ -324,7 +333,7 @@ describe('Integration: Go-to-npm Migration', () => {
 
     // Assert: Installation succeeded
     expect(result.success).toBe(true);
-    expect(result.installedFiles.length).toBe(23); // 8 agents + 5 commands + 6 templates + 3 rules + 1 output style
+    expect(result.installedFiles.length).toBe(24); // 8 agents + 5 commands + 6 templates + 3 rules + 1 output style + 1 settings.json
 
     // Verify v2 lock file was created
     const v2LockContent = await fs.readFile(lockFilePath, 'utf-8');
@@ -608,14 +617,14 @@ describe('Integration: Go-to-npm Migration', () => {
     expect(lockFile.files.rules.length).toBe(3);
     expect(lockFile.files.outputStyles.length).toBe(1);
 
-    // Verify total count
+    // Verify total count (excluding settings.json which is not tracked in lock file)
     const totalAssets =
       lockFile.files.agents.length +
       lockFile.files.commands.length +
       lockFile.files.templates.length +
       lockFile.files.rules.length +
       lockFile.files.outputStyles.length;
-    expect(totalAssets).toBe(23);
+    expect(totalAssets).toBe(23); // 23 assets (settings.json is merged, not tracked in lock)
 
     // Verify all files have checksums
     for (const agent of lockFile.files.agents) {

@@ -1,4 +1,5 @@
 import type { ClaudeSettings, PlaceholderMap } from '../types/settings';
+import { deepMerge } from './DeepMerge';
 
 /**
  * File System Interface
@@ -191,7 +192,14 @@ export class SettingsMerger {
   }
 
   /**
-   * Performs full settings merge (permissions, statusLine, hooks).
+   * Performs full settings merge using generic deep merge algorithm.
+   *
+   * This method uses a generic deep merge that works for ANY settings structure:
+   * - Objects: Recursively merged
+   * - Arrays: Concatenated and deduplicated
+   * - Primitives: User value overwrites new value
+   *
+   * No hardcoded keys - adding new settings doesn't require code changes!
    *
    * @param settingsPath - Settings file path
    * @param newSettings - Partial settings to merge
@@ -205,50 +213,14 @@ export class SettingsMerger {
   ): Promise<ClaudeSettings> {
     const userSettings = await this.readSettings(settingsPath);
 
-    // 1. Merge permissions.additionalDirectories
-    if (newSettings.permissions?.additionalDirectories) {
-      if (!userSettings.permissions) {
-        userSettings.permissions = { additionalDirectories: [] };
-      }
-      if (!userSettings.permissions.additionalDirectories) {
-        userSettings.permissions.additionalDirectories = [];
-      }
+    // Replace placeholders in the new settings
+    const processedNewSettings = this.replacePlaceholdersInObject(
+      newSettings,
+      placeholders
+    );
 
-      // Add new directories that don't already exist
-      for (const dir of newSettings.permissions.additionalDirectories) {
-        const replacedDir = this.replacePlaceholdersInString(dir, placeholders);
-        if (!userSettings.permissions.additionalDirectories.includes(replacedDir)) {
-          userSettings.permissions.additionalDirectories.push(replacedDir);
-        }
-      }
-    }
-
-    // 2. Set statusLine (overwrite if exists)
-    if (newSettings.statusLine) {
-      userSettings.statusLine = {
-        ...newSettings.statusLine,
-        command: this.replacePlaceholdersInString(
-          newSettings.statusLine.command || '',
-          placeholders
-        ),
-      };
-    }
-
-    // 3. Merge hooks (preserve existing)
-    if (newSettings.hooks) {
-      if (!userSettings.hooks) {
-        userSettings.hooks = {};
-      }
-
-      const { settings: mergedSettings, addedHooks } = this.mergeHooks(
-        userSettings,
-        newSettings.hooks
-      );
-
-      return this.replacePlaceholders(mergedSettings, addedHooks, placeholders);
-    }
-
-    return userSettings;
+    // Generic deep merge - user settings win on conflicts
+    return deepMerge(processedNewSettings, userSettings);
   }
 
   /**
@@ -413,6 +385,7 @@ export class SettingsMerger {
 
     result = result.replace(/\{\{STARTUP_PATH\}\}/g, placeholders.STARTUP_PATH);
     result = result.replace(/\{\{CLAUDE_PATH\}\}/g, placeholders.CLAUDE_PATH);
+    result = result.replace(/\{\{SHELL_SCRIPT_EXTENSION\}\}/g, placeholders.SHELL_SCRIPT_EXTENSION);
 
     return result;
   }
@@ -426,6 +399,48 @@ export class SettingsMerger {
    */
   private replacePlaceholdersInString(str: string, placeholders: PlaceholderMap): string {
     return this.replaceInCommand(str, placeholders);
+  }
+
+  /**
+   * Recursively replaces placeholders in an entire object structure.
+   *
+   * Handles:
+   * - Strings: Replace placeholders
+   * - Objects: Recursively process all properties
+   * - Arrays: Process each element
+   * - Primitives: Return as-is
+   *
+   * @param obj - Object to process
+   * @param placeholders - Replacement values
+   * @returns Deep copy of object with placeholders replaced
+   */
+  private replacePlaceholdersInObject<T>(obj: T, placeholders: PlaceholderMap): T {
+    // Handle null/undefined
+    if (obj === null || obj === undefined) {
+      return obj;
+    }
+
+    // Handle strings
+    if (typeof obj === 'string') {
+      return this.replaceInCommand(obj, placeholders) as T;
+    }
+
+    // Handle arrays
+    if (Array.isArray(obj)) {
+      return obj.map(item => this.replacePlaceholdersInObject(item, placeholders)) as T;
+    }
+
+    // Handle plain objects
+    if (typeof obj === 'object' && Object.getPrototypeOf(obj) === Object.prototype) {
+      const result: any = {};
+      for (const [key, value] of Object.entries(obj)) {
+        result[key] = this.replacePlaceholdersInObject(value, placeholders);
+      }
+      return result as T;
+    }
+
+    // Handle primitives (number, boolean, etc.)
+    return obj;
   }
 
   /**

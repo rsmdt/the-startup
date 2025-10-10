@@ -6,6 +6,6 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "{{STARTUP_PATH}}/bin/the-startup statusline"
+    "command": "{{STARTUP_PATH}}/bin/statusline{{SHELL_SCRIPT_EXTENSION}}"
   }
 }

@@ -168,8 +168,10 @@ describe('Real Integration: Install Flow with Actual Files', () => {
     const settingsContent = await readFile(settingsPath, 'utf-8');
     const settings = JSON.parse(settingsContent);
 
-    expect(settings.hooks).toBeDefined();
-    expect(settings.hooks['user-prompt-submit']).toBeDefined();
+    // Verify settings structure from assets/claude/settings.json
+    expect(settings.permissions).toBeDefined();
+    expect(settings.permissions.additionalDirectories).toBeDefined();
+    expect(settings.statusLine).toBeDefined();
 
     console.log(`\n✅ Installed ${result.installedFiles.length} files`);
     console.log(`📁 Agents: ${agentFiles.length} files`);

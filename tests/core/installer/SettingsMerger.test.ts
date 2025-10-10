@@ -27,8 +27,8 @@ import type { ClaudeSettings, PlaceholderMap } from '../../../src/core/types/set
 describe('SettingsMerger', () => {
   const settingsPath = '/Users/test/.claude/settings.json';
   const placeholders: PlaceholderMap = {
-    STARTUP_PATH: '/Users/test/.the-startup',
-    CLAUDE_PATH: '/Users/test/.claude',
+    STARTUP_PATH: '~/.the-startup',
+    CLAUDE_PATH: '~/.claude',
   };
 
   let merger: SettingsMerger;
@@ -76,7 +76,7 @@ describe('SettingsMerger', () => {
       });
 
       expect(result.hooks?.['new-hook']).toEqual({
-        command: '/Users/test/.claude/scripts/new-script.sh',
+        command: '~/.claude/scripts/new-script.sh',
         description: 'New hook',
       });
 
@@ -103,7 +103,7 @@ describe('SettingsMerger', () => {
       // Assert: Hooks object created with new hook
       expect(result.hooks).toBeDefined();
       expect(result.hooks?.['user-prompt-submit']).toEqual({
-        command: '/Users/test/.the-startup/bin/statusline.sh',
+        command: '~/.the-startup/bin/statusline.sh',
       });
       expect(result.someOtherSetting).toBe('user value');
     });
@@ -150,7 +150,7 @@ describe('SettingsMerger', () => {
 
       // Assert
       expect(result.hooks?.['test-hook']?.command).toBe(
-        '/Users/test/.the-startup/bin/script.sh'
+        '~/.the-startup/bin/script.sh'
       );
     });
 
@@ -169,7 +169,7 @@ describe('SettingsMerger', () => {
 
       // Assert
       expect(result.hooks?.['test-hook']?.command).toBe(
-        '/Users/test/.claude/scripts/script.sh'
+        '~/.claude/scripts/script.sh'
       );
     });
 
@@ -189,7 +189,7 @@ describe('SettingsMerger', () => {
 
       // Assert
       expect(result.hooks?.['test-hook']?.command).toBe(
-        '/Users/test/.the-startup/bin/script.sh --config /Users/test/.claude/config.json'
+        '~/.the-startup/bin/script.sh --config ~/.claude/config.json'
       );
     });
 
@@ -302,7 +302,7 @@ describe('SettingsMerger', () => {
       // Assert: New settings created with hooks
       expect(result.hooks).toBeDefined();
       expect(result.hooks?.['test-hook']?.command).toBe(
-        '/Users/test/.the-startup/bin/script.sh'
+        '~/.the-startup/bin/script.sh'
       );
 
       // Verify file was written
@@ -331,7 +331,7 @@ describe('SettingsMerger', () => {
       // Assert: Hook added to existing empty hooks
       expect(result.hooks).toBeDefined();
       expect(result.hooks?.['new-hook']?.command).toBe(
-        '/Users/test/.the-startup/bin/script.sh'
+        '~/.the-startup/bin/script.sh'
       );
       expect(result.otherSetting).toBe('preserved');
     });

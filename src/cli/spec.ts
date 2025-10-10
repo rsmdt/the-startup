@@ -93,7 +93,7 @@ async function handleReadSpec(
 async function handleCreateSpec(
   generator: SpecGenerator,
   name: string,
-  template?: 'PRD' | 'SDD' | 'PLAN' | 'BRD'
+  template?: 'product-requirements' | 'solution-design' | 'implementation-plan' | 'business-requirements'
 ): Promise<void> {
   console.log(chalk.blue.bold('\nCreating spec directory'));
   console.log(chalk.gray(`Name: ${name}\n`));
@@ -131,7 +131,7 @@ async function handleCreateSpec(
  */
 async function handleInteractiveSpec(
   generator: SpecGenerator,
-  template?: 'PRD' | 'SDD' | 'PLAN' | 'BRD'
+  template?: 'product-requirements' | 'solution-design' | 'implementation-plan' | 'business-requirements'
 ): Promise<void> {
   console.log(chalk.blue.bold('\nSpec Directory Creation'));
   console.log(chalk.gray('Create a numbered spec directory\n'));
@@ -168,17 +168,17 @@ async function handleInteractiveSpec(
 
     if (wantsTemplate) {
       const { templateChoice } = await inquirer.prompt<{
-        templateChoice: 'PRD' | 'SDD' | 'PLAN' | 'BRD';
+        templateChoice: 'product-requirements' | 'solution-design' | 'implementation-plan' | 'business-requirements';
       }>([
         {
           type: 'list',
           name: 'templateChoice',
           message: 'Select template:',
           choices: [
-            { name: 'Product Requirements Document (PRD)', value: 'PRD' },
-            { name: 'System Design Document (SDD)', value: 'SDD' },
-            { name: 'Implementation Plan (PLAN)', value: 'PLAN' },
-            { name: 'Business Requirements Document (BRD)', value: 'BRD' },
+            { name: 'Product Requirements', value: 'product-requirements' },
+            { name: 'Solution Design', value: 'solution-design' },
+            { name: 'Implementation Plan', value: 'implementation-plan' },
+            { name: 'Business Requirements', value: 'business-requirements' },
           ],
         },
       ]);

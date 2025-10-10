@@ -53,22 +53,16 @@ describe('Integration: Install Flow', () => {
     // Create mock asset provider with real file content
     assetProvider = {
       getAssetFiles: () => [
-        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/specify.md'), relativePath: 'specify.md' },
-        { category: 'agents' as const, sourcePath: join(tempDir, 'mock-assets/agents/implement.md'), relativePath: 'implement.md' },
-        { category: 'commands' as const, sourcePath: join(tempDir, 'mock-assets/commands/s-specify.md'), relativePath: 's-specify.md' },
-        { category: 'commands' as const, sourcePath: join(tempDir, 'mock-assets/commands/s-implement.md'), relativePath: 's-implement.md' },
-        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/SPEC.md'), relativePath: 'SPEC.md' },
-        { category: 'templates' as const, sourcePath: join(tempDir, 'mock-assets/templates/TASK-DOD.md'), relativePath: 'TASK-DOD.md' },
-        { category: 'rules' as const, sourcePath: join(tempDir, 'mock-assets/rules/SCQA.md'), relativePath: 'SCQA.md' },
-        { category: 'outputStyles' as const, sourcePath: join(tempDir, 'mock-assets/output-styles/json.md'), relativePath: 'json.md' },
+        { sourcePath: join(tempDir, 'mock-assets/agents/specify.md'), relativePath: 'agents/specify.md', targetCategory: 'claude' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/agents/implement.md'), relativePath: 'agents/implement.md', targetCategory: 'claude' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/commands/s-specify.md'), relativePath: 'commands/s-specify.md', targetCategory: 'claude' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/commands/s-implement.md'), relativePath: 'commands/s-implement.md', targetCategory: 'claude' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/templates/SPEC.md'), relativePath: 'templates/SPEC.md', targetCategory: 'startup' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/templates/TASK-DOD.md'), relativePath: 'templates/TASK-DOD.md', targetCategory: 'startup' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/rules/SCQA.md'), relativePath: 'rules/SCQA.md', targetCategory: 'startup' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/output-styles/json.md'), relativePath: 'output-styles/json.md', targetCategory: 'claude' as const, isJson: false },
+        { sourcePath: join(tempDir, 'mock-assets/settings.json'), relativePath: 'settings.json', targetCategory: 'claude' as const, isJson: true },
       ],
-      getSettingsTemplate: () => ({
-        hooks: {
-          'user-prompt-submit': {
-            command: '{{STARTUP_PATH}}/bin/statusline.sh',
-          },
-        },
-      }),
     };
 
     // Create mock asset files
@@ -81,8 +75,8 @@ describe('Integration: Install Flow', () => {
       assetProvider,
       '1.0.0',
       undefined,
-      tempDir,
-      tempDir
+      process.env.HOME || process.env.USERPROFILE || '/home/user', // Real home dir
+      tempDir  // Working directory
     );
   });
 
@@ -151,6 +145,19 @@ describe('Integration: Install Flow', () => {
       '# JSON Output Style\nFormat output as JSON.',
       'utf-8'
     );
+
+    // Create settings.json file
+    await fs.writeFile(
+      join(assetsDir, 'settings.json'),
+      JSON.stringify({
+        hooks: {
+          'user-prompt-submit': {
+            command: '{{STARTUP_PATH}}/bin/statusline.sh',
+          },
+        },
+      }, null, 2),
+      'utf-8'
+    );
   }
 
   /**
@@ -180,7 +187,7 @@ describe('Integration: Install Flow', () => {
 
     // Verify installation succeeded
     expect(result.success).toBe(true);
-    expect(result.installedFiles.length).toBe(8); // 2 agents + 2 commands + 2 templates + 1 rule + 1 output style
+    expect(result.installedFiles.length).toBe(9); // 2 agents + 2 commands + 2 templates + 1 rule + 1 output style + 1 settings.json
     expect(result.errors).toBeUndefined();
 
     // Verify directory structure was created
@@ -335,7 +342,7 @@ describe('Integration: Install Flow', () => {
     const result = await installer.install(options);
 
     expect(result.success).toBe(true);
-    expect(result.installedFiles.length).toBe(4); // 2 agents + 2 templates
+    expect(result.installedFiles.length).toBe(5); // 2 agents + 2 templates + 1 settings.json
 
     // Verify agents directory exists and has files
     await expect(fs.access(join(claudePath, 'agents'))).resolves.not.toThrow();

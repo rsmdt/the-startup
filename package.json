@@ -27,12 +27,10 @@
     "node": ">=18.0.0"
   },
   "bin": {
-    "the-agentic-startup": "./dist/index.js",
-    "the-startup-statusline": "./bin/statusline.sh"
+    "the-agentic-startup": "./dist/index.js"
   },
   "files": [
     "dist/",
-    "bin/",
     "assets/",
     "README.md",
     "LICENSE"

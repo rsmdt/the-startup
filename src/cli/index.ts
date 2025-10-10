@@ -5,7 +5,6 @@ import type {
   InitCommandOptions,
   SpecCommandOptions,
 } from '../core/types/config.js';
-import { statuslineCommand } from './statusline.js';
 import { initCommand } from './init.js';
 import { specCommand } from './spec.js';
 import { installCommand } from './install.js';
@@ -17,7 +16,6 @@ import { uninstallCommand } from './uninstall.js';
  * Creates and configures Commander.js program with all available commands.
  *
  * Commands:
- * - statusline: Cross-platform stdio passthrough to shell scripts
  * - init: Initialize DOR, DOD, TASK-DOD templates
  * - spec: Create numbered spec directories with optional templates
  * - install: Install components (interactive or non-interactive)
@@ -33,19 +31,6 @@ export function createCLI(): Command {
     .description('Enterprise-grade AI development agents as frictionless as any npm package')
     .version('1.0.0');
 
-  // Statusline command (PRD lines 213-223)
-  program
-    .command('statusline')
-    .description('Cross-platform statusline for Claude Code')
-    .action(async () => {
-      try {
-        await statuslineCommand();
-      } catch (error) {
-        console.error(error instanceof Error ? error.message : 'Unknown error');
-        process.exit(1);
-      }
-    });
-
   // Init command (PRD lines 190-200)
   program
     .command('init')
@@ -60,7 +45,7 @@ export function createCLI(): Command {
   program
     .command('spec [name]')
     .description('Create numbered spec directory with auto-incrementing ID')
-    .option('--add <template>', 'Generate template file (PRD, SDD, PLAN, BRD)')
+    .option('--add <template>', 'Generate template file (product-requirements, solution-design, implementation-plan, business-requirements)')
     .option('--read', 'Output spec state in TOML format (requires name/ID argument)')
     .action(async (name: string | undefined, options: SpecCommandOptions) => {
       await specCommand(name, options);

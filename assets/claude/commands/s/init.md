@@ -62,7 +62,7 @@ You'll initialize three quality gate templates:
 
 Then check current status:
 
-Run `{{STARTUP_PATH}}/bin/the-startup init --dry-run` and parse the output to see which templates exist.
+Run `the-agentic-startup init --dry-run` and parse the output to see which templates exist.
 
 **If all three exist:**
 "All templates already initialized. Would you like to re-customize them?"
@@ -93,7 +93,7 @@ Ask: "Initialize missing templates, or re-initialize all?"
 
 If definition-of-ready.md doesn't exist, run:
 ```bash
-{{STARTUP_PATH}}/bin/the-startup init definition-of-ready
+the-agentic-startup init definition-of-ready
 ```
 
 Then read the created file:
@@ -145,7 +145,7 @@ Ask: "definition-of-ready.md is ready. Should I proceed to definition-of-done.md
 
 If definition-of-done.md doesn't exist, run:
 ```bash
-{{STARTUP_PATH}}/bin/the-startup init definition-of-done
+the-agentic-startup init definition-of-done
 ```
 
 Then read the created file:
@@ -197,7 +197,7 @@ Ask: "definition-of-done.md is ready. Should I proceed to task-definition-of-don
 
 If task-definition-of-done.md doesn't exist, run:
 ```bash
-{{STARTUP_PATH}}/bin/the-startup init task-definition-of-done
+the-agentic-startup init task-definition-of-done
 ```
 
 Then read the created file:
@@ -291,9 +291,9 @@ Needs Manual Customization:
 
 ## ⚠️ Error Handling
 
-If `the-startup init` fails:
-- Check if `{{STARTUP_PATH}}/bin/the-startup` exists
-- Suggest running `the-startup install` if binary missing
+If `the-agentic-startup init` fails:
+- Check if `the-agentic-startup` is available
+- Suggest running `the-agentic-startup install` if CLI missing
 - Show error output to user
 
 If templates exist and user didn't use `--force`:
@@ -306,5 +306,5 @@ If templates exist and user didn't use `--force`:
 - Work sequentially: DOR → DOD → TASK-DOD
 - Wait for user confirmation between templates
 - Only replace [NEEDS CLARIFICATION] markers
-- Let `the-startup init` handle file operations
+- Let `the-agentic-startup init` handle file operations
 - Parse command output to drive conversation

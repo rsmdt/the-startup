@@ -23,11 +23,26 @@ describe('SpecGenerator', () => {
       mkdir: vi.fn().mockResolvedValue(undefined),
       readdir: vi.fn().mockResolvedValue([]),
       writeFile: vi.fn().mockResolvedValue(undefined),
-      readFile: vi.fn().mockResolvedValue(''),
+      readFile: vi.fn().mockImplementation((path: string) => {
+        // Mock reading template files
+        if (path.includes('product-requirements.md')) {
+          return Promise.resolve('# Product Requirements\n\nFull template content...');
+        }
+        if (path.includes('solution-design.md')) {
+          return Promise.resolve('# Solution Design\n\nFull template content...');
+        }
+        if (path.includes('implementation-plan.md')) {
+          return Promise.resolve('# Implementation Plan\n\nFull template content...');
+        }
+        if (path.includes('business-requirements.md')) {
+          return Promise.resolve('# Business Requirements\n\nFull template content...');
+        }
+        return Promise.resolve('');
+      }),
       stat: vi.fn().mockResolvedValue({ isDirectory: () => true }),
     };
 
-    generator = new SpecGenerator(mockFs, 'docs/specs');
+    generator = new SpecGenerator(mockFs, 'docs/specs', 'assets/the-startup/templates');
   });
 
   describe('createSpec', () => {
@@ -144,7 +159,7 @@ describe('SpecGenerator', () => {
           return Promise.resolve(['001-user-authentication']);
         }
         if (path === 'docs/specs/001-user-authentication') {
-          return Promise.resolve(['PRD.md', 'SDD.md', 'PLAN.md']);
+          return Promise.resolve(['product-requirements.md', 'solution-design.md', 'implementation-plan.md']);
         }
         return Promise.resolve([]);
       });
@@ -160,7 +175,7 @@ describe('SpecGenerator', () => {
       expect(result.toml).toContain('id = "001"');
       expect(result.toml).toContain('name = "user-authentication"');
       expect(result.toml).toContain('dir = "docs/specs/001-user-authentication"');
-      expect(result.toml).toContain('files = ["PRD.md", "SDD.md", "PLAN.md"]');
+      expect(result.toml).toContain('files = ["product-requirements.md", "solution-design.md", "implementation-plan.md"]');
     });
 
     it('should return error when spec ID does not exist', async () => {
@@ -191,71 +206,91 @@ describe('SpecGenerator', () => {
   });
 
   describe('createSpec with template', () => {
-    it('should create spec directory and generate PRD template', async () => {
+    it('should create spec directory and copy product-requirements template', async () => {
       const options: SpecOptions = {
         name: 'api-integration',
-        template: 'PRD',
+        template: 'product-requirements',
       };
 
       const result = await generator.createSpec(options);
 
       expect(result.success).toBe(true);
       expect(result.specId).toBe('001');
-      expect(result.templateGenerated).toBe('docs/specs/001-api-integration/PRD.md');
+      expect(result.templateGenerated).toBe('docs/specs/001-api-integration/product-requirements.md');
+
+      // Verify readFile was called to read source template
+      expect(mockFs.readFile).toHaveBeenCalledWith(
+        'assets/the-startup/templates/product-requirements.md',
+        'utf-8'
+      );
+
+      // Verify writeFile was called to write to destination
       expect(mockFs.writeFile).toHaveBeenCalledWith(
-        'docs/specs/001-api-integration/PRD.md',
-        expect.stringContaining('# Product Requirements Document'),
+        'docs/specs/001-api-integration/product-requirements.md',
+        expect.stringContaining('# Product Requirements'),
         'utf-8'
       );
     });
 
-    it('should create spec directory and generate SDD template', async () => {
+    it('should create spec directory and copy solution-design template', async () => {
       const options: SpecOptions = {
         name: 'database-migration',
-        template: 'SDD',
+        template: 'solution-design',
       };
 
       const result = await generator.createSpec(options);
 
       expect(result.success).toBe(true);
-      expect(result.templateGenerated).toBe('docs/specs/001-database-migration/SDD.md');
+      expect(result.templateGenerated).toBe('docs/specs/001-database-migration/solution-design.md');
+      expect(mockFs.readFile).toHaveBeenCalledWith(
+        'assets/the-startup/templates/solution-design.md',
+        'utf-8'
+      );
       expect(mockFs.writeFile).toHaveBeenCalledWith(
-        'docs/specs/001-database-migration/SDD.md',
-        expect.stringContaining('# System Design Document'),
+        'docs/specs/001-database-migration/solution-design.md',
+        expect.stringContaining('# Solution Design'),
         'utf-8'
       );
     });
 
-    it('should create spec directory and generate PLAN template', async () => {
+    it('should create spec directory and copy implementation-plan template', async () => {
       const options: SpecOptions = {
         name: 'ui-redesign',
-        template: 'PLAN',
+        template: 'implementation-plan',
       };
 
       const result = await generator.createSpec(options);
 
       expect(result.success).toBe(true);
-      expect(result.templateGenerated).toBe('docs/specs/001-ui-redesign/PLAN.md');
+      expect(result.templateGenerated).toBe('docs/specs/001-ui-redesign/implementation-plan.md');
+      expect(mockFs.readFile).toHaveBeenCalledWith(
+        'assets/the-startup/templates/implementation-plan.md',
+        'utf-8'
+      );
       expect(mockFs.writeFile).toHaveBeenCalledWith(
-        'docs/specs/001-ui-redesign/PLAN.md',
+        'docs/specs/001-ui-redesign/implementation-plan.md',
         expect.stringContaining('# Implementation Plan'),
         'utf-8'
       );
     });
 
-    it('should create spec directory and generate BRD template', async () => {
+    it('should create spec directory and copy business-requirements template', async () => {
       const options: SpecOptions = {
         name: 'business-requirements',
-        template: 'BRD',
+        template: 'business-requirements',
       };
 
       const result = await generator.createSpec(options);
 
       expect(result.success).toBe(true);
-      expect(result.templateGenerated).toBe('docs/specs/001-business-requirements/BRD.md');
+      expect(result.templateGenerated).toBe('docs/specs/001-business-requirements/business-requirements.md');
+      expect(mockFs.readFile).toHaveBeenCalledWith(
+        'assets/the-startup/templates/business-requirements.md',
+        'utf-8'
+      );
       expect(mockFs.writeFile).toHaveBeenCalledWith(
-        'docs/specs/001-business-requirements/BRD.md',
-        expect.stringContaining('# Business Requirements Document'),
+        'docs/specs/001-business-requirements/business-requirements.md',
+        expect.stringContaining('# Business Requirements'),
         'utf-8'
       );
     });

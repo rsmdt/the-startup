@@ -19,23 +19,24 @@ interface FileSystem {
  * - Create spec directories with auto-incrementing IDs (001, 002, 003...)
  * - Parse spec IDs from directory names (e.g., "004-typescript-npm-package-migration" → "004")
  * - Generate TOML output for --read flag (PRD line 206)
- * - Create template files for --add flag (PRD line 205)
+ * - Copy template files for --add flag (PRD line 205)
  *
  * Key Responsibilities:
  * - Auto-increment spec ID based on existing directories
  * - Create spec directory structure (docs/specs/[id]-[name]/)
- * - Generate template files (PRD, SDD, PLAN, BRD)
+ * - Copy rich template files from assets/the-startup/templates/
  * - Output spec metadata in TOML format
  * - Parse directory names to extract spec IDs
  *
  * @example
- * const generator = new SpecGenerator(fs, 'docs/specs');
+ * const generator = new SpecGenerator(fs, 'docs/specs', 'assets/the-startup/templates');
  * const result = await generator.createSpec({ name: 'user-authentication' });
  * // Creates: docs/specs/001-user-authentication/
  *
  * @example
- * const result = await generator.createSpec({ name: 'api-integration', template: 'PRD' });
- * // Creates: docs/specs/002-api-integration/PRD.md
+ * const result = await generator.createSpec({ name: 'api-integration', template: 'product-requirements' });
+ * // Creates: docs/specs/002-api-integration/product-requirements.md
+ * // (Copies from assets/the-startup/templates/product-requirements.md)
  *
  * @example
  * const result = await generator.readSpec('001');
@@ -44,7 +45,8 @@ interface FileSystem {
 export class SpecGenerator implements SpecNumbering {
   constructor(
     private fs: FileSystem,
-    private specsDir: string = 'docs/specs'
+    private specsDir: string = 'docs/specs',
+    private templatesDir: string = 'assets/the-startup/templates'
   ) {}
 
   /**
@@ -171,45 +173,28 @@ export class SpecGenerator implements SpecNumbering {
   }
 
   /**
-   * Generate template file in spec directory
+   * Copy template file from assets to spec directory
    *
-   * Creates template file with boilerplate content based on type.
+   * Copies rich template file from assets/the-startup/templates/ to the spec directory.
+   * Uses kebab-case filenames (e.g., implementation-plan.md).
    *
    * @param directory - Spec directory path
-   * @param template - Template type (PRD, SDD, PLAN, BRD)
-   * @returns Path to generated template file
+   * @param template - Template type (kebab-case)
+   * @returns Path to copied template file
    */
   private async generateTemplate(
     directory: string,
-    template: 'PRD' | 'SDD' | 'PLAN' | 'BRD'
+    template: 'product-requirements' | 'solution-design' | 'implementation-plan' | 'business-requirements'
   ): Promise<string> {
-    const templatePath = join(directory, `${template}.md`);
-    const content = this.getTemplateContent(template);
+    // Read source template from assets
+    const sourceTemplatePath = join(this.templatesDir, `${template}.md`);
+    const content = await this.fs.readFile(sourceTemplatePath, 'utf-8');
 
-    await this.fs.writeFile(templatePath, content, 'utf-8');
+    // Write to spec directory
+    const targetTemplatePath = join(directory, `${template}.md`);
+    await this.fs.writeFile(targetTemplatePath, content, 'utf-8');
 
-    return templatePath;
-  }
-
-  /**
-   * Get template boilerplate content
-   *
-   * Returns minimal template structure for each document type.
-   *
-   * @param template - Template type
-   * @returns Template content string
-   */
-  private getTemplateContent(template: 'PRD' | 'SDD' | 'PLAN' | 'BRD'): string {
-    switch (template) {
-      case 'PRD':
-        return '# Product Requirements Document\n\n';
-      case 'SDD':
-        return '# System Design Document\n\n';
-      case 'PLAN':
-        return '# Implementation Plan\n\n';
-      case 'BRD':
-        return '# Business Requirements Document\n\n';
-    }
+    return targetTemplatePath;
   }
 
   /**

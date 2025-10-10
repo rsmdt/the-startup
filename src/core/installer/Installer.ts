@@ -1,4 +1,4 @@
-import { join, resolve } from 'path';
+import { join, resolve, dirname } from 'path';
 import type { InstallerOptions, InstallResult } from '../types/config';
 import type { FileEntry } from '../types/lock';
 import type { LockManager } from './LockManager';
@@ -19,12 +19,13 @@ interface FileSystem {
 }
 
 /**
- * Asset file metadata
+ * Simplified asset file metadata
  */
 interface AssetFile {
-  category: 'agents' | 'commands' | 'templates' | 'rules' | 'outputStyles';
-  sourcePath: string;
-  relativePath: string;  // Path relative to category root (preserves nested structure)
+  sourcePath: string;       // Absolute path in assets/
+  relativePath: string;     // Path relative to category root
+  targetCategory: 'claude' | 'startup';  // Install to .claude/ or .the-startup/
+  isJson: boolean;          // Merge (true) or copy (false)
 }
 
 /**
@@ -32,7 +33,6 @@ interface AssetFile {
  */
 interface AssetProvider {
   getAssetFiles(): Promise<AssetFile[]>;
-  getSettingsTemplate(): any;
 }
 
 /**
@@ -119,24 +119,21 @@ export class Installer {
 
       // 2. Get selected assets
       const assetFiles = await this.getSelectedAssets(options.selectedFiles);
-      const totalSteps = assetFiles.length + 2; // +2 for settings and lock
+      const totalSteps = assetFiles.length + 1; // +1 for lock file (assets include settings.json)
       let currentStep = 0;
 
       // 3. Create directories
       this.reportProgress('Creating directories', currentStep++, totalSteps);
       await this.createDirectories(startupPath, claudePath, options.selectedFiles);
 
-      // 4. Copy asset files
+      // 4. Copy/merge asset files
       for (const asset of assetFiles) {
-        this.reportProgress(`Copying ${asset.category}`, currentStep++, totalSteps);
+        const category = this.extractCategory(asset.relativePath) || 'settings';
+        this.reportProgress(`Processing ${category}`, currentStep++, totalSteps);
         await this.copyAsset(asset, startupPath, claudePath);
       }
 
-      // 5. Merge settings.json
-      this.reportProgress('Merging settings', currentStep++, totalSteps);
-      await this.mergeSettings(claudePath, startupPath);
-
-      // 6. Create lock file with checksums
+      // 5. Create lock file with checksums
       this.reportProgress('Creating lock file', currentStep++, totalSteps);
       await this.createLockFile(startupPath);
 
@@ -175,7 +172,35 @@ export class Installer {
   }
 
   /**
+   * Converts absolute paths to tilde notation when under home directory.
+   * This makes paths more portable across different user environments.
+   *
+   * @param absolutePath - Absolute path (e.g., /Users/john/.the-startup)
+   * @returns Path with tilde notation if under home (e.g., ~/.the-startup), otherwise unchanged
+   *
+   * @example
+   * // On macOS/Linux with HOME=/Users/john
+   * toTildePath('/Users/john/.the-startup')  // → '~/.the-startup'
+   * toTildePath('/Users/john/.claude')       // → '~/.claude'
+   * toTildePath('/opt/the-startup')          // → '/opt/the-startup' (unchanged)
+   */
+  private toTildePath(absolutePath: string): string {
+    // Only convert if path is under home directory
+    if (!this.homeDir || !absolutePath.startsWith(this.homeDir)) {
+      return absolutePath;
+    }
+
+    // Replace home directory with ~
+    const relativePath = absolutePath.substring(this.homeDir.length);
+    return `~${relativePath}`;
+  }
+
+  /**
    * Gets selected asset files based on user selections.
+   *
+   * Extracts category from relativePath:
+   * - "agents/file.md" → category "agents"
+   * - "settings.json" → no category, always included
    */
   private async getSelectedAssets(
     selectedFiles: InstallerOptions['selectedFiles']
@@ -183,42 +208,66 @@ export class Installer {
     const allAssets = await this.assetProvider.getAssetFiles();
 
     return allAssets.filter((asset) => {
-      return selectedFiles[asset.category] === true;
+      // Extract category from first path component
+      const category = this.extractCategory(asset.relativePath);
+
+      // Files without category (like settings.json) are always included
+      if (!category) {
+        return true;
+      }
+
+      // Filter based on user selection
+      return selectedFiles[category] === true;
     });
   }
 
   /**
+   * Extracts category from relative path.
+   *
+   * @param relativePath - Path like "agents/the-chief.md" or "settings.json"
+   * @returns Category name or null if no category
+   */
+  private extractCategory(relativePath: string): keyof InstallerOptions['selectedFiles'] | null {
+    const firstComponent = relativePath.split('/')[0];
+
+    // Map directory names to category keys (handles both kebab-case and camelCase)
+    const categoryMap: Record<string, keyof InstallerOptions['selectedFiles']> = {
+      'agents': 'agents',
+      'commands': 'commands',
+      'templates': 'templates',
+      'rules': 'rules',
+      'output-styles': 'outputStyles',  // kebab-case directory name
+      'outputStyles': 'outputStyles',    // camelCase fallback
+    };
+
+    // Return mapped category or null if not found
+    return categoryMap[firstComponent] || null;
+  }
+
+  /**
    * Creates necessary installation directories.
+   *
+   * Just creates base directories - subdirectories are created
+   * as needed during file copying.
    */
   private async createDirectories(
     startupPath: string,
     claudePath: string,
-    selectedFiles: InstallerOptions['selectedFiles']
+    _selectedFiles: InstallerOptions['selectedFiles']
   ): Promise<void> {
-    // Always create base directories
+    // Create base directories
     await this.fs.mkdir(startupPath, { recursive: true });
     await this.fs.mkdir(claudePath, { recursive: true });
 
-    // Create category-specific directories
-    if (selectedFiles.agents) {
-      await this.fs.mkdir(join(claudePath, 'agents'), { recursive: true });
-    }
-    if (selectedFiles.commands) {
-      await this.fs.mkdir(join(claudePath, 'commands'), { recursive: true });
-    }
-    if (selectedFiles.templates) {
-      await this.fs.mkdir(join(startupPath, 'templates'), { recursive: true });
-    }
-    if (selectedFiles.rules) {
-      await this.fs.mkdir(join(startupPath, 'rules'), { recursive: true });
-    }
-    if (selectedFiles.outputStyles) {
-      await this.fs.mkdir(join(claudePath, 'output-styles'), { recursive: true });
-    }
+    // Subdirectories (agents, commands, templates, etc.) are created
+    // automatically during copyAsset based on file paths
   }
 
   /**
-   * Copies a single asset file to its destination.
+   * Copies or merges a single asset file to its destination.
+   *
+   * .json files are merged with existing files.
+   * All other files are copied (overwritten if exist).
    */
   private async copyAsset(
     asset: AssetFile,
@@ -226,70 +275,96 @@ export class Installer {
     claudePath: string
   ): Promise<void> {
     const destPath = this.getDestinationPath(asset, startupPath, claudePath);
-    const sourcePath = this.getSourcePath(asset);
 
-    // Ensure parent directory exists (for nested structures like agents/the-analyst/)
-    const destDir = destPath.substring(0, destPath.lastIndexOf('/'));
+    // Ensure parent directory exists
+    const destDir = dirname(destPath);
     await this.fs.mkdir(destDir, { recursive: true });
 
-    await this.fs.copyFile(sourcePath, destPath);
+    // Handle .json files specially (merge instead of overwrite)
+    if (asset.isJson) {
+      await this.mergeJsonFile(asset.sourcePath, destPath, startupPath, claudePath);
+    } else {
+      // Copy file (with placeholder replacement)
+      await this.copyFileWithPlaceholders(asset.sourcePath, destPath, startupPath, claudePath);
+    }
+
     this.installedFiles.push(destPath);
   }
 
   /**
    * Determines destination path for an asset file.
-   * Preserves nested directory structure using relativePath.
    */
   private getDestinationPath(
     asset: AssetFile,
     startupPath: string,
     claudePath: string
   ): string {
-    // Use relativePath to preserve nested structure (e.g., "the-analyst/requirements-analysis.md")
-    switch (asset.category) {
-      case 'agents':
-        return join(claudePath, 'agents', asset.relativePath);
-      case 'commands':
-        return join(claudePath, 'commands', asset.relativePath);
-      case 'templates':
-        return join(startupPath, 'templates', asset.relativePath);
-      case 'rules':
-        return join(startupPath, 'rules', asset.relativePath);
-      case 'outputStyles':
-        return join(claudePath, 'output-styles', asset.relativePath);
-    }
+    const basePath = asset.targetCategory === 'claude' ? claudePath : startupPath;
+    return join(basePath, asset.relativePath);
   }
 
   /**
-   * Gets source path for an asset file.
+   * Copies a file with placeholder replacement.
+   *
+   * Reads source file, replaces placeholders, writes to destination.
    */
-  private getSourcePath(asset: AssetFile): string {
-    // In production, this would resolve from embedded assets
-    // For testing, we use the asset's sourcePath directly
-    return asset.sourcePath;
-  }
-
-  /**
-   * Merges settings.json with complete configuration (permissions, statusLine, hooks).
-   */
-  private async mergeSettings(
-    claudePath: string,
-    startupPath: string
+  private async copyFileWithPlaceholders(
+    sourcePath: string,
+    destPath: string,
+    startupPath: string,
+    claudePath: string
   ): Promise<void> {
-    const settingsPath = join(claudePath, 'settings.json');
-    const settingsTemplate = this.assetProvider.getSettingsTemplate();
+    const content = await this.fs.readFile(sourcePath, 'utf-8');
+    const replaced = this.replacePlaceholders(content, startupPath, claudePath);
+    await this.fs.writeFile(destPath, replaced, 'utf-8');
+  }
+
+  /**
+   * Merges a JSON file with existing file at destination.
+   *
+   * Reads source JSON, replaces placeholders, merges with existing, writes result.
+   */
+  private async mergeJsonFile(
+    sourcePath: string,
+    destPath: string,
+    startupPath: string,
+    claudePath: string
+  ): Promise<void> {
+    // Read and parse source JSON
+    const sourceContent = await this.fs.readFile(sourcePath, 'utf-8');
+    const sourceJson = JSON.parse(sourceContent);
+
+    // Replace placeholders in source
+    const isWindows = process.platform === 'win32';
+    const shellScriptExtension = isWindows ? '.ps1' : '.sh';
 
     const placeholders: PlaceholderMap = {
-      STARTUP_PATH: startupPath,
-      CLAUDE_PATH: claudePath,
+      STARTUP_PATH: this.toTildePath(startupPath),
+      CLAUDE_PATH: this.toTildePath(claudePath),
+      SHELL_SCRIPT_EXTENSION: shellScriptExtension,
     };
 
-    // Use mergeFullSettings to handle permissions, statusLine, and hooks
-    await this.settingsMerger.mergeFullSettings(
-      settingsPath,
-      settingsTemplate, // Pass the complete settings template
-      placeholders
-    );
+    // Merge with existing file
+    await this.settingsMerger.mergeFullSettings(destPath, sourceJson, placeholders);
+  }
+
+  /**
+   * Replaces placeholders in a string.
+   */
+  private replacePlaceholders(
+    content: string,
+    startupPath: string,
+    claudePath: string
+  ): string {
+    const isWindows = process.platform === 'win32';
+    const shellScriptExtension = isWindows ? '.ps1' : '.sh';
+
+    let result = content;
+    result = result.replace(/\{\{STARTUP_PATH\}\}/g, this.toTildePath(startupPath));
+    result = result.replace(/\{\{CLAUDE_PATH\}\}/g, this.toTildePath(claudePath));
+    result = result.replace(/\{\{SHELL_SCRIPT_EXTENSION\}\}/g, shellScriptExtension);
+
+    return result;
   }
 
   /**

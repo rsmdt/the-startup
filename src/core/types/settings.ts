@@ -13,6 +13,7 @@
  * Placeholder replacement:
  * - {{STARTUP_PATH}}: Replaced with actual installation directory path
  * - {{CLAUDE_PATH}}: Replaced with Claude config directory path
+ * - {{SHELL_SCRIPT_EXTENSION}}: Replaced with .sh or .ps1 based on OS
  * - Replacement happens at install time before writing settings.json
  */
 
@@ -65,8 +66,9 @@ export interface ClaudeSettings {
        * May contain placeholders:
        * - {{STARTUP_PATH}}: Installation directory (e.g., /Users/name/.the-startup)
        * - {{CLAUDE_PATH}}: Claude config directory (e.g., /Users/name/.claude)
+       * - {{SHELL_SCRIPT_EXTENSION}}: Shell script extension (.sh or .ps1)
        *
-       * Placeholders are replaced at install time with absolute paths.
+       * Placeholders are replaced at install time with absolute paths and platform-specific values.
        */
       command: string;
 
@@ -99,4 +101,7 @@ export interface PlaceholderMap {
 
   /** Claude config directory path (e.g., /Users/name/.claude) */
   CLAUDE_PATH: string;
+
+  /** Shell script file extension (.sh for Unix/Mac, .ps1 for Windows) */
+  SHELL_SCRIPT_EXTENSION: string;
 }
