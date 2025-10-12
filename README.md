@@ -150,14 +150,20 @@ All commands use consistent agent delegation patterns:
 
 These rules are automatically loaded via `@rules/agent-delegation.md` references in commands.
 
-## 🎨 Optional: The Startup Output Style
+## 🎨 The Startup Output Style
 
-**Note:** Output styles cannot be auto-installed via plugins and must be manually configured.
+The plugin includes "The Startup" output style which provides:
+- **High-energy communication** - "Let's ship this NOW!" enthusiasm
+- **Parallel execution mindset** - Multiple agents simultaneously
+- **TodoWrite obsession** - Tracks every task religiously
+- **Startup DNA** - Y Combinator energy meets operational excellence
 
-To use the high-energy "Startup" output style:
+**Included with plugin installation** from `output-styles/the-startup.md`
 
-1. Manually copy `assets/claude/output-styles/the-startup.md` to `~/.claude/output-styles/`
-2. Activate: `/settings add "outputStyle": "the-startup"`
+Activate after installation:
+```
+/output-style The Startup
+```
 
 The Startup style provides:
 - High-energy, execution-focused communication

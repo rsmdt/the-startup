@@ -20,5 +20,6 @@
   ],
   "agents": ["agents/"],
   "commands": ["commands/"],
-  "hooks": "hooks/hooks.json"
+  "hooks": "hooks/hooks.json",
+  "outputStyles": ["output-styles/"]
 }
