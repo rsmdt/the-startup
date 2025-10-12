@@ -1,0 +1,12 @@
+{
+  "name": "the-startup-dev",
+  "description": "Local development marketplace for The Agentic Startup plugin",
+  "plugins": [
+    {
+      "name": "the-agentic-startup",
+      "source": ".",
+      "description": "Comprehensive agentic software development framework with specialized roles, workflow automation, and structured specification management",
+      "version": "2.0.0"
+    }
+  ]
+}
