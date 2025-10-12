@@ -16,13 +16,16 @@ npm run dev:install
 npm run dev:uninstall
 npm run dev:init
 npm run dev:spec
+npm run dev:spec-bin  # Run standalone spec executable
 
 # Run with custom arguments
 npm run dev:run -- install --yes
 npm run dev:run -- spec "Add user authentication"
+npm run dev:spec-bin -- test-feature --add solution-design
 
 # Or use tsx directly
 npx tsx src/index.ts install
+npx tsx src/bin/spec.ts test-feature
 ```
 
 ### Build and Run
@@ -38,6 +41,8 @@ node dist/index.js --help
 # Or link globally for easier testing (simulates npx behavior)
 npm link
 the-agentic-startup install
+the-agentic-startup spec test-feature
+the-agentic-startup-spec test-feature  # Standalone spec executable
 the-agentic-startup --help
 
 # Unlink when done testing
@@ -92,13 +97,14 @@ npm run check
 The project follows a standard TypeScript/Node.js layout with clear separation of concerns:
 
 - **`src/index.ts`**: Entry point that exports CLI runner
+- **`src/bin/`**: Standalone executable commands
+  - `spec.ts`: Standalone spec executable (the-agentic-startup-spec)
 - **`src/cli/`**: CLI command implementations using Commander.js
   - `index.ts`: CLI setup with Commander.js, registers all commands
   - `install.ts`: Installation command that launches Ink-based TUI
   - `uninstall.ts`: Uninstall command with lock file reading
   - `init.ts`: Initialize DOR/DOD/TASK-DOD templates
   - `spec.ts`: Create numbered spec directories with TOML output
-  - `statusline.ts`: Cross-platform stdio passthrough to shell scripts
 
 - **`src/core/`**: Core business logic modules
   - `installer/`: Installation logic and file management
@@ -239,4 +245,6 @@ The project is distributed as an npm package:
 - Installed globally: `npm install -g the-agentic-startup`
 - Or used via npx: `npx the-agentic-startup install`
 - Assets are included in the npm package (not embedded at build time)
-- Entry point: `dist/index.js` (built from TypeScript)
+- Main entry point: `dist/index.js` (built from TypeScript)
+- Standalone executables:
+  - `dist/bin/spec.js` - Available as `the-agentic-startup-spec` command

@@ -1,0 +1,24 @@
+{
+  "name": "the-agentic-startup",
+  "version": "2.0.0",
+  "description": "Comprehensive agentic software development framework with specialized roles, workflow automation, and structured specification management",
+  "author": {
+    "name": "Irudi Perera",
+    "email": "irudi@hey.com"
+  },
+  "homepage": "https://github.com/irudiperera/the-startup",
+  "repository": "https://github.com/irudiperera/the-startup",
+  "license": "MIT",
+  "keywords": [
+    "workflow",
+    "agents",
+    "specification",
+    "development",
+    "automation",
+    "claude",
+    "ai-development"
+  ],
+  "agents": ["agents/"],
+  "commands": ["commands/"],
+  "hooks": "hooks/hooks.json"
+}
