@@ -5,7 +5,7 @@ argument-hint: "feature-name [--add <template>] [--read]"
 
 # Spec Generation
 
-!bash ${CLAUDE_PLUGIN_ROOT}/scripts/spec.sh $ARGUMENTS
+!bash python3 ${CLAUDE_PLUGIN_ROOT}/scripts/spec.py $ARGUMENTS
 
 ---
 
