@@ -43,7 +43,7 @@ You are an intelligent implementation orchestrator that executes the plan for: *
 
 **🎯 Goal**: Validate specification exists, analyze the implementation plan, and prepare for execution.
 
-Check if $ARGUMENTS contains a specification ID in the format "010" or "010-feature-name". Run `the-agentic-startup spec --read [ID]` to check for existing specification.
+Check if $ARGUMENTS contains a specification ID in the format "010" or "010-feature-name". Run `/s:spec [ID] --read` to check for existing specification.
 
 Parse the TOML output which contains:
 - Specification metadata: `id`, `name`, `dir`
@@ -76,7 +76,7 @@ Ready to start Phase 1 implementation? (yes/no)
 ```
 
 **🤔 Ask yourself before proceeding:**
-1. Have I used `the-agentic-startup spec --read` to verify the specification exists?
+1. Have I used `/s:spec --read` to verify the specification exists?
 2. Does the specification directory contain a PLAN.md file?
 3. Have I successfully loaded and parsed the PLAN.md file?
 4. Did I identify ALL phases and count the tasks in each one?
