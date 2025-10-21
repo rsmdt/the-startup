@@ -1,12 +1,46 @@
 {
-  "name": "the-agetic-startup-marketplace",
-  "description": "Local development marketplace for The Agentic Startup plugin",
+  "name": "the-startup-marketplace",
+  "owner": {
+    "name": "Rudolf S.",
+    "email": "rudolf@example.com"
+  },
+  "metadata": {
+    "description": "Comprehensive agentic software development framework for Claude Code",
+    "version": "2.0.0",
+    "homepage": "https://github.com/rsmdt/the-startup"
+  },
   "plugins": [
     {
-      "name": "the-agentic-startup",
-      "source": ".",
-      "description": "Comprehensive agentic software development framework with specialized roles, workflow automation, and structured specification management",
-      "version": "2.0.0"
+      "name": "the-startup-commands",
+      "source": "./plugins/the-startup-commands",
+      "description": "Workflow orchestration commands for agentic software development",
+      "version": "2.0.0",
+      "category": "workflow",
+      "keywords": ["workflow", "commands", "specification", "implementation"]
+    },
+    {
+      "name": "the-startup-agents",
+      "source": "./plugins/the-startup-agents",
+      "description": "50 specialized agents for software development across 9 professional roles",
+      "version": "2.0.0",
+      "category": "agents",
+      "keywords": ["agents", "specialists", "roles", "delegation"]
+    },
+    {
+      "name": "the-startup-output-style",
+      "source": "./plugins/the-startup-output-style",
+      "description": "Custom Claude Code output style for The Startup methodology",
+      "version": "2.0.0",
+      "category": "productivity",
+      "keywords": ["output-style", "formatting", "ux"]
+    },
+    {
+      "name": "the-startup-statusline",
+      "source": "./plugins/the-startup-statusline",
+      "description": "Productivity hooks: welcome banner and git statusline",
+      "version": "2.0.0",
+      "category": "productivity",
+      "keywords": ["hooks", "statusline", "productivity"]
     }
   ]
 }
