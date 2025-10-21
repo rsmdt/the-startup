@@ -1,0 +1,18 @@
+{
+  "name": "the-startup-agents",
+  "version": "2.0.0",
+  "description": "50 specialized agents for software development across 9 professional roles",
+  "author": {
+    "name": "Rudolf S."
+  },
+  "homepage": "https://github.com/rsmdt/the-startup",
+  "repository": "https://github.com/rsmdt/the-startup",
+  "license": "MIT",
+  "keywords": [
+    "agents",
+    "specialists",
+    "roles",
+    "delegation"
+  ],
+  "agents": ["agents/"]
+}

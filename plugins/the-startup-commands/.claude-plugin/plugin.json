@@ -1,0 +1,19 @@
+{
+  "name": "the-startup-commands",
+  "version": "2.0.0",
+  "description": "Workflow orchestration commands for agentic software development",
+  "author": {
+    "name": "Rudolf S."
+  },
+  "homepage": "https://github.com/rsmdt/the-startup",
+  "repository": "https://github.com/rsmdt/the-startup",
+  "license": "MIT",
+  "keywords": [
+    "workflow",
+    "commands",
+    "specification",
+    "implementation",
+    "refactoring"
+  ],
+  "commands": ["commands/"]
+}

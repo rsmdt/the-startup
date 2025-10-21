@@ -63,7 +63,7 @@ Consider using it for multi-step tasks, agent coordination, or when the user pro
 
 ### Delegation Rules
 
-@{{STARTUP_PATH}}/rules/agent-delegation.md
+@rules/agent-delegation.md
 
 ## Startup Scenarios
 
