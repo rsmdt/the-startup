@@ -14,5 +14,5 @@
     "productivity",
     "ux"
   ],
-  "hooks": "hooks/hooks.json"
+  "hooks": "./hooks/hooks.json"
 }

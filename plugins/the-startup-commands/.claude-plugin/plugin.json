@@ -15,5 +15,12 @@
     "implementation",
     "refactoring"
   ],
-  "commands": ["commands/"]
+  "commands": [
+    "./commands/s/analyze.md",
+    "./commands/s/implement.md",
+    "./commands/s/init.md",
+    "./commands/s/refactor.md",
+    "./commands/s/spec.md",
+    "./commands/s/specify.md"
+  ]
 }
