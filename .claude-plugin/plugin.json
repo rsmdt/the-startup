@@ -3,11 +3,10 @@
   "version": "2.0.0",
   "description": "Comprehensive agentic software development framework with specialized roles, workflow automation, and structured specification management",
   "author": {
-    "name": "Irudi Perera",
-    "email": "irudi@hey.com"
+    "name": "Rudolf S.",
   },
-  "homepage": "https://github.com/irudiperera/the-startup",
-  "repository": "https://github.com/irudiperera/the-startup",
+  "homepage": "https://github.com/rsmdt/the-startup",
+  "repository": "https://github.com/rsmdt/the-startup",
   "license": "MIT",
   "keywords": [
     "workflow",
@@ -20,6 +19,5 @@
   ],
   "agents": ["agents/"],
   "commands": ["commands/"],
-  "hooks": "hooks/hooks.json",
   "outputStyles": ["output-styles/"]
 }
