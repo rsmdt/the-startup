@@ -1,38 +1,17 @@
-# Build artifacts (Go)
-/the-startup
-/the-startup-*
-
-# Build artifacts (TypeScript)
-dist/
-*.tsbuildinfo
-
-# Test artifacts
-*.test
-*.out
-coverage/
-.nyc_output/
-
-# Dependencies
-node_modules/
-
-# Go workspace
-go.work
-go.work.sum
-
 # IDE
+.claude/
 .idea/
 .vscode/
 *.swp
 *.swo
 *~
 
+# Python
+__pycache__/
+
 # OS
 .DS_Store
 Thumbs.db
-
-# Old/temporary directories
-.claude/
-.the-startup/
 
 # Logs
 *.log
