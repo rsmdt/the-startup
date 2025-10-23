@@ -5,18 +5,18 @@
     "email": "rudolf@example.com"
   },
   "metadata": {
-    "description": "Comprehensive agentic software development framework for Claude Code",
+    "description": "Comprehensive agentic framework for Claude Code",
     "version": "2.0.0",
     "homepage": "https://github.com/rsmdt/the-startup"
   },
   "plugins": [
     {
-      "name": "the-startup-commands",
-      "source": "./plugins/the-startup-commands",
-      "description": "Workflow orchestration commands for agentic software development",
+      "name": "start",
+      "source": "./plugins/start",
+      "description": "Core workflow commands with output styles and productivity hooks",
       "version": "2.0.0",
-      "category": "workflow",
-      "keywords": ["workflow", "commands", "specification", "implementation"]
+      "category": "core",
+      "keywords": ["workflow", "commands", "specification", "implementation", "output-style", "hooks"]
     },
     {
       "name": "the-startup-agents",
@@ -25,22 +25,6 @@
       "version": "2.0.0",
       "category": "agents",
       "keywords": ["agents", "specialists", "roles", "delegation"]
-    },
-    {
-      "name": "the-startup-output-style",
-      "source": "./plugins/the-startup-output-style",
-      "description": "Custom Claude Code output style for The Startup methodology",
-      "version": "2.0.0",
-      "category": "productivity",
-      "keywords": ["output-style", "formatting", "ux"]
-    },
-    {
-      "name": "the-startup-statusline",
-      "source": "./plugins/the-startup-statusline",
-      "description": "Productivity hooks: welcome banner and git statusline",
-      "version": "2.0.0",
-      "category": "productivity",
-      "keywords": ["hooks", "statusline", "productivity"]
     }
   ]
 }

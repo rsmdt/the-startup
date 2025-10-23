@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 The Agentic Startup - Spec Generation Script
 Creates numbered spec directories with auto-incrementing IDs

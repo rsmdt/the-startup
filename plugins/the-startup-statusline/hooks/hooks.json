@@ -1,8 +1,0 @@
-{
-  "SessionStart": [
-    {
-      "type": "command",
-      "command": "${CLAUDE_PLUGIN_ROOT}/hooks/welcome.sh"
-    }
-  ]
-}

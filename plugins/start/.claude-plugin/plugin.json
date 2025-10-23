@@ -1,5 +1,5 @@
 {
-  "name": "the-startup-commands",
+  "name": "start",
   "version": "2.0.0",
   "description": "Workflow orchestration commands for agentic software development",
   "author": {
@@ -16,11 +16,12 @@
     "refactoring"
   ],
   "commands": [
-    "./commands/s/analyze.md",
-    "./commands/s/implement.md",
-    "./commands/s/init.md",
-    "./commands/s/refactor.md",
-    "./commands/s/spec.md",
-    "./commands/s/specify.md"
-  ]
+    "./commands/analyze.md",
+    "./commands/implement.md",
+    "./commands/init.md",
+    "./commands/refactor.md",
+    "./commands/spec.md",
+    "./commands/specify.md"
+  ],
+  "outputStyles": ["./output-styles/"]
 }
