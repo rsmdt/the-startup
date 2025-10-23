@@ -14,14 +14,5 @@
     "specification",
     "implementation",
     "refactoring"
-  ],
-  "commands": [
-    "./commands/analyze.md",
-    "./commands/implement.md",
-    "./commands/init.md",
-    "./commands/refactor.md",
-    "./commands/spec.md",
-    "./commands/specify.md"
-  ],
-  "outputStyles": ["./output-styles/"]
+  ]
 }

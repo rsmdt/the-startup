@@ -1,8 +1,7 @@
 {
-  "name": "the-startup-marketplace",
+  "name": "the-startup",
   "owner": {
-    "name": "Rudolf S.",
-    "email": "rudolf@example.com"
+    "name": "Rudolf S."
   },
   "metadata": {
     "description": "Comprehensive agentic framework for Claude Code",
@@ -14,17 +13,13 @@
       "name": "start",
       "source": "./plugins/start",
       "description": "Core workflow commands with output styles and productivity hooks",
-      "version": "2.0.0",
-      "category": "core",
-      "keywords": ["workflow", "commands", "specification", "implementation", "output-style", "hooks"]
+      "version": "2.0.0"
     },
     {
       "name": "the-startup-agents",
       "source": "./plugins/the-startup-agents",
       "description": "50 specialized agents for software development across 9 professional roles",
-      "version": "2.0.0",
-      "category": "agents",
-      "keywords": ["agents", "specialists", "roles", "delegation"]
+      "version": "2.0.0"
     }
   ]
 }
