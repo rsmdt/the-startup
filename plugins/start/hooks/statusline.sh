@@ -19,7 +19,6 @@
 
 # ANSI color codes
 # Main text color: #FAFAFA (very light gray/white)
-# MAIN_COLOR="\033[38;2;250;250;250m"
 MAIN_COLOR="\033[38;2;250;250;250m"
 # Help text color: #606060 (gray, muted)
 HELP_COLOR="\033[38;2;96;96;96m"
