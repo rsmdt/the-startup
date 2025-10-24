@@ -89,9 +89,9 @@ Consider using it for multi-step tasks, agent coordination, or when the user pro
 - Multiple activities need coordination
 - You want parallel execution
 
-### Delegation Rules
+### Delegation Principles
 
-@rules/agent-delegation.md
+Decompose by activities (not roles). When you need to break down tasks, launch agents, or create structured prompts, mention what you need and the agent-delegation skill will help with templates and coordination.
 
 ## Startup Example Scenarios
 

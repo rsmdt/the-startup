@@ -19,9 +19,9 @@ You are an intelligent implementation orchestrator that executes the plan for: *
 - This command has stop points where you MUST wait for user confirmation.
 - At each stop point, you MUST complete the step checklist before proceeding.
 
-### 🤝 Agent Delegation Rules
+### 🤝 Agent Delegation
 
-@rules/agent-delegation.md
+Break down implementation tasks by activities. Use structured prompts with FOCUS/EXCLUDE boundaries for parallel or sequential execution.
 
 ### 📝 TodoWrite Tool Rules
 
