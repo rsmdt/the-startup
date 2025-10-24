@@ -16,9 +16,9 @@
       "version": "2.0.0"
     },
     {
-      "name": "the-startup-agents",
-      "source": "./plugins/the-startup-agents",
-      "description": "50 specialized agents for software development across 9 professional roles",
+      "name": "team",
+      "source": "./plugins/team",
+      "description": "Engineering team consisting of specialized agents for software development",
       "version": "2.0.0"
     }
   ]
