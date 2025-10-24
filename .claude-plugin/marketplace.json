@@ -12,14 +12,12 @@
     {
       "name": "start",
       "source": "./plugins/start",
-      "description": "Core workflow commands with output styles and productivity hooks",
-      "version": "2.0.0"
+      "description": "Core workflow commands with output styles and productivity hooks"
     },
     {
       "name": "team",
       "source": "./plugins/team",
-      "description": "Engineering team consisting of specialized agents for software development",
-      "version": "2.0.0"
+      "description": "Engineering team consisting of specialized agents for software development"
     }
   ]
 }

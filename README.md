@@ -1,16 +1,73 @@
-# The Agentic Startup
-
-**Comprehensive agentic software development framework for Claude Code with workflow orchestration, autonomous skills, and structured specification management.**
+<p align="center">
+  <img src="https://github.com/rsmdt/the-startup/blob/main/logo.png" width="400" alt="The Agentic Startup">
+</p>
 
 <p align="center">
-  <strong>Ship faster. Ship better. Ship with The Agentic Startup.</strong>
+  Ship faster. Ship better. Ship with <b>The Agentic Startup</b>.
+</p>
+
+<p align="center">
+  <a href="https://github.com/rsmdt/the-startup/releases/latest">
+    <img alt="Release" src="https://github.com/rsmdt/the-startup/actions/workflows/release.yml/badge.svg" />
+  </a>
+
+  <a href="https://github.com/hesreallyhim/awesome-claude-code">
+    <img alt="Mentioned in Awesome Claude Code" src="https://awesome.re/mentioned-badge.svg" />
+  </a>
 </p>
 
 ---
 
-## 🎉 Version 2.0 - Claude Code Marketplace Edition
+## 🤖 What is The Agentic Startup?
 
-**The Agentic Startup has been completely rewritten for the Claude Code marketplace!**
+**The Agentic Startup** is a spec-driven development framework for Claude Code that transforms how you build software.
+
+### The Problem
+
+Development often moves too fast without proper planning:
+- Features built without clear requirements
+- Architecture decisions made ad-hoc during coding
+- Technical debt accumulates from lack of upfront design
+- Teams struggle to maintain consistency across implementations
+
+### The Solution: Spec-Driven Development
+
+**The Agentic Startup** enforces a disciplined workflow:
+
+1. **📋 Specify First** - Create comprehensive specifications before writing code
+   - **PRD** (Product Requirements) - What to build and why
+   - **SDD** (Solution Design) - How to build it technically
+   - **PLAN** (Implementation Plan) - Executable tasks and phases
+
+2. **👀 Review & Refine** - Validate specifications with stakeholders
+   - Catch issues during planning, not during implementation
+   - Iterate on requirements and design cheaply
+   - Get alignment before costly development begins
+
+3. **⚡ Implement with Confidence** - Execute validated plans phase-by-phase
+   - Clear acceptance criteria at every step
+   - Parallel agent coordination for speed
+   - Built-in validation gates and quality checks
+
+4. **📚 Document & Learn** - Capture patterns for future reuse
+   - Automatically document discovered patterns
+   - Build organizational knowledge base
+   - Prevent reinventing solutions
+
+### Core Philosophy
+
+**Measure twice, cut once** - Investing time in specifications saves exponentially more time during implementation.
+
+**Documentation as code** - Specs, patterns, and interfaces are first-class artifacts that evolve with your codebase.
+
+**Parallel execution** - Multiple specialists work simultaneously within clear boundaries, maximizing velocity without chaos.
+
+**Quality gates** - Definition of Ready (DOR) and Definition of Done (DOD) ensure standards are maintained throughout.
+
+---
+
+> [!NOTE]
+> From v2.0 of **The Agentic Startup**, the repository has been rewritten as Claude Code marketplace
 
 ### What's New in 2.0
 
@@ -31,37 +88,33 @@
 
 ### Migrating from 1.x
 
-If you previously installed via npm (`the-agentic-startup`), the 1.x CLI is deprecated:
-
-**Before (1.x - Deprecated):**
-```bash
-npm install -g the-agentic-startup
-the-agentic-startup install
-```
-
-**Now (2.0 - Current):**
-```bash
-# In Claude Code
-/plugin install @the-startup/start
-```
-
-No need to uninstall 1.x - the marketplace version is completely separate.
+> **📌 Upgrading from the bash script installer (pre-2.0)?**
+> See the [complete migration guide](#migrating-from-1x-bash-script-version) at the bottom of this README.
 
 ---
 
 ## 📦 Quick Install
 
-### Requirements
-
-- **Claude Code v2.0+** - Required for marketplace plugins
-- Git repository (recommended for full workflow)
-
 ### Installation
 
-Install the Start plugin from the Claude Code marketplace:
+**Requirements**:
+- Claude Code v2.0+ - Claude Code with marketplace features
+
+Install the Start plugin from The Agentic Startup marketplace:
 
 ```bash
-/plugin install @the-startup/start
+# Add The Agentic Startup marketplace
+/plugin marketplace add rsmdt/the-startup
+
+# Install the Start plugin (required)
+/plugin install start@the-startup
+
+
+```
+
+Alternatively, browse and install interactively:
+```bash
+/plugin
 ```
 
 That's it! You now have access to 6 workflow commands and 2 autonomous skills.
@@ -137,10 +190,14 @@ The Agentic Startup leverages Claude Code's powerful extensibility features:
 **What:** Distributable packages of commands, skills, agents, and rules
 
 **How we use it:**
-- `@the-startup/start` - Workflow orchestration plugin
-- Future: `@the-startup/agents` - Specialized agent library
+- `start` - Workflow orchestration plugin
+- `team` - Specialized agent library
 
-**Install:** `/plugin install @the-startup/start`
+**Install:**
+```bash
+/plugin marketplace add rsmdt/the-startup
+/plugin install start@the-startup
+```
 
 ### ⚡ Commands (User-Invoked)
 
@@ -853,6 +910,86 @@ The plugin assists with **defensive security tasks only**:
 
 ---
 
+## 🔄 Migrating from 1.x (Bash Script Version)
+
+**The Agentic Startup** was previously distributed via bash script installer (pre-2.0). If you have the old version installed, here's how to migrate:
+
+### Uninstalling 1.x
+
+The old version installed files to your Claude Code configuration directory. To remove it:
+
+**1. Remove installed files:**
+
+```bash
+# Remove agents (if installed globally)
+rm -rf ~/.claude/agents/the-*.md
+
+# Remove commands (if installed globally)
+rm -rf ~/.claude/commands/s-*.md
+
+# Remove local installation (if used --local flag)
+rm -rf ./.the-startup
+
+# Remove output style
+rm -rf ~/.claude/output-styles/the-startup.md
+
+# Remove hooks (if any were installed)
+rm -rf ~/.claude/hooks/the-startup-*
+```
+
+**2. Clean up settings.json:**
+
+The old installer may have modified `~/.claude/settings.json`. Check for and remove:
+
+```json
+{
+  "hooks": {
+    "sessionStart": "...",  // Remove if it references the-startup
+    "statuslineComplete": "..."  // Remove if it references the-startup
+  },
+  "outputStyle": "The Startup"  // Remove or change to your preference
+}
+```
+
+**3. Verify cleanup:**
+
+```bash
+# Check for any remaining files
+find ~/.claude -name "*startup*" -o -name "*the-startup*"
+```
+
+### Installing 2.0 (Marketplace Version)
+
+After uninstalling the old version:
+
+```bash
+# Add The Agentic Startup marketplace
+/plugin marketplace add rsmdt/the-startup
+
+# Install the Start plugin
+/plugin install start@the-startup
+```
+
+### Key Differences
+
+| 1.x (Deprecated) | 2.0 (Current) |
+|-----------------|---------------|
+| Bash script installer | Claude Code marketplace |
+| Manual file placement | Automatic plugin installation |
+| Global/local installation | Plugin-based (isolated) |
+| Static agents in files | Dynamic skills system |
+| `/s:specify` commands | `/start:specify` commands |
+| Manual configuration | `/start:init` wizard |
+
+### Breaking Changes
+
+- **Command prefix changed:** `/s:*` → `/start:*`
+- **Agent files no longer used:** Replaced by skills system
+- **Hooks now managed by plugin system:** Automated via `/start:init`
+- **Settings.json modifications automated:** Use `/start:init` instead of manual edits
+
+---
+
 ## 🤝 Contributing
 
 Contributions welcome! Here's how:
@@ -912,7 +1049,11 @@ MIT License - see [LICENSE](LICENSE) file for details
 ### Install
 
 ```bash
-/plugin install @the-startup/start
+# Add The Agentic Startup marketplace
+/plugin marketplace add rsmdt/the-startup
+
+# Install the Start plugin
+/plugin install start@the-startup
 ```
 
 ### Configure

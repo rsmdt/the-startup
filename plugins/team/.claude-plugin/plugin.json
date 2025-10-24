@@ -10,8 +10,6 @@
   "license": "MIT",
   "keywords": [
     "agents",
-    "specialists",
-    "roles",
-    "delegation"
+    "specialists"
   ]
 }
