@@ -7,10 +7,7 @@
    - **After receiving user feedback, identify NEW research needs** based on their input and launch additional specialist agents to investigate any new questions or directions
 
 2. **Documentation Phase**
-   - Structure findings into supporting documentation:
-     - Create/update docs/domain/ for business rules and domain patterns discovered
-     - Create/update docs/patterns/ for reusable solution patterns identified
-     - Create/update docs/interfaces/ for external service contracts needed
+   - Document any discovered patterns, interfaces, or domain rules for future reference
    - Update the main document:
      - Base content on research findings gathered from specialist agents
      - Incorporate user feedback and additional research conducted
@@ -23,14 +20,14 @@
      - Conflicting information or recommendations
      - Proposed content based on the research
      - Questions that need user clarification
-   - Show what documentation was created/updated with file paths
+   - Report any patterns, interfaces, or domain rules that were documented
    - Present what was added to main document, what questions remain, and ask if you should continue
    - **Wait for user confirmation** before proceeding to next cycle
 
 **🤔 Ask yourself each cycle:**
 1. **Discovery**: Have I identified ALL activities needed for this section/area?
 2. **Discovery**: Have I launched parallel specialist agents to investigate?
-3. **Documentation**: Have I created/updated supporting documentation (domain/patterns/interfaces)?
+3. **Documentation**: Have I documented any discovered patterns, interfaces, or domain rules?
 4. **Documentation**: Have I updated the main document according to command-specific rules?
 5. **Review**: Have I presented COMPLETE agent responses to the user (not summaries)?
 6. **Review**: Have I received user confirmation before proceeding to next cycle?

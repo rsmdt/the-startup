@@ -92,7 +92,7 @@ Load the PRD from the specification directory. If the PRD file doesn't exist yet
 **Apply the Standard Cycle Pattern with these specifics:**
 - **Discovery Focus**: Competitive landscape, user needs, market standards, edge cases, and success criteria
 - **Agent Selection**: Market analysis, user research, requirements clarification, domain expertise
-- **Documentation**: PRD.md + supporting docs/domain/, docs/patterns/, docs/interfaces/
+- **Documentation**: PRD.md + any discovered domain rules, patterns, or external integrations
 - **Validation**: Avoid technical implementation details, focus on business requirements
 
 Continue cycles until the PRD is complete and user has confirmed to proceed to the SDD.
@@ -115,7 +115,7 @@ Load the SDD from the specification directory. If the SDD file doesn't exist yet
 **Apply the Standard Cycle Pattern with these specifics:**
 - **Discovery Focus**: Architecture patterns, data models, interfaces, security implications, performance characteristics, and integration approaches
 - **Agent Selection**: Architecture, database, API design, security, performance, technical domain expertise
-- **Documentation**: SDD.md + supporting docs/patterns/, docs/interfaces/, docs/domain/
+- **Documentation**: SDD.md + any discovered patterns, external service interfaces, or business rules
 - **Validation**: Avoid implementation code, focus only on design and architecture decisions
 
 Continue cycles until the SDD is complete and user has confirmed to proceed to the PLAN.
@@ -138,7 +138,7 @@ Load the PLAN from the specification directory. If the PLAN file doesn't exist y
 **Apply the Standard Cycle Pattern with these specifics:**
 - **Discovery Focus**: Implementation activities (database migrations, API endpoints, UI components, validation logic, deployment pipelines, test suites)
 - **Agent Selection**: Implementation planning, dependency analysis, risk assessment, validation planning
-- **Documentation**: PLAN.md + supporting docs/patterns/, docs/interfaces/, docs/domain/
+- **Documentation**: PLAN.md + any discovered patterns, interfaces, or domain rules
 - **Validation**: Ensure every phase traces back to PRD requirements and SDD design decisions, include specification alignment gates
 
 Continue cycles until the PLAN is complete and user has confirmed to proceed to final assessment.
@@ -219,28 +219,10 @@ docs/
 - NEVER create new subsections or modify the template hierarchy
 - The template structure is the contract - follow it exactly
 
-**💭 Documentation Philosophy**:
-- Any specialist agent can discover and document patterns or interfaces
-- You decide which specialist agent to use based on the domain
-- All specialist agents receive the same documentation instructions
-- Deduplication is everyone's responsibility
-
-**📄 When to Document a Pattern**:
-- Solution appears reusable across multiple features
-- Addresses a common problem in a consistent way
-- Would benefit future implementations
-
-**🔌 When to Document an Interface**:
-- External service integration required
-- Third-party API consumption
-- Webhook implementation needed
-- Data exchange with external systems
-
-**🔄 De-duplication Protocol**:
-1. Before creating: Specialist agents must check `docs/patterns/` and `docs/interfaces/`
-2. Naming convention: Use descriptive, searchable names
-3. Updates over duplicates: Enhance existing docs with new discoveries
-4. Cross-reference: Link between related patterns and interfaces
+**💭 Supporting Documentation**:
+- Specialist agents may discover reusable patterns, external integrations, or business rules during research
+- When patterns, interfaces, or domain rules are discovered, they should be documented for future reference
+- Always check existing documentation to avoid duplication
 
 ## 📌 Important Notes
 
