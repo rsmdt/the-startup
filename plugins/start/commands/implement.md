@@ -43,7 +43,7 @@ Break down implementation tasks by activities. Use structured prompts with FOCUS
 
 **🎯 Goal**: Validate specification exists, analyze the implementation plan, and prepare for execution.
 
-Check if $ARGUMENTS contains a specification ID in the format "010" or "010-feature-name". Run `/s:spec [ID] --read` to check for existing specification.
+Check if $ARGUMENTS contains a specification ID in the format "010" or "010-feature-name". Run `scripts/spec.py [ID] --read` to check for existing specification.
 
 Parse the TOML output which contains:
 - Specification metadata: `id`, `name`, `dir`
@@ -52,10 +52,10 @@ Parse the TOML output which contains:
 
 If the specification doesn't exist (error in output):
 - Display "❌ Specification not found: [ID]"
-- Suggest: "Run /s:specify with your feature description to create the specification first."
+- Suggest: "Run /start:specify with your feature description to create the specification first."
 - Exit gracefully
 
-If the specification exists, display "📁 Found existing spec: [directory]" and list available documents from the `[spec]` section. Verify `plan` exists in the `[spec]` section. If not, display error: "❌ No PLAN.md found. Run /s:specify first to create the implementation plan." and exit.
+If the specification exists, display "📁 Found existing spec: [directory]" and list available documents from the `[spec]` section. Verify `plan` exists in the `[spec]` section. If not, display error: "❌ No PLAN.md found. Run /start:specify first to create the implementation plan." and exit.
 
 **Quality Gates**: If the `[gates]` section exists with `task_definition_of_done`, note it for task validation. If gates don't exist, proceed without validation.
 
@@ -76,7 +76,7 @@ Ready to start Phase 1 implementation? (yes/no)
 ```
 
 **🤔 Ask yourself before proceeding:**
-1. Have I used `/s:spec --read` to verify the specification exists?
+1. Have I used the spec script to verify the specification exists?
 2. Does the specification directory contain a PLAN.md file?
 3. Have I successfully loaded and parsed the PLAN.md file?
 4. Did I identify ALL phases and count the tasks in each one?

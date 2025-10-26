@@ -20,49 +20,18 @@
 
 ## 🤖 What is The Agentic Startup?
 
-**The Agentic Startup** is a spec-driven development framework for Claude Code that transforms how you build software.
+**The Agentic Startup** is a spec-driven development framework for Claude Code that transforms how you build software. Think of it as having instant access to expert developers, architects, and engineers - all working together in parallel to turn your ideas into shipped code.
 
-### The Problem
+We follow **[Spec-Driven Development](https://www.perplexity.ai/?q=Spec+Driven+Development)**, where comprehensive specifications are created before coding begins, ensuring clarity and reducing rework.
 
-Development often moves too fast without proper planning:
-- Features built without clear requirements
-- Architecture decisions made ad-hoc during coding
-- Technical debt accumulates from lack of upfront design
-- Teams struggle to maintain consistency across implementations
+**The workflow**:
 
-### The Solution: Spec-Driven Development
+1. **📋 Specify** - Turn ideas into comprehensive PRD, SDD, and PLAN documents
+2. **⚡ Implement** - Execute plans phase-by-phase with parallel agent coordination
+3. **📚 Document** - Automatically capture patterns and knowledge as you build
+4. **🔄 Refactor** - Improve code quality while preserving behavior
 
-**The Agentic Startup** enforces a disciplined workflow:
-
-1. **📋 Specify First** - Create comprehensive specifications before writing code
-   - **PRD** (Product Requirements) - What to build and why
-   - **SDD** (Solution Design) - How to build it technically
-   - **PLAN** (Implementation Plan) - Executable tasks and phases
-
-2. **👀 Review & Refine** - Validate specifications with stakeholders
-   - Catch issues during planning, not during implementation
-   - Iterate on requirements and design cheaply
-   - Get alignment before costly development begins
-
-3. **⚡ Implement with Confidence** - Execute validated plans phase-by-phase
-   - Clear acceptance criteria at every step
-   - Parallel agent coordination for speed
-   - Built-in validation gates and quality checks
-
-4. **📚 Document & Learn** - Capture patterns for future reuse
-   - Automatically document discovered patterns
-   - Build organizational knowledge base
-   - Prevent reinventing solutions
-
-### Core Philosophy
-
-**Measure twice, cut once** - Investing time in specifications saves exponentially more time during implementation.
-
-**Documentation as code** - Specs, patterns, and interfaces are first-class artifacts that evolve with your codebase.
-
-**Parallel execution** - Multiple specialists work simultaneously within clear boundaries, maximizing velocity without chaos.
-
-**Quality gates** - Definition of Ready (DOR) and Definition of Done (DOD) ensure standards are maintained throughout.
+The framework leverages **Claude Code's plugin system** to provide workflow commands, autonomous skills, specialized agents, and quality templates - all working together like a high-velocity startup team.
 
 ---
 
@@ -73,6 +42,7 @@ Development often moves too fast without proper planning:
 
 ✨ **Native Claude Code Integration**
 - Distributed as official Claude Code marketplace plugins
+- Two plugins: `start` (workflows) + `team` (agents)
 - Seamless installation via Claude Code plugin system
 - Zero manual configuration required
 
@@ -81,9 +51,15 @@ Development often moves too fast without proper planning:
 - Progressive disclosure for optimal token efficiency
 - Skills for documentation, agent delegation, and more
 
+👥 **Specialized Agent Team**
+- 11 agent roles across 6 professional categories
+- 39+ activity-based specializations
+- Install optionally via `team@the-startup` plugin
+
 🎯 **Streamlined Architecture**
 - Commands orchestrate high-level workflows
 - Skills provide autonomous capabilities
+- Agents deliver specialized expertise
 - Rules define operational patterns
 
 ### Migrating from 1.x
@@ -93,91 +69,60 @@ Development often moves too fast without proper planning:
 
 ---
 
-## 📦 Quick Install
+## 🚀 Quick Start
 
 ### Installation
 
-**Requirements**:
-- Claude Code v2.0+ - Claude Code with marketplace features
-
-Install the Start plugin from The Agentic Startup marketplace:
+**Requirements**: Claude Code v2.0+ with marketplace support
 
 ```bash
 # Add The Agentic Startup marketplace
 /plugin marketplace add rsmdt/the-startup
 
-# Install the Start plugin (required)
+# Install the Start plugin (core workflows)
 /plugin install start@the-startup
 
-
+# (Optional) Install the Team plugin (specialized agents)
+/plugin install team@the-startup
 ```
 
-Alternatively, browse and install interactively:
-```bash
-/plugin
-```
+Alternatively, browse and install interactively via `/plugin`
 
-That's it! You now have access to 6 workflow commands and 2 autonomous skills.
+### Initialize Your Environment
 
-### Initial Setup
-
-After installation, configure your environment:
+Configure output style and statusline (one-time setup):
 
 ```bash
 /start:init
 ```
 
-This command will:
-- ✅ Set up **The Startup** output style (high-energy orchestration)
-- ✅ Configure your statusline (git branch integration)
-- ✅ Ask for your preferences interactively
+This sets up:
+- **The Startup** output style (high-energy parallel execution)
+- Git-aware statusline
+- Interactive preferences
 
-**Recommended:** Always run `/start:init` in new projects to configure Claude Code for optimal workflow.
+### Your First Workflow
 
----
-
-## 🚀 Quick Start
-
-### Your First Specification
-
-Create a comprehensive specification from a brief description:
-
+**1. Create a specification:**
 ```bash
 /start:specify Add user authentication with OAuth support
 ```
 
-Claude will orchestrate specialist agents to create:
-- **PRD** (Product Requirements) - What to build and why
-- **SDD** (Solution Design) - How to build it technically
-- **PLAN** (Implementation Plan) - Executable tasks and phases
+Creates `docs/specs/001-user-authentication/` with PRD, SDD, and PLAN documents.
 
-### Execute the Implementation
-
-Once your specification is ready:
-
+**2. Execute the implementation:**
 ```bash
 /start:implement 001
 ```
 
-Claude executes the plan phase-by-phase with:
-- Parallel agent coordination
-- Continuous validation
-- Real-time progress tracking
-- User confirmation at phase boundaries
+Runs phase-by-phase with parallel agents, validation gates, and progress tracking.
 
-### Analyze Your Codebase
-
-Discover and document patterns in your code:
-
+**3. Analyze patterns:**
 ```bash
-/start:analyze security
+/start:analyze security patterns in authentication
 ```
 
-Claude will:
-- Launch parallel specialist agents
-- Discover reusable patterns
-- Document in `docs/patterns/`, `docs/domain/`, `docs/interfaces/`
-- Ensure no duplication
+Discovers and documents patterns in `docs/patterns/`, `docs/domain/`, `docs/interfaces/`
 
 ---
 
@@ -204,7 +149,7 @@ The Agentic Startup leverages Claude Code's powerful extensibility features:
 **What:** Slash commands you explicitly run (e.g., `/start:specify`)
 
 **How we use it:**
-- 6 workflow commands for specification, implementation, analysis, refactoring
+- 5 workflow commands for specification, implementation, analysis, refactoring, initialization
 - Commands orchestrate multi-step processes
 - User decides when to invoke
 
@@ -220,13 +165,16 @@ The Agentic Startup leverages Claude Code's powerful extensibility features:
 
 **Activation:** Natural language (e.g., "break down this complex task")
 
-### 👥 Agents (Coming Soon)
+### 👥 Agents (Team Plugin)
 
 **What:** Specialized personas with focused expertise
 
-**Status:** Framework designed, library in development
+**How we use it:**
+- `team@the-startup` plugin provides 11 agent roles
+- Activity-based specialization (requirements, architecture, implementation, QA, design, platform engineering)
+- Launched via Task tool for specialist work
 
-**Future:** 50+ specialist agents across 9 professional roles
+**Install:** `/plugin install team@the-startup`
 
 ### 📊 Statusline (Hooks)
 
@@ -252,9 +200,21 @@ The Agentic Startup leverages Claude Code's powerful extensibility features:
 
 ---
 
-## 📋 Start Plugin Reference
+## 📋 Commands Reference
 
-The `@the-startup/start` plugin provides workflow orchestration for agentic development.
+Quick reference for all workflow commands. Click command names for detailed documentation.
+
+| Command | Description |
+|---------|-------------|
+| [`/start:init`](#startinit) | Initialize environment (output style, statusline) |
+| [`/start:specify`](#startspecify-description) | Create PRD, SDD, and PLAN from brief description |
+| [`/start:implement`](#startimplement-spec-id) | Execute implementation plan phase-by-phase |
+| [`/start:analyze`](#startanalyze-area) | Discover and document patterns, rules, interfaces |
+| [`/start:refactor`](#startrefactor-description) | Improve code quality while preserving behavior |
+
+---
+
+## 📖 Detailed Command Documentation
 
 ### Commands
 
@@ -360,36 +320,6 @@ Improve code quality while strictly preserving behavior.
 3. Applies changes incrementally
 4. Validates tests after each change
 5. Documents refactoring patterns discovered
-
----
-
-#### `/start:spec <name> [--add <template>]`
-
-Create numbered spec directories with auto-incrementing IDs.
-
-**Purpose:** Manage specification directories
-
-**Examples:**
-```bash
-# Create new spec directory
-/start:spec user-authentication
-
-# Create spec and add PRD template
-/start:spec payment-integration --add product-requirements
-
-# Read existing spec
-/start:spec 001 --read
-
-# Add template to existing spec
-/start:spec 001 --add solution-design
-```
-
-**Templates available:**
-- `product-requirements` - PRD template
-- `solution-design` - SDD template
-- `implementation-plan` - PLAN template
-
-**Output format:** `docs/specs/NNN-feature-name/`
 
 ---
 
@@ -527,7 +457,7 @@ plugins/start/templates/
 └── task-definition-of-done.md   # Task-level quality gate
 ```
 
-**Usage:** Automatically used by `/start:spec --add <template>`
+**Usage:** Automatically used by `/start:specify` when creating specifications
 
 ---
 
@@ -871,12 +801,19 @@ The plugin assists with **defensive security tasks only**:
 
 ## 🚧 Roadmap
 
-### Coming Soon
+### Available Now
 
-**Agents Plugin** (`@the-startup/agents`)
-- 50+ specialized agents across 9 professional roles
-- Activity-focused (not role-focused)
-- Framework-agnostic (React, Vue, Angular, etc.)
+**Team Plugin** (`team@the-startup`) ✅
+- 11 specialized agent roles across 6 professional categories
+- Activity-based specialization (39+ activities)
+- Install via `/plugin install team@the-startup`
+
+**Start Plugin** (`start@the-startup`) ✅
+- 5 workflow commands
+- 2 autonomous skills (documentation, agent-delegation)
+- Output style and statusline integration
+
+### Coming Soon
 
 **Additional Skills**
 - `specification-review` - Validate implementation against specs
@@ -894,11 +831,12 @@ The plugin assists with **defensive security tasks only**:
 
 ### 2.0.0 (Current - Claude Code Marketplace)
 - ✨ Complete rewrite for Claude Code marketplace
+- 🔌 Two plugins: `start` (workflows) + `team` (11 specialized agents)
 - 🤖 Autonomous skills system (documentation, agent-delegation)
-- ⚡ 6 workflow commands (specify, implement, analyze, refactor, spec, init)
+- ⚡ 5 workflow commands (specify, implement, analyze, refactor, init)
+- 👥 Activity-based agent specialization (39+ activities across 6 roles)
 - 🎨 The Startup output style included
 - 📊 Statusline integration with git branch
-- 🔌 Native plugin architecture
 - 📝 Progressive disclosure for optimal token usage
 - 🎯 DRY architecture (82% rules reduction)
 
@@ -1024,6 +962,54 @@ Contributions welcome! Here's how:
 
 ---
 
+## 🎯 Philosophy
+
+### The Problem We Solve
+
+Development often moves too fast without proper planning:
+- Features built without clear requirements
+- Architecture decisions made ad-hoc during coding
+- Technical debt accumulates from lack of upfront design
+- Teams struggle to maintain consistency across implementations
+
+### Our Approach: Spec-Driven Development
+
+**The Agentic Startup** enforces a disciplined workflow that balances speed with quality:
+
+**1. Specify First** - Create comprehensive specifications before writing code
+- **PRD** (Product Requirements) - What to build and why
+- **SDD** (Solution Design) - How to build it technically
+- **PLAN** (Implementation Plan) - Executable tasks and phases
+
+**2. Review & Refine** - Validate specifications with stakeholders
+- Catch issues during planning, not during implementation
+- Iterate on requirements and design cheaply
+- Get alignment before costly development begins
+
+**3. Implement with Confidence** - Execute validated plans phase-by-phase
+- Clear acceptance criteria at every step
+- Parallel agent coordination for speed
+- Built-in validation gates and quality checks
+
+**4. Document & Learn** - Capture patterns for future reuse
+- Automatically document discovered patterns
+- Build organizational knowledge base
+- Prevent reinventing solutions
+
+### Core Principles
+
+**Measure twice, cut once** - Investing time in specifications saves exponentially more time during implementation.
+
+**Documentation as code** - Specs, patterns, and interfaces are first-class artifacts that evolve with your codebase.
+
+**Parallel execution** - Multiple specialists work simultaneously within clear boundaries, maximizing velocity without chaos.
+
+**Quality gates** - Definition of Ready (DOR) and Definition of Done (DOD) ensure standards are maintained throughout.
+
+**Progressive disclosure** - Skills and agents load details only when needed, optimizing token efficiency while maintaining power.
+
+---
+
 ## 📚 Further Reading
 
 ### Documentation
@@ -1052,8 +1038,11 @@ MIT License - see [LICENSE](LICENSE) file for details
 # Add The Agentic Startup marketplace
 /plugin marketplace add rsmdt/the-startup
 
-# Install the Start plugin
+# Install the Start plugin (required)
 /plugin install start@the-startup
+
+# (Optional) Install the Team plugin for specialized agents
+/plugin install team@the-startup
 ```
 
 ### Configure
