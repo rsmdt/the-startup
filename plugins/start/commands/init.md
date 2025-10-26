@@ -54,7 +54,7 @@ Let's get started!
 **🎯 Goal**: Check if output style exists, then ask user if they want to install/reinstall.
 
 **First, check if already installed:**
-1. Run: `scripts/install-output-style.py --check`
+1. Run: `./scripts/install-output-style.py --check`
 2. Parse output:
    - If output contains "INSTALLED": Already installed
    - If output contains "NOT_INSTALLED": Not yet installed
@@ -70,7 +70,7 @@ Let's get started!
     2. "Skip" - "Don't reinstall output style"
   ```
 - If "Reinstall":
-  - Run: `scripts/install-output-style.py` to reinstall
+  - Run: `./scripts/install-output-style.py` to reinstall
   - Run SlashCommand tool with `/output-style The Startup`
   - Display: "✓ Output style reinstalled and activated"
   - Continue to next step
@@ -88,7 +88,7 @@ Let's get started!
     2. "Skip" - "Don't install output style"
   ```
 - If "Install":
-  - Run: `scripts/install-output-style.py` to install
+  - Run: `./scripts/install-output-style.py` to install
   - Run SlashCommand tool with `/output-style The Startup`
   - Display: "✓ Output style installed and activated"
   - Continue to next step
@@ -107,7 +107,7 @@ Let's get started!
 **🎯 Goal**: Check if statusline exists, then ask user if they want to install/reinstall.
 
 **First, check if already installed:**
-1. Run: `scripts/install-statusline.py --check`
+1. Run: `./scripts/install-statusline.py --check`
 3. Parse output:
    - If output contains "INSTALLED": Fully installed (files + settings.json configured)
    - Otherwise: Not installed (treat PARTIAL or NOT_INSTALLED the same)
@@ -123,7 +123,7 @@ Let's get started!
     2. "Skip" - "Don't reinstall output style"
   ```
 - If "Reinstall":
-  - Run: `scripts/install-statusline.py` to reinstall
+  - Run: `./scripts/install-statusline.py` to reinstall
   - Display: "✓ Statusline reinstalled (restart Claude Code to see changes)"
   - Continue to next step
 - If "Skip":
@@ -140,7 +140,7 @@ Let's get started!
     2. "Skip" - "Don't install statusline"
   ```
 - If "Install":
-  - Run: `scripts/install-statusline.py` to install
+  - Run: `./scripts/install-statusline.py` to install
   - Display: "✓ Statusline installed (restart Claude Code to see changes)"
   - Continue to next step
 - If "Skip":
