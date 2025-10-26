@@ -26,7 +26,7 @@ We follow **[Spec-Driven Development](https://www.perplexity.ai/?q=Spec+Driven+D
 
 **The workflow**:
 
-1. **📋 Specify** - Turn ideas into comprehensive PRD, SDD, and PLAN documents
+1. **📋 Specify** - Turn ideas into comprehensive specification documents (requirements, design, and implementation plan)
 2. **⚡ Implement** - Execute plans phase-by-phase with parallel agent coordination
 3. **📚 Document** - Automatically capture patterns and knowledge as you build
 4. **🔄 Refactor** - Improve code quality while preserving behavior
@@ -36,7 +36,7 @@ The framework leverages **Claude Code's plugin system** to provide workflow comm
 ---
 
 > [!NOTE]
-> From v2.0 of **The Agentic Startup**, the repository has been rewritten as Claude Code marketplace
+> **The Agentic Startup v2.0** is a complete rewrite for the Claude Code marketplace plugin system. The previous version (v1.x) used a Go-based bash script installer. See [MIGRATION.md](MIGRATION.md) if upgrading.
 
 ### What's New in 2.0
 
@@ -65,7 +65,7 @@ The framework leverages **Claude Code's plugin system** to provide workflow comm
 ### Migrating from 1.x
 
 > **📌 Upgrading from the bash script installer (pre-2.0)?**
-> See the [complete migration guide](#migrating-from-1x-bash-script-version) at the bottom of this README.
+> See the [complete migration guide](MIGRATION.md) for step-by-step instructions.
 
 ---
 
@@ -108,7 +108,7 @@ This sets up:
 /start:specify Add user authentication with OAuth support
 ```
 
-Creates `docs/specs/001-user-authentication/` with PRD, SDD, and PLAN documents.
+Creates `docs/specs/001-user-authentication/` with product-requirements.md, solution-design.md, and implementation-plan.md documents.
 
 **2. Execute the implementation:**
 ```bash
@@ -207,7 +207,7 @@ Quick reference for all workflow commands. Click command names for detailed docu
 | Command | Description |
 |---------|-------------|
 | [`/start:init`](#startinit) | Initialize environment (output style, statusline) |
-| [`/start:specify`](#startspecify-description) | Create PRD, SDD, and PLAN from brief description |
+| [`/start:specify`](#startspecify-description) | Create specification documents from brief description |
 | [`/start:implement`](#startimplement-spec-id) | Execute implementation plan phase-by-phase |
 | [`/start:analyze`](#startanalyze-area) | Discover and document patterns, rules, interfaces |
 | [`/start:refactor`](#startrefactor-description) | Improve code quality while preserving behavior |
@@ -220,143 +220,396 @@ Quick reference for all workflow commands. Click command names for detailed docu
 
 #### `/start:specify <description>`
 
-Create comprehensive specifications from brief descriptions.
+Create comprehensive specifications from brief descriptions through deep research and specialist agent coordination.
 
-**Purpose:** Generate PRD, SDD, and PLAN documents
+**Purpose:** Transform ideas into implementation-ready specifications with product requirements, solution design, and implementation plan documents
 
-**Example:**
+**Usage:**
 ```bash
 /start:specify Build a real-time notification system with WebSocket support
+/start:specify 001  # Resume existing specification work
 ```
 
-**What you get:**
-- `docs/specs/001-notification-system/PRD.md` - Product requirements
-- `docs/specs/001-notification-system/SDD.md` - Solution design
-- `docs/specs/001-notification-system/PLAN.md` - Implementation plan
+**Key Features:**
+- **Auto-incrementing Spec IDs** - Automatically creates numbered directories (001, 002, etc.)
+- **Resume Capability** - Can resume work on existing specifications by ID
+- **Pattern Documentation** - Automatically documents discovered patterns in `docs/patterns/`
+- **Interface Documentation** - Captures external service contracts in `docs/interfaces/`
+- **Domain Documentation** - Records business rules in `docs/domain/`
+- **Confidence Scoring** - Provides implementation readiness assessment with risk analysis
+- **Quality Gates** - Requires user approval between major phases
 
-**Process:**
-1. Creates spec directory with auto-incrementing ID
-2. Orchestrates specialist agents for research
-3. Documents requirements, design, and implementation steps
-4. Validates completeness at each stage
+<details>
+<summary><strong>View Details</strong></summary>
+
+### What You Get
+
+Three comprehensive documents in `docs/specs/[ID]-[name]/`:
+
+- **product-requirements.md** - Product Requirements Document
+  - User stories and use cases
+  - Feature specifications
+  - Success criteria
+  - Non-functional requirements
+
+- **solution-design.md** - Solution Design Document
+  - Technical architecture
+  - System components and interactions
+  - Data models and schemas
+  - Technology stack decisions
+  - Security and performance considerations
+
+- **implementation-plan.md** - Implementation Plan
+  - Phased task breakdown
+  - Dependencies and ordering
+  - Acceptance criteria per phase
+  - Risk assessment and mitigation
+
+### Deep Research Process
+
+The command orchestrates specialist agents through deep research cycles:
+
+1. **Discovery Phase**
+   - Investigates competitive landscape
+   - Researches best practices
+   - Identifies technical patterns
+   - Analyzes integration requirements
+
+2. **Documentation Phase**
+   - Generates product-requirements.md with requirements analysis
+   - Creates solution-design.md with architectural decisions
+   - Produces implementation-plan.md with executable tasks
+   - Documents discovered patterns/interfaces
+
+3. **Review Phase** (Quality Gate)
+   - Presents findings for user approval
+   - Validates completeness
+   - Iterates based on feedback
+   - Ensures specification clarity
+
+### Workflow
+
+```mermaid
+flowchart TD
+    A([Your Feature Idea]) --> |initialize| B{Check<br>Existing}
+    B --> |exists| C[Review and Refine]
+    C --> END[🚀 Ready for /start:implement 001]
+    B --> |new| D[📄 **Requirements Gathering**<br/>Create *product-requirements.md* if needed]
+    D --> E[📄 **Technical Research**<br/>Create *solution-design.md* if needed, document patterns, interfaces]
+    E --> F[📄 **Implementation Planning**<br/>Create *implementation-plan.md*]
+    F --> END
+```
+
+</details>
 
 ---
 
 #### `/start:implement <spec-id>`
 
-Execute implementation plans phase-by-phase.
+Execute implementation plans phase-by-phase with parallel specialist agents and continuous validation.
 
-**Purpose:** Turn specifications into working code
+**Purpose:** Transform validated specifications into working code with quality gates and progress tracking
 
-**Example:**
+**Usage:**
 ```bash
 /start:implement 001
+/start:implement path/to/custom/implementation-plan.md
 ```
 
-**Process:**
-1. Loads PLAN.md from spec directory
-2. Executes tasks phase-by-phase
-3. Launches parallel agents when safe
-4. Validates at phase boundaries
-5. Tracks progress with TodoWrite
-6. Waits for user confirmation between phases
+**Key Features:**
+- **Parallel Execution** - Multiple agents work simultaneously within phases
+- **Sequential Phases** - Phases execute in order with validation gates
+- **Rollback on Failure** - Automatic reversion if tests fail
+- **Specification Compliance** - Continuous validation against product-requirements.md/solution-design.md
+- **Pattern Recognition** - Documents implementation patterns discovered
+- **Real-time Updates** - TodoWrite tracking shows live progress
+- **Custom Plans** - Can implement any implementation-plan.md file, not just specs
 
-**Features:**
-- Parallel execution within phases
-- Sequential execution between phases
-- Specification compliance validation
-- Rollback on failures
+<details>
+<summary><strong>View Details</strong></summary>
+
+### Execution Process
+
+1. **Phase Loading**
+   - Loads one phase at a time from implementation-plan.md
+   - Displays tasks and acceptance criteria
+   - Identifies parallel execution opportunities
+
+2. **Smart Parallel Execution**
+   - Launches multiple specialist agents simultaneously when tasks are independent
+   - Coordinates file creation to prevent collisions
+   - Maintains clear boundaries with FOCUS/EXCLUDE templates
+
+3. **Quality Validation**
+   - Validates acceptance criteria at phase boundaries
+   - Runs tests after changes
+   - Checks specification compliance
+   - Verifies no regressions
+
+4. **Progress Tracking**
+   - Real-time TodoWrite updates
+   - Phase completion summaries
+   - Agent coordination status
+   - Time estimates and velocity
+
+5. **Approval Gates**
+   - Waits for user confirmation between phases
+   - Shows what was accomplished
+   - Previews next phase tasks
+   - Allows course correction
+
+### Workflow
+
+```mermaid
+flowchart TD
+    A([📄 *implementation-plan.md*]) --> |load| B[**Initialize Plan**<br/>Parse phases & tasks]
+    B --> |approve| C{Phases<br>Remaining?}
+    C --> |yes| D[**Execute Phase N**<br/>⚡ *Parallel agent execution*<br/>✓ *Run tests after each task*]
+    D --> |validate| E[**Phase Review**<br/>Check test results<br/>Review changes]
+    E --> |continue| C
+    C --> |no| F[**Final Validation**<br/>Run full test suite<br/>Verify all requirements]
+    F --> END[✅ **Implementation Complete**]
+```
+
+</details>
 
 ---
 
 #### `/start:analyze <area>`
 
-Discover and document business rules, technical patterns, and system interfaces.
+Discover and document business rules, technical patterns, and system interfaces through iterative exploration.
 
-**Purpose:** Extract knowledge from existing codebase
+**Purpose:** Extract organizational knowledge from existing codebase and create reusable documentation
 
-**Example:**
+**Usage:**
 ```bash
 /start:analyze security patterns in authentication
+/start:analyze business rules for user permissions
+/start:analyze technical patterns in our microservices architecture
 ```
 
-**Analysis areas:**
-- `business` - Business rules, domain logic, workflows
-- `technical` - Architectural patterns, code structure
-- `security` - Security patterns, vulnerabilities
-- `performance` - Optimization patterns, bottlenecks
-- `integration` - API contracts, service integrations
-- `data` - Storage patterns, data modeling
-- `testing` - Test strategies, validation approaches
-- `deployment` - CI/CD, infrastructure patterns
+<details>
+<summary><strong>View Details</strong></summary>
 
-**Output:**
-- `docs/domain/` - Business rules and domain knowledge
-- `docs/patterns/` - Technical patterns and solutions
-- `docs/interfaces/` - External service contracts
+### Analysis Process
+
+Uses cyclical discovery-documentation-review workflow:
+
+1. **Discovery Phase**
+   - Launches specialist agents to explore codebase
+   - Identifies patterns, rules, and interfaces
+   - Analyzes code structure and relationships
+   - Extracts implicit knowledge
+
+2. **Documentation Phase**
+   - Creates structured documentation using templates
+   - Categorizes findings appropriately
+   - Cross-references related documentation
+   - Ensures consistency
+
+3. **Review Phase** (Quality Gate)
+   - Presents findings to user
+   - Validates accuracy
+   - Iterates if needed
+   - Confirms placement
+
+### Analysis Areas
+
+- **Business** - Business rules, domain logic, workflows, validation rules
+- **Technical** - Architectural patterns, code structure, design patterns
+- **Security** - Security patterns, threat models, vulnerabilities, mitigations
+- **Performance** - Optimization patterns, bottlenecks, caching strategies
+- **Integration** - API contracts, service integrations, external dependencies
+- **Data** - Storage patterns, data modeling, schema design, migrations
+- **Testing** - Test strategies, validation approaches, quality gates
+- **Deployment** - CI/CD patterns, infrastructure, deployment strategies
+
+### Output Structure
+
+Documentation is automatically organized:
+
+- **`docs/domain/`** - Business rules and domain knowledge
+  - User workflows
+  - Business logic
+  - Validation rules
+  - Domain terminology
+
+- **`docs/patterns/`** - Technical patterns and solutions
+  - Architectural patterns
+  - Code patterns
+  - Design patterns
+  - Best practices
+
+- **`docs/interfaces/`** - External service contracts
+  - API integrations
+  - Webhook definitions
+  - Third-party services
+  - Protocol specifications
+
+### Workflow
+
+```mermaid
+flowchart TD
+    A([Analysis Request]) --> |initialize| B[**Scope Definition**<br/>Clarify analysis area<br/>Set cycle plan]
+    B --> |start cycle| C[**Discovery Phase**<br/>⚡ *Specialist analysis*<br/>🔍 *Pattern identification*]
+    C --> |document| D[**Documentation Phase**<br/>📄 *Create domain docs*<br/>📄 *Create pattern docs*<br/>📄 *Create interface docs*]
+    D --> |review| E[**Review & Validation**<br/>Check completeness<br/>Identify gaps]
+    E --> |continue?| F{More Cycles<br>Needed?}
+    F --> |yes| C
+    F --> |no| G[**Final Summary**<br/>📊 *Analysis report*<br/>🎯 *Recommendations*<br/>📋 *Next steps*]
+    G --> END[✅ **Analysis Complete**]
+```
+
+</details>
 
 ---
 
 #### `/start:refactor <description>`
 
-Improve code quality while strictly preserving behavior.
+Improve code quality while strictly preserving all existing behavior through test-validated incremental changes.
 
-**Purpose:** Safe, incremental refactoring
+**Purpose:** Safe, systematic refactoring with automatic rollback on test failures
 
-**Example:**
+**Usage:**
 ```bash
-/start:refactor Simplify the authentication middleware
+/start:refactor Simplify the authentication middleware for better testability
+/start:refactor Improve the WebSocket connection manager
 ```
 
-**Guarantees:**
-- All tests pass before and after
-- Behavior is strictly preserved
-- Incremental changes (never big-bang)
-- Rollback on test failures
+<details>
+<summary><strong>View Details</strong></summary>
 
-**Process:**
-1. Establishes test baseline
-2. Analyzes code for improvements
-3. Applies changes incrementally
-4. Validates tests after each change
-5. Documents refactoring patterns discovered
+### Safety Guarantees
+
+**Strict Behavior Preservation:**
+- All tests must pass before refactoring begins
+- Tests run after each incremental change
+- Automatic rollback if any test fails
+- No functional changes allowed
+
+**Incremental Approach:**
+- Never big-bang refactoring
+- Small, focused changes
+- One improvement at a time
+- Continuous validation
+
+**Test-Driven Safety:**
+- Establishes comprehensive test baseline
+- Validates behavior preservation
+- Identifies missing test coverage
+- Suggests additional tests if needed
+
+### Refactoring Process
+
+1. **Baseline Establishment**
+   - Runs full test suite
+   - Captures current behavior
+   - Identifies test coverage gaps
+   - Ensures starting point is valid
+
+2. **Analysis**
+   - Detects code smells
+   - Identifies improvement opportunities
+   - Prioritizes changes by impact
+   - Plans incremental steps
+
+3. **Incremental Changes**
+   - Applies one improvement at a time
+   - Runs tests after each change
+   - Validates behavior preservation
+   - Documents rationale
+
+4. **Pattern Documentation**
+   - Captures refactoring patterns discovered
+   - Documents anti-patterns eliminated
+   - Updates technical documentation
+   - Shares learnings
+
+5. **Validation**
+   - Final full test suite run
+   - Performance comparison
+   - Code quality metrics
+   - Rollback if issues detected
+
+### Common Improvements
+
+- Extract complex methods into smaller functions
+- Eliminate code duplication
+- Improve naming clarity
+- Simplify conditional logic
+- Reduce coupling between components
+- Improve error handling
+- Enhance testability
+- Remove dead code
+- Optimize imports
+
+### Workflow
+
+```mermaid
+flowchart TD
+    A([Refactoring Request]) --> |analyze| B[**Goal Clarification**<br/>Define objectives<br/>Analyze codebase]
+    B --> |assess| C{**Complexity<br>Check**}
+    C --> |simple| D[**Direct Refactoring**<br/>✓ *Run tests first*<br/>🔧 *Apply changes*<br/>✓ *Validate each step*]
+    D --> |review| E[**Specialist Review**<br/>Code quality check<br/>Performance impact]
+    E --> DONE[✅ **Refactoring Complete**]
+    C --> |complex| F[**Create Specification**<br/>📄 *Generate solution-design.md*<br/>📄 *Generate implementation-plan.md*<br/>Document approach]
+    F --> |defer| G[🚀 **Ready for /start:implement**<br/>Execute via planned phases]
+```
+
+</details>
 
 ---
 
 #### `/start:init`
 
-Initialize The Agentic Startup framework in your Claude Code environment.
+Initialize The Agentic Startup framework in your Claude Code environment with interactive setup.
 
-**Purpose:** One-time setup for optimal configuration
+**Purpose:** One-time setup for optimal configuration of output style and statusline
 
-**Example:**
+**Usage:**
 ```bash
 /start:init
 ```
 
-**What it does:**
-1. **Configures Output Style**
-   - Activates "The Startup" style
-   - High-energy, execution-focused communication
+<details>
+<summary><strong>View Details</strong></summary>
+
+### Configuration Steps
+
+1. **Output Style Configuration**
+   - Activates "The Startup" communication style
+   - High-energy, execution-focused personality
    - Parallel agent orchestration mindset
+   - Y Combinator energy meets operational excellence
 
-2. **Sets Up Statusline**
-   - Adds git branch to statusline
+2. **Statusline Setup**
+   - Adds git branch integration
    - Tracks current command state
-   - Custom hooks for real-time updates
+   - Shows real-time execution status
+   - Custom hooks for dynamic updates
 
-3. **Interactive Setup**
-   - Asks for your preferences
-   - Confirms each configuration
-   - Shows what changed
+3. **Interactive Preferences**
+   - Asks for your configuration choices
+   - Confirms each change before applying
+   - Shows exactly what was modified
+   - Allows customization
 
-**When to run:**
+### When to Run
+
+Run `/start:init` when:
 - First time using the plugin in a project
-- After updating to a new version
-- When starting a new repository
-- If you want to reconfigure settings
+- After updating to a new plugin version
+- Starting work in a new repository
+- Want to reconfigure output style or statusline
+- Statusline stopped working after settings changes
 
-**Requirements:** Claude Code v2.0+
+**Note:** Safe to run multiple times - won't duplicate configurations
+
+### Requirements
+
+Claude Code v2.0+
+
+</details>
 
 ---
 
@@ -449,9 +702,9 @@ Rich templates for structured documentation:
 
 ```
 plugins/start/templates/
-├── product-requirements.md      # PRD structure
-├── solution-design.md            # SDD structure
-├── implementation-plan.md        # PLAN structure
+├── product-requirements.md      # Product requirements structure
+├── solution-design.md            # Solution design structure
+├── implementation-plan.md        # Implementation plan structure
 ├── definition-of-ready.md        # Quality gate
 ├── definition-of-done.md         # Quality gate
 └── task-definition-of-done.md   # Task-level quality gate
@@ -493,9 +746,9 @@ The plugin encourages structured knowledge management:
 docs/
 ├── specs/
 │   └── [3-digit-number]-[feature-name]/
-│       ├── PRD.md                          # What to build
-│       ├── SDD.md                          # How to build it
-│       └── PLAN.md                         # Implementation tasks
+│       ├── product-requirements.md         # What to build
+│       ├── solution-design.md              # How to build it
+│       └── implementation-plan.md          # Implementation tasks
 │
 ├── domain/                                  # Business rules
 │   ├── user-permissions.md
@@ -590,9 +843,9 @@ Configures output style and statusline.
 
 **What happens:**
 - Creates `docs/specs/001-notification-system/`
-- Generates PRD (requirements and use cases)
-- Generates SDD (technical architecture and design)
-- Generates PLAN (implementation tasks and phases)
+- Generates product-requirements.md (requirements and use cases)
+- Generates solution-design.md (technical architecture and design)
+- Generates implementation-plan.md (implementation tasks and phases)
 - Documents discovered patterns/interfaces
 
 **Duration:** 15-30 minutes (depending on complexity)
@@ -600,9 +853,9 @@ Configures output style and statusline.
 ### 3. **Review Specification**
 
 Read generated files:
-- `docs/specs/001-notification-system/PRD.md`
-- `docs/specs/001-notification-system/SDD.md`
-- `docs/specs/001-notification-system/PLAN.md`
+- `docs/specs/001-notification-system/product-requirements.md`
+- `docs/specs/001-notification-system/solution-design.md`
+- `docs/specs/001-notification-system/implementation-plan.md`
 
 Provide feedback if needed, Claude will revise.
 
@@ -613,7 +866,7 @@ Provide feedback if needed, Claude will revise.
 ```
 
 **What happens:**
-- Loads PLAN.md
+- Loads implementation-plan.md
 - Executes Phase 1 tasks
 - Waits for user confirmation
 - Executes Phase 2 tasks
@@ -840,91 +1093,27 @@ The plugin assists with **defensive security tasks only**:
 - 📝 Progressive disclosure for optimal token usage
 - 🎯 DRY architecture (82% rules reduction)
 
-### 1.0.0 (Deprecated - npm CLI)
-- Initial release as npm package
-- Interactive TUI installation
+### 1.0.0 (Deprecated - Bash Script Installer)
+- Initial release with curl-based installation
+- Interactive CLI installation script
 - Manual component installation
-- **No longer maintained**
+- **No longer maintained** - See [MIGRATION.md](MIGRATION.md)
 
 ---
 
-## 🔄 Migrating from 1.x (Bash Script Version)
+## 🔄 Migrating from v1.x
 
-**The Agentic Startup** was previously distributed via bash script installer (pre-2.0). If you have the old version installed, here's how to migrate:
+**The Agentic Startup v1.x** was distributed via bash script installer. If you have the old version installed, migration to v2.0 (marketplace version) requires removing old files and reinstalling through the plugin system.
 
-### Uninstalling 1.x
+**📚 See [MIGRATION.md](MIGRATION.md) for complete step-by-step instructions.**
 
-The old version installed files to your Claude Code configuration directory. To remove it:
+### Quick Summary
 
-**1. Remove installed files:**
-
-```bash
-# Remove agents (if installed globally)
-rm -rf ~/.claude/agents/the-*.md
-
-# Remove commands (if installed globally)
-rm -rf ~/.claude/commands/s-*.md
-
-# Remove local installation (if used --local flag)
-rm -rf ./.the-startup
-
-# Remove output style
-rm -rf ~/.claude/output-styles/the-startup.md
-
-# Remove hooks (if any were installed)
-rm -rf ~/.claude/hooks/the-startup-*
-```
-
-**2. Clean up settings.json:**
-
-The old installer may have modified `~/.claude/settings.json`. Check for and remove:
-
-```json
-{
-  "hooks": {
-    "sessionStart": "...",  // Remove if it references the-startup
-    "statuslineComplete": "..."  // Remove if it references the-startup
-  },
-  "outputStyle": "The Startup"  // Remove or change to your preference
-}
-```
-
-**3. Verify cleanup:**
-
-```bash
-# Check for any remaining files
-find ~/.claude -name "*startup*" -o -name "*the-startup*"
-```
-
-### Installing 2.0 (Marketplace Version)
-
-After uninstalling the old version:
-
-```bash
-# Add The Agentic Startup marketplace
-/plugin marketplace add rsmdt/the-startup
-
-# Install the Start plugin
-/plugin install start@the-startup
-```
-
-### Key Differences
-
-| 1.x (Deprecated) | 2.0 (Current) |
-|-----------------|---------------|
-| Bash script installer | Claude Code marketplace |
-| Manual file placement | Automatic plugin installation |
-| Global/local installation | Plugin-based (isolated) |
-| Static agents in files | Dynamic skills system |
-| `/s:specify` commands | `/start:specify` commands |
-| Manual configuration | `/start:init` wizard |
-
-### Breaking Changes
-
-- **Command prefix changed:** `/s:*` → `/start:*`
-- **Agent files no longer used:** Replaced by skills system
-- **Hooks now managed by plugin system:** Automated via `/start:init`
-- **Settings.json modifications automated:** Use `/start:init` instead of manual edits
+**Key changes in v2.0:**
+- Command prefix: `/s:*` → `/start:*`
+- Distribution: Bash installer → Claude Code marketplace
+- Agents: Static files → Dynamic skills system
+- Configuration: Manual editing → `/start:init` wizard
 
 ---
 
@@ -977,9 +1166,9 @@ Development often moves too fast without proper planning:
 **The Agentic Startup** enforces a disciplined workflow that balances speed with quality:
 
 **1. Specify First** - Create comprehensive specifications before writing code
-- **PRD** (Product Requirements) - What to build and why
-- **SDD** (Solution Design) - How to build it technically
-- **PLAN** (Implementation Plan) - Executable tasks and phases
+- **product-requirements.md** - What to build and why
+- **solution-design.md** - How to build it technically
+- **implementation-plan.md** - Executable tasks and phases
 
 **2. Review & Refine** - Validate specifications with stakeholders
 - Catch issues during planning, not during implementation
