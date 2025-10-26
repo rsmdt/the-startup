@@ -11,8 +11,16 @@ from pathlib import Path
 from typing import Optional
 
 
+# Get plugin root from script location
+# This script is at: plugins/start/scripts/spec.py
+# Plugin root is: plugins/start/
+script_dir = Path(__file__).resolve().parent
+plugin_root = script_dir.parent
+
+# Specs are created in the current working directory
 SPECS_DIR = Path("docs/specs")
-TEMPLATES_DIR = Path("templates")
+# Templates are read from the plugin directory
+TEMPLATES_DIR = plugin_root / "templates"
 
 
 def get_next_spec_id() -> str:

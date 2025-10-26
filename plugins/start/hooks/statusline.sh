@@ -183,7 +183,7 @@ help_text="? for shortcuts"
 
 # Build the complete statusline
 # Main parts with MAIN_COLOR, help text with HELP_COLOR and italic
-statusline="${MAIN_COLOR}${dir_part}  ${model_part}  ${HELP_COLOR}${ITALIC}${help_text}${RESET}"
+statusline="${RESET}${dir_part}  ${model_part}  ${HELP_COLOR}${ITALIC}${help_text}${RESET}"
 
 # Output the statusline
 echo -e "$statusline"
