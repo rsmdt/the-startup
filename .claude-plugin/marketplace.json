@@ -1,0 +1,23 @@
+{
+  "name": "the-startup",
+  "owner": {
+    "name": "Rudolf S."
+  },
+  "metadata": {
+    "description": "Comprehensive agentic framework for Claude Code",
+    "version": "2.0.0",
+    "homepage": "https://github.com/rsmdt/the-startup"
+  },
+  "plugins": [
+    {
+      "name": "start",
+      "source": "./plugins/start",
+      "description": "Core workflow commands with output styles and productivity hooks"
+    },
+    {
+      "name": "team",
+      "source": "./plugins/team",
+      "description": "Engineering team consisting of specialized agents for software development"
+    }
+  ]
+}
