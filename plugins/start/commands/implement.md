@@ -43,7 +43,7 @@ Break down implementation tasks by activities. Use structured prompts with FOCUS
 
 **🎯 Goal**: Validate specification exists, analyze the implementation plan, and prepare for execution.
 
-Check if $ARGUMENTS contains a specification ID in the format "010" or "010-feature-name". Try to run `./scripts/spec.py [ID] --read` to check for existing specification. If that fails (script not found), use `~/.claude/plugins/marketplaces/the-startup/plugins/start/scripts/spec.py [ID] --read` as fallback.
+Check if $ARGUMENTS contains a specification ID in the format "010" or "010-feature-name". Run `~/.claude/plugins/marketplaces/the-startup/plugins/start/scripts/spec.py [ID] --read` to check for existing specification.
 
 Parse the TOML output which contains:
 - Specification metadata: `id`, `name`, `dir`

@@ -115,7 +115,34 @@ def read_spec(spec_id: str) -> None:
 
 def create_spec(feature_name: str, template: Optional[str] = None) -> None:
     """Create a new spec directory with optional template."""
-    # Get next spec ID
+    # Check if feature_name is an existing spec ID (3 digits)
+    is_spec_id = re.match(r'^\d{3}$', feature_name)
+
+    if is_spec_id and template:
+        # Try to find existing directory with this ID
+        if SPECS_DIR.exists():
+            for dir_path in SPECS_DIR.iterdir():
+                if dir_path.is_dir() and dir_path.name.startswith(f"{feature_name}-"):
+                    spec_dir = dir_path
+                    spec_id = feature_name
+                    print(f"Adding template to existing spec: {spec_dir}")
+
+                    # Copy template to existing directory
+                    template_file = TEMPLATES_DIR / f"{template}.md"
+                    if not template_file.exists():
+                        print(f"Error: Template {template_file} not found", file=sys.stderr)
+                        sys.exit(1)
+                    else:
+                        dest_file = spec_dir / f"{template}.md"
+                        dest_file.write_text(template_file.read_text())
+                        print(f"Generated template: {template}.md")
+                    return
+
+        # If we get here, the spec ID was not found
+        print(f"Error: Spec {feature_name} not found", file=sys.stderr)
+        sys.exit(1)
+
+    # Create new spec directory
     spec_id = get_next_spec_id()
     sanitized_name = sanitize_name(feature_name)
     spec_dir = SPECS_DIR / f"{spec_id}-{sanitized_name}"
