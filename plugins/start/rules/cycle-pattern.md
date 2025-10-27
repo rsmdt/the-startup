@@ -7,7 +7,6 @@
    - **After receiving user feedback, identify NEW research needs** based on their input and launch additional specialist agents to investigate any new questions or directions
 
 2. **Documentation Phase**
-   - Document any discovered patterns, interfaces, or domain rules for future reference
    - Update the main document:
      - Base content on research findings gathered from specialist agents
      - Incorporate user feedback and additional research conducted
@@ -20,15 +19,13 @@
      - Conflicting information or recommendations
      - Proposed content based on the research
      - Questions that need user clarification
-   - Report any patterns, interfaces, or domain rules that were documented
    - Present what was added to main document, what questions remain, and ask if you should continue
    - **Wait for user confirmation** before proceeding to next cycle
 
 **🤔 Ask yourself each cycle:**
 1. **Discovery**: Have I identified ALL activities needed for this section/area?
 2. **Discovery**: Have I launched parallel specialist agents to investigate?
-3. **Documentation**: Have I documented any discovered patterns, interfaces, or domain rules?
-4. **Documentation**: Have I updated the main document according to command-specific rules?
+3. **Documentation**: Have I updated the main document according to command-specific rules?
 5. **Review**: Have I presented COMPLETE agent responses to the user (not summaries)?
 6. **Review**: Have I received user confirmation before proceeding to next cycle?
 7. Are there more sections/areas that need investigation?

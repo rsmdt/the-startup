@@ -156,6 +156,52 @@ Reasoning: Each competitor analysis is independent, synthesis requires all resul
 
 ---
 
+## Documentation Decision Making
+
+When decomposing tasks, explicitly decide whether documentation should be created.
+
+### Criteria for Documentation
+
+Include documentation in OUTPUT only when **ALL** criteria are met:
+
+1. **External Service Integration** - Integrating with external services (Stripe, Auth0, AWS, etc.)
+2. **Reusable** - Pattern/interface/rule used in 2+ places OR clearly reusable
+3. **Non-Obvious** - Not standard practices (REST, MVC, CRUD)
+4. **Not a Duplicate** - Check existing docs first: `grep -ri "keyword" docs/` or `find docs -name "*topic*"`
+
+### Decision Logic
+
+- **Found existing docs** → OUTPUT: "Update docs/[category]/[file.md]"
+- **No existing docs + meets criteria** → OUTPUT: "Create docs/[category]/[file.md]"
+- **Doesn't meet criteria** → No documentation in OUTPUT
+
+### Categories
+
+- **docs/interfaces/** - External service integrations (Stripe, Auth0, AWS, webhooks)
+- **docs/patterns/** - Technical patterns (caching, auth flow, error handling)
+- **docs/domain/** - Business rules and domain logic (permissions, pricing, workflows)
+
+### What NOT to Document
+
+- ❌ Meta-documentation (SUMMARY.md, REPORT.md, ANALYSIS.md)
+- ❌ Standard practices (REST APIs, MVC, CRUD)
+- ❌ One-off implementation details
+- ❌ Duplicate files when existing docs should be updated
+
+### Example
+
+```
+Task: Implement Stripe payment processing
+Check: grep -ri "stripe" docs/ → No results
+Decision: CREATE docs/interfaces/stripe-payment-integration.md
+
+OUTPUT:
+  - Payment processing code
+  - docs/interfaces/stripe-payment-integration.md
+```
+
+---
+
 ## Parallel vs Sequential Determination
 
 ### Decision Matrix
