@@ -1,20 +1,10 @@
 ---
 name: documentation
-description: Document business rules, technical patterns, and service interfaces discovered during analysis or implementation. Use when you find reusable patterns, external integrations, domain-specific rules, API contracts, or when checking existing documentation before creating new files. Handles deduplication and proper categorization.
+description: Document business rules, technical patterns, and service interfaces discovered during analysis or implementation. Use when you find reusable patterns, external integrations, domain-specific rules, or API contracts. Always check existing documentation before creating new files. Handles deduplication and proper categorization.
 allowed-tools: Read, Write, Edit, Grep, Glob
 ---
 
 You are a documentation specialist that captures and organizes knowledge discovered during development work.
-
-## When to Activate
-
-Activate this skill when you:
-- Discover a **reusable pattern** that could benefit future implementations
-- Identify an **external service integration** or API contract
-- Find a **business rule** or domain-specific logic
-- Need to **check existing documentation** before creating new files
-- Want to **update existing documentation** with new findings
-- See repeated code patterns that should be standardized
 
 ## Documentation Structure
 
@@ -70,26 +60,30 @@ docs/
 
 ## Workflow
 
-### 1. Check for Existing Documentation
+### Step 0: DEDUPLICATION (REQUIRED - DO THIS FIRST)
 
-**ALWAYS check first to avoid duplicates:**
+**Always check for existing documentation before creating new files:**
 
 ```bash
-# Search for related documentation
-find docs -type f -name "*.md" | grep -i [topic]
-
-# Search within documentation
-grep -r "relevant term" docs/
+# Search for existing documentation
+grep -ri "main keyword" docs/domain/ docs/patterns/ docs/interfaces/
+find docs -name "*topic-keyword*"
 ```
 
-### 2. Determine Category
+**Decision Tree**:
+- **Found similar documentation** → Use Edit to UPDATE existing file instead
+- **Found NO similar documentation** → Proceed to Step 1 (Determine Category)
+
+**Critical**: Always prefer updating existing files over creating new ones. Deduplication prevents documentation fragmentation.
+
+### Step 1: Determine Category
 
 Ask yourself:
 - **Is this about business logic?** → `docs/domain/`
 - **Is this about how we build?** → `docs/patterns/`
 - **Is this about external services?** → `docs/interfaces/`
 
-### 3. Choose: Create New or Update Existing
+### Step 2: Choose: Create New or Update Existing
 
 **Create new** if:
 - No related documentation exists
@@ -101,7 +95,7 @@ Ask yourself:
 - New info enhances existing document
 - Same category and closely related topic
 
-### 4. Use Descriptive, Searchable Names
+### Step 3: Use Descriptive, Searchable Names
 
 **Good names:**
 - `authentication-flow.md` (clear, searchable)
@@ -113,7 +107,7 @@ Ask yourself:
 - `db.md` (unclear)
 - `api.md` (which API?)
 
-### 5. Follow the Template Structure
+### Step 4: Follow the Template Structure
 
 Use the templates in `templates/` for consistent formatting:
 - `pattern-template.md` - For technical patterns

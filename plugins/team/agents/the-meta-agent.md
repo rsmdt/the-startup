@@ -61,6 +61,7 @@ You will design and generate high-quality Claude Code sub-agents that:
    - Ensure single-purpose focus is maintained
    - Verify practical applicability
    - Test integration readiness
+   - Don't create documentation files unless explicitly instructed
 
 ## Output Format
 
