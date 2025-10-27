@@ -242,52 +242,11 @@ Create comprehensive specifications from brief descriptions through deep researc
 <details>
 <summary><strong>View Details</strong></summary>
 
-### What You Get
+**What you get:** Three comprehensive documents in `docs/specs/[ID]-[name]/`:
 
-Three comprehensive documents in `docs/specs/[ID]-[name]/`:
-
-- **product-requirements.md** - Product Requirements Document
-  - User stories and use cases
-  - Feature specifications
-  - Success criteria
-  - Non-functional requirements
-
-- **solution-design.md** - Solution Design Document
-  - Technical architecture
-  - System components and interactions
-  - Data models and schemas
-  - Technology stack decisions
-  - Security and performance considerations
-
-- **implementation-plan.md** - Implementation Plan
-  - Phased task breakdown
-  - Dependencies and ordering
-  - Acceptance criteria per phase
-  - Risk assessment and mitigation
-
-### Deep Research Process
-
-The command orchestrates specialist agents through deep research cycles:
-
-1. **Discovery Phase**
-   - Investigates competitive landscape
-   - Researches best practices
-   - Identifies technical patterns
-   - Analyzes integration requirements
-
-2. **Documentation Phase**
-   - Generates product-requirements.md with requirements analysis
-   - Creates solution-design.md with architectural decisions
-   - Produces implementation-plan.md with executable tasks
-   - Documents discovered patterns/interfaces
-
-3. **Review Phase** (Quality Gate)
-   - Presents findings for user approval
-   - Validates completeness
-   - Iterates based on feedback
-   - Ensures specification clarity
-
-### Workflow
+- **product-requirements.md** - User stories, feature specifications, success criteria, non-functional requirements
+- **solution-design.md** - Technical architecture, system components, data models, technology stack, security and performance considerations
+- **implementation-plan.md** - Phased task breakdown, dependencies, acceptance criteria, risk assessment
 
 ```mermaid
 flowchart TD
@@ -328,37 +287,7 @@ Execute implementation plans phase-by-phase with parallel specialist agents and 
 <details>
 <summary><strong>View Details</strong></summary>
 
-### Execution Process
-
-1. **Phase Loading**
-   - Loads one phase at a time from implementation-plan.md
-   - Displays tasks and acceptance criteria
-   - Identifies parallel execution opportunities
-
-2. **Smart Parallel Execution**
-   - Launches multiple specialist agents simultaneously when tasks are independent
-   - Coordinates file creation to prevent collisions
-   - Maintains clear boundaries with FOCUS/EXCLUDE templates
-
-3. **Quality Validation**
-   - Validates acceptance criteria at phase boundaries
-   - Runs tests after changes
-   - Checks specification compliance
-   - Verifies no regressions
-
-4. **Progress Tracking**
-   - Real-time TodoWrite updates
-   - Phase completion summaries
-   - Agent coordination status
-   - Time estimates and velocity
-
-5. **Approval Gates**
-   - Waits for user confirmation between phases
-   - Shows what was accomplished
-   - Previews next phase tasks
-   - Allows course correction
-
-### Workflow
+Loads implementation-plan.md and executes phase-by-phase with approval gates between phases. Multiple specialist agents work in parallel within each phase when tasks are independent. All changes are validated against acceptance criteria and tests run after each task.
 
 ```mermaid
 flowchart TD
@@ -391,62 +320,7 @@ Discover and document business rules, technical patterns, and system interfaces 
 <details>
 <summary><strong>View Details</strong></summary>
 
-### Analysis Process
-
-Uses cyclical discovery-documentation-review workflow:
-
-1. **Discovery Phase**
-   - Launches specialist agents to explore codebase
-   - Identifies patterns, rules, and interfaces
-   - Analyzes code structure and relationships
-   - Extracts implicit knowledge
-
-2. **Documentation Phase**
-   - Creates structured documentation using templates
-   - Categorizes findings appropriately
-   - Cross-references related documentation
-   - Ensures consistency
-
-3. **Review Phase** (Quality Gate)
-   - Presents findings to user
-   - Validates accuracy
-   - Iterates if needed
-   - Confirms placement
-
-### Analysis Areas
-
-- **Business** - Business rules, domain logic, workflows, validation rules
-- **Technical** - Architectural patterns, code structure, design patterns
-- **Security** - Security patterns, threat models, vulnerabilities, mitigations
-- **Performance** - Optimization patterns, bottlenecks, caching strategies
-- **Integration** - API contracts, service integrations, external dependencies
-- **Data** - Storage patterns, data modeling, schema design, migrations
-- **Testing** - Test strategies, validation approaches, quality gates
-- **Deployment** - CI/CD patterns, infrastructure, deployment strategies
-
-### Output Structure
-
-Documentation is automatically organized:
-
-- **`docs/domain/`** - Business rules and domain knowledge
-  - User workflows
-  - Business logic
-  - Validation rules
-  - Domain terminology
-
-- **`docs/patterns/`** - Technical patterns and solutions
-  - Architectural patterns
-  - Code patterns
-  - Design patterns
-  - Best practices
-
-- **`docs/interfaces/`** - External service contracts
-  - API integrations
-  - Webhook definitions
-  - Third-party services
-  - Protocol specifications
-
-### Workflow
+Uses cyclical discovery-documentation-review workflow to extract organizational knowledge. Specialist agents explore the codebase to identify patterns, rules, and interfaces across business, technical, security, performance, integration, data, testing, and deployment areas. Documentation is automatically organized into `docs/domain/`, `docs/patterns/`, and `docs/interfaces/` directories.
 
 ```mermaid
 flowchart TD
@@ -479,71 +353,7 @@ Improve code quality while strictly preserving all existing behavior through tes
 <details>
 <summary><strong>View Details</strong></summary>
 
-### Safety Guarantees
-
-**Strict Behavior Preservation:**
-- All tests must pass before refactoring begins
-- Tests run after each incremental change
-- Automatic rollback if any test fails
-- No functional changes allowed
-
-**Incremental Approach:**
-- Never big-bang refactoring
-- Small, focused changes
-- One improvement at a time
-- Continuous validation
-
-**Test-Driven Safety:**
-- Establishes comprehensive test baseline
-- Validates behavior preservation
-- Identifies missing test coverage
-- Suggests additional tests if needed
-
-### Refactoring Process
-
-1. **Baseline Establishment**
-   - Runs full test suite
-   - Captures current behavior
-   - Identifies test coverage gaps
-   - Ensures starting point is valid
-
-2. **Analysis**
-   - Detects code smells
-   - Identifies improvement opportunities
-   - Prioritizes changes by impact
-   - Plans incremental steps
-
-3. **Incremental Changes**
-   - Applies one improvement at a time
-   - Runs tests after each change
-   - Validates behavior preservation
-   - Documents rationale
-
-4. **Pattern Documentation**
-   - Captures refactoring patterns discovered
-   - Documents anti-patterns eliminated
-   - Updates technical documentation
-   - Shares learnings
-
-5. **Validation**
-   - Final full test suite run
-   - Performance comparison
-   - Code quality metrics
-   - Rollback if issues detected
-
-### Common Improvements
-
-- Extract complex methods into smaller functions
-- Eliminate code duplication
-- Improve naming clarity
-- Simplify conditional logic
-- Reduce coupling between components
-- Improve error handling
-- Enhance testability
-- Remove dead code
-- Optimize imports
-
-### Workflow
+Strictly preserves behavior through test-validated incremental changes. All tests must pass before refactoring begins and after each change. Automatic rollback on test failures. For simple refactorings, applies changes directly with continuous validation. For complex refactorings, creates specification documents and defers to `/start:implement` for planned execution.
 
 ```mermaid
 flowchart TD
@@ -574,40 +384,7 @@ Initialize The Agentic Startup framework in your Claude Code environment with in
 <details>
 <summary><strong>View Details</strong></summary>
 
-### Configuration Steps
-
-1. **Output Style Configuration**
-   - Activates "The Startup" communication style
-   - High-energy, execution-focused personality
-   - Parallel agent orchestration mindset
-   - Y Combinator energy meets operational excellence
-
-2. **Statusline Setup**
-   - Adds git branch integration
-   - Tracks current command state
-   - Shows real-time execution status
-   - Custom hooks for dynamic updates
-
-3. **Interactive Preferences**
-   - Asks for your configuration choices
-   - Confirms each change before applying
-   - Shows exactly what was modified
-   - Allows customization
-
-### When to Run
-
-Run `/start:init` when:
-- First time using the plugin in a project
-- After updating to a new plugin version
-- Starting work in a new repository
-- Want to reconfigure output style or statusline
-- Statusline stopped working after settings changes
-
-**Note:** Safe to run multiple times - won't duplicate configurations
-
-### Requirements
-
-Claude Code v2.0+
+Activates "The Startup" output style (high-energy, execution-focused communication with parallel agent orchestration mindset) and configures git-aware statusline with real-time command tracking. Interactive setup asks for preferences and confirms each change before applying. Safe to run multiple times.
 
 </details>
 
