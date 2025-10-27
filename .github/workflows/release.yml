@@ -1,0 +1,175 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., v2.0.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate marketplace.json
+        run: |
+          if [ ! -f .claude-plugin/marketplace.json ]; then
+            echo "Error: marketplace.json not found"
+            exit 1
+          fi
+
+          # Validate JSON syntax
+          python3 -m json.tool .claude-plugin/marketplace.json > /dev/null
+
+          echo "✓ marketplace.json is valid"
+
+      - name: Validate plugin structure
+        run: |
+          # Check required directories
+          if [ ! -d plugins/start ]; then
+            echo "Error: plugins/start directory not found"
+            exit 1
+          fi
+
+          echo "✓ Plugin structure is valid"
+
+      - name: Validate Python scripts
+        run: |
+          # Find all Python scripts and check syntax
+          find plugins -name "*.py" -type f | while read file; do
+            echo "Checking $file..."
+            python3 -m py_compile "$file"
+          done
+
+          echo "✓ All Python scripts are valid"
+
+  package:
+    needs: validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create plugin archives
+        run: |
+          VERSION="${{ github.event.inputs.version || github.ref_name }}"
+
+          mkdir -p release
+
+          # Create full plugin archive (includes both start and team plugins)
+          tar -czf "release/the-startup-${VERSION}.tar.gz" \
+            .claude-plugin/ \
+            plugins/ \
+            README.md \
+            CHANGELOG.md \
+            LICENSE \
+            MIGRATION.md
+
+          # Create zip version for Windows users
+          zip -r "release/the-startup-${VERSION}.zip" \
+            .claude-plugin/ \
+            plugins/ \
+            README.md \
+            CHANGELOG.md \
+            LICENSE \
+            MIGRATION.md
+
+          echo "✓ Plugin archives created"
+
+      - name: Generate checksums
+        run: |
+          cd release
+          sha256sum the-startup-* > checksums.txt
+          cat checksums.txt
+          cd ..
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: release/
+
+  release:
+    needs: package
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-artifacts
+          path: ./release
+
+      - name: Extract version from marketplace.json
+        id: version
+        run: |
+          VERSION=$(python3 -c "import json; print(json.load(open('.claude-plugin/marketplace.json'))['metadata']['version'])")
+          echo "plugin_version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.version || github.ref_name }}
+          name: Release ${{ github.event.inputs.version || github.ref_name }}
+          draft: false
+          prerelease: false
+          files: |
+            release/the-startup-*
+            release/checksums.txt
+          body: |
+            ## 🚀 The Agentic Startup ${{ github.event.inputs.version || github.ref_name }}
+
+            **Plugin Version**: ${{ steps.version.outputs.plugin_version }}
+
+            ### Installation
+
+            #### Via Claude Code Marketplace (Recommended)
+            ```bash
+            # Add The Agentic Startup marketplace
+            /plugin marketplace add rsmdt/the-startup
+
+            # Install the Start plugin (core workflows)
+            /plugin install start@the-startup
+
+            # (Optional) Install the Team plugin (specialized agents)
+            /plugin install team@the-startup
+            ```
+
+            #### Manual Installation
+            Download the archive for your platform:
+            - `the-startup-${{ github.event.inputs.version || github.ref_name }}.tar.gz` - For Linux/macOS
+            - `the-startup-${{ github.event.inputs.version || github.ref_name }}.zip` - For Windows
+
+            Extract and follow the manual installation instructions in the README.
+
+            ### What's Included
+
+            - **start@the-startup** - Core workflow commands and productivity tools
+            - **team@the-startup** - Specialized agent team (optional)
+
+            ### Changes
+
+            See [CHANGELOG.md](https://github.com/rsmdt/the-startup/blob/main/CHANGELOG.md) for detailed changes.
+
+            ### Checksums
+
+            SHA256 checksums are available in `checksums.txt`
+
+            ---
+
+            **Requirements**: Claude Code v2.0+ with marketplace support
