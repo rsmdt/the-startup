@@ -87,22 +87,45 @@ If no ID is provided in the arguments or the directory doesn't exist, generate a
 
 **🎯 Goal**: Complete PRD focusing on WHAT needs to be built and WHY it matters.
 
-Load the PRD from the specification directory. If the PRD file doesn't exist yet, run `~/.claude/plugins/marketplaces/the-startup/plugins/start/scripts/spec.py [ID] --add product-requirements` to generate it from the template. Once created or located, thoroughly read the entire PRD to understand its structure, required sections, and identify all sections that require clarification.
+**🔄 Context Priming**: First, check if the PRD already exists in the specification directory. If it exists, read the ENTIRE file completely to understand what has been documented, what questions remain, and where to continue. This primes your context for resuming work. If the PRD doesn't exist, run `~/.claude/plugins/marketplaces/the-startup/plugins/start/scripts/spec.py [ID] --add product-requirements` to generate it from the template.
+
+Once the PRD is loaded or created, thoroughly read the entire document to understand its structure, required sections, and identify all sections that require clarification.
 
 **Apply the Standard Cycle Pattern with these specifics:**
 - **Discovery Focus**: Competitive landscape, user needs, market standards, edge cases, and success criteria
 - **Agent Selection**: Market analysis, user research, requirements clarification, domain expertise
-- **Documentation**: PRD.md + any discovered domain rules, patterns, or external integrations
+- **Documentation**: product-requirements.md + any discovered domain rules, patterns, or external integrations
 - **Validation**: Avoid technical implementation details, focus on business requirements
 
 Continue cycles until the PRD is complete and user has confirmed to proceed to the SDD.
 
-**🔍 Final Validation**:
-Use specialist agents to validate the complete requirements specification for:
-- Completeness and clarity of requirements
-- Feasibility of the proposed features
-- Alignment with user needs and business goals
-- Identification of any missing edge cases
+**🔍 Final Validation - Multi-Angle Requirements Review**:
+
+Validate the PRD by examining it from multiple perspectives to ensure completeness and clarity:
+
+**Context Review**: What foundation have we established?
+- Launch specialist agents to review: problem statement clarity, user persona completeness, value proposition strength
+- Present findings: Is the business context well-defined and evidence-based?
+
+**Gap and Inconsistency Analysis**: What's missing, unclear, or contradictory?
+- Launch specialist agents to identify: gaps in user journeys, missing edge cases, unclear acceptance criteria, contradictions between sections
+- Present findings: What complications or ambiguities need resolution?
+
+**User Input from Multiple Directions**: What critical questions need user validation?
+- Based on gaps found, formulate specific questions for the user
+- Questions should probe: alternative scenarios, priority trade-offs, constraint boundaries, success criteria validation
+- Use AskUserQuestion tool to gather user input from different angles on key decisions
+
+**Coherence Validation**: Does our PRD adequately solve the stated problem?
+- Launch specialist agents to validate: requirements completeness, feasibility assessment, alignment with stated goals, edge case coverage
+- Present findings: Does the PRD form a coherent, complete answer to the business need?
+
+**🤔 Multi-Angle Validation Checklist**:
+1. Have specialist agents confirmed the problem statement is specific, measurable, and evidence-based?
+2. Have we identified and resolved all gaps, contradictions, and ambiguities?
+3. Have we queried the user from different angles (scenarios, priorities, constraints, success)?
+4. Have specialist agents confirmed the PRD answers the business need completely?
+5. Have all user inputs from multi-angle questioning been incorporated?
 
 Once complete, present a summary of the requirements specification with key decisions identified. Ask: "The requirements specification is complete. Should I proceed to technical specification (SDD)?" and wait for user confirmation before proceeding.
 
@@ -110,22 +133,62 @@ Once complete, present a summary of the requirements specification with key deci
 
 **🎯 Goal**: Complete SDD designing HOW the solution will be built through technical architecture and design decisions.
 
-Load the SDD from the specification directory. If the SDD file doesn't exist yet, run `~/.claude/plugins/marketplaces/the-startup/plugins/start/scripts/spec.py [ID] --add solution-design` to generate it from the template. Once created or located, thoroughly read the entire SDD to understand its structure, required sections, and identify all technical areas that need investigation. You MUST NEVER perform actual implementation or code changes. Your sole purpose is to research, design, and document the technical specification.
+**🔄 Context Priming**: First, check if the SDD already exists in the specification directory. If it exists, read the ENTIRE file completely to understand the current architecture decisions, what technical areas have been explored, and where design work should continue. This primes your context for resuming work. Additionally, read the completed PRD to ensure the technical design aligns with business requirements. If the SDD doesn't exist, run `~/.claude/plugins/marketplaces/the-startup/plugins/start/scripts/spec.py [ID] --add solution-design` to generate it from the template.
+
+Once the SDD is loaded or created, thoroughly read the entire document to understand its structure, required sections, and identify all technical areas that need investigation. You MUST NEVER perform actual implementation or code changes. Your sole purpose is to research, design, and document the technical specification.
 
 **Apply the Standard Cycle Pattern with these specifics:**
 - **Discovery Focus**: Architecture patterns, data models, interfaces, security implications, performance characteristics, and integration approaches
 - **Agent Selection**: Architecture, database, API design, security, performance, technical domain expertise
-- **Documentation**: SDD.md + any discovered patterns, external service interfaces, or business rules
+- **Documentation**: solution-design.md + any discovered patterns, external service interfaces, or business rules
 - **Validation**: Avoid implementation code, focus only on design and architecture decisions
 
 Continue cycles until the SDD is complete and user has confirmed to proceed to the PLAN.
 
-**🔍 Final Validation**:
-Use specialist agents to validate the complete technical design for:
-- Feasibility and scalability
-- Security considerations
-- Performance implications
-- Alignment with business requirements (no context drift)
+**🔍 Final Validation - Completeness and Consistency Review**:
+
+Ensure the design is complete, consistent, and free from conflicts through systematic validation:
+
+**Overlap and Conflict Detection**: Check for duplicated or conflicting responsibilities
+- Launch specialist agents to identify:
+  - **Component Overlap**: Are responsibilities duplicated across components?
+  - **Interface Conflicts**: Do multiple interfaces serve the same purpose?
+  - **Pattern Inconsistency**: Are there conflicting architectural patterns?
+  - **Data Redundancy**: Is data duplicated across different stores without justification?
+- Present findings: What overlaps or conflicts exist that need resolution?
+
+**Coverage Analysis**: Verify all requirements and concerns are addressed
+- Launch specialist agents to verify:
+  - **PRD Coverage**: Are ALL requirements from the PRD addressed in the design?
+  - **Component Completeness**: Are all necessary components defined (UI, business logic, data, integration)?
+  - **Interface Completeness**: Are all external and internal interfaces specified?
+  - **Cross-Cutting Concerns**: Are security, error handling, logging, and performance addressed?
+  - **Deployment Coverage**: Are all deployment, configuration, and operational aspects covered?
+- Present findings: What gaps exist in the design that need to be filled?
+
+**Boundary Validation**: Check for clear separation of concerns
+- Launch specialist agents to validate:
+  - **Component Boundaries**: Is each component's responsibility clearly defined and bounded?
+  - **Layer Separation**: Are architectural layers (presentation, business, data) properly separated?
+  - **Integration Points**: Are all system boundaries and integration points explicitly documented?
+  - **Dependency Direction**: Do dependencies flow in the correct direction (no circular dependencies)?
+- Present findings: Are boundaries clear and properly maintained?
+
+**Consistency Verification**: Ensure alignment and coherence throughout
+- Launch specialist agents to check:
+  - **PRD Alignment**: Does every SDD design decision trace back to a PRD requirement?
+  - **Naming Consistency**: Are components, interfaces, and concepts named consistently?
+  - **Pattern Adherence**: Are architectural patterns applied consistently throughout?
+  - **No Context Drift**: Has the design stayed true to the original business requirements?
+- Present findings: Are there inconsistencies or drift from requirements?
+
+**🤔 Completeness and Consistency Checklist**:
+1. Have specialist agents confirmed no overlapping responsibilities or conflicting patterns?
+2. Have specialist agents confirmed all PRD requirements and cross-cutting concerns are addressed?
+3. Have specialist agents confirmed clear separation of concerns and proper dependency direction?
+4. Have specialist agents confirmed alignment with PRD and consistent application of patterns?
+5. Have all gaps and overlaps identified been resolved?
+6. Can a developer implement from this design without ambiguity?
 
 Once complete, present a summary of the technical design with key architectural decisions. Ask: "The technical specification is complete. Should I proceed to implementation planning (PLAN)?" and wait for user confirmation before proceeding.
 
@@ -133,12 +196,14 @@ Once complete, present a summary of the technical design with key architectural 
 
 **🎯 Goal**: Complete PLAN developing an actionable plan that breaks down the work into executable tasks.
 
-Load the PLAN from the specification directory. If the PLAN file doesn't exist yet, run `~/.claude/plugins/marketplaces/the-startup/plugins/start/scripts/spec.py [ID] --add implementation-plan` to generate it from the template. Once created or located, thoroughly read the entire PLAN to understand its structure, required sections, and identify all phases that need detailed planning.
+**🔄 Context Priming**: First, check if the PLAN already exists in the specification directory. If it exists, read the ENTIRE file completely to understand what implementation phases have been planned, what remains to be detailed, and where planning should continue. This primes your context for resuming work. Additionally, read both the completed PRD and SDD to ensure the implementation plan addresses all requirements and follows the technical design. If the PLAN doesn't exist, run `~/.claude/plugins/marketplaces/the-startup/plugins/start/scripts/spec.py [ID] --add implementation-plan` to generate it from the template.
+
+Once the PLAN is loaded or created, thoroughly read the entire document to understand its structure, required sections, and identify all phases that need detailed planning.
 
 **Apply the Standard Cycle Pattern with these specifics:**
 - **Discovery Focus**: Implementation activities (database migrations, API endpoints, UI components, validation logic, deployment pipelines, test suites)
 - **Agent Selection**: Implementation planning, dependency analysis, risk assessment, validation planning
-- **Documentation**: PLAN.md + any discovered patterns, interfaces, or domain rules
+- **Documentation**: implementation-plan.md + any discovered patterns, interfaces, or domain rules
 - **Validation**: Ensure every phase traces back to PRD requirements and SDD design decisions, include specification alignment gates
 
 Continue cycles until the PLAN is complete and user has confirmed to proceed to final assessment.
@@ -204,9 +269,9 @@ All specifications and documentation MUST follow this exact structure:
 docs/
 ├── specs/
 │   └── [3-digit-number]-[feature-name]/    # Specification documents
-│       ├── PRD.md                          # Product Requirements Documentation (if applicable)
-│       ├── SDD.md                          # Solution Design Documentation (if applicable)
-│       └── PLAN.md                         # Implementation Plan
+│       ├── product-requirements.md         # Product Requirements Documentation (if applicable)
+│       ├── solution-design.md              # Solution Design Documentation (if applicable)
+│       └── implementation-plan.md          # Implementation Plan
 ├── domain/                                 # Business rules, domain logic, workflows, business patterns
 ├── patterns/                               # Technical code patterns, architectural solutions
 ├── interfaces/                             # External API contracts, service integrations
