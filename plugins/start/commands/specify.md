@@ -204,6 +204,7 @@ Once the PLAN is loaded or created, thoroughly read the entire document to under
 - **Agent Selection**: Implementation planning, dependency analysis, risk assessment, validation planning
 - **Documentation**: implementation-plan.md + any discovered patterns, interfaces, or domain rules
 - **Validation**: Ensure every phase traces back to PRD requirements and SDD design decisions, include specification alignment gates
+- **Task Sequencing**: Focus on task dependencies and sequencing, NOT time estimates
 
 Continue cycles until the PLAN is complete and user has confirmed to proceed to final assessment.
 
