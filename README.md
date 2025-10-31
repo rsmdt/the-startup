@@ -38,7 +38,7 @@ The framework leverages **Claude Code's plugin system** to provide workflow comm
 
 **Autonomous Skills System** - Model-invoked skills that activate based on natural language with progressive disclosure
 
-**Specialized Agent Team** - 11 agent roles across 39+ activity-based specializations (optional `team@the-startup` plugin)
+**Specialized Agent Team** - 11 agent roles across 27 activity-based specializations (optional [`team@the-startup`](plugins/team/README.md) plugin)
 
 **Migrating from 1.x?** See the [complete migration guide](MIGRATION.md) for step-by-step instructions.
 
@@ -60,6 +60,8 @@ The framework leverages **Claude Code's plugin system** to provide workflow comm
 # (Optional) Install the Team plugin (specialized agents)
 /plugin install team@the-startup
 ```
+
+**📖 [View all available agents →](plugins/team/README.md)**
 
 Alternatively, browse and install interactively via `/plugin`
 
