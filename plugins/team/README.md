@@ -160,3 +160,51 @@ When an agent is invoked, Claude Code automatically loads the referenced skills 
 - **Reduced Duplication**: Common patterns live in skills, not repeated across agents
 - **Consistent Guidance**: All agents provide uniform advice for shared concerns
 - **Modular Expertise**: Agents compose capabilities from relevant skills
+
+---
+
+## Agent Architecture
+
+### Slim Agent Design
+
+Agents follow a **slim template** that separates concerns:
+
+- **Agents** define WHO (role), WHAT (focus areas), and WHEN (deliverables)
+- **Skills** provide HOW (procedural knowledge, patterns, checklists)
+
+This design follows Claude Code's progressive disclosure model where skills load on-demand while agent content always loads.
+
+### Agent Template Structure
+
+```markdown
+---
+name: agent-name
+description: Clear purpose with usage examples
+skills: skill1, skill2, skill3
+model: inherit
+---
+
+{1-2 sentence role introduction}
+
+## Focus Areas
+{4-6 bullet points of what this agent specializes in}
+
+## Approach
+{3-5 high-level methodology steps}
+{Reference to skills for detailed patterns}
+
+## Deliverables
+{4-6 concrete outputs}
+
+## Quality Standards
+{Non-negotiable quality criteria}
+
+{Closing philosophy statement}
+```
+
+### Key Principles
+
+1. **No Duplication**: Agent content should NOT repeat what skills provide
+2. **Skill References**: Agents explicitly reference which skills to leverage
+3. **Focused Scope**: Each agent excels at one activity, not multiple domains
+4. **Concrete Deliverables**: Clear outputs the agent produces
