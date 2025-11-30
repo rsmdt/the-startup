@@ -113,3 +113,50 @@ Agents enforce quality standards:
 - Test strategies ensure comprehensive coverage
 - Performance profiling prevents optimization guesswork
 - Documentation keeps knowledge accessible
+
+---
+
+## Skills System
+
+The Team plugin includes a **skills library** that provides reusable expertise shared across multiple agents. Skills eliminate content duplication while ensuring consistent guidance.
+
+### How Skills Work
+
+Skills are referenced in agent YAML frontmatter:
+
+```yaml
+---
+name: api-development
+skills: codebase-exploration, framework-detection, api-design-patterns
+---
+```
+
+When an agent is invoked, Claude Code automatically loads the referenced skills into context, providing the agent with specialized knowledge without duplicating content across agent files.
+
+### Available Skills (16)
+
+| Category | Skill | Description |
+|----------|-------|-------------|
+| **Cross-Cutting** | `codebase-exploration` | Navigate, search, and understand project structures |
+| | `framework-detection` | Auto-detect project tech stacks and configurations |
+| | `pattern-recognition` | Identify existing codebase patterns for consistency |
+| | `best-practices` | Security, performance, and accessibility standards |
+| | `error-handling` | Consistent error patterns and recovery strategies |
+| | `documentation-reading` | Interpret docs, READMEs, specs, and configs |
+| **Development** | `api-design-patterns` | REST/GraphQL design, OpenAPI, versioning |
+| | `testing-strategies` | Test pyramid, coverage targets, framework patterns |
+| | `data-modeling` | Schema design, entity relationships, normalization |
+| | `documentation-creation` | ADRs, system docs, API docs, runbooks |
+| **Design** | `accessibility-standards` | WCAG compliance, ARIA, keyboard navigation |
+| | `user-research-methods` | Interview techniques, personas, journey mapping |
+| **Infrastructure** | `cicd-patterns` | Pipeline design, deployment strategies |
+| | `observability-patterns` | Monitoring, tracing, SLI/SLO design |
+| **Quality** | `performance-profiling` | Measurement, profiling tools, optimization |
+| | `security-assessment` | Vulnerability review, OWASP, threat modeling |
+
+### Benefits
+
+- **Single Source of Truth**: Update a skill once, all referencing agents benefit
+- **Reduced Duplication**: Common patterns live in skills, not repeated across agents
+- **Consistent Guidance**: All agents provide uniform advice for shared concerns
+- **Modular Expertise**: Agents compose capabilities from relevant skills
