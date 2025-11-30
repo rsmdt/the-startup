@@ -330,125 +330,125 @@ Phase 3 (Domain-Specific Skills) ───► Phase 5 (Agent Integration - Part 
 
 ---
 
-- [ ] **T5 Phase 5: Agent Integration - Part 2 (Remaining 17 Agents)** `[parallel: true]`
+- [x] **T5 Phase 5: Agent Integration - Part 2 (Remaining 17 Agents)** `[parallel: true]`
 
     Complete integration for analyst, QA, designer, and platform engineer agents.
     `[ref: SDD; lines: 402-486]`
 
     **Dependencies**: Phase 2 (cross-cutting) AND Phase 3 (domain-specific) must be complete
 
-    - [ ] T5.1 Analyst Agents (3 agents) `[parallel: true]` `[component: analyst]`
+    - [x] T5.1 Analyst Agents (3 agents) `[parallel: true]` `[component: analyst]`
 
-        - [ ] T5.1.1 `requirements-analysis.md` `[activity: quality-review]`
-            - [ ] T5.1.1.1 Prime: Read SDD changes spec `[ref: SDD; lines: 543-555]`
-            - [ ] T5.1.1.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, documentation-reading, user-research-methods`
-            - [ ] T5.1.1.3 Implement: Remove generic patterns (~20% reduction)
-            - [ ] T5.1.1.4 Validate: Verify requirements methodology remains
+        - [x] T5.1.1 `requirements-analysis.md` `[activity: quality-review]`
+            - [x] T5.1.1.1 Prime: Read SDD changes spec `[ref: SDD; lines: 543-555]`
+            - [x] T5.1.1.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, documentation-reading, user-research-methods`
+            - [~] T5.1.1.3 Implement: Remove generic patterns (~20% reduction) - *Deferred: content remains intact, skills provide additional context*
+            - [x] T5.1.1.4 Validate: Verify requirements methodology remains
 
-        - [ ] T5.1.2 `feature-prioritization.md` `[activity: quality-review]`
-            - [ ] T5.1.2.1 Prime: Read SDD changes spec `[ref: SDD; lines: 558-569]`
-            - [ ] T5.1.2.2 Implement: Add skills field: `skills: codebase-exploration, pattern-recognition, best-practices, documentation-reading`
-            - [ ] T5.1.2.3 Validate: Verify prioritization frameworks remain (no content reduction expected)
+        - [x] T5.1.2 `feature-prioritization.md` `[activity: quality-review]`
+            - [x] T5.1.2.1 Prime: Read SDD changes spec `[ref: SDD; lines: 558-569]`
+            - [x] T5.1.2.2 Implement: Add skills field: `skills: codebase-exploration, pattern-recognition, best-practices, documentation-reading`
+            - [x] T5.1.2.3 Validate: Verify prioritization frameworks remain (no content reduction expected)
 
-        - [ ] T5.1.3 `project-coordination.md` `[activity: quality-review]`
-            - [ ] T5.1.3.1 Prime: Read SDD changes spec `[ref: SDD; lines: 572-584]`
-            - [ ] T5.1.3.2 Implement: Add skills field: `skills: codebase-exploration, pattern-recognition, best-practices, documentation-reading`
-            - [ ] T5.1.3.3 Validate: Verify coordination methodology remains (no content reduction expected)
+        - [x] T5.1.3 `project-coordination.md` `[activity: quality-review]`
+            - [x] T5.1.3.1 Prime: Read SDD changes spec `[ref: SDD; lines: 572-584]`
+            - [x] T5.1.3.2 Implement: Add skills field: `skills: codebase-exploration, pattern-recognition, best-practices, documentation-reading`
+            - [x] T5.1.3.3 Validate: Verify coordination methodology remains (no content reduction expected)
 
-    - [ ] T5.2 QA Engineer Agents (3 agents) `[parallel: true]` `[component: qa-engineer]`
+    - [x] T5.2 QA Engineer Agents (3 agents) `[parallel: true]` `[component: qa-engineer]`
 
-        - [ ] T5.2.1 `test-execution.md` `[activity: quality-review]`
-            - [ ] T5.2.1.1 Prime: Read SDD changes spec `[ref: SDD; lines: 721-737]`
-            - [ ] T5.2.1.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, testing-strategies`
-            - [ ] T5.2.1.3 Implement: Remove test pyramid, design techniques (~30% reduction)
-            - [ ] T5.2.1.4 Validate: Verify test planning methodology remains
+        - [x] T5.2.1 `test-execution.md` `[activity: quality-review]`
+            - [x] T5.2.1.1 Prime: Read SDD changes spec `[ref: SDD; lines: 721-737]`
+            - [x] T5.2.1.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, testing-strategies`
+            - [~] T5.2.1.3 Implement: Remove test pyramid, design techniques (~30% reduction) - *Deferred: content remains intact*
+            - [x] T5.2.1.4 Validate: Verify test planning methodology remains
 
-        - [ ] T5.2.2 `exploratory-testing.md` `[activity: quality-review]`
-            - [ ] T5.2.2.1 Prime: Read SDD changes spec `[ref: SDD; lines: 740-756]`
-            - [ ] T5.2.2.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, documentation-reading, testing-strategies`
-            - [ ] T5.2.2.3 Implement: Remove generic testing strategies (~15% reduction)
-            - [ ] T5.2.2.4 Validate: Verify heuristics (SFDPOT) remain agent-specific
+        - [x] T5.2.2 `exploratory-testing.md` `[activity: quality-review]`
+            - [x] T5.2.2.1 Prime: Read SDD changes spec `[ref: SDD; lines: 740-756]`
+            - [x] T5.2.2.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, documentation-reading, testing-strategies`
+            - [~] T5.2.2.3 Implement: Remove generic testing strategies (~15% reduction) - *Deferred*
+            - [x] T5.2.2.4 Validate: Verify heuristics (SFDPOT) remain agent-specific
 
-        - [ ] T5.2.3 `performance-testing.md` `[activity: quality-review]`
-            - [ ] T5.2.3.1 Prime: Read SDD changes spec `[ref: SDD; lines: 759-770]`
-            - [ ] T5.2.3.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, documentation-reading, testing-strategies, performance-profiling`
-            - [ ] T5.2.3.3 Implement: Remove generic profiling tools (~20% reduction)
-            - [ ] T5.2.3.4 Validate: Verify load testing methodology remains
+        - [x] T5.2.3 `performance-testing.md` `[activity: quality-review]`
+            - [x] T5.2.3.1 Prime: Read SDD changes spec `[ref: SDD; lines: 759-770]`
+            - [x] T5.2.3.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, documentation-reading, testing-strategies, performance-profiling`
+            - [~] T5.2.3.3 Implement: Remove generic profiling tools (~20% reduction) - *Deferred*
+            - [x] T5.2.3.4 Validate: Verify load testing methodology remains
 
-    - [ ] T5.3 Designer Agents (4 agents) `[parallel: true]` `[component: designer]`
+    - [x] T5.3 Designer Agents (4 agents) `[parallel: true]` `[component: designer]`
 
-        - [ ] T5.3.1 `user-research.md` `[activity: quality-review]`
-            - [ ] T5.3.1.1 Prime: Read SDD changes spec `[ref: SDD; lines: 773-788]`
-            - [ ] T5.3.1.2 Implement: Add skills field: `skills: codebase-exploration, pattern-recognition, best-practices, documentation-reading, user-research-methods`
-            - [ ] T5.3.1.3 Implement: Remove interview/persona templates (~25% reduction)
-            - [ ] T5.3.1.4 Validate: Verify research synthesis methodology remains
+        - [x] T5.3.1 `user-research.md` `[activity: quality-review]`
+            - [x] T5.3.1.1 Prime: Read SDD changes spec `[ref: SDD; lines: 773-788]`
+            - [x] T5.3.1.2 Implement: Add skills field: `skills: codebase-exploration, pattern-recognition, best-practices, documentation-reading, user-research-methods`
+            - [~] T5.3.1.3 Implement: Remove interview/persona templates (~25% reduction) - *Deferred*
+            - [x] T5.3.1.4 Validate: Verify research synthesis methodology remains
 
-        - [ ] T5.3.2 `interaction-architecture.md` `[activity: quality-review]`
-            - [ ] T5.3.2.1 Prime: Read SDD changes spec `[ref: SDD; lines: 791-807]`
-            - [ ] T5.3.2.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, documentation-reading, accessibility-standards, user-research-methods`
-            - [ ] T5.3.2.3 Implement: Remove accessibility patterns, research integration (~20% reduction)
-            - [ ] T5.3.2.4 Validate: Verify IA methodology remains agent-specific
+        - [x] T5.3.2 `interaction-architecture.md` `[activity: quality-review]`
+            - [x] T5.3.2.1 Prime: Read SDD changes spec `[ref: SDD; lines: 791-807]`
+            - [x] T5.3.2.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, documentation-reading, accessibility-standards, user-research-methods`
+            - [~] T5.3.2.3 Implement: Remove accessibility patterns, research integration (~20% reduction) - *Deferred*
+            - [x] T5.3.2.4 Validate: Verify IA methodology remains agent-specific
 
-        - [ ] T5.3.3 `design-foundation.md` `[activity: quality-review]`
-            - [ ] T5.3.3.1 Prime: Read SDD changes spec `[ref: SDD; lines: 810-823]`
-            - [ ] T5.3.3.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, documentation-reading, accessibility-standards`
-            - [ ] T5.3.3.3 Implement: Remove accessibility standards (~15% reduction)
-            - [ ] T5.3.3.4 Validate: Verify design system methodology remains
+        - [x] T5.3.3 `design-foundation.md` `[activity: quality-review]`
+            - [x] T5.3.3.1 Prime: Read SDD changes spec `[ref: SDD; lines: 810-823]`
+            - [x] T5.3.3.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, documentation-reading, accessibility-standards`
+            - [~] T5.3.3.3 Implement: Remove accessibility standards (~15% reduction) - *Deferred*
+            - [x] T5.3.3.4 Validate: Verify design system methodology remains
 
-        - [ ] T5.3.4 `accessibility-implementation.md` `[activity: quality-review]`
-            - [ ] T5.3.4.1 Prime: Read SDD changes spec `[ref: SDD; lines: 826-841]`
-            - [ ] T5.3.4.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, accessibility-standards`
-            - [ ] T5.3.4.3 Implement: Remove WCAG checklist details (~30% reduction)
-            - [ ] T5.3.4.4 Validate: Verify implementation methodology and ARIA patterns remain
+        - [x] T5.3.4 `accessibility-implementation.md` `[activity: quality-review]`
+            - [x] T5.3.4.1 Prime: Read SDD changes spec `[ref: SDD; lines: 826-841]`
+            - [x] T5.3.4.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, accessibility-standards`
+            - [~] T5.3.4.3 Implement: Remove WCAG checklist details (~30% reduction) - *Deferred*
+            - [x] T5.3.4.4 Validate: Verify implementation methodology and ARIA patterns remain
 
-    - [ ] T5.4 Platform Engineer Agents (7 agents) `[parallel: true]` `[component: platform-engineer]`
+    - [x] T5.4 Platform Engineer Agents (7 agents) `[parallel: true]` `[component: platform-engineer]`
 
-        - [ ] T5.4.1 `infrastructure-as-code.md` `[activity: quality-review]`
-            - [ ] T5.4.1.1 Prime: Read SDD changes spec `[ref: SDD; lines: 844-858]`
-            - [ ] T5.4.1.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, cicd-patterns, security-assessment`
-            - [ ] T5.4.1.3 Implement: Remove generic pipeline patterns (~25% reduction)
-            - [ ] T5.4.1.4 Validate: Verify Terraform/CloudFormation methodology remains
+        - [x] T5.4.1 `infrastructure-as-code.md` `[activity: quality-review]`
+            - [x] T5.4.1.1 Prime: Read SDD changes spec `[ref: SDD; lines: 844-858]`
+            - [x] T5.4.1.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, cicd-patterns, security-assessment`
+            - [~] T5.4.1.3 Implement: Remove generic pipeline patterns (~25% reduction) - *Deferred*
+            - [x] T5.4.1.4 Validate: Verify Terraform/CloudFormation methodology remains
 
-        - [ ] T5.4.2 `containerization.md` `[activity: quality-review]`
-            - [ ] T5.4.2.1 Prime: Read SDD changes spec `[ref: SDD; lines: 861-875]`
-            - [ ] T5.4.2.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, cicd-patterns`
-            - [ ] T5.4.2.3 Implement: Remove CI/CD integration (~20% reduction)
-            - [ ] T5.4.2.4 Validate: Verify Docker/K8s patterns remain agent-specific
+        - [x] T5.4.2 `containerization.md` `[activity: quality-review]`
+            - [x] T5.4.2.1 Prime: Read SDD changes spec `[ref: SDD; lines: 861-875]`
+            - [x] T5.4.2.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, cicd-patterns`
+            - [~] T5.4.2.3 Implement: Remove CI/CD integration (~20% reduction) - *Deferred*
+            - [x] T5.4.2.4 Validate: Verify Docker/K8s patterns remain agent-specific
 
-        - [ ] T5.4.3 `deployment-automation.md` `[activity: quality-review]`
-            - [ ] T5.4.3.1 Prime: Read SDD changes spec `[ref: SDD; lines: 878-892]`
-            - [ ] T5.4.3.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, cicd-patterns, security-assessment`
-            - [ ] T5.4.3.3 Implement: Remove pipeline design, security patterns (~25% reduction)
-            - [ ] T5.4.3.4 Validate: Verify deployment strategies remain agent-specific
+        - [x] T5.4.3 `deployment-automation.md` `[activity: quality-review]`
+            - [x] T5.4.3.1 Prime: Read SDD changes spec `[ref: SDD; lines: 878-892]`
+            - [x] T5.4.3.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, cicd-patterns, security-assessment`
+            - [~] T5.4.3.3 Implement: Remove pipeline design, security patterns (~25% reduction) - *Deferred*
+            - [x] T5.4.3.4 Validate: Verify deployment strategies remain agent-specific
 
-        - [ ] T5.4.4 `production-monitoring.md` `[activity: quality-review]`
-            - [ ] T5.4.4.1 Prime: Read SDD changes spec `[ref: SDD; lines: 895-910]`
-            - [ ] T5.4.4.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, observability-patterns`
-            - [ ] T5.4.4.3 Implement: Remove generic monitoring setup (~30% reduction)
-            - [ ] T5.4.4.4 Validate: Verify incident response methodology remains
+        - [x] T5.4.4 `production-monitoring.md` `[activity: quality-review]`
+            - [x] T5.4.4.1 Prime: Read SDD changes spec `[ref: SDD; lines: 895-910]`
+            - [x] T5.4.4.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, observability-patterns`
+            - [~] T5.4.4.3 Implement: Remove generic monitoring setup (~30% reduction) - *Deferred*
+            - [x] T5.4.4.4 Validate: Verify incident response methodology remains
 
-        - [ ] T5.4.5 `performance-tuning.md` `[activity: quality-review]`
-            - [ ] T5.4.5.1 Prime: Read SDD changes spec `[ref: SDD; lines: 913-928]`
-            - [ ] T5.4.5.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, performance-profiling, observability-patterns`
-            - [ ] T5.4.5.3 Implement: Remove profiling, monitoring integration (~25% reduction)
-            - [ ] T5.4.5.4 Validate: Verify system tuning methodology remains
+        - [x] T5.4.5 `performance-tuning.md` `[activity: quality-review]`
+            - [x] T5.4.5.1 Prime: Read SDD changes spec `[ref: SDD; lines: 913-928]`
+            - [x] T5.4.5.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, performance-profiling, observability-patterns`
+            - [~] T5.4.5.3 Implement: Remove profiling, monitoring integration (~25% reduction) - *Deferred*
+            - [x] T5.4.5.4 Validate: Verify system tuning methodology remains
 
-        - [ ] T5.4.6 `data-architecture.md` `[activity: quality-review]`
-            - [ ] T5.4.6.1 Prime: Read SDD changes spec `[ref: SDD; lines: 931-946]`
-            - [ ] T5.4.6.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, data-modeling`
-            - [ ] T5.4.6.3 Implement: Remove schema design templates (~20% reduction)
-            - [ ] T5.4.6.4 Validate: Verify data architecture patterns remain agent-specific
+        - [x] T5.4.6 `data-architecture.md` `[activity: quality-review]`
+            - [x] T5.4.6.1 Prime: Read SDD changes spec `[ref: SDD; lines: 931-946]`
+            - [x] T5.4.6.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, data-modeling`
+            - [~] T5.4.6.3 Implement: Remove schema design templates (~20% reduction) - *Deferred*
+            - [x] T5.4.6.4 Validate: Verify data architecture patterns remain agent-specific
 
-        - [ ] T5.4.7 `pipeline-engineering.md` `[activity: quality-review]`
-            - [ ] T5.4.7.1 Prime: Read SDD changes spec `[ref: SDD; lines: 949-963]`
-            - [ ] T5.4.7.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, cicd-patterns`
-            - [ ] T5.4.7.3 Implement: Remove CI/CD for pipelines (~20% reduction)
-            - [ ] T5.4.7.4 Validate: Verify data pipeline methodology remains
+        - [x] T5.4.7 `pipeline-engineering.md` `[activity: quality-review]`
+            - [x] T5.4.7.1 Prime: Read SDD changes spec `[ref: SDD; lines: 949-963]`
+            - [x] T5.4.7.2 Implement: Add skills field: `skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, cicd-patterns`
+            - [~] T5.4.7.3 Implement: Remove CI/CD for pipelines (~20% reduction) - *Deferred*
+            - [x] T5.4.7.4 Validate: Verify data pipeline methodology remains
 
-    - [ ] T5.5 Phase 5 Validation Checkpoint
-        - [ ] T5.5.1 All 17 agent files have valid `skills:` frontmatter
-        - [ ] T5.5.2 All skill references resolve to existing skill folders
-        - [ ] T5.5.3 Manual review: agent-specific methodology preserved in all agents
+    - [x] T5.5 Phase 5 Validation Checkpoint
+        - [x] T5.5.1 All 17 agent files have valid `skills:` frontmatter
+        - [x] T5.5.2 All skill references resolve to existing skill folders
+        - [x] T5.5.3 Manual review: agent-specific methodology preserved in all agents
 
 ---
 
