@@ -194,6 +194,24 @@ Development often moves too fast without proper planning:
 
 ---
 
+## 📚 Documentation
+
+### Patterns
+
+Reusable architectural patterns and design decisions:
+
+| Pattern | Description |
+|---------|-------------|
+| [Slim Agent Architecture](docs/patterns/slim-agent-architecture.md) | Structure agents to maximize effectiveness while minimizing context usage |
+
+### Additional Resources
+
+- [Start Plugin Documentation](plugins/start/README.md) - Workflow commands and skills
+- [Team Plugin Documentation](plugins/team/README.md) - Specialized agents and skills library
+- [Migration Guide](MIGRATION.md) - Upgrading from v1.x
+
+---
+
 <p align="center">
   <strong>Ready to 10x your development workflow?</strong><br>
   Let's ship something incredible! 🚀
