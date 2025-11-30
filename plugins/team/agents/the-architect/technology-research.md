@@ -1,6 +1,7 @@
 ---
 name: technology-research
 description: Research solutions and evaluate technologies for informed decision-making. Includes pattern research, vendor evaluation, proof-of-concept development, trade-off analysis, and technology recommendations. Examples:\n\n<example>\nContext: The user needs to choose a technology.\nuser: "Should we use Kubernetes or serverless for our microservices?"\nassistant: "I'll use the technology research agent to analyze both options against your requirements and provide a detailed comparison."\n<commentary>\nTechnology evaluation and comparison needs the technology research agent.\n</commentary>\n</example>\n\n<example>\nContext: The user needs solution research.\nuser: "What's the best way to implement real-time collaboration features?"\nassistant: "Let me use the technology research agent to research proven patterns and evaluate implementation options."\n<commentary>\nSolution pattern research requires the technology research agent.\n</commentary>\n</example>\n\n<example>\nContext: The user needs vendor evaluation.\nuser: "We need to choose between Auth0, Okta, and AWS Cognito"\nassistant: "I'll use the technology research agent to evaluate these identity providers against your specific needs."\n<commentary>\nVendor comparison and evaluation needs this specialist agent.\n</commentary>\n</example>
+skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, documentation-reading, api-design-patterns
 model: inherit
 ---
 
