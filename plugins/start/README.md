@@ -2,7 +2,7 @@
 
 **Workflow orchestration plugin for spec-driven development in Claude Code.**
 
-The `start` plugin provides five workflow commands, two autonomous skills, and "The Startup" output style to transform how you build software with Claude Code.
+The `start` plugin provides six workflow commands, two autonomous skills, and "The Startup" output style to transform how you build software with Claude Code.
 
 ---
 
@@ -15,6 +15,7 @@ The `start` plugin provides five workflow commands, two autonomous skills, and "
 | `/start:implement` | Execute implementation plan phase-by-phase |
 | `/start:analyze` | Discover and document patterns, rules, interfaces |
 | `/start:refactor` | Improve code quality while preserving behavior |
+| `/start:debug` | Conversational debugging with systematic root cause analysis |
 
 ---
 
@@ -167,6 +168,56 @@ flowchart TD
     C --> |complex| F[**Create Specification**<br/>📄 *Generate solution-design.md*<br/>📄 *Generate implementation-plan.md*<br/>Document approach]
     F --> |defer| G[🚀 **Ready for /start:implement**<br/>Execute via planned phases]
 ```
+
+</details>
+
+---
+
+### `/start:debug <description>`
+
+Diagnose and resolve bugs through conversational investigation with systematic root cause analysis.
+
+**Purpose:** Natural language debugging partner that helps identify and fix issues through dialogue, not rigid procedures
+
+**Usage:**
+```bash
+/start:debug The API returns 500 errors when uploading large files
+/start:debug Tests are failing intermittently on CI but pass locally
+/start:debug Users report slow page loads after the latest deployment
+```
+
+**Key Features:**
+- **Conversational Flow** - Natural dialogue, not rigid checklists or procedures
+- **Progressive Disclosure** - Starts with summary, reveals details on request
+- **Observable Actions Only** - Reports only what was actually checked and found
+- **User-Driven** - Proposes next steps, lets user guide the direction
+- **Hypothesis Tracking** - Forms and tests ranked hypotheses systematically
+- **Evidence-Based** - Never fabricates reasoning; all conclusions backed by evidence
+
+<details>
+<summary><strong>View Details</strong></summary>
+
+Uses a conversational approach through five natural phases: understand the problem, narrow it down, find the root cause, fix and verify, wrap up. The debugger reports only observable actions ("I checked X and found Y") and never fabricates reasoning. Users can ask "what did you check?" at any point and receive honest, verifiable answers.
+
+```mermaid
+flowchart TD
+    A([Bug Description]) --> |understand| B[**Phase 1: Understand**<br/>Reproduce issue<br/>Gather context]
+    B --> |isolate| C[**Phase 2: Narrow Down**<br/>Form hypotheses<br/>Binary search]
+    C --> |investigate| D[**Phase 3: Root Cause**<br/>Test hypotheses<br/>Find evidence]
+    D --> |fix| E[**Phase 4: Fix & Verify**<br/>Propose fix<br/>Run tests]
+    E --> |close| F[**Phase 5: Wrap Up**<br/>Summarize if needed<br/>Suggest follow-ups]
+    F --> END[✅ **Bug Resolved**]
+
+    D --> |stuck| G{Need More<br/>Context?}
+    G --> |yes| B
+    G --> |different angle| C
+```
+
+**The Four Commandments:**
+1. **Conversational, not procedural** - It's a dialogue, not a checklist
+2. **Observable only** - "I looked at X and found Y" not "This is probably..."
+3. **Progressive disclosure** - Start brief, expand on request
+4. **User in control** - "Want me to...?" not "I will now..."
 
 </details>
 
@@ -393,6 +444,16 @@ Improve code quality without changing behavior:
 ```
 
 Test-validated incremental changes with automatic rollback on failures.
+
+### Debug (Separate)
+
+Diagnose and fix bugs through natural conversation:
+
+```bash
+/start:debug The notification system stops working after 100 concurrent users
+```
+
+Conversational investigation with observable evidence and user-driven direction.
 
 ---
 

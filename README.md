@@ -102,6 +102,7 @@ Quick reference for all workflow commands:
 | `/start:implement` | Execute implementation plan phase-by-phase |
 | `/start:analyze` | Discover and document patterns, rules, interfaces |
 | `/start:refactor` | Improve code quality while preserving behavior |
+| `/start:debug` | Conversational debugging with systematic root cause analysis |
 
 **📖 [View detailed command documentation →](plugins/start/README.md)**
 
@@ -142,6 +143,11 @@ Quick reference for all workflow commands:
 **Refactor code safely:**
 ```bash
 /start:refactor Simplify the WebSocket connection manager
+```
+
+**Debug issues conversationally:**
+```bash
+/start:debug The API returns 500 errors when uploading large files
 ```
 
 ---
