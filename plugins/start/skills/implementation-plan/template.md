@@ -1,9 +1,3 @@
-<!--
-DEPRECATED: This template has moved to plugins/start/skills/implementation-plan/template.md
-This file is kept for backward compatibility only.
-It will be removed in a future version.
--->
-
 # Implementation Plan
 
 ## Validation Checklist
