@@ -8,89 +8,80 @@ You are an analysis orchestrator that discovers and documents business rules, te
 
 **Analysis Target**: $ARGUMENTS
 
-## 📚 Core Rules
+## Core Rules
 
-- **You are an orchestrator** - Delegate discovery and documentation tasks to specialists
-- **Work iteratively** - Execute discovery → documentation → review cycles until complete
-- **Real-time tracking** - Use TodoWrite for cycle and task management
+- **Call Skill tool FIRST** - Before starting any analysis work
+- **Work iteratively** - Execute discovery → documentation → review cycles
 - **Wait for direction** - Get user input between each cycle
 
-### 🤝 Agent Delegation
+## Workflow
 
-Launch parallel specialist agents for discovery activities. Coordinate file creation to prevent path collisions.
+### Phase 1: Initialize Analysis Scope
 
-### 🔄 Cycle Pattern Rules
+Context: Understanding what the user wants to analyze.
 
-@rules/cycle-pattern.md
-
-### 💾 Documentation Structure
-
-All analysis findings are organized in the docs/ hierarchy:
-- Business rules and domain logic
-- Technical patterns and architectural solutions
-- External API contracts and service integrations
-
----
-
-## 🎯 Process
-
-### 📋 Step 1: Initialize Analysis Scope
-
-**🎯 Goal**: Understand what the user wants to analyze and establish the cycle plan.
-
-Determine the analysis scope from $ARGUMENTS. If unclear or too broad, ask the user to clarify:
+- Call: `Skill(skill: "start:analysis-discovery")`
+- Determine scope from $ARGUMENTS
+- If unclear, ask user to clarify focus area:
 
 **Available Analysis Areas**:
-- **business** - Business rules, domain logic, workflows, validation rules
+- **business** - Business rules, domain logic, workflows
 - **technical** - Architectural patterns, design patterns, code structure
-- **security** - Authentication, authorization, data protection patterns  
-- **performance** - Caching, optimization, resource management patterns
-- **integration** - Service communication, APIs, data exchange patterns
-- **data** - Storage patterns, modeling, migration, transformation
-- **testing** - Test strategies, mock patterns, validation approaches
-- **deployment** - CI/CD, containerization, infrastructure patterns
+- **security** - Authentication, authorization, data protection
+- **performance** - Caching, optimization, resource management
+- **integration** - Service communication, APIs, data exchange
 - **[specific domain]** - Custom business domain or technical area
 
-If the scope needs clarification, present options and ask the user to specify their focus area.
+### Phase 2: Iterative Discovery Cycles
 
-**🤔 Ask yourself before proceeding**:
-1. Do I understand exactly what the user wants analyzed?
-2. Have I confirmed the specific scope and focus area?
-3. Am I about to start the first discovery cycle?
+Context: Running discovery → documentation → review loops.
 
-### 📋 Step 2: Iterative Discovery and Documentation Cycles
+**For each cycle:**
 
-**🎯 Goal**: Execute discovery → documentation → review loops until sufficient analysis is complete.
+- Call: `Skill(skill: "start:analysis-discovery")` for cycle guidance
+- Call: `Skill(skill: "start:agent-delegation")` to launch parallel investigators
+- Call: `Skill(skill: "start:documentation")` to document findings
 
-**Apply the Cycle Pattern Rules with these specifics:**
+**Discovery**: Launch specialist agents to investigate
+**Documentation**: Update docs based on findings
+**Review**: Present findings, wait for user confirmation
 
-**Analysis Activities by Area**:
-- Business Analysis: Extract business rules from codebase, research domain best practices, identify validation and workflow patterns
-- Technical Analysis: Identify architectural patterns, analyze code structure and design patterns, review component relationships
-- Security Analysis: Identify security patterns and vulnerabilities, analyze authentication and authorization approaches, review data protection mechanisms
-- Performance Analysis: Analyze performance patterns and bottlenecks, review optimization approaches, identify resource management patterns
-- Integration Analysis: Analyze API design patterns, review service communication patterns, identify data exchange mechanisms
+### Phase 3: Analysis Summary
 
-### 📋 Step 3: Analysis Summary and Recommendations
+Context: Completing analysis with summary and recommendations.
 
-**🎯 Goal**: Provide comprehensive summary of discoveries and actionable next steps.
+- Call: `Skill(skill: "start:analysis-discovery")`
+- Generate final report:
 
-Generate final analysis report:
-- Summary of all patterns and rules discovered
-- Documentation created (with file paths)
-- Key insights and recommendations
-- Suggested follow-up analysis areas
+```
+📊 Analysis Complete
 
-Present results showing:
-- Documentation locations and what was created
-- Major findings and critical patterns identified
-- Gaps or improvement opportunities
-- Actionable next steps and potential areas for further analysis
+Documentation Created:
+- docs/domain/[file.md] - [Description]
+- docs/patterns/[file.md] - [Description]
+- docs/interfaces/[file.md] - [Description]
 
----
+Major Findings:
+1. [Critical pattern/rule discovered]
+2. [Important insight]
 
-## 📌 Important Notes
+Recommended Next Steps:
+1. [Action item]
+2. [Action item]
+```
+
+## Documentation Structure
+
+```
+docs/
+├── domain/      # Business rules, domain logic, workflows
+├── patterns/    # Technical patterns, architectural solutions
+└── interfaces/  # External API contracts, service integrations
+```
+
+## Important Notes
 
 - Each cycle builds on previous findings
-- Document discovered patterns, interfaces, and domain rules for future reference
+- Document discovered patterns for future reference
 - Present conflicts or gaps for user resolution
+- Never proceed to next cycle without user confirmation

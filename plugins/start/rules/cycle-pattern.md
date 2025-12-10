@@ -1,3 +1,9 @@
+<!--
+DEPRECATED: This content has moved to plugins/start/skills/analysis-discovery/SKILL.md
+This file is kept for backward compatibility only.
+It will be removed in a future version.
+-->
+
 **For Each Cycle:**
 
 1. **Discovery Phase**

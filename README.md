@@ -26,7 +26,8 @@ We follow **[Spec-Driven Development](https://www.perplexity.ai/?q=Spec+Driven+D
 **The workflow**:
 
 1. **📋 Specify** - Turn ideas into comprehensive specification documents
-2. **⚡ Implement** - Execute plans phase-by-phase with parallel agent coordination
+2. **✅ Validate** - Quality gate to check specs, implementations, or understanding
+3. **⚡ Implement** - Execute plans phase-by-phase with parallel agent coordination
 
 The framework leverages **Claude Code's plugin system** to provide workflow commands, autonomous skills, specialized agents, and quality templates - all working together like a high-velocity startup team.
 
@@ -100,6 +101,7 @@ Quick reference for all workflow commands:
 | `/start:init` | Initialize environment (output style, statusline) |
 | `/start:specify` | Create specification documents from brief description |
 | `/start:implement` | Execute implementation plan phase-by-phase |
+| `/start:validate` | Validate specs, implementations, or understanding (quality gate) |
 | `/start:analyze` | Discover and document patterns, rules, interfaces |
 | `/start:refactor` | Improve code quality while preserving behavior |
 | `/start:debug` | Conversational debugging with systematic root cause analysis |
@@ -110,7 +112,7 @@ Quick reference for all workflow commands:
 
 ## 🔄 Typical Development Workflow
 
-### Specify → Implement
+### Specify → Validate → Implement
 
 **1. Create Specification**
 
@@ -122,7 +124,18 @@ Quick reference for all workflow commands:
 - Documents discovered patterns and interfaces
 - Duration: 15-30 minutes
 
-**2. Execute Implementation**
+**2. Validate Before Implementation (Optional)**
+
+```bash
+/start:validate 001
+```
+
+- Checks completeness, consistency, correctness
+- Detects ambiguities and gaps
+- Provides advisory recommendations
+- Duration: 2-5 minutes
+
+**3. Execute Implementation**
 
 ```bash
 /start:implement 001
@@ -134,6 +147,11 @@ Quick reference for all workflow commands:
 - Duration: Varies by complexity
 
 ### Separate Workflows
+
+**Validate understanding or implementation:**
+```bash
+/start:validate Check the current auth implementation against the SDD
+```
 
 **Analyze existing code:**
 ```bash
