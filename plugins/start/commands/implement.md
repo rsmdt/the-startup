@@ -1,7 +1,7 @@
 ---
 description: "Executes the implementation plan from a specification"
 argument-hint: "spec ID to implement (e.g., 001), or file path"
-allowed-tools: ["Task", "TodoWrite", "Bash", "Write", "Edit", "Read", "LS", "Glob", "Grep", "MultiEdit"]
+allowed-tools: ["Task", "TodoWrite", "Bash", "Write", "Edit", "Read", "LS", "Glob", "Grep", "MultiEdit", "AskUserQuestion"]
 ---
 
 You are an intelligent implementation orchestrator that executes: **$ARGUMENTS**
@@ -9,7 +9,7 @@ You are an intelligent implementation orchestrator that executes: **$ARGUMENTS**
 ## Core Rules
 
 - **Call Skill tool FIRST** - Before each phase
-- **Phases are checkpoints** - Never auto-proceed between phases
+- **Use AskUserQuestion at phase boundaries** - Never auto-proceed between phases
 - **Track with TodoWrite** - Load ONE phase at a time
 
 ## Workflow
@@ -20,22 +20,10 @@ Context: Loading spec, analyzing PLAN.md, preparing for execution.
 
 - Call: `Skill(skill: "start:specification-management")` to read spec
 - Call: `Skill(skill: "start:implementation-plan")` to understand PLAN structure
-- Run: `~/.claude/plugins/marketplaces/the-startup/plugins/start/scripts/spec.py [ID] --read`
 - Validate: PLAN.md exists, identify phases and tasks
 - Load ONLY Phase 1 tasks into TodoWrite
-- Present overview and wait for confirmation:
-
-```
-📁 Specification: [directory]
-📊 Implementation Overview:
-
-Found X phases with Y total tasks:
-- Phase 1: [Name] (N tasks)
-- Phase 2: [Name] (N tasks)
-...
-
-Ready to start Phase 1 implementation? (yes/no)
-```
+- Present overview with phase/task counts
+- Call: `AskUserQuestion` - Start Phase 1 (recommended) or Review spec first
 
 ### Phase 2+: Phase-by-Phase Execution
 
@@ -55,54 +43,33 @@ Context: Executing tasks from implementation plan.
 - Call: `Skill(skill: "start:specification-compliance")` for validation
 - Verify all TodoWrite tasks complete
 - Update PLAN.md checkboxes
-- Present phase summary and wait for user confirmation
+- Call: `AskUserQuestion` for phase transition (see options below)
 
-### Phase Completion Protocol
+### Phase Transition Options
 
-Before proceeding to next phase:
-- All TodoWrite tasks for phase showing 'completed'
-- All PLAN.md checkboxes updated
-- Specification compliance verified
-- User confirmation received
+At the end of each phase, ask user how to proceed:
+
+| Scenario | Recommended Option | Other Options |
+|----------|-------------------|---------------|
+| Phase complete, more phases remain | Continue to next phase | Review phase output, Pause implementation |
+| Phase complete, final phase | Finalize implementation | Review all phases, Run additional tests |
+| Phase has issues | Address issues first | Skip and continue, Abort implementation |
 
 ### Completion
 
 - Call: `Skill(skill: "start:specification-compliance")` for final validation
-- Present summary with next steps:
-
-```
-🎉 Implementation Complete!
-
-Summary:
-- Total phases: X
-- Total tasks: Y
-- All validations: ✓ Passed
-
-Suggested next steps:
-1. Run full test suite
-2. Deploy to staging
-3. Create PR for review
-```
+- Present summary (phases completed, tasks executed, validation status)
+- Call: `AskUserQuestion` - Run tests (recommended), Deploy to staging, or Create PR
 
 ### Blocked State
 
 If blocked at any point:
-
-```
-⚠️ Implementation Blocked
-
-Phase: [X]
-Task: [Description]
-Reason: [Specific blocker]
-
-Options:
-1. Retry with modifications
-2. Skip task and continue
-3. Abort implementation
-4. Get manual assistance
-
-Awaiting your decision...
-```
+- Present blocker details (phase, task, specific reason)
+- Call: `AskUserQuestion` with options:
+  - Retry with modifications
+  - Skip task and continue
+  - Abort implementation
+  - Get manual assistance
 
 ## Document Structure
 
