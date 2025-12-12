@@ -1,9 +1,3 @@
-<!--
-DEPRECATED: This template has moved to plugins/start/skills/solution-design/template.md
-This file is kept for backward compatibility only.
-It will be removed in a future version.
--->
-
 # Solution Design Document
 
 ## Validation Checklist

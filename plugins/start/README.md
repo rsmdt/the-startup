@@ -2,7 +2,7 @@
 
 **Workflow orchestration plugin for spec-driven development in Claude Code.**
 
-The `start` plugin provides six workflow commands, two autonomous skills, and "The Startup" output style to transform how you build software with Claude Code.
+The `start` plugin provides seven workflow commands, twelve autonomous skills, and "The Startup" output style to transform how you build software with Claude Code.
 
 ---
 
@@ -13,6 +13,7 @@ The `start` plugin provides six workflow commands, two autonomous skills, and "T
 | `/start:init` | Initialize environment (output style, statusline) |
 | `/start:specify` | Create specification documents from brief description |
 | `/start:implement` | Execute implementation plan phase-by-phase |
+| `/start:validate` | Validate specs, implementations, or understanding |
 | `/start:analyze` | Discover and document patterns, rules, interfaces |
 | `/start:refactor` | Improve code quality while preserving behavior |
 | `/start:debug` | Conversational debugging with systematic root cause analysis |
@@ -101,6 +102,64 @@ flowchart TD
     E --> |continue| C
     C --> |no| F[**Final Validation**<br/>Run full test suite<br/>Verify all requirements]
     F --> END[✅ **Implementation Complete**]
+```
+
+</details>
+
+---
+
+### `/start:validate <target>`
+
+Validate specifications, implementations, or understanding through intelligent context detection and the 3 Cs framework (Completeness, Consistency, Correctness).
+
+**Purpose:** Quality gate that works at any lifecycle stage - during specification, before implementation, or after completion
+
+**Usage:**
+```bash
+/start:validate 001                                          # Validate spec by ID
+/start:validate docs/specs/001/solution-design.md            # Validate specific file
+/start:validate Check the auth implementation against SDD    # Compare implementation to spec
+/start:validate Is my caching approach correct?              # Validate understanding
+```
+
+**Key Features:**
+- **Intelligent Mode Detection** - Automatically determines validation type from input
+- **The 3 Cs Framework** - Checks Completeness, Consistency, and Correctness
+- **Ambiguity Detection** - Scans for vague language ("should", "various", "etc.")
+- **Cross-Document Traceability** - Verifies PRD→SDD→PLAN alignment
+- **Advisory Only** - Provides recommendations without blocking
+- **Comparison Validation** - Compares implementations against specifications
+- **Understanding Validation** - Confirms correctness of approach or design
+
+<details>
+<summary><strong>View Details</strong></summary>
+
+**Four validation modes** automatically detected from input:
+
+| Input Type | Mode | What Gets Validated |
+|------------|------|---------------------|
+| Spec ID (`005`) | Specification | Full spec quality and readiness |
+| File path (`src/auth.ts`) | File | Individual file quality |
+| "Check X against Y" | Comparison | Implementation vs specification |
+| Freeform text | Understanding | Approach correctness |
+
+**The 3 Cs Framework:**
+
+1. **Completeness** - All sections filled, no `[NEEDS CLARIFICATION]` markers, checklists complete
+2. **Consistency** - Cross-document traceability, terminology alignment, no contradictions
+3. **Correctness** - ADRs confirmed, dependencies valid, acceptance criteria testable
+
+```mermaid
+flowchart TD
+    A([Validation Request]) --> |parse| B{Detect Mode}
+    B --> |spec ID| C[**Specification Validation**<br/>3 Cs + Ambiguity + Readiness]
+    B --> |file path| D[**File Validation**<br/>Quality + Completeness]
+    B --> |"against"| E[**Comparison Validation**<br/>Implementation vs Spec]
+    B --> |freeform| F[**Understanding Validation**<br/>Approach Correctness]
+    C --> G[**Report**<br/>📊 Findings + 💡 Recommendations]
+    D --> G
+    E --> G
+    F --> G
 ```
 
 </details>
@@ -245,7 +304,43 @@ Activates "The Startup" output style (high-energy, execution-focused communicati
 
 ## Autonomous Skills
 
-The `start` plugin includes two skills that activate automatically based on context. You never need to explicitly invoke them - they just work when needed.
+The `start` plugin includes twelve skills that activate automatically based on context. You never need to explicitly invoke them - they just work when needed.
+
+### Core Skills
+
+| Skill | Purpose |
+|-------|---------|
+| `agent-delegation` | Task decomposition, FOCUS/EXCLUDE templates, parallel coordination |
+| `documentation` | Auto-document patterns, interfaces, domain rules |
+| `specification-management` | Spec directory creation, README tracking, phase transitions |
+| `specification-validation` | 3 Cs validation, ambiguity detection, comparison checks |
+
+### Document Skills
+
+| Skill | Purpose |
+|-------|---------|
+| `product-requirements` | PRD template, validation, requirements gathering |
+| `solution-design` | SDD template, architecture design, ADR management |
+| `implementation-plan` | PLAN template, task sequencing, dependency mapping |
+
+### Execution Skills
+
+| Skill | Purpose |
+|-------|---------|
+| `execution-orchestration` | Phase-by-phase execution, TodoWrite tracking, checkpoints |
+| `specification-compliance` | Implementation vs spec verification, deviation detection |
+
+### Methodology Skills
+
+| Skill | Purpose |
+|-------|---------|
+| `analysis-discovery` | Iterative discovery cycles for pattern/rule extraction |
+| `debugging-methodology` | Scientific debugging, hypothesis tracking, evidence-based |
+| `refactoring-methodology` | Safe refactoring patterns, behavior preservation |
+
+---
+
+### Skill Details
 
 ### `documentation`
 
@@ -399,7 +494,7 @@ The `start` plugin includes **The Startup** output style - a high-energy, execut
 
 ## Typical Development Workflow
 
-### Specify → Implement
+### Specify → Validate → Implement
 
 **1. Create Specification**
 
@@ -413,7 +508,20 @@ The `start` plugin includes **The Startup** output style - a high-energy, execut
 - Documents discovered patterns/interfaces
 - Duration: 15-30 minutes
 
-**2. Execute Implementation**
+**2. Validate Before Implementation (Optional)**
+
+```bash
+/start:validate 001
+```
+
+**What happens:**
+- Checks completeness, consistency, correctness (3 Cs)
+- Detects ambiguities and vague language
+- Verifies cross-document traceability
+- Provides advisory recommendations
+- Duration: 2-5 minutes
+
+**3. Execute Implementation**
 
 ```bash
 /start:implement 001
@@ -424,6 +532,16 @@ The `start` plugin includes **The Startup** output style - a high-energy, execut
 - Parallel agent coordination within phases
 - Continuous test validation
 - Duration: Varies by complexity
+
+### Validate (Separate)
+
+Validate at any point during development:
+
+```bash
+/start:validate Check the auth service against solution-design.md
+```
+
+Compares implementation against specification, reports deviations and coverage.
 
 ### Analyze (Separate)
 

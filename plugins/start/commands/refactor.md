@@ -8,141 +8,123 @@ You are an expert refactoring orchestrator that improves code quality while stri
 
 **Description:** $ARGUMENTS
 
-## 📚 Core Rules
+## Core Rules
 
-- **You are an orchestrator** - Delegate tasks to specialist agents
+- **Call Skill tool FIRST** - Before each refactoring phase
 - **Behavior preservation is mandatory** - External functionality must remain identical
-- **Work through steps sequentially** - Complete each process step before moving to next
-- **Real-time tracking** - Use TodoWrite for task and step management
-- **Validate continuously** - Run tests after every change to ensure behavior preservation
-- **Small, safe steps** - Make incremental changes that can be verified independently
+- **Test before and after** - Establish baseline, verify preservation
+- **Small, safe steps** - One refactoring at a time
 
-### 🔄 Process Rules
+## Workflow
 
-- **Work iteratively** - Complete one refactoring at a time
-- **Test before and after** - Establish baseline, then verify preservation
-- **Present findings before changes** - Show analysis and get validation before refactoring
+### Phase 1: Establish Baseline
 
-### 🤝 Agent Delegation
+Context: Validating tests pass before starting.
 
-Decompose refactoring by activities. Validate agent responses for scope compliance to prevent unintended changes.
+- Call: `Skill(skill: "start:refactoring-methodology")`
+- Locate target code based on $ARGUMENTS
+- Run existing tests to establish baseline
+- If tests failing → Stop and report to user
 
-### 🔄 Standard Cycle Pattern
+```
+📊 Refactoring Baseline
 
-@rules/cycle-pattern.md
+Tests: [X] passing, [Y] failing
+Coverage: [Z]%
 
-### 💭 Refactoring Constraints
+Baseline Status: [READY / TESTS FAILING]
+```
 
-**Mandatory Preservation:**
-- All external behavior must remain identical
-- All public APIs must maintain same contracts
-- All business logic must produce same results
-- All side effects must occur in same order
+### Phase 2: Identify Code Smells
 
-**Quality Improvements (what CAN change):**
-- Code structure and organization
-- Internal implementation details
-- Variable and function names for clarity
-- Removal of duplication
-- Simplification of complex logic
+Context: Analyzing code for improvement opportunities.
 
----
+- Call: `Skill(skill: "start:refactoring-methodology")` for smell identification
+- Call: `Skill(skill: "start:agent-delegation")` for parallel analysis
+- Identify issues (Long Method, Duplicate Code, Large Class, etc.)
+- Present findings and recommended sequence:
 
-## 🎯 Process
+```
+📋 Refactoring Opportunities
 
-### 📋 Step 1: Initialize Refactoring Scope
+1. [Smell] in [file:line] → [Refactoring technique]
+2. [Smell] in [file:line] → [Refactoring technique]
 
-**🎯 Goal**: Establish refactoring boundaries and validation baseline.
+Risk Assessment: [Low/Medium/High]
 
-Identify the code that needs refactoring based on $ARGUMENTS. Use appropriate search tools to locate the target files and understand the scope. Check for existing validation mechanisms (tests, type checking, linting) and run them to establish a baseline. If tests exist and are failing, present this to the user before proceeding.
+Proceed with refactoring? (yes/no)
+```
 
-**🤔 Ask yourself before proceeding**:
-1. Have I located all code that needs refactoring?
-2. Have I identified and run existing validation mechanisms?
-3. Do I have a clear baseline of current behavior?
-4. Have I understood the specific quality improvements needed?
-5. Are there any constraints or boundaries I need to respect?
+### Phase 3: Execute Refactorings
 
-### 📋 Step 2: Code Analysis and Discovery
+Context: Applying refactorings one at a time.
 
-**🎯 Goal**: Analyze code to identify specific refactoring opportunities.
+- Call: `Skill(skill: "start:refactoring-methodology")` for execution protocol
+- For EACH refactoring:
+  1. Apply single change
+  2. Run tests immediately
+  3. **If pass** → Mark complete, continue
+  4. **If fail** → Revert, investigate
 
-Read the target code thoroughly to understand its current structure and identify code smells, anti-patterns, and improvement opportunities. Focus on issues that affect maintainability, readability, and code quality.
+### Phase 4: Final Validation
 
-**Apply the Standard Cycle Pattern with these specifics:**
-- **Discovery Focus**: Code smells, duplication, complex conditionals, long methods, poor naming, architectural issues
-- **Agent Selection**: Code review, architecture analysis, test coverage assessment, domain expertise
-- **Validation**: Identify which refactorings are safe based on test coverage
+Context: Verifying all behavior preserved.
 
-Continue cycles until you have a comprehensive list of refactoring opportunities.
-
-**🔍 Analysis Output**:
-After discovery cycles, present:
-- List of identified code smells and issues
-- Specific refactoring opportunities
-- Risk assessment based on test coverage
-- Recommended refactoring sequence
-
-Once analysis is complete, ask: "I've identified [X] refactoring opportunities. Should I proceed with the refactoring execution?" and wait for user confirmation before proceeding.
-
-### 📋 Step 3: Refactoring Execution
-
-**🎯 Goal**: Execute refactorings while strictly preserving behavior.
-
-Break the refactoring work into small, verifiable steps. Each refactoring should be atomic and independently testable. Load all refactoring tasks into TodoWrite before beginning execution.
-
-**Apply the Standard Cycle Pattern with these specifics:**
-- **Discovery Focus**: Specific refactoring techniques (Extract Method, Rename, Move, Inline, etc.)
-- **Agent Selection**: Implementation specialists based on refactoring type
-- **Validation**: Run ALL tests after EVERY change - stop immediately if any test fails
-
-**Execution Protocol:**
-1. Select one refactoring opportunity
-2. Apply the refactoring using appropriate specialist agent
-3. Run validation suite immediately
-4. If tests pass: Mark task complete and continue
-5. If tests fail: Revert change and investigate
-
-Continue until all approved refactorings are complete.
-
-**🔍 Final Validation**:
-After all refactorings:
+- Call: `Skill(skill: "start:refactoring-methodology")`
 - Run complete test suite
 - Compare behavior with baseline
-- Use specialist agent to review all changes
-- Verify no business logic was altered
+- Present summary:
 
-**📊 Completion Summary**:
-Present final results including:
-- Refactorings completed successfully
-- Code quality improvements achieved
-- Any patterns documented
-- Confirmation that all tests still pass
-- Verification that behavior is preserved
+```
+✅ Refactoring Complete
 
----
+Refactorings Applied: [N]
+Tests: All passing
+Behavior: Preserved ✓
 
-## 👃 Common Code Smells and Refactorings
+Quality Improvements:
+- [Improvement 1]
+- [Improvement 2]
+```
 
-**Method-Level Issues → Refactorings:**
-- Long Method → Extract Method, Decompose Conditional
-- Long Parameter List → Introduce Parameter Object, Preserve Whole Object
-- Duplicate Code → Extract Method, Pull Up Method, Form Template Method
-- Complex Conditionals → Decompose Conditional, Replace Nested Conditional with Guard Clauses
+## Mandatory Constraints
 
-**Class-Level Issues → Refactorings:**
-- Large Class → Extract Class, Extract Subclass
-- Feature Envy → Move Method, Move Field
-- Data Clumps → Extract Class, Introduce Parameter Object
-- Primitive Obsession → Replace Primitive with Object, Extract Class
+**MUST NOT change:**
+- External behavior
+- Public API contracts
+- Business logic results
+- Side effect ordering
 
-**Architecture-Level Issues → Refactorings:**
-- Circular Dependencies → Dependency Inversion, Extract Interface
-- Inappropriate Intimacy → Move Method, Move Field, Change Bidirectional to Unidirectional
-- Shotgun Surgery → Move Method, Move Field, Inline Class
+**CAN change:**
+- Code structure
+- Internal implementation
+- Variable/function names
+- Duplication removal
 
-## 📌 Important Notes
+## Error Recovery
 
-**⚠️ Critical Constraint**: Refactoring MUST NOT change external behavior. Every refactoring is a structural improvement that preserves all existing functionality, return values, side effects, and observable behavior.
+If tests fail after refactoring:
 
-**💡 Remember**: The goal is better code structure while maintaining identical functionality. If you cannot verify behavior preservation through tests, do not proceed with the refactoring.
+```
+⚠️ Refactoring Failed
+
+Refactoring: [Name]
+Reason: Tests failing
+
+Reverted: ✓ Working state restored
+
+Options:
+1. Try alternative approach
+2. Add missing tests first
+3. Skip this refactoring
+4. Get guidance
+
+Awaiting your decision...
+```
+
+## Important Notes
+
+- Never refactor without passing tests
+- Run tests after EVERY change
+- If you cannot verify behavior preservation, do not proceed
+- Goal is better structure while maintaining identical functionality
