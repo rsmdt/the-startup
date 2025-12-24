@@ -19,7 +19,7 @@
 
 ## 🤖 What is The Agentic Startup?
 
-**The Agentic Startup** is a spec-driven development framework for Claude Code that transforms how you build software. Think of it as having instant access to expert developers, architects, and engineers - all working together in parallel to turn your ideas into shipped code.
+**The Agentic Startup** is a spec-driven development framework for Claude Code that transforms how you build software. Think Y Combinator demo day energy meets engineering discipline - multiple specialists executing in parallel while you stay in control.
 
 We follow **[Spec-Driven Development](https://www.perplexity.ai/?q=Spec+Driven+Development)**, where comprehensive specifications are created before coding begins, ensuring clarity and reducing rework.
 
@@ -33,7 +33,7 @@ The framework leverages **Claude Code's plugin system** to provide workflow comm
 
 ---
 
-## What's New in 2.0
+## ✨ Key Features
 
 **Native Claude Code Integration** - Distributed as official marketplace plugins with zero manual configuration
 
@@ -41,7 +41,7 @@ The framework leverages **Claude Code's plugin system** to provide workflow comm
 
 **Specialized Agent Team** - 11 agent roles across 27 activity-based specializations (optional [`team@the-startup`](plugins/team/README.md) plugin)
 
-**Migrating from 1.x?** See the [complete migration guide](MIGRATION.md) for step-by-step instructions.
+**Structured Momentum** - Y Combinator energy meets engineering discipline - parallel execution with quality gates
 
 ---
 
@@ -171,6 +171,10 @@ Quick reference for all workflow commands:
 ---
 
 ## 🎯 Philosophy
+
+### Why Activity-Based Agents?
+
+Research shows **2-22% accuracy improvement** with specialized task agents vs. single broad agents ([Multi-Agent Collaboration, 2025](https://arxiv.org/html/2501.06322v1)). Leading frameworks organize agents by **capability**, not job titles. The Agentic Startup applies this research through activity-based specialization.
 
 ### The Problem We Solve
 
