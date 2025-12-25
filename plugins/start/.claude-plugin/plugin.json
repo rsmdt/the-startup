@@ -15,5 +15,5 @@
     "implementation",
     "refactoring"
   ],
-  "outputStyles": "../output-styles/"
+  "outputStyles": "./output-styles/"
 }
