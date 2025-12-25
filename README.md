@@ -11,6 +11,14 @@
     <img alt="Release" src="https://github.com/rsmdt/the-startup/actions/workflows/release.yml/badge.svg" />
   </a>
 
+  <a href="https://github.com/rsmdt/the-startup/releases">
+    <img alt="Downloads" src="https://img.shields.io/github/downloads/rsmdt/the-startup/total?style=flat&label=downloads&color=blue" />
+  </a>
+
+  <a href="https://github.com/rsmdt/the-startup/stargazers">
+    <img alt="GitHub Stars" src="https://img.shields.io/github/stars/rsmdt/the-startup?style=flat&color=yellow" />
+  </a>
+
   <a href="https://github.com/hesreallyhim/awesome-claude-code">
     <img alt="Mentioned in Awesome Claude Code" src="https://awesome.re/mentioned-badge.svg" />
   </a>
