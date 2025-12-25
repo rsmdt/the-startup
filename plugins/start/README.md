@@ -2,7 +2,7 @@
 
 **Workflow orchestration plugin for spec-driven development in Claude Code.**
 
-The `start` plugin provides seven workflow commands, twelve autonomous skills, and "The Startup" output style to transform how you build software with Claude Code.
+The `start` plugin provides seven workflow commands, twelve autonomous skills, and two output styles to transform how you build software with Claude Code.
 
 ---
 
@@ -286,7 +286,7 @@ flowchart TD
 
 Initialize The Agentic Startup framework in your Claude Code environment with interactive setup.
 
-**Purpose:** One-time setup for optimal configuration of output style and statusline
+**Purpose:** Configure git-aware statusline for real-time command tracking
 
 **Usage:**
 ```bash
@@ -296,7 +296,9 @@ Initialize The Agentic Startup framework in your Claude Code environment with in
 <details>
 <summary><strong>View Details</strong></summary>
 
-Activates "The Startup" output style (high-energy, execution-focused communication with parallel agent orchestration mindset) and configures git-aware statusline with real-time command tracking. Interactive setup asks for preferences and confirms each change before applying. Safe to run multiple times.
+Configures git-aware statusline with real-time command tracking. Interactive setup asks for preferences and confirms each change before applying. Safe to run multiple times.
+
+**Note:** Output styles are available immediately via `/output-style` - no initialization required.
 
 </details>
 
@@ -446,49 +448,79 @@ The skill always checks existing documentation before creating new files, preven
 
 ---
 
-## 🎨 The Startup Output Style
+## 🎨 Output Styles
 
-The `start` plugin includes **The Startup** output style - a high-energy, execution-focused communication style that embodies startup velocity with operational excellence.
+The `start` plugin includes two output styles for different working preferences. Both share the same operational fundamentals (verification, code ownership, scope management) but express them differently.
 
-**Activate it via:** `/start:init`
+**Activate via:** `/output-style The Startup` or `/output-style The ScaleUp`
 
-### Personality
+---
 
-**The Startup** embodies:
+### The Startup 🚀
+
+**High-energy execution with structured momentum.**
+
+| Aspect | Description |
+|--------|-------------|
+| **Vibe** | Demo day energy, Y Combinator intensity |
+| **Voice** | "Let's deliver this NOW!", "BOOM! That's what I'm talking about!" |
+| **Mantra** | "Done is better than perfect, but quality is non-negotiable" |
+
+**Personality:**
 - **The Visionary Leader** - "We'll figure it out" - execute fast, iterate faster
 - **The Rally Captain** - Turn challenges into team victories
 - **The Orchestrator** - Run parallel execution like a conductor
 - **The Pragmatist** - MVP today beats perfect next quarter
 
-### Communication Style
+**Best for:**
+- Fast-paced development sprints
+- High-energy execution mode
+- When you want momentum and celebration
 
-**How The Startup communicates:**
-- High energy, high clarity ("Let's deliver this NOW!")
-- Execution mentality ("We've got momentum, let's push!")
-- Celebrate wins ("That's what I'm talking about!")
-- Own failures fast ("That didn't work. Here's the fix.")
-- Always forward motion ("Next, we're tackling...")
+---
 
-### Workflow Patterns
+### The ScaleUp 📈
 
-**What you get:**
-- Parallel-first mindset (launches multiple agents simultaneously)
-- TodoWrite obsession (tracks every task religiously)
-- "Ask yourself" checkpoints (self-validation at key decision points)
-- Investor update summaries (comprehensive status reports)
+**Calm confidence with educational depth.**
 
-### When to Use
+| Aspect | Description |
+|--------|-------------|
+| **Vibe** | Professional craft, engineering excellence |
+| **Voice** | "We've solved harder problems. Here's the approach.", "This decision matters because..." |
+| **Mantra** | "Sustainable speed at scale. We move fast, but we don't break things" |
 
-**Perfect for:**
-- Fast-paced development
-- Complex multi-step workflows
-- Parallel agent coordination
-- High-energy execution
+**Personality:**
+- **The Seasoned Leader** - We've been through the fire. Now we build to last.
+- **The Strategist** - Think two steps ahead. Today's shortcut is tomorrow's outage.
+- **The Multiplier** - Your job is to make the whole team better, not just ship code.
+- **The Guardian** - Reliability isn't optional. Customers trust us with their business.
 
-**Maybe not for:**
-- Simple single-step tasks
-- Exploratory conversations
-- Learning/tutorial sessions
+**Unique feature - Educational Insights:**
+
+The ScaleUp provides contextual explanations as it works:
+
+> I've added the retry logic to the API client:
+> ```typescript
+> await retry(fetchUser, { maxAttempts: 3, backoff: 'exponential' });
+> ```
+> 💡 *Insight: I used exponential backoff here because this endpoint has rate limiting. The existing `src/utils/retry.ts` helper already implements this pattern - I'm reusing it rather than adding a new dependency.*
+
+**Best for:**
+- Learning while building
+- Understanding codebase patterns
+- When you want explanations with your code
+- Onboarding to unfamiliar codebases
+
+---
+
+### Comparison
+
+| Dimension | The Startup | The ScaleUp |
+|-----------|-------------|-------------|
+| **Energy** | High-octane, celebratory | Calm, measured |
+| **Explanations** | Minimal - ships fast | Educational insights included |
+| **Failures** | "That didn't work. Moving on." | "Here's what failed and why..." |
+| **Closing thought** | "What did we deliver?" | "Can the team maintain this without me?" |
 
 ---
 
