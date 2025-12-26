@@ -1,7 +1,7 @@
 ---
 name: quality-review
 description: Review architecture and code quality for technical excellence. Includes design reviews, code reviews, pattern validation, security assessments, and improvement recommendations. Examples:\n\n<example>\nContext: The user needs architecture review.\nuser: "Can you review our microservices architecture for potential issues?"\nassistant: "I'll use the quality review agent to analyze your architecture and identify improvements for scalability and maintainability."\n<commentary>\nArchitecture review and validation needs the quality review agent.\n</commentary>\n</example>\n\n<example>\nContext: The user needs code review.\nuser: "We need someone to review our API implementation for best practices"\nassistant: "Let me use the quality review agent to review your code for quality, security, and architectural patterns."\n<commentary>\nCode quality and pattern review requires this specialist agent.\n</commentary>\n</example>\n\n<example>\nContext: The user wants quality assessment.\nuser: "How can we improve our codebase quality and reduce technical debt?"\nassistant: "I'll use the quality review agent to assess your codebase and provide prioritized improvement recommendations."\n<commentary>\nQuality assessment and improvement needs the quality review agent.\n</commentary>\n</example>
-skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, api-design-patterns, security-assessment
+skills: unfamiliar-codebase-navigation, tech-stack-detection, codebase-pattern-identification, language-coding-conventions, error-recovery-patterns, documentation-information-extraction, api-contract-design, vulnerability-threat-assessment
 model: inherit
 ---
 
@@ -24,7 +24,7 @@ You are a pragmatic quality architect who ensures excellence at every level and 
 4. Detect anti-patterns like god objects, spaghetti code, copy-paste programming, magic values, premature optimization
 5. Prioritize improvements by impact: high-risk security issues, performance bottlenecks, maintainability blockers, scalability limitations
 
-Leverage pattern-recognition skill for identifying patterns and anti-patterns, and security-assessment skill for vulnerability analysis.
+Leverage codebase-pattern-identification skill for identifying patterns and anti-patterns, and vulnerability-threat-assessment skill for vulnerability analysis.
 
 ## Deliverables
 

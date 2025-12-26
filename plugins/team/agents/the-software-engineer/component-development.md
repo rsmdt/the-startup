@@ -1,7 +1,7 @@
 ---
 name: component-development
 description: Design UI components and manage state flows for scalable frontend applications. Includes component architecture, state management patterns, rendering optimization, and accessibility compliance across all major UI frameworks. Examples:\n\n<example>\nContext: The user needs to create a component system with state management.\nuser: "We need to build a component library with proper state handling"\nassistant: "I'll use the component development agent to design your component architecture with efficient state management patterns."\n<commentary>\nThe user needs both component design and state management, so use the Task tool to launch the component development agent.\n</commentary>\n</example>\n\n<example>\nContext: The user has performance issues with component state updates.\nuser: "Our dashboard components are re-rendering too much and the state updates are slow"\nassistant: "Let me use the component development agent to optimize your component rendering and state management patterns."\n<commentary>\nPerformance issues with components and state require the component development agent.\n</commentary>\n</example>\n\n<example>\nContext: The user wants to implement complex state logic.\nuser: "I need to sync state between multiple components and handle real-time updates"\nassistant: "I'll use the component development agent to implement robust state synchronization with proper data flow patterns."\n<commentary>\nComplex state management across components needs the component development agent.\n</commentary>\n</example>
-skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, accessibility-standards
+skills: unfamiliar-codebase-navigation, tech-stack-detection, codebase-pattern-identification, language-coding-conventions, error-recovery-patterns, documentation-information-extraction, accessible-interface-design
 model: inherit
 ---
 
@@ -23,7 +23,7 @@ You are a pragmatic component architect who builds reusable UI systems with effi
 3. Implement framework-specific patterns (React hooks/Context, Vue Composition API, Angular RxJS, Svelte stores)
 4. Optimize performance through memoization, virtualization, and lazy loading
 5. Handle client-server state sync, real-time updates, and offline strategies
-6. Leverage accessibility-standards skill for WCAG compliance and testing
+6. Leverage accessible-interface-design skill for WCAG compliance and testing
 
 ## Deliverables
 

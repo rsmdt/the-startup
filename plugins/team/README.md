@@ -127,7 +127,7 @@ Skills are referenced in agent YAML frontmatter:
 ```yaml
 ---
 name: api-development
-skills: codebase-exploration, framework-detection, api-design-patterns
+skills: unfamiliar-codebase-navigation, tech-stack-detection, api-contract-design
 ---
 ```
 
@@ -137,22 +137,22 @@ When an agent is invoked, Claude Code automatically loads the referenced skills 
 
 | Category | Skill | Description |
 |----------|-------|-------------|
-| **Cross-Cutting** | `codebase-exploration` | Navigate, search, and understand project structures |
-| | `framework-detection` | Auto-detect project tech stacks and configurations |
-| | `pattern-recognition` | Identify existing codebase patterns for consistency |
-| | `best-practices` | Security, performance, and accessibility standards |
-| | `error-handling` | Consistent error patterns and recovery strategies |
-| | `documentation-reading` | Interpret docs, READMEs, specs, and configs |
-| **Development** | `api-design-patterns` | REST/GraphQL design, OpenAPI, versioning |
-| | `testing-strategies` | Test pyramid, coverage targets, framework patterns |
-| | `data-modeling` | Schema design, entity relationships, normalization |
-| | `documentation-creation` | ADRs, system docs, API docs, runbooks |
-| **Design** | `accessibility-standards` | WCAG compliance, ARIA, keyboard navigation |
-| | `user-research-methods` | Interview techniques, personas, journey mapping |
-| **Infrastructure** | `cicd-patterns` | Pipeline design, deployment strategies |
-| | `observability-patterns` | Monitoring, tracing, SLI/SLO design |
-| **Quality** | `performance-profiling` | Measurement, profiling tools, optimization |
-| | `security-assessment` | Vulnerability review, OWASP, threat modeling |
+| **Cross-Cutting** | `unfamiliar-codebase-navigation` | Navigate, search, and understand project structures |
+| | `tech-stack-detection` | Auto-detect project tech stacks and configurations |
+| | `codebase-pattern-identification` | Identify existing codebase patterns for consistency |
+| | `language-coding-conventions` | Security, performance, and accessibility standards |
+| | `error-recovery-patterns` | Consistent error patterns and recovery strategies |
+| | `documentation-information-extraction` | Interpret docs, READMEs, specs, and configs |
+| **Development** | `api-contract-design` | REST/GraphQL design, OpenAPI, versioning |
+| | `comprehensive-test-design` | Test pyramid, coverage targets, framework patterns |
+| | `entity-relationship-design` | Schema design, entity relationships, normalization |
+| | `technical-documentation-authoring` | ADRs, system docs, API docs, runbooks |
+| **Design** | `accessible-interface-design` | WCAG compliance, ARIA, keyboard navigation |
+| | `user-insight-synthesis` | Interview techniques, personas, journey mapping |
+| **Infrastructure** | `pipeline-deployment-design` | Pipeline design, deployment strategies |
+| | `production-observability-design` | Monitoring, tracing, SLI/SLO design |
+| **Quality** | `performance-bottleneck-analysis` | Measurement, profiling tools, optimization |
+| | `vulnerability-threat-assessment` | Vulnerability review, OWASP, threat modeling |
 
 ### Benefits
 

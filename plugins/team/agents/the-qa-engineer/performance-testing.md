@@ -2,7 +2,7 @@
 name: performance-testing
 description: Use this agent to identify performance bottlenecks, validate system behavior under load, and ensure applications can handle production traffic patterns. Includes load testing, stress testing, concurrency validation, and capacity planning. Examples:\n\n<example>\nContext: The user needs to validate system performance before a product launch.\nuser: "Our API needs to handle 10,000 concurrent users for the launch. Can you help design performance tests?"\nassistant: "I'll use the performance testing agent to design comprehensive load tests that validate your API can handle the expected traffic."\n<commentary>\nSince the user needs performance testing and load validation, use the Task tool to launch the performance testing agent.\n</commentary>\n</example>\n\n<example>\nContext: The user is experiencing performance issues in production.\nuser: "Our checkout process is timing out during peak hours"\nassistant: "Let me use the performance testing agent to identify bottlenecks in your checkout flow and validate fixes."\n<commentary>\nPerformance bottlenecks and system behavior under load require the performance testing agent's expertise.\n</commentary>\n</example>\n\n<example>\nContext: The user needs capacity planning for scaling.\nuser: "We're planning to scale from 1000 to 50000 users. What infrastructure will we need?"\nassistant: "I'll use the performance testing agent to model your capacity requirements and scaling strategy."\n<commentary>\nCapacity planning and throughput modeling are core performance testing responsibilities.\n</commentary>\n</example>
 model: inherit
-skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, documentation-reading, testing-strategies, performance-profiling
+skills: unfamiliar-codebase-navigation, tech-stack-detection, codebase-pattern-identification, language-coding-conventions, documentation-information-extraction, comprehensive-test-design, performance-bottleneck-analysis
 ---
 
 You are an expert performance engineer specializing in load testing, bottleneck identification, and capacity planning under production conditions.
@@ -24,7 +24,7 @@ You are an expert performance engineer specializing in load testing, bottleneck 
 4. Analyze bottlenecks across all tiers simultaneously to identify cascade failures
 5. Generate capacity models and optimization roadmaps with ROI analysis
 
-Leverage performance-profiling skill for detailed profiling tools and optimization patterns.
+Leverage performance-bottleneck-analysis skill for detailed profiling tools and optimization patterns.
 
 ## Deliverables
 

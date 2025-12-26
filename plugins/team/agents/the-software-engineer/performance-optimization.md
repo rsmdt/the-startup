@@ -1,7 +1,7 @@
 ---
 name: performance-optimization
 description: Use this agent to optimize application performance including bundle size, rendering speed, memory usage, Core Web Vitals, and user-perceived performance through systematic profiling and optimization. Includes audits, bundle optimization, runtime profiling, memory leak detection, and monitoring. Examples:\n\n<example>\nContext: The user is experiencing slow page load times and needs performance improvements.\nuser: "Our app takes 8 seconds to load on mobile devices, can you help optimize it?"\nassistant: "I'll use the performance optimization agent to analyze your app's performance bottlenecks and implement targeted optimizations."\n<commentary>\nSince the user needs performance analysis and optimization, use the Task tool to launch the performance optimization agent.\n</commentary>\n</example>\n\n<example>\nContext: The user needs to improve Core Web Vitals scores for SEO.\nuser: "Our Lighthouse score is only 45, we need to improve our Core Web Vitals"\nassistant: "Let me use the performance optimization agent to audit your Core Web Vitals and implement specific optimizations for LCP, FID, and CLS."\n<commentary>\nThe user needs Core Web Vitals optimization, so use the Task tool to launch the performance optimization agent.\n</commentary>\n</example>\n\n<example>\nContext: The user suspects memory leaks in their application.\nuser: "The app gets progressively slower after being open for a while, I think we have memory leaks"\nassistant: "I'll use the performance optimization agent to profile memory usage, identify leaks, and implement proper memory management and resource disposal patterns."\n<commentary>\nMemory profiling and optimization is needed, use the Task tool to launch the performance optimization agent.\n</commentary>\n</example>
-skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, performance-profiling
+skills: unfamiliar-codebase-navigation, tech-stack-detection, codebase-pattern-identification, language-coding-conventions, error-recovery-patterns, documentation-information-extraction, performance-bottleneck-analysis
 model: inherit
 ---
 
@@ -23,7 +23,7 @@ You are an expert performance engineer specializing in systematic, data-driven o
 3. Implement code splitting, tree shaking, image optimization, and strategic memoization
 4. Apply framework-specific patterns (React.memo, Vue v-memo, Angular OnPush, etc.)
 5. Verify improvements with A/B testing; monitor for regressions with CI/CD integration
-6. Leverage performance-profiling skill for profiling tools, optimization patterns, and monitoring strategies
+6. Leverage performance-bottleneck-analysis skill for profiling tools, optimization patterns, and monitoring strategies
 
 ## Deliverables
 

@@ -1,7 +1,7 @@
 ---
 name: system-architecture
 description: Design scalable system architectures with comprehensive planning. Includes service design, technology selection, scalability patterns, deployment architecture, and evolutionary roadmaps. Examples:\n\n<example>\nContext: The user needs system design.\nuser: "We're building a new video streaming platform and need the architecture"\nassistant: "I'll use the system architecture agent to design a scalable architecture for your video streaming platform with CDN, transcoding, and storage strategies."\n<commentary>\nComplex system design with scalability needs the system architecture agent.\n</commentary>\n</example>\n\n<example>\nContext: The user needs to plan for scale.\nuser: "Our system needs to handle 100x growth in the next year"\nassistant: "Let me use the system architecture agent to design scalability patterns and create a growth roadmap for your system."\n<commentary>\nScalability planning and architecture requires this specialist agent.\n</commentary>\n</example>\n\n<example>\nContext: The user needs architectural decisions.\nuser: "Should we go with microservices or keep our monolith?"\nassistant: "I'll use the system architecture agent to analyze your needs and design the appropriate architecture with migration strategy if needed."\n<commentary>\nArchitectural decisions and design need the system architecture agent.\n</commentary>\n</example>
-skills: codebase-exploration, framework-detection, pattern-recognition, best-practices, error-handling, documentation-reading, api-design-patterns, security-assessment, data-modeling, observability-patterns
+skills: unfamiliar-codebase-navigation, tech-stack-detection, codebase-pattern-identification, language-coding-conventions, error-recovery-patterns, documentation-information-extraction, api-contract-design, vulnerability-threat-assessment, entity-relationship-design, production-observability-design
 model: inherit
 ---
 
@@ -24,7 +24,7 @@ You are a pragmatic system architect who designs architectures that scale elegan
 4. Plan scalability through horizontal scaling, caching, sharding, load balancing, and auto-scaling policies
 5. Create deployment architecture with multi-region strategies, disaster recovery, and infrastructure as code
 
-Leverage pattern-recognition skill for architecture pattern selection and observability-patterns skill for monitoring design.
+Leverage codebase-pattern-identification skill for architecture pattern selection and production-observability-design skill for monitoring design.
 
 ## Deliverables
 
