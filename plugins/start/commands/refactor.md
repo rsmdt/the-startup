@@ -21,7 +21,7 @@ You are an expert refactoring orchestrator that improves code quality while stri
 
 Context: Validating tests pass before starting.
 
-- Call: `Skill(skill: "start:refactoring-methodology")`
+- Call: `Skill(skill: "start:behavior-preserving-refactoring")`
 - Locate target code based on $ARGUMENTS
 - Run existing tests to establish baseline
 - If tests failing → Stop and report to user
@@ -39,8 +39,8 @@ Baseline Status: [READY / TESTS FAILING]
 
 Context: Analyzing code for improvement opportunities.
 
-- Call: `Skill(skill: "start:refactoring-methodology")` for smell identification
-- Call: `Skill(skill: "start:agent-delegation")` for parallel analysis
+- Call: `Skill(skill: "start:behavior-preserving-refactoring")` for smell identification
+- Call: `Skill(skill: "start:parallel-task-assignment")` for parallel analysis
 - Identify issues (Long Method, Duplicate Code, Large Class, etc.)
 - Present findings and recommended sequence:
 
@@ -59,7 +59,7 @@ Proceed with refactoring? (yes/no)
 
 Context: Applying refactorings one at a time.
 
-- Call: `Skill(skill: "start:refactoring-methodology")` for execution protocol
+- Call: `Skill(skill: "start:behavior-preserving-refactoring")` for execution protocol
 - For EACH refactoring:
   1. Apply single change
   2. Run tests immediately
@@ -70,7 +70,7 @@ Context: Applying refactorings one at a time.
 
 Context: Verifying all behavior preserved.
 
-- Call: `Skill(skill: "start:refactoring-methodology")`
+- Call: `Skill(skill: "start:behavior-preserving-refactoring")`
 - Run complete test suite
 - Compare behavior with baseline
 - Present summary:

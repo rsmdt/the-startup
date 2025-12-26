@@ -1,5 +1,5 @@
 <!--
-DEPRECATED: This content has moved to plugins/start/skills/analysis-discovery/SKILL.md
+DEPRECATED: This content has moved to plugins/start/skills/codebase-insight-extraction/SKILL.md
 This file is kept for backward compatibility only.
 It will be removed in a future version.
 -->

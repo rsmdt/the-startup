@@ -18,8 +18,8 @@ You are an intelligent implementation orchestrator that executes: **$ARGUMENTS**
 
 Context: Loading spec, analyzing PLAN.md, preparing for execution.
 
-- Call: `Skill(skill: "start:specification-management")` to read spec
-- Call: `Skill(skill: "start:implementation-plan")` to understand PLAN structure
+- Call: `Skill(skill: "start:specification-lifecycle-management")` to read spec
+- Call: `Skill(skill: "start:phased-implementation-planning")` to understand PLAN structure
 - Validate: PLAN.md exists, identify phases and tasks
 - Load ONLY Phase 1 tasks into TodoWrite
 - Present overview with phase/task counts
@@ -30,17 +30,17 @@ Context: Loading spec, analyzing PLAN.md, preparing for execution.
 Context: Executing tasks from implementation plan.
 
 **At phase start:**
-- Call: `Skill(skill: "start:execution-orchestration")` for phase management
-- Call: `Skill(skill: "start:specification-compliance")` for SDD requirements
+- Call: `Skill(skill: "start:multi-agent-coordination")` for phase management
+- Call: `Skill(skill: "start:specification-implementation-verification")` for SDD requirements
 - Clear previous phase from TodoWrite, load current phase tasks
 
 **During execution:**
-- Call: `Skill(skill: "start:agent-delegation")` for task decomposition
+- Call: `Skill(skill: "start:parallel-task-assignment")` for task decomposition
 - Execute tasks (parallel when marked `[parallel: true]`, sequential otherwise)
 - Use structured prompts with FOCUS/EXCLUDE/CONTEXT
 
 **At checkpoint:**
-- Call: `Skill(skill: "start:specification-compliance")` for validation
+- Call: `Skill(skill: "start:specification-implementation-verification")` for validation
 - Verify all TodoWrite tasks complete
 - Update PLAN.md checkboxes
 - Call: `AskUserQuestion` for phase transition (see options below)
@@ -57,7 +57,7 @@ At the end of each phase, ask user how to proceed:
 
 ### Completion
 
-- Call: `Skill(skill: "start:specification-compliance")` for final validation
+- Call: `Skill(skill: "start:specification-implementation-verification")` for final validation
 - Present summary (phases completed, tasks executed, validation status)
 - Call: `AskUserQuestion` - Run tests (recommended), Deploy to staging, or Create PR
 

@@ -24,7 +24,7 @@ You are an expert requirements gatherer that creates specification documents for
 
 Context: Creating new spec or checking existing spec status.
 
-- Call: `Skill(skill: "start:specification-management")`
+- Call: `Skill(skill: "start:specification-lifecycle-management")`
 - Initialize specification using $ARGUMENTS (skill handles directory creation/reading)
 - Call: `AskUserQuestion` to let user choose direction (see options below)
 
@@ -57,7 +57,7 @@ When reading an existing spec, analyze document status and ask where to continue
 
 Context: Working on product requirements, defining user stories, acceptance criteria.
 
-- Call: `Skill(skill: "start:product-requirements")`
+- Call: `Skill(skill: "start:requirements-gathering-analysis")`
 - Focus: WHAT needs to be built and WHY it matters
 - Avoid: Technical implementation details
 - Deliverable: Complete Product Requirements
@@ -69,7 +69,7 @@ Context: Working on product requirements, defining user stories, acceptance crit
 
 Context: Working on solution design, designing architecture, defining interfaces.
 
-- Call: `Skill(skill: "start:solution-design")`
+- Call: `Skill(skill: "start:technical-architecture-design")`
 - Focus: HOW the solution will be built
 - Avoid: Actual implementation code
 - Deliverable: Complete Solution Design
@@ -81,7 +81,7 @@ Context: Working on solution design, designing architecture, defining interfaces
 
 Context: Working on implementation plan, planning phases, sequencing tasks.
 
-- Call: `Skill(skill: "start:implementation-plan")`
+- Call: `Skill(skill: "start:phased-implementation-planning")`
 - Focus: Task sequencing and dependencies
 - Avoid: Time estimates
 - Deliverable: Complete Implementation Plan
@@ -93,7 +93,7 @@ Context: Working on implementation plan, planning phases, sequencing tasks.
 
 Context: Reviewing all documents, assessing implementation readiness.
 
-- Call: `Skill(skill: "start:specification-management")`
+- Call: `Skill(skill: "start:specification-lifecycle-management")`
 - Review documents and assess context drift between them
 - Generate readiness and confidence assessment
 - Provide next steps (`/start:validate [ID]` then `/start:implement [ID]`)

@@ -115,7 +115,7 @@ Consider using it for multi-step tasks, agent coordination, or when the user pro
 
 ### Delegation Principles
 
-Decompose by activities (not roles). When you need to break down tasks, launch agents, or create structured prompts, mention what you need and the agent-delegation skill will help with templates and coordination.
+Decompose by activities (not roles). When you need to break down tasks, launch agents, or create structured prompts, mention what you need and the parallel-task-assignment skill will help with templates and coordination.
 
 ## Startup Example Scenarios
 

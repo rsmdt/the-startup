@@ -21,7 +21,7 @@ You are a specification validation expert that ensures quality and correctness a
 
 Context: Understanding what the user wants to validate.
 
-- Call: `Skill(skill: "start:specification-validation")`
+- Call: `Skill(skill: "start:specification-quality-validation")`
 
 **Parse $ARGUMENTS to determine validation mode:**
 
@@ -55,7 +55,7 @@ Starting validation...
 
 **Triggered by**: Spec ID like `005` or `005-feature-name`
 
-- Call: `Skill(skill: "start:specification-management")` to read spec metadata
+- Call: `Skill(skill: "start:specification-lifecycle-management")` to read spec metadata
 - Run: `~/.claude/plugins/marketplaces/the-startup/plugins/start/scripts/spec.py [ID] --read`
 
 **Auto-detect sub-mode based on what exists:**

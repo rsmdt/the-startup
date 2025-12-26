@@ -312,39 +312,39 @@ The `start` plugin includes twelve skills that activate automatically based on c
 
 | Skill | Purpose |
 |-------|---------|
-| `agent-delegation` | Task decomposition, FOCUS/EXCLUDE templates, parallel coordination |
-| `documentation` | Auto-document patterns, interfaces, domain rules |
-| `specification-management` | Spec directory creation, README tracking, phase transitions |
-| `specification-validation` | 3 Cs validation, ambiguity detection, comparison checks |
+| `parallel-task-assignment` | Task decomposition, FOCUS/EXCLUDE templates, parallel coordination |
+| `knowledge-base-capture` | Auto-document patterns, interfaces, domain rules |
+| `specification-lifecycle-management` | Spec directory creation, README tracking, phase transitions |
+| `specification-quality-validation` | 3 Cs validation, ambiguity detection, comparison checks |
 
 ### Document Skills
 
 | Skill | Purpose |
 |-------|---------|
-| `product-requirements` | PRD template, validation, requirements gathering |
-| `solution-design` | SDD template, architecture design, ADR management |
-| `implementation-plan` | PLAN template, task sequencing, dependency mapping |
+| `requirements-gathering-analysis` | PRD template, validation, requirements gathering |
+| `technical-architecture-design` | SDD template, architecture design, ADR management |
+| `phased-implementation-planning` | PLAN template, task sequencing, dependency mapping |
 
 ### Execution Skills
 
 | Skill | Purpose |
 |-------|---------|
-| `execution-orchestration` | Phase-by-phase execution, TodoWrite tracking, checkpoints |
-| `specification-compliance` | Implementation vs spec verification, deviation detection |
+| `multi-agent-coordination` | Phase-by-phase execution, TodoWrite tracking, checkpoints |
+| `specification-implementation-verification` | Implementation vs spec verification, deviation detection |
 
 ### Methodology Skills
 
 | Skill | Purpose |
 |-------|---------|
-| `analysis-discovery` | Iterative discovery cycles for pattern/rule extraction |
-| `debugging-methodology` | Scientific debugging, hypothesis tracking, evidence-based |
-| `refactoring-methodology` | Safe refactoring patterns, behavior preservation |
+| `codebase-insight-extraction` | Iterative discovery cycles for pattern/rule extraction |
+| `systematic-bug-diagnosis` | Scientific debugging, hypothesis tracking, evidence-based |
+| `behavior-preserving-refactoring` | Safe refactoring patterns, behavior preservation |
 
 ---
 
 ### Skill Details
 
-### `documentation`
+### `knowledge-base-capture`
 
 **Activates when:** Patterns, interfaces, or domain rules are discovered
 
@@ -361,7 +361,7 @@ The `start` plugin includes twelve skills that activate automatically based on c
 ```
 Agent discovers: "I found a reusable caching pattern using Redis"
 ↓
-Documentation skill activates automatically
+Knowledge-base-capture skill activates automatically
 ↓
 Creates: docs/patterns/caching-strategy.md
 ```
@@ -373,7 +373,7 @@ Creates: docs/patterns/caching-strategy.md
 
 ---
 
-### `agent-delegation`
+### `parallel-task-assignment`
 
 **Activates when:** Task decomposition, agent coordination, or template generation needed
 
@@ -391,7 +391,7 @@ Creates: docs/patterns/caching-strategy.md
 ```
 User: "Break down this authentication task"
 ↓
-Agent-delegation skill activates
+Parallel-task-assignment skill activates
 ↓
 Outputs:
 - Activity breakdown
@@ -437,7 +437,7 @@ docs/
 
 ### Auto-Documentation
 
-The `documentation` skill automatically creates files in the correct location when patterns, interfaces, or domain rules are discovered during:
+The `knowledge-base-capture` skill automatically creates files in the correct location when patterns, interfaces, or domain rules are discovered during:
 - Specification creation (`/start:specify`)
 - Implementation (`/start:implement`)
 - Analysis (`/start:analyze`)
@@ -609,7 +609,7 @@ Conversational investigation with observable evidence and user-driven direction.
 
 ## Skills in Action
 
-### Example 1: Documentation Skill
+### Example 1: Knowledge-Base-Capture Skill
 
 **Scenario:** During implementation, an agent discovers a pattern
 
@@ -618,7 +618,7 @@ Agent output: "I implemented a retry mechanism with exponential backoff for API 
 ```
 
 **What happens automatically:**
-1. Documentation skill recognizes "pattern" trigger
+1. Knowledge-base-capture skill recognizes "pattern" trigger
 2. Checks `docs/patterns/` for existing retry patterns
 3. Not found → Creates `docs/patterns/api-retry-strategy.md`
 4. Uses pattern template
@@ -628,7 +628,7 @@ Agent output: "I implemented a retry mechanism with exponential backoff for API 
 
 ---
 
-### Example 2: Agent-Delegation Skill
+### Example 2: Parallel-Task-Assignment Skill
 
 **Scenario:** Complex task needs breakdown
 
@@ -637,7 +637,7 @@ User: "Implement user authentication - break this down into activities"
 ```
 
 **What happens automatically:**
-1. Agent-delegation skill recognizes "break this down"
+1. Parallel-task-assignment skill recognizes "break this down"
 2. Analyzes task complexity
 3. Generates output:
 
