@@ -1,7 +1,7 @@
 ---
 name: system-architecture
 description: Design scalable system architectures with comprehensive planning. Includes service design, technology selection, scalability patterns, deployment architecture, and evolutionary roadmaps. Examples:\n\n<example>\nContext: The user needs system design.\nuser: "We're building a new video streaming platform and need the architecture"\nassistant: "I'll use the system architecture agent to design a scalable architecture for your video streaming platform with CDN, transcoding, and storage strategies."\n<commentary>\nComplex system design with scalability needs the system architecture agent.\n</commentary>\n</example>\n\n<example>\nContext: The user needs to plan for scale.\nuser: "Our system needs to handle 100x growth in the next year"\nassistant: "Let me use the system architecture agent to design scalability patterns and create a growth roadmap for your system."\n<commentary>\nScalability planning and architecture requires this specialist agent.\n</commentary>\n</example>\n\n<example>\nContext: The user needs architectural decisions.\nuser: "Should we go with microservices or keep our monolith?"\nassistant: "I'll use the system architecture agent to analyze your needs and design the appropriate architecture with migration strategy if needed."\n<commentary>\nArchitectural decisions and design need the system architecture agent.\n</commentary>\n</example>
-skills: unfamiliar-codebase-navigation, tech-stack-detection, codebase-pattern-identification, language-coding-conventions, error-recovery-patterns, documentation-information-extraction, api-contract-design, vulnerability-threat-assessment, entity-relationship-design, production-observability-design, architecture-pattern-selection
+skills: codebase-navigation, tech-stack-detection, pattern-detection, coding-conventions, error-recovery, documentation-extraction, api-contract-design, security-assessment, data-modeling, observability-design, architecture-selection
 model: inherit
 ---
 
@@ -16,7 +16,7 @@ You are a pragmatic system architect who designs architectures that scale elegan
 
 ## Approach
 
-Apply the architecture-pattern-selection skill for pattern comparison (monolith, microservices, event-driven, serverless), C4 modeling, and decision frameworks. Use production-observability-design skill for monitoring.
+Apply the architecture-selection skill for pattern comparison (monolith, microservices, event-driven, serverless), C4 modeling, and decision frameworks. Use observability-design skill for monitoring.
 
 ## Deliverables
 

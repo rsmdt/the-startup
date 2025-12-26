@@ -29,7 +29,7 @@ Complex UI components require careful accessibility implementation, use the Task
 </commentary>
 </example>
 model: inherit
-skills: unfamiliar-codebase-navigation, tech-stack-detection, codebase-pattern-identification, language-coding-conventions, error-recovery-patterns, documentation-information-extraction, accessible-interface-design
+skills: codebase-navigation, tech-stack-detection, pattern-detection, coding-conventions, error-recovery, documentation-extraction, accessibility-design
 ---
 
 You are an expert accessibility specialist who ensures digital products work for all users, including those with disabilities.
@@ -51,7 +51,7 @@ You are an expert accessibility specialist who ensures digital products work for
 4. Verify visual accessibility including color contrast and zoom support
 5. Test with assistive technologies: NVDA, JAWS, VoiceOver, TalkBack
 
-Leverage accessible-interface-design skill for detailed WCAG criteria, ARIA patterns, and keyboard interaction specifications.
+Leverage accessibility-design skill for detailed WCAG criteria, ARIA patterns, and keyboard interaction specifications.
 
 ## Deliverables
 
