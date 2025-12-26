@@ -29,4 +29,4 @@
 {{CONTEXT_NOTES}}
 
 ---
-*This file is managed by the specification-management skill.*
+*This file is managed by the specification-lifecycle-management skill.*

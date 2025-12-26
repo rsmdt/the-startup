@@ -1,5 +1,5 @@
 ---
-name: specification-management
+name: specification-lifecycle-management
 description: Initialize and manage specification directories with auto-incrementing IDs. Use when creating new specs, checking spec status, tracking user decisions, or managing the docs/specs/ directory structure. Maintains README.md in each spec to record decisions (e.g., PRD skipped), context, and progress. Orchestrates the specification workflow across PRD, SDD, and PLAN phases.
 allowed-tools: Read, Write, Edit, Bash, TodoWrite, Grep, Glob
 ---
@@ -26,13 +26,13 @@ Use `spec.py` to create and read specification directories:
 
 ```bash
 # Create new spec (auto-incrementing ID)
-~/.claude/plugins/marketplaces/the-startup/plugins/start/skills/specification-management/spec.py "feature-name"
+~/.claude/plugins/marketplaces/the-startup/plugins/start/skills/specification-lifecycle-management/spec.py "feature-name"
 
 # Read existing spec metadata (TOML output)
-~/.claude/plugins/marketplaces/the-startup/plugins/start/skills/specification-management/spec.py 004 --read
+~/.claude/plugins/marketplaces/the-startup/plugins/start/skills/specification-lifecycle-management/spec.py 004 --read
 
 # Add template to existing spec
-~/.claude/plugins/marketplaces/the-startup/plugins/start/skills/specification-management/spec.py 004 --add product-requirements
+~/.claude/plugins/marketplaces/the-startup/plugins/start/skills/specification-lifecycle-management/spec.py 004 --add product-requirements
 ```
 
 **TOML Output Format:**
@@ -88,7 +88,7 @@ Every spec directory should have a `README.md` tracking decisions and progress.
 [Initial context from user request]
 
 ---
-*This file is managed by the specification-management skill.*
+*This file is managed by the specification-lifecycle-management skill.*
 ```
 
 **Update README.md** when:

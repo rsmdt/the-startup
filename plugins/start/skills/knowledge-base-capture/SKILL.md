@@ -1,5 +1,5 @@
 ---
-name: documentation
+name: knowledge-base-capture
 description: Document business rules, technical patterns, and service interfaces discovered during analysis or implementation. Use when you find reusable patterns, external integrations, domain-specific rules, or API contracts. Always check existing documentation before creating new files. Handles deduplication and proper categorization.
 allowed-tools: Read, Write, Edit, Grep, Glob
 ---

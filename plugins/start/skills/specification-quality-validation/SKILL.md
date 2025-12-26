@@ -1,5 +1,5 @@
 ---
-name: specification-validation
+name: specification-quality-validation
 description: |
   Validate specifications, implementations, or understanding for completeness,
   consistency, and correctness. Use when checking spec quality, comparing
@@ -321,9 +321,9 @@ Score: [X]%
 ## Integration with Other Skills
 
 Works alongside:
-- **specification-management**: Read spec metadata
-- **specification-compliance**: Detailed implementation verification
-- **agent-delegation**: Parallel validation checks
+- **specification-lifecycle-management**: Read spec metadata
+- **specification-implementation-verification**: Detailed implementation verification
+- **parallel-task-assignment**: Parallel validation checks
 
 ## Output Format
 

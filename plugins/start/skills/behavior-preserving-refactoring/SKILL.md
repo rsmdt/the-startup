@@ -1,5 +1,5 @@
 ---
-name: refactoring-methodology
+name: behavior-preserving-refactoring
 description: |
   Systematic code refactoring while preserving all external behavior.
   Use when identifying code smells, planning refactoring sequences,

@@ -1,5 +1,5 @@
 ---
-name: analysis-discovery
+name: codebase-insight-extraction
 description: |
   Discover patterns, rules, and interfaces through iterative analysis cycles.
   Use when analyzing business rules, technical patterns, security, performance,

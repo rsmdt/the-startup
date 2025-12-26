@@ -1,5 +1,5 @@
 ---
-name: specification-compliance
+name: specification-implementation-verification
 description: |
   Validate implementation against specifications (PRD/SDD/PLAN). Use when
   verifying specification compliance, checking interface contracts, validating

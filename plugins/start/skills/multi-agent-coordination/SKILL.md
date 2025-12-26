@@ -1,5 +1,5 @@
 ---
-name: execution-orchestration
+name: multi-agent-coordination
 description: |
   Execute implementation plans phase-by-phase with checkpoint validation.
   Use when implementing from a PLAN, executing task sequences, managing

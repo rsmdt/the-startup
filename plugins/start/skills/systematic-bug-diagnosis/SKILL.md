@@ -1,5 +1,5 @@
 ---
-name: debugging-methodology
+name: systematic-bug-diagnosis
 description: |
   Apply scientific debugging methodology through conversational investigation.
   Use when investigating bugs, forming hypotheses, tracing error causes,
