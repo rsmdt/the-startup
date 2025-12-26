@@ -7,48 +7,48 @@ Reusable expertise modules that provide consistent guidance across multiple agen
 ```
 skills/
 ├── cross-cutting/       # Universal skills for all agents
-│   ├── best-practices/
-│   ├── codebase-exploration/
-│   ├── documentation-reading/
-│   ├── error-handling/
-│   ├── framework-detection/
-│   └── pattern-recognition/
+│   ├── language-coding-conventions/
+│   ├── unfamiliar-codebase-navigation/
+│   ├── documentation-information-extraction/
+│   ├── error-recovery-patterns/
+│   ├── tech-stack-detection/
+│   └── codebase-pattern-identification/
 ├── design/              # UX and accessibility skills
-│   ├── accessibility-standards/
-│   └── user-research-methods/
+│   ├── accessible-interface-design/
+│   └── user-insight-synthesis/
 ├── development/         # Software development skills
-│   ├── api-design-patterns/
-│   ├── data-modeling/
-│   ├── documentation-creation/
-│   └── testing-strategies/
+│   ├── api-contract-design/
+│   ├── entity-relationship-design/
+│   ├── technical-documentation-authoring/
+│   └── comprehensive-test-design/
 ├── infrastructure/      # DevOps and platform skills
-│   ├── cicd-patterns/
-│   └── observability-patterns/
+│   ├── pipeline-deployment-design/
+│   └── production-observability-design/
 └── quality/             # Quality assurance skills
-    ├── performance-profiling/
-    └── security-assessment/
+    ├── performance-bottleneck-analysis/
+    └── vulnerability-threat-assessment/
 ```
 
 ## Skills Index
 
 | Skill | Category | Description |
 |-------|----------|-------------|
-| `accessibility-standards` | design | WCAG 2.1 AA compliance patterns, screen reader compatibility, keyboard navigation |
-| `api-design-patterns` | development | REST and GraphQL API design patterns, OpenAPI/Swagger specifications |
-| `best-practices` | cross-cutting | Security, performance, and accessibility standards |
-| `cicd-patterns` | infrastructure | Pipeline design, deployment strategies (blue-green, canary, rolling) |
-| `codebase-exploration` | cross-cutting | Navigate, search, and understand project structures |
-| `data-modeling` | development | Schema design, entity relationships, normalization |
-| `documentation-creation` | development | ADRs, system documentation, API documentation, runbooks |
-| `documentation-reading` | cross-cutting | Interpret existing docs, READMEs, specs, and configuration files |
-| `error-handling` | cross-cutting | Consistent error patterns, validation approaches, recovery strategies |
-| `framework-detection` | cross-cutting | Auto-detect project tech stacks (React, Vue, Express, Django, etc.) |
-| `observability-patterns` | infrastructure | Monitoring strategies, distributed tracing, SLI/SLO design |
-| `pattern-recognition` | cross-cutting | Identify existing codebase patterns for consistency |
-| `performance-profiling` | quality | Measurement approaches, profiling tools, optimization patterns |
-| `security-assessment` | quality | Vulnerability review, OWASP patterns, secure coding practices |
-| `testing-strategies` | development | Test pyramid principles, coverage targets, framework-specific patterns |
-| `user-research-methods` | design | Interview techniques, persona creation, journey mapping |
+| `accessible-interface-design` | design | WCAG 2.1 AA compliance patterns, screen reader compatibility, keyboard navigation |
+| `api-contract-design` | development | REST and GraphQL API design patterns, OpenAPI/Swagger specifications |
+| `language-coding-conventions` | cross-cutting | Security, performance, and accessibility standards |
+| `pipeline-deployment-design` | infrastructure | Pipeline design, deployment strategies (blue-green, canary, rolling) |
+| `unfamiliar-codebase-navigation` | cross-cutting | Navigate, search, and understand project structures |
+| `entity-relationship-design` | development | Schema design, entity relationships, normalization |
+| `technical-documentation-authoring` | development | ADRs, system documentation, API documentation, runbooks |
+| `documentation-information-extraction` | cross-cutting | Interpret existing docs, READMEs, specs, and configuration files |
+| `error-recovery-patterns` | cross-cutting | Consistent error patterns, validation approaches, recovery strategies |
+| `tech-stack-detection` | cross-cutting | Auto-detect project tech stacks (React, Vue, Express, Django, etc.) |
+| `production-observability-design` | infrastructure | Monitoring strategies, distributed tracing, SLI/SLO design |
+| `codebase-pattern-identification` | cross-cutting | Identify existing codebase patterns for consistency |
+| `performance-bottleneck-analysis` | quality | Measurement approaches, profiling tools, optimization patterns |
+| `vulnerability-threat-assessment` | quality | Vulnerability review, OWASP patterns, secure coding practices |
+| `comprehensive-test-design` | development | Test pyramid principles, coverage targets, framework-specific patterns |
+| `user-insight-synthesis` | design | Interview techniques, persona creation, journey mapping |
 
 ## Usage
 
@@ -57,7 +57,7 @@ Skills are referenced in agent YAML frontmatter:
 ```yaml
 ---
 name: my-agent
-skills: codebase-exploration, framework-detection, best-practices
+skills: unfamiliar-codebase-navigation, tech-stack-detection, language-coding-conventions
 ---
 ```
 
