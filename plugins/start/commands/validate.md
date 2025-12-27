@@ -94,11 +94,65 @@ Starting validation...
 - If spec exists: validate implementation against spec
 - If no spec: analyze code quality and completeness
 - Look for TODOs, FIXMEs, incomplete implementations
+- **Security scan**: Check for common vulnerabilities (see Security Checks below)
+- **Test coverage**: Check if tests exist for this file
 
 **For any file:**
 - Report structure and content summary
 - Identify potential issues or gaps
 - Provide improvement recommendations
+
+### Security Checks (for implementation files)
+
+Scan for common security vulnerability patterns:
+
+| Category | What to Look For |
+|----------|------------------|
+| **Hardcoded Secrets** | Password, API key, token, or credential assignments to string literals |
+| **SQL Injection** | Raw query execution, string concatenation in queries, unparameterized database calls |
+| **Code Injection** | Uses of eval, exec, Function constructor, or dynamic code execution |
+| **XSS Vulnerabilities** | Direct DOM manipulation with user content (innerHTML, document.write) |
+| **Path Traversal** | Unsanitized file path construction from user input |
+
+**Security Report Format:**
+```
+🔐 Security Scan
+
+File: [path]
+Issues Found: [N]
+
+⚠️ Potential Issues:
+1. [Issue type] at line [N]: [Description]
+   Recommendation: [How to fix]
+
+✅ Passed Checks:
+- No hardcoded secrets detected
+- No SQL injection patterns found
+```
+
+### Test Coverage Check (for implementation files)
+
+**Intent:** Determine if implementation has corresponding tests
+
+**Process:**
+1. Search for test files matching the source file name (*.test.*, *.spec.*)
+2. Check if exported functions appear in test files
+3. Identify functions without test coverage
+
+**Coverage Report Format:**
+```
+🧪 Test Coverage
+
+File: [path]
+Test File: [test-path or "Not found"]
+Functions Tested: [N/M] ([percentage]%)
+
+Untested Functions:
+- [function-name] (line [N])
+- [function-name] (line [N])
+
+Recommendation: Add tests for untested functions
+```
 
 ---
 
@@ -197,38 +251,35 @@ Context Gathered: [Files/specs reviewed]
 
 ### Completeness Check
 
-```bash
-# NEEDS CLARIFICATION markers
-grep -c "\[NEEDS CLARIFICATION" [file]
-
-# Checklist status
-grep -c "\[x\]" [file]
-grep -c "\[ \]" [file]
-
-# TODO/FIXME markers
-grep -inE "(TODO|FIXME|XXX|HACK)" [file]
-```
+**What to verify:**
+- Count of `[NEEDS CLARIFICATION]` markers (should be zero)
+- Checklist completion ratio (completed vs uncompleted items)
+- Presence of TODO, FIXME, XXX, or HACK markers
+- All required sections are present and filled
 
 ### Consistency Check
 
-- Terminology used consistently
-- No contradictory statements
-- Cross-references are valid
-- Naming conventions followed
+**What to verify:**
+- Terminology used consistently across documents
+- No contradictory statements between sections
+- Cross-references point to valid targets
+- Naming conventions followed throughout
 
 ### Correctness Check
 
-- Logic is sound
-- Dependencies are valid
-- Interfaces match contracts
-- Business rules are followed
+**What to verify:**
+- Logic is sound and achievable
+- Dependencies are valid and available
+- Interfaces match their contracts
+- Business rules are correctly captured
 
 ### Ambiguity Detection
 
-```bash
-# Vague language patterns
-grep -inE "(should|might|could|may|various|etc\.|and so on|appropriate|reasonable|fast|slow|many|few)" [file]
-```
+**Vague language patterns to flag:**
+- Uncertainty words: should, might, could, may
+- Vague quantities: various, many, few, some
+- Incomplete lists: etc., and so on, and more
+- Subjective terms: appropriate, reasonable, fast, slow, simple, easy
 
 ---
 
@@ -241,15 +292,33 @@ Mode: [Detected mode]
 Target: [What was validated]
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Overall: [✅ EXCELLENT / 🟡 GOOD / 🟠 NEEDS ATTENTION]
+Overall: [✅ EXCELLENT / 🟡 GOOD / 🟠 NEEDS ATTENTION / 🔴 CRITICAL]
 
 [Mode-specific findings summary]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 Quality Metrics (if applicable)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+| Metric          | Status | Details           |
+|-----------------|--------|-------------------|
+| Test Coverage   | [✅/🟡/❌] | [N]% coverage      |
+| Security Scan   | [✅/🟡/❌] | [N] issues found   |
+| Documentation   | [✅/🟡/❌] | [status]           |
+| Code Quality    | [✅/🟡/❌] | [N] issues         |
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 💡 Recommendations (Advisory)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-[Prioritized list of recommendations with locations]
+Priority 1 (Critical):
+- [Security or breaking issues]
+
+Priority 2 (Important):
+- [Quality improvements]
+
+Priority 3 (Nice to have):
+- [Enhancements]
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
