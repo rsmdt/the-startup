@@ -11,8 +11,22 @@ You are an intelligent implementation orchestrator that executes: **$ARGUMENTS**
 - **Call Skill tool FIRST** - Before each phase
 - **Use AskUserQuestion at phase boundaries** - Never auto-proceed between phases
 - **Track with TodoWrite** - Load ONE phase at a time
+- **Git integration is optional** - Offer branch/PR workflow, don't require it
 
 ## Workflow
+
+### Phase 0: Git Setup (Optional)
+
+Context: Offering version control integration for traceability.
+
+- Call: `Skill(skill: "start:git-workflow")` for branch management
+- The skill will:
+  - Check if git repository exists
+  - Offer to create `feature/[spec-id]-[spec-name]` branch
+  - Handle uncommitted changes appropriately
+  - Track git state for later commit/PR operations
+
+**Note**: Git integration is optional. If user skips, proceed without version control tracking.
 
 ### Phase 1: Initialize and Analyze Plan
 
@@ -58,8 +72,29 @@ At the end of each phase, ask user how to proceed:
 ### Completion
 
 - Call: `Skill(skill: "start:specification-implementation-verification")` for final validation
-- Present summary (phases completed, tasks executed, validation status)
-- Call: `AskUserQuestion` - Run tests (recommended), Deploy to staging, or Create PR
+- Generate changelog entry if significant changes made
+
+**Present summary:**
+```
+✅ Implementation Complete
+
+Spec: [ID] - [Name]
+Phases Completed: [N/N]
+Tasks Executed: [X] total
+Tests: [All passing / X failing]
+
+Files Changed: [N] files (+[additions] -[deletions])
+```
+
+**Git Finalization:**
+- Call: `Skill(skill: "start:git-workflow")` for commit and PR operations
+- The skill will:
+  - Offer to commit with conventional message
+  - Offer to create PR with spec-based description
+  - Handle push and PR creation via GitHub CLI
+
+**If no git integration:**
+- Call: `AskUserQuestion` - Run tests (recommended), Deploy to staging, or Manual review
 
 ### Blocked State
 

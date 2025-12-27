@@ -15,10 +15,23 @@ You are an expert requirements gatherer that creates specification documents for
 - **Phases are sequential** - PRD → SDD → PLAN (can skip phases)
 - **Track decisions in specification README** - Log workflow decisions in spec directory
 - **Wait for confirmation** - Never auto-proceed between documents
+- **Git integration is optional** - Offer branch/commit workflow, don't require it
 
 ## Workflow
 
 **CRITICAL**: At the start of each phase, you MUST call the Skill tool to load procedural knowledge.
+
+### Phase 0: Git Setup (Optional)
+
+Context: Offering version control integration for specification tracking.
+
+- Call: `Skill(skill: "start:git-workflow")` for branch management
+- The skill will:
+  - Check if git repository exists
+  - Offer to create `spec/[id]-[name]` branch for the specification
+  - Handle uncommitted changes appropriately
+
+**Note**: Git integration is optional. If user skips, proceed without version control tracking.
 
 ### Phase 1: Initialize Specification
 
@@ -96,7 +109,28 @@ Context: Reviewing all documents, assessing implementation readiness.
 - Call: `Skill(skill: "start:specification-lifecycle-management")`
 - Review documents and assess context drift between them
 - Generate readiness and confidence assessment
-- Provide next steps (`/start:validate [ID]` then `/start:implement [ID]`)
+
+**Git Finalization (if enabled):**
+- Call: `Skill(skill: "start:git-workflow")` for commit and PR operations
+- The skill will:
+  - Offer to commit specification with conventional message
+  - Offer to create spec review PR for team review
+  - Handle push and PR creation via GitHub CLI
+
+**Present summary:**
+```
+✅ Specification Complete
+
+Spec: [ID] - [Name]
+Documents: PRD ✓ | SDD ✓ | PLAN ✓
+
+Readiness: [HIGH/MEDIUM/LOW]
+Confidence: [N]%
+
+Next Steps:
+1. /start:validate [ID] - Validate specification quality
+2. /start:implement [ID] - Begin implementation
+```
 
 ## Documentation Structure
 
