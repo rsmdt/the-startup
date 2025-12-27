@@ -53,6 +53,36 @@ The framework leverages **Claude Code's plugin system** to provide workflow comm
 
 ---
 
+## 📦 Plugins
+
+### Start Plugin (`start@the-startup`)
+
+**Core workflow orchestration** — 9 commands, 16 skills, 2 output styles
+
+| Category | Capabilities |
+|----------|-------------|
+| **Build** | `specify` → `validate` → `implement` pipeline with parallel agent coordination |
+| **Quality** | Multi-agent code review, security scanning, test coverage checks |
+| **Maintain** | Documentation generation, codebase analysis, safe refactoring, debugging |
+| **Git** | Optional branch/commit/PR workflows integrated into commands |
+
+### Team Plugin (`team@the-startup`) — *Optional*
+
+**Specialized agent library** — 11 roles, 27 activity-based specializations
+
+| Role | Focus Areas |
+|------|-------------|
+| **Chief** | Complexity assessment, activity routing, parallel execution |
+| **Analyst** | Requirements, prioritization, project coordination |
+| **Architect** | System design, technology research, quality review, documentation |
+| **Software Engineer** | APIs, components, domain modeling, performance |
+| **QA Engineer** | Test strategy, exploratory testing, load testing |
+| **Designer** | User research, interaction design, design systems, accessibility |
+| **Platform Engineer** | IaC, containers, CI/CD, monitoring, data pipelines |
+| **Meta Agent** | Agent design and generation |
+
+---
+
 ## 🚀 Quick Start
 
 ### Installation
