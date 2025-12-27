@@ -1,6 +1,6 @@
 {
   "name": "start",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "description": "Workflow orchestration commands for agentic software development",
   "author": {
     "name": "Rudolf S."
@@ -13,7 +13,10 @@
     "commands",
     "specification",
     "implementation",
-    "refactoring"
+    "refactoring",
+    "code-review",
+    "documentation",
+    "migration"
   ],
   "outputStyles": "./output-styles/"
 }
