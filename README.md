@@ -24,36 +24,246 @@
   </a>
 </p>
 
+---
 
-## 🤖 What is The Agentic Startup?
+## 🚀 Quick Start
 
-**The Agentic Startup** is a spec-driven development framework for Claude Code that transforms how you build software. Think Y Combinator demo day energy meets engineering discipline - multiple specialists executing in parallel while you stay in control.
+**Requirements:** Claude Code v2.0+ with marketplace support
 
-We follow **[Spec-Driven Development](https://www.perplexity.ai/?q=Spec+Driven+Development)**, where comprehensive specifications are created before coding begins, ensuring clarity and reducing rework.
+### 1. Install the Marketplace & Plugins
 
-**The workflow**:
+```bash
+# Add The Agentic Startup marketplace
+/plugin marketplace add rsmdt/the-startup
 
-1. **📋 Specify** - Turn ideas into comprehensive specification documents
-2. **✅ Validate** - Quality gate to check specs, implementations, or understanding
-3. **⚡ Implement** - Execute plans phase-by-phase with parallel agent coordination
+# Install the Start plugin (core workflows)
+/plugin install start@the-startup
 
-The framework leverages **Claude Code's plugin system** to provide workflow commands, autonomous skills, specialized agents, and quality templates - all working together like a high-velocity startup team.
+# (Optional) Install the Team plugin (specialized agents and skills)
+/plugin install team@the-startup
+```
+
+### 2. Initialize Your Environment
+
+```bash
+/start:init
+```
+
+Configures the git-aware statusline for real-time command tracking.
+
+### 3. Build Your First Feature
+
+```bash
+# Create a specification
+/start:specify Add user authentication with OAuth support
+
+# Execute the implementation
+/start:implement 001
+```
+
+That's it! You're now using spec-driven development.
 
 ---
 
-## ✨ Key Features
+## 📖 The Complete Workflow
 
-**Native Claude Code Integration** - Distributed as official marketplace plugins with zero manual configuration
+The Agentic Startup follows **spec-driven development**: comprehensive specifications before code, ensuring clarity and reducing rework.
 
-**Autonomous Skills System** - Model-invoked skills that activate based on natural language with progressive disclosure
+### All Commands at a Glance
 
-**Specialized Agent Team** - 11 agent roles across 27 activity-based specializations (optional [`team@the-startup`](plugins/team/README.md) plugin)
+```
+┌──────────────────────────────────────────────────────────┐
+│                    SETUP (one-time)                      │
+│                                                          │
+│  /start:init ───────► Configure statusline & environment │
+└──────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌──────────────────────────────────────────────────────────┐
+│                    BUILD (primary flow)                  │
+│                                                          │
+│  /start:specify ────► Create specs (PRD + SDD + PLAN)    │
+│        │                                                 │
+│        ▼                                                 │
+│  /start:validate ───► Check quality (3 Cs framework)     │
+│        │                                                 │
+│        ▼                                                 │
+│  /start:implement ──► Execute plan phase-by-phase        │
+│        │                                                 │
+│        ▼                                                 │
+│  /start:review ─────► Multi-agent code review            │
+│        │                                                 │
+│        ▼                                                 │
+│  /start:document ───► Generate/sync documentation        │
+└──────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌──────────────────────────────────────────────────────────┐
+│                    MAINTAIN (as needed)                  │
+│                                                          │
+│  /start:analyze ────► Discover patterns & rules          │
+│                                                          │
+│  /start:refactor ───► Improve code (preserve behavior)   │
+│                                                          │
+│  /start:debug ──────► Fix bugs (root cause analysis)     │
+└──────────────────────────────────────────────────────────┘
+```
 
-**Structured Momentum** - Y Combinator energy meets engineering discipline - parallel execution with quality gates
+### Step-by-Step Walkthrough
+
+#### Step 1: Create Your Specification
+
+```bash
+/start:specify Add real-time notification system with WebSocket support
+```
+
+This creates a specification directory with three documents:
+
+```
+docs/specs/001-notification-system/
+├── product-requirements.md   # What to build and why
+├── solution-design.md        # How to build it technically
+└── implementation-plan.md    # Executable tasks and phases
+```
+
+**The spec cycle may take 15-30 minutes.** Claude will research your codebase, ask clarifying questions, and produce comprehensive documents. The process naturally involves multiple back-and-forth exchanges.
+
+#### Step 2: Handle Context Limits (Resume Pattern)
+
+Large specifications may approach Claude's context window limits. When this happens:
+
+```bash
+# Start a new conversation and resume where you left off
+/start:specify 001
+```
+
+**The resume pattern:**
+- Pass the spec ID (e.g., `001`) instead of a description
+- Claude reads the existing spec files and continues from there
+- You can reset context as many times as needed
+- Each document (PRD → SDD → PLAN) can be completed in separate sessions if needed
+
+**Pro tip:** If Claude suggests "you may want to reset context", do it! The quality of output improves with fresh context.
+
+#### Step 3: Validate Before Implementation
+
+```bash
+/start:validate 001
+```
+
+This quality gate checks:
+- **Completeness** - All sections filled, no missing details
+- **Consistency** - No contradictions between documents
+- **Correctness** - Requirements are testable and achievable
+
+Validation is advisory—it provides recommendations but doesn't block you.
+
+#### Step 4: Execute the Implementation
+
+```bash
+/start:implement 001
+```
+
+Claude will:
+1. Parse the implementation plan
+2. Execute phases sequentially (with your approval between phases)
+3. Run tests after each task
+4. Use parallel agents within phases for speed
+
+**Large implementations may also need context resets.** Simply run `/start:implement 001` again in a fresh conversation—Claude tracks progress in the spec files.
+
+#### Step 5: Review and Ship
+
+```bash
+/start:review
+```
+
+Four parallel specialists review your code:
+- 🔒 **Security** - Authentication, authorization, input validation
+- ⚡ **Performance** - Query optimization, memory management
+- ✨ **Quality** - Code style, design patterns, maintainability
+- 🧪 **Tests** - Coverage gaps, edge cases
+
+---
+
+## 🎯 Which Command Should I Use?
+
+### Decision Tree
+
+```
+What do you need to do?
+│
+├─ Build something new? ──────────────────► /start:specify
+│                                           Then: /start:validate → /start:implement
+│
+├─ Understand existing code? ─────────────► /start:analyze
+│   └─ Want to improve it? ───────────────► Then: /start:refactor
+│
+├─ Something is broken? ──────────────────► /start:debug
+│
+├─ Code ready for merge? ─────────────────► /start:review
+│
+├─ Need documentation? ───────────────────► /start:document
+│
+└─ First time setup? ─────────────────────► /start:init
+```
+
+### Command Reference
+
+| Command | Purpose | When to Use |
+|---------|---------|-------------|
+| `/start:specify` | Create specifications | New features, complex changes |
+| `/start:implement` | Execute plans | After spec is validated |
+| `/start:validate` | Check quality | Before implementation, after specs |
+| `/start:review` | Multi-agent code review | Before merging PRs |
+| `/start:document` | Generate documentation | After implementation |
+| `/start:analyze` | Extract knowledge | Understanding existing code |
+| `/start:refactor` | Improve code quality | Cleanup without behavior change |
+| `/start:debug` | Fix bugs | When something is broken |
+| `/start:init` | Setup environment | First-time configuration |
+
+### Capability Matrix
+
+| Capability | specify | implement | validate | review | document | analyze | refactor | debug |
+|------------|:-------:|:---------:|:--------:|:------:|:--------:|:-------:|:--------:|:-----:|
+| **Creates specifications** | ✅ | - | - | - | - | - | - | - |
+| **Executes implementation plans** | - | ✅ | - | - | - | - | - | - |
+| **Runs tests** | - | ✅ | ✅ | - | - | - | ✅ | ✅ |
+| **Creates git branches** | ✅ | ✅ | - | - | - | - | ✅ | - |
+| **Creates PRs** | ✅ | ✅ | - | - | - | - | - | - |
+| **Multi-agent parallel** | ✅ | ✅ | - | ✅ | ✅ | ✅ | - | - |
+| **Security scanning** | - | - | ✅ | ✅ | - | - | - | - |
+| **Generates documentation** | ✅ | - | - | - | ✅ | ✅ | - | - |
+
+### When Commands Overlap
+
+**validate vs review** — *Different purposes, different timing*
+
+| Aspect | `/start:validate` | `/start:review` |
+|--------|-------------------|-----------------|
+| **When** | During development | Before merging |
+| **Focus** | Spec compliance, quality gates | Code quality, security, performance |
+| **Output** | Advisory recommendations | PR comments, findings report |
+
+**analyze vs document** — *Discovery vs generation*
+
+| Aspect | `/start:analyze` | `/start:document` |
+|--------|------------------|-------------------|
+| **Purpose** | Discover what exists | Generate documentation |
+| **Output** | Knowledge documentation | API docs, READMEs, JSDoc |
+
+**refactor vs debug** — *Improvement vs fixing*
+
+| Aspect | `/start:refactor` | `/start:debug` |
+|--------|-------------------|----------------|
+| **Behavior** | Must preserve exactly | Expected to change (fix) |
+| **Tests** | Must all pass throughout | May need new/updated tests |
 
 ---
 
 ## 📦 Plugins
+
+The Agentic Startup is distributed as **Claude Code marketplace plugins**—native integration with zero manual configuration.
 
 ### Start Plugin (`start@the-startup`)
 
@@ -65,6 +275,8 @@ The framework leverages **Claude Code's plugin system** to provide workflow comm
 | **Quality** | Multi-agent code review, security scanning, test coverage checks |
 | **Maintain** | Documentation generation, codebase analysis, safe refactoring, debugging |
 | **Git** | Optional branch/commit/PR workflows integrated into commands |
+
+**📖 [View detailed command documentation →](plugins/start/README.md)**
 
 ### Team Plugin (`team@the-startup`) — *Optional*
 
@@ -81,130 +293,23 @@ The framework leverages **Claude Code's plugin system** to provide workflow comm
 | **Platform Engineer** | IaC, containers, CI/CD, monitoring, data pipelines |
 | **Meta Agent** | Agent design and generation |
 
----
-
-## 🚀 Quick Start
-
-### Installation
-
-**Requirements**: Claude Code v2.0+ with marketplace support
-
-```bash
-# Add The Agentic Startup marketplace
-/plugin marketplace add rsmdt/the-startup
-
-# Install the Start plugin (core workflows)
-/plugin install start@the-startup
-
-# (Optional) Install the Team plugin (specialized agents)
-/plugin install team@the-startup
-```
-
 **📖 [View all available agents →](plugins/team/README.md)**
 
-Alternatively, browse and install interactively via `/plugin`
-
-### Initialize Your Environment
-
-Configure output style and statusline (one-time setup):
-
-```bash
-/start:init
-```
-
-### Your First Workflow
-
-**1. Create a specification:**
-```bash
-/start:specify Add user authentication with OAuth support
-```
-
-Creates `docs/specs/001-user-authentication/` with product-requirements.md, solution-design.md, and implementation-plan.md documents.
-
-**2. Execute the implementation:**
-```bash
-/start:implement 001
-```
-
-Runs phase-by-phase with parallel agents, validation gates, and progress tracking.
-
 ---
 
-## 📋 Commands
+## 🤖 What is The Agentic Startup?
 
-Quick reference for all workflow commands:
+**The Agentic Startup** is a spec-driven development framework for Claude Code that transforms how you build software. Think Y Combinator demo day energy meets engineering discipline—multiple specialists executing in parallel while you stay in control.
 
-| Command | Description |
-|---------|-------------|
-| `/start:init` | Initialize environment (output style, statusline) |
-| `/start:specify` | Create specification documents from brief description |
-| `/start:implement` | Execute implementation plan phase-by-phase |
-| `/start:validate` | Validate specs, implementations, or understanding (quality gate) |
-| `/start:analyze` | Discover and document patterns, rules, interfaces |
-| `/start:refactor` | Improve code quality while preserving behavior |
-| `/start:debug` | Conversational debugging with systematic root cause analysis |
+### Key Features
 
-**📖 [View detailed command documentation →](plugins/start/README.md)**
+**Native Claude Code Integration** — Distributed as official marketplace plugins with zero manual configuration
 
----
+**Autonomous Skills System** — Model-invoked skills that activate based on natural language with progressive disclosure
 
-## 🔄 Typical Development Workflow
+**Specialized Agent Team** — 11 agent roles across 27 activity-based specializations (optional [`team@the-startup`](plugins/team/README.md) plugin)
 
-### Specify → Validate → Implement
-
-**1. Create Specification**
-
-```bash
-/start:specify Add real-time notification system with WebSocket support
-```
-
-- Creates comprehensive specs in `docs/specs/001-notification-system/`
-- Documents discovered patterns and interfaces
-- Duration: 15-30 minutes
-
-**2. Validate Before Implementation (Optional)**
-
-```bash
-/start:validate 001
-```
-
-- Checks completeness, consistency, correctness
-- Detects ambiguities and gaps
-- Provides advisory recommendations
-- Duration: 2-5 minutes
-
-**3. Execute Implementation**
-
-```bash
-/start:implement 001
-```
-
-- Executes phases sequentially with user approval
-- Parallel agent coordination within phases
-- Continuous test validation
-- Duration: Varies by complexity
-
-### Separate Workflows
-
-**Validate understanding or implementation:**
-```bash
-/start:validate Check the current auth implementation against the SDD
-```
-
-**Analyze existing code:**
-```bash
-/start:analyze security patterns in authentication
-```
-
-**Refactor code safely:**
-```bash
-/start:refactor Simplify the WebSocket connection manager
-```
-
-**Debug issues conversationally:**
-```bash
-/start:debug The API returns 500 errors when uploading large files
-```
+**Structured Momentum** — Y Combinator energy meets engineering discipline—parallel execution with quality gates
 
 ---
 
@@ -224,39 +329,37 @@ Development often moves too fast without proper planning:
 
 ### Our Approach: Spec-Driven Development
 
-**The Agentic Startup** enforces a disciplined workflow that balances speed with quality:
+**1. Specify First** — Create comprehensive specifications before writing code
+- **product-requirements.md** — What to build and why
+- **solution-design.md** — How to build it technically
+- **implementation-plan.md** — Executable tasks and phases
 
-**1. Specify First** - Create comprehensive specifications before writing code
-- **product-requirements.md** - What to build and why
-- **solution-design.md** - How to build it technically
-- **implementation-plan.md** - Executable tasks and phases
-
-**2. Review & Refine** - Validate specifications with stakeholders
+**2. Review & Refine** — Validate specifications with stakeholders
 - Catch issues during planning, not during implementation
 - Iterate on requirements and design cheaply
 - Get alignment before costly development begins
 
-**3. Implement with Confidence** - Execute validated plans phase-by-phase
+**3. Implement with Confidence** — Execute validated plans phase-by-phase
 - Clear acceptance criteria at every step
 - Parallel agent coordination for speed
 - Built-in validation gates and quality checks
 
-**4. Document & Learn** - Capture patterns for future reuse
+**4. Document & Learn** — Capture patterns for future reuse
 - Automatically document discovered patterns
 - Build organizational knowledge base
 - Prevent reinventing solutions
 
 ### Core Principles
 
-**Measure twice, cut once** - Investing time in specifications saves exponentially more time during implementation.
+**Measure twice, cut once** — Investing time in specifications saves exponentially more time during implementation.
 
-**Documentation as code** - Specs, patterns, and interfaces are first-class artifacts that evolve with your codebase.
+**Documentation as code** — Specs, patterns, and interfaces are first-class artifacts that evolve with your codebase.
 
-**Parallel execution** - Multiple specialists work simultaneously within clear boundaries, maximizing velocity without chaos.
+**Parallel execution** — Multiple specialists work simultaneously within clear boundaries, maximizing velocity without chaos.
 
-**Quality gates** - Definition of Ready (DOR) and Definition of Done (DOD) ensure standards are maintained throughout.
+**Quality gates** — Definition of Ready (DOR) and Definition of Done (DOD) ensure standards are maintained throughout.
 
-**Progressive disclosure** - Skills and agents load details only when needed, optimizing token efficiency while maintaining power.
+**Progressive disclosure** — Skills and agents load details only when needed, optimizing token efficiency while maintaining power.
 
 ---
 
@@ -272,9 +375,9 @@ Reusable architectural patterns and design decisions:
 
 ### Additional Resources
 
-- [Start Plugin Documentation](plugins/start/README.md) - Workflow commands and skills
-- [Team Plugin Documentation](plugins/team/README.md) - Specialized agents and skills library
-- [Migration Guide](MIGRATION.md) - Upgrading from v1.x
+- [Start Plugin Documentation](plugins/start/README.md) — Workflow commands and skills
+- [Team Plugin Documentation](plugins/team/README.md) — Specialized agents and skills library
+- [Migration Guide](MIGRATION.md) — Upgrading from v1.x
 
 ---
 
