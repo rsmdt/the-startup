@@ -33,6 +33,7 @@
 - [📖 The Complete Workflow](#-the-complete-workflow)
 - [🎯 Which Command Should I Use?](#-which-command-should-i-use)
 - [📦 Plugins](#-plugins)
+- [🎨 Output Styles](#-output-styles)
 - [🎯 Philosophy](#-philosophy)
 - [📚 Documentation](#-documentation)
 
@@ -64,6 +65,10 @@
 
 # Initialize your environment (statusline)
 /start:init
+
+# Choose your output style
+/output-style start:The Startup    # High-energy, fast execution
+/output-style start:The ScaleUp    # Calm confidence, educational
 ```
 
 ---
@@ -313,6 +318,47 @@ The Agentic Startup is distributed as **Claude Code marketplace plugins**—nati
 | **Meta Agent** | Agent design and generation |
 
 **📖 [View all available agents →](plugins/team/README.md)**
+
+---
+
+## 🎨 Output Styles
+
+The Start plugin includes two output styles that change how Claude communicates while working. Both maintain the same quality standards—the difference is in personality and explanation depth.
+
+**Switch anytime:** `/output-style start:The Startup` or `/output-style start:The ScaleUp`
+
+### The Startup 🚀
+
+**High-energy execution with structured momentum.**
+
+- **Vibe:** Demo day energy, Y Combinator intensity
+- **Voice:** "Let's deliver this NOW!", "BOOM! That's what I'm talking about!"
+- **Mantra:** "Done is better than perfect, but quality is non-negotiable"
+
+**Best for:** Fast-paced sprints, high-energy execution, when you want momentum and celebration.
+
+### The ScaleUp 📈
+
+**Calm confidence with educational depth.**
+
+- **Vibe:** Professional craft, engineering excellence
+- **Voice:** "We've solved harder problems. Here's the approach."
+- **Mantra:** "Sustainable speed at scale. We move fast, but we don't break things."
+
+**Unique feature — Educational Insights:** The ScaleUp explains decisions as it works:
+
+> 💡 *Insight: I used exponential backoff here because this endpoint has rate limiting. The existing `src/utils/retry.ts` helper already implements this pattern.*
+
+**Best for:** Learning while building, understanding codebase patterns, onboarding to unfamiliar codebases.
+
+### Comparison
+
+| Dimension | The Startup | The ScaleUp |
+|-----------|-------------|-------------|
+| **Energy** | High-octane, celebratory | Calm, measured |
+| **Explanations** | Minimal—ships fast | Educational insights included |
+| **On failure** | "That didn't work. Moving on." | "Here's what failed and why..." |
+| **Closing thought** | "What did we deliver?" | "Can the team maintain this?" |
 
 ---
 

@@ -724,7 +724,7 @@ The skill always checks existing documentation before creating new files, preven
 
 The `start` plugin includes two output styles for different working preferences. Both share the same operational fundamentals (verification, code ownership, scope management) but express them differently.
 
-**Activate via:** `/output-style The Startup` or `/output-style The ScaleUp`
+**Activate via:** `/output-style start:The Startup` or `/output-style start:The ScaleUp`
 
 ---
 
