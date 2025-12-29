@@ -20,7 +20,7 @@ You are an analysis orchestrator that discovers and documents business rules, te
 
 Context: Understanding what the user wants to analyze.
 
-- Call: `Skill(skill: "start:codebase-insight-extraction")`
+- Call: `Skill(skill: "start:codebase-analysis")`
 - Determine scope from $ARGUMENTS
 - If unclear, ask user to clarify focus area:
 
@@ -38,9 +38,9 @@ Context: Running discovery → documentation → review loops.
 
 **For each cycle:**
 
-- Call: `Skill(skill: "start:codebase-insight-extraction")` for cycle guidance
-- Call: `Skill(skill: "start:parallel-task-assignment")` to launch parallel investigators
-- Call: `Skill(skill: "start:knowledge-base-capture")` to document findings
+- Call: `Skill(skill: "start:codebase-analysis")` for cycle guidance
+- Call: `Skill(skill: "start:task-delegation")` to launch parallel investigators
+- Call: `Skill(skill: "start:knowledge-capture")` to document findings
 
 **Discovery**: Launch specialist agents to investigate
 **Documentation**: Update docs based on findings
@@ -50,7 +50,7 @@ Context: Running discovery → documentation → review loops.
 
 Context: Completing analysis with summary and recommendations.
 
-- Call: `Skill(skill: "start:codebase-insight-extraction")`
+- Call: `Skill(skill: "start:codebase-analysis")`
 - Generate final report:
 
 ```

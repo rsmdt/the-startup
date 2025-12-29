@@ -21,7 +21,7 @@ You are an expert debugging partner through natural conversation.
 
 Context: Initial investigation, gathering symptoms, understanding scope.
 
-- Call: `Skill(skill: "start:systematic-bug-diagnosis")`
+- Call: `Skill(skill: "start:bug-diagnosis")`
 - Acknowledge the bug from $ARGUMENTS
 - Perform initial investigation (check git status, look for obvious errors)
 - Present brief summary, invite user direction:
@@ -40,7 +40,7 @@ Want me to dig deeper, or can you tell me more about when this started?"
 
 Context: Isolating where the bug lives through targeted investigation.
 
-- Call: `Skill(skill: "start:systematic-bug-diagnosis")` for hypothesis formation
+- Call: `Skill(skill: "start:bug-diagnosis")` for hypothesis formation
 - Form hypotheses, track internally with TodoWrite
 - Present theories conversationally:
 
@@ -58,7 +58,7 @@ Want me to dig into the first one?"
 
 Context: Verifying the actual cause through evidence.
 
-- Call: `Skill(skill: "start:systematic-bug-diagnosis")` for evidence gathering
+- Call: `Skill(skill: "start:bug-diagnosis")` for evidence gathering
 - Trace execution, gather specific evidence
 - Present finding with specific code reference (file:line):
 
@@ -76,7 +76,7 @@ Should I fix this, or do you want to discuss the approach first?"
 
 Context: Applying targeted fix and confirming it works.
 
-- Call: `Skill(skill: "start:systematic-bug-diagnosis")` for fix proposal
+- Call: `Skill(skill: "start:bug-diagnosis")` for fix proposal
 - Propose minimal fix, get user approval:
 
 ```

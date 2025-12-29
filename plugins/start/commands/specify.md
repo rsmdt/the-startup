@@ -37,7 +37,7 @@ Context: Offering version control integration for specification tracking.
 
 Context: Creating new spec or checking existing spec status.
 
-- Call: `Skill(skill: "start:specification-lifecycle-management")`
+- Call: `Skill(skill: "start:specification-management")`
 - Initialize specification using $ARGUMENTS (skill handles directory creation/reading)
 - Call: `AskUserQuestion` to let user choose direction (see options below)
 
@@ -70,7 +70,7 @@ When reading an existing spec, analyze document status and ask where to continue
 
 Context: Working on product requirements, defining user stories, acceptance criteria.
 
-- Call: `Skill(skill: "start:requirements-gathering-analysis")`
+- Call: `Skill(skill: "start:requirements-analysis")`
 - Focus: WHAT needs to be built and WHY it matters
 - Avoid: Technical implementation details
 - Deliverable: Complete Product Requirements
@@ -82,7 +82,7 @@ Context: Working on product requirements, defining user stories, acceptance crit
 
 Context: Working on solution design, designing architecture, defining interfaces.
 
-- Call: `Skill(skill: "start:technical-architecture-design")`
+- Call: `Skill(skill: "start:architecture-design")`
 - Focus: HOW the solution will be built
 - Avoid: Actual implementation code
 - Deliverable: Complete Solution Design
@@ -94,7 +94,7 @@ Context: Working on solution design, designing architecture, defining interfaces
 
 Context: Working on implementation plan, planning phases, sequencing tasks.
 
-- Call: `Skill(skill: "start:phased-implementation-planning")`
+- Call: `Skill(skill: "start:implementation-planning")`
 - Focus: Task sequencing and dependencies
 - Avoid: Time estimates
 - Deliverable: Complete Implementation Plan
@@ -106,7 +106,7 @@ Context: Working on implementation plan, planning phases, sequencing tasks.
 
 Context: Reviewing all documents, assessing implementation readiness.
 
-- Call: `Skill(skill: "start:specification-lifecycle-management")`
+- Call: `Skill(skill: "start:specification-management")`
 - Review documents and assess context drift between them
 - Generate readiness and confidence assessment
 

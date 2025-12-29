@@ -438,26 +438,26 @@ The `start` plugin includes sixteen skills that activate automatically based on 
 
 | Skill | Purpose |
 |-------|---------|
-| `parallel-task-assignment` | Task decomposition, FOCUS/EXCLUDE templates, parallel coordination |
-| `knowledge-base-capture` | Auto-document patterns, interfaces, domain rules |
-| `specification-lifecycle-management` | Spec directory creation, README tracking, phase transitions |
-| `specification-quality-validation` | 3 Cs validation, ambiguity detection, comparison checks |
+| `task-delegation` | Task decomposition, FOCUS/EXCLUDE templates, parallel coordination |
+| `knowledge-capture` | Auto-document patterns, interfaces, domain rules |
+| `specification-management` | Spec directory creation, README tracking, phase transitions |
+| `specification-validation` | 3 Cs validation, ambiguity detection, comparison checks |
 
 ### Document Skills
 
 | Skill | Purpose |
 |-------|---------|
-| `requirements-gathering-analysis` | PRD template, validation, requirements gathering |
-| `technical-architecture-design` | SDD template, architecture design, ADR management |
-| `phased-implementation-planning` | PLAN template, task sequencing, dependency mapping |
+| `requirements-analysis` | PRD template, validation, requirements gathering |
+| `architecture-design` | SDD template, architecture design, ADR management |
+| `implementation-planning` | PLAN template, task sequencing, dependency mapping |
 | `documentation-sync` | Staleness detection, coverage metrics, doc generation |
 
 ### Execution Skills
 
 | Skill | Purpose |
 |-------|---------|
-| `multi-agent-coordination` | Phase-by-phase execution, TodoWrite tracking, checkpoints |
-| `specification-implementation-verification` | Implementation vs spec verification, deviation detection |
+| `agent-coordination` | Phase-by-phase execution, TodoWrite tracking, checkpoints |
+| `implementation-verification` | Implementation vs spec verification, deviation detection |
 | `git-workflow` | Branch creation, commit messages, PR creation |
 
 ### Review Skills
@@ -476,15 +476,15 @@ The `start` plugin includes sixteen skills that activate automatically based on 
 
 | Skill | Purpose |
 |-------|---------|
-| `codebase-insight-extraction` | Iterative discovery cycles for pattern/rule extraction |
-| `systematic-bug-diagnosis` | Scientific debugging, hypothesis tracking, evidence-based |
-| `behavior-preserving-refactoring` | Safe refactoring patterns, behavior preservation |
+| `codebase-analysis` | Iterative discovery cycles for pattern/rule extraction |
+| `bug-diagnosis` | Scientific debugging, hypothesis tracking, evidence-based |
+| `safe-refactoring` | Safe refactoring patterns, behavior preservation |
 
 ---
 
 ### Skill Details
 
-### `knowledge-base-capture`
+### `knowledge-capture`
 
 **Activates when:** Patterns, interfaces, or domain rules are discovered
 
@@ -513,7 +513,7 @@ Creates: docs/patterns/caching-strategy.md
 
 ---
 
-### `parallel-task-assignment`
+### `task-delegation`
 
 **Activates when:** Task decomposition, agent coordination, or template generation needed
 
@@ -709,7 +709,7 @@ docs/
 
 ### Auto-Documentation
 
-The `knowledge-base-capture` skill automatically creates files in the correct location when patterns, interfaces, or domain rules are discovered during:
+The `knowledge-capture` skill automatically creates files in the correct location when patterns, interfaces, or domain rules are discovered during:
 - Specification creation (`/start:specify`)
 - Implementation (`/start:implement`)
 - Analysis (`/start:analyze`)

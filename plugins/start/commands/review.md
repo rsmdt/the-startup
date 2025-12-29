@@ -68,8 +68,8 @@ Context: Understanding what to review and gathering the diff.
 
 Context: Dispatching parallel specialist agents.
 
-- Call: `Skill(skill: "start:multi-perspective-code-review")` for review methodology
-- Call: `Skill(skill: "start:parallel-task-assignment")` to launch agents
+- Call: `Skill(skill: "start:code-review")` for review methodology
+- Call: `Skill(skill: "start:task-delegation")` to launch agents
 
 **Launch these agents in parallel:**
 

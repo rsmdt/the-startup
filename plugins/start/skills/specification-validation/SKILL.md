@@ -321,7 +321,7 @@ Score: [X]%
 ## Integration with Other Skills
 
 Works alongside:
-- **specification-lifecycle-management**: Read spec metadata
+- **specification-management**: Read spec metadata
 - **specification-implementation-verification**: Detailed implementation verification
 - **parallel-task-assignment**: Parallel validation checks
 
