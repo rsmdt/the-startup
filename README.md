@@ -26,11 +26,31 @@
 
 ---
 
-## 🚀 Quick Start
+## Table of Contents
+
+- [🤖 What is The Agentic Startup?](#-what-is-the-agentic-startup)
+- [🚀 Quick Start](#-quick-start)
+- [📖 The Complete Workflow](#-the-complete-workflow)
+- [🎯 Which Command Should I Use?](#-which-command-should-i-use)
+- [📦 Plugins](#-plugins)
+- [🎯 Philosophy](#-philosophy)
+- [📚 Documentation](#-documentation)
+
+---
+
+## 🤖 What is The Agentic Startup?
+
+**The Agentic Startup** is a spec-driven development framework for Claude Code. Create comprehensive specifications before coding, then execute with parallel specialist agents—Y Combinator energy meets engineering discipline.
+
+**Key Features:**
+- **Native Claude Code Integration** — Marketplace plugins with zero configuration
+- **Spec-Driven Development** — PRD → SDD → Implementation Plan → Code
+- **Parallel Agent Execution** — Multiple specialists work simultaneously
+- **Quality Gates** — Built-in validation at every stage
+
+### Installation
 
 **Requirements:** Claude Code v2.0+ with marketplace support
-
-### 1. Install the Marketplace & Plugins
 
 ```bash
 # Add The Agentic Startup marketplace
@@ -39,19 +59,18 @@
 # Install the Start plugin (core workflows)
 /plugin install start@the-startup
 
-# (Optional) Install the Team plugin (specialized agents and skills)
+# (Optional) Install the Team plugin (specialized agents)
 /plugin install team@the-startup
-```
 
-### 2. Initialize Your Environment
-
-```bash
+# Initialize your environment (statusline)
 /start:init
 ```
 
-Configures the git-aware statusline for real-time command tracking.
+---
 
-### 3. Build Your First Feature
+## 🚀 Quick Start
+
+Create a specification and implement it:
 
 ```bash
 # Create a specification
@@ -294,22 +313,6 @@ The Agentic Startup is distributed as **Claude Code marketplace plugins**—nati
 | **Meta Agent** | Agent design and generation |
 
 **📖 [View all available agents →](plugins/team/README.md)**
-
----
-
-## 🤖 What is The Agentic Startup?
-
-**The Agentic Startup** is a spec-driven development framework for Claude Code that transforms how you build software. Think Y Combinator demo day energy meets engineering discipline—multiple specialists executing in parallel while you stay in control.
-
-### Key Features
-
-**Native Claude Code Integration** — Distributed as official marketplace plugins with zero manual configuration
-
-**Autonomous Skills System** — Model-invoked skills that activate based on natural language with progressive disclosure
-
-**Specialized Agent Team** — 11 agent roles across 27 activity-based specializations (optional [`team@the-startup`](plugins/team/README.md) plugin)
-
-**Structured Momentum** — Y Combinator energy meets engineering discipline—parallel execution with quality gates
 
 ---
 

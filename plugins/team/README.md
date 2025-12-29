@@ -6,6 +6,16 @@ The `team` plugin provides 11 specialized agent roles with 27 activity-based spe
 
 ---
 
+## Table of Contents
+
+- [Installation](#installation)
+- [Agent Roles](#agent-roles) — Chief, Analyst, Architect, Software Engineer, QA Engineer, Designer, Platform Engineer, Meta Agent
+- [Philosophy](#philosophy) — specialist expertise, activity-focused design, quality standards
+- [Skills System](#skills-system) — 16 reusable skills shared across agents
+- [Agent Architecture](#agent-architecture) — slim agent design, template structure
+
+---
+
 ## Installation
 
 ```bash

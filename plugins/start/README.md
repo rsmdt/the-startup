@@ -8,6 +8,19 @@ The `start` plugin provides nine workflow commands, sixteen autonomous skills, a
 
 ---
 
+## Table of Contents
+
+- [Commands](#commands) — specify, implement, validate, review, document, analyze, refactor, debug, init
+- [Autonomous Skills](#autonomous-skills) — 16 context-activated skills
+- [Documentation Structure](#-documentation-structure) — specs, domain, patterns, interfaces
+- [Output Styles](#-output-styles) — The Startup, The ScaleUp
+- [Typical Development Workflow](#typical-development-workflow) — primary and maintenance flows
+- [Skills in Action](#skills-in-action) — real-world examples
+- [Templates](#templates) — PRD, SDD, PLAN, DOR, DOD
+- [Philosophy](#philosophy) — spec-driven development principles
+
+---
+
 ## Commands
 
 ### `/start:specify <description>`
