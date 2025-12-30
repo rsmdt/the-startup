@@ -1,6 +1,6 @@
 ---
 name: accessibility-implementation
-description: Use this agent to ensure WCAG 2.1 AA compliance, implement accessible user interfaces, improve keyboard navigation, enhance screen reader compatibility, and make products usable by people with disabilities. Includes ARIA attributes, color contrast, accessible forms, focus states, and assistive technology testing. Examples:
+description: PROACTIVELY ensure accessibility when building forms, interactive elements, or user interfaces. MUST BE USED when WCAG compliance is required or accessibility audits reveal issues. Automatically invoke when creating buttons, modals, navigation, or any keyboard-interactive elements. Includes ARIA, color contrast, focus states, and screen reader compatibility. Examples:
 
 <example>
 Context: The user is building a form that needs to be accessible.
