@@ -28,7 +28,7 @@ assistant: "I'll use the accessibility-implementation agent to implement proper 
 Complex UI components require careful accessibility implementation, use the Task tool to launch the accessibility-implementation agent.
 </commentary>
 </example>
-model: inherit
+model: haiku
 skills: codebase-navigation, tech-stack-detection, pattern-detection, coding-conventions, error-recovery, documentation-extraction, accessibility-design
 ---
 

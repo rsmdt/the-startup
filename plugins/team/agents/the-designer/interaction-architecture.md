@@ -1,7 +1,7 @@
 ---
 name: interaction-architecture
 description: Design information architecture and user interactions for intuitive experiences. Includes navigation systems, user flows, wireframes, content organization, and interaction patterns. Examples:\n\n<example>\nContext: The user needs navigation design.\nuser: "Our app navigation is confusing users"\nassistant: "I'll use the interaction architecture agent to redesign your navigation system and improve information hierarchy."\n<commentary>\nNavigation and information architecture needs this specialist agent.\n</commentary>\n</example>\n\n<example>\nContext: The user needs user flow design.\nuser: "We need to design the onboarding flow for new users"\nassistant: "Let me use the interaction architecture agent to create an intuitive onboarding flow with clear interaction patterns."\n<commentary>\nUser flow and interaction design requires the interaction architecture agent.\n</commentary>\n</example>\n\n<example>\nContext: The user needs content organization.\nuser: "We have too much content and users can't find anything"\nassistant: "I'll use the interaction architecture agent to reorganize your content with proper categorization and search strategies."\n<commentary>\nContent organization and findability needs this specialist.\n</commentary>\n</example>
-model: inherit
+model: sonnet
 skills: codebase-navigation, tech-stack-detection, pattern-detection, coding-conventions, documentation-extraction, accessibility-design, user-insight-synthesis
 ---
 
