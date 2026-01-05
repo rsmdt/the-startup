@@ -322,8 +322,46 @@ Score: [X]%
 
 Works alongside:
 - **specification-management**: Read spec metadata
-- **specification-implementation-verification**: Detailed implementation verification
-- **parallel-task-assignment**: Parallel validation checks
+- **implementation-verification**: Detailed implementation verification
+- **task-delegation**: Parallel validation checks
+- **constitution-validation**: Constitutional rule compliance (when CONSTITUTION.md exists)
+- **drift-detection**: Spec-implementation alignment (during implementation phases)
+
+## Constitution Integration
+
+When validating specifications or implementations, check for constitution compliance:
+
+### During Specification Validation (Mode A)
+
+If `CONSTITUTION.md` exists at project root:
+1. Parse constitution rules
+2. Check SDD ADRs against L1/L2 rules
+3. Verify proposed architecture doesn't violate constitutional constraints
+4. Report any conflicts in validation output
+
+### During Comparison Validation (Mode C)
+
+If comparing implementation against specification:
+1. Also validate implementation against constitution
+2. Include constitution violations in comparison report
+3. Flag code that may satisfy spec but violates constitution
+
+### Constitution Check Output
+
+Add to validation reports when constitution exists:
+
+```
+📜 Constitution Compliance
+
+Status: [✅ Compliant / ⚠️ Violations Found]
+
+[If violations found:]
+L1 Violations: [N] (blocking, autofix available)
+L2 Violations: [N] (blocking, manual fix required)
+L3 Advisories: [N] (optional improvements)
+
+[Detailed violation list if any...]
+```
 
 ## Output Format
 

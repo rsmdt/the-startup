@@ -66,6 +66,9 @@
 # Initialize your environment (statusline)
 /start:init
 
+# (Optional) Create project governance rules
+/start:constitution                # Auto-enforced during specify, implement, review
+
 # Choose your output style
 /output-style start:The Startup    # High-energy, fast execution
 /output-style start:The ScaleUp    # Calm confidence, educational
@@ -100,6 +103,9 @@ The Agentic Startup follows **spec-driven development**: comprehensive specifica
 │                    SETUP (one-time)                      │
 │                                                          │
 │  /start:init ───────► Configure statusline & environment │
+│                                                          │
+│  /start:constitution ► Create project governance rules   │
+│                        (optional, auto-enforced in BUILD)│
 └──────────────────────────────────────────────────────────┘
                             │
                             ▼
@@ -107,16 +113,16 @@ The Agentic Startup follows **spec-driven development**: comprehensive specifica
 │                    BUILD (primary flow)                  │
 │                                                          │
 │  /start:specify ────► Create specs (PRD + SDD + PLAN)    │
-│        │                                                 │
+│        │               ↳ Constitution checked on SDD     │
 │        ▼                                                 │
 │  /start:validate ───► Check quality (3 Cs framework)     │
-│        │                                                 │
+│        │               ↳ Constitution mode available     │
 │        ▼                                                 │
 │  /start:implement ──► Execute plan phase-by-phase        │
-│        │                                                 │
+│        │               ↳ Constitution + drift enforced   │
 │        ▼                                                 │
 │  /start:review ─────► Multi-agent code review            │
-│        │                                                 │
+│        │               ↳ Constitution compliance checked │
 │        ▼                                                 │
 │  /start:document ───► Generate/sync documentation        │
 └──────────────────────────────────────────────────────────┘
@@ -217,6 +223,9 @@ Four parallel specialists review your code:
 ```
 What do you need to do?
 │
+├─ First time setup? ─────────────────────► /start:init
+│   └─ Want project-wide guardrails? ─────► Then: /start:constitution
+│
 ├─ Build something new? ──────────────────► /start:specify
 │                                           Then: /start:validate → /start:implement
 │
@@ -229,13 +238,15 @@ What do you need to do?
 │
 ├─ Need documentation? ───────────────────► /start:document
 │
-└─ First time setup? ─────────────────────► /start:init
+└─ Check constitution compliance? ────────► /start:validate constitution
 ```
 
 ### Command Reference
 
 | Command | Purpose | When to Use |
 |---------|---------|-------------|
+| `/start:init` | Setup environment | First-time configuration |
+| `/start:constitution` | Create governance rules | Establish project-wide guardrails |
 | `/start:specify` | Create specifications | New features, complex changes |
 | `/start:implement` | Execute plans | After spec is validated |
 | `/start:validate` | Check quality | Before implementation, after specs |
@@ -244,20 +255,21 @@ What do you need to do?
 | `/start:analyze` | Extract knowledge | Understanding existing code |
 | `/start:refactor` | Improve code quality | Cleanup without behavior change |
 | `/start:debug` | Fix bugs | When something is broken |
-| `/start:init` | Setup environment | First-time configuration |
 
 ### Capability Matrix
 
-| Capability | specify | implement | validate | review | document | analyze | refactor | debug |
-|------------|:-------:|:---------:|:--------:|:------:|:--------:|:-------:|:--------:|:-----:|
-| **Creates specifications** | ✅ | - | - | - | - | - | - | - |
-| **Executes implementation plans** | - | ✅ | - | - | - | - | - | - |
-| **Runs tests** | - | ✅ | ✅ | - | - | - | ✅ | ✅ |
-| **Creates git branches** | ✅ | ✅ | - | - | - | - | ✅ | - |
-| **Creates PRs** | ✅ | ✅ | - | - | - | - | - | - |
-| **Multi-agent parallel** | ✅ | ✅ | - | ✅ | ✅ | ✅ | - | - |
-| **Security scanning** | - | - | ✅ | ✅ | - | - | - | - |
-| **Generates documentation** | ✅ | - | - | - | ✅ | ✅ | - | - |
+| Capability | constitution | specify | implement | validate | review | document | analyze | refactor | debug |
+|------------|:------------:|:-------:|:---------:|:--------:|:------:|:--------:|:-------:|:--------:|:-----:|
+| **Creates specifications** | - | ✅ | - | - | - | - | - | - | - |
+| **Executes implementation plans** | - | - | ✅ | - | - | - | - | - | - |
+| **Runs tests** | - | - | ✅ | ✅ | - | - | - | ✅ | ✅ |
+| **Creates git branches** | - | ✅ | ✅ | - | - | - | - | ✅ | - |
+| **Creates PRs** | - | ✅ | ✅ | - | - | - | - | - | - |
+| **Multi-agent parallel** | - | ✅ | ✅ | - | ✅ | ✅ | ✅ | - | - |
+| **Security scanning** | - | - | - | ✅ | ✅ | - | - | - | - |
+| **Generates documentation** | - | ✅ | - | - | - | ✅ | ✅ | - | - |
+| **Constitution enforcement** | ✅ | ✅ | ✅ | ✅ | ✅ | - | - | - | - |
+| **Drift detection** | - | - | ✅ | - | - | - | - | - | - |
 
 ### When Commands Overlap
 
@@ -291,12 +303,13 @@ The Agentic Startup is distributed as **Claude Code marketplace plugins**—nati
 
 ### Start Plugin (`start@the-startup`)
 
-**Core workflow orchestration** — 9 commands, 16 skills, 2 output styles
+**Core workflow orchestration** — 10 commands, 18 skills, 2 output styles
 
 | Category | Capabilities |
 |----------|-------------|
+| **Setup** | Environment configuration (`init`), project governance rules (`constitution`) |
 | **Build** | `specify` → `validate` → `implement` pipeline with parallel agent coordination |
-| **Quality** | Multi-agent code review, security scanning, test coverage checks |
+| **Quality** | Multi-agent code review, security scanning, constitution enforcement, drift detection |
 | **Maintain** | Documentation generation, codebase analysis, safe refactoring, debugging |
 | **Git** | Optional branch/commit/PR workflows integrated into commands |
 

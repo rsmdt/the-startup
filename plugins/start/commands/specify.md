@@ -87,6 +87,12 @@ Context: Working on solution design, designing architecture, defining interfaces
 - Avoid: Actual implementation code
 - Deliverable: Complete Solution Design
 
+**Constitution Alignment (if CONSTITUTION.md exists):**
+- Call: `Skill(skill: "start:constitution-validation")` in planning mode
+- Verify proposed architecture doesn't violate constitutional rules
+- Ensure ADRs don't contradict L1/L2 constitution rules
+- Report any potential conflicts for resolution before finalizing SDD
+
 **After SDD completion:**
 - Call: `AskUserQuestion` - Continue to PLAN (recommended) or Finalize SDD
 

@@ -71,7 +71,34 @@ Context: Dispatching parallel specialist agents.
 - Call: `Skill(skill: "start:code-review")` for review methodology
 - Call: `Skill(skill: "start:task-delegation")` to launch agents
 
+**Check for constitution:**
+- If `CONSTITUTION.md` exists at project root:
+  - Call: `Skill(skill: "start:constitution-validation")` in validation mode
+  - Include constitution violations in review findings
+
 **Launch these agents in parallel:**
+
+#### Agent 0: Constitution Checker (if CONSTITUTION.md exists)
+```
+FOCUS: Validate changed code against project constitution rules
+    - Check all changed files against constitution rules
+    - Apply scopes to filter relevant rules
+    - Execute pattern matching and semantic checks
+    - Report violations by level (L1/L2/L3)
+
+EXCLUDE: General code quality (covered by other agents)
+
+CONTEXT: [Include the diff and constitution rules]
+
+OUTPUT: Constitution findings with:
+    - Level: L1 (Must) / L2 (Should) / L3 (May)
+    - Rule: Rule name from constitution
+    - Location: file:line
+    - Issue: What violates the rule
+    - Fix: How to resolve (for L1, provide autofix)
+
+SUCCESS: All constitution violations identified with rule references
+```
 
 #### Agent 1: Security Reviewer
 ```
@@ -200,6 +227,7 @@ Overall Assessment: [✅ APPROVE / 🟡 APPROVE WITH COMMENTS / 🔴 REQUEST CHA
 
 | Category      | Critical | High | Medium | Low |
 |---------------|----------|------|--------|-----|
+| 📜 Constitution | [N]    | [N]  | [N]    | [N] |
 | 🔐 Security   | [N]      | [N]  | [N]    | [N] |
 | ⚡ Performance | [N]      | [N]  | [N]    | [N] |
 | 📝 Quality    | [N]      | [N]  | [N]    | [N] |

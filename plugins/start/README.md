@@ -2,7 +2,7 @@
 
 **Workflow orchestration plugin for spec-driven development in Claude Code.**
 
-The `start` plugin provides nine workflow commands, sixteen autonomous skills, and two output styles to transform how you build software with Claude Code.
+The `start` plugin provides ten workflow commands, eighteen autonomous skills, and two output styles to transform how you build software with Claude Code.
 
 **📖 For quick start, workflow guide, and command selection, see the [main README](../../README.md).**
 
@@ -10,8 +10,8 @@ The `start` plugin provides nine workflow commands, sixteen autonomous skills, a
 
 ## Table of Contents
 
-- [Commands](#commands) — specify, implement, validate, review, document, analyze, refactor, debug, init
-- [Autonomous Skills](#autonomous-skills) — 16 context-activated skills
+- [Commands](#commands) — specify, implement, validate, review, document, analyze, refactor, debug, constitution, init
+- [Autonomous Skills](#autonomous-skills) — 18 context-activated skills
 - [Documentation Structure](#-documentation-structure) — specs, domain, patterns, interfaces
 - [Output Styles](#-output-styles) — The Startup, The ScaleUp
 - [Typical Development Workflow](#typical-development-workflow) — primary and maintenance flows
@@ -408,6 +408,85 @@ flowchart TD
 
 ---
 
+### `/start:constitution [focus-areas]`
+
+Create or update a project constitution with governance rules through discovery-based pattern analysis.
+
+**Purpose:** Establish checkable project rules that are enforced during implementation, review, and validation
+
+**Usage:**
+```bash
+/start:constitution                                    # Create new constitution via codebase discovery
+/start:constitution "security and testing"             # Focus on specific areas
+/start:constitution "Add API patterns"                 # Update existing constitution
+```
+
+**Key Features:**
+- **Discovery-Based Rules** - Analyzes actual codebase patterns, never assumes frameworks
+- **L1/L2/L3 Level System** - L1 (blocking + autofix), L2 (blocking, manual), L3 (advisory)
+- **Three-Layer Enforcement** - Checked during specify (SDD), implement, and review
+- **Pattern + Check Rules** - Supports regex patterns and semantic LLM-interpreted checks
+- **Graceful Degradation** - System works normally if no constitution exists
+
+<details>
+<summary><strong>View Details</strong></summary>
+
+Creates `CONSTITUTION.md` at project root (like README, LICENSE, CODE_OF_CONDUCT). The constitution defines checkable guardrails that detect violations during development.
+
+**Key Distinction:**
+- **CLAUDE.md** = Project description, AI guidance ("Use React with TypeScript")
+- **CONSTITUTION.md** = Checkable rules that catch violations ("No barrel exports")
+
+**Level Definitions:**
+
+| Level | Name | Blocking | Autofix | Use Case |
+|-------|------|----------|---------|----------|
+| **L1** | Must | ✅ Yes | ✅ AI auto-corrects | Security, correctness, critical architecture |
+| **L2** | Should | ✅ Yes | ❌ No | Important rules requiring human judgment |
+| **L3** | May | ❌ No | ❌ No | Style preferences, suggestions |
+
+**Rule Format Example:**
+
+```markdown
+### No Hardcoded Secrets
+
+\```yaml
+level: L1
+pattern: "(api_key|secret|password)\\s*[:=]\\s*['\"][^'\"]{8,}['\"]"
+scope: "**/*.{ts,js}"
+exclude: "**/*.test.*, .env.example"
+message: Hardcoded secret detected. Use environment variables.
+\```
+
+Secrets must never be committed to source control.
+```
+
+**Three-Layer Enforcement:**
+
+| Phase | Command | Enforcement |
+|-------|---------|-------------|
+| **Planning** | `/start:specify` (SDD) | SDD must not violate constitutional principles |
+| **Task** | `/start:implement` | Task ordering respects constitutional priorities |
+| **Implementation** | `/start:implement` | Generated code checked; L1/L2 violations block completion |
+
+```mermaid
+flowchart TD
+    A([/start:constitution]) --> |check| B{Constitution<br>Exists?}
+    B --> |no| C[**Discovery Phase**<br/>Explore codebase patterns]
+    C --> D[**Rule Generation**<br/>Create L1/L2/L3 rules]
+    D --> E[**User Confirmation**<br/>Present proposed rules]
+    E --> F[**Write CONSTITUTION.md**<br/>At project root]
+    B --> |yes| G{Update or<br>Validate?}
+    G --> |update| H[Add new rules<br/>Focus on specified areas]
+    H --> E
+    G --> |validate| I[Run /start:validate constitution]
+    F --> END[✅ Constitution Created]
+```
+
+</details>
+
+---
+
 ### `/start:init`
 
 Initialize The Agentic Startup framework in your Claude Code environment with interactive setup.
@@ -432,7 +511,7 @@ Configures git-aware statusline with real-time command tracking. Interactive set
 
 ## Autonomous Skills
 
-The `start` plugin includes sixteen skills that activate automatically based on context. You never need to explicitly invoke them - they just work when needed.
+The `start` plugin includes eighteen skills that activate automatically based on context. You never need to explicitly invoke them - they just work when needed.
 
 ### Core Skills
 
@@ -442,6 +521,8 @@ The `start` plugin includes sixteen skills that activate automatically based on 
 | `knowledge-capture` | Auto-document patterns, interfaces, domain rules |
 | `specification-management` | Spec directory creation, README tracking, phase transitions |
 | `specification-validation` | 3 Cs validation, ambiguity detection, comparison checks |
+| `constitution-validation` | Create/validate project constitutions with L1/L2/L3 rules |
+| `drift-detection` | Detect spec-implementation divergence during implementation |
 
 ### Document Skills
 
@@ -798,6 +879,22 @@ The ScaleUp provides contextual explanations as it works:
 
 ## Typical Development Workflow
 
+### Setup (One-Time Per Project)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                             PROJECT SETUP                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   /start:init ────────────► Configure statusline & environment              │
+│                                                                              │
+│   /start:constitution ────► Create project governance rules (optional)      │
+│        │                    L1/L2/L3 rules auto-enforced in BUILD flow      │
+│        │                    CONSTITUTION.md at project root                  │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
 ### Primary Workflow: Specify → Validate → Implement → Review
 
 ```
@@ -809,11 +906,16 @@ The ScaleUp provides contextual explanations as it works:
 │        │                   │                    │                   │        │
 │   Create specs      Check quality        Execute plan        Code review    │
 │   PRD + SDD + PLAN  3 Cs framework      Phase-by-phase     Security + Perf │
+│        │                   │                    │                   │        │
+│   ↳ Constitution     ↳ Constitution      ↳ Constitution      ↳ Constitution │
+│     checked on SDD     mode available      + drift enforced    compliance   │
 │                                                                              │
 │   Optional: /start:document after implementation for documentation sync     │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
+
+*If `CONSTITUTION.md` exists, rules are automatically checked at each stage.*
 
 **1. Create Specification**
 

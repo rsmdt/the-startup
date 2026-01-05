@@ -55,6 +55,8 @@ Context: Executing tasks from implementation plan.
 
 **At checkpoint:**
 - Call: `Skill(skill: "start:implementation-verification")` for validation
+- Call: `Skill(skill: "start:drift-detection")` for spec alignment check (see Drift Detection below)
+- Call: `Skill(skill: "start:constitution-validation")` for constitution compliance (if CONSTITUTION.md exists)
 - Verify all TodoWrite tasks complete
 - Update PLAN.md checkboxes
 - Call: `AskUserQuestion` for phase transition (see options below)
@@ -115,9 +117,62 @@ docs/specs/[ID]-[name]/
 └── implementation-plan.md    # Executed phase-by-phase
 ```
 
+## Drift Detection
+
+At the end of each phase, check for specification drift:
+
+- Call: `Skill(skill: "start:drift-detection")`
+
+**Drift Types:**
+| Type | Description | Action |
+|------|-------------|--------|
+| **Scope Creep** | Implementation adds features not in spec | Acknowledge or update spec |
+| **Missing** | Spec requires feature not implemented | Implement or defer |
+| **Contradicts** | Implementation conflicts with spec | Resolve conflict |
+| **Extra** | Unplanned work that may be valuable | Acknowledge or remove |
+
+**When Drift Detected:**
+1. Present drift findings with specific locations
+2. Call: `AskUserQuestion` with options:
+   - Acknowledge and continue (log drift, proceed)
+   - Update implementation (align with spec)
+   - Update specification (modify spec to match reality)
+   - Defer decision (mark for later review)
+3. Log decision to spec README drift log
+
+**Drift Log Format (in spec README.md):**
+```markdown
+## Drift Log
+
+| Date | Phase | Drift Type | Status | Notes |
+|------|-------|------------|--------|-------|
+| [date] | Phase 2 | Scope creep | Acknowledged | Added pagination not in spec |
+```
+
+## Constitution Enforcement
+
+If `CONSTITUTION.md` exists at project root, enforce rules during implementation:
+
+- Call: `Skill(skill: "start:constitution-validation")` in enforcement mode
+
+**Level Behavior During Implementation:**
+| Level | Behavior |
+|-------|----------|
+| **L1 (Must)** | Block phase completion; AI automatically fixes violation |
+| **L2 (Should)** | Block phase completion; report to user for manual fix |
+| **L3 (May)** | Report as advisory; do not block |
+
+**If L1/L2 violations found:**
+1. Report violations with locations and fixes
+2. For L1: Apply autofix before proceeding
+3. For L2: Wait for user to address or acknowledge
+4. Re-validate after fixes
+
 ## Important Notes
 
 - **Phase boundaries are stops** - Always wait for user confirmation
 - **Respect parallel execution hints** - Launch concurrent agents when marked
 - **Track in TodoWrite** - Real-time task tracking during execution
 - **Accumulate context wisely** - Pass relevant prior outputs to later phases
+- **Drift detection is informational** - Awareness, not rigid enforcement
+- **Constitution enforcement is blocking** - L1/L2 violations must be addressed

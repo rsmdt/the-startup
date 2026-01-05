@@ -30,13 +30,15 @@ Context: Understanding what the user wants to validate.
 | Spec ID (3 digits or ID-name) | Specification Validation | `005`, `005-user-auth` |
 | File path | File Validation | `src/auth.ts`, `docs/api.md` |
 | "Check X against Y" | Comparison Validation | `Check implementation against spec` |
+| "constitution" | Constitution Validation | `constitution`, `constitution src/` |
 | "Validate X" or freeform | Understanding Validation | `Validate my understanding of the auth flow` |
 
 **Detection logic:**
 1. If matches pattern `^\d{3}` or `^\d{3}-` → Spec ID mode
-2. If contains file extension or path separator → File path mode
-3. If contains "against", "with", "matches" → Comparison mode
-4. Otherwise → Understanding/freeform mode
+2. If contains "constitution" → Constitution mode (Mode E)
+3. If contains file extension or path separator → File path mode
+4. If contains "against", "with", "matches" → Comparison mode
+5. Otherwise → Understanding/freeform mode
 
 Present detected mode:
 ```
@@ -203,6 +205,54 @@ Overall: 🟡 PARTIAL MATCH
 
 ---
 
+## Mode E: Constitution Validation
+
+**Triggered by**: Input containing "constitution"
+
+Examples:
+- `constitution` - Validate entire codebase
+- `constitution src/services/` - Validate specific directory
+
+- Call: `Skill(skill: "start:constitution-validation")` in validation mode
+
+**Process:**
+1. Check for `CONSTITUTION.md` at project root
+2. If not found: Report gracefully and exit
+3. Parse constitution rules from Markdown structure
+4. For each rule:
+   - Apply scope to find matching files (using Glob)
+   - If Pattern: execute regex match
+   - If Check: use LLM to interpret semantic check
+   - Collect violations with file, line, code snippet
+5. Categorize findings by level (L1/L2/L3)
+6. Generate compliance report
+
+**Constitution Validation Report:**
+```
+📜 Constitution Compliance
+
+Constitution: CONSTITUTION.md
+Target: [codebase or specific path]
+
+Summary:
+- ✅ Passed: [N] rules
+- 🛑 L1 Violations: [N] (blocking, autofix)
+- ❌ L2 Violations: [N] (blocking, manual)
+- ⚠️ L3 Advisories: [N] (optional)
+
+[Detailed findings by category...]
+
+Recommendations:
+1. [Priority action based on L1 violations]
+2. [Next action based on L2 violations]
+```
+
+**Graceful degradation:**
+- If no constitution: "No CONSTITUTION.md found. Skipping constitution checks."
+- If invalid rules: Skip invalid rules, warn, continue with valid ones
+
+---
+
 ## Mode D: Understanding Validation
 
 **Triggered by**: Freeform requests about understanding or correctness
@@ -335,6 +385,8 @@ Priority 3 (Nice to have):
 | `docs/specs/005-auth/solution-design.md` | File | Validate SDD completeness |
 | `src/services/auth.ts` | File | Check implementation quality |
 | `Check src/auth against SDD` | Comparison | Compare implementation to design |
+| `constitution` | Constitution | Validate codebase against CONSTITUTION.md |
+| `constitution src/api/` | Constitution | Validate specific directory against constitution |
 | `Validate the caching approach` | Understanding | Analyze and validate understanding |
 | `Is my API design correct?` | Understanding | Review and validate design decisions |
 
