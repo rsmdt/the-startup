@@ -54,6 +54,15 @@
 **Requirements:** Claude Code v2.0+ with marketplace support
 
 ```bash
+curl -fsSL https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh | sh
+```
+
+This installs the core plugins, configures the default output style, and optionally sets up the git-aware statusline.
+
+<details>
+<summary><strong>Manual Installation</strong></summary>
+
+```bash
 # Add The Agentic Startup marketplace
 /plugin marketplace add rsmdt/the-startup
 
@@ -62,15 +71,18 @@
 
 # (Optional) Install the Team plugin (specialized agents)
 /plugin install team@the-startup
+```
 
-# Initialize your environment (statusline)
-/start:init
+</details>
 
+**After installation:**
+
+```bash
 # (Optional) Create project governance rules
 /start:constitution                # Auto-enforced during specify, implement, review
 
-# Choose your output style
-/output-style start:The Startup    # High-energy, fast execution
+# Switch output styles anytime
+/output-style start:The Startup    # High-energy, fast execution (default)
 /output-style start:The ScaleUp    # Calm confidence, educational
 ```
 
@@ -100,12 +112,10 @@ The Agentic Startup follows **spec-driven development**: comprehensive specifica
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│                    SETUP (one-time)                      │
-│                                                          │
-│  /start:init ───────► Configure statusline & environment │
+│                    SETUP (optional)                      │
 │                                                          │
 │  /start:constitution ► Create project governance rules   │
-│                        (optional, auto-enforced in BUILD)│
+│                        (auto-enforced in BUILD workflow) │
 └──────────────────────────────────────────────────────────┘
                             │
                             ▼
@@ -223,8 +233,7 @@ Four parallel specialists review your code:
 ```
 What do you need to do?
 │
-├─ First time setup? ─────────────────────► /start:init
-│   └─ Want project-wide guardrails? ─────► Then: /start:constitution
+├─ Want project-wide guardrails? ─────────► /start:constitution
 │
 ├─ Build something new? ──────────────────► /start:specify
 │                                           Then: /start:validate → /start:implement
@@ -245,7 +254,6 @@ What do you need to do?
 
 | Command | Purpose | When to Use |
 |---------|---------|-------------|
-| `/start:init` | Setup environment | First-time configuration |
 | `/start:constitution` | Create governance rules | Establish project-wide guardrails |
 | `/start:specify` | Create specifications | New features, complex changes |
 | `/start:implement` | Execute plans | After spec is validated |

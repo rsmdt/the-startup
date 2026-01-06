@@ -10,7 +10,7 @@ The `start` plugin provides ten workflow commands, eighteen autonomous skills, a
 
 ## Table of Contents
 
-- [Commands](#commands) — specify, implement, validate, review, document, analyze, refactor, debug, constitution, init
+- [Commands](#commands) — specify, implement, validate, review, document, analyze, refactor, debug, constitution
 - [Autonomous Skills](#autonomous-skills) — 18 context-activated skills
 - [Documentation Structure](#-documentation-structure) — specs, domain, patterns, interfaces
 - [Output Styles](#-output-styles) — The Startup, The ScaleUp
@@ -487,25 +487,26 @@ flowchart TD
 
 ---
 
-### `/start:init`
+### Installation
 
-Initialize The Agentic Startup framework in your Claude Code environment with interactive setup.
+Install The Agentic Startup framework using the one-line installer:
 
-**Purpose:** Configure git-aware statusline for real-time command tracking
-
-**Usage:**
 ```bash
-/start:init
+curl -fsSL https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh | sh
 ```
 
-<details>
-<summary><strong>View Details</strong></summary>
+**What it does:**
+- Adds the `rsmdt/the-startup` marketplace
+- Installs `team@the-startup` and `start@the-startup` plugins
+- Configures `start:The Startup` as the default output style
+- Optionally installs the git-aware statusline
 
-Configures git-aware statusline with real-time command tracking. Interactive setup asks for preferences and confirms each change before applying. Safe to run multiple times.
+**Flags:**
+- `--yes` - Skip all confirmation prompts
+- `--no-statusline` - Skip statusline installation
+- `--help` - Show usage information
 
-**Note:** Output styles are available immediately via `/output-style` - no initialization required.
-
-</details>
+**Note:** Output styles are available immediately via `/output-style` - no additional setup required.
 
 ---
 
@@ -879,16 +880,14 @@ The ScaleUp provides contextual explanations as it works:
 
 ## Typical Development Workflow
 
-### Setup (One-Time Per Project)
+### Setup (Optional)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                             PROJECT SETUP                                    │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
-│   /start:init ────────────► Configure statusline & environment              │
-│                                                                              │
-│   /start:constitution ────► Create project governance rules (optional)      │
+│   /start:constitution ────► Create project governance rules                 │
 │        │                    L1/L2/L3 rules auto-enforced in BUILD flow      │
 │        │                    CONSTITUTION.md at project root                  │
 │                                                                              │
