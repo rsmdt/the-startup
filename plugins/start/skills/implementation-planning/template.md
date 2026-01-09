@@ -70,46 +70,71 @@ If implementation cannot follow specification exactly:
 
 ## Implementation Phases
 
-[NEEDS CLARIFICATION: Define implementation phases. Each phase is a logical unit of work following TDD principles.]
+Each task follows red-green-refactor: **Prime** (understand context), **Test** (red), **Implement** (green), **Validate** (refactor + verify).
 
-- [ ] T1 Phase 1 [What functionality this phase delivers]
+> **Tracking Principle**: Track logical units that produce verifiable outcomes. The TDD cycle is the method, not separate tracked items.
 
-    - [ ] T1.1 Prime Context [What detailed sections are relevant for this phase from the specification]
-        - [ ] T1.1.1 [Read interface contracts] `[ref: file; lines: 1-10]`
-    - [ ] T1.2 Write Tests [What behavior needs to be tested]
-        - [ ] T1.2.1 [Specific test case to verify specific behaviour] `[ref: file; lines: 123]` `[activity: type]`
-    - [ ] T1.3 Implement [What needs to be built to pass tests]
-        - [ ] T1.3.1 [Key implementation details or steps if complex] `[activity: type]`
-    - [ ] T1.4 Implement [Additional implementation if needed] `[activity: type]`
-    - [ ] T1.5 Validate [Verify that implementation is according to quality gates]
-        - [ ] T1.5.1 [Review code so it is according to the defined quality gates] `[activity: lint-code, format-code, review-code, more]`
-        - [ ] T1.5.2 [Validate code by running automated test and check commands] `[activity: run-tests, more]`
-        - [ ] T1.5.3 [Ensure specification compliance] `[activity: business-acceptance, more]`
+---
 
-- [ ] T2 Phase 2 [What functionality this phase delivers]
+### Phase 1: [What functionality this phase delivers]
 
-    - [ ] T2.1 [Sub-phase/Component A] `[parallel: true]` `[component: name]`
-        - [ ] T2.1.1 Prime Context [What detailed sections are relevant for this phase from the specification]
-        - [ ] T2.1.2 Write Tests [What behavior needs to be tested]
-        - [ ] T2.1.3 Implement [What needs to be built to pass tests]
-        - [ ] T2.1.4 Validate [Verify that implementation is according to quality gates]
+[NEEDS CLARIFICATION: Define tasks that each produce a verifiable outcome]
 
-    - [ ] T2.2 [Sub-phase/Component B] `[parallel: true]` `[component: name]`
-        - [ ] T2.2.1 Prime Context [What detailed sections are relevant for this phase from the specification]
-        - [ ] T2.2.2 Write Tests [What behavior needs to be tested]
-        - [ ] T2.2.3 Implement [What needs to be built to pass tests]
-        - [ ] T2.2.4 Validate [Verify that implementation is according to quality gates]
+- [ ] **T1.1 [Logical work unit name]** `[activity: type]`
 
-- [ ] T3 Integration & End-to-End Validation
+  **Prime**: [What specification sections to read] `[ref: SDD/Section; lines: X-Y]`
 
-    - [ ] T3.1 [All unit tests passing per component if multi-component]
-    - [ ] T3.2 [Integration tests for component interactions]
-    - [ ] T3.3 [End-to-end tests for complete user flows]
-    - [ ] T3.4 [Performance tests meet requirements] `[ref: SDD/Section 10 "Quality Requirements"]`
-    - [ ] T3.5 [Security validation passes] `[ref: SDD/Section 10 "Security Requirements"]`
-    - [ ] T3.6 [Acceptance criteria verified against PRD] `[ref: PRD acceptance criteria sections]`
-    - [ ] T3.7 [Test coverage meets standards]
-    - [ ] T3.8 [Documentation updated for any API/interface changes]
-    - [ ] T3.9 [Build and deployment verification]
-    - [ ] T3.10 [All PRD requirements implemented]
-    - [ ] T3.11 [Implementation follows SDD design]
+  **Test**: [Key behaviors to verify - list scenarios, not individual test files]
+
+  **Implement**: [What to build - key files/components to create or modify]
+
+  **Validate**: Run tests, lint, typecheck; verify against specification
+
+- [ ] **T1.2 [Next logical work unit]** `[activity: type]`
+
+  **Prime**: [Context needed]
+
+  **Test**: [Key behaviors]
+
+  **Implement**: [What to build]
+
+  **Validate**: Run tests, lint, typecheck
+
+---
+
+### Phase 2: [What functionality this phase delivers]
+
+[NEEDS CLARIFICATION: For phases with parallel work, each parallel unit is a tracked item]
+
+- [ ] **T2.1 [Component/Area A]** `[parallel: true]` `[component: name]`
+
+  **Prime**: [Context] `[ref: ...]`
+
+  **Test**: [Behaviors to verify]
+
+  **Implement**: [Files to create/modify]
+
+  **Validate**: Component tests pass
+
+- [ ] **T2.2 [Component/Area B]** `[parallel: true]` `[component: name]`
+
+  **Prime**: [Context]
+
+  **Test**: [Behaviors]
+
+  **Implement**: [Files]
+
+  **Validate**: Component tests pass
+
+- [ ] **T2.3 Phase Validation** `[activity: validate]`
+
+  Run all phase tests, linting, type checking. Verify components integrate correctly.
+
+---
+
+### Phase 3: Integration & Validation
+
+- [ ] **T3.1 Integration Testing** - Cross-component integration tests pass `[ref: SDD/integration points]`
+- [ ] **T3.2 E2E Testing** - End-to-end user flows verified `[ref: PRD/acceptance criteria]`
+- [ ] **T3.3 Quality Gates** - Performance, security, coverage requirements met `[ref: SDD/Quality Requirements]`
+- [ ] **T3.4 Specification Compliance** - All PRD/SDD requirements verified, documentation updated

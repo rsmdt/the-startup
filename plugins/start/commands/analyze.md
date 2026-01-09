@@ -62,7 +62,24 @@ SUCCESS: All patterns/rules in focus area discovered and documented
 
 ### Phase 3: Analysis Summary
 
-- Present final report with all findings
+```
+## Analysis: [area]
+
+### Discoveries
+
+**[Category]**
+- [pattern/rule name] - [description]
+  - Evidence: [file:line references]
+
+### Documentation
+
+- [docs/path/file.md] - [what was documented]
+
+### Open Questions
+
+- [unresolved items for future investigation]
+```
+
 - Offer documentation options: Save to docs/, Skip, or Export as markdown
 
 ## Important Notes

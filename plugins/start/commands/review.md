@@ -50,10 +50,26 @@ SUCCESS: All concerns in focus area identified with actionable fixes
 
 - Deduplicate overlapping findings
 - Rank by severity (Critical > High > Medium > Low) and confidence
-- Present unified report with:
-  - Overall assessment: APPROVE / APPROVE WITH COMMENTS / REQUEST CHANGES
-  - Findings grouped by priority with file:line locations
-  - Positive observations
+
+```
+## Code Review: [target]
+
+**Verdict**: [APPROVE / APPROVE WITH COMMENTS / REQUEST CHANGES]
+
+### Findings
+
+**[Severity]**
+- [file:line] - [issue description]
+  → [recommendation]
+
+### Strengths
+
+- [positive observation with code reference]
+
+### Summary
+
+[Overall assessment and key takeaways]
+```
 
 ### Phase 4: Next Steps
 

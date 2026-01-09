@@ -38,26 +38,56 @@ When working on a PLAN, focus on:
 - Resource assignments
 - Actual implementation code
 
+## Task Granularity Principle
+
+**Track logical units that produce verifiable outcomes.** The TDD cycle is the execution method, not separate tracked items.
+
+### Good Tracking Units (produces outcome)
+- "Payment Entity" → Produces: working entity with tests ✓
+- "Stripe Adapter" → Produces: working integration with tests ✓
+- "Payment Form Component" → Produces: working UI with tests ✓
+
+### Bad Tracking Units (too granular)
+- "Read payment interface contracts" → Preparation, not deliverable
+- "Test Payment.validate() rejects negative amounts" → Part of larger outcome
+- "Run linting" → Validation step, not deliverable
+
+### Structure Pattern
+
+```markdown
+- [ ] **T1.1 Payment Entity** `[activity: domain-modeling]`
+
+  **Prime**: Read payment interface contracts `[ref: SDD/Section 4.2; lines: 145-200]`
+
+  **Test**: Entity validation rejects negative amounts; supports currency conversion; handles refunds
+
+  **Implement**: Create `src/domain/Payment.ts` with validation logic
+
+  **Validate**: Run unit tests, lint, typecheck
+```
+
+The checkbox tracks "Payment Entity" as a unit. Prime/Test/Implement/Validate are embedded guidance.
+
 ## TDD Phase Structure
 
-Every implementation phase follows this pattern:
+Every task follows red-green-refactor within this pattern:
 
 ### 1. Prime Context
 - Read relevant specification sections
 - Understand interfaces and contracts
 - Load patterns and examples
 
-### 2. Write Tests
+### 2. Write Tests (Red)
 - Test behavior before implementation
 - Reference PRD acceptance criteria
 - Cover happy path and edge cases
 
-### 3. Implement
+### 3. Implement (Green)
 - Build to pass tests
 - Follow SDD architecture
 - Use discovered patterns
 
-### 4. Validate
+### 4. Validate (Refactor)
 - Run automated tests
 - Check code quality (lint, format)
 - Verify specification compliance
@@ -112,14 +142,15 @@ For each phase requiring definition, follow this iterative process:
 
 ## Specification Compliance
 
-Every phase should include compliance gates:
+Every phase should include a validation task:
 
 ```markdown
-- [ ] T1.5 Validate
-    - [ ] T1.5.1 Review code against SDD patterns `[activity: review-code]`
-    - [ ] T1.5.2 Run automated tests `[activity: run-tests]`
-    - [ ] T1.5.3 Verify PRD acceptance criteria `[activity: business-acceptance]`
+- [ ] **T1.3 Phase Validation** `[activity: validate]`
+
+  Run all phase tests, linting, type checking. Verify against SDD patterns and PRD acceptance criteria.
 ```
+
+For complex phases, validation is embedded in each task's **Validate** step.
 
 ### Deviation Protocol
 

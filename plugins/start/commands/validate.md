@@ -64,10 +64,21 @@ Determine what to validate from $ARGUMENTS:
 
 ### Phase 4: Report Findings
 
-Present findings with:
-- Overall assessment (Excellent / Good / Needs Attention / Critical)
-- Specific issues with file:line locations
-- Actionable recommendations for each finding
+```
+## Validation: [target]
+
+**Assessment**: [Excellent / Good / Needs Attention / Critical]
+
+### Findings
+
+**[Category]**
+- [file:line] - [issue description]
+  → [recommendation]
+
+### Summary
+
+[What was validated and key conclusions]
+```
 
 ## Important Notes
 

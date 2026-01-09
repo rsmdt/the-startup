@@ -71,7 +71,25 @@ SUCCESS: All issues in focus area identified with safe refactoring steps
 
 - Run complete test suite
 - Compare behavior with baseline
-- Present before/after metrics: Lines of Code, Cyclomatic Complexity, Functions >20 lines, Duplicate Code Blocks
+
+```
+## Refactoring: [target]
+
+**Status**: [Complete / Partial - reason]
+
+### Changes
+
+- [file:line] - [what was changed and why]
+
+### Verification
+
+- Tests: [passing / failing with details]
+- Behavior: [preserved / changed - explanation if changed]
+
+### Summary
+
+[What was improved and any follow-up recommendations]
+```
 
 ## Mandatory Constraints
 

@@ -1,101 +1,154 @@
 # Implementation Phase Examples
 
-Reference examples for structuring implementation phases.
+Reference examples for structuring implementation phases with grouped task tracking.
 
-## Example: Complete Phase Structure
+## Core Principle
+
+**Track logical units that produce verifiable outcomes.** Each checkbox represents a deliverable, not a step in the process. The TDD cycle (Prime → Test → Implement → Validate) is embedded guidance within each task.
+
+---
+
+## Example: Foundation Phase
 
 ```markdown
-- [ ] T1 Phase 1: Payment Domain Foundation
+### Phase 1: Payment Domain Foundation
 
-    - [ ] T1.1 Prime Context
-        - [ ] T1.1.1 Read payment interface contracts `[ref: SDD/Section 4.2; lines: 145-200]`
-        - [ ] T1.1.2 Review existing repository patterns `[ref: docs/patterns/repository-pattern.md]`
-        - [ ] T1.1.3 Load database schema design `[ref: SDD/Section 4.3]`
+Establishes core domain entities, repository patterns, and database schema.
 
-    - [ ] T1.2 Write Tests
-        - [ ] T1.2.1 Unit tests for Payment entity validation `[ref: PRD/Section 4.1 - acceptance criteria]` `[activity: write-unit-tests]`
-        - [ ] T1.2.2 Unit tests for PaymentRepository CRUD operations `[activity: write-unit-tests]`
-        - [ ] T1.2.3 Integration tests for database persistence `[activity: write-integration-tests]`
+- [ ] **T1.1 Payment Entity** `[activity: domain-modeling]`
 
-    - [ ] T1.3 Implement
-        - [ ] T1.3.1 Create Payment entity with validation logic `[activity: domain-modeling]`
-        - [ ] T1.3.2 Create PaymentRepository with PostgreSQL adapter `[activity: data-architecture]`
-        - [ ] T1.3.3 Create database migration for payments table `[activity: data-architecture]`
+  **Prime**: Read payment interface contracts and validation rules `[ref: SDD/Section 4.2; lines: 145-200]`
 
-    - [ ] T1.4 Validate
-        - [ ] T1.4.1 Run unit tests and verify all pass `[activity: run-tests]`
-        - [ ] T1.4.2 Run linter and fix any issues `[activity: lint-code]`
-        - [ ] T1.4.3 Verify entity matches SDD data model `[activity: review-code]`
+  **Test**: Entity validation rejects negative amounts; supports multiple currencies; calculates fees correctly; handles partial refunds
+
+  **Implement**: Create `src/domain/Payment.ts` with Amount value object and validation logic
+
+  **Validate**: Run unit tests, lint, typecheck
+
+- [ ] **T1.2 Payment Repository** `[activity: data-architecture]`
+
+  **Prime**: Review existing repository patterns and database schema `[ref: docs/patterns/repository-pattern.md]` `[ref: SDD/Section 4.3]`
+
+  **Test**: CRUD operations work correctly; queries filter by status and date range; handles concurrent updates
+
+  **Implement**: Create `src/repositories/PaymentRepository.ts` with PostgreSQL adapter; create migration for payments table
+
+  **Validate**: Run integration tests against test database
+
+- [ ] **T1.3 Phase Validation** `[activity: validate]`
+
+  Run all unit and integration tests. Verify entity matches SDD data model. Lint and typecheck pass.
 ```
+
+**Task count**: 3 tracked items (vs ~12 with granular tracking)
+
+---
 
 ## Example: Parallel Tasks
 
 ```markdown
-- [ ] T2 Phase 2: API and Integration Layer
+### Phase 2: API and Integration Layer
 
-    - [ ] T2.1 API Development `[parallel: true]` `[component: backend]`
-        - [ ] T2.1.1 Prime: Read API specification `[ref: SDD/Section 4.4]`
-        - [ ] T2.1.2 Test: Controller endpoint tests `[activity: write-unit-tests]`
-        - [ ] T2.1.3 Implement: PaymentController with routes `[activity: api-development]`
-        - [ ] T2.1.4 Validate: API contract matches specification `[activity: review-code]`
+API endpoints and external service integration. These can be developed in parallel.
 
-    - [ ] T2.2 Stripe Integration `[parallel: true]` `[component: backend]`
-        - [ ] T2.2.1 Prime: Read Stripe integration pattern `[ref: docs/interfaces/stripe-payment-integration.md]`
-        - [ ] T2.2.2 Test: Mock Stripe client tests `[activity: write-unit-tests]`
-        - [ ] T2.2.3 Implement: StripePaymentAdapter `[activity: backend-implementation]`
-        - [ ] T2.2.4 Validate: Integration tests with Stripe test mode `[activity: run-tests]`
+- [ ] **T2.1 Payment API Endpoints** `[parallel: true]` `[component: backend]`
+
+  **Prime**: Read API specification and authentication requirements `[ref: SDD/Section 4.4]`
+
+  **Test**: POST /payments creates payment and returns 201; GET /payments/:id returns payment or 404; validation errors return 422 with details
+
+  **Implement**: Create `src/controllers/PaymentController.ts` with create, get, list routes
+
+  **Validate**: API contract tests pass; authentication enforced
+
+- [ ] **T2.2 Stripe Integration** `[parallel: true]` `[component: backend]`
+
+  **Prime**: Read Stripe integration pattern and webhook handling `[ref: docs/interfaces/stripe-payment-integration.md]`
+
+  **Test**: Charges created with correct amount; webhook validates signature; handles declined cards gracefully
+
+  **Implement**: Create `src/adapters/StripePaymentAdapter.ts` with charge and refund methods
+
+  **Validate**: Integration tests pass with Stripe test mode
+
+- [ ] **T2.3 Phase Validation** `[activity: validate]`
+
+  Run all API and integration tests. Verify endpoints match OpenAPI spec. Lint and typecheck pass.
 ```
+
+**Task count**: 3 tracked items (vs ~10 with granular tracking)
+
+---
 
 ## Example: Multi-Component Feature
 
 ```markdown
-- [ ] T3 Phase 3: Frontend Integration
+### Phase 3: Frontend Integration
 
-    - [ ] T3.1 Payment Form Component `[component: frontend]`
-        - [ ] T3.1.1 Prime: Read UI specifications `[ref: SDD/Section 5.1]`
-        - [ ] T3.1.2 Test: Component render and interaction tests `[activity: write-component-tests]`
-        - [ ] T3.1.3 Implement: PaymentForm React component `[activity: component-development]`
-        - [ ] T3.1.4 Validate: Accessibility audit passes `[activity: accessibility-review]`
+UI components and state management for the payment flow.
 
-    - [ ] T3.2 State Management `[component: frontend]`
-        - [ ] T3.2.1 Prime: Read state management pattern `[ref: docs/patterns/state-management.md]`
-        - [ ] T3.2.2 Test: Reducer and selector tests `[activity: write-unit-tests]`
-        - [ ] T3.2.3 Implement: Payment slice with async thunks `[activity: component-development]`
-        - [ ] T3.2.4 Validate: State transitions match flow diagram `[activity: review-code]`
+- [ ] **T3.1 Payment Form Component** `[component: frontend]`
 
-    - [ ] T3.3 Integration Point `[depends: T3.1, T3.2]`
-        - [ ] T3.3.1 Wire PaymentForm to payment state
-        - [ ] T3.3.2 Connect to backend API
-        - [ ] T3.3.3 E2E test: Complete payment flow `[activity: write-e2e-tests]`
+  **Prime**: Read UI specifications and form validation rules `[ref: SDD/Section 5.1]`
+
+  **Test**: Form renders with all fields; validates card number format; submits on valid input; shows error states
+
+  **Implement**: Create `src/components/PaymentForm.tsx` with Stripe Elements integration
+
+  **Validate**: Component tests pass; accessibility audit passes
+
+- [ ] **T3.2 Payment State Management** `[component: frontend]`
+
+  **Prime**: Read state management pattern and async handling `[ref: docs/patterns/state-management.md]`
+
+  **Test**: Loading states during API calls; success state updates UI; error state shows message; retry logic works
+
+  **Implement**: Create `src/store/paymentSlice.ts` with async thunks for API calls
+
+  **Validate**: State transitions match flow diagram; reducer tests pass
+
+- [ ] **T3.3 Payment Flow Integration** `[depends: T3.1, T3.2]`
+
+  **Prime**: Review complete user journey from cart to confirmation
+
+  **Test**: E2E flow from form submission to confirmation page; handles payment failures; shows receipt
+
+  **Implement**: Wire PaymentForm to payment state; connect to backend API; add confirmation page
+
+  **Validate**: E2E test passes; manual QA of happy path and error cases
 ```
+
+**Task count**: 3 tracked items (vs ~12 with granular tracking)
+
+---
 
 ## Example: Final Validation Phase
 
 ```markdown
-- [ ] T4 Integration & End-to-End Validation
+### Phase 4: Integration & Validation
 
-    - [ ] T4.1 Cross-Component Testing
-        - [ ] T4.1.1 All backend unit tests pass
-        - [ ] T4.1.2 All frontend unit tests pass
-        - [ ] T4.1.3 Integration tests for API ↔ Database
-        - [ ] T4.1.4 Integration tests for Frontend ↔ API
+Full system validation with all components working together.
 
-    - [ ] T4.2 End-to-End Flows
-        - [ ] T4.2.1 E2E: Happy path payment completion `[ref: PRD/Section 3.1]`
-        - [ ] T4.2.2 E2E: Payment failure handling `[ref: PRD/Section 3.2]`
-        - [ ] T4.2.3 E2E: Payment history display `[ref: PRD/Section 3.3]`
+- [ ] **T4.1 Integration Testing** `[activity: integration-test]`
 
-    - [ ] T4.3 Quality Gates
-        - [ ] T4.3.1 Performance: API response < 200ms p95 `[ref: SDD/Section 10]`
-        - [ ] T4.3.2 Security: Input validation verified `[ref: SDD/Section 8]`
-        - [ ] T4.3.3 Coverage: > 80% line coverage
+  Verify cross-component integration: API ↔ Database, Frontend ↔ API, Payment ↔ Stripe
 
-    - [ ] T4.4 Final Acceptance
-        - [ ] T4.4.1 All PRD acceptance criteria verified `[ref: PRD/Section 4]`
-        - [ ] T4.4.2 Implementation follows SDD design `[ref: SDD/Section 5]`
-        - [ ] T4.4.3 Documentation updated for API changes
-        - [ ] T4.4.4 Build and deployment verification
+- [ ] **T4.2 E2E User Flows** `[activity: e2e-test]`
+
+  Verify complete user journeys: happy path payment `[ref: PRD/Section 3.1]`; payment failure handling `[ref: PRD/Section 3.2]`; payment history display `[ref: PRD/Section 3.3]`
+
+- [ ] **T4.3 Quality Gates** `[activity: validate]`
+
+  Performance: API response < 200ms p95 `[ref: SDD/Section 10]`; Security: input validation verified; Coverage: > 80% line coverage
+
+- [ ] **T4.4 Specification Compliance** `[activity: business-acceptance]`
+
+  All PRD acceptance criteria verified `[ref: PRD/Section 4]`; implementation follows SDD design; documentation updated for API changes
 ```
+
+**Task count**: 4 tracked items (vs ~15 with granular tracking)
+
+---
 
 ## Activity Type Reference
 
@@ -107,26 +160,58 @@ Common activity types for specialist selection:
 | `data-architecture` | Database schema, migrations, queries |
 | `api-development` | REST/GraphQL endpoint implementation |
 | `component-development` | UI component implementation |
-| `write-unit-tests` | Unit test creation |
-| `write-integration-tests` | Integration test creation |
-| `write-e2e-tests` | End-to-end test creation |
-| `write-component-tests` | UI component tests |
-| `run-tests` | Test execution and verification |
-| `lint-code` | Code linting and style fixes |
-| `format-code` | Code formatting |
-| `review-code` | Code review and quality check |
-| `accessibility-review` | A11y compliance check |
-| `security-review` | Security assessment |
 | `backend-implementation` | General backend code |
 | `frontend-implementation` | General frontend code |
+| `integration-test` | Cross-component integration testing |
+| `e2e-test` | End-to-end user flow testing |
+| `validate` | Quality gates and compliance checks |
 | `business-acceptance` | PRD criteria verification |
+
+---
 
 ## What Makes Good Implementation Plans
 
-1. **Clear Task Boundaries** - Each task is completable independently
-2. **Specification Links** - Every task traces to PRD/SDD
-3. **TDD Structure** - Test → Implement → Validate
+1. **Logical Unit Tracking** - Each checkbox produces a verifiable outcome
+2. **Embedded TDD Guidance** - Prime/Test/Implement/Validate as text, not checkboxes
+3. **Specification Links** - Every task traces to PRD/SDD
 4. **Parallel Opportunities** - Independent work clearly marked
 5. **No Time Estimates** - Focus on sequence, not duration
 6. **Activity Hints** - Guide specialist selection
-7. **Final Validation** - Comprehensive quality gates
+7. **Phase Validation** - Quality gates at phase boundaries
+
+## Comparison: Before and After
+
+**Before (granular - 9 tracked items):**
+```markdown
+- [ ] T1.1 Prime Context
+    - [ ] T1.1.1 Read payment interface contracts
+    - [ ] T1.1.2 Review repository patterns
+- [ ] T1.2 Write Tests
+    - [ ] T1.2.1 Unit tests for Payment entity
+    - [ ] T1.2.2 Unit tests for PaymentRepository
+- [ ] T1.3 Implement
+    - [ ] T1.3.1 Create Payment entity
+    - [ ] T1.3.2 Create PaymentRepository
+- [ ] T1.4 Validate
+    - [ ] T1.4.1 Run tests
+```
+
+**After (grouped - 3 tracked items):**
+```markdown
+- [ ] **T1.1 Payment Entity** `[activity: domain-modeling]`
+  **Prime**: Read payment contracts `[ref: SDD/Section 4.2]`
+  **Test**: Validation rules, currency support, fee calculation
+  **Implement**: Create `src/domain/Payment.ts`
+  **Validate**: Unit tests, lint, typecheck
+
+- [ ] **T1.2 Payment Repository** `[activity: data-architecture]`
+  **Prime**: Review repository patterns `[ref: docs/patterns/repository-pattern.md]`
+  **Test**: CRUD operations, query filters, concurrency
+  **Implement**: Create repository and migration
+  **Validate**: Integration tests
+
+- [ ] **T1.3 Phase Validation** `[activity: validate]`
+  Run all tests, verify against SDD, lint and typecheck pass
+```
+
+Same detail, 67% fewer TodoWrite operations.
