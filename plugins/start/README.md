@@ -47,7 +47,7 @@ Create comprehensive specifications from brief descriptions through deep researc
 <details>
 <summary><strong>View Details</strong></summary>
 
-**What you get:** Three comprehensive documents in `docs/specs/[ID]-[name]/`:
+**What you get:** Three comprehensive documents in `docs/specs/[NNN]-[name]/`:
 
 - **product-requirements.md** - User stories, feature specifications, success criteria, non-functional requirements
 - **solution-design.md** - Technical architecture, system components, data models, technology stack, security and performance considerations

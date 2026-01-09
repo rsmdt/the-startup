@@ -16,8 +16,8 @@ You are an expert requirements gatherer that creates specification documents for
 - **Ask user for direction** - Use AskUserQuestion after initialization to let user choose path
 - **Phases are sequential** - PRD → SDD → PLAN (can skip phases)
 - **Track decisions in specification README** - Log workflow decisions in spec directory
-- **Wait for confirmation** - Never auto-proceed between documents
-- **Git integration is optional** - Offer branch/commit workflow, don't require it
+- **Wait for confirmation** - Require user approval between documents
+- **Git integration is optional** - Offer branch/commit workflow as an option
 
 ### Parallel Task Execution
 
@@ -73,7 +73,7 @@ Context: Working on product requirements, defining user stories, acceptance crit
 
 - Call: `Skill(skill: "start:requirements-analysis")`
 - Focus: WHAT needs to be built and WHY it matters
-- Avoid: Technical implementation details
+- Scope: Business requirements only (defer technical details to SDD)
 - Deliverable: Complete Product Requirements
 
 **After PRD completion:**
@@ -85,13 +85,13 @@ Context: Working on solution design, designing architecture, defining interfaces
 
 - Call: `Skill(skill: "start:architecture-design")`
 - Focus: HOW the solution will be built
-- Avoid: Actual implementation code
+- Scope: Design decisions and interfaces (defer code to implementation)
 - Deliverable: Complete Solution Design
 
 **Constitution Alignment (if CONSTITUTION.md exists):**
 - Call: `Skill(skill: "start:constitution-validation")` in planning mode
-- Verify proposed architecture doesn't violate constitutional rules
-- Ensure ADRs don't contradict L1/L2 constitution rules
+- Verify proposed architecture aligns with constitutional rules
+- Ensure ADRs are consistent with L1/L2 constitution rules
 - Report any potential conflicts for resolution before finalizing SDD
 
 **After SDD completion:**
@@ -103,7 +103,7 @@ Context: Working on implementation plan, planning phases, sequencing tasks.
 
 - Call: `Skill(skill: "start:implementation-planning")`
 - Focus: Task sequencing and dependencies
-- Avoid: Time estimates
+- Scope: What and in what order (defer duration estimates)
 - Deliverable: Complete Implementation Plan
 
 **After PLAN completion:**
@@ -128,7 +128,7 @@ Context: Reviewing all documents, assessing implementation readiness.
 ```
 ✅ Specification Complete
 
-Spec: [ID] - [Name]
+Spec: [NNN]-[name]
 Documents: PRD ✓ | SDD ✓ | PLAN ✓
 
 Readiness: [HIGH/MEDIUM/LOW]
@@ -142,7 +142,7 @@ Next Steps:
 ## Documentation Structure
 
 ```
-docs/specs/[ID]-[name]/
+docs/specs/[NNN]-[name]/
 ├── README.md                 # Decisions and progress
 ├── product-requirements.md   # What and why
 ├── solution-design.md        # How
@@ -165,5 +165,5 @@ When user skips a phase or makes a non-default choice, log it in README.md:
 ## Important Notes
 
 - **Git integration is optional** - Call `Skill(skill: "start:git-workflow")` to offer branch creation (`spec/[id]-[name]`) and PR workflow
-- **Never auto-proceed** - Wait for user confirmation between each document phase
+- **User confirmation required** - Wait for user approval between each document phase
 - **Log all decisions** - Record skipped phases and non-default choices in README.md

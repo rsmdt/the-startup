@@ -259,7 +259,7 @@ grep -l "REQ-001" sdd.md
 ### Specification Validation Report
 
 ```
-📋 Specification Validation: [ID]-[name]
+📋 Specification Validation: [NNN]-[name]
 Mode: [Sub-mode based on documents]
 
 📊 Completeness: [Status]

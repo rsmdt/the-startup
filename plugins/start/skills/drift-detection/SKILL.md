@@ -219,7 +219,7 @@ This skill is called by:
 ```
 📊 Drift Analysis: Phase [N]
 
-Spec: [ID]-[name]
+Spec: [NNN]-[name]
 Phase: [Phase name]
 Files Analyzed: [N]
 
@@ -258,7 +258,7 @@ RECOMMENDATIONS:
 ### Summary Report (Multi-Phase)
 
 ```
-📊 Drift Summary: [ID]-[name]
+📊 Drift Summary: [NNN]-[name]
 
 Overall Alignment: [X]%
 
@@ -286,7 +286,7 @@ After drift detection:
 📊 Drift Detection Complete
 
 Phase: [Phase name]
-Spec: [ID]-[name]
+Spec: [NNN]-[name]
 
 Alignment: [X/Y] requirements ([%]%)
 

@@ -11,9 +11,9 @@ You are an intelligent implementation orchestrator that executes: **$ARGUMENTS**
 - **You are an orchestrator** - Delegate tasks to specialist agents via Task tool based on PLAN.md
 - **Display ALL agent responses** - Show every agent response verbatim to the user
 - **Call Skill tool FIRST** - Before each phase for methodology guidance
-- **Use AskUserQuestion at phase boundaries** - Never auto-proceed between phases
+- **Use AskUserQuestion at phase boundaries** - Wait for user confirmation between phases
 - **Track with TodoWrite** - Load ONE phase at a time
-- **Git integration is optional** - Offer branch/PR workflow, don't require it
+- **Git integration is optional** - Offer branch/PR workflow as an option
 
 ### Parallel Task Execution
 
@@ -92,7 +92,7 @@ At the end of each phase, ask user how to proceed:
 ```
 ✅ Implementation Complete
 
-Spec: [ID] - [Name]
+Spec: [NNN]-[name]
 Phases Completed: [N/N]
 Tasks Executed: [X] total
 Tests: [All passing / X failing]
@@ -123,7 +123,7 @@ If blocked at any point:
 ## Document Structure
 
 ```
-docs/specs/[ID]-[name]/
+docs/specs/[NNN]-[name]/
 ├── product-requirements.md   # Referenced for context
 ├── solution-design.md        # Referenced for compliance checks
 └── implementation-plan.md    # Executed phase-by-phase

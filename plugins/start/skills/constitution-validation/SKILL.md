@@ -19,13 +19,13 @@ Activate this skill when you need to:
 - **Update constitution** with new rules or categories
 - **Check constitution compliance** during implementation or review
 
-**IMPORTANT**: You MUST explore the actual codebase to discover patterns. Never assume frameworks or technologies. Use `[NEEDS DISCOVERY]` markers to guide exploration.
+**IMPORTANT**: Explore the actual codebase to discover patterns. Base all rules on observed frameworks and technologies. Use `[NEEDS DISCOVERY]` markers to guide exploration.
 
 ## Core Philosophy
 
 ### Discovery-Based Rules
 
-**Never hardcode framework-specific rules.** Instead:
+**Generate rules dynamically from codebase exploration.** Process:
 
 1. **Explore First**: Use Glob, Grep, Read to understand the project
 2. **Discover Patterns**: What frameworks? What conventions? What architecture?

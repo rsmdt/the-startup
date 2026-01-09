@@ -27,13 +27,13 @@ Activate this skill when you need to:
 
 ### The Four Commandments
 
-1. **Conversational, not procedural** - This isn't a checklist. It's a dialogue. Let the user guide where to look next.
+1. **Conversational, not procedural** - This is a dialogue, not a checklist. Let the user guide where to look next.
 
-2. **Observable only** - Never say "this is probably..." unless you checked. Say "I looked at X and found Y."
+2. **Observable only** - State only what you verified. Say "I looked at X and found Y."
 
-3. **Progressive disclosure** - Start brief. Expand on request. Don't dump information.
+3. **Progressive disclosure** - Start brief. Expand on request. Reveal detail incrementally.
 
-4. **User in control** - Propose, don't dictate. "Want me to...?" not "I will now..."
+4. **User in control** - Propose and let user decide. "Want me to...?" not "I will now..."
 
 ### Scientific Method for Debugging
 
@@ -65,7 +65,7 @@ Want me to dig deeper, or can you tell me more about when this started?"
 - "Does this happen every time, or only sometimes?"
 - "Did anything change recently - new code, dependencies, config?"
 
-**DO NOT** present a formal checklist.
+**Keep the interaction conversational.**
 
 ### Phase 2: Narrow It Down
 
@@ -211,11 +211,11 @@ Let me know if you want to add a test for this case.
 "I checked git log and found this file was last modified 2 days ago"
 ```
 
-❌ **DON'T fabricate reasoning**:
+**Require evidence for claims**:
 ```
-"I analyzed the code flow and determined..." (unless you actually traced it)
-"Based on my understanding of the architecture..." (unless you read it)
-"This appears to be..." (unless you have evidence)
+"I analyzed the code flow..." → Only if you actually traced it
+"Based on my understanding..." → Only if you read the architecture docs
+"This appears to be..." → Only if you have supporting evidence
 ```
 
 ### When You Haven't Checked Something
@@ -248,7 +248,7 @@ A few options:
 What sounds most useful?"
 ```
 
-Never pretend to know more than you do. Transparency builds trust.
+Be transparent about what you've verified. Honesty builds trust.
 
 ## Debugging Truths
 
@@ -281,7 +281,7 @@ Next: [Proposed action - awaiting user direction]
 - Start brief, expand on request
 - Report only observable actions
 - Let user guide direction
-- Propose, don't dictate
+- Propose and await user decision
 
 ### Hypothesis Tracking
 Use TodoWrite internally to track:

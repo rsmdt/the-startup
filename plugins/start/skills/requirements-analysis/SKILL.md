@@ -23,7 +23,7 @@ The PRD template is at [template.md](template.md). Use this structure exactly.
 
 **To write template to spec directory:**
 1. Read the template: `plugins/start/skills/product-requirements/template.md`
-2. Write to spec directory: `docs/specs/[ID]-[name]/product-requirements.md`
+2. Write to spec directory: `docs/specs/[NNN]-[name]/product-requirements.md`
 
 ## PRD Focus Areas
 
@@ -33,7 +33,7 @@ When working on a PRD, focus on:
 - **WHO** uses it (personas, journeys)
 - **WHEN** it succeeds (metrics, acceptance criteria)
 
-**Avoid:**
+**Keep in SDD (not PRD):**
 - Technical implementation details
 - Architecture decisions
 - Database schemas
@@ -57,7 +57,7 @@ For each section requiring clarification, follow this iterative process:
 - **Update the PRD** with research findings
 - **Replace [NEEDS CLARIFICATION] markers** with actual content
 - Focus only on current section being processed
-- Follow template structure exactly - never add or remove sections
+- Follow template structure exactly—preserve all sections as defined
 
 ### 3. Review Phase
 - **Present ALL agent findings** to user (complete responses, not summaries)

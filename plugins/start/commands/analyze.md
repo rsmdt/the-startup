@@ -86,5 +86,5 @@ SUCCESS: All patterns/rules in focus area discovered and documented
 
 - Each cycle builds on previous findings
 - Present conflicts or gaps for user resolution
-- Never proceed to next cycle without user confirmation
-- **Never auto-write documentation** - Always ask user first
+- Wait for user confirmation before proceeding to next cycle
+- **Confirm before writing documentation** - Always ask user first

@@ -58,7 +58,7 @@ Every spec directory should have a `README.md` tracking decisions and progress.
 **Create README.md** when a new spec is created:
 
 ```markdown
-# Specification: [ID]-[name]
+# Specification: [NNN]-[name]
 
 ## Status
 
@@ -150,8 +150,8 @@ Before completing any operation:
 After spec operations, report:
 
 ```
-📁 Specification: [ID]-[name]
-📍 Directory: docs/specs/[ID]-[name]/
+📁 Specification: [NNN]-[name]
+📍 Directory: docs/specs/[NNN]-[name]/
 📋 Current Phase: [Phase]
 
 Documents:

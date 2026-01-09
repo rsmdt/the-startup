@@ -93,12 +93,12 @@ SUCCESS: All issues in focus area identified with safe refactoring steps
 
 ## Mandatory Constraints
 
-**MUST NOT change:** External behavior, public API contracts, business logic results, side effect ordering
+**Preserved (immutable):** External behavior, public API contracts, business logic results, side effect ordering
 
 **CAN change:** Code structure, internal implementation, variable/function names, duplication removal, dependencies/versions
 
 ## Important Notes
 
-- **Never refactor without passing tests** - Run tests after EVERY change
-- **Behavior preservation is mandatory** - If you cannot verify, do not proceed
+- **Ensure tests pass before refactoring** - Run tests after EVERY change
+- **Behavior preservation is mandatory** - Verify behavior preservation before proceeding
 - **Document BEFORE execution** - If user wants documentation, create it before making changes

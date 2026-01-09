@@ -2,6 +2,7 @@
 
 ## Validation Checklist
 
+- [ ] All `[NEEDS CLARIFICATION: ...]` markers have been addressed
 - [ ] All specification file paths are correct and exist
 - [ ] Context priming section is complete
 - [ ] All implementation phases are defined
@@ -28,11 +29,11 @@
 
 ### Deviation Protocol
 
-If implementation cannot follow specification exactly:
-1. Document the deviation and reason
-2. Get approval before proceeding
-3. Update SDD if the deviation is an improvement
-4. Never deviate without documentation
+When implementation requires changes from the specification:
+1. Document the deviation with clear rationale
+2. Obtain approval before proceeding
+3. Update SDD when the deviation improves the design
+4. Record all deviations in this plan for traceability
 
 ## Metadata Reference
 
@@ -45,26 +46,39 @@ If implementation cannot follow specification exactly:
 
 ## Context Priming
 
-*GATE: You MUST fully read all files mentioned in this section before starting any implementation.*
+*GATE: Read all files in this section before starting any implementation.*
 
 **Specification**:
 
-[NEEDS CLARIFICATION: Replace file location with actual path and add/remove files accordingly]
-- `docs/specs/[ID]-[feature-name]/PRD.md` - Product Requirements (if exists)
-- `docs/specs/[ID]-[feature-name]/SDD.md` - Solution Design
+[NEEDS CLARIFICATION: Replace with actual paths from your spec directory]
+- `docs/specs/[NNN]-[name]/product-requirements.md` - Product Requirements
+- `docs/specs/[NNN]-[name]/solution-design.md` - Solution Design
 
 **Key Design Decisions**:
 
-[NEEDS CLARIFICATION: Extract critical decisions from the SDD]
-- [Critical decision 1]
-- [Critical decision 2]
+[NEEDS CLARIFICATION: Extract 2-5 critical decisions from the SDD that affect implementation]
+- **ADR-1**: [Decision name] - [One-line summary of what was decided and why]
+- **ADR-2**: [Decision name] - [One-line summary]
 
 **Implementation Context**:
 
-[NEEDS CLARIFICATION: Extract actionable information from specs]
-- Commands to run: [Project-specific commands from SDD for testing, building, etc.]
-- Patterns to follow: [Links to relevant pattern docs]
-- Interfaces to implement: [Links to interface specifications]
+[NEEDS CLARIFICATION: Update commands to match project setup]
+```bash
+# Testing
+npm test                    # Unit tests
+npm run test:integration    # Integration tests
+
+# Quality
+npm run lint               # Linting
+npm run typecheck          # Type checking
+
+# Full validation
+npm run validate           # All checks
+```
+
+Patterns: `[ref: docs/patterns/relevant-pattern.md]`
+
+Interfaces: `[ref: docs/interfaces/relevant-api.md]`
 
 ---
 
@@ -76,65 +90,112 @@ Each task follows red-green-refactor: **Prime** (understand context), **Test** (
 
 ---
 
-### Phase 1: [What functionality this phase delivers]
+### Phase 1: Core Foundation
 
-[NEEDS CLARIFICATION: Define tasks that each produce a verifiable outcome]
+[NEEDS CLARIFICATION: Describe what this phase delivers - "Establishes X capability" or "Enables Y functionality"]
 
-- [ ] **T1.1 [Logical work unit name]** `[activity: type]`
+Establishes the foundational [domain/infrastructure/components] required for subsequent phases.
 
-  **Prime**: [What specification sections to read] `[ref: SDD/Section; lines: X-Y]`
+- [ ] **T1.1 [Primary deliverable name]** `[activity: domain-modeling]`
 
-  **Test**: [Key behaviors to verify - list scenarios, not individual test files]
+  **Prime**: Read [entity/component] specification `[ref: SDD/Section X; lines: Y-Z]`
 
-  **Implement**: [What to build - key files/components to create or modify]
+  **Test**: [Behavior 1]; [Behavior 2]; [Edge case handling]
 
-  **Validate**: Run tests, lint, typecheck; verify against specification
+  **Implement**: Create `src/[path]/[File].ts` with [key capability]
 
-- [ ] **T1.2 [Next logical work unit]** `[activity: type]`
+  **Validate**: Unit tests pass; lint clean; types check
 
-  **Prime**: [Context needed]
+- [ ] **T1.2 [Secondary deliverable name]** `[activity: data-architecture]`
 
-  **Test**: [Key behaviors]
+  **Prime**: Review [pattern/interface] requirements `[ref: SDD/Section X]`
 
-  **Implement**: [What to build]
+  **Test**: [CRUD operations]; [Query patterns]; [Error handling]
 
-  **Validate**: Run tests, lint, typecheck
+  **Implement**: Create `src/[path]/[File].ts` with [key capability]
+
+  **Validate**: Integration tests pass; lint clean; types check
+
+- [ ] **T1.3 Phase Validation** `[activity: validate]`
+
+  Run all Phase 1 tests. Verify foundation matches SDD data models. Lint and typecheck pass.
 
 ---
 
-### Phase 2: [What functionality this phase delivers]
+### Phase 2: [API/Integration/UI] Layer
 
-[NEEDS CLARIFICATION: For phases with parallel work, each parallel unit is a tracked item]
+[NEEDS CLARIFICATION: Describe what this phase delivers. Mark parallel tasks for concurrent execution.]
 
-- [ ] **T2.1 [Component/Area A]** `[parallel: true]` `[component: name]`
+Builds the [API endpoints/integrations/UI components] that expose Phase 1 capabilities.
 
-  **Prime**: [Context] `[ref: ...]`
+- [ ] **T2.1 [Component A]** `[parallel: true]` `[component: backend]`
 
-  **Test**: [Behaviors to verify]
+  **Prime**: Read API specification `[ref: SDD/Section X]`
 
-  **Implement**: [Files to create/modify]
+  **Test**: [Endpoint behavior]; [Validation]; [Error responses]
 
-  **Validate**: Component tests pass
+  **Implement**: Create `src/[path]/[Controller].ts` with routes
 
-- [ ] **T2.2 [Component/Area B]** `[parallel: true]` `[component: name]`
+  **Validate**: API tests pass; contract matches specification
 
-  **Prime**: [Context]
+- [ ] **T2.2 [Component B]** `[parallel: true]` `[component: backend]`
 
-  **Test**: [Behaviors]
+  **Prime**: Read integration pattern `[ref: docs/interfaces/X.md]`
 
-  **Implement**: [Files]
+  **Test**: [Success flow]; [Failure handling]; [Retry logic]
 
-  **Validate**: Component tests pass
+  **Implement**: Create `src/[path]/[Adapter].ts` with integration
+
+  **Validate**: Integration tests pass with test/mock service
 
 - [ ] **T2.3 Phase Validation** `[activity: validate]`
 
-  Run all phase tests, linting, type checking. Verify components integrate correctly.
+  Run all Phase 2 tests. Verify API contracts match SDD. Lint and typecheck pass.
 
 ---
 
 ### Phase 3: Integration & Validation
 
-- [ ] **T3.1 Integration Testing** - Cross-component integration tests pass `[ref: SDD/integration points]`
-- [ ] **T3.2 E2E Testing** - End-to-end user flows verified `[ref: PRD/acceptance criteria]`
-- [ ] **T3.3 Quality Gates** - Performance, security, coverage requirements met `[ref: SDD/Quality Requirements]`
-- [ ] **T3.4 Specification Compliance** - All PRD/SDD requirements verified, documentation updated
+Full system validation ensuring all components work together correctly.
+
+- [ ] **T3.1 Integration Testing** `[activity: integration-test]`
+
+  Verify cross-component integration: [Component A] ↔ [Component B]; [Service] ↔ [Database]
+
+  `[ref: SDD/integration points]`
+
+- [ ] **T3.2 E2E User Flows** `[activity: e2e-test]`
+
+  Verify complete user journeys: [Happy path flow]; [Error handling flow]; [Edge case flow]
+
+  `[ref: PRD/acceptance criteria]`
+
+- [ ] **T3.3 Quality Gates** `[activity: validate]`
+
+  - Performance: [Specific metric] < [threshold] `[ref: SDD/Quality Requirements]`
+  - Security: [Specific check] verified
+  - Coverage: > [X]% line coverage
+
+- [ ] **T3.4 Specification Compliance** `[activity: business-acceptance]`
+
+  - All PRD acceptance criteria verified
+  - Implementation follows SDD design
+  - Documentation updated for API/interface changes
+  - Build and deployment verification complete
+
+---
+
+## Plan Verification
+
+Before this plan is ready for implementation, verify:
+
+| Criterion | Status |
+|-----------|--------|
+| A developer can follow this plan without additional clarification | ⬜ |
+| Every task produces a verifiable deliverable | ⬜ |
+| All PRD acceptance criteria map to specific tasks | ⬜ |
+| All SDD components have implementation tasks | ⬜ |
+| Dependencies are explicit with no circular references | ⬜ |
+| Parallel opportunities are marked with `[parallel: true]` | ⬜ |
+| Each task has specification references `[ref: ...]` | ⬜ |
+| Project commands in Context Priming are accurate | ⬜ |

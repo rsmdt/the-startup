@@ -24,7 +24,7 @@ Activate this skill when you need to:
 
 ## TodoWrite Phase Protocol
 
-**CRITICAL**: Never load all tasks at once - causes cognitive overload.
+**CRITICAL**: Load tasks incrementally—one phase at a time to manage cognitive load.
 
 ### Loading Protocol
 1. Load ONLY current phase tasks into TodoWrite

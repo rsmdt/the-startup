@@ -28,7 +28,7 @@ Every implementation must match the specification exactly. Deviations require ex
 ## Specification Document Hierarchy
 
 ```
-docs/specs/[ID]-[name]/
+docs/specs/[NNN]-[name]/
 ├── product-requirements.md   # WHAT and WHY (business requirements)
 ├── solution-design.md        # HOW (technical design, interfaces, patterns)
 └── implementation-plan.md    # WHEN (execution sequence, phases)

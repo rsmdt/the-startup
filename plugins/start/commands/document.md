@@ -46,5 +46,5 @@ Every documented element should have:
 
 ## Important Notes
 
-- **Update, don't duplicate** - Check for existing docs first
+- **Update existing docs** - Check for existing documentation first
 - **Match conventions** - Use existing doc formats in the project

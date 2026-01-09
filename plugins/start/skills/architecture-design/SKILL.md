@@ -17,7 +17,7 @@ Activate this skill when you need to:
 - **Design architecture** and document technical decisions
 - **Work on any `solution-design.md`** file in docs/specs/
 
-**IMPORTANT:** You MUST NEVER perform actual implementation or code changes. Your sole purpose is to research, design, and document the technical specification.
+**IMPORTANT:** Focus exclusively on research, design, and documentation. Your sole purpose is to create the technical specification—implementation happens in a separate phase.
 
 ## Template
 
@@ -25,7 +25,7 @@ The SDD template is at [template.md](template.md). Use this structure exactly.
 
 **To write template to spec directory:**
 1. Read the template: `plugins/start/skills/solution-design/template.md`
-2. Write to spec directory: `docs/specs/[ID]-[name]/solution-design.md`
+2. Write to spec directory: `docs/specs/[NNN]-[name]/solution-design.md`
 
 ## SDD Focus Areas
 
@@ -37,7 +37,7 @@ When working on an SDD, focus on:
 
 **Ensure alignment with:**
 - PRD requirements (every requirement should be addressable)
-- Existing codebase patterns (don't reinvent the wheel)
+- Existing codebase patterns (leverage what already works)
 - Constraints identified in the PRD
 
 ## Cycle Pattern
@@ -59,7 +59,7 @@ For each section requiring clarification, follow this iterative process:
 - **Update the SDD** with research findings
 - **Replace [NEEDS CLARIFICATION] markers** with actual content
 - Focus only on current section being processed
-- Follow template structure exactly - never add or remove sections
+- Follow template structure exactly—preserve all sections as defined
 
 ### 3. Review Phase
 - **Present ALL agent findings** to user (complete responses, not summaries)
@@ -139,7 +139,7 @@ Every significant decision needs user confirmation:
   - User confirmed: _Pending_
 ```
 
-**Never proceed with implementation-impacting decisions without user confirmation.**
+**Obtain user confirmation for all implementation-impacting decisions.**
 
 ## Output Format
 

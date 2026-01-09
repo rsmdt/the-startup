@@ -23,7 +23,7 @@ Activate this skill when you need to:
 
 ## Core Principle
 
-Analysis is iterative. Each cycle builds on previous findings. Never try to discover everything at once.
+Analysis is iterative. Each cycle builds on previous findings. Discover incrementally—one area per cycle.
 
 ## Analysis Cycle Pattern
 
@@ -130,8 +130,8 @@ FOCUS: [Specific discovery activity]
   - What rules to extract
 
 EXCLUDE: [Out of scope areas]
-  - Don't analyze [unrelated areas]
-  - Don't document yet (discovery only)
+  - [Unrelated areas]: out of scope
+  - Documentation: deferred to documentation phase
 
 CONTEXT: [Background for investigation]
   - Analysis area: [business/technical/etc.]
@@ -262,7 +262,7 @@ Always launch multiple agents for investigation.
 - External integrations → docs/interfaces/
 
 ### User Confirmation Required
-Never proceed to next cycle without user confirmation.
+Obtain user confirmation before proceeding to next cycle.
 
 ### Build on Prior Cycles
 Each cycle accumulates context from previous findings.

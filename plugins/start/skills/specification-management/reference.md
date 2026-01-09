@@ -4,7 +4,7 @@
 
 - **Format**: 3-digit zero-padded number (001, 002, ..., 999)
 - **Auto-incrementing**: Script scans existing directories to find next ID
-- **Directory naming**: `[ID]-[sanitized-feature-name]`
+- **Directory naming**: `[NNN]-[sanitized-feature-name]`
 - **Sanitization**: Lowercase, special chars → hyphens, trim leading/trailing hyphens
 
 ## Directory Structure

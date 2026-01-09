@@ -27,14 +27,14 @@ Activate this skill when you need to:
 
 ## Mandatory Constraints
 
-### What MUST NOT Change
+### Preserved Behaviors (Immutable)
 
 - All external behavior remains identical
 - All public APIs maintain same contracts
 - All business logic produces same results
 - All side effects occur in same order
 
-### What CAN Change
+### Allowed Changes
 
 - Code structure and organization
 - Internal implementation details
@@ -211,9 +211,9 @@ FOCUS: [Specific refactoring]
   - Run tests after change
 
 EXCLUDE: [Other code, unrelated improvements]
-  - Don't refactor beyond specified scope
-  - Don't add features
-  - Don't change behavior
+  - Stay within specified scope
+  - Preserve existing feature set
+  - Maintain identical behavior
 
 CONTEXT:
   - Baseline tests passing
@@ -237,7 +237,7 @@ TERMINATION: Refactoring complete OR tests fail
 
 ### If Tests Fail After Refactoring
 
-1. **Stop immediately** - Don't compound the problem
+1. **Stop immediately** - Preserve working state
 2. **Revert the change** - Restore working state
 3. **Investigate** - Why did behavior change?
 4. **Options**:
@@ -286,11 +286,11 @@ Next: [What happens next]
 
 ### Golden Rules
 
-1. **Tests first** - Never refactor without passing tests
+1. **Tests first** - Ensure tests pass before refactoring
 2. **One at a time** - Single refactoring per cycle
 3. **Test after each** - Verify immediately
-4. **Revert on failure** - Don't debug, just undo
-5. **No behavior changes** - Structure only
+4. **Revert on failure** - Undo immediately, debug separately
+5. **Structure only** - Preserve all behavior
 
 ### Stop Conditions
 

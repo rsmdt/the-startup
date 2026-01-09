@@ -19,9 +19,9 @@ Activate this skill when you need to:
 
 ### Git Safety
 
-- **Never force push** to main/master
-- **Never modify git config** without explicit request
-- **Always check repository status** before operations
+- **Preserve history** on main/master (no force push)
+- **Keep git config unchanged** unless explicitly requested
+- **Check repository status** before operations
 - **Create backups** before destructive operations
 
 ### Branch Naming Convention

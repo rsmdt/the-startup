@@ -306,8 +306,8 @@ When working on a spec-based implementation:
 ```markdown
 ## Specification Context
 
-Spec: [ID] - [Name]
-Location: docs/specs/[ID]-[name]/
+Spec: [NNN]-[name]
+Location: docs/specs/[NNN]-[name]/
 
 Progress vs Spec:
 - PRD: [Status]
