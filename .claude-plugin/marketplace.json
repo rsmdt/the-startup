@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Comprehensive agentic framework for Claude Code",
-    "version": "2.9.0",
+    "version": "2.10.0",
     "homepage": "https://github.com/rsmdt/the-startup"
   },
   "plugins": [
