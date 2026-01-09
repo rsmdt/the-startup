@@ -154,7 +154,7 @@ When an agent is invoked, Claude Code automatically loads the referenced skills 
 | | `error-recovery-patterns` | Consistent error patterns and recovery strategies |
 | | `documentation-information-extraction` | Interpret docs, READMEs, specs, and configs |
 | **Development** | `api-contract-design` | REST/GraphQL design, OpenAPI, versioning |
-| | `comprehensive-test-design` | Test pyramid, coverage targets, framework patterns |
+| | `testing` | Test pyramid, coverage targets, framework patterns |
 | | `entity-relationship-design` | Schema design, entity relationships, normalization |
 | | `technical-documentation-authoring` | ADRs, system docs, API docs, runbooks |
 | **Design** | `accessible-interface-design` | WCAG compliance, ARIA, keyboard navigation |
