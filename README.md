@@ -34,6 +34,7 @@
 - [🎯 Which Command Should I Use?](#-which-command-should-i-use)
 - [📦 Plugins](#-plugins)
 - [🎨 Output Styles](#-output-styles)
+- [📊 Statusline](#-statusline)
 - [🎯 Philosophy](#-philosophy)
 - [📚 Documentation](#-documentation)
 
@@ -57,7 +58,7 @@
 curl -fsSL https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh | sh
 ```
 
-This installs the core plugins, configures the default output style, and optionally sets up the git-aware statusline.
+This installs the core plugins, configures the default output style, and sets up the [statusline](#-statusline) with a customizable config file.
 
 <details>
 <summary><strong>Manual Installation</strong></summary>
@@ -380,6 +381,86 @@ The Start plugin includes two output styles that change how Claude communicates 
 | **Explanations** | Minimal—ships fast | Educational insights included |
 | **On failure** | "That didn't work. Moving on." | "Here's what failed and why..." |
 | **Closing thought** | "What did we deliver?" | "Can the team maintain this?" |
+
+---
+
+## 📊 Statusline
+
+The installer sets up a custom statusline that displays context usage, session cost, and other useful information directly in your Claude Code terminal.
+
+### What You See
+
+```
+📁 ~/C/p/project ⎇ main*  🤖 Opus 4.5 (The Startup)  🧠 ⣿⣿⡇⠀⠀ 50%  🕐 30m  💰 $1.50  ? for shortcuts
+```
+
+| Component | Description |
+|-----------|-------------|
+| 📁 `~/C/p/project` | Current directory (abbreviated) |
+| ⎇ `main*` | Git branch (* indicates uncommitted changes) |
+| 🤖 `Opus 4.5 (The Startup)` | Model and output style |
+| 🧠 `⣿⣿⡇⠀⠀ 50%` | Context window usage (color-coded) |
+| 🕐 `30m` | Session duration |
+| 💰 `$1.50` | Session cost (color-coded by plan) |
+
+### Color Thresholds
+
+Both context usage and cost display color-coded warnings:
+
+| Color | Context | Cost (Pro plan) |
+|-------|---------|-----------------|
+| 🟢 Green | < 70% | < $1.50 |
+| 🟡 Amber | 70-89% | $1.50 - $4.99 |
+| 🔴 Red | ≥ 90% | ≥ $5.00 |
+
+### Configuration
+
+The statusline reads from `~/.config/the-agentic-startup/statusline.toml`:
+
+```toml
+# Format string (customize what's displayed)
+format = "<path> <branch>  <model>  <context>  <session>  <help>"
+
+# Plan for cost thresholds: "auto" | "pro" | "max5x" | "max20x" | "api"
+plan = "auto"
+fallback_plan = "pro"
+
+[thresholds.context]
+warn = 70    # percentage
+danger = 90
+
+[thresholds.cost]
+# Uncomment to override plan defaults:
+# warn = 2.00
+# danger = 5.00
+```
+
+### Plan-Based Cost Defaults
+
+| Plan | Monthly | Warn | Danger |
+|------|---------|------|--------|
+| `pro` | $20 | $1.50 | $5.00 |
+| `max5x` | $100 | $5.00 | $15.00 |
+| `max20x` | $200 | $10.00 | $30.00 |
+| `api` | Pay-as-you-go | $2.00 | $10.00 |
+
+### Format Placeholders
+
+| Placeholder | Description | Example |
+|-------------|-------------|---------|
+| `<path>` | Abbreviated directory | `~/C/p/project` |
+| `<branch>` | Git branch with dirty indicator | `⎇ main*` |
+| `<model>` | Model and output style | `🤖 Opus 4.5 (The Startup)` |
+| `<context>` | Context usage bar and percentage | `🧠 ⣿⣿⡇⠀⠀ 50%` |
+| `<session>` | Duration and cost | `🕐 30m  💰 $1.50` |
+| `<lines>` | Lines added/removed | `+156/-23` |
+| `<spec>` | Active spec ID (when in docs/specs/) | `📋 005` |
+| `<help>` | Help text | `? for shortcuts` |
+
+**Example minimal format:**
+```toml
+format = "<context>  <session>"
+```
 
 ---
 

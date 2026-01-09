@@ -1,0 +1,58 @@
+# Statusline Configuration for Claude Code
+# Location: ~/.config/the-agentic-startup/statusline.toml
+
+# ==============================================================================
+# Format
+# ==============================================================================
+# Available placeholders:
+#   <path>    - Directory path (abbreviated)
+#   <branch>  - Git branch with icon (* if dirty)
+#   <model>   - Model name and output style
+#   <context> - Context usage bar and percentage
+#   <session> - Session duration and cost
+#   <lines>   - Lines added/removed
+#   <spec>    - Active specification ID
+#   <help>    - Help text
+
+format = "<path> <branch>  <model>  <context>  <session>  <help>"
+
+# ==============================================================================
+# Plan Configuration
+# ==============================================================================
+# Determines default cost thresholds based on your Claude subscription.
+#
+# Options:
+#   "auto"  - Attempt to detect from Claude config (falls back to fallback_plan)
+#   "pro"   - Claude Pro ($20/mo)
+#   "max5x" - Claude Max 5x ($100/mo)
+#   "max20x"- Claude Max 20x ($200/mo)
+#   "api"   - Direct API usage (pay-as-you-go)
+#
+# Plan defaults (cost per session):
+#   pro:    warn=$1.50,  danger=$5.00
+#   max5x:  warn=$5.00,  danger=$15.00
+#   max20x: warn=$10.00, danger=$30.00
+#   api:    warn=$2.00,  danger=$10.00
+
+plan = "auto"
+fallback_plan = "pro"
+
+# ==============================================================================
+# Context Thresholds (percentage-based)
+# ==============================================================================
+# Colors change when context window usage exceeds these percentages.
+# Includes ~45k token buffer for compaction overhead.
+
+[thresholds.context]
+warn = 70    # Amber warning
+danger = 90  # Red danger
+
+# ==============================================================================
+# Cost Thresholds (absolute USD values)
+# ==============================================================================
+# Per-session cost thresholds. Set explicit values to override plan defaults.
+# Leave commented to use plan-based defaults.
+
+[thresholds.cost]
+# warn = 2.00
+# danger = 5.00

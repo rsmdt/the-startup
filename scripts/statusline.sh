@@ -2,23 +2,17 @@
 #
 # Statusline script for Claude Code
 #
-# Usage: statusline.sh [-f "<format>"] [--help]
+# Configuration: ~/.config/the-agentic-startup/statusline.toml
 #
 # Format placeholders:
 #   <path>    - Directory path (abbreviated)
 #   <branch>  - Git branch with icon (* if dirty)
 #   <model>   - Model name and output style
 #   <context> - Context usage bar and percentage
-#   <session> - Session duration and cost
+#   <session> - Session duration and cost (🕐 💰)
 #   <lines>   - Lines added/removed
 #   <spec>    - Active specification ID
 #   <help>    - Help text
-#
-# Default format: "<path> <branch>  <model>  <context>  <session>  <help>"
-#
-# Examples:
-#   statusline.sh -f "<path> | <context> <model>"
-#   statusline.sh -f "<path> <branch>  <spec>  <model>  <context>  <lines>"
 #
 # Input: JSON from Claude Code via stdin
 # Output: Single formatted statusline with ANSI colors
@@ -40,37 +34,161 @@ readonly STYLE_RESET="\033[0m"
 
 readonly BRAILLE_CHARS=("⠀" "⡀" "⡄" "⡆" "⡇" "⣇" "⣧" "⣷" "⣿")
 
-readonly DEFAULT_FORMAT="<path> <branch>  <model>  <context>  <session>  <help>"
+readonly CONFIG_DIR="$HOME/.config/the-agentic-startup"
+readonly CONFIG_FILE="$CONFIG_DIR/statusline.toml"
+readonly CLAUDE_SETTINGS="$HOME/.claude/settings.json"
 
+readonly DEFAULT_FORMAT="<path> <branch>  <model>  <context>  <session>  <help>"
 readonly VALID_PLACEHOLDERS="path|branch|model|context|session|lines|spec|help"
+
+# Plan defaults: cost_warn, cost_danger (in USD)
+declare -A PLAN_DEFAULTS=(
+  [pro_cost_warn]="1.50"
+  [pro_cost_danger]="5.00"
+  [max5x_cost_warn]="5.00"
+  [max5x_cost_danger]="15.00"
+  [max20x_cost_warn]="10.00"
+  [max20x_cost_danger]="30.00"
+  [api_cost_warn]="2.00"
+  [api_cost_danger]="10.00"
+)
+
+# ==============================================================================
+# Configuration
+# ==============================================================================
+
+# Config values (set by load_config)
+cfg_format="$DEFAULT_FORMAT"
+cfg_plan="auto"
+cfg_fallback_plan="pro"
+cfg_context_warn=70
+cfg_context_danger=90
+cfg_cost_warn=""
+cfg_cost_danger=""
+
+# Parse a simple TOML value (handles strings, numbers, comments)
+toml_get() {
+  local file="$1"
+  local key="$2"
+  local section="$3"
+
+  [[ ! -f "$file" ]] && return 1
+
+  local in_section=""
+  local value=""
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    # Skip empty lines and comments
+    [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
+
+    # Check for section header
+    if [[ "$line" =~ ^\[([a-zA-Z0-9_.]+)\] ]]; then
+      in_section="${BASH_REMATCH[1]}"
+      continue
+    fi
+
+    # Match key = value
+    if [[ "$line" =~ ^[[:space:]]*([a-zA-Z_][a-zA-Z0-9_]*)[[:space:]]*=[[:space:]]*(.+)$ ]]; then
+      local k="${BASH_REMATCH[1]}"
+      local v="${BASH_REMATCH[2]}"
+
+      # Check if we're in the right section (or no section required)
+      if [[ -z "$section" && -z "$in_section" ]] || [[ "$in_section" == "$section" ]]; then
+        if [[ "$k" == "$key" ]]; then
+          # Remove quotes and inline comments
+          v="${v%%#*}"                    # Remove inline comments
+          v="${v%"${v##*[![:space:]]}"}"  # Trim trailing whitespace
+          v="${v#\"}"                     # Remove leading quote
+          v="${v%\"}"                     # Remove trailing quote
+          echo "$v"
+          return 0
+        fi
+      fi
+    fi
+  done < "$file"
+
+  return 1
+}
+
+detect_plan() {
+  # Try to detect plan from Claude settings
+  if [[ -f "$CLAUDE_SETTINGS" ]] && command -v jq &>/dev/null; then
+    local plan_info
+    plan_info=$(jq -r '.subscription.plan // .plan // empty' "$CLAUDE_SETTINGS" 2>/dev/null)
+
+    case "$plan_info" in
+      *max*20*|*20x*) echo "max20x"; return ;;
+      *max*5*|*5x*)   echo "max5x"; return ;;
+      *pro*)          echo "pro"; return ;;
+      *api*)          echo "api"; return ;;
+    esac
+  fi
+
+  # Fallback
+  echo "$cfg_fallback_plan"
+}
+
+load_config() {
+  # Load format
+  local format
+  format=$(toml_get "$CONFIG_FILE" "format")
+  [[ -n "$format" ]] && cfg_format="$format"
+
+  # Load plan settings
+  local plan fallback
+  plan=$(toml_get "$CONFIG_FILE" "plan")
+  fallback=$(toml_get "$CONFIG_FILE" "fallback_plan")
+  [[ -n "$plan" ]] && cfg_plan="$plan"
+  [[ -n "$fallback" ]] && cfg_fallback_plan="$fallback"
+
+  # Load context thresholds
+  local ctx_warn ctx_danger
+  ctx_warn=$(toml_get "$CONFIG_FILE" "warn" "thresholds.context")
+  ctx_danger=$(toml_get "$CONFIG_FILE" "danger" "thresholds.context")
+  [[ -n "$ctx_warn" ]] && cfg_context_warn="$ctx_warn"
+  [[ -n "$ctx_danger" ]] && cfg_context_danger="$ctx_danger"
+
+  # Load explicit cost thresholds (if set)
+  cfg_cost_warn=$(toml_get "$CONFIG_FILE" "warn" "thresholds.cost")
+  cfg_cost_danger=$(toml_get "$CONFIG_FILE" "danger" "thresholds.cost")
+
+  # If no explicit cost thresholds, use plan defaults
+  if [[ -z "$cfg_cost_warn" || -z "$cfg_cost_danger" ]]; then
+    local effective_plan="$cfg_plan"
+    [[ "$effective_plan" == "auto" ]] && effective_plan=$(detect_plan)
+
+    [[ -z "$cfg_cost_warn" ]] && cfg_cost_warn="${PLAN_DEFAULTS[${effective_plan}_cost_warn]:-${PLAN_DEFAULTS[pro_cost_warn]}}"
+    [[ -z "$cfg_cost_danger" ]] && cfg_cost_danger="${PLAN_DEFAULTS[${effective_plan}_cost_danger]:-${PLAN_DEFAULTS[pro_cost_danger]}}"
+  fi
+}
 
 # ==============================================================================
 # Help
 # ==============================================================================
 
 show_help() {
-  cat << 'EOF'
+  cat << EOF
 Statusline script for Claude Code
 
-Usage: statusline.sh [-f "<format>"] [--help]
+Usage: statusline.sh [--help]
+
+Configuration file: $CONFIG_FILE
 
 Format placeholders:
   <path>    - Directory path (abbreviated, e.g., ~/C/p/project)
   <branch>  - Git branch with icon, * if dirty (e.g., ⎇ main*)
   <model>   - Model name and output style (e.g., 🤖 Opus (The ScaleUp))
   <context> - Context usage bar and percentage (e.g., 🧠 ⣿⣿⡇⠀⠀ 50%)
-  <session> - Session duration and cost (e.g., 🕐 30m  $0.50)
+  <session> - Session duration and cost (e.g., 🕐 30m  💰 \$0.50)
   <lines>   - Lines added/removed (e.g., +156/-23)
   <spec>    - Active specification ID (e.g., 📋 005)
   <help>    - Help text (? for shortcuts)
 
-Default format:
-  "<path> <branch>  <model>  <context>  <session>  <help>"
-
-Examples:
-  statusline.sh -f "<path> | <context> <model>"
-  statusline.sh -f "<path> <branch>  <spec>  <model>  <context>  <lines>"
-  statusline.sh -f "<context>"
+Plan-based cost thresholds:
+  pro     - warn: \$1.50,  danger: \$5.00
+  max5x   - warn: \$5.00,  danger: \$15.00
+  max20x  - warn: \$10.00, danger: \$30.00
+  api     - warn: \$2.00,  danger: \$10.00
 
 Input: JSON from Claude Code via stdin
 EOF
@@ -201,8 +319,8 @@ format_context() {
   done
 
   local color="$COLOR_DEFAULT"
-  [[ "$percent" -ge 70 ]] && color="$COLOR_WARNING"
-  [[ "$percent" -ge 90 ]] && color="$COLOR_DANGER"
+  [[ "$percent" -ge "$cfg_context_warn" ]] && color="$COLOR_WARNING"
+  [[ "$percent" -ge "$cfg_context_danger" ]] && color="$COLOR_DANGER"
 
   echo "🧠 ${color}${bar} ${percent}%${STYLE_RESET}"
 }
@@ -229,6 +347,13 @@ format_duration() {
   fi
 }
 
+# Compare two decimal numbers (returns 0 if $1 >= $2)
+decimal_gte() {
+  local a="$1" b="$2"
+  # Use awk for reliable decimal comparison
+  awk -v a="$a" -v b="$b" 'BEGIN { exit !(a >= b) }'
+}
+
 format_session() {
   local result=""
 
@@ -239,10 +364,19 @@ format_session() {
   if [[ -n "$session_cost" && "$session_cost" != "null" ]]; then
     local formatted_cost
     formatted_cost=$(printf "%.2f" "$session_cost")
+
+    # Determine cost color based on thresholds
+    local cost_color="$COLOR_SUCCESS"
+    if decimal_gte "$session_cost" "$cfg_cost_danger"; then
+      cost_color="$COLOR_DANGER"
+    elif decimal_gte "$session_cost" "$cfg_cost_warn"; then
+      cost_color="$COLOR_WARNING"
+    fi
+
     if [[ -n "$result" ]]; then
-      result+="  ${COLOR_SUCCESS}\$${formatted_cost}${STYLE_RESET}"
+      result+="  💰 ${cost_color}\$${formatted_cost}${STYLE_RESET}"
     else
-      result="${COLOR_SUCCESS}\$${formatted_cost}${STYLE_RESET}"
+      result="💰 ${cost_color}\$${formatted_cost}${STYLE_RESET}"
     fi
   fi
 
@@ -274,22 +408,13 @@ format_spec() {
 # ==============================================================================
 
 main() {
-  local format="$DEFAULT_FORMAT"
+  # Handle help
+  [[ "$1" == "-h" || "$1" == "--help" ]] && show_help
 
-  while [[ $# -gt 0 ]]; do
-    case "$1" in
-      -h|--help)
-        show_help
-        ;;
-      -f|--format)
-        format="$2"
-        shift 2
-        ;;
-      *)
-        shift
-        ;;
-    esac
-  done
+  # Load configuration
+  load_config
+
+  local format="$cfg_format"
 
   # Compute only needed parts
   local path_part branch_part model_part context_part session_part lines_part spec_part help_part

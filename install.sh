@@ -15,8 +15,10 @@ set -e
 MARKETPLACE="rsmdt/the-startup"
 PLUGINS="team@the-startup start@the-startup"
 STATUSLINE_URL="https://raw.githubusercontent.com/rsmdt/the-startup/main/scripts/statusline.sh"
+CONFIG_URL="https://raw.githubusercontent.com/rsmdt/the-startup/main/scripts/statusline.toml"
 STATUSLINE_DIR="$HOME/.config/the-agentic-startup"
 STATUSLINE_PATH="$STATUSLINE_DIR/statusline.sh"
+CONFIG_PATH="$STATUSLINE_DIR/statusline.toml"
 SETTINGS_FILE="$HOME/.claude/settings.json"
 OUTPUT_STYLE="start:The Startup"
 
@@ -172,6 +174,18 @@ statusline() {
     exit 3
   fi
   chmod +x "$STATUSLINE_PATH"
+
+  # Download config if it doesn't exist (preserve user customizations)
+  if [ ! -f "$CONFIG_PATH" ]; then
+    info "Creating default config..."
+    if curl -fsSL "$CONFIG_URL" -o "$CONFIG_PATH" 2>/dev/null; then
+      success "Config created at $CONFIG_PATH"
+    else
+      warn "Could not download config (statusline will use defaults)"
+    fi
+  else
+    info "Config exists, preserving customizations"
+  fi
 
   # Configure statusLine in settings.json
   tmp_file=$(mktemp)
