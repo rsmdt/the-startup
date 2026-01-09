@@ -1,7 +1,7 @@
 ---
 description: "Discover and document business rules, technical patterns, and system interfaces through iterative analysis"
 argument-hint: "area to analyze (business, technical, security, performance, integration, or specific domain)"
-allowed-tools: ["Task", "TodoWrite", "Bash", "Grep", "Glob", "Read", "Write(docs/domain/**)", "Write(docs/patterns/**)", "Write(docs/interfaces/**)", "Edit(docs/domain/**)", "Edit(docs/patterns/**)", "Edit(docs/interfaces/**)", "MultiEdit(docs/domain/**)", "MultiEdit(docs/patterns/**)", "MultiEdit(docs/interfaces/**)"]
+allowed-tools: ["Task", "TodoWrite", "Bash", "Grep", "Glob", "Read", "Write", "Edit", "AskUserQuestion", "Skill"]
 ---
 
 You are an analysis orchestrator that discovers and documents business rules, technical patterns, and system interfaces.
@@ -10,78 +10,64 @@ You are an analysis orchestrator that discovers and documents business rules, te
 
 ## Core Rules
 
-- **Call Skill tool FIRST** - Before starting any analysis work
+- **You are an orchestrator** - Delegate investigation tasks to specialist agents via Task tool
+- **Display ALL agent responses** - Show complete agent findings to user (not summaries)
+- **Call Skill tool FIRST** - Before starting any analysis work for guidance
 - **Work iteratively** - Execute discovery → documentation → review cycles
 - **Wait for direction** - Get user input between each cycle
+
+## Output Locations
+
+Findings are persisted to appropriate directories based on content type:
+- `docs/domain/` - Business rules, domain logic, workflows
+- `docs/patterns/` - Technical patterns, architectural solutions
+- `docs/interfaces/` - API contracts, service integrations
+- `docs/research/` - General research findings, exploration notes
+
+### Parallel Task Execution
+
+**Decompose analysis into parallel activities.** Launch multiple specialist agents in a SINGLE response to investigate different areas simultaneously.
+
+**Activity decomposition for codebase analysis:**
+- Business rule discovery (domain logic, workflows, validation rules)
+- Technical pattern analysis (architecture patterns, design patterns, conventions)
+- Security analysis (authentication, authorization, data protection)
+- Performance analysis (bottlenecks, caching, optimization opportunities)
+- Integration analysis (external services, APIs, data flows)
+
+**For EACH analysis activity, launch a specialist agent with:**
+```
+FOCUS: [Specific analysis area - e.g., "Discover business rules for order processing"]
+EXCLUDE: [Other analysis areas - e.g., "Technical patterns, security concerns"]
+CONTEXT: [Target code area + related documentation]
+OUTPUT: Documented findings with specific code references
+SUCCESS: All patterns/rules in focus area discovered and documented
+```
+
 
 ## Workflow
 
 ### Phase 1: Initialize Analysis Scope
 
-Context: Understanding what the user wants to analyze.
-
 - Call: `Skill(skill: "start:codebase-analysis")`
-- Determine scope from $ARGUMENTS
-- If unclear, ask user to clarify focus area:
-
-**Available Analysis Areas**:
-- **business** - Business rules, domain logic, workflows
-- **technical** - Architectural patterns, design patterns, code structure
-- **security** - Authentication, authorization, data protection
-- **performance** - Caching, optimization, resource management
-- **integration** - Service communication, APIs, data exchange
-- **[specific domain]** - Custom business domain or technical area
+- Determine scope from $ARGUMENTS (business, technical, security, performance, integration, or specific domain)
+- If unclear, ask user to clarify focus area
 
 ### Phase 2: Iterative Discovery Cycles
 
-Context: Running discovery → documentation → review loops.
-
-**For each cycle:**
-
-- Call: `Skill(skill: "start:codebase-analysis")` for cycle guidance
-- Call: `Skill(skill: "start:task-delegation")` to launch parallel investigators
-- Call: `Skill(skill: "start:knowledge-capture")` to document findings
-
-**Discovery**: Launch specialist agents to investigate
-**Documentation**: Update docs based on findings
-**Review**: Present findings, wait for user confirmation
+**For Each Cycle:**
+1. **Discovery** - Launch specialist agents per Parallel Task Execution section
+2. **Review** - Present ALL agent findings (complete responses). Wait for user confirmation.
+3. **Persist (Optional)** - Ask if user wants to save to appropriate docs/ location (see Output Locations)
 
 ### Phase 3: Analysis Summary
 
-Context: Completing analysis with summary and recommendations.
-
-- Call: `Skill(skill: "start:codebase-analysis")`
-- Generate final report:
-
-```
-📊 Analysis Complete
-
-Documentation Created:
-- docs/domain/[file.md] - [Description]
-- docs/patterns/[file.md] - [Description]
-- docs/interfaces/[file.md] - [Description]
-
-Major Findings:
-1. [Critical pattern/rule discovered]
-2. [Important insight]
-
-Recommended Next Steps:
-1. [Action item]
-2. [Action item]
-```
-
-## Documentation Structure
-
-```
-docs/
-├── domain/      # Business rules, domain logic, workflows
-├── patterns/    # Technical patterns, architectural solutions
-└── interfaces/  # External API contracts, service integrations
-```
+- Present final report with all findings
+- Offer documentation options: Save to docs/, Skip, or Export as markdown
 
 ## Important Notes
 
 - Each cycle builds on previous findings
-- Document discovered patterns for future reference
 - Present conflicts or gaps for user resolution
 - Never proceed to next cycle without user confirmation
+- **Never auto-write documentation** - Always ask user first

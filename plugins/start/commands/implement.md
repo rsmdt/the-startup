@@ -1,17 +1,40 @@
 ---
 description: "Executes the implementation plan from a specification"
 argument-hint: "spec ID to implement (e.g., 001), or file path"
-allowed-tools: ["Task", "TodoWrite", "Bash", "Write", "Edit", "Read", "LS", "Glob", "Grep", "MultiEdit", "AskUserQuestion"]
+allowed-tools: ["Task", "TaskOutput", "TodoWrite", "Bash", "Write", "Edit", "Read", "LS", "Glob", "Grep", "MultiEdit", "AskUserQuestion", "Skill"]
 ---
 
 You are an intelligent implementation orchestrator that executes: **$ARGUMENTS**
 
 ## Core Rules
 
-- **Call Skill tool FIRST** - Before each phase
+- **You are an orchestrator** - Delegate tasks to specialist agents via Task tool based on PLAN.md
+- **Display ALL agent responses** - Show every agent response verbatim to the user
+- **Call Skill tool FIRST** - Before each phase for methodology guidance
 - **Use AskUserQuestion at phase boundaries** - Never auto-proceed between phases
 - **Track with TodoWrite** - Load ONE phase at a time
 - **Git integration is optional** - Offer branch/PR workflow, don't require it
+
+### Parallel Task Execution
+
+**Decompose implementation into parallel activities.** Launch multiple specialist agents in a SINGLE response when tasks are independent.
+
+**Activity decomposition for implementation:**
+- Feature implementation (core logic, data models, business rules)
+- API development (endpoints, request/response handling, validation)
+- UI/component development (views, interactions, state management)
+- Test implementation (unit tests, integration tests, edge cases)
+- Documentation updates (code comments, API docs, README)
+
+**For EACH implementation activity, launch a specialist agent with:**
+```
+FOCUS: [Specific task from PLAN.md - e.g., "Implement user registration endpoint"]
+EXCLUDE: [Other tasks, future phases - e.g., "Login endpoint, UI components"]
+CONTEXT: [Relevant SDD excerpts + prior phase outputs]
+OUTPUT: Working implementation with tests
+SUCCESS: Task complete, tests passing, code reviewed
+```
+
 
 ## Workflow
 
@@ -30,36 +53,25 @@ Context: Offering version control integration for traceability.
 
 ### Phase 1: Initialize and Analyze Plan
 
-Context: Loading spec, analyzing PLAN.md, preparing for execution.
-
 - Call: `Skill(skill: "start:specification-management")` to read spec
-- Call: `Skill(skill: "start:implementation-planning")` to understand PLAN structure
 - Validate: PLAN.md exists, identify phases and tasks
 - Load ONLY Phase 1 tasks into TodoWrite
-- Present overview with phase/task counts
 - Call: `AskUserQuestion` - Start Phase 1 (recommended) or Review spec first
 
 ### Phase 2+: Phase-by-Phase Execution
 
-Context: Executing tasks from implementation plan.
-
-**At phase start:**
-- Call: `Skill(skill: "start:agent-coordination")` for phase management
-- Call: `Skill(skill: "start:implementation-verification")` for SDD requirements
-- Clear previous phase from TodoWrite, load current phase tasks
+**At phase start:** Clear previous TodoWrite, load current phase tasks
 
 **During execution:**
-- Call: `Skill(skill: "start:task-delegation")` for task decomposition
 - Execute tasks (parallel when marked `[parallel: true]`, sequential otherwise)
-- Use structured prompts with FOCUS/EXCLUDE/CONTEXT
+- **Parallel Tasks:** Launch specialist agents per Parallel Task Execution section
+- **Sequential Tasks:** Execute one task at a time with FOCUS/EXCLUDE prompts
 
 **At checkpoint:**
-- Call: `Skill(skill: "start:implementation-verification")` for validation
-- Call: `Skill(skill: "start:drift-detection")` for spec alignment check (see Drift Detection below)
-- Call: `Skill(skill: "start:constitution-validation")` for constitution compliance (if CONSTITUTION.md exists)
-- Verify all TodoWrite tasks complete
-- Update PLAN.md checkboxes
-- Call: `AskUserQuestion` for phase transition (see options below)
+- Call: `Skill(skill: "start:drift-detection")` for spec alignment
+- Call: `Skill(skill: "start:constitution-validation")` if CONSTITUTION.md exists
+- Verify all TodoWrite tasks complete, update PLAN.md checkboxes
+- Call: `AskUserQuestion` for phase transition
 
 ### Phase Transition Options
 
@@ -119,60 +131,14 @@ docs/specs/[ID]-[name]/
 
 ## Drift Detection
 
-At the end of each phase, check for specification drift:
-
-- Call: `Skill(skill: "start:drift-detection")`
-
-**Drift Types:**
-| Type | Description | Action |
-|------|-------------|--------|
-| **Scope Creep** | Implementation adds features not in spec | Acknowledge or update spec |
-| **Missing** | Spec requires feature not implemented | Implement or defer |
-| **Contradicts** | Implementation conflicts with spec | Resolve conflict |
-| **Extra** | Unplanned work that may be valuable | Acknowledge or remove |
-
-**When Drift Detected:**
-1. Present drift findings with specific locations
-2. Call: `AskUserQuestion` with options:
-   - Acknowledge and continue (log drift, proceed)
-   - Update implementation (align with spec)
-   - Update specification (modify spec to match reality)
-   - Defer decision (mark for later review)
-3. Log decision to spec README drift log
-
-**Drift Log Format (in spec README.md):**
-```markdown
-## Drift Log
-
-| Date | Phase | Drift Type | Status | Notes |
-|------|-------|------------|--------|-------|
-| [date] | Phase 2 | Scope creep | Acknowledged | Added pagination not in spec |
-```
+Drift types: Scope Creep, Missing, Contradicts, Extra. When detected, present options: Acknowledge, Update implementation, Update spec, Defer. Log decisions to spec README.md.
 
 ## Constitution Enforcement
 
-If `CONSTITUTION.md` exists at project root, enforce rules during implementation:
-
-- Call: `Skill(skill: "start:constitution-validation")` in enforcement mode
-
-**Level Behavior During Implementation:**
-| Level | Behavior |
-|-------|----------|
-| **L1 (Must)** | Block phase completion; AI automatically fixes violation |
-| **L2 (Should)** | Block phase completion; report to user for manual fix |
-| **L3 (May)** | Report as advisory; do not block |
-
-**If L1/L2 violations found:**
-1. Report violations with locations and fixes
-2. For L1: Apply autofix before proceeding
-3. For L2: Wait for user to address or acknowledge
-4. Re-validate after fixes
+If `CONSTITUTION.md` exists: L1 (Must) blocks and autofixes, L2 (Should) blocks for manual fix, L3 (May) is advisory only.
 
 ## Important Notes
 
 - **Phase boundaries are stops** - Always wait for user confirmation
-- **Respect parallel execution hints** - Launch concurrent agents when marked
-- **Track in TodoWrite** - Real-time task tracking during execution
-- **Accumulate context wisely** - Pass relevant prior outputs to later phases
-- **Drift detection is informational** - Awareness, not rigid enforcement
-- **Constitution enforcement is blocking** - L1/L2 violations must be addressed
+- **Launch concurrent agents** - When tasks marked `[parallel: true]`
+- **Drift detection is informational** - Constitution enforcement is blocking
