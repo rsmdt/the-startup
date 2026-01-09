@@ -204,6 +204,46 @@ After documenting, always report:
   Action: [Created new / Updated existing / Merged with existing]
 ```
 
+## Documentation Maintenance
+
+Beyond creating documentation, maintain its accuracy over time.
+
+### Staleness Detection
+
+Check for stale documentation when modifying code:
+
+1. **Git-based staleness**: Compare doc and code modification times
+   - If source file changed after related doc → flag for review
+
+2. **Reference validation**: Verify documented items still exist
+   - Function names, API endpoints, configuration options
+
+3. **Example validation**: Confirm code examples still work
+
+### Staleness Categories
+
+| Category | Indicator | Action |
+|----------|-----------|--------|
+| 🔴 Critical | Code changed, doc not updated | Update immediately |
+| 🟡 Warning | > 90 days since doc update | Review needed |
+| ⚪ Info | > 180 days since update | Consider refresh |
+
+### Sync During Implementation
+
+When modifying code, proactively check documentation impact:
+
+**Function signature changes** → Update JSDoc/docstrings and API docs
+**New public API** → Create documentation before PR
+**Breaking changes** → Update all references, add migration notes
+
+### Documentation Quality Checklist
+
+- [ ] Parameters documented with correct types
+- [ ] Return values documented
+- [ ] Error conditions documented
+- [ ] Examples execute correctly
+- [ ] Cross-references are valid links
+
 ## Remember
 
 - **Deduplication is critical** - Always check first
@@ -211,3 +251,4 @@ After documenting, always report:
 - **Names are discoverable** - Use full, descriptive names
 - **Templates ensure consistency** - Follow the structure
 - **Cross-reference liberally** - Connect related knowledge
+- **Maintain freshness** - Update docs when code changes

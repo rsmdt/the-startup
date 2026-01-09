@@ -532,7 +532,6 @@ The `start` plugin includes eighteen skills that activate automatically based on
 | `requirements-analysis` | PRD template, validation, requirements gathering |
 | `architecture-design` | SDD template, architecture design, ADR management |
 | `implementation-planning` | PLAN template, task sequencing, dependency mapping |
-| `documentation-sync` | Staleness detection, coverage metrics, doc generation |
 
 ### Execution Skills
 
@@ -547,12 +546,6 @@ The `start` plugin includes eighteen skills that activate automatically based on
 | Skill | Purpose |
 |-------|---------|
 | `code-review` | Multi-perspective review, security/performance/quality/tests |
-
-### Session Skills
-
-| Skill | Purpose |
-|-------|---------|
-| `context-preservation` | Session context capture and restoration across conversations |
 
 ### Methodology Skills
 
@@ -689,75 +682,6 @@ Consolidates findings → Posts to PR #123
 - **Performance** - Query optimization, caching, memory management
 - **Quality** - Code style, design patterns, maintainability
 - **Tests** - Coverage, edge cases, test quality
-
----
-
-### `documentation-sync`
-
-**Activates when:** Documentation generation or audit is needed
-
-**Trigger terms:** "document", "generate docs", "API docs", "README", "coverage"
-
-**What it does:**
-- Detects documentation staleness (outdated vs code changes)
-- Generates JSDoc/TSDoc, OpenAPI specs, READMEs
-- Reports documentation coverage metrics
-- Identifies undocumented exports and APIs
-
-**Example activation:**
-```
-User: "/start:document src/api/"
-↓
-Documentation-sync skill activates
-↓
-Actions:
-  📊 Analyze current coverage
-  🔍 Detect stale documentation
-  📝 Generate missing docs
-  📈 Report coverage metrics
-```
-
-**Modes supported:**
-- `code` - JSDoc/TSDoc inline comments
-- `api` - OpenAPI/Swagger specifications
-- `readme` - Project README updates
-- `audit` - Coverage and staleness report
-- `module` - Complete module documentation
-
----
-
-### `context-preservation`
-
-**Activates when:** Session context should be saved or restored
-
-**Trigger terms:** "save context", "resume", "continue", "where were we", end of significant work
-
-**What it does:**
-- Captures decisions, progress, blockers, discoveries
-- Saves context to `.claude/context/` directory
-- Restores context when resuming work
-- Merges context across multiple sessions
-
-**Example activation:**
-```
-End of session with significant work
-↓
-Context-preservation skill activates
-↓
-Saves to: .claude/context/session-2024-01-15-auth-implementation.md
-↓
-Captures:
-  - 3 decisions made
-  - 5 tasks completed
-  - 1 blocker encountered
-  - 2 patterns discovered
-```
-
-**Context categories:**
-- **Decisions** - Architectural choices, trade-offs, rejected alternatives
-- **Progress** - Completed tasks, current state, next steps
-- **Blockers** - What's blocking, what was tried, potential solutions
-- **Discoveries** - Patterns found, gotchas, undocumented behaviors
 
 ---
 
