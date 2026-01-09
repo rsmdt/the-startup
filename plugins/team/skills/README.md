@@ -20,7 +20,7 @@ skills/
 │   ├── api-contract-design/
 │   ├── entity-relationship-design/
 │   ├── technical-documentation-authoring/
-│   └── comprehensive-test-design/
+│   └── testing/
 ├── infrastructure/      # DevOps and platform skills
 │   ├── pipeline-deployment-design/
 │   └── production-observability-design/
@@ -47,7 +47,7 @@ skills/
 | `codebase-pattern-identification` | cross-cutting | Identify existing codebase patterns for consistency |
 | `performance-bottleneck-analysis` | quality | Measurement approaches, profiling tools, optimization patterns |
 | `vulnerability-threat-assessment` | quality | Vulnerability review, OWASP patterns, secure coding practices |
-| `comprehensive-test-design` | development | Test pyramid principles, coverage targets, framework-specific patterns |
+| `testing` | development | Test pyramid principles, coverage targets, framework-specific patterns |
 | `user-insight-synthesis` | design | Interview techniques, persona creation, journey mapping |
 
 ## Usage
