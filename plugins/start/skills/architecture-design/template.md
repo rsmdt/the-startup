@@ -1,19 +1,29 @@
+---
+title: "[NEEDS CLARIFICATION: Feature title]"
+status: draft
+version: "1.0"
+---
+
 # Solution Design Document
 
 ## Validation Checklist
 
+### CRITICAL GATES (Must Pass)
+
 - [ ] All required sections are complete
 - [ ] No [NEEDS CLARIFICATION] markers remain
+- [ ] Architecture pattern is clearly stated with rationale
+- [ ] **All architecture decisions confirmed by user**
+- [ ] Every interface has specification
+
+### QUALITY CHECKS (Should Pass)
+
 - [ ] All context sources are listed with relevance ratings
 - [ ] Project commands are discovered from actual project files
 - [ ] Constraints → Strategy → Design → Implementation path is logical
-- [ ] Architecture pattern is clearly stated with rationale
 - [ ] Every component in diagram has directory mapping
-- [ ] Every interface has specification
 - [ ] Error handling covers all error types
 - [ ] Quality requirements are specific and measurable
-- [ ] Every quality requirement has test coverage
-- [ ] **All architecture decisions confirmed by user**
 - [ ] Component names consistent across diagrams
 - [ ] A developer could implement from this design
 
@@ -35,51 +45,42 @@ CON-3 [Auth requirements, data protection needs, regulatory compliance]
 
 [NEEDS CLARIFICATION: What documentation, patterns, and external resources apply?]
 
-- ICO-1 [general application context]
- ```yaml
- # Internal documentation and patterns
- - doc: docs/patterns/pattern-name.md
-   relevance: HIGH
-   why: "Existing pattern that must be followed"
+#### Documentation Context
+```yaml
+# Internal documentation and patterns
+- doc: docs/patterns/pattern-name.md
+  relevance: HIGH
+  why: "Existing pattern that must be followed"
 
- - doc: docs/interfaces/interface-name.md
-   relevance: MEDIUM
-   why: "External service integration requirements"
+- doc: docs/interfaces/interface-name.md
+  relevance: MEDIUM
+  why: "External service integration requirements"
 
- - doc: docs/architecture/decisions/adr-001.md
-   relevance: HIGH
-   why: "Previous architectural decisions that constrain approach"
+# External documentation and APIs (if applicable)
+- url: https://docs.library.com/api
+  relevance: MEDIUM
+  why: "Third-party API constraints"
+```
 
- # External documentation and APIs
- - url: https://docs.library.com/api
-   relevance: MEDIUM
-   sections: [specific endpoints or features if applicable]
-   why: "Third-party API constraints and capabilities"
-
- - url: https://framework.dev/best-practices
-   relevance: LOW
-   why: "Framework conventions to follow"
- ```
-
-- ICO-2 [component-name]: [location path or repository]
- ```yaml
- # Source code files that must be understood
- - file: src/components/placeholder/example.tsx
-   relevance: HIGH  # HIGH/MEDIUM/LOW
-   sections: [specific functions or line ranges if applicable]
-   why: "Explanation of why this file matters for the implementation"
- 
- - file: @package.json
-   relevance: MEDIUM
-   why: "Dependencies and build scripts that constrain the solution"
- ```
-
-- ICO-3 [another-component-name] (if applicable)
+#### Code Context
 ```yaml
 # Source code files that must be understood
-- file: [relevant source files]
+- file: src/components/placeholder/example.tsx
+  relevance: HIGH
+  why: "Explanation of why this file matters"
+
+- file: @package.json
+  relevance: MEDIUM
+  why: "Dependencies and build scripts"
+```
+
+#### External APIs (if applicable)
+```yaml
+# Third-party services this feature integrates with
+- service: [Service Name]
+  doc: [URL or internal reference]
   relevance: [HIGH/MEDIUM/LOW]
-  why: "[Explanation]"
+  why: "[Integration requirements]"
 ```
 
 ### Implementation Boundaries
@@ -98,13 +99,13 @@ CON-3 [Auth requirements, data protection needs, regulatory compliance]
 ```mermaid
 graph TB
     System[Your System]
-    
+
     User1[User Type 1] --> System
     User2[User Type 2] --> System
-    
+
     System --> ExtAPI1[External API 1]
     System --> ExtAPI2[External Service 2]
-    
+
     ExtSystem[External System] --> System
     System --> Database[(Database)]
     System --> MessageQueue[Message Queue]
@@ -121,14 +122,14 @@ inbound:
     authentication: [OAuth2/JWT/Session]
     doc: @docs/interfaces/web-api.md
     data_flow: "User actions and queries"
-    
+
   - name: "Mobile App API"
     type: HTTPS
     format: REST
     authentication: JWT
     doc: @docs/interfaces/mobile-api.md
     data_flow: "Mobile-specific operations"
-    
+
   - name: "Webhook Receiver"
     type: HTTPS
     format: JSON
@@ -145,7 +146,7 @@ outbound:
     doc: @docs/interfaces/payment-gateway.md
     data_flow: "Transaction processing"
     criticality: HIGH
-    
+
   - name: "Notification Service"
     type: AMQP/HTTPS
     format: JSON
@@ -153,7 +154,7 @@ outbound:
     doc: @docs/interfaces/notification-service.md
     data_flow: "User notifications"
     criticality: MEDIUM
-    
+
   - name: "Analytics Platform"
     type: HTTPS
     format: JSON
@@ -169,13 +170,13 @@ data:
     connection: Connection Pool
     doc: @docs/interfaces/database-schema.md
     data_flow: "Application state persistence"
-    
+
   - name: "Cache Layer"
     type: Redis/Memcached
     connection: Client Library
     doc: @docs/interfaces/cache-strategy.md
     data_flow: "Temporary data and sessions"
-    
+
   - name: "File Storage"
     type: S3/Azure Blob/GCS
     connection: SDK
@@ -194,53 +195,19 @@ data:
 
 ### Project Commands
 
-[NEEDS CLARIFICATION: What are the project-specific commands for development, validation, and deployment? For multi-component features, organize commands by component. These commands must be discovered from package.json, Makefile, docker-compose.yml, or other build configuration files. Pay special attention to monorepo structures and database-specific testing tools.]
+[NEEDS CLARIFICATION: What are the project-specific commands? Discover from package.json, Makefile, or build configs.]
 
 ```bash
-# Component: [component-name]
-Location: [path or repository]
+# Core Commands (discovered from project files)
+Install: [npm install / pip install / go mod download]
+Dev:     [npm run dev / python manage.py runserver]
+Test:    [npm test / pytest / go test]
+Lint:    [npm run lint / flake8 / golint]
+Build:   [npm run build / python setup.py / go build]
 
-## Environment Setup
-Install Dependencies: [discovered from package.json, requirements.txt, go.mod, etc.]
-Environment Variables: [discovered from .env.example, config files]
-Start Development: [discovered from package.json scripts, Makefile targets]
-
-# Testing Commands (CRITICAL - discover ALL testing approaches)
-Unit Tests: [e.g., npm test, go test, cargo test]
-Integration Tests: [e.g., npm run test:integration]
-Database Tests: [e.g., pgTap for PostgreSQL, database-specific test runners]
-E2E Tests: [e.g., npm run test:e2e, playwright test]
-Test Coverage: [e.g., npm run test:coverage]
-
-# Code Quality Commands
-Linting: [discovered from package.json, .eslintrc, etc.]
-Type Checking: [discovered from tsconfig.json, mypy.ini, etc.]
-Formatting: [discovered from .prettierrc, rustfmt.toml, etc.]
-
-# Build & Compilation
-Build Project: [discovered from build scripts]
-Watch Mode: [discovered from development scripts]
-
-# Database Operations (if applicable)
-Database Setup: [discovered from database scripts]
-Database Migration: [discovered from migration tools]
-Database Tests: [discovered from database test configuration]
-
-# Monorepo Commands (if applicable)
-Workspace Commands: [discovered from workspace configuration]
-Package-specific Commands: [discovered from individual package.json files]
-Cross-package Commands: [commands that affect multiple packages]
-Dependency Management: [how to update shared dependencies]
-Local Package Linking: [how packages reference each other locally]
-
-# Multi-Component Coordination (if applicable)
-Start All: [command to start all components]
-Run All Tests: [command to test across components]
-Build All: [command to build all components]
-Deploy All: [orchestrated deployment command]
-
-# Additional Project-Specific Commands
-[Any other relevant commands discovered in the codebase]
+# Database (if applicable)
+Migrate: [migration command]
+Seed:    [seed command]
 ```
 
 ## Solution Strategy
@@ -302,13 +269,13 @@ interfaces:
     relevance: CRITICAL
     sections: [authentication_flow, token_management]
     why: "Core authentication flow must be followed"
-  
+
   - name: "Payment Processing Interface"
     doc: @docs/interfaces/payment-gateway.md
     relevance: HIGH
     sections: [transaction_processing, webhook_handling]
     why: "Integration with payment provider constraints"
-    
+
   - name: "Event Bus Interface"
     doc: @docs/interfaces/event-bus.md (NEW)
     relevance: MEDIUM
@@ -323,14 +290,14 @@ interfaces:
 # Database/storage schema modifications
 Table: primary_entity_table
   ADD COLUMN: new_field (data_type, constraints)
-  MODIFY COLUMN: existing_field (new_constraints) 
+  MODIFY COLUMN: existing_field (new_constraints)
   ADD INDEX: performance_index (fields)
 
 Table: supporting_entity_table (NEW)
   id: primary_key
   related_id: foreign_key
   business_field: data_type, constraints
-  
+
 # Reference detailed schema documentation if available
 schema_doc: @docs/interfaces/database-schema.md
 migration_scripts: @migrations/v2.1.0/
@@ -356,7 +323,7 @@ Endpoint: Feature Operation
       error_code: string
       message: string
       details: object (optional)
-  
+
 # Reference comprehensive API documentation if available
 api_doc: @docs/interfaces/internal-api.md
 openapi_spec: @specs/openapi.yaml
@@ -369,11 +336,11 @@ openapi_spec: @specs/openapi.yaml
 ```pseudocode
 # Core business objects being modified/created
 ENTITY: PrimaryEntity (MODIFIED/NEW)
-  FIELDS: 
+  FIELDS:
     existing_field: data_type
     + new_field: data_type (NEW)
     ~ modified_field: updated_type (CHANGED)
-  
+
   BEHAVIORS:
     existing_method(): return_type
     + new_method(parameters): return_type (NEW)
@@ -382,7 +349,7 @@ ENTITY: PrimaryEntity (MODIFIED/NEW)
 ENTITY: SupportingEntity (NEW)
   FIELDS: [field_definitions]
   BEHAVIORS: [method_definitions]
-  
+
 # Reference domain model documentation if available
 domain_doc: @docs/domain/entity-model.md
 ```
@@ -431,13 +398,13 @@ External_Service_Name:
 function calculateDiscount(order: Order, user: User): Discount {
   // Business rule: VIP users get additional benefits
   const baseDiscount = order.subtotal * getBaseDiscountRate(user.tier);
-  
+
   // Complex rule: Stacking discounts with limits
   const promotionalDiscount = Math.min(
     order.promotions.reduce((sum, promo) => sum + promo.value, 0),
     order.subtotal * MAX_PROMO_PERCENTAGE
   );
-  
+
   // Edge case: Never exceed maximum discount
   return Math.min(
     baseDiscount + promotionalDiscount,
@@ -485,7 +452,7 @@ describe('PromoCodeValidator', () => {
   it('should validate promo code format and availability', async () => {
     // This test documents expected interface behavior
     const validator = new PromoCodeValidator(mockRepository);
-    
+
     // Valid code passes all checks
     const validResult = await validator.validate('SUMMER2024');
     expect(validResult).toEqual({
@@ -493,7 +460,7 @@ describe('PromoCodeValidator', () => {
       discount: { type: 'percentage', value: 20 },
       restrictions: { minOrder: 50, maxUses: 1 }
     });
-    
+
     // Expired code returns specific error
     const expiredResult = await validator.validate('EXPIRED2023');
     expect(expiredResult).toEqual({
@@ -524,7 +491,7 @@ sequenceDiagram
     participant PromoCodeController
     participant PromoCodeValidator
     participant OrderDiscountService
-    
+
     User->>UI: Apply promo code
     UI->>PromoCodeController: POST /apply-code
     PromoCodeController->>PromoCodeValidator: validate(code)
@@ -553,7 +520,7 @@ OUTPUT: processed_result
 
 1. VALIDATE: input_parameters, user_permissions, system_state
 2. TRANSFORM: raw_input -> structured_data
-3. APPLY_BUSINESS_RULES: 
+3. APPLY_BUSINESS_RULES:
    - Check constraints and limits
    - Calculate derived values
    - Apply conditional logic
@@ -592,25 +559,64 @@ OUTPUT: processed_result
   relevance: [CRITICAL|HIGH|MEDIUM|LOW]
   why: "[Brief explanation of why this pattern is needed]"
 
-# New patterns created for this feature  
+# New patterns created for this feature
 - pattern: @docs/patterns/[new-pattern-name].md (NEW)
   relevance: [CRITICAL|HIGH|MEDIUM|LOW]
   why: "[Brief explanation of why this pattern was created]"
 ```
 
-### Interface Specifications
+### User Interface & UX (if applicable)
 
-[NEEDS CLARIFICATION: What external interfaces are involved and need documentation?]
-```yaml
-# External interfaces this feature integrates with
-- interface: @docs/interfaces/[interface-name].md
-  relevance: [CRITICAL|HIGH|MEDIUM|LOW]
-  why: "[Brief explanation of why this interface is relevant]"
+[NEEDS CLARIFICATION: What UI/UX architecture decisions apply to this feature?]
 
-# New interfaces created
-- interface: @docs/interfaces/[new-interface-name].md (NEW)
-  relevance: [CRITICAL|HIGH|MEDIUM|LOW]
-  why: "[Brief explanation of why this interface is being created]"
+**Information Architecture:**
+- Navigation: [Site structure, menu hierarchy, breadcrumbs]
+- Content Organization: [Page layouts, content grouping, user mental models]
+- User Flows: [Task completion paths, entry/exit points]
+
+**Design System:**
+- Components: [Which design system components to use/extend]
+- Tokens: [Colors, typography, spacing from design system]
+- Patterns: [Form patterns, feedback patterns, loading states]
+
+**Interaction Design:**
+- State Management: [UI state, form state, optimistic updates]
+- Feedback: [Loading indicators, success/error states, notifications]
+- Accessibility: [WCAG level, keyboard navigation, screen reader support]
+
+#### UI Visualization Guide
+
+**Entry Points** — Use ASCII wireframes to show where features live:
+```
+┌─────────────────────────────────────────┐
+│  Workspace Switcher Dropdown            │
+├─────────────────────────────────────────┤
+│  ✓ Current Workspace                    │
+│    Other Workspace                      │
+│  ─────────────────────────────          │
+│  ⚙️  Settings                           │
+│  🔑 API Keys                  ← NEW     │
+└─────────────────────────────────────────┘
+```
+
+**Screen Flows** — Use Mermaid flowcharts for navigation:
+```mermaid
+flowchart LR
+    A[Entry Point] -->|Action| B[Screen 2]
+    B -->|Action| C[Screen 3]
+    C -->|Complete| A
+    C -->|Cancel| B
+```
+
+**Component States** — Use Mermaid state diagrams for interactions:
+```mermaid
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> Loading: Submit
+    Loading --> Success: 200 OK
+    Loading --> Error: 4xx/5xx
+    Error --> Idle: Retry
+    Success --> [*]
 ```
 
 ### System-Wide Patterns
@@ -631,86 +637,6 @@ OUTPUT: processed_result
 - **Service Discovery**: [How components find each other in different environments]
 - **Circuit Breakers**: [Handling failures between components]
 - **Distributed Tracing**: [Correlation IDs, trace propagation across services]
-
-### Implementation Patterns
-
-#### Code Patterns and Conventions
-[NEEDS CLARIFICATION: What code patterns, naming conventions, and implementation approaches should be followed?]
-
-#### State Management Patterns
-[NEEDS CLARIFICATION: How is state, refs, side effects, and data flow managed across the application?]
-
-#### Performance Characteristics
-[NEEDS CLARIFICATION: What are the system-wide performance strategies, optimization patterns, and resource management approaches?]
-
-#### Integration Patterns
-[NEEDS CLARIFICATION: What are the common approaches for external service integration, API communication, and event handling?]
-
-#### Component Structure Pattern
-
-[NEEDS CLARIFICATION: What component organization pattern should be followed?]
-```pseudocode
-# Follow existing component organization in codebase
-COMPONENT: FeatureComponent(properties)
-  INITIALIZE: local_state, external_data_hooks
-  
-  HANDLE: loading_states, error_states, success_states
-  
-  RENDER: 
-    IF loading: loading_indicator
-    IF error: error_display(error_info)
-    IF success: main_content(data, actions)
-```
-
-#### Data Processing Pattern
-
-[NEEDS CLARIFICATION: How should business logic flow be structured?]
-```pseudocode
-# Business logic flow
-FUNCTION: process_feature_operation(input, context)
-  VALIDATE: input_format, permissions, preconditions
-  AUTHORIZE: user_access, operation_permissions
-  TRANSFORM: input_data -> business_objects
-  EXECUTE: core_business_logic
-  PERSIST: save_results, update_related_data
-  RESPOND: success_result OR error_information
-```
-
-#### Error Handling Pattern
-
-[NEEDS CLARIFICATION: How should errors be classified, logged, and handled?]
-```pseudocode
-# Error management approach
-FUNCTION: handle_operation_errors(operation_result)
-  CLASSIFY: error_type (validation, business_rule, system)
-  LOG: error_details, context_information
-  RECOVER: attempt_recovery_if_applicable
-  RESPOND: 
-    user_facing_message(safe_error_info)
-    system_recovery_action(if_needed)
-```
-
-#### Test Pattern
-
-[NEEDS CLARIFICATION: What testing approach should be used for behavior verification?]
-```pseudocode
-# Testing approach for behavior verification
-TEST_SCENARIO: "Feature operates correctly under normal conditions"
-  SETUP: valid_input_data, required_system_state
-  EXECUTE: feature_operation_with_input
-  VERIFY: 
-    expected_output_produced
-    system_state_updated_correctly
-    side_effects_occurred_as_expected
-    error_conditions_handled_properly
-```
-
-### Integration Points
-
-[NEEDS CLARIFICATION: How does this feature integrate with the existing system?]
-- Connection Points: [Where this connects to existing system]
-- Data Flow: [What data flows in/out]
-- Events: [What events are triggered/consumed]
 
 ## Architecture Decisions
 
@@ -733,6 +659,35 @@ TEST_SCENARIO: "Feature operates correctly under normal conditions"
 - Usability: [User experience requirements, accessibility standards]
 - Security: [Access control, data protection, audit requirements]
 - Reliability: [Uptime targets, error recovery, data integrity]
+
+## Acceptance Scenarios
+
+[NEEDS CLARIFICATION: What scenarios verify the PRD acceptance criteria are met?]
+
+Map each critical PRD acceptance criterion to a testable scenario. These scenarios define "done" for direct implementation without a PLAN.
+
+**Scenario: [PRD/AC-X.Y - Brief description]**
+```gherkin
+Given: [Initial system state]
+When: [User/system action]
+Then: [Expected outcome]
+And: [Additional verifiable result]
+```
+
+**Scenario: [PRD/AC-X.Y - Error handling]**
+```gherkin
+Given: [Pre-condition]
+When: [Invalid action or error condition]
+Then: [System handles gracefully]
+And: [User receives appropriate feedback]
+```
+
+**Scenario: [PRD/AC-X.Y - Edge case]**
+```gherkin
+Given: [Boundary condition]
+When: [Edge case operation]
+Then: [Correct behavior at limits]
+```
 
 ## Risks and Technical Debt
 
@@ -759,59 +714,6 @@ TEST_SCENARIO: "Feature operates correctly under normal conditions"
 - [Timing issues, race conditions, or synchronization problems]
 - [Configuration quirks or environment-specific issues]
 - [Known issues with third-party dependencies]
-
-## Test Specifications
-
-### Critical Test Scenarios
-
-[NEEDS CLARIFICATION: What are the critical test scenarios that must pass?]
-**Scenario 1: Primary Happy Path**
-```gherkin
-Given: [System in valid initial state]
-And: [Required preconditions met]
-When: [User performs main action]
-Then: [Expected outcome occurs]
-And: [System state updated correctly]
-And: [Appropriate feedback provided]
-```
-
-**Scenario 2: Validation Error Handling**
-```gherkin
-Given: [System ready for input]
-When: [User provides invalid input]
-Then: [Specific error message displayed]
-And: [System state remains unchanged]
-And: [User can recover/retry]
-```
-
-**Scenario 3: System Error Recovery**
-```gherkin
-Given: [Normal operation in progress]
-When: [System error occurs during processing]
-Then: [Error handled gracefully]
-And: [User notified appropriately]
-And: [System maintains data integrity]
-```
-
-**Scenario 4: Edge Case Handling**
-```gherkin
-Given: [Boundary condition scenario]
-When: [Edge case operation attempted]
-Then: [System handles edge case correctly]
-And: [No unexpected behavior occurs]
-```
-
-### Test Coverage Requirements
-
-[NEEDS CLARIFICATION: What aspects require test coverage?]
-- **Business Logic**: [All decision paths, calculations, validation rules]
-- **User Interface**: [All interaction flows, states, accessibility]  
-- **Integration Points**: [External service calls, data persistence]
-- **Edge Cases**: [Boundary values, empty states, concurrent operations]
-- **Performance**: [Response times under load, resource usage]
-- **Security**: [Input validation, authorization, data protection]
-
----
 
 ## Glossary
 

@@ -1,12 +1,25 @@
+---
+title: "[NEEDS CLARIFICATION: Feature title]"
+status: draft
+version: "1.0"
+---
+
 # Implementation Plan
 
 ## Validation Checklist
 
+### CRITICAL GATES (Must Pass)
+
 - [ ] All `[NEEDS CLARIFICATION: ...]` markers have been addressed
 - [ ] All specification file paths are correct and exist
+- [ ] Each phase follows TDD: Prime → Test → Implement → Validate
+- [ ] Every task has verifiable success criteria
+- [ ] A developer could follow this plan independently
+
+### QUALITY CHECKS (Should Pass)
+
 - [ ] Context priming section is complete
 - [ ] All implementation phases are defined
-- [ ] Each phase follows TDD: Prime → Test → Implement → Validate
 - [ ] Dependencies between phases are clear (no circular dependencies)
 - [ ] Parallel work is properly tagged with `[parallel: true]`
 - [ ] Activity hints provided for specialist selection `[activity: type]`
@@ -14,7 +27,6 @@
 - [ ] Every test references PRD acceptance criteria
 - [ ] Integration & E2E tests defined in final phase
 - [ ] Project commands match actual project setup
-- [ ] A developer could follow this plan independently
 
 ---
 
@@ -42,6 +54,21 @@ When implementation requires changes from the specification:
 - `[ref: document/section; lines: 1, 2-3]` - Links to specifications, patterns, or interfaces and (if applicable) line(s)
 - `[activity: type]` - Activity hint for specialist agent selection
 
+### Success Criteria
+
+**Validate** = Process verification ("did we follow TDD?")
+**Success** = Outcome verification ("does it work correctly?")
+
+```markdown
+# Single-line format
+- Success: [Criterion] `[ref: PRD/AC-X.Y]`
+
+# Multi-line format
+- Success:
+  - [ ] [Criterion 1] `[ref: PRD/AC-X.Y]`
+  - [ ] [Criterion 2] `[ref: SDD/Section]`
+```
+
 ---
 
 ## Context Priming
@@ -53,6 +80,7 @@ When implementation requires changes from the specification:
 [NEEDS CLARIFICATION: Replace with actual paths from your spec directory]
 - `docs/specs/[NNN]-[name]/product-requirements.md` - Product Requirements
 - `docs/specs/[NNN]-[name]/solution-design.md` - Solution Design
+- `docs/{patterns,interfaces,research}/[name].md`  - Optional references
 
 **Key Design Decisions**:
 
@@ -62,7 +90,7 @@ When implementation requires changes from the specification:
 
 **Implementation Context**:
 
-[NEEDS CLARIFICATION: Update commands to match project setup]
+[NEEDS CLARIFICATION: Update implementation-relevant commands to match project setup]
 ```bash
 # Testing
 npm test                    # Unit tests
@@ -75,10 +103,6 @@ npm run typecheck          # Type checking
 # Full validation
 npm run validate           # All checks
 ```
-
-Patterns: `[ref: docs/patterns/relevant-pattern.md]`
-
-Interfaces: `[ref: docs/interfaces/relevant-api.md]`
 
 ---
 
@@ -98,27 +122,23 @@ Establishes the foundational [domain/infrastructure/components] required for sub
 
 - [ ] **T1.1 [Primary deliverable name]** `[activity: domain-modeling]`
 
-  **Prime**: Read [entity/component] specification `[ref: SDD/Section X; lines: Y-Z]`
-
-  **Test**: [Behavior 1]; [Behavior 2]; [Edge case handling]
-
-  **Implement**: Create `src/[path]/[File].ts` with [key capability]
-
-  **Validate**: Unit tests pass; lint clean; types check
+  - Prime: Read [entity/component] specification `[ref: SDD/Section X; lines: Y-Z]`
+  - Test: [Behavior 1]; [Behavior 2]; [Edge case handling]
+  - Implement: Create `src/[path]/[File].ts` with [key capability]
+  - Validate: Unit tests pass; lint clean; types check
+  - Success: [Criterion 1] `[ref: PRD/AC-1.1]`; [Criterion 2] `[ref: SDD/Section]`
 
 - [ ] **T1.2 [Secondary deliverable name]** `[activity: data-architecture]`
 
-  **Prime**: Review [pattern/interface] requirements `[ref: SDD/Section X]`
-
-  **Test**: [CRUD operations]; [Query patterns]; [Error handling]
-
-  **Implement**: Create `src/[path]/[File].ts` with [key capability]
-
-  **Validate**: Integration tests pass; lint clean; types check
+  - Prime: Review [pattern/interface] requirements `[ref: SDD/Section X]`
+  - Test: [CRUD operations]; [Query patterns]; [Error handling]
+  - Implement: Create `src/[path]/[File].ts` with [key capability]
+  - Validate: Integration tests pass; lint clean; types check
+  - Success: [Criterion 1] `[ref: PRD/AC-1.2]`; [Criterion 2] `[ref: SDD/Section]`
 
 - [ ] **T1.3 Phase Validation** `[activity: validate]`
 
-  Run all Phase 1 tests. Verify foundation matches SDD data models. Lint and typecheck pass.
+  - Run all Phase 1 tests. Verify foundation matches SDD data models. Lint and typecheck pass.
 
 ---
 
@@ -130,23 +150,22 @@ Builds the [API endpoints/integrations/UI components] that expose Phase 1 capabi
 
 - [ ] **T2.1 [Component A]** `[parallel: true]` `[component: backend]`
 
-  **Prime**: Read API specification `[ref: SDD/Section X]`
-
-  **Test**: [Endpoint behavior]; [Validation]; [Error responses]
-
-  **Implement**: Create `src/[path]/[Controller].ts` with routes
-
-  **Validate**: API tests pass; contract matches specification
+  - Prime: Read API specification `[ref: SDD/Section X]`
+  - Test: [Endpoint behavior]; [Validation]; [Error responses]
+  - Implement: Create `src/[path]/[Controller].ts` with routes
+  - Validate: API tests pass; contract matches specification
+  - Success: [Criterion] `[ref: PRD/AC-2.1]`
 
 - [ ] **T2.2 [Component B]** `[parallel: true]` `[component: backend]`
 
-  **Prime**: Read integration pattern `[ref: docs/interfaces/X.md]`
-
-  **Test**: [Success flow]; [Failure handling]; [Retry logic]
-
-  **Implement**: Create `src/[path]/[Adapter].ts` with integration
-
-  **Validate**: Integration tests pass with test/mock service
+  - Prime: Read integration pattern `[ref: docs/interfaces/X.md]`
+  - Test: [Success flow]; [Failure handling]; [Retry logic]
+  - Implement: Create `src/[path]/[Adapter].ts` with integration
+  - Validate: Integration tests pass with test/mock service
+  - Success:
+    - [Success criterion 1] `[ref: PRD/AC-2.2]`
+    - [Failure handling verified] `[ref: SDD/Error Handling]`
+    - [Retry logic works with backoff] `[ref: docs/patterns/resilience.md]`
 
 - [ ] **T2.3 Phase Validation** `[activity: validate]`
 
@@ -154,7 +173,7 @@ Builds the [API endpoints/integrations/UI components] that expose Phase 1 capabi
 
 ---
 
-### Phase 3: Integration & Validation
+### Phase 3: Final Integration & Validation
 
 Full system validation ensuring all components work together correctly.
 

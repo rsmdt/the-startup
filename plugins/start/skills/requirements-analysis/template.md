@@ -1,18 +1,29 @@
+---
+title: "[NEEDS CLARIFICATION: Feature title]"
+status: draft
+version: "1.0"
+---
+
 # Product Requirements Document
 
 ## Validation Checklist
 
+### CRITICAL GATES (Must Pass)
+
 - [ ] All required sections are complete
 - [ ] No [NEEDS CLARIFICATION] markers remain
 - [ ] Problem statement is specific and measurable
+- [ ] Every feature has testable acceptance criteria (EARS format)
+- [ ] No contradictions between sections
+
+### QUALITY CHECKS (Should Pass)
+
 - [ ] Problem is validated by evidence (not assumptions)
 - [ ] Context → Problem → Solution flow makes sense
 - [ ] Every persona has at least one user journey
 - [ ] All MoSCoW categories addressed (Must/Should/Could/Won't)
-- [ ] Every feature has testable acceptance criteria
 - [ ] Every metric has corresponding tracking events
 - [ ] No feature redundancy (check for duplicates)
-- [ ] No contradictions between sections
 - [ ] No technical implementation details included
 - [ ] A new team member could understand this PRD
 
@@ -58,10 +69,25 @@
 
 #### Feature 1: [NEEDS CLARIFICATION: Feature name]
 - **User Story:** As a [user type], I want to [action] so that [benefit]
-- **Acceptance Criteria:**
-  - [ ] [Specific, testable criterion]
-  - [ ] [Another measurable criterion]
-  - [ ] [Edge case handling]
+- **Acceptance Criteria (EARS Format):**
+
+  Use the appropriate pattern for each criterion:
+  - UBIQUITOUS: `THE SYSTEM SHALL [action]` - always-on behavior
+  - EVENT-DRIVEN: `WHEN [trigger], THE SYSTEM SHALL [action]` - user/system events
+  - STATE-DRIVEN: `WHILE [state], THE SYSTEM SHALL [action]` - mode-dependent
+  - OPTIONAL: `WHERE [feature enabled], THE SYSTEM SHALL [action]` - configurable
+  - COMPLEX: `IF [condition], THEN THE SYSTEM SHALL [action]` - business rules
+
+  **Good Example:**
+  - [ ] WHEN the user submits valid credentials, THE SYSTEM SHALL redirect to dashboard within 2 seconds
+
+  **Bad Example:**
+  - [ ] User can log in _(vague, not testable)_
+
+  Criteria:
+  - [ ] [EARS-formatted criterion]
+  - [ ] [EARS-formatted criterion]
+  - [ ] [EARS-formatted edge case]
 
 #### Feature 2: [NEEDS CLARIFICATION: Feature name]
 [Repeat structure as needed]
