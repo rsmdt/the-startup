@@ -2,7 +2,7 @@
 
 **Specialized agent library for Claude Code that provides expert capabilities across all software development domains.**
 
-The `team` plugin provides 11 specialized agent roles with 27 activity-based specializations. Each agent brings deep expertise in a specific domain, enabling Claude Code to tackle complex tasks with specialist knowledge.
+The `team` plugin provides 11 specialized agent roles with 31 activity-based specializations. Each agent brings deep expertise in a specific domain, enabling Claude Code to tackle complex tasks with specialist knowledge.
 
 ---
 
@@ -43,7 +43,7 @@ Routes project work by assessing complexity across multiple dimensions and ident
 - **Feature Prioritization** - Prioritize features, evaluate trade-offs, and establish success metrics
 - **Project Coordination** - Break down complex projects, identify dependencies, and coordinate cross-functional work
 
-### 🏗️ The Architect (4 specializations)
+### 🏗️ The Architect (7 specializations)
 
 **System design and technical excellence specialist**
 
@@ -51,8 +51,11 @@ Routes project work by assessing complexity across multiple dimensions and ident
 - **Technology Research** - Research solutions, evaluate technologies, and provide informed recommendations
 - **Quality Review** - Review architecture and code quality for technical excellence
 - **System Documentation** - Create architectural documentation, design decision records, and integration guides
+- **Security Review** - Identify vulnerabilities, injection risks, auth issues, and secrets exposure
+- **Simplification Review** - Aggressively challenge complexity, enforce YAGNI, detect over-engineering
+- **Compatibility Review** - Detect breaking changes, validate migration paths, ensure backwards compatibility
 
-### 👨‍💻 The Software Engineer (4 specializations)
+### 👨‍💻 The Software Engineer (5 specializations)
 
 **Implementation and optimization specialist**
 
@@ -60,6 +63,7 @@ Routes project work by assessing complexity across multiple dimensions and ident
 - **Component Development** - Design UI components and manage state flows for scalable frontend applications
 - **Domain Modeling** - Model business domains with proper entities, business rules, and persistence design
 - **Performance Optimization** - Optimize application performance through systematic profiling and optimization
+- **Concurrency Review** - Find race conditions, deadlocks, async anti-patterns, and resource leaks
 
 ### 🧪 The QA Engineer (3 specializations)
 
@@ -78,7 +82,7 @@ Routes project work by assessing complexity across multiple dimensions and ident
 - **Design Foundation** - Create design systems and visual foundations for consistent user experiences
 - **Accessibility Implementation** - Ensure WCAG compliance and make products usable by everyone
 
-### ⚙️ The Platform Engineer (7 specializations)
+### ⚙️ The Platform Engineer (8 specializations)
 
 **Infrastructure and operations specialist**
 
@@ -89,6 +93,7 @@ Routes project work by assessing complexity across multiple dimensions and ident
 - **Performance Tuning** - Optimize system and database performance through profiling and tuning
 - **Data Architecture** - Design data architectures with schema modeling and migration planning
 - **Pipeline Engineering** - Design and implement data pipelines for high-volume processing
+- **Dependency Review** - Assess CVEs, license compliance, supply chain security, and necessity
 
 ### 🤖 The Meta Agent
 

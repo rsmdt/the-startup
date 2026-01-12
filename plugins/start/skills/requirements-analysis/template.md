@@ -13,7 +13,7 @@ version: "1.0"
 - [ ] All required sections are complete
 - [ ] No [NEEDS CLARIFICATION] markers remain
 - [ ] Problem statement is specific and measurable
-- [ ] Every feature has testable acceptance criteria (EARS format)
+- [ ] Every feature has testable acceptance criteria (Gherkin format)
 - [ ] No contradictions between sections
 
 ### QUALITY CHECKS (Should Pass)
@@ -69,25 +69,24 @@ version: "1.0"
 
 #### Feature 1: [NEEDS CLARIFICATION: Feature name]
 - **User Story:** As a [user type], I want to [action] so that [benefit]
-- **Acceptance Criteria (EARS Format):**
+- **Acceptance Criteria (Gherkin Format):**
 
-  Use the appropriate pattern for each criterion:
-  - UBIQUITOUS: `THE SYSTEM SHALL [action]` - always-on behavior
-  - EVENT-DRIVEN: `WHEN [trigger], THE SYSTEM SHALL [action]` - user/system events
-  - STATE-DRIVEN: `WHILE [state], THE SYSTEM SHALL [action]` - mode-dependent
-  - OPTIONAL: `WHERE [feature enabled], THE SYSTEM SHALL [action]` - configurable
-  - COMPLEX: `IF [condition], THEN THE SYSTEM SHALL [action]` - business rules
+  Use the Given/When/Then structure for each criterion:
+  - `Given` [precondition or initial state]
+  - `When` [user action or system event]
+  - `Then` [expected observable outcome]
+  - `And` [additional outcomes if needed]
 
   **Good Example:**
-  - [ ] WHEN the user submits valid credentials, THE SYSTEM SHALL redirect to dashboard within 2 seconds
+  - [ ] Given the user has entered valid credentials, When they submit the login form, Then they are redirected to the dashboard within 2 seconds
 
   **Bad Example:**
   - [ ] User can log in _(vague, not testable)_
 
   Criteria:
-  - [ ] [EARS-formatted criterion]
-  - [ ] [EARS-formatted criterion]
-  - [ ] [EARS-formatted edge case]
+  - [ ] Given [state], When [action], Then [outcome]
+  - [ ] Given [state], When [action], Then [outcome]
+  - [ ] Given [edge case], When [action], Then [correct behavior]
 
 #### Feature 2: [NEEDS CLARIFICATION: Feature name]
 [Repeat structure as needed]

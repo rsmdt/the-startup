@@ -660,34 +660,30 @@ stateDiagram-v2
 - Security: [Access control, data protection, audit requirements]
 - Reliability: [Uptime targets, error recovery, data integrity]
 
-## Acceptance Scenarios
+## Acceptance Criteria
 
-[NEEDS CLARIFICATION: What scenarios verify the PRD acceptance criteria are met?]
+[NEEDS CLARIFICATION: What system behaviors verify the PRD acceptance scenarios are met?]
 
-Map each critical PRD acceptance criterion to a testable scenario. These scenarios define "done" for direct implementation without a PLAN.
+Translate each critical PRD acceptance scenario into a system-level specification using EARS format. These criteria define the technical "done" for implementation.
 
-**Scenario: [PRD/AC-X.Y - Brief description]**
-```gherkin
-Given: [Initial system state]
-When: [User/system action]
-Then: [Expected outcome]
-And: [Additional verifiable result]
-```
+Use the appropriate EARS pattern for each criterion:
+- **UBIQUITOUS**: `THE SYSTEM SHALL [action]` - always-on behavior
+- **EVENT-DRIVEN**: `WHEN [trigger], THE SYSTEM SHALL [action]` - user/system events
+- **STATE-DRIVEN**: `WHILE [state], THE SYSTEM SHALL [action]` - mode-dependent
+- **OPTIONAL**: `WHERE [feature enabled], THE SYSTEM SHALL [action]` - configurable
+- **COMPLEX**: `IF [condition], THEN THE SYSTEM SHALL [action]` - business rules
 
-**Scenario: [PRD/AC-X.Y - Error handling]**
-```gherkin
-Given: [Pre-condition]
-When: [Invalid action or error condition]
-Then: [System handles gracefully]
-And: [User receives appropriate feedback]
-```
+**Main Flow Criteria: [PRD/AC-X.Y - Brief description]**
+- [ ] WHEN [user/system trigger], THE SYSTEM SHALL [expected behavior]
+- [ ] THE SYSTEM SHALL [always-on requirement]
 
-**Scenario: [PRD/AC-X.Y - Edge case]**
-```gherkin
-Given: [Boundary condition]
-When: [Edge case operation]
-Then: [Correct behavior at limits]
-```
+**Error Handling Criteria: [PRD/AC-X.Y - Error handling]**
+- [ ] WHEN [error condition occurs], THE SYSTEM SHALL [graceful handling]
+- [ ] IF [invalid input], THEN THE SYSTEM SHALL [appropriate feedback]
+
+**Edge Case Criteria: [PRD/AC-X.Y - Edge case]**
+- [ ] WHILE [boundary state], THE SYSTEM SHALL [correct behavior]
+- [ ] IF [limit condition], THEN THE SYSTEM SHALL [appropriate response]
 
 ## Risks and Technical Debt
 

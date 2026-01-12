@@ -76,7 +76,7 @@ Use this checklist to validate SDD completeness before proceeding to Implementat
 
 - [ ] **A developer could implement from this** - Clear enough for someone new
 - [ ] **Implementation examples provided** - For complex logic (where helpful)
-- [ ] **Test scenarios defined** - Gherkin scenarios for key flows
+- [ ] **Acceptance criteria defined** - EARS criteria for system behaviors
 - [ ] **Dependencies identified** - External libraries, services, etc.
 
 ## Consistency Checks
