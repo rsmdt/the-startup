@@ -1,31 +1,31 @@
 ---
-name: accessibility-implementation
-description: PROACTIVELY ensure accessibility when building forms, interactive elements, or user interfaces. MUST BE USED when WCAG compliance is required or accessibility audits reveal issues. Automatically invoke when creating buttons, modals, navigation, or any keyboard-interactive elements. Includes ARIA, color contrast, focus states, and screen reader compatibility. Examples:
+name: build-accessibility
+description: PROACTIVELY build accessibility features when building forms, interactive elements, or user interfaces. MUST BE USED when WCAG compliance is required or accessibility audits reveal issues. Automatically invoke when creating buttons, modals, navigation, or any keyboard-interactive elements. Includes ARIA, color contrast, focus states, and screen reader compatibility. Examples:
 
 <example>
 Context: The user is building a form that needs to be accessible.
 user: "I need to make this registration form accessible for screen readers"
-assistant: "I'll use the accessibility-implementation agent to ensure your form meets WCAG standards with proper labels, error handling, and keyboard navigation."
+assistant: "I'll use the build-accessibility agent to ensure your form meets WCAG standards with proper labels, error handling, and keyboard navigation."
 <commentary>
-The user needs accessibility features implemented for their form, so use the Task tool to launch the accessibility-implementation agent.
+The user needs accessibility features implemented for their form, so use the Task tool to launch the build-accessibility agent.
 </commentary>
 </example>
 
 <example>
 Context: The user's application needs an accessibility audit.
 user: "Can you check if our dashboard meets accessibility standards?"
-assistant: "Let me use the accessibility-implementation agent to audit your dashboard against WCAG 2.1 AA criteria and implement necessary improvements."
+assistant: "Let me use the build-accessibility agent to audit your dashboard against WCAG 2.1 AA criteria and implement necessary improvements."
 <commentary>
-The user needs accessibility compliance verification and implementation, so use the Task tool to launch the accessibility-implementation agent.
+The user needs accessibility compliance verification and implementation, so use the Task tool to launch the build-accessibility agent.
 </commentary>
 </example>
 
 <example>
 Context: The user is implementing a complex interactive component.
 user: "I'm building a custom dropdown menu component that needs keyboard support"
-assistant: "I'll use the accessibility-implementation agent to implement proper keyboard navigation, ARIA patterns, and focus management for your dropdown."
+assistant: "I'll use the build-accessibility agent to implement proper keyboard navigation, ARIA patterns, and focus management for your dropdown."
 <commentary>
-Complex UI components require careful accessibility implementation, use the Task tool to launch the accessibility-implementation agent.
+Complex UI components require careful accessibility implementation, use the Task tool to launch the build-accessibility agent.
 </commentary>
 </example>
 model: haiku

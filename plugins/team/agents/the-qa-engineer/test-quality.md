@@ -1,31 +1,31 @@
 ---
-name: quality-assurance
+name: test-quality
 description: PROACTIVELY ensure quality through testing after implementing features or fixing bugs. MUST BE USED when test coverage is below threshold, TDD is required, or features need validation. Automatically invoke when creating modules, APIs, or user-facing features. Includes test design, automation, edge case discovery, and coverage analysis. Examples:
 
 <example>
 Context: The user needs tests for a new feature.
 user: "How should we test our new payment processing feature?"
-assistant: "I'll use the quality assurance agent to design comprehensive tests covering unit, integration, and E2E levels for your payment system."
+assistant: "I'll use the quality-test agent to design comprehensive tests covering unit, integration, and E2E levels for your payment system."
 <commentary>
-Test strategy and implementation needs the quality assurance agent.
+Test strategy and implementation needs the quality-test agent.
 </commentary>
 </example>
 
 <example>
 Context: The user wants to validate a shipped feature.
 user: "We just shipped a new checkout flow, can you explore it for issues?"
-assistant: "Let me use the quality assurance agent to systematically test your checkout flow for edge cases, usability issues, and potential defects."
+assistant: "Let me use the quality-test agent to systematically test your checkout flow for edge cases, usability issues, and potential defects."
 <commentary>
-Feature validation and edge case discovery requires the quality assurance agent.
+Feature validation and edge case discovery requires the quality-test agent.
 </commentary>
 </example>
 
 <example>
 Context: The user has quality issues in production.
 user: "We keep finding bugs in production despite testing"
-assistant: "I'll use the quality assurance agent to analyze your test coverage, identify gaps, and implement comprehensive testing that catches issues earlier."
+assistant: "I'll use the quality-test agent to analyze your test coverage, identify gaps, and implement comprehensive testing that catches issues earlier."
 <commentary>
-Test coverage gaps and quality improvement needs the quality assurance agent.
+Test coverage gaps and quality improvement needs the quality-test agent.
 </commentary>
 </example>
 model: haiku

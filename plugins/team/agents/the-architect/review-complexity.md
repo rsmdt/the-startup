@@ -1,6 +1,6 @@
 ---
-name: simplification-review
-description: AGGRESSIVELY review code for simplification opportunities. MUST BE USED when reviewing PRs to challenge unnecessary complexity. Automatically invoke for new abstractions, multi-layer changes, or code that feels "clever". Includes complexity reduction, YAGNI enforcement, over-engineering detection, and clarity improvement. Examples:\n\n<example>\nContext: Reviewing a PR with new abstractions.\nuser: "Review this PR that adds a new factory pattern"\nassistant: "I'll use the simplification-review agent to verify the abstraction is justified by current needs."\n<commentary>\nNew abstractions require aggressive review to prevent over-engineering and YAGNI violations.\n</commentary>\n</example>\n\n<example>\nContext: Reviewing complex implementation.\nuser: "This code works but feels complicated"\nassistant: "Let me use the simplification-review agent to identify opportunities for reducing complexity."\n<commentary>\n"Feels complicated" is a signal for simplification review to find unnecessary complexity.\n</commentary>\n</example>\n\n<example>\nContext: Reviewing refactored code.\nuser: "Check if this refactoring actually improved the code"\nassistant: "I'll use the simplification-review agent to assess if the changes reduced or added complexity."\n<commentary>\nRefactoring should simplify - this agent verifies that outcome.\n</commentary>\n</example>
+name: review-complexity
+description: AGGRESSIVELY review code for complexity issues. MUST BE USED when reviewing PRs to challenge unnecessary complexity. Automatically invoke for new abstractions, multi-layer changes, or code that feels "clever". Includes complexity reduction, YAGNI enforcement, over-engineering detection, and clarity improvement. Examples:\n\n<example>\nContext: Reviewing a PR with new abstractions.\nuser: "Review this PR that adds a new factory pattern"\nassistant: "I'll use the review-complexity agent to verify the abstraction is justified by current needs."\n<commentary>\nNew abstractions require aggressive review to prevent over-engineering and YAGNI violations.\n</commentary>\n</example>\n\n<example>\nContext: Reviewing complex implementation.\nuser: "This code works but feels complicated"\nassistant: "Let me use the review-complexity agent to identify opportunities for reducing complexity."\n<commentary>\n"Feels complicated" is a signal for complexity review to find unnecessary complexity.\n</commentary>\n</example>\n\n<example>\nContext: Reviewing refactored code.\nuser: "Check if this refactoring actually improved the code"\nassistant: "I'll use the review-complexity agent to assess if the changes reduced or added complexity."\n<commentary>\nRefactoring should simplify - this agent verifies that outcome.\n</commentary>\n</example>
 skills: codebase-navigation, pattern-detection, coding-conventions
 model: sonnet
 ---
@@ -73,7 +73,7 @@ When in doubt, challenge the complexity:
 ## Finding Format
 
 ```
-[🔧 Simplification] **[Title]** (SEVERITY)
+[🔧 Complexity] **[Title]** (SEVERITY)
 📍 Location: `file:line`
 🔍 Confidence: HIGH/MEDIUM/LOW
 ❌ Complexity: [What makes this unnecessarily complex]
