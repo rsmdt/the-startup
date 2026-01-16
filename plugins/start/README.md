@@ -2,7 +2,7 @@
 
 **Workflow orchestration plugin for spec-driven development in Claude Code.**
 
-The `start` plugin provides ten workflow commands, eighteen autonomous skills, and two output styles to transform how you build software with Claude Code.
+The `start` plugin provides eleven workflow commands, eighteen autonomous skills, and two output styles to transform how you build software with Claude Code.
 
 **📖 For quick start, workflow guide, and command selection, see the [main README](../../README.md).**
 
@@ -10,7 +10,7 @@ The `start` plugin provides ten workflow commands, eighteen autonomous skills, a
 
 ## Table of Contents
 
-- [Commands](#commands) — specify, implement, validate, review, document, analyze, refactor, debug, constitution
+- [Commands](#commands) — specify, implement, validate, review, document, analyze, refactor, simplify, debug, constitution
 - [Autonomous Skills](#autonomous-skills) — 18 context-activated skills
 - [Documentation Structure](#-documentation-structure) — specs, domain, patterns, interfaces
 - [Output Styles](#-output-styles) — The Startup, The ScaleUp
@@ -353,6 +353,84 @@ flowchart TD
     C --> |complex| F[**Create Specification**<br/>📄 *Generate solution-design.md*<br/>📄 *Generate implementation-plan.md*<br/>Document approach]
     F --> |defer| G[🚀 **Ready for /start:implement**<br/>Execute via planned phases]
 ```
+
+</details>
+
+---
+
+### `/start:simplify <target>`
+
+Simplify and refine code for clarity, consistency, and maintainability while preserving exact functionality.
+
+**Purpose:** Reduce complexity and improve readability through parallel analysis and safe, incremental refactoring
+
+**Usage:**
+```bash
+/start:simplify staged                           # Simplify staged changes
+/start:simplify recent                           # Simplify recent commits
+/start:simplify src/utils/auth.ts                # Simplify specific file
+/start:simplify src/services/                    # Simplify directory
+/start:simplify all                              # Simplify entire codebase (use with caution)
+```
+
+**Key Features:**
+- **5 Parallel Analysis Perspectives** - Complexity, Clarity, Redundancy, Structure, YAGNI
+- **Test-Validated Changes** - Establishes baseline, verifies after each change
+- **Sequential Execution** - One refactoring at a time with immediate test feedback
+- **Automatic Rollback** - Reverts on test failure
+- **Impact Ranking** - Prioritizes high-impact, low-risk improvements
+
+<details>
+<summary><strong>View Details</strong></summary>
+
+**When to use `/start:simplify` vs `/start:refactor`:**
+
+| Use Case | Command | Why |
+|----------|---------|-----|
+| Clean up staged changes before commit | `/start:simplify staged` | Quick, focused analysis |
+| Improve readability of a module | `/start:simplify src/module/` | Multi-perspective clarity check |
+| Major architectural restructuring | `/start:refactor` | Needs planning, spec creation |
+| Remove complexity after feature complete | `/start:simplify recent` | Polish recent work |
+| Upgrade dependencies, breaking changes | `/start:refactor` | Risk assessment, migration plan |
+
+**Analysis Perspectives:**
+
+| Perspective | What It Finds |
+|-------------|---------------|
+| 🔧 **Complexity** | Long methods (>20 lines), deep nesting, complex conditionals |
+| 📝 **Clarity** | Unclear names, magic numbers, nested ternaries, clever code |
+| 🔄 **Redundancy** | Copy-paste code, repeated patterns, duplicated logic |
+| 🏗️ **Structure** | Mixed concerns, god classes, feature envy |
+| 🧹 **YAGNI** | Dead code, unused abstractions, speculative generality |
+
+```mermaid
+flowchart TD
+    A([Simplify Request]) --> |parse| B[**Gather Target**<br/>Parse scope<br/>Load code]
+    B --> |baseline| C[**Run Tests**<br/>Establish baseline<br/>Check coverage]
+    C --> |analyze| D[**Launch 5 Agents**<br/>⚡ *Parallel analysis*<br/>🔧 Complexity<br/>📝 Clarity<br/>🔄 Redundancy<br/>🏗️ Structure<br/>🧹 YAGNI]
+    D --> |synthesize| E[**Rank Findings**<br/>Deduplicate<br/>Prioritize by impact]
+    E --> |confirm| F{User<br>Approves?}
+    F --> |yes| G[**Execute**<br/>One change at a time<br/>Test after each]
+    G --> |pass| H{More<br>Changes?}
+    H --> |yes| G
+    H --> |no| I[**Summary**<br/>Changes made<br/>Quality improvements]
+    F --> |no| I
+    G --> |fail| J[**Rollback**<br/>Revert change<br/>Report issue]
+    J --> H
+    I --> END[✅ **Simplification Complete**]
+```
+
+**Clarity Over Brevity:**
+
+The simplify command prioritizes readable code over compact code:
+
+| ❌ Avoid | ✅ Prefer |
+|----------|-----------|
+| Nested ternaries | `if/else` or `switch` |
+| Dense one-liners | Multi-line with clear steps |
+| Clever tricks | Obvious implementations |
+| Abbreviations | Descriptive names |
+| Magic numbers | Named constants |
 
 </details>
 
@@ -911,13 +989,22 @@ The ScaleUp provides contextual explanations as it works:
 
 Documents findings in `docs/patterns/`, `docs/domain/`, `docs/interfaces/`
 
-**Improve Code Quality**
+**Simplify Recent Changes**
 
 ```bash
-/start:refactor Simplify the WebSocket connection manager
+/start:simplify staged
+/start:simplify recent
 ```
 
-Test-validated incremental changes with automatic rollback on failures.
+Quick cleanup before commit - reduces complexity, improves clarity, removes dead code.
+
+**Major Refactoring**
+
+```bash
+/start:refactor Restructure the authentication module for better testability
+```
+
+For architectural changes - creates specs, plans migration, handles breaking changes.
 
 **Fix Bugs**
 

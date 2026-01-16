@@ -15,25 +15,51 @@ You are an intelligent implementation orchestrator that executes: **$ARGUMENTS**
 - **Track with TodoWrite** - Load ONE phase at a time
 - **Git integration is optional** - Offer branch/PR workflow as an option
 
+## Implementation Perspectives
+
+When tasks are independent, launch parallel agents for different implementation concerns.
+
+| Perspective | Intent | What to Implement |
+|-------------|--------|-------------------|
+| 🔧 **Feature** | Build core functionality | Business logic, data models, domain rules, algorithms |
+| 🔌 **API** | Create service interfaces | Endpoints, request/response handling, validation, error responses |
+| 🎨 **UI** | Build user interfaces | Views, components, interactions, state management |
+| 🧪 **Tests** | Ensure correctness | Unit tests, integration tests, edge cases, fixtures |
+| 📖 **Docs** | Maintain documentation | Code comments, API docs, README updates |
+
 ### Parallel Task Execution
 
 **Decompose implementation into parallel activities.** Launch multiple specialist agents in a SINGLE response when tasks are independent.
 
-**Activity decomposition for implementation:**
-- Feature implementation (core logic, data models, business rules)
-- API development (endpoints, request/response handling, validation)
-- UI/component development (views, interactions, state management)
-- Test implementation (unit tests, integration tests, edge cases)
-- Documentation updates (code comments, API docs, README)
+**For each perspective, describe the implementation intent:**
 
-**For EACH implementation activity, launch a specialist agent with:**
 ```
-FOCUS: [Specific task from PLAN.md - e.g., "Implement user registration endpoint"]
-EXCLUDE: [Other tasks, future phases - e.g., "Login endpoint, UI components"]
-CONTEXT: [Relevant SDD excerpts + prior phase outputs]
-OUTPUT: Working implementation with tests
-SUCCESS: Task complete, tests passing, code reviewed
+Implement [PERSPECTIVE] for [task from PLAN.md]:
+
+CONTEXT:
+- Spec: [SDD excerpts, interfaces, data models]
+- Prior work: [Outputs from earlier phases]
+- Standards: [From CLAUDE.md, project conventions]
+
+FOCUS: [What this perspective implements - from table above]
+
+OUTPUT: Implementation formatted as:
+  🔧 **[Component/Feature]**
+  📍 Location: `file:line`
+  📝 Implementation: [What was built]
+  🧪 Tests: [Test file and coverage]
+  ✅ Status: Complete / Needs review
 ```
+
+**Perspective-Specific Guidance:**
+
+| Perspective | Agent Focus |
+|-------------|-------------|
+| 🔧 Feature | Implement business logic per SDD, follow domain patterns, add error handling |
+| 🔌 API | Create endpoints per SDD interfaces, validate inputs, document with OpenAPI |
+| 🎨 UI | Build components per design, manage state, ensure accessibility |
+| 🧪 Tests | Cover happy paths and edge cases, mock external deps, assert behavior |
+| 📖 Docs | Update JSDoc/TSDoc, sync README, document new APIs |
 
 
 ## Workflow
@@ -64,8 +90,9 @@ Context: Offering version control integration for traceability.
 
 **During execution:**
 - Execute tasks (parallel when marked `[parallel: true]`, sequential otherwise)
-- **Parallel Tasks:** Launch specialist agents per Parallel Task Execution section
-- **Sequential Tasks:** Execute one task at a time with FOCUS/EXCLUDE prompts
+- **Parallel Tasks:** Launch agents per Implementation Perspectives table, synthesize results
+- **Sequential Tasks:** Execute one task at a time with FOCUS prompts
+- **Synthesis:** After parallel execution, collect outputs, verify consistency, merge changes
 
 **At checkpoint:**
 - Call: `Skill(skill: "start:drift-detection")` for spec alignment

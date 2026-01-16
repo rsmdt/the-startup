@@ -24,25 +24,62 @@ Findings are persisted to appropriate directories based on content type:
 - `docs/interfaces/` - API contracts, service integrations
 - `docs/research/` - General research findings, exploration notes
 
+## Analysis Perspectives
+
+Launch parallel agents for comprehensive codebase analysis. Select perspectives based on $ARGUMENTS focus area.
+
+| Perspective | Intent | What to Discover |
+|-------------|--------|------------------|
+| 📋 **Business** | Understand domain logic | Business rules, validation logic, workflows, state machines, domain entities |
+| 🏗️ **Technical** | Map architecture | Design patterns, conventions, module structure, dependency patterns |
+| 🔐 **Security** | Identify security model | Auth flows, authorization rules, data protection, input validation |
+| ⚡ **Performance** | Find optimization opportunities | Bottlenecks, caching patterns, query patterns, resource usage |
+| 🔌 **Integration** | Map external boundaries | External APIs, webhooks, data flows, third-party services |
+
+### Focus Area Mapping
+
+| Input | Perspectives to Launch |
+|-------|----------------------|
+| "business" or "domain" | 📋 Business |
+| "technical" or "architecture" | 🏗️ Technical |
+| "security" | 🔐 Security |
+| "performance" | ⚡ Performance |
+| "integration" or "api" | 🔌 Integration |
+| Empty or broad request | All relevant perspectives |
+
 ### Parallel Task Execution
 
 **Decompose analysis into parallel activities.** Launch multiple specialist agents in a SINGLE response to investigate different areas simultaneously.
 
-**Activity decomposition for codebase analysis:**
-- Business rule discovery (domain logic, workflows, validation rules)
-- Technical pattern analysis (architecture patterns, design patterns, conventions)
-- Security analysis (authentication, authorization, data protection)
-- Performance analysis (bottlenecks, caching, optimization opportunities)
-- Integration analysis (external services, APIs, data flows)
+**For each perspective, describe the analysis intent:**
 
-**For EACH analysis activity, launch a specialist agent with:**
 ```
-FOCUS: [Specific analysis area - e.g., "Discover business rules for order processing"]
-EXCLUDE: [Other analysis areas - e.g., "Technical patterns, security concerns"]
-CONTEXT: [Target code area + related documentation]
-OUTPUT: Documented findings with specific code references
-SUCCESS: All patterns/rules in focus area discovered and documented
+Analyze codebase for [PERSPECTIVE]:
+
+CONTEXT:
+- Target: [code area to analyze]
+- Scope: [module/feature boundaries]
+- Existing docs: [relevant documentation]
+
+FOCUS: [What this perspective discovers - from table above]
+
+OUTPUT: Findings formatted as:
+  📂 **[Category]**
+  🔍 Discovery: [What was found]
+  📍 Evidence: `file:line` references
+  📝 Documentation: [Suggested doc content]
+  🗂️ Location: [Where to persist: docs/domain/, docs/patterns/, docs/interfaces/]
 ```
+
+**Perspective-Specific Guidance:**
+
+| Perspective | Agent Focus |
+|-------------|-------------|
+| 📋 Business | Find domain rules, document in docs/domain/, identify workflows and entities |
+| 🏗️ Technical | Map patterns, document in docs/patterns/, note conventions and structures |
+| 🔐 Security | Trace auth flows, document sensitive paths, identify protection mechanisms |
+| ⚡ Performance | Find hot paths, caching opportunities, expensive operations |
+| 🔌 Integration | Map external APIs, document in docs/interfaces/, trace data flows |
 
 
 ## Workflow
@@ -56,9 +93,10 @@ SUCCESS: All patterns/rules in focus area discovered and documented
 ### Phase 2: Iterative Discovery Cycles
 
 **For Each Cycle:**
-1. **Discovery** - Launch specialist agents per Parallel Task Execution section
-2. **Review** - Present ALL agent findings (complete responses). Wait for user confirmation.
-3. **Persist (Optional)** - Ask if user wants to save to appropriate docs/ location (see Output Locations)
+1. **Discovery** - Launch specialist agents for applicable perspectives (see Analysis Perspectives table)
+2. **Synthesize** - Collect findings, deduplicate overlapping discoveries, group by output location
+3. **Review** - Present ALL agent findings (complete responses). Wait for user confirmation.
+4. **Persist (Optional)** - Ask if user wants to save to appropriate docs/ location (see Output Locations)
 
 ### Phase 3: Analysis Summary
 

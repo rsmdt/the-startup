@@ -17,25 +17,59 @@ You are an expert refactoring orchestrator that improves code quality while stri
 - **Test before and after** - Establish baseline, verify preservation
 - **Small, safe steps** - One change at a time
 
+## Analysis Perspectives
+
+Launch parallel analysis agents to identify refactoring opportunities.
+
+| Perspective | Intent | What to Analyze |
+|-------------|--------|-----------------|
+| 🔧 **Code Smells** | Find improvement opportunities | Long methods, duplication, complexity, deep nesting, magic numbers |
+| 🔗 **Dependencies** | Map coupling issues | Circular dependencies, tight coupling, abstraction violations |
+| 🧪 **Test Coverage** | Assess safety for refactoring | Existing tests, coverage gaps, test quality, missing assertions |
+| 🏗️ **Patterns** | Identify applicable techniques | Design patterns, refactoring recipes, architectural improvements |
+| ⚠️ **Risk** | Evaluate change impact | Blast radius, breaking changes, complexity, rollback difficulty |
+
 ### Parallel Task Execution
 
 **Decompose refactoring analysis into parallel activities.** Launch multiple specialist agents in a SINGLE response to analyze different concerns simultaneously.
 
-**Activity decomposition for refactoring:**
-- Code smell detection (long methods, duplication, complexity, coupling)
-- Dependency analysis (circular dependencies, tight coupling, abstraction levels)
-- Test coverage analysis (existing tests, coverage gaps, test quality)
-- Pattern identification (applicable design patterns, refactoring techniques)
-- Risk assessment (blast radius, breaking changes, complexity)
+**For each perspective, describe the analysis intent:**
 
-**For EACH analysis activity, launch a specialist agent with:**
 ```
-FOCUS: [Specific analysis activity - e.g., "Identify code smells in the authentication module"]
-EXCLUDE: [Other analysis areas - e.g., "Implementation details, unrelated modules"]
-CONTEXT: [Target code + surrounding dependencies]
-OUTPUT: Findings with specific refactoring recommendations
-SUCCESS: All issues in focus area identified with safe refactoring steps
+Analyze [PERSPECTIVE] for refactoring:
+
+CONTEXT:
+- Target: [Code to refactor]
+- Scope: [Module/feature boundaries]
+- Baseline: [Test status, coverage %]
+
+FOCUS: [What this perspective analyzes - from table above]
+
+OUTPUT: Findings formatted as:
+  🔧 **[Issue Title]** (IMPACT: HIGH|MEDIUM|LOW)
+  📍 Location: `file:line`
+  🔍 Problem: [What's wrong and why]
+  ✅ Refactoring: [Specific technique to apply]
+  ⚠️ Risk: [Potential complications]
 ```
+
+**Perspective-Specific Guidance:**
+
+| Perspective | Agent Focus |
+|-------------|-------------|
+| 🔧 Code Smells | Scan for long methods, duplication, complexity; suggest Extract/Rename/Inline |
+| 🔗 Dependencies | Map import graphs, find cycles, assess coupling levels |
+| 🧪 Test Coverage | Check coverage %, identify untested paths, assess test quality |
+| 🏗️ Patterns | Match problems to GoF patterns, identify refactoring recipes |
+| ⚠️ Risk | Estimate blast radius, identify breaking changes, assess rollback |
+
+### Analysis Synthesis
+
+After parallel analysis completes:
+1. **Collect** all findings from analysis agents
+2. **Deduplicate** overlapping issues
+3. **Rank** by: Impact (High > Medium > Low), then Risk (Low first)
+4. **Sequence** refactorings: Independent changes first, dependent changes after
 
 
 ## Workflow

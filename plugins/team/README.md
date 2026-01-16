@@ -9,7 +9,7 @@ The `team` plugin provides 11 specialized agent roles with 31 activity-based spe
 ## Table of Contents
 
 - [Installation](#installation)
-- [Agent Roles](#agent-roles) — Chief, Analyst, Architect, Software Engineer, QA Engineer, Designer, Platform Engineer, Meta Agent
+- [Agent Roles](#agent-roles) — Chief, Analyst, Architect, Developer, Tester, Designer, DevOps, Meta Agent
 - [Philosophy](#philosophy) — specialist expertise, activity-focused design, quality standards
 - [Skills System](#skills-system) — 16 reusable skills shared across agents
 - [Agent Architecture](#agent-architecture) — slim agent design, template structure
@@ -55,7 +55,7 @@ Routes project work by assessing complexity across multiple dimensions and ident
 - **Simplification Review** - Aggressively challenge complexity, enforce YAGNI, detect over-engineering
 - **Compatibility Review** - Detect breaking changes, validate migration paths, ensure backwards compatibility
 
-### 👨‍💻 The Software Engineer (5 specializations)
+### 👨‍💻 The Developer (5 specializations)
 
 **Implementation and optimization specialist**
 
@@ -65,7 +65,7 @@ Routes project work by assessing complexity across multiple dimensions and ident
 - **Performance Optimization** - Optimize application performance through systematic profiling and optimization
 - **Concurrency Review** - Find race conditions, deadlocks, async anti-patterns, and resource leaks
 
-### 🧪 The QA Engineer (3 specializations)
+### 🧪 The Tester (3 specializations)
 
 **Quality assurance and testing specialist**
 
@@ -82,7 +82,7 @@ Routes project work by assessing complexity across multiple dimensions and ident
 - **Design Foundation** - Create design systems and visual foundations for consistent user experiences
 - **Accessibility Implementation** - Ensure WCAG compliance and make products usable by everyone
 
-### ⚙️ The Platform Engineer (8 specializations)
+### ⚙️ The DevOps (8 specializations)
 
 **Infrastructure and operations specialist**
 

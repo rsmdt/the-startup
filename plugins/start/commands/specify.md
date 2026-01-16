@@ -19,25 +19,59 @@ You are an expert requirements gatherer that creates specification documents for
 - **Wait for confirmation** - Require user approval between documents
 - **Git integration is optional** - Offer branch/commit workflow as an option
 
+## Research Perspectives
+
+Launch parallel research agents to gather comprehensive specification inputs.
+
+| Perspective | Intent | What to Research |
+|-------------|--------|------------------|
+| 📋 **Requirements** | Understand user needs | User stories, stakeholder goals, acceptance criteria, edge cases |
+| 🏗️ **Technical** | Evaluate architecture options | Patterns, technology choices, constraints, dependencies |
+| 🔐 **Security** | Identify protection needs | Authentication, authorization, data protection, compliance |
+| ⚡ **Performance** | Define capacity targets | Load expectations, latency targets, scalability requirements |
+| 🔌 **Integration** | Map external boundaries | APIs, third-party services, data flows, contracts |
+
 ### Parallel Task Execution
 
 **Decompose research into parallel activities.** Launch multiple specialist agents in a SINGLE response to investigate different areas simultaneously.
 
-**Activity decomposition for specification research:**
-- Requirements discovery (user needs, stakeholder goals, acceptance criteria)
-- Technical research (architecture patterns, technology options, constraints)
-- Security analysis (authentication, authorization, data protection requirements)
-- Performance requirements (load expectations, latency targets, scalability)
-- Integration research (external APIs, third-party services, data flows)
+**For each perspective, describe the research intent:**
 
-**For EACH research activity, launch a specialist agent with:**
 ```
-FOCUS: [Specific research activity - e.g., "Analyze authentication requirements for user registration"]
-EXCLUDE: [Other research areas - e.g., "Performance, integration, detailed implementation"]
-CONTEXT: [User description + relevant codebase context]
-OUTPUT: Research findings with specific recommendations
-SUCCESS: All questions in focus area answered with actionable insights
+Research [PERSPECTIVE] for specification:
+
+CONTEXT:
+- Description: [User's feature description]
+- Codebase: [Relevant existing code, patterns]
+- Constraints: [Known limitations, requirements]
+
+FOCUS: [What this perspective researches - from table above]
+
+OUTPUT: Findings formatted as:
+  📋 **[Topic]**
+  🔍 Discovery: [What was found]
+  📍 Evidence: [Code references, documentation]
+  💡 Recommendation: [Actionable insight for spec]
+  ❓ Open Questions: [Needs clarification]
 ```
+
+**Perspective-Specific Guidance:**
+
+| Perspective | Agent Focus |
+|-------------|-------------|
+| 📋 Requirements | Interview stakeholders (user), identify personas, define acceptance criteria |
+| 🏗️ Technical | Analyze existing architecture, evaluate options, identify constraints |
+| 🔐 Security | Assess auth needs, data sensitivity, compliance requirements |
+| ⚡ Performance | Define SLOs, identify bottleneck risks, set capacity targets |
+| 🔌 Integration | Map external APIs, document contracts, identify data flows |
+
+### Research Synthesis
+
+After parallel research completes:
+1. **Collect** all findings from research agents
+2. **Deduplicate** overlapping discoveries
+3. **Identify conflicts** requiring user decision
+4. **Organize** by document section (PRD, SDD, PLAN)
 
 
 ## Workflow

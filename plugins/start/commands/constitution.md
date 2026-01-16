@@ -4,16 +4,41 @@ argument-hint: "optional focus areas (e.g., 'security and testing', 'architectur
 allowed-tools: ["Task", "TodoWrite", "Bash", "Grep", "Glob", "Read", "Write", "Edit", "AskUserQuestion", "Skill"]
 ---
 
-You are a governance specialist that creates and updates project constitutions through codebase discovery.
+You are a governance orchestrator that coordinates parallel pattern discovery to create project constitutions.
 
 **Focus Areas:** $ARGUMENTS
 
 ## Core Rules
 
+- **You are an orchestrator** - Delegate discovery tasks to specialist agents via Task tool
+- **Parallel discovery** - Launch ALL discovery perspectives simultaneously in a single response
 - **Call Skill tool FIRST** - Load constitution-validation methodology
 - **Discovery before rules** - Explore codebase to understand actual patterns
 - **User confirmation required** - Present discovered rules for approval
-- **File operations at command level** - Command writes CONSTITUTION.md, skill generates content
+
+## Discovery Perspectives
+
+Pattern discovery should cover these categories. Launch parallel agents for comprehensive analysis.
+
+| Perspective | Intent | What to Discover |
+|-------------|--------|------------------|
+| 🔐 **Security** | Identify security patterns and risks | Authentication methods, secret handling, input validation, injection prevention, CORS |
+| 🏗️ **Architecture** | Understand structural patterns | Layer structure, module boundaries, API patterns, data flow, dependencies |
+| 📝 **Code Quality** | Find coding conventions | Naming conventions, import patterns, error handling, logging, code organization |
+| 🧪 **Testing** | Discover test practices | Test framework, file patterns, coverage requirements, mocking approaches |
+
+### Focus Area Mapping
+
+When $ARGUMENTS specifies focus areas, select relevant perspectives:
+
+| Input | Discovery Perspectives |
+|-------|----------------------|
+| "security" | 🔐 Security |
+| "testing" | 🧪 Testing |
+| "architecture" | 🏗️ Architecture |
+| "code quality" | 📝 Code Quality |
+| Empty or "all" | All perspectives |
+| Framework-specific | Relevant subset based on framework |
 
 ## Workflow
 
@@ -35,43 +60,49 @@ test -f CONSTITUTION.md && echo "exists" || echo "not found"
 Context: No constitution exists, creating from scratch.
 
 - Call: `Skill(skill: "start:constitution-validation")`
-- The skill provides:
-  - Template structure
-  - Discovery methodology
-  - Rule generation guidelines
+- The skill provides template structure, discovery methodology, and rule generation guidelines
 
-**Discovery Process:**
+**Launch Discovery Agents:**
 
-For each category, explore the codebase:
+Launch ALL applicable discovery perspectives in parallel (single response with multiple Task calls).
+
+**For each perspective, describe the discovery intent:**
 
 ```
-📂 Exploring: Security patterns
-- Authentication: [discovered]
-- Secret handling: [discovered]
-- Input validation: [discovered]
+Discover [PERSPECTIVE] patterns for constitution rules:
 
-📂 Exploring: Architecture patterns
-- Layer structure: [discovered]
-- Module boundaries: [discovered]
-- API patterns: [discovered]
+CONTEXT:
+- Project root: [path]
+- Tech stack: [detected frameworks, languages]
+- Existing configs: [.eslintrc, tsconfig, etc.]
 
-📂 Exploring: Code quality conventions
-- Naming conventions: [discovered]
-- Import patterns: [discovered]
-- Error handling: [discovered]
+FOCUS: [What this perspective discovers - from table above]
 
-📂 Exploring: Testing setup
-- Test framework: [discovered]
-- File patterns: [discovered]
-- Coverage: [discovered]
+OUTPUT: Findings formatted as:
+  📂 **[Category]**
+  🔍 Pattern: [What was discovered]
+  📍 Evidence: `file:line` references
+  📜 Proposed Rule: [L1/L2/L3] [Rule statement]
 ```
 
-**Rule Generation:**
+**Perspective-Specific Discovery:**
 
-Based on discoveries, generate rules with appropriate levels:
-- L1 (Must): Security critical, auto-fixable
-- L2 (Should): Important, needs human judgment
-- L3 (May): Advisory, style preferences
+| Perspective | Agent Focus |
+|-------------|-------------|
+| 🔐 Security | Find auth patterns, secret handling, validation approaches, generate security rules |
+| 🏗️ Architecture | Identify layer structure, module patterns, API design, generate architecture rules |
+| 📝 Code Quality | Discover naming conventions, imports, error handling, generate quality rules |
+| 🧪 Testing | Find test framework, patterns, coverage setup, generate testing rules |
+
+**Synthesize Discoveries:**
+
+1. **Collect** all findings from discovery agents
+2. **Deduplicate** overlapping patterns
+3. **Classify** rules by level:
+   - L1 (Must): Security critical, auto-fixable
+   - L2 (Should): Important, needs human judgment
+   - L3 (May): Advisory, style preferences
+4. **Group** by category for presentation
 
 **User Confirmation:**
 
