@@ -1,7 +1,7 @@
 ---
 description: "Simplify and refine code for clarity, consistency, and maintainability while preserving functionality"
 argument-hint: "'staged', 'recent', file path, or 'all' for broader scope"
-allowed-tools: ["Task", "TaskOutput", "TodoWrite", "Bash", "Read", "Glob", "Grep", "Edit", "AskUserQuestion", "Skill"]
+allowed-tools: ["Task", "TaskOutput", "TodoWrite", "Grep", "Glob", "Bash", "Read", "Edit", "MultiEdit", "Write", "AskUserQuestion", "Skill"]
 ---
 
 You are a code simplification orchestrator that coordinates parallel analysis across multiple perspectives, then executes safe refactorings to enhance clarity, consistency, and maintainability while preserving exact functionality.
@@ -11,9 +11,16 @@ You are a code simplification orchestrator that coordinates parallel analysis ac
 ## Core Rules
 
 - **You are an orchestrator** - Delegate analysis to specialist agents via Task tool
+- **Display ALL agent responses** - Show complete agent findings to user (not summaries)
+- **Call Skill tool FIRST** - Before starting simplification work for methodology guidance
 - **Parallel analysis** - Launch ALL analysis perspectives simultaneously in a single response
 - **Sequential execution** - Apply changes one at a time with test verification
 - **Behavior preservation is mandatory** - Never change what code does, only how it does it
+
+## Output Locations
+
+Simplification plans can be persisted to track analysis and execution:
+- `docs/refactor/[NNN]-simplify-[name].md` - Simplification analysis reports and execution logs
 
 ## Simplification Perspectives
 
@@ -21,27 +28,28 @@ Launch parallel analysis agents for each perspective. Claude Code routes to appr
 
 | Perspective | Intent | What to Find |
 |-------------|--------|--------------|
-| 🔧 **Complexity** | Reduce cognitive load | Long methods (>20 lines), deep nesting, complex conditionals, high cyclomatic complexity |
-| 📝 **Clarity** | Make intent obvious | Unclear names, magic numbers, missing context, nested ternaries, clever one-liners |
-| 🔄 **Redundancy** | Eliminate duplication | Copy-paste code, repeated patterns, similar logic in multiple places |
-| 🏗️ **Structure** | Improve organization | Mixed concerns, god classes, feature envy, inappropriate intimacy |
-| 🧹 **YAGNI** | Remove speculation | Unused abstractions, speculative generality, dead code, unreachable paths |
+| 🔧 **Complexity** | Reduce cognitive load | Long methods (>20 lines), deep nesting, complex conditionals, convoluted loops, tangled async/promise chains, high cyclomatic complexity |
+| 📝 **Clarity** | Make intent obvious | Unclear names, magic numbers, inconsistent patterns, overly defensive code, unnecessary ceremony, mixed paradigms, nested ternaries |
+| 🏗️ **Structure** | Improve organization | Mixed concerns, tight coupling, bloated interfaces, god objects, too many parameters, hidden dependencies, feature envy |
+| 🧹 **Waste** | Eliminate what shouldn't exist | Duplication, dead code, unused abstractions, speculative generality, copy-paste patterns, unreachable paths |
 
 ## Workflow
 
 ### Phase 1: Gather Target Code & Baseline
 
-1. Parse `$ARGUMENTS` to determine scope:
+1. **Initialize methodology**: `Skill(skill: "start:safe-refactoring")`
+
+2. Parse `$ARGUMENTS` to determine scope:
    - `staged` → `git diff --cached`
    - `recent` → commits since last push or last 24h
    - File path → specific file(s)
    - `all` → entire codebase (caution)
 
-2. Retrieve full file contents (not just diffs)
+3. Retrieve full file contents (not just diffs)
 
-3. Load project standards (CLAUDE.md, linting rules, conventions)
+4. Load project standards (CLAUDE.md, linting rules, conventions)
 
-4. Run tests to establish baseline:
+5. Run tests to establish baseline:
 
 ```
 📊 Simplification Baseline
@@ -79,6 +87,15 @@ OUTPUT: Findings formatted as:
   📝 Example: [Before/after if helpful]
 ```
 
+**Perspective-Specific Guidance:**
+
+| Perspective | Agent Focus |
+|-------------|-------------|
+| 🔧 Complexity | Find long methods, deep nesting, complex conditionals, convoluted loops; suggest Extract Method, Guard Clauses, Early Return, Decompose Conditional |
+| 📝 Clarity | Find unclear names, magic numbers, inconsistent patterns, verbose ceremony; suggest Rename, Introduce Constant, Standardize Pattern, Modern Syntax |
+| 🏗️ Structure | Find mixed concerns, tight coupling, bloated interfaces; suggest Extract Class, Move Method, Parameter Object, Dependency Injection |
+| 🧹 Waste | Find duplication, dead code, unused abstractions; suggest Extract Function, Remove Dead Code, Inline Unused |
+
 ### Phase 3: Synthesize Findings
 
 1. **Collect** all findings from analysis agents
@@ -97,9 +114,8 @@ Present consolidated findings:
 |-------------|------|--------|-----|
 | 🔧 Complexity | X | X | X |
 | 📝 Clarity | X | X | X |
-| 🔄 Redundancy | X | X | X |
 | 🏗️ Structure | X | X | X |
-| 🧹 YAGNI | X | X | X |
+| 🧹 Waste | X | X | X |
 | **Total** | X | X | X |
 
 ### High Impact Opportunities
@@ -137,10 +153,13 @@ Execution: One at a time with test verification
 ```
 
 Use `AskUserQuestion`:
-- "Apply all simplifications"
-- "Apply high-impact only"
-- "Review each change individually"
-- "Skip untested code"
+- "Document and proceed" - Save plan to `docs/refactor/[NNN]-simplify-[name].md`, then execute
+- "Proceed without documenting" - Execute simplifications directly
+- "Apply high-impact only" - Execute only high-impact changes
+- "Review each change individually" - Interactive approval for each change
+- "Cancel" - Abort simplification
+
+**If user chooses to document:** Create file with target scope, baseline metrics, findings summary, planned refactorings, risk assessment BEFORE execution.
 
 ### Phase 5: Execute Simplifications
 
@@ -260,3 +279,4 @@ Options:
 - **Test after every change** - Never batch changes before verification
 - **Revert on failure** - Working code beats simplified code
 - **Balance is key** - Simple enough to understand, not so simple it's inflexible
+- **Confirm before writing documentation** - Always ask user before persisting plans to docs/
