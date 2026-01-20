@@ -122,19 +122,19 @@ Establishes the foundational [domain/infrastructure/components] required for sub
 
 - [ ] **T1.1 [Primary deliverable name]** `[activity: domain-modeling]`
 
-  - Prime: Read [entity/component] specification `[ref: SDD/Section X; lines: Y-Z]`
-  - Test: [Behavior 1]; [Behavior 2]; [Edge case handling]
-  - Implement: Create `src/[path]/[File].ts` with [key capability]
-  - Validate: Unit tests pass; lint clean; types check
-  - Success: [Criterion 1] `[ref: PRD/AC-1.1]`; [Criterion 2] `[ref: SDD/Section]`
+  1. Prime: Read [entity/component] specification `[ref: SDD/Section X; lines: Y-Z]`
+  2. Test: [Behavior 1]; [Behavior 2]; [Edge case handling]
+  3. Implement: Create `src/[path]/[File].ts` with [key capability]
+  4. Validate: Unit tests pass; lint clean; types check
+  5. Success: [Criterion 1] `[ref: PRD/AC-1.1]`; [Criterion 2] `[ref: SDD/Section]`
 
 - [ ] **T1.2 [Secondary deliverable name]** `[activity: data-architecture]`
 
-  - Prime: Review [pattern/interface] requirements `[ref: SDD/Section X]`
-  - Test: [CRUD operations]; [Query patterns]; [Error handling]
-  - Implement: Create `src/[path]/[File].ts` with [key capability]
-  - Validate: Integration tests pass; lint clean; types check
-  - Success: [Criterion 1] `[ref: PRD/AC-1.2]`; [Criterion 2] `[ref: SDD/Section]`
+  1. Prime: Review [pattern/interface] requirements `[ref: SDD/Section X]`
+  2. Test: [CRUD operations]; [Query patterns]; [Error handling]
+  3. Implement: Create `src/[path]/[File].ts` with [key capability]
+  4. Validate: Integration tests pass; lint clean; types check
+  5. Success: [Criterion 1] `[ref: PRD/AC-1.2]`; [Criterion 2] `[ref: SDD/Section]`
 
 - [ ] **T1.3 Phase Validation** `[activity: validate]`
 
@@ -150,22 +150,22 @@ Builds the [API endpoints/integrations/UI components] that expose Phase 1 capabi
 
 - [ ] **T2.1 [Component A]** `[parallel: true]` `[component: backend]`
 
-  - Prime: Read API specification `[ref: SDD/Section X]`
-  - Test: [Endpoint behavior]; [Validation]; [Error responses]
-  - Implement: Create `src/[path]/[Controller].ts` with routes
-  - Validate: API tests pass; contract matches specification
-  - Success: [Criterion] `[ref: PRD/AC-2.1]`
+  1. Prime: Read API specification `[ref: SDD/Section X]`
+  2. Test: [Endpoint behavior]; [Validation]; [Error responses]
+  3. Implement: Create `src/[path]/[Controller].ts` with routes
+  4. Validate: API tests pass; contract matches specification
+  5. Success: [Criterion] `[ref: PRD/AC-2.1]`
 
 - [ ] **T2.2 [Component B]** `[parallel: true]` `[component: backend]`
 
-  - Prime: Read integration pattern `[ref: docs/interfaces/X.md]`
-  - Test: [Success flow]; [Failure handling]; [Retry logic]
-  - Implement: Create `src/[path]/[Adapter].ts` with integration
-  - Validate: Integration tests pass with test/mock service
-  - Success:
-    - [Success criterion 1] `[ref: PRD/AC-2.2]`
-    - [Failure handling verified] `[ref: SDD/Error Handling]`
-    - [Retry logic works with backoff] `[ref: docs/patterns/resilience.md]`
+  1. Prime: Read integration pattern `[ref: docs/interfaces/X.md]`
+  2. Test: [Success flow]; [Failure handling]; [Retry logic]
+  3. Implement: Create `src/[path]/[Adapter].ts` with integration
+  4. Validate: Integration tests pass with test/mock service
+  5. Success:
+      - [Success criterion 1] `[ref: PRD/AC-2.2]`
+      - [Failure handling verified] `[ref: SDD/Error Handling]`
+      - [Retry logic works with backoff] `[ref: docs/patterns/resilience.md]`
 
 - [ ] **T2.3 Phase Validation** `[activity: validate]`
 
