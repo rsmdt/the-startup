@@ -68,7 +68,7 @@ OUTPUT: Implementation formatted as:
 
 Context: Offering version control integration for traceability.
 
-- Call: `Skill(skill: "start:git-workflow")` for branch management
+- Call: `Skill(start:git-workflow)` for branch management
 - The skill will:
   - Check if git repository exists
   - Offer to create `feature/[spec-id]-[spec-name]` branch
@@ -79,7 +79,7 @@ Context: Offering version control integration for traceability.
 
 ### Phase 1: Initialize and Analyze Plan
 
-- Call: `Skill(skill: "start:specification-management")` to read spec
+- Call: `Skill(start:specification-management)` to read spec
 - Validate: PLAN.md exists, identify phases and tasks
 - Load ONLY Phase 1 tasks into TodoWrite
 - Call: `AskUserQuestion` - Start Phase 1 (recommended) or Review spec first
@@ -95,8 +95,8 @@ Context: Offering version control integration for traceability.
 - **Synthesis:** After parallel execution, collect outputs, verify consistency, merge changes
 
 **At checkpoint:**
-- Call: `Skill(skill: "start:drift-detection")` for spec alignment
-- Call: `Skill(skill: "start:constitution-validation")` if CONSTITUTION.md exists
+- Call: `Skill(start:drift-detection)` for spec alignment
+- Call: `Skill(start:constitution-validation)` if CONSTITUTION.md exists
 - Verify all TodoWrite tasks complete, update PLAN.md checkboxes
 - Call: `AskUserQuestion` for phase transition
 
@@ -112,7 +112,7 @@ At the end of each phase, ask user how to proceed:
 
 ### Completion
 
-- Call: `Skill(skill: "start:implementation-verification")` for final validation
+- Call: `Skill(start:implementation-verification)` for final validation
 - Generate changelog entry if significant changes made
 
 **Present summary:**
@@ -128,7 +128,7 @@ Files Changed: [N] files (+[additions] -[deletions])
 ```
 
 **Git Finalization:**
-- Call: `Skill(skill: "start:git-workflow")` for commit and PR operations
+- Call: `Skill(start:git-workflow)` for commit and PR operations
 - The skill will:
   - Offer to commit with conventional message
   - Offer to create PR with spec-based description

@@ -82,7 +82,7 @@ After parallel research completes:
 
 Context: Creating new spec or checking existing spec status.
 
-- Call: `Skill(skill: "start:specification-management")`
+- Call: `Skill(start:specification-management)`
 - Initialize specification using $ARGUMENTS (skill handles directory creation/reading)
 - Call: `AskUserQuestion` to let user choose direction (see options below)
 
@@ -105,7 +105,7 @@ Analyze document status (check for `[NEEDS CLARIFICATION]` markers and checklist
 
 Context: Working on product requirements, defining user stories, acceptance criteria.
 
-- Call: `Skill(skill: "start:requirements-analysis")`
+- Call: `Skill(start:requirements-analysis)`
 - Focus: WHAT needs to be built and WHY it matters
 - Scope: Business requirements only (defer technical details to SDD)
 - Deliverable: Complete Product Requirements
@@ -117,13 +117,13 @@ Context: Working on product requirements, defining user stories, acceptance crit
 
 Context: Working on solution design, designing architecture, defining interfaces.
 
-- Call: `Skill(skill: "start:architecture-design")`
+- Call: `Skill(start:architecture-design)`
 - Focus: HOW the solution will be built
 - Scope: Design decisions and interfaces (defer code to implementation)
 - Deliverable: Complete Solution Design
 
 **Constitution Alignment (if CONSTITUTION.md exists):**
-- Call: `Skill(skill: "start:constitution-validation")` in planning mode
+- Call: `Skill(start:constitution-validation)` in planning mode
 - Verify proposed architecture aligns with constitutional rules
 - Ensure ADRs are consistent with L1/L2 constitution rules
 - Report any potential conflicts for resolution before finalizing SDD
@@ -135,7 +135,7 @@ Context: Working on solution design, designing architecture, defining interfaces
 
 Context: Working on implementation plan, planning phases, sequencing tasks.
 
-- Call: `Skill(skill: "start:implementation-planning")`
+- Call: `Skill(start:implementation-planning)`
 - Focus: Task sequencing and dependencies
 - Scope: What and in what order (defer duration estimates)
 - Deliverable: Complete Implementation Plan
@@ -147,12 +147,12 @@ Context: Working on implementation plan, planning phases, sequencing tasks.
 
 Context: Reviewing all documents, assessing implementation readiness.
 
-- Call: `Skill(skill: "start:specification-management")`
+- Call: `Skill(start:specification-management)`
 - Review documents and assess context drift between them
 - Generate readiness and confidence assessment
 
 **Git Finalization (if enabled):**
-- Call: `Skill(skill: "start:git-workflow")` for commit and PR operations
+- Call: `Skill(start:git-workflow)` for commit and PR operations
 - The skill will:
   - Offer to commit specification with conventional message
   - Offer to create spec review PR for team review
@@ -198,6 +198,6 @@ When user skips a phase or makes a non-default choice, log it in README.md:
 
 ## Important Notes
 
-- **Git integration is optional** - Call `Skill(skill: "start:git-workflow")` to offer branch creation (`spec/[id]-[name]`) and PR workflow
+- **Git integration is optional** - Call `Skill(start:git-workflow)` to offer branch creation (`spec/[id]-[name]`) and PR workflow
 - **User confirmation required** - Wait for user approval between each document phase
 - **Log all decisions** - Record skipped phases and non-default choices in README.md

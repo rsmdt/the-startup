@@ -76,7 +76,7 @@ After parallel analysis completes:
 
 ### Phase 1: Establish Baseline
 
-- Call: `Skill(skill: "start:safe-refactoring")`
+- Call: `Skill(start:safe-refactoring)`
 - Locate target code based on $ARGUMENTS
 - Run existing tests to establish baseline
 - If tests failing → Stop and report to user

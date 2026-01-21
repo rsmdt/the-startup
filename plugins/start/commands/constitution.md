@@ -59,7 +59,7 @@ test -f CONSTITUTION.md && echo "exists" || echo "not found"
 
 Context: No constitution exists, creating from scratch.
 
-- Call: `Skill(skill: "start:constitution-validation")`
+- Call: `Skill(start:constitution-validation)`
 - The skill provides template structure, discovery methodology, and rule generation guidelines
 
 **Launch Discovery Agents:**
@@ -136,7 +136,7 @@ Present discovered rules in categories:
 
 Context: Constitution exists, updating with new rules.
 
-- Call: `Skill(skill: "start:constitution-validation")`
+- Call: `Skill(start:constitution-validation)`
 - Read current constitution
 - Parse existing rules and categories
 
@@ -180,7 +180,7 @@ Context: User may want to immediately check codebase compliance.
 - Call: `AskUserQuestion` - Run validation now or skip
 
 If validation requested:
-- Call: `Skill(skill: "start:constitution-validation")` in validation mode
+- Call: `Skill(start:constitution-validation)` in validation mode
 - Report compliance findings
 
 ## Focus Area Interpretation
