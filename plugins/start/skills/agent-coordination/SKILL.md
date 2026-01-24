@@ -22,6 +22,16 @@ Activate this skill when you need to:
 - **Handle blocked states** with options
 - **Validate checkpoints** before proceeding
 
+## Orchestrator Role
+
+**CRITICAL**: The orchestrating command/skill NEVER implements code directly. It coordinates.
+
+1. **Read plan** - Identify tasks for current phase
+2. **Delegate ALL tasks** - Via Task tool to subagents (parallel AND sequential)
+3. **Summarize results** - Extract key outputs for user visibility
+4. **Track progress** - TodoWrite updates
+5. **Manage transitions** - Phase boundaries, user confirmation
+
 ## TodoWrite Phase Protocol
 
 **CRITICAL**: Load tasks incrementally—one phase at a time to manage cognitive load.
@@ -55,15 +65,19 @@ Activate this skill when you need to:
 
 ### Task Execution
 
+**Delegate ALL tasks to subagents** (see Orchestrator Role above).
+
 **For Parallel Tasks** (same indentation, marked `[parallel: true]`):
 - Mark all as `in_progress` in TodoWrite
-- Launch multiple agents in single response
+- Launch ALL parallel agents in SINGLE response
+- Await results, summarize each
 - Track completion independently
 
 **For Sequential Tasks**:
-- Execute one at a time
-- Mark as `in_progress` before starting
-- Mark as `completed` immediately after finishing
+- Launch ONE subagent via Task tool
+- Await result, summarize key outputs
+- Mark as `completed` in TodoWrite
+- Proceed to next task
 
 ### Task Metadata
 
@@ -96,6 +110,38 @@ VERIFY:
   - Business logic follows defined flows
   - Architecture decisions are respected
   - No unauthorized deviations
+```
+
+## Result Summarization
+
+After each subagent completes, extract and present key outputs. Do NOT display full responses.
+
+### Extract Key Outputs
+
+From subagent response, identify:
+- **Files**: Paths created or modified
+- **Summary**: 1-2 sentence implementation highlight
+- **Tests**: Pass/fail/pending status
+- **Blockers**: Issues preventing completion
+
+### Present Concise Summary
+
+**Success format:**
+```
+✅ Task [N]: [Name]
+
+Files: src/services/auth.ts, src/routes/auth.ts
+Summary: Implemented JWT authentication with bcrypt password hashing
+Tests: 5 passing
+```
+
+**Blocked format:**
+```
+⚠️ Task [N]: [Name]
+
+Status: Blocked
+Reason: Missing User model - need src/models/User.ts
+Options: [present via AskUserQuestion]
 ```
 
 ## Checkpoint Validation

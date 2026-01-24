@@ -295,6 +295,21 @@ TERMINATION: [When to stop]
 
 ### Template Customization Rules
 
+#### For Implementation Tasks (Orchestrator Context Offloading)
+
+When orchestrator delegates implementation tasks and needs structured results for summarization:
+
+```
+OUTPUT:
+    - [Expected file path 1]
+    - [Expected file path 2]
+    - Structured result:
+        - Files created/modified: [paths]
+        - Summary: [1-2 sentences]
+        - Tests: [status]
+        - Blockers: [if any]
+```
+
 #### For File-Creating Agents
 
 Add **DISCOVERY_FIRST** section at the beginning:
@@ -368,6 +383,15 @@ TERMINATION: Research complete OR information unavailable
 
 ### Context Insertion Strategy
 
+**Two approaches based on orchestrator needs:**
+
+#### Direct Context Injection
+
+Pass context directly when:
+- Context is small and specific
+- Quick research tasks without spec documents
+- You have the exact information needed
+
 **Always include in CONTEXT:**
 
 1. **Relevant rules** - Extract applicable rules from CLAUDE.md or project docs
@@ -375,7 +399,7 @@ TERMINATION: Research complete OR information unavailable
 3. **Prior outputs** - For sequential tasks, include relevant results from previous steps
 4. **Specification references** - For implementation tasks, cite PRD/SDD/PLAN sections
 
-**Context Example:**
+**Example:**
 ```
 CONTEXT: Testing authentication service handling login, tokens, and sessions.
     - TDD required: Write tests before implementation
@@ -385,6 +409,24 @@ CONTEXT: Testing authentication service handling login, tokens, and sessions.
     - Current auth flow: docs/patterns/authentication-flow.md
     - Security requirements: PRD Section 3.2
 ```
+
+#### Self-Priming Pattern
+
+Use "Self-prime from" directives when:
+- Implementation tasks with existing spec documents (PLAN, SDD, PRD)
+- Subagent needs full document context (not filtered excerpts)
+- Orchestrator should stay lightweight for longevity
+
+**Example:**
+```
+CONTEXT:
+    - Self-prime from: docs/specs/001-auth/implementation-plan.md (Phase 2, Task 3)
+    - Self-prime from: docs/specs/001-auth/solution-design.md (Section 4.2)
+    - Self-prime from: CLAUDE.md (project standards)
+    - Match interfaces defined in SDD Section 4.2
+    - Follow existing patterns in src/services/
+```
+
 
 ### Template Generation Examples
 
