@@ -42,11 +42,17 @@ CONTEXT:
 
 FOCUS: [What this perspective validates - from table above]
 
-OUTPUT: Findings formatted as:
-  [✅|⚠️|❌] **[Finding Title]** (SEVERITY: HIGH|MEDIUM|LOW)
-  📍 Location: `file:line`
-  🔍 Issue: [What was found]
-  ✅ Recommendation: [How to fix]
+OUTPUT: Return findings as a structured list, one per finding:
+
+FINDING:
+- status: PASS | WARN | FAIL
+- severity: HIGH | MEDIUM | LOW
+- title: Brief title (max 40 chars, e.g., "Missing acceptance criteria")
+- location: Shortest unique path + line (e.g., "product-requirements.md:45")
+- issue: One sentence describing what was found (e.g., "AC for user story 3 has no testable conditions")
+- recommendation: How to fix (e.g., "Add specific, measurable acceptance criteria with expected values")
+
+If no findings for this perspective, return: NO_FINDINGS
 ```
 
 **Perspective-Specific Guidance:**
@@ -96,18 +102,42 @@ Determine what to validate from $ARGUMENTS:
 
 ### Phase 4: Report Findings
 
-```
+```markdown
 ## Validation: [target]
 
-**Assessment**: [Excellent / Good / Needs Attention / Critical]
-
-### Findings
-
-**[Category]**
-- [file:line] - [issue description]
-  → [recommendation]
+**Assessment**: ✅ Excellent | 🟢 Good | 🟡 Needs Attention | 🔴 Critical
 
 ### Summary
+
+| Perspective | Pass | Warn | Fail |
+|-------------|------|------|------|
+| ✅ Completeness | X | X | X |
+| 🔗 Consistency | X | X | X |
+| 📍 Alignment | X | X | X |
+| 📐 Coverage | X | X | X |
+| **Total** | X | X | X |
+
+*🔴 Failures (Must Fix)*
+
+| ID | Finding | Recommendation |
+|----|---------|----------------|
+| F1 | Missing acceptance criteria *(product-requirements.md:45)* | Add testable conditions *(AC for user story 3 has no measurable outcomes)* |
+| F2 | Contradicting requirements *(solution-design.md:120)* | Resolve conflict *(SDD says REST, PRD says GraphQL)* |
+
+*🟡 Warnings (Should Fix)*
+
+| ID | Finding | Recommendation |
+|----|---------|----------------|
+| W1 | Vague language detected *(implementation-plan.md:30)* | Be specific *(\"various edge cases\" - list them explicitly)* |
+
+*✅ Passes*
+
+| Perspective | Verified |
+|-------------|----------|
+| Completeness | All sections populated, no TODO markers |
+| Consistency | Terminology consistent across docs |
+
+### Verdict
 
 [What was validated and key conclusions]
 ```

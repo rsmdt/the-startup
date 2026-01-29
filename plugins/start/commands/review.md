@@ -75,12 +75,26 @@ CONTEXT:
 
 FOCUS: [What this perspective looks for - from table above]
 
-OUTPUT: Findings formatted as:
-  [EMOJI] **Title** (SEVERITY: CRITICAL|HIGH|MEDIUM|LOW)
-  📍 Location: `file:line`
-  🔍 Confidence: HIGH|MEDIUM|LOW
-  ❌ Issue: [What's wrong]
-  ✅ Fix: [Specific recommendation]
+OUTPUT: Return findings as a structured list, one per finding:
+
+FINDING:
+- severity: CRITICAL | HIGH | MEDIUM | LOW
+- confidence: HIGH | MEDIUM | LOW
+- title: Brief title (max 40 chars, e.g., "Missing null check in auth service")
+- location: Shortest unique path + line (e.g., "auth/service.ts:42-45")
+- issue: One sentence describing what's wrong (e.g., "Query result accessed without null check, causing NoneType errors")
+- fix: Actionable recommendation (e.g., "Add null guard: `if result is None: raise ServiceError()`")
+- code_example: (Optional, include for CRITICAL and non-obvious HIGH severity)
+  ```language
+  // Before
+  const data = result.data;
+
+  // After
+  if (!result) throw new Error('No result');
+  const data = result.data;
+  ```
+
+If no findings for this perspective, return: NO_FINDINGS
 ```
 
 ### Phase 3: Synthesize & Present
@@ -108,30 +122,66 @@ Present in this format:
 | 🧪 Testing | X | X | X | X |
 | **Total** | X | X | X | X |
 
-### Critical & High Findings (Must Address)
+*🔴 Critical & High Findings (Must Address)*
 
-**[🔐 Security] Title** (CRITICAL)
-📍 `file:line`
-❌ Issue description
-✅ Specific fix with code example
+| ID | Finding | Remediation |
+|----|---------|-------------|
+| C1 | Brief title *(file:line)* | Specific fix recommendation *(concise issue description)* |
+| C2 | Brief title *(file:line)* | Specific fix recommendation *(concise issue description)* |
+| H1 | Brief title *(file:line)* | Specific fix recommendation *(concise issue description)* |
 
-### Medium Findings (Should Address)
+#### Code Examples for Critical Fixes
 
-...
+**[C1] Title**
+```language
+// Before
+old code
 
-### Low Findings (Consider)
+// After
+new code
+```
 
-...
+**[C2] Title**
+```language
+// Before
+old code
+
+// After
+new code
+```
+
+*🟡 Medium Findings (Should Address)*
+
+| ID | Finding | Remediation |
+|----|---------|-------------|
+| M1 | Brief title *(file:line)* | Specific fix recommendation *(concise issue description)* |
+| M2 | Brief title *(file:line)* | Specific fix recommendation *(concise issue description)* |
+
+*⚪ Low Findings (Consider)*
+
+| ID | Finding | Remediation |
+|----|---------|-------------|
+| L1 | Brief title *(file:line)* | Specific fix recommendation *(concise issue description)* |
 
 ### Strengths
 
-- [Positive observation with specific code reference]
-- [Good patterns noticed]
+- ✅ [Positive observation with specific code reference]
+- ✅ [Good patterns noticed]
 
 ### Verdict Reasoning
 
 [Why this verdict was chosen based on findings]
 ```
+
+**Table Column Guidelines:**
+- **ID**: Severity letter + number (C1 = Critical #1, H2 = High #2, M1 = Medium #1, L1 = Low #1)
+- **Finding**: Brief title + location in italics (e.g., `Missing null check *(auth/service.ts:42)*`)
+- **Remediation**: Fix recommendation + issue context in italics (e.g., `Add null guard *(query result accessed without check)*`)
+
+**Code Examples:**
+- REQUIRED for all Critical findings (before/after style)
+- Include for High findings when the fix is non-obvious
+- Medium/Low findings use table-only format
 
 ### Phase 4: Next Steps
 

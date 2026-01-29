@@ -45,12 +45,17 @@ CONTEXT:
 
 FOCUS: [What this perspective analyzes - from table above]
 
-OUTPUT: Findings formatted as:
-  🔧 **[Issue Title]** (IMPACT: HIGH|MEDIUM|LOW)
-  📍 Location: `file:line`
-  🔍 Problem: [What's wrong and why]
-  ✅ Refactoring: [Specific technique to apply]
-  ⚠️ Risk: [Potential complications]
+OUTPUT: Return findings as a structured list, one per finding:
+
+FINDING:
+- impact: HIGH | MEDIUM | LOW
+- title: Brief title (max 40 chars, e.g., "Long method in calculateTotal")
+- location: Shortest unique path + line (e.g., "billing.ts:45-120")
+- problem: One sentence describing what's wrong (e.g., "75-line method with 4 responsibilities")
+- refactoring: Specific technique to apply (e.g., "Extract Method: Split into validateOrder, applyDiscounts, calculateTax, formatResult")
+- risk: Potential complications (e.g., "Requires updating 3 call sites")
+
+If no findings for this perspective, return: NO_FINDINGS
 ```
 
 **Perspective-Specific Guidance:**
@@ -85,7 +90,42 @@ After parallel analysis completes:
 
 - Launch parallel analysis agents per Parallel Task Execution section
 - Identify issues: code smells, breaking changes (for upgrades), deprecated patterns, etc.
-- Present findings with recommended sequence and risk assessment
+- Present findings with recommended sequence and risk assessment:
+
+```markdown
+## Refactoring Analysis: [target]
+
+### Summary
+
+| Perspective | High | Medium | Low |
+|-------------|------|--------|-----|
+| 🔧 Code Smells | X | X | X |
+| 🔗 Dependencies | X | X | X |
+| 🧪 Test Coverage | X | X | X |
+| 🏗️ Patterns | X | X | X |
+| ⚠️ Risk | X | X | X |
+| **Total** | X | X | X |
+
+*🔴 High Impact Issues*
+
+| ID | Finding | Remediation | Risk |
+|----|---------|-------------|------|
+| H1 | Long method in calculateTotal *(billing.ts:45)* | Extract Method: Split into 4 functions *(75 lines, 4 responsibilities)* | Low - well tested |
+| H2 | Circular dependency *(auth ↔ user)* | Introduce interface *(tight coupling blocks testing)* | Medium - 5 call sites |
+
+*🟡 Medium Impact Issues*
+
+| ID | Finding | Remediation | Risk |
+|----|---------|-------------|------|
+| M1 | Brief title *(file:line)* | Specific technique *(problem description)* | Risk level |
+
+*⚪ Low Impact Issues*
+
+| ID | Finding | Remediation | Risk |
+|----|---------|-------------|------|
+| L1 | Brief title *(file:line)* | Specific technique *(problem description)* | Risk level |
+```
+
 - Call: `AskUserQuestion` with options:
   1. **Document and proceed** - Save plan to `docs/refactor/[NNN]-[name].md`, then execute
   2. **Proceed without documenting** - Execute refactorings directly

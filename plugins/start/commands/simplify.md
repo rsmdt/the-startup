@@ -118,21 +118,30 @@ Present consolidated findings:
 | 🧹 Waste | X | X | X |
 | **Total** | X | X | X |
 
-### High Impact Opportunities
+*🔴 High Impact Opportunities*
 
-**[🔧 Complexity] Long Method in calculateTotal** (HIGH)
-📍 `src/billing.ts:45-120`
-❌ 75-line method with 4 responsibilities
-✅ Extract Method: Split into `validateOrder`, `applyDiscounts`, `calculateTax`, `formatResult`
+| ID | Finding | Remediation |
+|----|---------|-------------|
+| H1 | Long Method in calculateTotal *(billing.ts:45-120)* | Extract Method: Split into 4 functions *(75-line method with 4 responsibilities)* |
+| H2 | Deep nesting in processOrder *(orders.ts:30)* | Guard Clauses: Early return pattern *(5 levels of nested conditionals)* |
 
-### Medium Impact Opportunities
-...
+*🟡 Medium Impact Opportunities*
 
-### Low Impact Opportunities
-...
+| ID | Finding | Remediation |
+|----|---------|-------------|
+| M1 | Brief title *(file:line)* | Specific refactoring *(issue description)* |
 
-### Untested Code (Requires Decision)
-- `src/legacy.ts:10-50` - No test coverage, skip or add tests first?
+*⚪ Low Impact Opportunities*
+
+| ID | Finding | Remediation |
+|----|---------|-------------|
+| L1 | Brief title *(file:line)* | Specific refactoring *(issue description)* |
+
+*⚠️ Untested Code (Requires Decision)*
+
+| File | Lines | Recommendation |
+|------|-------|----------------|
+| legacy.ts | 10-50 | No test coverage - skip or add tests first? |
 ```
 
 ### Phase 4: Plan & Confirm
