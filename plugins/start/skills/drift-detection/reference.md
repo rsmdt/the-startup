@@ -290,11 +290,11 @@ Use spec.py to:
 - Locate spec documents
 - Understand spec structure
 
-### With implementation-verification
+### With specification-validation
 
-Combine with verification for comprehensive check:
+Combine with validation for comprehensive check:
 - Drift detection: Is it aligned with spec?
-- Implementation verification: Is it technically correct?
+- Specification validation (Mode C): Compare implementation against spec
 
 ## Performance Considerations
 

@@ -2,16 +2,16 @@
 
 **Workflow orchestration plugin for spec-driven development in Claude Code.**
 
-The `start` plugin provides eleven workflow commands, eighteen autonomous skills, and two output styles to transform how you build software with Claude Code.
+The `start` plugin provides ten user-invocable workflow skills, sixteen autonomous skills, and two output styles to transform how you build software with Claude Code.
 
-**📖 For quick start, workflow guide, and command selection, see the [main README](../../README.md).**
+**📖 For quick start, workflow guide, and skill selection, see the [main README](../../README.md).**
 
 ---
 
 ## Table of Contents
 
-- [Commands](#commands) — specify, implement, validate, review, document, analyze, refactor, simplify, debug, constitution
-- [Autonomous Skills](#autonomous-skills) — 18 context-activated skills
+- [User-Invocable Skills](#user-invocable-skills) — specify, implement, validate, review, document, analyze, refactor, simplify, debug, constitution
+- [Autonomous Skills](#autonomous-skills) — 16 context-activated skills
 - [Documentation Structure](#-documentation-structure) — specs, domain, patterns, interfaces
 - [Output Styles](#-output-styles) — The Startup, The ScaleUp
 - [Typical Development Workflow](#typical-development-workflow) — primary and maintenance flows
@@ -21,7 +21,9 @@ The `start` plugin provides eleven workflow commands, eighteen autonomous skills
 
 ---
 
-## Commands
+## User-Invocable Skills
+
+These skills are invoked by the user via slash commands (e.g., `/start:specify`). Unlike autonomous skills which activate automatically based on context, user-invocable skills wait for explicit invocation.
 
 ### `/start:specify <description>`
 
@@ -590,7 +592,7 @@ curl -fsSL https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh |
 
 ## Autonomous Skills
 
-The `start` plugin includes eighteen skills that activate automatically based on context. You never need to explicitly invoke them - they just work when needed.
+The `start` plugin includes sixteen autonomous skills that activate automatically based on context. You never need to explicitly invoke them - they just work when needed.
 
 ### Core Skills
 
@@ -616,14 +618,7 @@ The `start` plugin includes eighteen skills that activate automatically based on
 | Skill | Purpose |
 |-------|---------|
 | `agent-coordination` | Phase-by-phase execution, TodoWrite tracking, checkpoints |
-| `implementation-verification` | Implementation vs spec verification, deviation detection |
 | `git-workflow` | Branch creation, commit messages, PR creation |
-
-### Review Skills
-
-| Skill | Purpose |
-|-------|---------|
-| `code-review` | Multi-perspective review, security/performance/quality/tests |
 
 ### Methodology Skills
 
@@ -632,6 +627,7 @@ The `start` plugin includes eighteen skills that activate automatically based on
 | `codebase-analysis` | Iterative discovery cycles for pattern/rule extraction |
 | `bug-diagnosis` | Scientific debugging, hypothesis tracking, evidence-based |
 | `safe-refactoring` | Safe refactoring patterns, behavior preservation |
+| `writing-skills` | Skill authoring, auditing, and verification methodology |
 
 ---
 

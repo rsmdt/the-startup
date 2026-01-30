@@ -322,7 +322,6 @@ Score: [X]%
 
 Works alongside:
 - **specification-management**: Read spec metadata
-- **implementation-verification**: Detailed implementation verification
 - **task-delegation**: Parallel validation checks
 - **constitution-validation**: Constitutional rule compliance (when CONSTITUTION.md exists)
 - **drift-detection**: Spec-implementation alignment (during implementation phases)
