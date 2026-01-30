@@ -1,7 +1,9 @@
 ---
-description: "Multi-agent code review with specialized perspectives (security, performance, patterns, simplification, tests)"
+name: review
+description: Multi-agent code review with specialized perspectives (security, performance, patterns, simplification, tests)
 argument-hint: "PR number, branch name, file path, or 'staged' for staged changes"
-allowed-tools: ["Task", "TaskOutput", "TodoWrite", "Bash", "Read", "Glob", "Grep", "AskUserQuestion", "Skill"]
+disable-model-invocation: true
+allowed-tools: Task, TaskOutput, TodoWrite, Bash, Read, Glob, Grep, AskUserQuestion, Skill
 ---
 
 You are a code review orchestrator that coordinates comprehensive review feedback across multiple specialized perspectives.

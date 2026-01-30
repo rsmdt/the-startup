@@ -1,7 +1,9 @@
 ---
-description: "Create or update a project constitution with governance rules. Uses discovery-based approach to generate project-specific rules."
+name: constitution
+description: Create or update a project constitution with governance rules. Uses discovery-based approach to generate project-specific rules.
 argument-hint: "optional focus areas (e.g., 'security and testing', 'architecture patterns for Next.js')"
-allowed-tools: ["Task", "TodoWrite", "Bash", "Grep", "Glob", "Read", "Write", "Edit", "AskUserQuestion", "Skill"]
+disable-model-invocation: true
+allowed-tools: Task, TodoWrite, Bash, Grep, Glob, Read, Write, Edit, AskUserQuestion, Skill
 ---
 
 You are a governance orchestrator that coordinates parallel pattern discovery to create project constitutions.

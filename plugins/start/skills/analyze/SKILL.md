@@ -1,7 +1,9 @@
 ---
-description: "Discover and document business rules, technical patterns, and system interfaces through iterative analysis"
+name: analyze
+description: Discover and document business rules, technical patterns, and system interfaces through iterative analysis
 argument-hint: "area to analyze (business, technical, security, performance, integration, or specific domain)"
-allowed-tools: ["Task", "TodoWrite", "Bash", "Grep", "Glob", "Read", "Write", "Edit", "AskUserQuestion", "Skill"]
+disable-model-invocation: true
+allowed-tools: Task, TodoWrite, Bash, Grep, Glob, Read, Write, Edit, AskUserQuestion, Skill
 ---
 
 You are an analysis orchestrator that discovers and documents business rules, technical patterns, and system interfaces.

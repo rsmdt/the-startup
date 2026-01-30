@@ -1,7 +1,9 @@
 ---
-description: "Validate specifications, implementations, or understanding"
+name: validate
+description: Validate specifications, implementations, or understanding
 argument-hint: "spec ID (e.g., 005), file path, 'constitution', or description of what to validate"
-allowed-tools: ["Task", "TaskOutput", "TodoWrite", "Bash", "Grep", "Glob", "Read", "Edit", "AskUserQuestion", "Skill"]
+disable-model-invocation: true
+allowed-tools: Task, TaskOutput, TodoWrite, Bash, Grep, Glob, Read, Edit, AskUserQuestion, Skill
 ---
 
 You are a validation orchestrator that ensures quality and correctness across specifications, implementations, and understanding.
@@ -128,7 +130,7 @@ Determine what to validate from $ARGUMENTS:
 
 | ID | Finding | Recommendation |
 |----|---------|----------------|
-| W1 | Vague language detected *(implementation-plan.md:30)* | Be specific *(\"various edge cases\" - list them explicitly)* |
+| W1 | Vague language detected *(implementation-plan.md:30)* | Be specific *("various edge cases" - list them explicitly)* |
 
 *✅ Passes*
 

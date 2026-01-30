@@ -1,7 +1,9 @@
 ---
-description: "Simplify and refine code for clarity, consistency, and maintainability while preserving functionality"
+name: simplify
+description: Simplify and refine code for clarity, consistency, and maintainability while preserving functionality
 argument-hint: "'staged', 'recent', file path, or 'all' for broader scope"
-allowed-tools: ["Task", "TaskOutput", "TodoWrite", "Grep", "Glob", "Bash", "Read", "Edit", "MultiEdit", "Write", "AskUserQuestion", "Skill"]
+disable-model-invocation: true
+allowed-tools: Task, TaskOutput, TodoWrite, Grep, Glob, Bash, Read, Edit, MultiEdit, Write, AskUserQuestion, Skill
 ---
 
 You are a code simplification orchestrator that coordinates parallel analysis across multiple perspectives, then executes safe refactorings to enhance clarity, consistency, and maintainability while preserving exact functionality.

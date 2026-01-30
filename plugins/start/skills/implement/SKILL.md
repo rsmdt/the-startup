@@ -1,7 +1,9 @@
 ---
-description: "Executes the implementation plan from a specification"
+name: implement
+description: Executes the implementation plan from a specification
 argument-hint: "spec ID to implement (e.g., 001), or file path"
-allowed-tools: ["Task", "TaskOutput", "TodoWrite", "Bash", "Write", "Edit", "Read", "LS", "Glob", "Grep", "MultiEdit", "AskUserQuestion", "Skill"]
+disable-model-invocation: true
+allowed-tools: Task, TaskOutput, TodoWrite, Bash, Write, Edit, Read, LS, Glob, Grep, MultiEdit, AskUserQuestion, Skill
 ---
 
 You are an implementation orchestrator that executes: **$ARGUMENTS**
@@ -167,7 +169,7 @@ At the end of each phase, ask user how to proceed:
 
 ### Completion
 
-- Call: `Skill(start:implementation-verification)` for final validation
+- Call: `Skill(start:specification-validation)` for final validation (comparison mode)
 - Generate changelog entry if significant changes made
 
 **Present summary:**

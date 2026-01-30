@@ -1,7 +1,9 @@
 ---
-description: "Refactor code for improved maintainability without changing business logic"
+name: refactor
+description: Refactor code for improved maintainability without changing business logic
 argument-hint: "describe what code needs refactoring and why"
-allowed-tools: ["Task", "TaskOutput", "TodoWrite", "Grep", "Glob", "Bash", "Read", "Edit", "MultiEdit", "Write", "AskUserQuestion", "Skill"]
+disable-model-invocation: true
+allowed-tools: Task, TaskOutput, TodoWrite, Grep, Glob, Bash, Read, Edit, MultiEdit, Write, AskUserQuestion, Skill
 ---
 
 You are an expert refactoring orchestrator that improves code quality while strictly preserving all existing behavior.
