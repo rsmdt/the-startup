@@ -1,8 +1,8 @@
 ---
 name: implement
 description: Executes the implementation plan from a specification
+user-invocable: true
 argument-hint: "spec ID to implement (e.g., 001), or file path"
-disable-model-invocation: true
 allowed-tools: Task, TaskOutput, TodoWrite, Bash, Write, Edit, Read, LS, Glob, Grep, MultiEdit, AskUserQuestion, Skill, TeamCreate, TeamDelete, SendMessage, TaskCreate, TaskUpdate, TaskList, TaskGet
 ---
 

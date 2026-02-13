@@ -1,8 +1,8 @@
 ---
 name: document
 description: Generate and maintain documentation for code, APIs, and project components
+user-invocable: true
 argument-hint: "file/directory path, 'api' for API docs, 'readme' for README, or 'audit' for doc audit"
-disable-model-invocation: true
 allowed-tools: Task, TaskOutput, TodoWrite, Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion, Skill, TeamCreate, TeamDelete, SendMessage, TaskCreate, TaskUpdate, TaskList, TaskGet
 ---
 

@@ -1,8 +1,8 @@
 ---
 name: refactor
 description: Refactor code for improved maintainability without changing business logic
+user-invocable: true
 argument-hint: "describe what code needs refactoring and why"
-disable-model-invocation: true
 allowed-tools: Task, TaskOutput, TodoWrite, Grep, Glob, Bash, Read, Edit, MultiEdit, Write, AskUserQuestion, Skill, TeamCreate, TeamDelete, SendMessage, TaskCreate, TaskUpdate, TaskList, TaskGet
 ---
 

@@ -1,8 +1,8 @@
 ---
 name: debug
 description: Systematically diagnose and resolve bugs through conversational investigation and root cause analysis
+user-invocable: true
 argument-hint: "describe the bug, error message, or unexpected behavior"
-disable-model-invocation: true
 allowed-tools: Task, TaskOutput, TodoWrite, Bash, Grep, Glob, Read, Edit, MultiEdit, AskUserQuestion, Skill, TeamCreate, TeamDelete, SendMessage, TaskCreate, TaskUpdate, TaskList, TaskGet
 ---
 

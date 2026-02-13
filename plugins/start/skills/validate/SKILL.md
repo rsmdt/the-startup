@@ -1,8 +1,8 @@
 ---
 name: validate
 description: Validate specifications, implementations, constitution compliance, or understanding. Includes spec quality checks, drift detection, and constitution enforcement.
+user-invocable: true
 argument-hint: "spec ID (e.g., 005), file path, 'constitution', 'drift', or description of what to validate"
-disable-model-invocation: true
 allowed-tools: Task, TaskOutput, TodoWrite, Bash, Grep, Glob, Read, Edit, Write, AskUserQuestion, TeamCreate, TeamDelete, SendMessage, TaskCreate, TaskUpdate, TaskList, TaskGet
 ---
 

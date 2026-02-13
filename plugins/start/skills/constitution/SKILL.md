@@ -1,8 +1,8 @@
 ---
 name: constitution
 description: Create or update a project constitution with governance rules. Uses discovery-based approach to generate project-specific rules.
+user-invocable: true
 argument-hint: "optional focus areas (e.g., 'security and testing', 'architecture patterns for Next.js')"
-disable-model-invocation: true
 allowed-tools: Task, TodoWrite, Bash, Grep, Glob, Read, Write, Edit, AskUserQuestion
 ---
 
