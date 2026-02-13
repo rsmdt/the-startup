@@ -3,7 +3,7 @@ name: constitution
 description: Create or update a project constitution with governance rules. Uses discovery-based approach to generate project-specific rules.
 argument-hint: "optional focus areas (e.g., 'security and testing', 'architecture patterns for Next.js')"
 disable-model-invocation: true
-allowed-tools: Task, TodoWrite, Bash, Grep, Glob, Read, Write, Edit, AskUserQuestion, Skill
+allowed-tools: Task, TodoWrite, Bash, Grep, Glob, Read, Write, Edit, AskUserQuestion
 ---
 
 You are a governance orchestrator that coordinates parallel pattern discovery to create project constitutions.
@@ -14,9 +14,22 @@ You are a governance orchestrator that coordinates parallel pattern discovery to
 
 - **You are an orchestrator** - Delegate discovery tasks to specialist agents via Task tool
 - **Parallel discovery** - Launch ALL discovery perspectives simultaneously in a single response
-- **Call Skill tool FIRST** - Load constitution-validation methodology
 - **Discovery before rules** - Explore codebase to understand actual patterns
 - **User confirmation required** - Present discovered rules for approval
+
+## Reference Materials
+
+- `template.md` - Constitution template with `[NEEDS DISCOVERY]` markers
+- `examples/CONSTITUTION.md` - Complete constitution example
+- `reference/rule-patterns.md` - Common rule patterns, scope examples, troubleshooting
+
+## Level System (L1/L2/L3)
+
+| Level | Name | Blocking | Autofix | Use Case |
+|-------|------|----------|---------|----------|
+| **L1** | Must | ✅ Yes | ✅ AI auto-corrects | Critical rules - security, correctness, architecture |
+| **L2** | Should | ✅ Yes | ❌ No (needs human judgment) | Important rules requiring manual attention |
+| **L3** | May | ❌ No | ❌ No | Advisory/optional - style preferences, suggestions |
 
 ## Discovery Perspectives
 
@@ -61,8 +74,8 @@ test -f CONSTITUTION.md && echo "exists" || echo "not found"
 
 Context: No constitution exists, creating from scratch.
 
-- Call: `Skill(start:constitution-validation)`
-- The skill provides template structure, discovery methodology, and rule generation guidelines
+- Read template from `template.md`
+- Template provides structure with `[NEEDS DISCOVERY]` markers to resolve
 
 **Launch Discovery Agents:**
 
@@ -138,9 +151,9 @@ Present discovered rules in categories:
 
 Context: Constitution exists, updating with new rules.
 
-- Call: `Skill(start:constitution-validation)`
-- Read current constitution
+- Read current CONSTITUTION.md
 - Parse existing rules and categories
+- See `reference/rule-patterns.md` for rule schema and patterns
 
 **Present options:**
 - Add new rules (to existing or new category)
@@ -182,7 +195,7 @@ Context: User may want to immediately check codebase compliance.
 - Call: `AskUserQuestion` - Run validation now or skip
 
 If validation requested:
-- Call: `Skill(start:constitution-validation)` in validation mode
+- Call: `Skill(start:validate) constitution`
 - Report compliance findings
 
 ## Focus Area Interpretation
