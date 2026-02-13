@@ -1,5 +1,5 @@
 ---
-name: requirements-analysis
+name: specify-requirements
 description: Create and validate product requirements documents (PRD). Use when writing requirements, defining user stories, specifying acceptance criteria, analyzing user needs, or working on product-requirements.md files in docs/specs/. Includes validation checklist, iterative cycle pattern, and multi-angle review process.
 allowed-tools: Read, Write, Edit, Task, TodoWrite, Grep, Glob
 ---
@@ -22,7 +22,7 @@ Activate this skill when you need to:
 The PRD template is at [template.md](template.md). Use this structure exactly.
 
 **To write template to spec directory:**
-1. Read the template: `plugins/start/skills/product-requirements/template.md`
+1. Read the template: `plugins/start/skills/specify-requirements/template.md`
 2. Write to spec directory: `docs/specs/[NNN]-[name]/product-requirements.md`
 
 ## PRD Focus Areas

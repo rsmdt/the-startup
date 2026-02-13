@@ -12,10 +12,10 @@
 ```
 docs/specs/
 ├── 001-user-authentication/
-│   ├── README.md                 # Managed by specification-management skill
+│   ├── README.md                 # Managed by specify-meta skill
 │   ├── product-requirements.md   # Created by requirements-gathering-analysis skill
-│   ├── solution-design.md        # Created by technical-architecture-design skill
-│   └── implementation-plan.md    # Created by phased-implementation-planning skill
+│   ├── solution-design.md        # Created by specify-solution skill
+│   └── implementation-plan.md    # Created by specify-plan skill
 ├── 002-payment-processing/
 │   └── ...
 └── 003-notification-system/

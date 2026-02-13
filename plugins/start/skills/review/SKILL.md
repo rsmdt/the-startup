@@ -73,27 +73,10 @@ Code review should cover these perspectives. For each, launch a Task with clear 
 
 ### Mode Selection Gate
 
-After gathering context, offer the user a choice of execution mode:
+After gathering context, use `AskUserQuestion` to let the user choose execution mode:
 
-```
-AskUserQuestion({
-  questions: [{
-    question: "How should we execute this review?",
-    header: "Exec Mode",
-    options: [
-      {
-        label: "Standard (Recommended)",
-        description: "Subagent mode — parallel fire-and-forget agents. Best for straightforward reviews with independent perspectives."
-      },
-      {
-        label: "Team Mode",
-        description: "Persistent teammates with shared task list and peer coordination. Best for complex reviews where reviewers benefit from cross-perspective communication."
-      }
-    ],
-    multiSelect: false
-  }]
-})
-```
+- **Standard (default recommendation)**: Subagent mode — parallel fire-and-forget agents. Best for straightforward reviews with independent perspectives.
+- **Team Mode**: Persistent teammates with shared task list and peer coordination. Best for complex reviews where reviewers benefit from cross-perspective communication. Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` in settings.
 
 **Recommend Team Mode when:**
 - Diff touches 10+ files across multiple domains
@@ -157,155 +140,39 @@ Continue to **Phase 3: Synthesize & Present**.
 
 ### Phase 2 (Team Mode): Launch Review Team
 
-#### Step 1: Create Team
+> Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` enabled in settings.
 
-Derive a team name from the review target:
-- PR number → `review-pr-123`
-- Branch → `review-feature-auth`
-- Staged → `review-staged`
-- File path → `review-src-auth` (first meaningful path segment)
+#### Setup
 
-```
-TeamCreate({
-  team_name: "{review-target-name}",
-  description: "Code review team for {target}"
-})
-```
+1. **Create team** — derive name from review target (e.g., `review-pr-123`, `review-feature-auth`, `review-staged`)
+2. **Create one task per applicable review perspective** — all independent, no dependencies. Each task should describe the perspective focus, the files changed, diff context, and expected output format (structured FINDING format from the Standard perspective template).
+3. **Spawn one reviewer per perspective**:
 
-#### Step 2: Create Tasks
+| Teammate | Perspective | subagent_type |
+|----------|------------|---------------|
+| `security-reviewer` | Security | `team:the-architect:review-security` |
+| `simplification-reviewer` | Simplification | `team:the-architect:review-complexity` |
+| `performance-reviewer` | Performance | `team:the-developer:optimize-performance` |
+| `quality-reviewer` | Quality | `general-purpose` |
+| `test-reviewer` | Testing | `team:the-tester:test-quality` |
+| `concurrency-reviewer` | Concurrency | `team:the-developer:review-concurrency` |
+| `dependency-reviewer` | Dependencies | `team:the-devops:review-dependency` |
+| `compatibility-reviewer` | Compatibility | `team:the-architect:review-compatibility` |
+| `accessibility-reviewer` | Accessibility | `team:the-designer:build-accessibility` |
 
-Create one task per applicable review perspective. All tasks are independent — no `addBlockedBy` needed.
+> **Fallback**: If team plugin agents are unavailable, use `general-purpose` for all.
 
-```
-TaskCreate({
-  subject: "{Perspective} review of {target}",
-  description: """
-    Review the following changes for {perspective focus}:
-    - {checklist item 1}
-    - {checklist item 2}
-    - {checklist item 3}
+4. **Assign each task** to its corresponding reviewer.
 
-    Files changed: {file list}
-    Diff context: {diff summary or pointer to files}
+**Reviewer prompt should include**: files changed with diff, full file context, project standards, expected output format (FINDING structure), and team protocol: check TaskList → mark in_progress/completed → send findings to lead → discover peers via team config → DM cross-perspective insights (e.g., "FYI: Found {issue} at {location} — relates to your review") → do NOT wait for peer responses.
 
-    Return findings in structured format:
-    FINDING:
-    - severity: CRITICAL | HIGH | MEDIUM | LOW
-    - confidence: HIGH | MEDIUM | LOW
-    - title: Brief title (max 40 chars)
-    - location: file:line
-    - issue: One sentence
-    - fix: Actionable recommendation
-    - code_example: (Optional, for CRITICAL/HIGH)
+#### Monitoring
 
-    If no findings: return NO_FINDINGS
-  """,
-  activeForm: "Reviewing {perspective}",
-  metadata: {
-    "perspective": "{perspective-key}",
-    "emoji": "{perspective-emoji}"
-  }
-})
-```
+Messages arrive automatically. If a reviewer is blocked: provide missing context via DM. After 3 retries, skip that perspective and note it.
 
-#### Step 3: Spawn Reviewer Teammates
+#### Shutdown
 
-Spawn one teammate per applicable perspective. Use specialized agent types from the team plugin where available.
-
-| Teammate Name | Perspective | subagent_type |
-|---------------|------------|---------------|
-| `security-reviewer` | 🔐 Security | `team:the-architect:review-security` |
-| `simplification-reviewer` | 🔧 Simplification | `team:the-architect:review-complexity` |
-| `performance-reviewer` | ⚡ Performance | `team:the-developer:optimize-performance` |
-| `quality-reviewer` | 📝 Quality | `general-purpose` |
-| `test-reviewer` | 🧪 Testing | `team:the-tester:test-quality` |
-| `concurrency-reviewer` | 🧵 Concurrency | `team:the-developer:review-concurrency` |
-| `dependency-reviewer` | 📦 Dependencies | `team:the-devops:review-dependency` |
-| `compatibility-reviewer` | 🔄 Compatibility | `team:the-architect:review-compatibility` |
-| `accessibility-reviewer` | ♿ Accessibility | `team:the-designer:build-accessibility` |
-
-**Spawn template for each reviewer:**
-
-```
-Task({
-  description: "{Perspective} code review",
-  prompt: """
-  You are the {name} on the {team-name} team.
-
-  CONTEXT:
-    - Files changed: {file list}
-    - Changes: {the diff or code}
-    - Full file context: {surrounding code for each changed file}
-    - Project standards: {from CLAUDE.md, .editorconfig, etc.}
-
-  OUTPUT: Return findings in structured format:
-    FINDING:
-    - severity: CRITICAL | HIGH | MEDIUM | LOW
-    - confidence: HIGH | MEDIUM | LOW
-    - title: Brief title (max 40 chars)
-    - location: file:line
-    - issue: One sentence describing what's wrong
-    - fix: Actionable recommendation
-    - code_example: (Optional, for CRITICAL/HIGH)
-
-    If no findings: return NO_FINDINGS
-
-  SUCCESS: All {perspective} concerns identified with remediation steps
-
-  TEAM PROTOCOL:
-    - Check TaskList for your assigned review task
-    - Mark in_progress when starting, completed when done
-    - Send findings to lead via SendMessage
-    - Discover teammates via ~/.claude/teams/{team-name}/config.json
-    - If you find an issue overlapping another reviewer's domain,
-      DM them: "FYI: Found {issue} at {location} — relates to your review"
-    - Do NOT wait for peer responses — send findings to lead regardless
-  """,
-  subagent_type: "{subagent_type from table}",
-  team_name: "{team-name}",
-  name: "{teammate-name}",
-  mode: "bypassPermissions"
-})
-```
-
-Launch ALL reviewer teammates simultaneously in a single response with multiple Task calls.
-
-#### Step 4: Monitor & Collect
-
-Messages from reviewers arrive automatically — the lead does NOT poll.
-
-```
-Collection loop:
-1. Receive message from reviewer: "Review complete. Findings: ..."
-2. Receive message from another reviewer: "Review complete. Findings: ..."
-3. When all reviewers have reported:
-   → Check TaskList to verify all review tasks are completed
-   → Proceed to synthesis
-```
-
-If a reviewer is blocked or reports an issue:
-- Missing context → Send DM with the needed information
-- Tool failure → Reassign task or handle directly
-- After 3 retries for the same task → Skip that perspective and note it in the summary
-
-#### Step 5: Graceful Shutdown
-
-After collecting all findings:
-
-```
-1. Verify all tasks completed via TaskList
-2. For EACH reviewer teammate (sequentially):
-   SendMessage({
-     type: "shutdown_request",
-     recipient: "{reviewer-name}",
-     content: "Review complete. Thank you for your analysis."
-   })
-3. Wait for each shutdown_response (approve: true)
-4. After ALL teammates shut down:
-   TeamDelete()
-```
-
-If a teammate rejects shutdown: check TaskList for incomplete work, resolve, then re-request.
+After all reviewers report: verify via TaskList → send sequential `shutdown_request` to each → wait for approval → TeamDelete.
 
 Continue to **Phase 3: Synthesize & Present**.
 

@@ -2,249 +2,175 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Common Commands
+## What This Is
 
-### Development Mode (No Build Required)
+**The Agentic Startup** is a spec-driven development framework for Claude Code, distributed as marketplace plugins. It provides workflow commands, autonomous skills, specialized agents, and output styles to transform how you build software.
 
-Run commands directly from TypeScript source using tsx:
+## Repository Structure
+
+```
+the-startup/
+├── plugins/
+│   ├── start/                    # Core workflow orchestration plugin
+│   │   ├── .claude-plugin/       # Plugin manifest (plugin.json)
+│   │   ├── skills/               # 14 skills (9 user-invocable + 5 autonomous)
+│   │   ├── output-styles/        # The Startup, The ScaleUp output styles
+│   │   └── README.md             # Detailed plugin documentation
+│   │
+│   ├── team/                     # Specialized agent library plugin
+│   │   ├── agents/               # 11 roles with activity-based specializations
+│   │   │   ├── the-chief.md      # Complexity assessment, routing
+│   │   │   ├── the-analyst/      # research-market, research-requirements
+│   │   │   ├── the-architect/    # design-system, review-security, etc.
+│   │   │   ├── the-developer/    # build-feature, optimize-performance, etc.
+│   │   │   ├── the-devops/       # build-containers, build-pipelines, etc.
+│   │   │   ├── the-designer/     # design-visual, design-interaction, etc.
+│   │   │   ├── the-tester/       # test-quality, test-performance
+│   │   │   └── the-meta-agent.md # Agent design and generation
+│   │   └── skills/               # Cross-cutting and domain skills
+│   │
+│   └── constitution/             # Project governance rules plugin (optional)
+│
+├── scripts/
+│   ├── statusline.sh             # Custom statusline for Claude Code terminal
+│   └── statusline.toml           # Statusline configuration template
+│
+├── docs/
+│   ├── PHILOSOPHY.md             # Activity-based architecture rationale
+│   ├── PRINCIPLES.md             # Core development principles
+│   ├── patterns/                 # Technical patterns documentation
+│   └── specs/                    # Feature specifications (PRD/SDD/PLAN)
+│
+├── install.sh                    # One-line installer script
+└── README.md                     # User-facing documentation
+```
+
+## Key Concepts
+
+### Plugin Architecture
+
+Each plugin lives in `plugins/[name]/` with:
+- `.claude-plugin/plugin.json` - Plugin manifest defining name, version, components
+- `commands/` - Slash command definitions (markdown files)
+- `skills/` - Autonomous skills (SKILL.md files with trigger terms)
+- `output-styles/` - Output style definitions
+- `agents/` - Agent definitions (team plugin only)
+
+### Skill Structure
+
+Skills use progressive disclosure to minimize context usage:
+```
+skills/[skill-name]/
+├── SKILL.md           # Core logic (~7-24 KB, always loaded)
+├── reference.md       # Advanced protocols (loaded when needed)
+├── templates/         # Document templates
+├── examples/          # Real-world scenarios
+└── validation.md      # Quality checklists
+```
+
+### Agent Structure (Team Plugin)
+
+Agents are organized by role with activity-based specializations:
+```
+agents/the-[role]/
+├── [activity-1].md    # e.g., the-architect/design-system.md
+├── [activity-2].md    # e.g., the-architect/review-security.md
+└── ...
+```
+
+Each agent markdown file defines:
+- Purpose and trigger conditions
+- Tool access permissions
+- Activation examples
+- Integration with other agents
+
+## Development Workflow
+
+### Testing Changes Locally
 
 ```bash
-# Run installer in development mode
-npm run dev:install
+# The plugins are directories - test by installing from local path
+claude plugin install ./plugins/start
+claude plugin install ./plugins/team
 
-# Run other commands
-npm run dev:uninstall
-npm run dev:init
-npm run dev:spec
-npm run dev:spec-bin  # Run standalone spec executable
+# Or use the main installer to test full installation
+./install.sh
 
-# Run with custom arguments
-npm run dev:run -- install --yes
-npm run dev:run -- spec "Add user authentication"
-npm run dev:spec-bin -- test-feature --add solution-design
-
-# Or use tsx directly
-npx tsx src/index.ts install
-npx tsx src/bin/spec.ts test-feature
+# Uninstall to reset
+claude plugin uninstall start@the-startup
+claude plugin uninstall team@the-startup
 ```
 
-### Build and Run
+### Editing Skills
 
-```bash
-# Build the project
-npm run build
+1. Skills are markdown files (`SKILL.md`) - edit directly
+2. Skills activate on trigger terms defined in their YAML frontmatter
+3. Keep `SKILL.md` under ~25 KB for context efficiency
+4. Move advanced content to `reference.md` (loaded on demand)
 
-# Run the built CLI directly
-node dist/index.js install
-node dist/index.js --help
+### Editing Commands
 
-# Or link globally for easier testing (simulates npx behavior)
-npm link
-the-agentic-startup install
-the-agentic-startup spec test-feature
-the-agentic-startup-spec test-feature  # Standalone spec executable
-the-agentic-startup --help
+1. Commands are markdown files in `plugins/[plugin]/commands/`
+2. Command name matches filename (e.g., `specify.md` → `/start:specify`)
+3. Commands orchestrate skills - they define workflow, skills provide implementation
 
-# Unlink when done testing
-npm unlink -g the-agentic-startup
+### Editing Agents
 
-# Watch mode (rebuilds on file changes)
-npm run dev
-# Then in another terminal, run:
-node dist/index.js install
-```
+1. Agents are markdown files in `plugins/team/agents/[role]/`
+2. Agent name matches `[role]:[activity]` pattern
+3. Agents define specialized Task tool prompts for subagent delegation
 
-### Testing
-```bash
-# Run all tests
-npm test
+### Editing Output Styles
 
-# Run tests with coverage
-npm run test:coverage
+1. Output styles are markdown files in `plugins/[plugin]/output-styles/`
+2. Define personality, voice, and behavioral patterns
+3. Activated via `/output-style [plugin]:[style-name]`
 
-# Run tests in watch mode
-npm run test:watch
+## Important Patterns
 
-# Run specific test file
-npm test tests/core/installer/Installer.test.ts
+### Progressive Disclosure
 
-# Run tests with UI (if available)
-npm run test:ui
-```
+Skills load minimal context initially, then progressively load:
+- `reference.md` - Advanced protocols when complexity increases
+- `templates/` - Document templates when creating artifacts
+- `examples/` - Real-world scenarios when pattern matching
 
-### Development Workflow
-```bash
-# Format code
-npm run format
+### Spec-Driven Development
 
-# Lint code
-npm run lint
+The primary workflow: `/start:specify` → `/start:validate` → `/start:implement` → `/start:review`
 
-# Type check
-npm run typecheck
+Specifications live in `docs/specs/[NNN]-[name]/`:
+- `product-requirements.md` - What to build
+- `solution-design.md` - How to build it
+- `implementation-plan.md` - Executable tasks
 
-# Clean build artifacts
-npm run clean
+### Knowledge Capture
 
-# Full check (lint + typecheck + test)
-npm run check
-```
+Discovered patterns, interfaces, and domain rules are automatically documented in:
+- `docs/patterns/` - Technical patterns
+- `docs/interfaces/` - External integrations
+- `docs/domain/` - Business rules
 
-## Architecture Overview
+### Constitution Enforcement
 
-### Package Structure
+Optional `CONSTITUTION.md` at project root defines checkable rules:
+- L1 (Must) - Blocking with autofix
+- L2 (Should) - Blocking, manual fix
+- L3 (May) - Advisory only
 
-The project follows a standard TypeScript/Node.js layout with clear separation of concerns:
+## File Naming Conventions
 
-- **`src/index.ts`**: Entry point that exports CLI runner
-- **`src/bin/`**: Standalone executable commands
-  - `spec.ts`: Standalone spec executable (the-agentic-startup-spec)
-- **`src/cli/`**: CLI command implementations using Commander.js
-  - `index.ts`: CLI setup with Commander.js, registers all commands
-  - `install.ts`: Installation command that launches Ink-based TUI
-  - `uninstall.ts`: Uninstall command with lock file reading
-  - `init.ts`: Initialize DOR/DOD/TASK-DOD templates
-  - `spec.ts`: Create numbered spec directories with TOML output
+| Type | Location | Naming |
+|------|----------|--------|
+| Commands | `plugins/*/commands/*.md` | lowercase-kebab (e.g., `specify.md`) |
+| Skills | `plugins/*/skills/*/SKILL.md` | directory is skill name |
+| Agents | `plugins/team/agents/the-*/` | `the-[role]/[activity].md` |
+| Output Styles | `plugins/*/output-styles/*.md` | Title Case (e.g., `The Startup.md`) |
+| Specs | `docs/specs/[NNN]-*/` | 3-digit ID prefix |
 
-- **`src/core/`**: Core business logic modules
-  - `installer/`: Installation logic and file management
-    - `Installer.ts`: Main installer with rollback mechanism
-    - `LockManager.ts`: Lock file creation, reading, checksum management
-    - `SettingsMerger.ts`: Deep merge settings with backup/restore
-  - `init/`: Template initialization logic
-    - `Initializer.ts`: DOR/DOD/TASK-DOD template processing
-  - `spec/`: Specification directory management
-    - `SpecGenerator.ts`: Auto-incrementing IDs, TOML output, template generation
-  - `types/`: TypeScript type definitions
-    - `config.ts`: Configuration types for all commands
-    - `settings.ts`: Claude settings.json types
-    - `lock.ts`: Lock file format types with v1→v2 migration support
+## Publishing
 
-- **`src/ui/`**: Ink-based interactive UI components (React)
-  - `install/`: Installation wizard components
-    - `InstallWizard.tsx`: Main wizard with state machine (6 states)
-    - `ChoiceSelector.tsx`, `FinalConfirmation.tsx`, `Complete.tsx`: UI components
-  - `uninstall/`: Uninstall wizard
-    - `UninstallWizard.tsx`: Lock file reading and confirmation
-  - `shared/`: Reusable UI components
-    - `theme.ts`, `Spinner.tsx`, `ErrorDisplay.tsx`, `Banner.tsx`
-
-- **`tests/`**: Comprehensive test suite
-  - `core/`: Unit tests for all core modules
-  - `ui/`: UI component tests using ink-testing-library
-  - `integration/`: Integration tests for full workflows
-
-- **`docs/`**: Project documentation structure
-  - `domain/`: Business rules, workflows, and domain patterns
-  - `patterns/`: Technical patterns and architectural solutions
-  - `interfaces/`: API contracts and service integrations
-  - `specs/`: Feature specifications (PRD, SDD, PLAN documents)
-
-### Embedded Assets
-
-The application includes all assets as separate files distributed with the npm package:
-- `assets/claude/agents/**/*.md`: Agent definitions (11 roles, 39 activities)
-- `assets/claude/commands/**/*.md`: Slash command definitions (5 commands)
-- `assets/claude/output-styles/the-startup.md`: Custom output style
-- `assets/the-startup/templates/*`: Template files (PRD, BRD, SDD, PLAN, DOR, DOD, TASK-DOD)
-- `assets/the-startup/rules/*`: Agent delegation and cycle pattern rules
-
-### UI Architecture (Ink/React)
-
-The installer uses React components with Ink for terminal UI:
-
-1. **InstallWizard**: Main component orchestrating installation flow
-2. **State Machine**: Manages transitions between installation steps
-   - Intro → StartupPath → ClaudePath → FileSelection → Installing → Complete
-3. **React Components**: Each step is a separate React component
-   - ChoiceSelector: Arrow key navigation menu for path selection
-   - FinalConfirmation: Final confirmation screen with file tree display
-   - Complete: Shows installation success summary
-   - Banner: ASCII art banner display
-   - ErrorDisplay: Handles error display with recovery options
-
-### Installation Flow
-
-1. User runs `the-agentic-startup install` or `npm run dev install`
-2. Ink TUI launches with path selection
-3. Files are selected using interactive tree (or --yes flag for all)
-4. Assets are copied to:
-   - `.claude/agents/` and `.claude/commands/`: Agent and command definitions
-   - `.the-startup/templates/`: Template files
-   - `.the-startup/rules/`: Agent delegation rules
-5. Settings.json is merged with hooks (backup created)
-6. Lock file (v2 format) is created with checksums
-7. Rollback mechanism ensures clean state on any failure
-
-### Lock File Format
-
-The project supports two lock file versions with automatic migration:
-
-**v1 (deprecated)**: Flat map of files
-```json
-{
-  "version": "1.0.0",
-  "files": {
-    "agents/the-chief.md": { "size": 2048, "checksum": "sha256:..." }
-  }
-}
-```
-
-**v2 (current)**: Categorized arrays with metadata
-```json
-{
-  "version": "2.0.0",
-  "install_date": "2025-10-06T10:00:00Z",
-  "categories": {
-    "agents": [
-      { "path": "agents/the-chief.md", "size": 2048, "checksum": "sha256:..." }
-    ]
-  }
-}
-```
-
-Migration happens automatically on read via `LockManager.migrateLockFile()`.
-
-## Key Implementation Details
-
-### File Path Handling
-- Installation paths support `~` expansion for home directory
-- Project-local installation uses `.the-startup` directory
-- Claude configuration expected at `~/.claude`
-- All paths use `path.join()` for cross-platform compatibility
-
-### Placeholder Replacement
-Templates use placeholders that are replaced during installation:
-- `{{STARTUP_PATH}}`: Installation directory path
-- `{{CLAUDE_PATH}}`: Claude configuration directory
-
-### Rollback Mechanism
-The installer implements atomic operations with full rollback:
-- Tracks all installed files during installation
-- Creates backup of settings.json before modification
-- On any failure: deletes all installed files, restores settings backup
-- Ensures system is in clean state after failed installation
-
-### Error Handling
-- Custom error types with specific messages (ENOENT, EACCES, ENOSPC)
-- Installation validates paths and provides clear error messages
-- Settings merger handles JSON parse errors gracefully
-- Lock file migration handles both v1 and v2 formats
-
-### Testing Strategy
-- Unit tests for all core modules (Installer, LockManager, SettingsMerger, etc.)
-- Integration tests for full installation/uninstall workflows
-- UI tests using ink-testing-library for React components
-- Migration test from v1 to v2 lock file format
-- Real-file integration tests using actual assets for verification
-
-## Distribution
-
-The project is distributed as an npm package:
-- Published to npm registry
-- Installed globally: `npm install -g the-agentic-startup`
-- Or used via npx: `npx the-agentic-startup install`
-- Assets are included in the npm package (not embedded at build time)
-- Main entry point: `dist/index.js` (built from TypeScript)
-- Standalone executables:
-  - `dist/bin/spec.js` - Available as `the-agentic-startup-spec` command
+The repository is a Claude Code marketplace. Publishing happens via:
+1. Push to `main` branch
+2. GitHub Actions workflow creates release
+3. Users install via `/plugin marketplace add rsmdt/the-startup`

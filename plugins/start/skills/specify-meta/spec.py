@@ -3,7 +3,7 @@
 The Agentic Startup - Spec Generation Script
 Creates numbered spec directories with auto-incrementing IDs
 
-Location: plugins/start/skills/specification-management/spec.py
+Location: plugins/start/skills/specify-meta/spec.py
 Template resolution: skills/[template-name]/template.md (primary)
                     templates/[template-name].md (fallback, deprecated)
 """
@@ -16,7 +16,7 @@ from typing import Optional
 
 
 # Get plugin root from script location
-# This script is at: plugins/start/skills/specification-management/spec.py
+# This script is at: plugins/start/skills/specify-meta/spec.py
 # Plugin root is: plugins/start/
 script_dir = Path(__file__).resolve().parent
 plugin_root = script_dir.parent.parent

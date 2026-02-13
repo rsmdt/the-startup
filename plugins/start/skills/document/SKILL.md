@@ -29,6 +29,7 @@ For comprehensive documentation, cover these perspectives. Launch parallel agent
 | 🔌 **API** | Enable integration | Endpoints, request/response schemas, authentication, error codes, OpenAPI spec |
 | 📘 **README** | Enable quick start | Features, installation, configuration, usage examples, troubleshooting |
 | 📊 **Audit** | Identify gaps | Coverage metrics, stale docs, missing documentation, prioritized backlog |
+| 🗂️ **Capture** | Preserve discoveries | Business rules → `docs/domain/`, technical patterns → `docs/patterns/`, external integrations → `docs/interfaces/` |
 
 ### When to Use Each Perspective
 
@@ -38,6 +39,7 @@ For comprehensive documentation, cover these perspectives. Launch parallel agent
 | `api` | 🔌 API + 📖 Code (for handlers) |
 | `readme` | 📘 README |
 | `audit` | 📊 Audit (all areas) |
+| `capture` or pattern/rule/interface discovery | 🗂️ Capture |
 | `all` or empty | All applicable perspectives |
 
 ## Workflow
@@ -52,27 +54,10 @@ For comprehensive documentation, cover these perspectives. Launch parallel agent
 
 ### Execution Mode Selection
 
-After analyzing scope, present the mode selection gate:
+After analyzing scope, use `AskUserQuestion` to let the user choose execution mode:
 
-```
-AskUserQuestion({
-  questions: [{
-    question: "How should we execute this documentation?",
-    header: "Exec Mode",
-    options: [
-      {
-        label: "Standard (Recommended)",
-        description: "Subagent mode — parallel fire-and-forget agents. Best for focused documentation of specific files or single perspectives."
-      },
-      {
-        label: "Team Mode",
-        description: "Persistent teammates with shared task list and coordination. Best for broad documentation across multiple perspectives simultaneously."
-      }
-    ],
-    multiSelect: false
-  }]
-})
-```
+- **Standard (default recommendation)**: Subagent mode — parallel fire-and-forget agents. Best for focused documentation of specific files or single perspectives.
+- **Team Mode**: Persistent teammates with shared task list and coordination. Best for broad documentation across multiple perspectives simultaneously. Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` in settings.
 
 **When to recommend Team Mode instead:** If complexity signals are present, move "(Recommended)" to the Team Mode option label instead:
 - Target is `all` or `audit` scope (multiple perspectives needed)
@@ -98,6 +83,7 @@ Launch applicable documentation activities in parallel (single response with mul
 Generate [PERSPECTIVE] documentation:
 
 CONTEXT:
+- DISCOVERY_FIRST: Check for existing documentation at target location. Update existing docs rather than creating duplicates.
 - Target: [files/directories to document]
 - Existing docs: [what already exists]
 - Project style: [from existing docs, CLAUDE.md]
@@ -119,6 +105,7 @@ OUTPUT: Documentation formatted as:
 | 🔌 API | Discover routes, document endpoints, generate OpenAPI spec, include examples |
 | 📘 README | Analyze project, write Features/Install/Config/Usage/Testing sections |
 | 📊 Audit | Calculate coverage %, find stale docs, identify gaps, create backlog |
+| 🗂️ Capture | Categorize discovery (domain/patterns/interfaces), deduplicate, use templates, cross-reference |
 
 ### Phase 3: Synthesize & Apply
 
@@ -160,161 +147,70 @@ OUTPUT: Documentation formatted as:
 
 ## Team Mode Workflow
 
-Team mode uses persistent teammates with a shared task list. The lead (you) orchestrates documentation generation; teammates write docs. Synthesis and merge remain lead-only.
+> Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` enabled in settings.
 
-### Team Setup
+You orchestrate; persistent teammates generate documentation. Synthesis and merge are lead-only.
 
-**1. Create the team:**
+### Setup
 
-```
-TeamCreate({
-  team_name: "document-{target}",
-  description: "Documentation team for {target description}"
-})
-```
+1. **Create team** named `document-{target}` (e.g., `document-api`, `document-audit`)
+2. **Create one task per applicable perspective** — all independent. Each task should describe the documentation perspective, target files, existing docs, project style, and expected output format.
+3. **Spawn teammates** by perspective (only applicable ones):
 
-Use a descriptive target identifier (e.g., `document-api`, `document-audit`, `document-src-auth`).
+| Role | Perspective | subagent_type |
+|------|------------|---------------|
+| `code-documenter` | Code | `general-purpose` |
+| `api-documenter` | API | `general-purpose` |
+| `readme-documenter` | README | `general-purpose` |
+| `audit-documenter` | Audit | `general-purpose` |
+| `capture-documenter` | Capture | `general-purpose` |
 
-**2. Create tasks for each applicable perspective:**
+4. **Assign tasks** to corresponding teammates.
 
-For each documentation perspective identified in Phase 1, create an independent task:
+**Teammate prompt should include**: target files/directories, existing docs, project style (from CLAUDE.md), discovery-first instruction (update existing docs, don't duplicate), expected output, and team protocol: check TaskList → mark in_progress/completed → send results to lead → claim unassigned work when idle.
 
-```
-TaskCreate({
-  subject: "Generate {perspective} documentation for {target}",
-  description: """
-    Documentation perspective: {perspective name}
-    Target: {files/directories to document}
-    Existing docs: {what already exists}
-    Project style: {conventions from existing docs, CLAUDE.md}
+### Monitoring
 
-    {Perspective-specific instructions from Perspective-Specific Guidance table}
-
-    OUTPUT: Documentation formatted as:
-      📄 **[File/Section]**
-      📍 Location: `path/to/doc`
-      📝 Content: [Generated documentation]
-      🔗 References: [Code locations documented]
-  """,
-  activeForm: "Generating {perspective} documentation",
-  metadata: {
-    "perspective": "{code|api|readme|audit}"
-  }
-})
-```
-
-All documentation tasks are independent — no `addBlockedBy` needed. All perspectives run in parallel.
-
-### Spawning Documentation Teammates
-
-Spawn teammates based on the perspectives identified. Match teammate roles to documentation perspectives:
-
-| Role Name | Perspective | subagent_type | Model |
-|-----------|------------|---------------|-------|
-| `code-documenter` | 📖 Code | `general-purpose` | (default) |
-| `api-documenter` | 🔌 API | `general-purpose` | (default) |
-| `readme-documenter` | 📘 README | `general-purpose` | (default) |
-| `audit-documenter` | 📊 Audit | `general-purpose` | (default) |
-
-**Only spawn teammates for applicable perspectives.** If only Code and API perspectives are needed, spawn `code-documenter` and `api-documenter`.
-
-**Spawn each teammate:**
-
-```
-Task({
-  description: "{perspective} documentation",
-  prompt: """
-  You are the {role-name} on the {team-name} team.
-
-  CONTEXT:
-    - Target: {files/directories to document}
-    - Existing docs: {what already exists}
-    - Project style: {conventions from existing docs, CLAUDE.md}
-    - Self-prime from: CLAUDE.md (project standards)
-    - Scan target files/directories to understand what needs documenting
-
-  OUTPUT:
-    - Generated documentation content
-    - Report: files documented, sections created/updated, coverage summary
-
-  SUCCESS:
-    - Documentation is accurate and matches source code
-    - Follows existing project documentation style
-    - Links to actual file paths and line numbers
-    - No duplication of existing documentation
-
-  TEAM PROTOCOL:
-    - Check TaskList for your assigned tasks
-    - Mark in_progress when starting, completed when done
-    - Send results to lead via SendMessage
-    - After completing tasks, check TaskList for unassigned unblocked tasks
-    - If no available work, go idle
-  """,
-  subagent_type: "general-purpose",
-  team_name: "{team-name}",
-  name: "{role-name}",
-  mode: "bypassPermissions"
-})
-```
-
-**Assign tasks** after spawning:
-
-```
-TaskUpdate({ taskId: "{task-id}", owner: "{teammate-name}" })
-```
-
-### Leader Monitoring Loop
-
-As the lead, you coordinate through the task system and messages:
-
-1. **Messages arrive automatically** — Teammates send generated docs via SendMessage when tasks complete
-2. **Check TaskList periodically** — Verify task status and progress
-3. **Handle blockers** — When a teammate reports being blocked, provide context or reassign
-4. **Never generate docs directly** — Delegate all documentation work to teammates
+Messages arrive automatically. Handle blockers via DM (missing info, unclear scope, etc.). After 3 failures, skip or take over. Never generate docs directly.
 
 ### Synthesis & Apply (Lead-Only)
 
-When all documentation tasks are complete, the lead handles synthesis:
+When all tasks complete: collect generated docs → review for consistency → merge with existing docs → resolve conflicts between perspectives → apply changes.
 
-1. **Collect** all generated documentation from teammate messages
-2. **Review** for consistency and style alignment across perspectives
-3. **Merge** with existing documentation (update, don't duplicate)
-4. **Resolve conflicts** — If multiple perspectives document the same area, reconcile
-5. **Apply** changes to files
+### Completion
 
-### Team Completion
+Send sequential `shutdown_request` to each teammate → wait for approval → TeamDelete. Continue to Summary phase (same as Standard mode).
 
-When all documentation is generated and applied:
+---
 
-**1. Graceful shutdown sequence:**
+## Knowledge Capture (Capture Perspective)
 
-For EACH teammate (sequentially, not broadcast):
-```
-SendMessage({
-  type: "shutdown_request",
-  recipient: "{teammate-name}",
-  content: "All documentation complete. Thank you for your contributions."
-})
-```
+When the Capture perspective is active, agents categorize discoveries into the correct directory:
 
-Wait for each `shutdown_response` (approve: true). If a teammate rejects, check TaskList for incomplete work they reference.
+| Discovery Type | Directory | Examples |
+|---------------|-----------|----------|
+| Business rules, domain logic, workflows | `docs/domain/` | User permissions, order workflows, pricing rules |
+| Technical patterns, architectural solutions | `docs/patterns/` | Caching strategy, error handling, repository pattern |
+| External APIs, service integrations | `docs/interfaces/` | Stripe payments, OAuth providers, webhook specs |
 
-**2. Clean up team resources:**
-```
-TeamDelete()
-```
+**Categorization decision tree:**
+- **Is this about business logic?** → `docs/domain/`
+- **Is this about how we build?** → `docs/patterns/`
+- **Is this about external services?** → `docs/interfaces/`
 
-**3. Continue to Summary** (same format as Standard mode Phase 4).
+**Deduplication protocol (REQUIRED before creating any file):**
+1. Search by topic across all three directories
+2. Check category for existing files on the same subject
+3. Read related files to verify no overlap
+4. Decide: create new vs enhance existing
+5. Cross-reference between related docs
 
-### Error Handling in Team Mode
+**Templates:** Use the templates in `templates/` for consistent formatting:
+- `pattern-template.md` — Technical patterns
+- `interface-template.md` — External integrations
+- `domain-template.md` — Business rules
 
-| Blocker Type | Lead Action |
-|-------------|-------------|
-| Missing information | DM teammate with the needed context |
-| Target files unclear | DM teammate with specific file paths |
-| External issue (missing file) | Present to user via AskUserQuestion: Fix / Skip / Abort |
-| Unclear scope | DM teammate with clarification; if still blocked, reassign |
-| Teammate error | DM with guidance to retry; after 3 failures, take over or skip |
+**Advanced protocols:** Load `reference/knowledge-capture.md` for naming conventions, update-vs-create decision matrix, cross-referencing patterns, and quality standards.
 
 ---
 

@@ -149,7 +149,7 @@ Specialized Agents (Workers)
 Input → Agent A → Agent B → Agent C → Output
 
 Example: Code Review Pipeline
-Requirements → the-analyst/requirements-analysis
+Requirements → the-analyst/research-requirements
          ↓
 System Design → the-architect/system-design
          ↓

@@ -1,5 +1,5 @@
 ---
-name: architecture-design
+name: specify-solution
 description: Create and validate solution design documents (SDD). Use when designing architecture, defining interfaces, documenting technical decisions, analyzing system components, or working on solution-design.md files in docs/specs/. Includes validation checklist, consistency verification, and overlap detection.
 allowed-tools: Read, Write, Edit, Task, TodoWrite, Grep, Glob
 ---
@@ -24,7 +24,7 @@ Activate this skill when you need to:
 The SDD template is at [template.md](template.md). Use this structure exactly.
 
 **To write template to spec directory:**
-1. Read the template: `plugins/start/skills/solution-design/template.md`
+1. Read the template: `plugins/start/skills/specify-solution/template.md`
 2. Write to spec directory: `docs/specs/[NNN]-[name]/solution-design.md`
 
 ## SDD Focus Areas

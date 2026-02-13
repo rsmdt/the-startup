@@ -35,8 +35,7 @@ Parse `$ARGUMENTS` to determine mode:
 | File path (`src/auth.ts`) | **File Validation** | Validate individual file quality |
 | `drift` or `check drift` | **Drift Detection** | Check spec-implementation alignment |
 | `constitution` | **Constitution Validation** | Check code against CONSTITUTION.md |
-| Comparison phrase | **Comparison Validation** | Compare source against reference |
-| Freeform text | **Understanding Validation** | Validate approach or understanding |
+| Freeform text | **General Validation** | Validate approach, understanding, or compare sources |
 
 ## Validation Perspectives
 
@@ -85,27 +84,10 @@ Freeform → Understanding Validation
 
 ### Mode Selection Gate
 
-After gathering context, determine applicable perspectives and offer execution mode:
+After gathering context, use `AskUserQuestion` to let the user choose execution mode:
 
-```
-AskUserQuestion({
-  questions: [{
-    question: "How should we execute this validation?",
-    header: "Exec Mode",
-    options: [
-      {
-        label: "Standard (Recommended)",
-        description: "Subagent mode — parallel fire-and-forget agents. Best for focused validation with a few perspectives."
-      },
-      {
-        label: "Team Mode",
-        description: "Persistent teammates with shared task list and coordination. Best for comprehensive validation across many perspectives."
-      }
-    ],
-    multiSelect: false
-  }]
-})
-```
+- **Standard (default recommendation)**: Subagent mode — parallel fire-and-forget agents. Best for focused validation with a few perspectives.
+- **Team Mode**: Persistent teammates with shared task list and coordination. Best for comprehensive validation across many perspectives. Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` in settings.
 
 **Recommend Team Mode when:**
 - Validating a full spec (all perspectives applicable)
@@ -165,147 +147,34 @@ Continue to **Phase 4: Synthesize & Present**.
 
 ### Phase 3 (Team Mode): Launch Validation Team
 
-#### Step 1: Create Team
+> Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` enabled in settings.
 
-Derive a team name from the validation target:
-- Spec ID → `validate-005`
-- File path → `validate-src-auth` (first meaningful path segment)
-- Drift → `validate-drift-{spec-id}`
-- Constitution → `validate-constitution`
+#### Setup
 
-```
-TeamCreate({
-  team_name: "{validate-target-name}",
-  description: "Validation team for {target}"
-})
-```
+1. **Create team** — derive name from target (e.g., `validate-005`, `validate-drift-003`, `validate-constitution`)
+2. **Create one task per applicable validation perspective** — all independent, no dependencies. Each task should describe the perspective focus, target files, spec context, and expected output format (FINDING: status/severity/title/location/issue/recommendation).
+3. **Spawn one validator per perspective**:
 
-#### Step 2: Create Tasks
+| Teammate | Perspective | subagent_type |
+|----------|------------|---------------|
+| `completeness-validator` | Completeness | `general-purpose` |
+| `consistency-validator` | Consistency | `general-purpose` |
+| `alignment-validator` | Alignment | `general-purpose` |
+| `coverage-validator` | Coverage | `general-purpose` |
+| `drift-validator` | Drift | `general-purpose` |
+| `constitution-validator` | Constitution | `general-purpose` |
 
-Create one task per applicable validation perspective. All tasks are independent — no `addBlockedBy` needed.
+4. **Assign each task** to its corresponding validator.
 
-```
-TaskCreate({
-  subject: "{Perspective} validation of {target}",
-  description: """
-    Validate the following for {perspective focus}:
-    - {checklist item 1}
-    - {checklist item 2}
-    - {checklist item 3}
+**Validator prompt should include**: target files, spec files, project standards, expected output format, and team protocol: check TaskList → mark in_progress/completed → send findings to lead → claim next unblocked task when done.
 
-    Target files: {file list}
-    Spec context: {spec summary or pointer to files}
+#### Monitoring
 
-    Return findings in structured format:
-    FINDING:
-    - status: PASS | WARN | FAIL
-    - severity: HIGH | MEDIUM | LOW
-    - title: Brief title (max 40 chars)
-    - location: file:line
-    - issue: One sentence describing what was found
-    - recommendation: How to fix
+Messages arrive automatically. If blocked: provide context via DM. After 3 retries, skip that perspective and note it.
 
-    If no findings: return NO_FINDINGS
-  """,
-  activeForm: "Validating {perspective}",
-  metadata: {
-    "perspective": "{perspective-key}",
-    "emoji": "{perspective-emoji}"
-  }
-})
-```
+#### Shutdown
 
-#### Step 3: Spawn Validator Teammates
-
-Spawn one teammate per applicable perspective. Use the Leader-Worker pattern — validators report findings to lead.
-
-| Teammate Name | Perspective | subagent_type |
-|---------------|------------|---------------|
-| `completeness-validator` | ✅ Completeness | `general-purpose` |
-| `consistency-validator` | 🔗 Consistency | `general-purpose` |
-| `alignment-validator` | 📍 Alignment | `general-purpose` |
-| `coverage-validator` | 📐 Coverage | `general-purpose` |
-| `drift-validator` | 📊 Drift | `general-purpose` |
-| `constitution-validator` | 📜 Constitution | `general-purpose` |
-
-**Spawn template for each validator:**
-
-```
-Task({
-  description: "{Perspective} validation",
-  prompt: """
-  You are the {name} on the {team-name} team.
-
-  CONTEXT:
-    - Target files: {file list}
-    - Spec files: {spec documents if applicable}
-    - Project standards: {from CLAUDE.md, conventions}
-
-  OUTPUT: Return findings in structured format:
-    FINDING:
-    - status: PASS | WARN | FAIL
-    - severity: HIGH | MEDIUM | LOW
-    - title: Brief title (max 40 chars)
-    - location: file:line
-    - issue: One sentence describing what was found
-    - recommendation: How to fix
-
-    If no findings: return NO_FINDINGS
-
-  SUCCESS: All {perspective} concerns identified with specific recommendations
-
-  TEAM PROTOCOL:
-    - Check TaskList for your assigned validation task
-    - Mark in_progress when starting, completed when done
-    - Send findings to lead via SendMessage
-    - After completing, check TaskList for next available unblocked task
-    - If no more tasks, go idle
-  """,
-  subagent_type: "general-purpose",
-  team_name: "{team-name}",
-  name: "{validator-name}",
-  mode: "bypassPermissions"
-})
-```
-
-Launch ALL validator teammates simultaneously in a single response with multiple Task calls.
-
-#### Step 4: Monitor & Collect
-
-Messages from validators arrive automatically — the lead does NOT poll.
-
-```
-Collection loop:
-1. Receive message from validator: "Validation complete. Findings: ..."
-2. Receive message from another validator: "Validation complete. Findings: ..."
-3. When all validators have reported:
-   → Check TaskList to verify all validation tasks are completed
-   → Proceed to synthesis
-```
-
-If a validator is blocked or reports an issue:
-- Missing context → Send DM with the needed information
-- Tool failure → Reassign task or handle directly
-- After 3 retries for the same task → Skip that perspective and note it in the summary
-
-#### Step 5: Graceful Shutdown
-
-After collecting all findings:
-
-```
-1. Verify all tasks completed via TaskList
-2. For EACH validator teammate (sequentially):
-   SendMessage({
-     type: "shutdown_request",
-     recipient: "{validator-name}",
-     content: "Validation complete. Thank you for your analysis."
-   })
-3. Wait for each shutdown_response (approve: true)
-4. After ALL teammates shut down:
-   TeamDelete()
-```
-
-If a teammate rejects shutdown: check TaskList for incomplete work, resolve, then re-request.
+After all validators report: verify via TaskList → send sequential `shutdown_request` to each → wait for approval → TeamDelete.
 
 Continue to **Phase 4: Synthesize & Present**.
 

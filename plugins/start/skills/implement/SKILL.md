@@ -27,6 +27,23 @@ You are an implementation orchestrator that executes: **$ARGUMENTS**
 4. Track progress via TodoWrite (Standard) or TaskList (Team)
 5. Coordinate phase transitions with user
 
+## TodoWrite Phase Protocol
+
+**CRITICAL**: Load tasks incrementally—one phase at a time to manage cognitive load.
+
+1. Load ONLY current phase tasks into TodoWrite
+2. Clear completed phase tasks before loading next phase
+3. Maintain phase progress separately from task progress
+4. Create natural pause points for user feedback
+
+### Task Metadata
+
+Extract from PLAN.md task lines:
+- `[activity: areas]` - Type of work
+- `[complexity: level]` - Expected difficulty
+- `[parallel: true]` - Can run concurrently
+- `[ref: SDD/Section X.Y]` - Specification reference
+
 ## Implementation Perspectives
 
 When tasks are independent, launch parallel agents for different implementation concerns.
@@ -43,44 +60,14 @@ When tasks are independent, launch parallel agents for different implementation 
 
 **Delegate ALL tasks to subagents or teammates.** For parallel tasks, launch multiple agents in a SINGLE response. For sequential tasks, launch one at a time.
 
-**For EVERY task, use the FOCUS/EXCLUDE template with self-priming CONTEXT:**
+**For EVERY task, structure the agent prompt with these sections:**
 
-```
-Task(description: "[Task name] from [spec-id]", prompt: """
-FOCUS: [Task description from PLAN.md]
-  - [Specific deliverable 1]
-  - [Specific deliverable 2]
-  - [Interface to implement from SDD]
-
-EXCLUDE:
-  - Other tasks in this phase
-  - Future phase work
-  - Scope beyond spec
-  - Unauthorized additions
-
-CONTEXT:
-  - Self-prime from: docs/specs/[NNN]-[name]/implementation-plan.md (Phase X, Task Y)
-  - Self-prime from: docs/specs/[NNN]-[name]/solution-design.md (Section X.Y)
-  - Self-prime from: CLAUDE.md (project standards)
-  - Match interfaces defined in SDD
-  - Follow existing patterns in [relevant codebase directory]
-
-OUTPUT:
-  - [Expected file path 1]
-  - [Expected file path 2]
-  - Structured result: files, summary, tests, blockers
-
-SUCCESS:
-  - Interfaces match SDD specification
-  - Follows existing codebase patterns
-  - Tests pass (if applicable)
-  - No unauthorized deviations
-
-TERMINATION:
-  - Completed successfully
-  - Blocked by [specific issue] - report what's needed
-""", subagent_type: "general-purpose")
-```
+- **FOCUS**: Task description from PLAN.md with specific deliverables and SDD interfaces to implement
+- **EXCLUDE**: Other tasks in this phase, future phase work, scope beyond spec, unauthorized additions
+- **CONTEXT**: Point the agent to self-prime from the implementation plan (Phase X, Task Y), solution design (Section X.Y), and CLAUDE.md for project standards. Specify relevant codebase directories to match existing patterns.
+- **OUTPUT**: Expected file paths and structured result (files, summary, tests, blockers)
+- **SUCCESS**: Interfaces match SDD, follows codebase patterns, tests pass, no unauthorized deviations
+- **TERMINATION**: Completed successfully, or blocked with specific issue reported
 
 **Perspective-Specific Guidance:**
 
@@ -94,22 +81,29 @@ TERMINATION:
 
 ### Result Summarization
 
-After each subagent returns, extract and present key outputs:
+After each subagent completes, extract and present key outputs. Do NOT display full responses.
 
+**Extract Key Outputs:**
+- **Files**: Paths created or modified
+- **Summary**: 1-2 sentence implementation highlight
+- **Tests**: Pass/fail/pending status
+- **Blockers**: Issues preventing completion
+
+**Success format:**
 ```
 ✅ Task [N]: [Name]
 
-Files: [list of created/modified paths]
-Summary: [1-2 sentence implementation highlight]
-Tests: [passing/failing/pending]
+Files: src/services/auth.ts, src/routes/auth.ts
+Summary: Implemented JWT authentication with bcrypt password hashing
+Tests: 5 passing
 ```
 
-If blocked:
+**Blocked format:**
 ```
 ⚠️ Task [N]: [Name]
 
 Status: Blocked
-Reason: [specific blocker]
+Reason: Missing User model - need src/models/User.ts
 Options: [present via AskUserQuestion]
 ```
 
@@ -119,18 +113,15 @@ Options: [present via AskUserQuestion]
 
 Context: Offering version control integration for traceability.
 
-- Call: `Skill(start:git-workflow)` for branch management
-- The skill will:
-  - Check if git repository exists
-  - Offer to create `feature/[spec-id]-[spec-name]` branch
-  - Handle uncommitted changes appropriately
-  - Track git state for later commit/PR operations
+- Check if git repository exists
+- Offer to create `feature/[spec-id]-[spec-name]` branch
+- Handle uncommitted changes appropriately (stash, commit, or proceed)
 
 **Note**: Git integration is optional. If user skips, proceed without version control tracking.
 
 ### Phase 1: Initialize and Analyze Plan
 
-- Call: `Skill(start:specification-management)` to read spec
+- Call: `Skill(start:specify-meta)` to read spec
 - Validate: PLAN.md exists, identify ALL phases and tasks
 - Assess complexity signals for mode recommendation:
   - 3+ phases in the plan
@@ -140,27 +131,10 @@ Context: Offering version control integration for traceability.
 
 ### Execution Mode Selection
 
-After analyzing the plan, present the mode selection gate:
+After analyzing the plan, use `AskUserQuestion` to let the user choose execution mode:
 
-```
-AskUserQuestion({
-  questions: [{
-    question: "How should we execute this implementation?",
-    header: "Exec Mode",
-    options: [
-      {
-        label: "Standard (Recommended)",
-        description: "Subagent mode — parallel fire-and-forget agents. Best for straightforward work with independent tasks."
-      },
-      {
-        label: "Team Mode",
-        description: "Persistent teammates with shared task list and coordination. Best for complex multi-phase work where agents need to communicate."
-      }
-    ],
-    multiSelect: false
-  }]
-})
-```
+- **Standard (default recommendation)**: Subagent mode — parallel fire-and-forget agents. Best for straightforward work with independent tasks.
+- **Team Mode**: Persistent teammates with shared task list and coordination. Best for complex multi-phase work where agents need to communicate. Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` in settings.
 
 **When to recommend Team Mode instead:** If complexity signals are present (3+ phases, cross-phase dependencies, 5+ parallel tasks, or shared state), move "(Recommended)" to the Team Mode option label instead.
 
@@ -206,218 +180,51 @@ At the end of each phase, ask user how to proceed:
 
 ## Team Mode Workflow
 
-Team mode uses persistent teammates with a shared task list. The lead (you) orchestrates; teammates execute.
+> Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` enabled in settings.
 
-### Team Setup
+You orchestrate; persistent teammates execute. Use the shared task list (TaskCreate/TaskUpdate/TaskList) instead of TodoWrite.
 
-**1. Create the team:**
+### Setup
 
-```
-TeamCreate({
-  team_name: "{spec-id}-impl",
-  description: "Implementation team for {spec name}"
-})
-```
+1. **Create team** named `{spec-id}-impl` (e.g., `004-impl`)
+2. **Create ALL tasks upfront** from PLAN.md — one TaskCreate per task across all phases. Include phase number, task number, activity type, complexity, SDD reference, and full task description. Use metadata to track: phase, task, activity, complexity, parallel flag.
+3. **Set dependency chains**: Phase N+1 tasks blocked by all Phase N tasks. Within a phase, sequential tasks chain via addBlockedBy. Parallel tasks within a phase have no cross-dependencies.
+4. **Spawn teammates** by work stream (only spawn roles needed for current work):
 
-Use the spec ID from the implementation plan (e.g., `004-impl`, `012-impl`).
+| Role | Purpose | subagent_type | Model |
+|------|---------|---------------|-------|
+| `feature-builder` | Core business logic | `general-purpose` | default |
+| `api-builder` | Endpoints, service interfaces | `general-purpose` | default |
+| `ui-builder` | Frontend components | `general-purpose` | default |
+| `test-builder` | Test creation, validation | `general-purpose` | default |
+| `docs-builder` | Documentation updates | `general-purpose` | haiku |
 
-**2. Create ALL tasks upfront from PLAN.md:**
+Number duplicates: `feature-builder-1`, `feature-builder-2`.
 
-For each task in EVERY phase, create a task with metadata:
+5. **Assign tasks** to each teammate after spawning.
 
-```
-TaskCreate({
-  subject: "Phase {N}, Task {M}: {description}",
-  description: """
-    From implementation plan Phase {N}, Task {M}.
-    Activity: {perspective from plan}
-    Complexity: {complexity from plan}
-    SDD Reference: Section {X.Y}
+**Teammate prompt should include**: role name, team name, self-priming context (implementation plan, SDD, CLAUDE.md), success criteria (match SDD interfaces, follow patterns, tests pass), and team protocol: check TaskList → mark in_progress/completed → send results summary to lead (files, summary, tests, blockers) → claim unassigned unblocked work when idle.
 
-    {Task description from PLAN.md}
-    Self-prime from: docs/specs/{id}/solution-design.md (Section {X.Y})
-    Self-prime from: docs/specs/{id}/implementation-plan.md (Phase {N})
-  """,
-  activeForm: "{Present continuous form of task}",
-  metadata: {
-    "phase": "{N}",
-    "task": "{M}",
-    "activity": "{perspective}",
-    "complexity": "{low|medium|high}",
-    "sddRef": "{section}",
-    "parallel": "{true|false}"
-  }
-})
-```
+### Monitoring & Error Handling
 
-**3. Set up dependency chains:**
+Messages arrive automatically — do not poll. Check TaskList for progress. Never implement directly.
 
-```
-// All Phase 2 tasks are blocked by ALL Phase 1 tasks
-TaskUpdate({ taskId: "{phase2-task}", addBlockedBy: ["{phase1-task-1}", "{phase1-task-2}", ...] })
+| Blocker | Action |
+|---------|--------|
+| Missing info | DM context to teammate |
+| Dependency incomplete | Check task status, tell teammate to stand by |
+| External issue | Ask user: Fix / Skip / Abort |
+| Teammate error | Retry up to 3 times, then escalate to user |
 
-// Within a phase, sequential tasks chain:
-TaskUpdate({ taskId: "{task-3}", addBlockedBy: ["{task-2}"] })
+**Team-level failure**: Shut down all teammates → TeamDelete → offer user: Standard mode / Retry / Abort.
 
-// Parallel tasks within a phase have NO blockedBy to each other
-```
+### Phase Transitions
 
-All tasks across all phases are created upfront. Cross-phase `addBlockedBy` ensures teammates naturally find unblocked work as phases complete.
+When all phase tasks complete: verify via TaskList → run `Skill(start:validate) drift` (and constitution if applicable) → present phase summary → ask user: Continue / Review / Pause → DM idle teammates about newly unblocked work. Shut down unneeded teammates; spawn new roles as needed.
 
-### Spawning Teammates
+### Completion
 
-Spawn teammates based on the work streams needed. Match teammate roles to Implementation Perspectives:
-
-| Role Name | Purpose | subagent_type | Model |
-|-----------|---------|---------------|-------|
-| `feature-builder` | Core business logic | `general-purpose` | (default) |
-| `api-builder` | Endpoints and service interfaces | `general-purpose` | (default) |
-| `ui-builder` | Frontend components | `general-purpose` | (default) |
-| `test-builder` | Test creation and validation | `general-purpose` | (default) |
-| `docs-builder` | Documentation updates | `general-purpose` | `haiku` |
-
-Append a number if multiple teammates share a perspective (e.g., `feature-builder-1`, `feature-builder-2`).
-
-**Spawn each teammate with the CONTEXT + TEAM PROTOCOL template:**
-
-```
-Task({
-  description: "{3-5 word task summary}",
-  prompt: """
-  You are the {role-name} on the {team-name} team.
-
-  CONTEXT:
-    - Self-prime from: docs/specs/{id}/implementation-plan.md
-    - Self-prime from: docs/specs/{id}/solution-design.md
-    - Self-prime from: CLAUDE.md (project standards)
-    - Match interfaces defined in SDD
-    - Follow existing patterns in codebase
-
-  SUCCESS:
-    - Interfaces match SDD specification
-    - Follows existing codebase patterns
-    - Tests pass (if applicable)
-
-  TEAM PROTOCOL:
-    - Check TaskList for your assigned tasks
-    - Mark tasks in_progress when starting, completed when done
-    - Send results summary to lead via SendMessage (files changed, summary, test status, blockers)
-    - After completing assigned tasks, check TaskList for unassigned unblocked tasks
-    - If no available work, go idle and wait for instructions
-  """,
-  subagent_type: "general-purpose",
-  team_name: "{team-name}",
-  name: "{role-name}",
-  mode: "bypassPermissions"
-})
-```
-
-**Only spawn teammates needed for the current work.** If Phase 1 only has feature and test tasks, spawn `feature-builder` and `test-builder`. Spawn additional roles as later phases require them.
-
-**Assign initial tasks** after spawning:
-
-```
-TaskUpdate({ taskId: "{task-id}", owner: "{teammate-name}" })
-```
-
-### Leader Monitoring Loop
-
-As the lead, you coordinate through the task system and messages:
-
-1. **Messages arrive automatically** — Teammates send results via SendMessage when tasks complete
-2. **Check TaskList periodically** — Verify task status and progress
-3. **Handle blockers** — When a teammate reports being blocked, follow the Error Handling protocol below
-4. **Send follow-up work** — DM idle teammates when new tasks become available
-5. **Never implement directly** — Delegate all coding work to teammates
-
-### Phase Transitions in Team Mode
-
-When all tasks in a phase complete:
-
-1. **Verify completion** — Check TaskList to confirm all current phase tasks are done
-2. **Run checkpoint validation:**
-   - Call: `Skill(start:validate) drift` for spec alignment
-   - Call: `Skill(start:validate) constitution` if CONSTITUTION.md exists
-3. **Present phase summary to user:**
-
-```markdown
-✅ Phase [X] Complete: [Phase Name]
-
-Tasks: [X/X] completed
-- ✅ Task 1: [Name] — [1-line summary from teammate message]
-  Files: [paths]
-- ✅ Task 2: [Name] — [1-line summary from teammate message]
-  Files: [paths]
-- ⚠️ Task 3: [Name] — Completed with notes: [deviation/concern]
-
-Tests: [aggregate pass/fail from all teammates]
-Validations: [drift check results]
-
-Ready for Phase [X+1]: [Name]?
-```
-
-4. **Ask for phase transition:**
-   - `AskUserQuestion`: Continue / Review phase output / Pause implementation
-
-5. **Advance to next phase:**
-   - Next phase tasks are already created — they become unblocked as dependencies resolve
-   - DM idle teammates: "Phase {N} is ready. Check TaskList for new work."
-   - If some teammates are no longer needed → send `shutdown_request`
-   - If next phase needs different expertise → spawn new teammates
-
-### Error Handling in Team Mode
-
-**Blocked teammate protocol:**
-
-| Blocker Type | Lead Action |
-|-------------|-------------|
-| Missing information | DM teammate with the needed context |
-| Dependency on incomplete task | Check TaskList — if in_progress, tell teammate to stand by; if unstarted, assign it |
-| External issue (missing file, broken dep) | Present to user via AskUserQuestion: Fix / Skip / Abort |
-| Unclear scope | DM teammate with clarification; if still blocked after clarification, reassign |
-| Teammate error | DM with guidance to retry; after 3 failures, take over or skip |
-
-**Failed task recovery:**
-
-1. Non-critical task fails → Mark completed with notes, continue
-2. Critical task fails → Must resolve:
-   a. Send guidance DM to same teammate → retry
-   b. Reassign to different teammate → fresh attempt
-   c. Lead handles directly → bypass team for this task
-   d. Escalate to user → AskUserQuestion with options
-3. Maximum 3 retry attempts per task across all teammates → then escalate to user
-
-**Team-level failure** (multiple teammates blocked, cascading failures):
-
-1. Send `shutdown_request` to all active teammates
-2. Wait for shutdowns
-3. Call `TeamDelete`
-4. Present to user: "Team execution encountered significant issues. Completed: [X/Y tasks]."
-5. Offer options: Continue in Standard mode / Retry Team mode / Abort
-
-### Team Completion
-
-When ALL phases and tasks are done:
-
-**1. Graceful shutdown sequence:**
-
-For EACH teammate (sequentially, not broadcast):
-```
-SendMessage({
-  type: "shutdown_request",
-  recipient: "{teammate-name}",
-  content: "All work complete. Thank you for your contributions."
-})
-```
-
-Wait for each `shutdown_response` (approve: true). If a teammate rejects, check TaskList for incomplete work they reference.
-
-**2. Clean up team resources:**
-```
-TeamDelete()
-```
-
-**3. Continue to Completion phase** (same as Standard mode).
+Send sequential `shutdown_request` to each teammate (not broadcast). Wait for each approval. If rejected, check TaskList for incomplete work. After all shut down: TeamDelete. Continue to standard Completion phase.
 
 ---
 
@@ -439,12 +246,10 @@ Mode: [Standard / Team]
 Files Changed: [N] files (+[additions] -[deletions])
 ```
 
-**Git Finalization:**
-- Call: `Skill(start:git-workflow)` for commit and PR operations
-- The skill will:
-  - Offer to commit with conventional message
-  - Offer to create PR with spec-based description
-  - Handle push and PR creation via GitHub CLI
+**Git Finalization (if user requested git integration):**
+- Offer to commit with conventional message (`feat([spec-id]): ...`)
+- Offer to create PR with spec-based description via `gh pr create`
+- Handle push and PR creation
 
 **If no git integration:**
 - Call: `AskUserQuestion` - Run tests (recommended), Deploy to staging, or Manual review
@@ -458,6 +263,22 @@ If blocked at any point (either mode):
   - Skip task and continue
   - Abort implementation
   - Get manual assistance
+
+## Review Handling Protocol
+
+After implementation tasks, handle review feedback:
+- **APPROVED/LGTM/✅** → Proceed to next task
+- **Specification violation** → Must fix before proceeding
+- **Revision needed** → Implement changes (max 3 cycles)
+- **After 3 cycles** → Escalate to user via AskUserQuestion
+
+## Context Accumulation
+
+Pass accumulated context between phases:
+- Phase 1 context = PRD/SDD excerpts
+- Phase 2 context = Phase 1 outputs + relevant specs
+- Phase N context = Accumulated outputs from prior phases + relevant specs
+- Pass only RELEVANT context to avoid overload
 
 ## Document Structure
 

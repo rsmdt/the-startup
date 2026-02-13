@@ -1,5 +1,5 @@
 ---
-name: implementation-planning
+name: specify-plan
 description: Create and validate implementation plans (PLAN). Use when planning implementation phases, defining tasks, sequencing work, analyzing dependencies, or working on implementation-plan.md files in docs/specs/. Includes TDD phase structure and specification compliance gates.
 allowed-tools: Read, Write, Edit, Task, TodoWrite, Grep, Glob
 ---
@@ -31,7 +31,7 @@ Activate when:
 The PLAN template is at [template.md](template.md). Use this structure exactly.
 
 **To write template to spec directory:**
-1. Read the template: `plugins/start/skills/implementation-plan/template.md`
+1. Read the template: `plugins/start/skills/specify-plan/template.md`
 2. Write to spec directory: `docs/specs/[NNN]-[name]/implementation-plan.md`
 
 ## PLAN Focus Areas

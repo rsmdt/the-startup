@@ -1,6 +1,6 @@
 ---
-name: specification-management
-description: Initialize and manage specification directories with auto-incrementing IDs. Use when creating new specs, checking spec status, tracking user decisions, or managing the docs/specs/ directory structure. Maintains README.md in each spec to record decisions (e.g., PRD skipped), context, and progress. Orchestrates the specification workflow across PRD, SDD, and PLAN phases.
+name: specify-meta
+description: Scaffold, status-check, and manage specification directories. Handles auto-incrementing IDs, README tracking, phase transitions, and decision logging in docs/specs/. Used by both specify and implement workflows.
 allowed-tools: Read, Write, Edit, Bash, TodoWrite, Grep, Glob
 ---
 
@@ -24,16 +24,20 @@ Activate this skill when you need to:
 
 Use `spec.py` to create and read specification directories:
 
+The `spec.py` script is located in this skill's directory (alongside this SKILL.md file).
+
 ```bash
 # Create new spec (auto-incrementing ID)
-~/.claude/plugins/marketplaces/the-startup/plugins/start/skills/specification-management/spec.py "feature-name"
+spec.py "feature-name"
 
 # Read existing spec metadata (TOML output)
-~/.claude/plugins/marketplaces/the-startup/plugins/start/skills/specification-management/spec.py 004 --read
+spec.py 004 --read
 
 # Add template to existing spec
-~/.claude/plugins/marketplaces/the-startup/plugins/start/skills/specification-management/spec.py 004 --add product-requirements
+spec.py 004 --add product-requirements
 ```
+
+> **Note:** Resolve `spec.py` from this skill's directory. The full path depends on your plugin installation location.
 
 **TOML Output Format:**
 ```toml
@@ -88,7 +92,7 @@ Every spec directory should have a `README.md` tracking decisions and progress.
 [Initial context from user request]
 
 ---
-*This file is managed by the specification-management skill.*
+*This file is managed by the specify-meta skill.*
 ```
 
 **Update README.md** when:
@@ -125,9 +129,9 @@ Log all significant decisions:
 ## Workflow Integration
 
 This skill works with document-specific skills:
-- `product-requirements` skill - PRD creation and validation
-- `solution-design` skill - SDD creation and validation
-- `implementation-plan` skill - PLAN creation and validation
+- `specify-requirements` skill - PRD creation and validation
+- `specify-solution` skill - SDD creation and validation
+- `specify-plan` skill - PLAN creation and validation
 
 **Handoff Pattern:**
 1. Specification-management creates directory and README

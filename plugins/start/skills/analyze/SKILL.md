@@ -88,33 +88,15 @@ OUTPUT: Findings formatted as:
 
 ### Phase 1: Initialize Analysis Scope
 
-- Call: `Skill(start:codebase-analysis)`
 - Determine scope from $ARGUMENTS (business, technical, security, performance, integration, or specific domain)
 - If unclear, ask user to clarify focus area
 
 ### Mode Selection Gate
 
-After initializing scope, offer the user a choice of execution mode:
+After initializing scope, use `AskUserQuestion` to let the user choose execution mode:
 
-```
-AskUserQuestion({
-  questions: [{
-    question: "How should we execute this analysis?",
-    header: "Exec Mode",
-    options: [
-      {
-        label: "Standard (Recommended)",
-        description: "Subagent mode — parallel fire-and-forget agents. Best for focused analysis on a single domain or small scope."
-      },
-      {
-        label: "Team Mode",
-        description: "Persistent analyst teammates with shared task list and cross-domain discovery coordination. Best for broad analysis across multiple perspectives."
-      }
-    ],
-    multiSelect: false
-  }]
-})
-```
+- **Standard (default recommendation)**: Subagent mode — parallel fire-and-forget agents. Best for focused analysis on a single domain or small scope.
+- **Team Mode**: Persistent analyst teammates with shared task list and cross-domain discovery coordination. Best for broad analysis across multiple perspectives. Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` in settings.
 
 **Recommend Team Mode when:**
 - Analyzing multiple domains simultaneously (e.g., broad or "all" focus)
@@ -133,6 +115,45 @@ AskUserQuestion({
 **For Each Cycle:**
 1. **Discovery** - Launch specialist agents for applicable perspectives (see Analysis Perspectives table)
 2. **Synthesize** - Collect findings, deduplicate overlapping discoveries, group by output location
+
+### Cycle Self-Check
+
+Ask yourself each cycle:
+1. Have I identified ALL activities needed for this area?
+2. Have I launched parallel specialist agents to investigate?
+3. Have I updated documentation according to category rules?
+4. Have I presented COMPLETE agent responses (not summaries)?
+5. Have I received user confirmation before next cycle?
+6. Are there more areas that need investigation?
+7. Should I continue or wait for user input?
+
+### Findings Presentation Format
+
+After each discovery cycle, present findings to the user:
+
+```
+🔍 Discovery Cycle [N] Complete
+
+Area: [Analysis area]
+Agents Launched: [N]
+
+Key Findings:
+1. [Finding with evidence]
+2. [Finding with evidence]
+3. [Finding with evidence]
+
+Patterns Identified:
+- [Pattern name]: [Brief description]
+
+Documentation Created/Updated:
+- docs/[category]/[file.md]
+
+Questions for Clarification:
+1. [Question about ambiguous finding]
+
+Should I continue to [next area] or investigate [finding] further?
+```
+
 3. **Review** - Present ALL agent findings (complete responses). Wait for user confirmation.
 4. **Persist (Optional)** - Ask if user wants to save to appropriate docs/ location (see Output Locations)
 
@@ -142,171 +163,41 @@ Continue to **Phase 3: Analysis Summary**.
 
 ### Phase 2 (Team Mode): Launch Analysis Team
 
-#### Step 1: Create Team
+> Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` enabled in settings.
 
-Derive team name from the analysis focus area:
+#### Setup
 
-```
-TeamCreate({
-  team_name: "analyze-{focus-area}",
-  description: "Analysis team for {focus area}"
-})
-```
+1. **Create team** named `analyze-{focus-area}` (e.g., `analyze-business`, `analyze-full-codebase`)
+2. **Create one task per applicable perspective** — all independent, no dependencies. Each task should describe the perspective focus, target scope, existing docs, and expected output format.
+3. **Spawn one analyst per perspective**:
 
-Examples: `analyze-business`, `analyze-security`, `analyze-full-codebase`
+| Teammate | Perspective | subagent_type |
+|----------|------------|---------------|
+| `business-analyst` | Business | `general-purpose` |
+| `technical-analyst` | Technical | `general-purpose` |
+| `security-analyst` | Security | `general-purpose` |
+| `performance-analyst` | Performance | `general-purpose` |
+| `integration-analyst` | Integration | `general-purpose` |
 
-#### Step 2: Create Tasks
+4. **Assign each task** to its corresponding analyst.
 
-Create one task per applicable analysis perspective. All tasks are independent — no `addBlockedBy` needed.
+**Analyst prompt should include**: target scope, existing documentation, expected output format (Discovery/Evidence/Documentation/Location), and team protocol: check TaskList → mark in_progress/completed → send findings to lead → discover peers via team config → DM cross-domain insights → do NOT wait for peer responses.
 
-```
-TaskCreate({
-  subject: "{Perspective} analysis of {target}",
-  description: """
-    Analyze the codebase for {perspective focus}:
-    - {discovery focus items from Analysis Perspectives table}
+#### Monitoring & Collection
 
-    Target: {code area to analyze}
-    Scope: {module/feature boundaries}
-    Existing docs: {relevant documentation}
+Messages arrive automatically. If an analyst is blocked: provide context via DM. After 3 retries, skip that perspective.
 
-    Return findings formatted as:
-    📂 **[Category]**
-    🔍 Discovery: [What was found]
-    📍 Evidence: `file:line` references
-    📝 Documentation: [Suggested doc content]
-    🗂️ Location: [Where to persist: docs/domain/, docs/patterns/, docs/interfaces/]
-  """,
-  activeForm: "Analyzing {perspective}",
-  metadata: {
-    "perspective": "{perspective-key}",
-    "emoji": "{perspective-emoji}"
-  }
-})
-```
+#### Synthesis
 
-#### Step 3: Spawn Analyst Teammates
+When all analysts complete: collect findings → deduplicate overlapping discoveries → group by output location (docs/domain/, docs/patterns/, docs/interfaces/) → present synthesized findings to user.
 
-Spawn one teammate per applicable perspective. All analysts use `Explore` subagent type (read-only research).
+#### Iterate or Complete
 
-| Teammate Name | Perspective | subagent_type |
-|---------------|------------|---------------|
-| `business-analyst` | 📋 Business | `Explore` |
-| `technical-analyst` | 🏗️ Technical | `Explore` |
-| `security-analyst` | 🔐 Security | `Explore` |
-| `performance-analyst` | ⚡ Performance | `Explore` |
-| `integration-analyst` | 🔌 Integration | `Explore` |
+Ask user: **Next cycle** (send new directions to idle analysts via DM, create new tasks) | **Persist findings** (save to docs/) | **Complete analysis** (proceed to shutdown).
 
-**Spawn template for each analyst:**
+#### Shutdown
 
-```
-Task({
-  description: "{Perspective} codebase analysis",
-  prompt: """
-  You are the {name} on the {team-name} team.
-
-  CONTEXT:
-    - Target: {code area to analyze}
-    - Scope: {module/feature boundaries}
-    - Existing docs: {relevant documentation}
-
-  OUTPUT: Findings formatted as:
-    📂 **[Category]**
-    🔍 Discovery: [What was found]
-    📍 Evidence: `file:line` references
-    📝 Documentation: [Suggested doc content]
-    🗂️ Location: [Where to persist: docs/domain/, docs/patterns/, docs/interfaces/]
-
-  SUCCESS: All {perspective} discoveries identified with evidence and documentation suggestions
-
-  TEAM PROTOCOL:
-    - Check TaskList for your assigned analysis task
-    - Mark in_progress when starting, completed when done
-    - Send findings to lead via SendMessage
-    - Discover teammates via ~/.claude/teams/{team-name}/config.json
-    - If you find something overlapping another analyst's domain,
-      DM them: "FYI: Found {discovery} at {location} — relates to your analysis"
-    - Do NOT wait for peer responses — send findings to lead regardless
-  """,
-  subagent_type: "Explore",
-  team_name: "{team-name}",
-  name: "{analyst-name}",
-  mode: "bypassPermissions"
-})
-```
-
-Launch ALL analyst teammates simultaneously in a single response with multiple Task calls.
-
-#### Step 4: Monitor & Collect
-
-Messages from analysts arrive automatically — the lead does NOT poll.
-
-```
-Collection loop:
-1. Receive message from analyst: "Analysis complete. Findings: ..."
-2. Receive message from another analyst: "Analysis complete. Findings: ..."
-3. When all analysts have reported:
-   → Check TaskList to verify all analysis tasks are completed
-   → Proceed to synthesis
-```
-
-If an analyst is blocked or reports an issue:
-- Missing context → Send DM with the needed information
-- After 3 retries for the same task → Skip that perspective and note it in the summary
-
-#### Step 5: Synthesize Cycle Findings
-
-Lead collects findings from all analysts, then:
-
-```
-Synthesis protocol:
-1. Collect all findings from all analysts
-2. Deduplicate overlapping discoveries (same code location, same pattern)
-3. Group by output location:
-   - docs/domain/   → Business rules, domain logic, workflows
-   - docs/patterns/  → Technical patterns, architectural solutions
-   - docs/interfaces/ → API contracts, service integrations
-4. Present synthesized findings to user (complete analyst responses)
-5. Wait for user direction
-```
-
-#### Step 6: Iterate or Complete
-
-After presenting findings, ask the user:
-- **Next cycle** — Dig deeper into specific areas (team stays active for another round)
-- **Persist findings** — Save to appropriate docs/ locations
-- **Complete analysis** — Proceed to shutdown and summary
-
-For subsequent cycles, send DMs to idle analysts with new direction:
-```
-SendMessage({
-  type: "message",
-  recipient: "{analyst-name}",
-  content: "Next cycle: Focus on {new direction from user}. Check TaskList for your updated task.",
-  summary: "New analysis direction assigned"
-})
-```
-
-Create new tasks for the next cycle via TaskCreate and assign to analysts.
-
-#### Step 7: Graceful Shutdown
-
-After the final cycle:
-
-```
-1. Verify all tasks completed via TaskList
-2. For EACH analyst teammate (sequentially):
-   SendMessage({
-     type: "shutdown_request",
-     recipient: "{analyst-name}",
-     content: "Analysis complete. Thank you for your discoveries."
-   })
-3. Wait for each shutdown_response (approve: true)
-4. After ALL teammates shut down:
-   TeamDelete()
-```
-
-If a teammate rejects shutdown: check TaskList for incomplete work, resolve, then re-request.
+Verify all tasks complete → send sequential `shutdown_request` to each analyst → wait for approval → TeamDelete.
 
 Continue to **Phase 3: Analysis Summary**.
 
