@@ -1,6 +1,31 @@
 # Drift Detection Reference
 
-Advanced techniques for detecting and managing specification drift.
+Techniques for detecting and managing divergence between specifications and implementation.
+
+## Core Philosophy
+
+**Drift is Information, Not Failure.**
+
+Drift isn't inherently bad—it's valuable feedback:
+- **Scope creep** may indicate incomplete requirements
+- **Missing items** may reveal unrealistic timelines
+- **Contradictions** may surface spec ambiguities
+- **Extra work** may be necessary improvements
+
+The goal is **awareness and conscious decision-making**, not rigid compliance.
+
+---
+
+## Drift Types
+
+| Type | Description | Example |
+|------|-------------|---------|
+| **Scope Creep** | Implementation adds features not in spec | Added pagination not specified in PRD |
+| **Missing** | Spec requires feature not implemented | Error handling specified but not done |
+| **Contradicts** | Implementation conflicts with spec | Spec says REST, code uses GraphQL |
+| **Extra** | Unplanned work that may be valuable | Added caching for performance |
+
+---
 
 ## Detection Strategies
 
@@ -93,26 +118,32 @@ grep -r "POST.*\/api\/users\|router.post.*users" src/
 grep -r "email.*valid\|password.*strength" src/
 ```
 
-## Annotation Formats
+---
 
-### Standard Annotations
+## Code Annotations (Optional)
+
+Developers can optionally annotate code to aid drift detection:
 
 ```typescript
-// Implements: [Document]-[Section/ID]
-// Implements: PRD-AC-1 - User login acceptance criteria
-// Implements: SDD-3.2 - Repository pattern
-// Implements: PLAN-2.1 - Registration endpoint
+// Implements: PRD-1.2 - User can reset password
+async function resetPassword(email: string) {
+  // ...
+}
 
-// Extra: [Brief justification]
-// Extra: Added rate limiting for security
-// Extra: Caching layer for performance
+// Implements: SDD-3.1 - Repository pattern for data access
+class UserRepository {
+  // ...
+}
 
-// Deferred: [What and why]
-// Deferred: Admin dashboard - moved to Phase 3
-
-// TODO: [Spec reference if applicable]
-// TODO: PRD-4.2 - Email notifications not yet implemented
+// Extra: Performance optimization not in spec
+const memoizedQuery = useMemo(() => {
+  // ...
+}, [deps]);
 ```
+
+**Annotation Format:**
+- `// Implements: [DOC]-[SECTION]` - Links to spec requirement
+- `// Extra: [REASON]` - Acknowledges unspecified work
 
 ### Annotation Scanning
 
@@ -130,7 +161,11 @@ grep -r "// Deferred:" src/
 grep -r "// TODO:.*PRD\|SDD\|PLAN" src/
 ```
 
-## Heuristic Patterns
+---
+
+## Heuristic Detection
+
+When annotations aren't present, use these heuristics:
 
 ### Naming Convention Analysis
 
@@ -153,12 +188,6 @@ describe('Authentication', () => {
 });
 ```
 
-**Extraction:**
-```bash
-# Extract test descriptions
-grep -r "describe\|it\|test(" tests/ --include="*.test.ts"
-```
-
 ### Import Analysis
 
 Imports reveal architectural patterns:
@@ -173,6 +202,8 @@ import { AuthService } from '@/services/auth';
 // Direct ORM usage may indicate pattern violation
 import { prisma } from '@/lib/prisma';  // Should only be in repositories
 ```
+
+---
 
 ## Contradiction Detection
 
@@ -210,6 +241,8 @@ grep -r "timeout\|limit\|size\|duration\|retry" src/config/
 - Enum values
 - Validation constraints
 
+---
+
 ## Drift Severity Assessment
 
 ### High Severity (Address Immediately)
@@ -233,84 +266,104 @@ grep -r "timeout\|limit\|size\|duration\|retry" src/config/
 - Optimization opportunities
 - Documentation improvements
 
-## README Drift Log Examples
+---
 
-### Initial Log Entry
+## Drift Logging
 
-```markdown
-## Drift Log
+All drift decisions should be logged to the spec README for traceability.
 
-| Date | Phase | Drift Type | Status | Notes |
-|------|-------|------------|--------|-------|
-| 2026-01-04 | Phase 1 | Extra | Acknowledged | Added health check endpoint |
-```
+### Drift Log Format
 
-### After Multiple Phases
+Add to spec README under `## Drift Log` section:
 
 ```markdown
 ## Drift Log
 
 | Date | Phase | Drift Type | Status | Notes |
 |------|-------|------------|--------|-------|
-| 2026-01-04 | Phase 1 | Extra | Acknowledged | Added health check endpoint |
-| 2026-01-04 | Phase 2 | Scope creep | Acknowledged | Added pagination to user list |
-| 2026-01-04 | Phase 2 | Missing | Updated | Added email validation per PRD-2.3 |
-| 2026-01-04 | Phase 3 | Contradicts | Deferred | Session timeout 30m vs spec 15m |
+| 2026-01-04 | Phase 2 | Scope creep | Acknowledged | Added pagination not in spec |
+| 2026-01-04 | Phase 2 | Missing | Updated | Added validation per spec |
+| 2026-01-04 | Phase 3 | Contradicts | Deferred | Session timeout differs from spec |
 ```
 
-### With Resolution Notes
+### Status Values
 
-```markdown
-## Drift Log
+| Status | Meaning | Action Taken |
+|--------|---------|--------------|
+| **Acknowledged** | Drift noted, proceeding anyway | Implementation continues as-is |
+| **Updated** | Spec or implementation changed to align | Drift resolved |
+| **Deferred** | Decision postponed | Will address in future phase |
 
-| Date | Phase | Drift Type | Status | Notes |
-|------|-------|------------|--------|-------|
-| 2026-01-04 | Phase 2 | Missing | Updated | Added email validation per PRD-2.3 |
-| 2026-01-05 | Phase 3 | Contradicts | Updated | Changed timeout to 15m per spec |
-| 2026-01-05 | Phase 3 | Scope creep | Updated | Spec updated to include pagination |
-```
+---
 
-## Integration with Other Skills
+## User Decision Workflow
 
-### With constitution-validation
-
-After drift detection, check if drifted code complies with constitution:
+When drift is detected, present options:
 
 ```
-1. Detect drift
-2. If new code added (scope creep, extra)
-3. Validate new code against constitution
-4. Report both drift AND constitution findings
+⚠️ Drift Detected
+
+Found [N] drift items:
+
+1. 🔶 Scope Creep: Added pagination (not in spec)
+   Location: src/api/users.ts:45
+
+2. ❌ Missing: Email validation (PRD-2.3)
+   Expected: Input validation for email format
+
+Options:
+1. Acknowledge and continue (log drift, proceed)
+2. Update implementation (implement missing, remove extra)
+3. Update specification (modify spec to match reality)
+4. Defer decision (mark for later review)
 ```
 
-### With specification-management
+---
 
-Use spec.py to:
-- Read spec metadata
-- Locate spec documents
-- Understand spec structure
+## Report Format
 
-### With specification-validation
+### Phase Drift Report
 
-Combine with validation for comprehensive check:
-- Drift detection: Is it aligned with spec?
-- Specification validation (Mode C): Compare implementation against spec
+```
+📊 Drift Analysis: Phase [N]
 
-## Performance Considerations
+Spec: [NNN]-[name]
+Phase: [Phase name]
+Files Analyzed: [N]
 
-### Efficient Searching
+┌─────────────────────────────────────────────────────┐
+│ ALIGNMENT SUMMARY                                   │
+├─────────────────────────────────────────────────────┤
+│ ✅ Aligned:    [N] requirements                     │
+│ ❌ Missing:    [N] requirements                     │
+│ ⚠️ Contradicts: [N] items                           │
+│ 🔶 Extra:      [N] items                            │
+└─────────────────────────────────────────────────────┘
 
-1. **Narrow search scope** to modified files
-2. **Use ripgrep** for faster text search
-3. **Cache spec parsing** across phases
-4. **Batch file reads** when possible
+DETAILS:
 
-### Incremental Detection
+❌ Missing Requirements:
+1. [Requirement from spec]
+   Source: PRD Section [X]
+   Status: Not found in implementation
 
-Track what was already verified:
-- Store verification state between phases
-- Only re-verify modified areas
-- Mark files as "verified" after check
+⚠️ Contradictions:
+1. [What differs]
+   Spec: [What spec says]
+   Implementation: [What code does]
+   Location: [file:line]
+
+🔶 Extra Work:
+1. [What was added]
+   Location: [file:line]
+   Justification: [Why it was added, if known]
+
+RECOMMENDATIONS:
+- [Priority action 1]
+- [Priority action 2]
+```
+
+---
 
 ## Troubleshooting
 
@@ -331,10 +384,3 @@ Track what was already verified:
   - Solution: Deeper code analysis
 - **Different terminology**: Spec and code use different terms
   - Solution: Keyword expansion
-
-### Large Codebases
-
-- Use targeted searching based on PLAN tasks
-- Focus on recently modified files
-- Sample verification for comprehensive requirements
-- Prioritize high-severity requirements
