@@ -2,16 +2,16 @@
 
 **Workflow orchestration plugin for spec-driven development in Claude Code.**
 
-The `start` plugin provides eleven workflow commands, eighteen autonomous skills, and two output styles to transform how you build software with Claude Code.
+The `start` plugin provides nine user-invocable workflow skills, five autonomous skills, and two output styles to transform how you build software with Claude Code.
 
-**📖 For quick start, workflow guide, and command selection, see the [main README](../../README.md).**
+**📖 For quick start, workflow guide, and skill selection, see the [main README](../../README.md).**
 
 ---
 
 ## Table of Contents
 
-- [Commands](#commands) — specify, implement, validate, review, document, analyze, refactor, simplify, debug, constitution
-- [Autonomous Skills](#autonomous-skills) — 18 context-activated skills
+- [User-Invocable Skills](#user-invocable-skills) — specify, implement, validate, review, document, analyze, refactor, debug, constitution
+- [Autonomous Skills](#autonomous-skills) — 5 context-activated skills
 - [Documentation Structure](#-documentation-structure) — specs, domain, patterns, interfaces
 - [Output Styles](#-output-styles) — The Startup, The ScaleUp
 - [Typical Development Workflow](#typical-development-workflow) — primary and maintenance flows
@@ -21,7 +21,9 @@ The `start` plugin provides eleven workflow commands, eighteen autonomous skills
 
 ---
 
-## Commands
+## User-Invocable Skills
+
+These skills are invoked by the user via slash commands (e.g., `/start:specify`). Unlike autonomous skills which activate automatically based on context, user-invocable skills wait for explicit invocation.
 
 ### `/start:specify <description>`
 
@@ -358,84 +360,6 @@ flowchart TD
 
 ---
 
-### `/start:simplify <target>`
-
-Simplify and refine code for clarity, consistency, and maintainability while preserving exact functionality.
-
-**Purpose:** Reduce complexity and improve readability through parallel analysis and safe, incremental refactoring
-
-**Usage:**
-```bash
-/start:simplify staged                           # Simplify staged changes
-/start:simplify recent                           # Simplify recent commits
-/start:simplify src/utils/auth.ts                # Simplify specific file
-/start:simplify src/services/                    # Simplify directory
-/start:simplify all                              # Simplify entire codebase (use with caution)
-```
-
-**Key Features:**
-- **5 Parallel Analysis Perspectives** - Complexity, Clarity, Redundancy, Structure, YAGNI
-- **Test-Validated Changes** - Establishes baseline, verifies after each change
-- **Sequential Execution** - One refactoring at a time with immediate test feedback
-- **Automatic Rollback** - Reverts on test failure
-- **Impact Ranking** - Prioritizes high-impact, low-risk improvements
-
-<details>
-<summary><strong>View Details</strong></summary>
-
-**When to use `/start:simplify` vs `/start:refactor`:**
-
-| Use Case | Command | Why |
-|----------|---------|-----|
-| Clean up staged changes before commit | `/start:simplify staged` | Quick, focused analysis |
-| Improve readability of a module | `/start:simplify src/module/` | Multi-perspective clarity check |
-| Major architectural restructuring | `/start:refactor` | Needs planning, spec creation |
-| Remove complexity after feature complete | `/start:simplify recent` | Polish recent work |
-| Upgrade dependencies, breaking changes | `/start:refactor` | Risk assessment, migration plan |
-
-**Analysis Perspectives:**
-
-| Perspective | What It Finds |
-|-------------|---------------|
-| 🔧 **Complexity** | Long methods (>20 lines), deep nesting, complex conditionals |
-| 📝 **Clarity** | Unclear names, magic numbers, nested ternaries, clever code |
-| 🔄 **Redundancy** | Copy-paste code, repeated patterns, duplicated logic |
-| 🏗️ **Structure** | Mixed concerns, god classes, feature envy |
-| 🧹 **YAGNI** | Dead code, unused abstractions, speculative generality |
-
-```mermaid
-flowchart TD
-    A([Simplify Request]) --> |parse| B[**Gather Target**<br/>Parse scope<br/>Load code]
-    B --> |baseline| C[**Run Tests**<br/>Establish baseline<br/>Check coverage]
-    C --> |analyze| D[**Launch 5 Agents**<br/>⚡ *Parallel analysis*<br/>🔧 Complexity<br/>📝 Clarity<br/>🔄 Redundancy<br/>🏗️ Structure<br/>🧹 YAGNI]
-    D --> |synthesize| E[**Rank Findings**<br/>Deduplicate<br/>Prioritize by impact]
-    E --> |confirm| F{User<br>Approves?}
-    F --> |yes| G[**Execute**<br/>One change at a time<br/>Test after each]
-    G --> |pass| H{More<br>Changes?}
-    H --> |yes| G
-    H --> |no| I[**Summary**<br/>Changes made<br/>Quality improvements]
-    F --> |no| I
-    G --> |fail| J[**Rollback**<br/>Revert change<br/>Report issue]
-    J --> H
-    I --> END[✅ **Simplification Complete**]
-```
-
-**Clarity Over Brevity:**
-
-The simplify command prioritizes readable code over compact code:
-
-| ❌ Avoid | ✅ Prefer |
-|----------|-----------|
-| Nested ternaries | `if/else` or `switch` |
-| Dense one-liners | Multi-line with clear steps |
-| Clever tricks | Obvious implementations |
-| Abbreviations | Descriptive names |
-| Magic numbers | Named constants |
-
-</details>
-
----
-
 ### `/start:debug <description>`
 
 Diagnose and resolve bugs through conversational investigation with systematic root cause analysis.
@@ -590,176 +514,22 @@ curl -fsSL https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh |
 
 ## Autonomous Skills
 
-The `start` plugin includes eighteen skills that activate automatically based on context. You never need to explicitly invoke them - they just work when needed.
+The `start` plugin includes five autonomous skills that activate automatically based on context. You never need to explicitly invoke them — they work when needed.
 
-### Core Skills
-
-| Skill | Purpose |
-|-------|---------|
-| `task-delegation` | Task decomposition, FOCUS/EXCLUDE templates, parallel coordination |
-| `knowledge-capture` | Auto-document patterns, interfaces, domain rules |
-| `specification-management` | Spec directory creation, README tracking, phase transitions |
-| `specification-validation` | 3 Cs validation, ambiguity detection, comparison checks |
-| `constitution-validation` | Create/validate project constitutions with L1/L2/L3 rules |
-| `drift-detection` | Detect spec-implementation divergence during implementation |
-
-### Document Skills
+### Specification Skills
 
 | Skill | Purpose |
 |-------|---------|
-| `requirements-analysis` | PRD template, validation, requirements gathering |
-| `architecture-design` | SDD template, architecture design, ADR management |
-| `implementation-planning` | PLAN template, task sequencing, dependency mapping |
-
-### Execution Skills
-
-| Skill | Purpose |
-|-------|---------|
-| `agent-coordination` | Phase-by-phase execution, TodoWrite tracking, checkpoints |
-| `implementation-verification` | Implementation vs spec verification, deviation detection |
-| `git-workflow` | Branch creation, commit messages, PR creation |
-
-### Review Skills
-
-| Skill | Purpose |
-|-------|---------|
-| `code-review` | Multi-perspective review, security/performance/quality/tests |
+| `specify-meta` | Spec directory creation, README tracking, phase transitions |
+| `specify-requirements` | PRD template, validation, requirements gathering |
+| `specify-solution` | SDD template, architecture design, ADR management |
+| `specify-plan` | PLAN template, task sequencing, dependency mapping |
 
 ### Methodology Skills
 
 | Skill | Purpose |
 |-------|---------|
-| `codebase-analysis` | Iterative discovery cycles for pattern/rule extraction |
-| `bug-diagnosis` | Scientific debugging, hypothesis tracking, evidence-based |
-| `safe-refactoring` | Safe refactoring patterns, behavior preservation |
-
----
-
-### Skill Details
-
-### `knowledge-capture`
-
-**Activates when:** Patterns, interfaces, or domain rules are discovered
-
-**Trigger terms:** "pattern", "interface", "domain rule", "document", "reusable"
-
-**What it does:**
-- Checks for existing documentation (prevents duplicates)
-- Categorizes correctly (domain/patterns/interfaces)
-- Uses appropriate templates
-- Creates cross-references
-- Reports what was documented
-
-**Example activation:**
-```
-Agent discovers: "I found a reusable caching pattern using Redis"
-↓
-Knowledge-base-capture skill activates automatically
-↓
-Creates: docs/patterns/caching-strategy.md
-```
-
-**Progressive disclosure:**
-- `SKILL.md` - Core documentation logic (~7 KB)
-- `reference.md` - Advanced protocols (~11 KB, loads when needed)
-- `templates/` - Pattern, interface, domain templates (~6 KB each)
-
----
-
-### `task-delegation`
-
-**Activates when:** Task decomposition, agent coordination, or template generation needed
-
-**Trigger terms:** "break down", "launch agents", "FOCUS/EXCLUDE", "parallel", "coordinate"
-
-**What it does:**
-- Decomposes complex tasks into activities
-- Determines parallel vs sequential execution
-- Generates FOCUS/EXCLUDE templates for agents
-- Coordinates file creation (prevents collisions)
-- Validates agent responses for scope compliance
-- Generates retry strategies for failed agents
-
-**Example activation:**
-```
-User: "Break down this authentication task"
-↓
-Parallel-task-assignment skill activates
-↓
-Outputs:
-- Activity breakdown
-- Dependency analysis
-- Parallel/sequential recommendation
-- FOCUS/EXCLUDE templates for each activity
-```
-
-**Progressive disclosure:**
-- `SKILL.md` - Core delegation logic (~24 KB)
-- `reference.md` - Advanced patterns (~19 KB, loads when needed)
-- `examples/` - Real-world scenarios (~38 KB, loads when relevant)
-
----
-
-### `git-workflow`
-
-**Activates when:** Branch creation, commits, or PR operations needed
-
-**Trigger terms:** "create branch", "commit", "pull request", "push"
-
-**What it does:**
-- Creates branches with consistent naming (`spec/`, `feature/`, `refactor/`, `migrate/`)
-- Generates conventional commit messages with co-author attribution
-- Creates PRs with spec-based descriptions
-- Handles uncommitted changes (stash, commit, or proceed)
-
-**Example activation:**
-```
-User: "/start:specify Add authentication"
-↓
-Git-workflow skill activates (Phase 0)
-↓
-Offers: Create spec/001-authentication branch? [Y/n]
-```
-
-**Integration points:**
-- `/start:specify` - Offers `spec/[id]-[name]` branches
-- `/start:implement` - Offers `feature/[id]-[name]` branches
-- `/start:refactor` - Offers `refactor/[scope]` or `migrate/[from]-to-[to]` branches
-
----
-
-### `code-review`
-
-**Activates when:** Code review is needed before merging
-
-**Trigger terms:** "review", "code review", "PR review", "check my code"
-
-**What it does:**
-- Launches 4 parallel specialist agents (Security, Performance, Quality, Tests)
-- Auto-detects review target (PR, staged changes, branch, files)
-- Consolidates findings with severity and confidence scores
-- Posts comments to GitHub PRs via `gh` CLI
-
-**Example activation:**
-```
-User: "/start:review --pr 123"
-↓
-Code-review skill activates
-↓
-Launches:
-  🔒 Security Agent → SQL injection, XSS, secrets
-  ⚡ Performance Agent → N+1, memory leaks
-  ✨ Quality Agent → SOLID, naming, complexity
-  🧪 Tests Agent → Coverage gaps, edge cases
-↓
-Consolidates findings → Posts to PR #123
-```
-
-**Review perspectives:**
-- **Security** - Authentication, authorization, input validation, secrets
-- **Performance** - Query optimization, caching, memory management
-- **Quality** - Code style, design patterns, maintainability
-- **Tests** - Coverage, edge cases, test quality
+| `writing-skills` | Skill authoring, auditing, and verification methodology |
 
 ---
 
@@ -793,14 +563,14 @@ docs/
 
 ### Auto-Documentation
 
-The `knowledge-capture` skill automatically creates files in the correct location when patterns, interfaces, or domain rules are discovered during:
+The `document` skill's Capture perspective automatically creates files in the correct location when patterns, interfaces, or domain rules are discovered during:
 - Specification creation (`/start:specify`)
 - Implementation (`/start:implement`)
 - Analysis (`/start:analyze`)
 
 ### Deduplication
 
-The skill always checks existing documentation before creating new files, preventing duplicates.
+The capture workflow always checks existing documentation before creating new files, preventing duplicates.
 
 ---
 
@@ -989,16 +759,7 @@ The ScaleUp provides contextual explanations as it works:
 
 Documents findings in `docs/patterns/`, `docs/domain/`, `docs/interfaces/`
 
-**Simplify Recent Changes**
-
-```bash
-/start:simplify staged
-/start:simplify recent
-```
-
-Quick cleanup before commit - reduces complexity, improves clarity, removes dead code.
-
-**Major Refactoring**
+**Refactoring**
 
 ```bash
 /start:refactor Restructure the authentication module for better testability
@@ -1026,7 +787,7 @@ Reports documentation coverage and identifies stale or missing docs.
 
 ## Skills in Action
 
-### Example 1: Knowledge-Base-Capture Skill
+### Example: Knowledge Capture via Document Skill
 
 **Scenario:** During implementation, an agent discovers a pattern
 
@@ -1035,7 +796,7 @@ Agent output: "I implemented a retry mechanism with exponential backoff for API 
 ```
 
 **What happens automatically:**
-1. Knowledge-base-capture skill recognizes "pattern" trigger
+1. Document skill's Capture perspective activates
 2. Checks `docs/patterns/` for existing retry patterns
 3. Not found → Creates `docs/patterns/api-retry-strategy.md`
 4. Uses pattern template
@@ -1045,54 +806,24 @@ Agent output: "I implemented a retry mechanism with exponential backoff for API 
 
 ---
 
-### Example 2: Parallel-Task-Assignment Skill
-
-**Scenario:** Complex task needs breakdown
-
-```
-User: "Implement user authentication - break this down into activities"
-```
-
-**What happens automatically:**
-1. Parallel-task-assignment skill recognizes "break this down"
-2. Analyzes task complexity
-3. Generates output:
-
-```
-Task: Implement user authentication
-
-Activities:
-1. Analyze security requirements
-2. Design database schema
-3. Create API endpoints
-4. Build login UI
-
-Dependencies: 1 → 2 → (3 & 4 parallel)
-
-Execution: Sequential (1→2), then Parallel (3&4)
-
-Agent Prompts Generated: ✅
-```
-
-**You didn't have to:** Manually create FOCUS/EXCLUDE templates or plan execution strategy
-
 ---
 
 ## Templates
 
-Rich templates for structured documentation:
+Rich templates for structured documentation, co-located with their skills:
 
 ```
-plugins/start/templates/
-├── product-requirements.md      # Product requirements structure
-├── solution-design.md            # Solution design structure
-├── implementation-plan.md        # Implementation plan structure
-├── definition-of-ready.md        # Quality gate
-├── definition-of-done.md         # Quality gate
-└── task-definition-of-done.md   # Task-level quality gate
+plugins/start/skills/
+├── specify-requirements/template.md   # Product requirements structure
+├── specify-solution/template.md       # Solution design structure
+├── specify-plan/template.md           # Implementation plan structure
+└── document/templates/                # Knowledge capture templates
+    ├── domain-template.md             # Business rules
+    ├── pattern-template.md            # Technical patterns
+    └── interface-template.md          # External integrations
 ```
 
-**Usage:** Automatically used by `/start:specify` when creating specifications
+**Usage:** Automatically used by `/start:specify` and `/start:document` when creating documentation
 
 ---
 

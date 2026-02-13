@@ -6,49 +6,57 @@ Reusable expertise modules that provide consistent guidance across multiple agen
 
 ```
 skills/
-├── cross-cutting/       # Universal skills for all agents
-│   ├── language-coding-conventions/
-│   ├── unfamiliar-codebase-navigation/
-│   ├── documentation-information-extraction/
-│   ├── error-recovery-patterns/
-│   ├── tech-stack-detection/
-│   └── codebase-pattern-identification/
-├── design/              # UX and accessibility skills
-│   ├── accessible-interface-design/
-│   └── user-insight-synthesis/
-├── development/         # Software development skills
+├── cross-cutting/              # Universal skills for all agents
+│   ├── codebase-navigation/
+│   ├── coding-conventions/
+│   ├── documentation-extraction/
+│   ├── feature-prioritization/
+│   ├── pattern-detection/
+│   ├── requirements-elicitation/
+│   └── tech-stack-detection/
+├── design/                     # UX and design skills
+│   ├── user-insight-synthesis/
+│   └── user-research/
+├── development/                # Software development skills
 │   ├── api-contract-design/
-│   ├── entity-relationship-design/
-│   ├── technical-documentation-authoring/
+│   ├── architecture-selection/
+│   ├── data-modeling/
+│   ├── domain-driven-design/
+│   ├── technical-writing/
 │   └── testing/
-├── infrastructure/      # DevOps and platform skills
-│   ├── pipeline-deployment-design/
-│   └── production-observability-design/
-└── quality/             # Quality assurance skills
-    ├── performance-bottleneck-analysis/
-    └── vulnerability-threat-assessment/
+├── infrastructure/             # DevOps and platform skills
+│   ├── deployment-pipeline-design/
+│   └── observability-design/
+└── quality/                    # Quality assurance skills
+    ├── code-quality-review/
+    ├── performance-analysis/
+    └── security-assessment/
 ```
 
 ## Skills Index
 
 | Skill | Category | Description |
 |-------|----------|-------------|
-| `accessible-interface-design` | design | WCAG 2.1 AA compliance patterns, screen reader compatibility, keyboard navigation |
-| `api-contract-design` | development | REST and GraphQL API design patterns, OpenAPI/Swagger specifications |
-| `language-coding-conventions` | cross-cutting | Security, performance, and accessibility standards |
-| `pipeline-deployment-design` | infrastructure | Pipeline design, deployment strategies (blue-green, canary, rolling) |
-| `unfamiliar-codebase-navigation` | cross-cutting | Navigate, search, and understand project structures |
-| `entity-relationship-design` | development | Schema design, entity relationships, normalization |
-| `technical-documentation-authoring` | development | ADRs, system documentation, API documentation, runbooks |
-| `documentation-information-extraction` | cross-cutting | Interpret existing docs, READMEs, specs, and configuration files |
-| `error-recovery-patterns` | cross-cutting | Consistent error patterns, validation approaches, recovery strategies |
+| `codebase-navigation` | cross-cutting | Navigate, search, and understand project structures |
+| `coding-conventions` | cross-cutting | Security, performance, accessibility, and error handling standards |
+| `documentation-extraction` | cross-cutting | Interpret existing docs, READMEs, specs, and configuration files |
+| `feature-prioritization` | cross-cutting | RICE, MoSCoW, Kano, and value-effort prioritization frameworks |
+| `pattern-detection` | cross-cutting | Identify existing codebase patterns for consistency |
+| `requirements-elicitation` | cross-cutting | Requirement gathering, stakeholder analysis, user story patterns |
 | `tech-stack-detection` | cross-cutting | Auto-detect project tech stacks (React, Vue, Express, Django, etc.) |
-| `production-observability-design` | infrastructure | Monitoring strategies, distributed tracing, SLI/SLO design |
-| `codebase-pattern-identification` | cross-cutting | Identify existing codebase patterns for consistency |
-| `performance-bottleneck-analysis` | quality | Measurement approaches, profiling tools, optimization patterns |
-| `vulnerability-threat-assessment` | quality | Vulnerability review, OWASP patterns, secure coding practices |
-| `testing` | development | Test pyramid principles, coverage targets, framework-specific patterns |
-| `user-insight-synthesis` | design | Interview techniques, persona creation, journey mapping |
+| `user-insight-synthesis` | design | Research synthesis, persona creation, testing validation |
+| `user-research` | design | Interview techniques, persona creation, journey mapping |
+| `api-contract-design` | development | REST and GraphQL API design patterns, OpenAPI/Swagger |
+| `architecture-selection` | development | Monolith, microservices, serverless architecture patterns |
+| `data-modeling` | development | Schema design, entity relationships, normalization |
+| `domain-driven-design` | development | DDD patterns, bounded contexts, aggregates |
+| `technical-writing` | development | ADRs, system documentation, API documentation, runbooks |
+| `testing` | development | Test pyramid principles, coverage targets, framework patterns |
+| `deployment-pipeline-design` | infrastructure | Pipeline design, deployment strategies (blue-green, canary) |
+| `observability-design` | infrastructure | Monitoring strategies, distributed tracing, SLI/SLO design |
+| `code-quality-review` | quality | Systematic code review patterns and feedback techniques |
+| `performance-analysis` | quality | Measurement approaches, profiling tools, optimization patterns |
+| `security-assessment` | quality | Vulnerability review, OWASP patterns, secure coding practices |
 
 ## Usage
 
@@ -57,7 +65,7 @@ Skills are referenced in agent YAML frontmatter:
 ```yaml
 ---
 name: my-agent
-skills: unfamiliar-codebase-navigation, tech-stack-detection, language-coding-conventions
+skills: codebase-navigation, tech-stack-detection, coding-conventions
 ---
 ```
 

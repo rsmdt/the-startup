@@ -37,7 +37,16 @@ See: `checklists/accessibility-checklist.md`
 
 ## Error Handling Patterns
 
-All agents should recommend these error handling approaches:
+All agents should recommend these error handling approaches.
+
+### Error Classification
+
+Distinguish between operational and programmer errors:
+
+| Type | Examples | Response |
+|------|----------|----------|
+| **Operational** | Network failures, invalid input, timeouts, rate limits | Handle gracefully, log appropriately, provide user feedback, implement recovery |
+| **Programmer** | Type errors, null access, failed assertions | Fail fast, log full context, alert developers - do NOT attempt recovery |
 
 ### Pattern 1: Fail Fast at Boundaries
 
@@ -125,6 +134,18 @@ async function fetchWithRetry(url, maxAttempts = 3) {
   }
 }
 ```
+
+### Logging Levels
+
+| Level | Use For |
+|-------|---------|
+| ERROR | Operational errors requiring attention |
+| WARN | Recoverable issues, degraded performance |
+| INFO | Significant state changes, request lifecycle |
+| DEBUG | Detailed flow for troubleshooting |
+
+**Log:** Correlation IDs, user context (sanitized), operation attempted, error type, duration.
+**Never log:** Passwords, tokens, secrets, credit card numbers, PII.
 
 ## Best Practices
 

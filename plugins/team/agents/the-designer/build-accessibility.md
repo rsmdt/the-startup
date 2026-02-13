@@ -29,7 +29,7 @@ Complex UI components require careful accessibility implementation, use the Task
 </commentary>
 </example>
 model: haiku
-skills: codebase-navigation, tech-stack-detection, pattern-detection, coding-conventions, error-recovery, documentation-extraction
+skills: codebase-navigation, tech-stack-detection, pattern-detection, coding-conventions, documentation-extraction
 ---
 
 You are an expert accessibility specialist who ensures digital products work for all users, including those with disabilities.

@@ -148,26 +148,30 @@ skills: unfamiliar-codebase-navigation, tech-stack-detection, api-contract-desig
 
 When an agent is invoked, Claude Code automatically loads the referenced skills into context, providing the agent with specialized knowledge without duplicating content across agent files.
 
-### Available Skills (16)
+### Available Skills (20)
 
 | Category | Skill | Description |
 |----------|-------|-------------|
-| **Cross-Cutting** | `unfamiliar-codebase-navigation` | Navigate, search, and understand project structures |
+| **Cross-Cutting** | `codebase-navigation` | Navigate, search, and understand project structures |
+| | `coding-conventions` | Security, performance, accessibility, and error handling standards |
+| | `documentation-extraction` | Interpret docs, READMEs, specs, and configs |
+| | `feature-prioritization` | RICE, MoSCoW, Kano, and value-effort prioritization |
+| | `pattern-detection` | Identify existing codebase patterns for consistency |
+| | `requirements-elicitation` | Requirement gathering and stakeholder analysis |
 | | `tech-stack-detection` | Auto-detect project tech stacks and configurations |
-| | `codebase-pattern-identification` | Identify existing codebase patterns for consistency |
-| | `language-coding-conventions` | Security, performance, and accessibility standards |
-| | `error-recovery-patterns` | Consistent error patterns and recovery strategies |
-| | `documentation-information-extraction` | Interpret docs, READMEs, specs, and configs |
+| **Design** | `user-insight-synthesis` | Research synthesis, persona creation, testing validation |
+| | `user-research` | Interview techniques, personas, journey mapping |
 | **Development** | `api-contract-design` | REST/GraphQL design, OpenAPI, versioning |
+| | `architecture-selection` | Monolith, microservices, serverless patterns |
+| | `data-modeling` | Schema design, entity relationships, normalization |
+| | `domain-driven-design` | DDD patterns, bounded contexts, aggregates |
+| | `technical-writing` | ADRs, system docs, API docs, runbooks |
 | | `testing` | Test pyramid, coverage targets, framework patterns |
-| | `entity-relationship-design` | Schema design, entity relationships, normalization |
-| | `technical-documentation-authoring` | ADRs, system docs, API docs, runbooks |
-| **Design** | `accessible-interface-design` | WCAG compliance, ARIA, keyboard navigation |
-| | `user-insight-synthesis` | Interview techniques, personas, journey mapping |
-| **Infrastructure** | `pipeline-deployment-design` | Pipeline design, deployment strategies |
-| | `production-observability-design` | Monitoring, tracing, SLI/SLO design |
-| **Quality** | `performance-bottleneck-analysis` | Measurement, profiling tools, optimization |
-| | `vulnerability-threat-assessment` | Vulnerability review, OWASP, threat modeling |
+| **Infrastructure** | `deployment-pipeline-design` | Pipeline design, deployment strategies |
+| | `observability-design` | Monitoring, tracing, SLI/SLO design |
+| **Quality** | `code-quality-review` | Systematic code review patterns and feedback |
+| | `performance-analysis` | Measurement, profiling tools, optimization |
+| | `security-assessment` | Vulnerability review, OWASP, threat modeling |
 
 ### Benefits
 
