@@ -2,7 +2,7 @@
 
 **Workflow orchestration plugin for spec-driven development in Claude Code.**
 
-The `start` plugin provides nine user-invocable workflow skills, five autonomous skills, and two output styles to transform how you build software with Claude Code.
+The `start` plugin provides ten user-invocable workflow skills, five autonomous skills, and two output styles to transform how you build software with Claude Code.
 
 **📖 For quick start, workflow guide, and skill selection, see the [main README](../../README.md).**
 
@@ -10,7 +10,7 @@ The `start` plugin provides nine user-invocable workflow skills, five autonomous
 
 ## Table of Contents
 
-- [User-Invocable Skills](#user-invocable-skills) — specify, implement, validate, review, document, analyze, refactor, debug, constitution
+- [User-Invocable Skills](#user-invocable-skills) — specify, implement, validate, test, review, document, analyze, refactor, debug, constitution
 - [Autonomous Skills](#autonomous-skills) — 5 context-activated skills
 - [Documentation Structure](#-documentation-structure) — specs, domain, patterns, interfaces
 - [Output Styles](#-output-styles) — The Startup, The ScaleUp
@@ -23,9 +23,9 @@ The `start` plugin provides nine user-invocable workflow skills, five autonomous
 
 ## User-Invocable Skills
 
-These skills are invoked by the user via slash commands (e.g., `/start:specify`). Unlike autonomous skills which activate automatically based on context, user-invocable skills wait for explicit invocation.
+These skills are invoked by the user via slash commands (e.g., `/specify`). Unlike autonomous skills which activate automatically based on context, user-invocable skills wait for explicit invocation.
 
-### `/start:specify <description>`
+### `/specify <description>`
 
 Create comprehensive specifications from brief descriptions through deep research and specialist agent coordination.
 
@@ -33,8 +33,8 @@ Create comprehensive specifications from brief descriptions through deep researc
 
 **Usage:**
 ```bash
-/start:specify Build a real-time notification system with WebSocket support
-/start:specify 001  # Resume existing specification work
+/specify Build a real-time notification system with WebSocket support
+/specify 001  # Resume existing specification work
 ```
 
 **Key Features:**
@@ -59,7 +59,7 @@ Create comprehensive specifications from brief descriptions through deep researc
 flowchart TD
     A([Your Feature Idea]) --> |initialize| B{Check<br>Existing}
     B --> |exists| C[Review and Refine]
-    C --> END[🚀 Ready for /start:implement 001]
+    C --> END[🚀 Ready for /implement 001]
     B --> |new| D[📄 **Requirements Gathering**<br/>Create *product-requirements.md* if needed]
     D --> E[📄 **Technical Research**<br/>Create *solution-design.md* if needed, document patterns, interfaces]
     E --> F[📄 **Implementation Planning**<br/>Create *implementation-plan.md*]
@@ -70,7 +70,7 @@ flowchart TD
 
 ---
 
-### `/start:implement <spec-id>`
+### `/implement <spec-id>`
 
 Execute implementation plans phase-by-phase with parallel specialist agents and continuous validation.
 
@@ -78,8 +78,8 @@ Execute implementation plans phase-by-phase with parallel specialist agents and 
 
 **Usage:**
 ```bash
-/start:implement 001
-/start:implement path/to/custom/implementation-plan.md
+/implement 001
+/implement path/to/custom/implementation-plan.md
 ```
 
 **Key Features:**
@@ -111,7 +111,7 @@ flowchart TD
 
 ---
 
-### `/start:validate <target>`
+### `/validate <target>`
 
 Validate specifications, implementations, or understanding through intelligent context detection and the 3 Cs framework (Completeness, Consistency, Correctness).
 
@@ -119,10 +119,10 @@ Validate specifications, implementations, or understanding through intelligent c
 
 **Usage:**
 ```bash
-/start:validate 001                                          # Validate spec by ID
-/start:validate docs/specs/001/solution-design.md            # Validate specific file
-/start:validate Check the auth implementation against SDD    # Compare implementation to spec
-/start:validate Is my caching approach correct?              # Validate understanding
+/validate 001                                          # Validate spec by ID
+/validate docs/specs/001/solution-design.md            # Validate specific file
+/validate Check the auth implementation against SDD    # Compare implementation to spec
+/validate Is my caching approach correct?              # Validate understanding
 ```
 
 **Key Features:**
@@ -169,7 +169,60 @@ flowchart TD
 
 ---
 
-### `/start:review [target]`
+### `/test [target]`
+
+Run tests with strict code ownership enforcement — no "pre-existing failures" excuses allowed.
+
+**Purpose:** Discover and execute tests, ensure the codebase is left in a passing state, and enforce ownership of any failures encountered
+
+**Usage:**
+```bash
+/test                            # Run full test suite
+/test all                        # Run full test suite (explicit)
+/test src/auth/                  # Run tests for specific path
+/test baseline                   # Capture current test state
+```
+
+**Key Features:**
+- **Test Discovery** - Automatically finds test runner, config, and test files
+- **Code Ownership** - If tests fail, you own the fix — no blaming pre-existing issues
+- **Baseline Capture** - Record current passing/failing state before changes
+- **Multi-Agent Parallel** - Can distribute test suites across parallel agents
+- **Targeted Execution** - Run specific test files, directories, or the full suite
+
+<details>
+<summary><strong>View Details</strong></summary>
+
+**The Ownership Mandate:**
+
+When tests fail, the skill enforces strict ownership:
+- No "these were pre-existing failures"
+- No "not caused by my changes"
+- No leaving failing tests for the user
+
+**Test Modes:**
+
+| Input | Mode | What Happens |
+|-------|------|--------------|
+| (empty) or `all` | Full Suite | Discovers and runs all tests |
+| File/directory path | Targeted | Runs tests for specific scope |
+| `baseline` | Capture | Records current test state for comparison |
+
+```mermaid
+flowchart TD
+    A([Test Request]) --> |discover| B[**Find Test Runner**<br/>Config, scripts, test files]
+    B --> |execute| C[**Run Tests**<br/>Full suite or targeted]
+    C --> |check| D{Tests Pass?}
+    D --> |yes| E[✅ **All Clear**<br/>Report results]
+    D --> |no| F[**Own the Failures**<br/>Investigate & fix each one]
+    F --> |fixed| C
+```
+
+</details>
+
+---
+
+### `/review [target]`
 
 Multi-agent code review with security, performance, quality, and test coverage specialists running in parallel.
 
@@ -177,10 +230,10 @@ Multi-agent code review with security, performance, quality, and test coverage s
 
 **Usage:**
 ```bash
-/start:review                                    # Review current PR/staged changes
-/start:review --pr 123                           # Review specific PR
-/start:review --branch feature/auth              # Review branch changes
-/start:review src/auth/ src/users/               # Review specific files/directories
+/review                                    # Review current PR/staged changes
+/review --pr 123                           # Review specific PR
+/review --branch feature/auth              # Review branch changes
+/review src/auth/ src/users/               # Review specific files/directories
 ```
 
 **Key Features:**
@@ -231,7 +284,7 @@ flowchart TD
 
 ---
 
-### `/start:document [target]`
+### `/document [target]`
 
 Generate and sync documentation including API docs, READMEs, JSDoc comments, and documentation audits.
 
@@ -239,11 +292,11 @@ Generate and sync documentation including API docs, READMEs, JSDoc comments, and
 
 **Usage:**
 ```bash
-/start:document src/api/                         # Generate API documentation
-/start:document --mode readme                    # Update project README
-/start:document --mode code src/utils/           # Add JSDoc to code files
-/start:document --mode audit                     # Audit documentation coverage
-/start:document --mode module src/auth/          # Document entire module
+/document src/api/                         # Generate API documentation
+/document --mode readme                    # Update project README
+/document --mode code src/utils/           # Add JSDoc to code files
+/document --mode audit                     # Audit documentation coverage
+/document --mode module src/auth/          # Document entire module
 ```
 
 **Key Features:**
@@ -294,7 +347,7 @@ flowchart TD
 
 ---
 
-### `/start:analyze <area>`
+### `/analyze <area>`
 
 Discover and document business rules, technical patterns, and system interfaces through iterative exploration.
 
@@ -302,9 +355,9 @@ Discover and document business rules, technical patterns, and system interfaces 
 
 **Usage:**
 ```bash
-/start:analyze security patterns in authentication
-/start:analyze business rules for user permissions
-/start:analyze technical patterns in our microservices architecture
+/analyze security patterns in authentication
+/analyze business rules for user permissions
+/analyze technical patterns in our microservices architecture
 ```
 
 <details>
@@ -328,7 +381,7 @@ flowchart TD
 
 ---
 
-### `/start:refactor <description>`
+### `/refactor <description>`
 
 Improve code quality while strictly preserving all existing behavior through test-validated incremental changes.
 
@@ -336,14 +389,14 @@ Improve code quality while strictly preserving all existing behavior through tes
 
 **Usage:**
 ```bash
-/start:refactor Simplify the authentication middleware for better testability
-/start:refactor Improve the WebSocket connection manager
+/refactor Simplify the authentication middleware for better testability
+/refactor Improve the WebSocket connection manager
 ```
 
 <details>
 <summary><strong>View Details</strong></summary>
 
-Strictly preserves behavior through test-validated incremental changes. All tests must pass before refactoring begins and after each change. Automatic rollback on test failures. For simple refactorings, applies changes directly with continuous validation. For complex refactorings, creates specification documents and defers to `/start:implement` for planned execution.
+Strictly preserves behavior through test-validated incremental changes. All tests must pass before refactoring begins and after each change. Automatic rollback on test failures. For simple refactorings, applies changes directly with continuous validation. For complex refactorings, creates specification documents and defers to `/implement` for planned execution.
 
 ```mermaid
 flowchart TD
@@ -353,14 +406,14 @@ flowchart TD
     D --> |review| E[**Specialist Review**<br/>Code quality check<br/>Performance impact]
     E --> DONE[✅ **Refactoring Complete**]
     C --> |complex| F[**Create Specification**<br/>📄 *Generate solution-design.md*<br/>📄 *Generate implementation-plan.md*<br/>Document approach]
-    F --> |defer| G[🚀 **Ready for /start:implement**<br/>Execute via planned phases]
+    F --> |defer| G[🚀 **Ready for /implement**<br/>Execute via planned phases]
 ```
 
 </details>
 
 ---
 
-### `/start:debug <description>`
+### `/debug <description>`
 
 Diagnose and resolve bugs through conversational investigation with systematic root cause analysis.
 
@@ -368,9 +421,9 @@ Diagnose and resolve bugs through conversational investigation with systematic r
 
 **Usage:**
 ```bash
-/start:debug The API returns 500 errors when uploading large files
-/start:debug Tests are failing intermittently on CI but pass locally
-/start:debug Users report slow page loads after the latest deployment
+/debug The API returns 500 errors when uploading large files
+/debug Tests are failing intermittently on CI but pass locally
+/debug Users report slow page loads after the latest deployment
 ```
 
 **Key Features:**
@@ -410,7 +463,7 @@ flowchart TD
 
 ---
 
-### `/start:constitution [focus-areas]`
+### `/constitution [focus-areas]`
 
 Create or update a project constitution with governance rules through discovery-based pattern analysis.
 
@@ -418,9 +471,9 @@ Create or update a project constitution with governance rules through discovery-
 
 **Usage:**
 ```bash
-/start:constitution                                    # Create new constitution via codebase discovery
-/start:constitution "security and testing"             # Focus on specific areas
-/start:constitution "Add API patterns"                 # Update existing constitution
+/constitution                                    # Create new constitution via codebase discovery
+/constitution "security and testing"             # Focus on specific areas
+/constitution "Add API patterns"                 # Update existing constitution
 ```
 
 **Key Features:**
@@ -467,13 +520,13 @@ Secrets must never be committed to source control.
 
 | Phase | Command | Enforcement |
 |-------|---------|-------------|
-| **Planning** | `/start:specify` (SDD) | SDD must not violate constitutional principles |
-| **Task** | `/start:implement` | Task ordering respects constitutional priorities |
-| **Implementation** | `/start:implement` | Generated code checked; L1/L2 violations block completion |
+| **Planning** | `/specify` (SDD) | SDD must not violate constitutional principles |
+| **Task** | `/implement` | Task ordering respects constitutional priorities |
+| **Implementation** | `/implement` | Generated code checked; L1/L2 violations block completion |
 
 ```mermaid
 flowchart TD
-    A([/start:constitution]) --> |check| B{Constitution<br>Exists?}
+    A([/constitution]) --> |check| B{Constitution<br>Exists?}
     B --> |no| C[**Discovery Phase**<br/>Explore codebase patterns]
     C --> D[**Rule Generation**<br/>Create L1/L2/L3 rules]
     D --> E[**User Confirmation**<br/>Present proposed rules]
@@ -481,7 +534,7 @@ flowchart TD
     B --> |yes| G{Update or<br>Validate?}
     G --> |update| H[Add new rules<br/>Focus on specified areas]
     H --> E
-    G --> |validate| I[Run /start:validate constitution]
+    G --> |validate| I[Run /validate constitution]
     F --> END[✅ Constitution Created]
 ```
 
@@ -564,9 +617,9 @@ docs/
 ### Auto-Documentation
 
 The `document` skill's Capture perspective automatically creates files in the correct location when patterns, interfaces, or domain rules are discovered during:
-- Specification creation (`/start:specify`)
-- Implementation (`/start:implement`)
-- Analysis (`/start:analyze`)
+- Specification creation (`/specify`)
+- Implementation (`/implement`)
+- Analysis (`/analyze`)
 
 ### Deduplication
 
@@ -659,7 +712,7 @@ The ScaleUp provides contextual explanations as it works:
 │                             PROJECT SETUP                                    │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
-│   /start:constitution ────► Create project governance rules                 │
+│   /constitution ────► Create project governance rules                 │
 │        │                    L1/L2/L3 rules auto-enforced in BUILD flow      │
 │        │                    CONSTITUTION.md at project root                  │
 │                                                                              │
@@ -673,7 +726,7 @@ The ScaleUp provides contextual explanations as it works:
 │                          PRIMARY DEVELOPMENT FLOW                            │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
-│   /start:specify ──► /start:validate ──► /start:implement ──► /start:review │
+│   /specify ──► /validate ──► /implement ──► /review │
 │        │                   │                    │                   │        │
 │   Create specs      Check quality        Execute plan        Code review    │
 │   PRD + SDD + PLAN  3 Cs framework      Phase-by-phase     Security + Perf │
@@ -681,7 +734,7 @@ The ScaleUp provides contextual explanations as it works:
 │   ↳ Constitution     ↳ Constitution      ↳ Constitution      ↳ Constitution │
 │     checked on SDD     mode available      + drift enforced    compliance   │
 │                                                                              │
-│   Optional: /start:document after implementation for documentation sync     │
+│   Optional: /document after implementation for documentation sync     │
 │                                                                              │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -691,7 +744,7 @@ The ScaleUp provides contextual explanations as it works:
 **1. Create Specification**
 
 ```bash
-/start:specify Add real-time notification system with WebSocket support
+/specify Add real-time notification system with WebSocket support
 ```
 
 **What happens:**
@@ -703,7 +756,7 @@ The ScaleUp provides contextual explanations as it works:
 **2. Validate Before Implementation (Recommended)**
 
 ```bash
-/start:validate 001
+/validate 001
 ```
 
 **What happens:**
@@ -715,7 +768,7 @@ The ScaleUp provides contextual explanations as it works:
 **3. Execute Implementation**
 
 ```bash
-/start:implement 001
+/implement 001
 ```
 
 **What happens:**
@@ -728,7 +781,7 @@ The ScaleUp provides contextual explanations as it works:
 **4. Review Before Merge**
 
 ```bash
-/start:review
+/review
 ```
 
 **What happens:**
@@ -739,7 +792,7 @@ The ScaleUp provides contextual explanations as it works:
 **5. Generate Documentation (Optional)**
 
 ```bash
-/start:document src/notifications/
+/document src/notifications/
 ```
 
 **What happens:**
@@ -754,7 +807,7 @@ The ScaleUp provides contextual explanations as it works:
 **Understand Existing Code**
 
 ```bash
-/start:analyze security patterns in authentication
+/analyze security patterns in authentication
 ```
 
 Documents findings in `docs/patterns/`, `docs/domain/`, `docs/interfaces/`
@@ -762,7 +815,7 @@ Documents findings in `docs/patterns/`, `docs/domain/`, `docs/interfaces/`
 **Refactoring**
 
 ```bash
-/start:refactor Restructure the authentication module for better testability
+/refactor Restructure the authentication module for better testability
 ```
 
 For architectural changes - creates specs, plans migration, handles breaking changes.
@@ -770,7 +823,7 @@ For architectural changes - creates specs, plans migration, handles breaking cha
 **Fix Bugs**
 
 ```bash
-/start:debug The notification system stops working after 100 concurrent users
+/debug The notification system stops working after 100 concurrent users
 ```
 
 Conversational investigation with observable evidence and user-driven direction.
@@ -778,7 +831,7 @@ Conversational investigation with observable evidence and user-driven direction.
 **Audit Documentation**
 
 ```bash
-/start:document --mode audit
+/document --mode audit
 ```
 
 Reports documentation coverage and identifies stale or missing docs.
@@ -823,7 +876,7 @@ plugins/start/skills/
     └── interface-template.md          # External integrations
 ```
 
-**Usage:** Automatically used by `/start:specify` and `/start:document` when creating documentation
+**Usage:** Automatically used by `/specify` and `/document` when creating documentation
 
 ---
 

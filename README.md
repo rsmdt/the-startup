@@ -31,7 +31,7 @@
 - [🤖 What is The Agentic Startup?](#-what-is-the-agentic-startup)
 - [🚀 Quick Start](#-quick-start)
 - [📖 The Complete Workflow](#-the-complete-workflow)
-- [🎯 Which Command Should I Use?](#-which-command-should-i-use)
+- [🎯 Which Skill Should I Use?](#-which-skill-should-i-use)
 - [📦 Plugins](#-plugins)
 - [🎨 Output Styles](#-output-styles)
 - [📊 Statusline](#-statusline)
@@ -80,7 +80,7 @@ This installs the core plugins, configures the default output style, and sets up
 
 ```bash
 # (Optional) Create project governance rules
-/start:constitution                # Auto-enforced during specify, implement, review
+/constitution                      # Auto-enforced during specify, implement, review
 
 # Switch output styles anytime
 /output-style start:The Startup    # High-energy, fast execution (default)
@@ -95,10 +95,10 @@ Create a specification and implement it:
 
 ```bash
 # Create a specification
-/start:specify Add user authentication with OAuth support
+/specify Add user authentication with OAuth support
 
 # Execute the implementation
-/start:implement 001
+/implement 001
 ```
 
 That's it! You're now using spec-driven development.
@@ -109,44 +109,47 @@ That's it! You're now using spec-driven development.
 
 The Agentic Startup follows **spec-driven development**: comprehensive specifications before code, ensuring clarity and reducing rework.
 
-### All Commands at a Glance
+### All Skills at a Glance
 
 ```
 ┌──────────────────────────────────────────────────────────┐
 │                    SETUP (optional)                      │
 │                                                          │
-│  /start:constitution ► Create project governance rules   │
-│                        (auto-enforced in BUILD workflow) │
+│  /constitution ► Create project governance rules          │
+│                  (auto-enforced in BUILD workflow)        │
 └──────────────────────────────────────────────────────────┘
                             │
                             ▼
 ┌──────────────────────────────────────────────────────────┐
 │                    BUILD (primary flow)                  │
 │                                                          │
-│  /start:specify ────► Create specs (PRD + SDD + PLAN)    │
-│        │               ↳ Constitution checked on SDD     │
-│        ▼                                                 │
-│  /start:validate ───► Check quality (3 Cs framework)     │
-│        │               ↳ Constitution mode available     │
-│        ▼                                                 │
-│  /start:implement ──► Execute plan phase-by-phase        │
-│        │               ↳ Constitution + drift enforced   │
-│        ▼                                                 │
-│  /start:review ─────► Multi-agent code review            │
-│        │               ↳ Constitution compliance checked │
-│        ▼                                                 │
-│  /start:document ───► Generate/sync documentation        │
+│  /specify ────► Create specs (PRD + SDD + PLAN)          │
+│      │           ↳ Constitution checked on SDD           │
+│      ▼                                                   │
+│  /validate ───► Check quality (3 Cs framework)           │
+│      │           ↳ Constitution mode available           │
+│      ▼                                                   │
+│  /implement ──► Execute plan phase-by-phase              │
+│      │           ↳ Constitution + drift enforced         │
+│      ▼                                                   │
+│  /test ───────► Run tests, enforce ownership             │
+│      │           ↳ No "pre-existing" excuses             │
+│      ▼                                                   │
+│  /review ─────► Multi-agent code review                  │
+│      │           ↳ Constitution compliance checked       │
+│      ▼                                                   │
+│  /document ───► Generate/sync documentation              │
 └──────────────────────────────────────────────────────────┘
                             │
                             ▼
 ┌──────────────────────────────────────────────────────────┐
 │                    MAINTAIN (as needed)                  │
 │                                                          │
-│  /start:analyze ────► Discover patterns & rules          │
+│  /analyze ────► Discover patterns & rules                 │
 │                                                          │
-│  /start:refactor ───► Improve code (preserve behavior)   │
+│  /refactor ───► Improve code (preserve behavior)         │
 │                                                          │
-│  /start:debug ──────► Fix bugs (root cause analysis)     │
+│  /debug ──────► Fix bugs (root cause analysis)           │
 └──────────────────────────────────────────────────────────┘
 ```
 
@@ -155,7 +158,7 @@ The Agentic Startup follows **spec-driven development**: comprehensive specifica
 #### Step 1: Create Your Specification
 
 ```bash
-/start:specify Add real-time notification system with WebSocket support
+/specify Add real-time notification system with WebSocket support
 ```
 
 This creates a specification directory with three documents:
@@ -175,7 +178,7 @@ Large specifications may approach Claude's context window limits. When this happ
 
 ```bash
 # Start a new conversation and resume where you left off
-/start:specify 001
+/specify 001
 ```
 
 **The resume pattern:**
@@ -189,7 +192,7 @@ Large specifications may approach Claude's context window limits. When this happ
 #### Step 3: Validate Before Implementation
 
 ```bash
-/start:validate 001
+/validate 001
 ```
 
 This quality gate checks:
@@ -202,7 +205,7 @@ Validation is advisory—it provides recommendations but doesn't block you.
 #### Step 4: Execute the Implementation
 
 ```bash
-/start:implement 001
+/implement 001
 ```
 
 Claude will:
@@ -211,12 +214,12 @@ Claude will:
 3. Run tests after each task
 4. Use parallel agents within phases for speed
 
-**Large implementations may also need context resets.** Simply run `/start:implement 001` again in a fresh conversation—Claude tracks progress in the spec files.
+**Large implementations may also need context resets.** Simply run `/implement 001` again in a fresh conversation—Claude tracks progress in the spec files.
 
 #### Step 5: Review and Ship
 
 ```bash
-/start:review
+/review
 ```
 
 Four parallel specialists review your code:
@@ -227,64 +230,68 @@ Four parallel specialists review your code:
 
 ---
 
-## 🎯 Which Command Should I Use?
+## 🎯 Which Skill Should I Use?
 
 ### Decision Tree
 
 ```
 What do you need to do?
 │
-├─ Want project-wide guardrails? ─────────► /start:constitution
+├─ Want project-wide guardrails? ─────────► /constitution
 │
-├─ Build something new? ──────────────────► /start:specify
-│                                           Then: /start:validate → /start:implement
+├─ Build something new? ──────────────────► /specify
+│                                           Then: /validate → /implement
 │
-├─ Understand existing code? ─────────────► /start:analyze
-│   └─ Want to improve it? ───────────────► Then: /start:refactor
+├─ Understand existing code? ─────────────► /analyze
+│   └─ Want to improve it? ───────────────► Then: /refactor
 │
-├─ Something is broken? ──────────────────► /start:debug
+├─ Something is broken? ──────────────────► /debug
 │
-├─ Code ready for merge? ─────────────────► /start:review
+├─ Need to run tests? ───────────────────► /test
 │
-├─ Need documentation? ───────────────────► /start:document
+├─ Code ready for merge? ─────────────────► /review
 │
-└─ Check constitution compliance? ────────► /start:validate constitution
+├─ Need documentation? ───────────────────► /document
+│
+└─ Check constitution compliance? ────────► /validate constitution
 ```
 
-### Command Reference
+### Skill Reference
 
-| Command | Purpose | When to Use |
+| Skill | Purpose | When to Use |
 |---------|---------|-------------|
-| `/start:constitution` | Create governance rules | Establish project-wide guardrails |
-| `/start:specify` | Create specifications | New features, complex changes |
-| `/start:implement` | Execute plans | After spec is validated |
-| `/start:validate` | Check quality | Before implementation, after specs |
-| `/start:review` | Multi-agent code review | Before merging PRs |
-| `/start:document` | Generate documentation | After implementation |
-| `/start:analyze` | Extract knowledge | Understanding existing code |
-| `/start:refactor` | Improve code quality | Cleanup without behavior change |
-| `/start:debug` | Fix bugs | When something is broken |
+| `/constitution` | Create governance rules | Establish project-wide guardrails |
+| `/specify` | Create specifications | New features, complex changes |
+| `/implement` | Execute plans | After spec is validated |
+| `/validate` | Check quality | Before implementation, after specs |
+| `/test` | Run tests, enforce ownership | After implementation, fixing bugs |
+| `/review` | Multi-agent code review | Before merging PRs |
+| `/document` | Generate documentation | After implementation |
+| `/analyze` | Extract knowledge | Understanding existing code |
+| `/refactor` | Improve code quality | Cleanup without behavior change |
+| `/debug` | Fix bugs | When something is broken |
 
 ### Capability Matrix
 
-| Capability | constitution | specify | implement | validate | review | document | analyze | refactor | debug |
-|------------|:------------:|:-------:|:---------:|:--------:|:------:|:--------:|:-------:|:--------:|:-----:|
-| **Creates specifications** | - | ✅ | - | - | - | - | - | - | - |
-| **Executes implementation plans** | - | - | ✅ | - | - | - | - | - | - |
-| **Runs tests** | - | - | ✅ | ✅ | - | - | - | ✅ | ✅ |
-| **Creates git branches** | - | ✅ | ✅ | - | - | - | - | ✅ | - |
-| **Creates PRs** | - | ✅ | ✅ | - | - | - | - | - | - |
-| **Multi-agent parallel** | - | ✅ | ✅ | - | ✅ | ✅ | ✅ | - | - |
-| **Security scanning** | - | - | - | ✅ | ✅ | - | - | - | - |
-| **Generates documentation** | - | ✅ | - | - | - | ✅ | ✅ | - | - |
-| **Constitution enforcement** | ✅ | ✅ | ✅ | ✅ | ✅ | - | - | - | - |
-| **Drift detection** | - | - | ✅ | - | - | - | - | - | - |
+| Capability | constitution | specify | implement | validate | test | review | document | analyze | refactor | debug |
+|------------|:------------:|:-------:|:---------:|:--------:|:----:|:------:|:--------:|:-------:|:--------:|:-----:|
+| **Creates specifications** | - | ✅ | - | - | - | - | - | - | - | - |
+| **Executes implementation plans** | - | - | ✅ | - | - | - | - | - | - | - |
+| **Runs tests** | - | - | ✅ | ✅ | ✅ | - | - | - | ✅ | ✅ |
+| **Creates git branches** | - | ✅ | ✅ | - | - | - | - | - | ✅ | - |
+| **Creates PRs** | - | ✅ | ✅ | - | - | - | - | - | - | - |
+| **Multi-agent parallel** | - | ✅ | ✅ | - | ✅ | ✅ | ✅ | ✅ | - | - |
+| **Security scanning** | - | - | - | ✅ | - | ✅ | - | - | - | - |
+| **Generates documentation** | - | ✅ | - | - | - | - | ✅ | ✅ | - | - |
+| **Constitution enforcement** | ✅ | ✅ | ✅ | ✅ | - | ✅ | - | - | - | - |
+| **Drift detection** | - | - | ✅ | - | - | - | - | - | - | - |
+| **Code ownership enforcement** | - | - | - | - | ✅ | - | - | - | - | - |
 
-### When Commands Overlap
+### When Skills Overlap
 
 **validate vs review** — *Different purposes, different timing*
 
-| Aspect | `/start:validate` | `/start:review` |
+| Aspect | `/validate` | `/review` |
 |--------|-------------------|-----------------|
 | **When** | During development | Before merging |
 | **Focus** | Spec compliance, quality gates | Code quality, security, performance |
@@ -292,14 +299,14 @@ What do you need to do?
 
 **analyze vs document** — *Discovery vs generation*
 
-| Aspect | `/start:analyze` | `/start:document` |
+| Aspect | `/analyze` | `/document` |
 |--------|------------------|-------------------|
 | **Purpose** | Discover what exists | Generate documentation |
 | **Output** | Knowledge documentation | API docs, READMEs, JSDoc |
 
 **refactor vs debug** — *Improvement vs fixing*
 
-| Aspect | `/start:refactor` | `/start:debug` |
+| Aspect | `/refactor` | `/debug` |
 |--------|-------------------|----------------|
 | **Behavior** | Must preserve exactly | Expected to change (fix) |
 | **Tests** | Must all pass throughout | May need new/updated tests |
@@ -312,7 +319,7 @@ The Agentic Startup is distributed as **Claude Code marketplace plugins**—nati
 
 ### Start Plugin (`start@the-startup`)
 
-**Core workflow orchestration** — 10 commands, 18 skills, 2 output styles
+**Core workflow orchestration** — 10 user-invocable skills, 5 autonomous skills, 2 output styles
 
 | Category | Capabilities |
 |----------|-------------|
@@ -320,9 +327,9 @@ The Agentic Startup is distributed as **Claude Code marketplace plugins**—nati
 | **Build** | `specify` → `validate` → `implement` pipeline with parallel agent coordination |
 | **Quality** | Multi-agent code review, security scanning, constitution enforcement, drift detection |
 | **Maintain** | Documentation generation, codebase analysis, safe refactoring, debugging |
-| **Git** | Optional branch/commit/PR workflows integrated into commands |
+| **Git** | Optional branch/commit/PR workflows integrated into skills |
 
-**📖 [View detailed command documentation →](plugins/start/README.md)**
+**📖 [View detailed skill documentation →](plugins/start/README.md)**
 
 ### Team Plugin (`team@the-startup`) — *Optional*
 
@@ -381,6 +388,42 @@ The Start plugin includes two output styles that change how Claude communicates 
 | **Explanations** | Minimal—ships fast | Educational insights included |
 | **On failure** | "That didn't work. Moving on." | "Here's what failed and why..." |
 | **Closing thought** | "What did we deliver?" | "Can the team maintain this?" |
+
+---
+
+## 🔧 How Skills Work
+
+The Agentic Startup is built on Claude Code's [skills system](https://code.claude.com/docs/en/skills), which follows the [Agent Skills](https://agentskills.io) open standard. Understanding how skills are invoked helps you get the most out of the framework.
+
+### Invocation Model
+
+Skills have two invocation paths, controlled by frontmatter fields in each skill's `SKILL.md`:
+
+| Path | How It Works | Controlled By |
+|------|-------------|---------------|
+| **User slash command** | You type `/skill-name [args]` | `user-invocable` (default: `true`) |
+| **Model auto-invocation** | Claude detects context and loads the skill via the Skill tool | `disable-model-invocation` (default: `false`) |
+
+Skills from the Start plugin are invoked directly by name (e.g., `/specify`, `/test`).
+
+### User-Invocable vs Autonomous Skills
+
+| Type | Visible in `/` menu? | Claude auto-invokes? | Example |
+|------|:--------------------:|:--------------------:|---------|
+| **User-invocable** | Yes | Yes | `/specify` — you trigger the spec workflow |
+| **Autonomous** | No | Yes | `specify-requirements` — loaded by `specify` when creating PRDs |
+
+The 10 user-invocable skills are the ones you interact with directly. The 5 autonomous skills activate behind the scenes when orchestrator skills need them (e.g., `specify` loads `specify-requirements`, `specify-solution`, and `specify-plan` during the specification workflow).
+
+### Progressive Disclosure
+
+Skills load efficiently to conserve context:
+
+1. **At startup** — Only skill names and descriptions are loaded (~100 tokens each)
+2. **On invocation** — Full `SKILL.md` content loads when you or Claude triggers the skill
+3. **On demand** — Supporting files (`reference.md`, templates, scripts) load only when needed
+
+This means all 15 skills can be available without consuming significant context until actually used.
 
 ---
 
@@ -526,7 +569,7 @@ Reusable architectural patterns and design decisions:
 
 ### Additional Resources
 
-- [Start Plugin Documentation](plugins/start/README.md) — Workflow commands and skills
+- [Start Plugin Documentation](plugins/start/README.md) — Workflow skills
 - [Team Plugin Documentation](plugins/team/README.md) — Specialized agents and skills library
 - [Migration Guide](MIGRATION.md) — Upgrading from v1.x
 
