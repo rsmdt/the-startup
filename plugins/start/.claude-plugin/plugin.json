@@ -1,6 +1,6 @@
 {
   "name": "start",
-  "version": "2.18.0",
+  "version": "3.0.0",
   "description": "Workflow orchestration commands for agentic software development",
   "author": {
     "name": "Rudolf S."
