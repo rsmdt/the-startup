@@ -147,6 +147,44 @@ configure() {
   fi
 }
 
+agent_teams() {
+  # Check if agent teams env var is already configured
+  if jq -e '.env.CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS == "1"' "$SETTINGS_FILE" >/dev/null 2>&1; then
+    success "Agent Teams already enabled, excellent!"
+    AGENT_TEAMS_CONFIGURED=true
+    return
+  fi
+
+  # Ask user if they want to enable agent teams
+  printf "\n"
+  printf "Agent Teams ${DIM}(experimental)${RESET} enables multi-agent collaboration\n"
+  printf "where specialized agents work together on complex tasks.\n"
+  printf "\n"
+  printf "Enable Agent Teams? [Y/n] "
+  read -r answer </dev/tty
+
+  # Default to yes
+  case "$answer" in
+    [nN]|[nN][oO])
+      AGENT_TEAMS_CONFIGURED=false
+      info "Skipping Agent Teams"
+      ;;
+    *)
+      info "Enabling Agent Teams..."
+      tmp_file=$(mktemp)
+      if jq '.env = (.env // {}) + {"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"}' "$SETTINGS_FILE" > "$tmp_file"; then
+        mv "$tmp_file" "$SETTINGS_FILE"
+        success "Agent Teams enabled"
+        AGENT_TEAMS_CONFIGURED=true
+      else
+        rm -f "$tmp_file"
+        error "Failed to enable Agent Teams"
+        AGENT_TEAMS_CONFIGURED=false
+      fi
+      ;;
+  esac
+}
+
 statusline() {
   # Check curl is available
   if ! command -v curl >/dev/null 2>&1; then
@@ -237,13 +275,24 @@ parse_args() {
 main() {
   parse_args "$@"
 
+  AGENT_TEAMS_CONFIGURED=false
+
   banner
   install
   configure
+  agent_teams
   statusline
 
   echo ""
   printf "${BRIGHT_GREEN}Installation complete!${RESET}\n"
+
+  if [ "$AGENT_TEAMS_CONFIGURED" = false ]; then
+    printf "\n"
+    printf "${YELLOW}💡${RESET} You can enable Agent Teams later by adding to ${DIM}~/.claude/settings.json${RESET}:\n"
+    printf "${DIM}   \"env\": { \"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS\": \"1\" }${RESET}\n"
+  fi
+
+  printf "\n"
   printf "${DIM}Learn more: https://github.com/rsmdt/the-startup${RESET}\n"
 }
 

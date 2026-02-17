@@ -35,20 +35,27 @@
 - [📦 Plugins](#-plugins)
 - [🎨 Output Styles](#-output-styles)
 - [📊 Statusline](#-statusline)
+- [💡 Why The Agentic Startup?](#-why-the-agentic-startup)
 - [🎯 Philosophy](#-philosophy)
 - [📚 Documentation](#-documentation)
 
 ---
 
+> **New in v3:** Agent Teams (experimental) — enable multi-agent collaboration where specialized agents coordinate and work together on complex tasks. The installer now offers to configure this automatically.
+
+---
+
 ## 🤖 What is The Agentic Startup?
 
-**The Agentic Startup** is a spec-driven development framework for Claude Code. Create comprehensive specifications before coding, then execute with parallel specialist agents—Y Combinator energy meets engineering discipline.
+**The Agentic Startup** is a multi-agent AI framework that makes Claude Code work like a startup team. Create comprehensive specifications before coding, then execute with parallel specialist agents — expert developers, architects, and engineers working together to turn your ideas into shipped code.
+
+**10 slash commands across 3 phases.** Specify first, then build with confidence.
 
 **Key Features:**
-- **Native Claude Code Integration** — Marketplace plugins with zero configuration
 - **Spec-Driven Development** — PRD → SDD → Implementation Plan → Code
 - **Parallel Agent Execution** — Multiple specialists work simultaneously
 - **Quality Gates** — Built-in validation at every stage
+- **Zero Configuration** — Marketplace plugins, one-line install
 
 ### Installation
 
@@ -63,15 +70,14 @@ This installs the core plugins, configures the default output style, and sets up
 <details>
 <summary><strong>Manual Installation</strong></summary>
 
+Start `claude` and run the following:
+
 ```bash
 # Add The Agentic Startup marketplace
 /plugin marketplace add rsmdt/the-startup
 
-# Install the Start plugin (core workflows)
-/plugin install start@the-startup
-
-# (Optional) Install the Team plugin (specialized agents)
-/plugin install team@the-startup
+/plugin install start@the-startup  # Install the Start plugin (core workflows)
+/plugin install team@the-startup   # (Optional) Install the Team plugin (specialized agents)
 ```
 
 </details>
@@ -83,8 +89,8 @@ This installs the core plugins, configures the default output style, and sets up
 /constitution                      # Auto-enforced during specify, implement, review
 
 # Switch output styles anytime
-/output-style start:The Startup    # High-energy, fast execution (default)
-/output-style start:The ScaleUp    # Calm confidence, educational
+/output-style "start:The Startup"   # High-energy, fast execution (default)
+/output-style "start:The ScaleUp"   # Calm confidence, educational
 ```
 
 ---
@@ -115,8 +121,8 @@ The Agentic Startup follows **spec-driven development**: comprehensive specifica
 ┌──────────────────────────────────────────────────────────┐
 │                    SETUP (optional)                      │
 │                                                          │
-│  /constitution ► Create project governance rules          │
-│                  (auto-enforced in BUILD workflow)        │
+│  /constitution ► Create project governance rules         │
+│                  (auto-enforced in BUILD workflow)       │
 └──────────────────────────────────────────────────────────┘
                             │
                             ▼
@@ -145,7 +151,7 @@ The Agentic Startup follows **spec-driven development**: comprehensive specifica
 ┌──────────────────────────────────────────────────────────┐
 │                    MAINTAIN (as needed)                  │
 │                                                          │
-│  /analyze ────► Discover patterns & rules                 │
+│  /analyze ────► Discover patterns & rules                │
 │                                                          │
 │  /refactor ───► Improve code (preserve behavior)         │
 │                                                          │
@@ -333,7 +339,7 @@ The Agentic Startup is distributed as **Claude Code marketplace plugins**—nati
 
 ### Team Plugin (`team@the-startup`) — *Optional*
 
-**Specialized agent library** — 11 roles, 27 activity-based specializations
+**Specialized agent library** — 8 roles, 20 activity-based agents. Now with experimental [Agent Teams](#agent-teams-experimental--new-in-v3) support for multi-agent collaboration.
 
 | Role | Focus Areas |
 |------|-------------|
@@ -507,9 +513,63 @@ format = "<context>  <session>"
 
 ---
 
-## 🎯 Philosophy
+## 💡 Why The Agentic Startup?
 
-### Why Activity-Based Agents?
+Real workflow features that solve real problems — not just another AI wrapper.
+
+### Resume Across Sessions
+
+Hit a context limit? Start a new conversation and pick up exactly where you left off. Specs persist on disk — Claude reads them and continues.
+
+```bash
+/specify 001    # ← resumes spec creation from where you left off
+/implement 001  # ← resumes implementation, tracking progress in spec files
+```
+
+### Code Ownership Mandate
+
+No more "pre-existing failure" excuses. When `/test` finds a failing test, it fixes it — period. You touched the codebase, you own it.
+
+### Drift Detection
+
+Implementation drifting from the spec? Caught automatically during `/implement`. Scope creep, missing items, contradictions — flagged with options to update the spec or the code.
+
+### Adaptive Code Review
+
+`/review` auto-detects what matters. Async code triggers concurrency review. Dependency changes trigger supply-chain checks. UI changes trigger accessibility audits. 5 base perspectives + conditional specialists.
+
+### Implement Any Plan
+
+Not just for specs created with `/specify`. `/implement` works with any markdown implementation plan — bring your own architecture docs, migration guides, or design documents.
+
+```bash
+/implement path/to/plan.md
+```
+
+### Non-Linear Specs
+
+Skip what you don't need. Start with a solution design, jump to the plan, or go full PRD → SDD → PLAN. Skipped phases are logged as decisions, not gaps.
+
+### Adversarial Debugging
+
+Tough bugs get multiple investigators that actively try to disprove each other's hypotheses. The surviving theory is most likely the root cause — competing hypotheses, not confirmation bias.
+
+### Agent Teams (Experimental) — New in v3
+
+Enable multi-agent collaboration where specialized agents coordinate autonomously on complex tasks. The installer configures this automatically, or enable manually:
+
+```json
+// ~/.claude/settings.json
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  }
+}
+```
+
+---
+
+## 🎯 Philosophy
 
 Research shows **2-22% accuracy improvement** with specialized task agents vs. single broad agents ([Multi-Agent Collaboration, 2025](https://arxiv.org/html/2501.06322v1)). Leading frameworks organize agents by **capability**, not job titles. The Agentic Startup applies this research through activity-based specialization.
 
@@ -521,7 +581,7 @@ Development often moves too fast without proper planning:
 - Technical debt accumulates from lack of upfront design
 - Teams struggle to maintain consistency across implementations
 
-### Our Approach: Spec-Driven Development
+### Our Approach
 
 **1. Specify First** — Create comprehensive specifications before writing code
 - **product-requirements.md** — What to build and why
@@ -545,15 +605,11 @@ Development often moves too fast without proper planning:
 
 ### Core Principles
 
-**Measure twice, cut once** — Investing time in specifications saves exponentially more time during implementation.
-
-**Documentation as code** — Specs, patterns, and interfaces are first-class artifacts that evolve with your codebase.
-
-**Parallel execution** — Multiple specialists work simultaneously within clear boundaries, maximizing velocity without chaos.
-
-**Quality gates** — Definition of Ready (DOR) and Definition of Done (DOD) ensure standards are maintained throughout.
-
-**Progressive disclosure** — Skills and agents load details only when needed, optimizing token efficiency while maintaining power.
+- **Measure twice, cut once** — Investing time in specifications saves exponentially more time during implementation.
+- **Documentation as code** — Specs, patterns, and interfaces are first-class artifacts that evolve with your codebase.
+- **Parallel execution** — Multiple specialists work simultaneously within clear boundaries, maximizing velocity without chaos.
+- **Quality gates** — Definition of Ready (DOR) and Definition of Done (DOD) ensure standards are maintained throughout.
+- **Progressive disclosure** — Skills and agents load details only when needed, optimizing token efficiency while maintaining power.
 
 ---
 
