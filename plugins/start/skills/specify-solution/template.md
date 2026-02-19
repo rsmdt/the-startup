@@ -26,6 +26,8 @@ version: "1.0"
 - [ ] Quality requirements are specific and measurable
 - [ ] Component names consistent across diagrams
 - [ ] A developer could implement from this design
+- [ ] Implementation examples use actual schema column names (not pseudocode), verified against migration files
+- [ ] Complex queries include traced walkthroughs with example data showing how the logic evaluates
 
 ---
 
@@ -385,6 +387,16 @@ External_Service_Name:
 - Non-obvious integration patterns
 - Security-sensitive implementations
 - Performance-critical sections
+
+**When examples include raw SQL or direct database access**:
+
+1. **Schema Reference** — List actual column names for every table in the query. Point to the migration file as source of truth. Call out columns that DON'T exist (common: pseudocode names like `status` for date-computed fields, `code` on junction tables where it lives on a catalog table, `period_start` when only a timestamp like `settled_at` exists).
+
+2. **Traced Walkthrough** — For queries with conditional logic, show example rows and trace how the condition evaluates for each variant. Include concrete numbers. The reader should understand *why* the query produces different results for different inputs without having to mentally execute the SQL.
+
+3. **Edge Cases** — Document what happens when the query returns no rows, NULL values, or zero. Map each case to the Python/TypeScript code path that handles it.
+
+**Why this matters**: Pseudocode column names in SQL examples look plausible but cause immediate implementation failures. A new session cannot verify column names from the SDD alone — it must cross-reference migration files. Including the schema reference eliminates this round-trip and prevents wrong-column bugs.
 
 [NEEDS CLARIFICATION: Are there complex areas that would benefit from code examples? If not, remove this section]
 

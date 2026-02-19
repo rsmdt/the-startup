@@ -42,6 +42,7 @@ Use this checklist to validate SDD completeness before proceeding to Implementat
 
 - [ ] **Data models defined** - Entities, fields, types
 - [ ] **Database schema specified** - Tables, columns, relationships (if applicable)
+- [ ] **SQL examples use actual column names** - Verified against migration files, not pseudocode (e.g. `product_bundle_id` not `bundle_id`, `settled_at` not `period_start`)
 - [ ] **Data flow documented** - How data moves through the system
 - [ ] **Storage decisions explained** - Why specific storage choices
 
@@ -76,6 +77,7 @@ Use this checklist to validate SDD completeness before proceeding to Implementat
 
 - [ ] **A developer could implement from this** - Clear enough for someone new
 - [ ] **Implementation examples provided** - For complex logic (where helpful)
+- [ ] **Complex queries include traced walkthroughs** - Example data rows showing how conditional logic evaluates for each variant
 - [ ] **Acceptance criteria defined** - EARS criteria for system behaviors
 - [ ] **Dependencies identified** - External libraries, services, etc.
 
