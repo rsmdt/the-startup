@@ -30,6 +30,33 @@ version: "1.0"
 
 ---
 
+## Output Schema
+
+### PLAN Status Report
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| specId | string | Yes | Spec identifier (NNN-name format) |
+| title | string | Yes | Feature title |
+| status | enum: `DRAFT`, `IN_REVIEW`, `COMPLETE` | Yes | Document readiness |
+| phases | PhaseStatus[] | Yes | Status of each implementation phase |
+| totalTasks | number | Yes | Total tasks across all phases |
+| parallelTasks | number | Yes | Tasks marked `[parallel: true]` |
+| specReferences | number | Yes | Count of `[ref: ...]` specification links |
+| clarificationsRemaining | number | Yes | Count of `[NEEDS CLARIFICATION]` markers |
+
+### PhaseStatus
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| phase | number | Yes | Phase number |
+| name | string | Yes | Phase name |
+| status | enum: `COMPLETE`, `NEEDS_CLARIFICATION`, `IN_PROGRESS` | Yes | Current state |
+| tasks | number | Yes | Task count in this phase |
+| detail | string | No | What needs clarification or what's in progress |
+
+---
+
 ## Specification Compliance Guidelines
 
 ### How to Ensure Specification Adherence

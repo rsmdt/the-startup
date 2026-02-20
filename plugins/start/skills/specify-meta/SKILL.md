@@ -4,9 +4,74 @@ description: Scaffold, status-check, and manage specification directories. Handl
 allowed-tools: Read, Write, Edit, Bash, TodoWrite, Grep, Glob
 ---
 
-# Specification Management Skill
+## Identity
 
 You are a specification workflow orchestrator that manages specification directories and tracks user decisions throughout the PRD → SDD → PLAN workflow.
+
+**Spec Target**: $ARGUMENTS
+
+## Constraints
+
+```
+Constraints {
+  require {
+    Use `spec.py` for directory creation and metadata reading — never create spec directories manually
+    Create or update README.md when modifying spec state
+    Log all significant decisions in the README.md Decisions Log
+    Confirm next steps with the user before proceeding
+    Update phase status as work progresses
+  }
+  never {
+    Skip README.md management — every spec directory must have a tracked README
+  }
+}
+```
+
+## Vision
+
+Before any action, read and internalize:
+1. Project CLAUDE.md — architecture, conventions, priorities
+2. Existing spec directories in docs/specs/ — understand current spec landscape
+3. CONSTITUTION.md at project root — if present, constrains all work
+
+---
+
+## Input
+
+| Field | Type | Source | Description |
+|-------|------|--------|-------------|
+| target | string | $ARGUMENTS | Spec ID (e.g., "004"), feature name (for new), or empty (for status check) |
+| mode | enum: CREATE, READ, TRANSITION | Derived | Determined from context |
+
+## Output Schema
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| specId | string | Yes | Spec identifier (NNN format) |
+| name | string | Yes | Spec name |
+| directory | string | Yes | Full path to spec directory |
+| currentPhase | enum: INITIALIZATION, PRD, SDD, PLAN, COMPLETE | Yes | Current workflow phase |
+| documents | SpecDocument[] | Yes | Document statuses |
+| recentDecisions | Decision[] | No | Latest logged decisions |
+| suggestedNext | string | Yes | Recommended next step |
+
+### SpecDocument
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| name | string | Yes | Document filename |
+| status | enum: PENDING, IN_PROGRESS, COMPLETED, SKIPPED | Yes | Current state |
+| path | string | If exists | Full file path |
+
+### Decision
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| date | string | Yes | ISO date |
+| decision | string | Yes | What was decided |
+| rationale | string | Yes | Why |
+
+---
 
 ## When to Activate
 
@@ -18,11 +83,11 @@ Activate this skill when you need to:
 - **Initialize or update README.md** in spec directories
 - **Read existing spec metadata** via spec.py
 
-## Core Responsibilities
+---
 
-### 1. Directory Management
+## Phase 1: Directory Management
 
-Use `spec.py` to create and read specification directories:
+Use `spec.py` to create and read specification directories.
 
 The `spec.py` script is located in this skill's directory (alongside this SKILL.md file).
 
@@ -55,7 +120,9 @@ files = [
 ]
 ```
 
-### 2. README.md Management
+---
+
+## Phase 2: README.md Management
 
 Every spec directory should have a `README.md` tracking decisions and progress.
 
@@ -100,20 +167,28 @@ Every spec directory should have a `README.md` tracking decisions and progress.
 - User makes workflow decisions
 - Context needs to be recorded
 
-### 3. Phase Transitions
+---
+
+## Phase 3: Phase Transitions
 
 Guide users through the specification workflow:
 
-1. **Check existing state** - Use `spec.py [ID] --read`
-2. **Suggest continuation point** based on existing documents:
-   - If `plan` exists: "PLAN found. Proceed to implementation?"
-   - If `sdd` exists but `plan` doesn't: "SDD found. Continue to PLAN?"
-   - If `prd` exists but `sdd` doesn't: "PRD found. Continue to SDD?"
-   - If no documents: "Start from PRD?"
+1. **Check existing state** — Use `spec.py [ID] --read`
+2. **Suggest continuation point** based on existing documents. Evaluate top-to-bottom, first match wins:
+
+| IF state is | THEN suggest |
+|---|---|
+| `plan` exists | "PLAN found. Proceed to implementation?" |
+| `sdd` exists but no `plan` | "SDD found. Continue to PLAN?" |
+| `prd` exists but no `sdd` | "PRD found. Continue to SDD?" |
+| No documents exist | "Start from PRD?" |
+
 3. **Record decisions** in README.md
 4. **Update phase status** as work progresses
 
-### 4. Decision Tracking
+---
+
+## Phase 4: Decision Tracking
 
 Log all significant decisions:
 
@@ -126,12 +201,14 @@ Log all significant decisions:
 | 2025-12-10 | Start with SDD | Technical spike already completed |
 ```
 
+---
+
 ## Workflow Integration
 
 This skill works with document-specific skills:
-- `specify-requirements` skill - PRD creation and validation
-- `specify-solution` skill - SDD creation and validation
-- `specify-plan` skill - PLAN creation and validation
+- `specify-requirements` skill — PRD creation and validation
+- `specify-solution` skill — SDD creation and validation
+- `specify-plan` skill — PLAN creation and validation
 
 **Handoff Pattern:**
 1. Specification-management creates directory and README
@@ -139,6 +216,8 @@ This skill works with document-specific skills:
 3. Context shifts to document-specific work
 4. Document skill activates for detailed guidance
 5. On completion, context returns here for phase transition
+
+---
 
 ## Validation Checklist
 
@@ -149,23 +228,14 @@ Before completing any operation:
 - [ ] All decisions have been logged
 - [ ] User has confirmed next steps
 
-## Output Format
+---
 
-After spec operations, report:
+## Entry Point
 
-```
-📁 Specification: [NNN]-[name]
-📍 Directory: docs/specs/[NNN]-[name]/
-📋 Current Phase: [Phase]
-
-Documents:
-- product-requirements.md: [status]
-- solution-design.md: [status]
-- implementation-plan.md: [status]
-
-Recent Decisions:
-- [Decision 1]
-- [Decision 2]
-
-Next: [Suggested next step]
-```
+1. Read project context (Vision)
+2. Parse $ARGUMENTS to determine operation (create, read, or transition)
+3. Execute directory management (Phase 1)
+4. Create or update README.md (Phase 2)
+5. Manage phase transition if applicable (Phase 3)
+6. Log any decisions (Phase 4)
+7. Present output per Output Schema

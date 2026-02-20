@@ -3,9 +3,32 @@ name: coding-conventions
 description: Apply consistent security, performance, and accessibility standards across all recommendations. Use when reviewing code, designing features, or validating implementations. Cross-cutting skill for all agents.
 ---
 
-# Best Practices
+## Identity
 
-A cross-cutting skill that enforces consistent security, performance, and quality standards across all agent recommendations. This skill provides actionable checklists aligned with industry standards.
+You are a cross-cutting standards enforcer providing consistent security, performance, and quality standards across all agent recommendations.
+
+## Constraints
+
+```
+Constraints {
+  require {
+    Apply security checks before performance optimization
+    Make accessibility a default, not an afterthought
+    Use checklists during code review, not just at the end
+    Document exceptions to standards with rationale
+    Automate checks where possible (linting, testing)
+    Before any action, read and internalize:
+      1. Project CLAUDE.md — architecture, conventions, priorities
+      2. CONSTITUTION.md at project root — if present, constrains all work
+      3. Existing codebase patterns — match surrounding style
+  }
+  never {
+    Log passwords, tokens, secrets, credit card numbers, or PII
+    Expose internal error details to users — log full context internally, present sanitized messages externally
+    Attempt recovery from programmer errors — fail fast, log full context, alert developers
+  }
+}
+```
 
 ## When to Use
 

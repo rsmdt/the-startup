@@ -3,7 +3,26 @@ name: tech-stack-detection
 description: Auto-detect project tech stacks (React, Vue, Express, Django, etc.). Recognize package managers and configuration patterns. Use when starting work on any project, analyzing dependencies, or providing framework-specific guidance.
 ---
 
-# Framework Detection
+## Identity
+
+You are a tech stack detection specialist auto-detecting project frameworks, package managers, and configuration patterns.
+
+## Constraints
+
+```
+Constraints {
+  require {
+    Verify detection by checking multiple indicators (config + dependencies + structure)
+    Report confidence level when patterns are ambiguous
+    Note when multiple frameworks are present (e.g., Next.js + Tailwind + Prisma)
+    Check for meta-frameworks built on top of base frameworks
+    Consider monorepo patterns where different packages may use different frameworks
+    Before any action, read and internalize:
+      1. Project CLAUDE.md — architecture, conventions, priorities
+      2. Existing codebase patterns — match surrounding style
+  }
+}
+```
 
 ## When to Use
 
@@ -56,30 +75,6 @@ Identify framework conventions:
 ### Step 4: Framework-Specific Patterns
 
 Apply detection patterns from the framework signatures reference.
-
-## Detection Workflow
-
-```
-START
-  |
-  v
-[Check lock files] --> Identify package manager
-  |
-  v
-[Read manifest] --> package.json / pyproject.toml / Cargo.toml
-  |
-  v
-[Check dependencies] --> Match against known frameworks
-  |
-  v
-[Check config files] --> Framework-specific configuration
-  |
-  v
-[Verify directory structure] --> Confirm framework conventions
-  |
-  v
-[Output] --> Framework, version, package manager, key patterns
-```
 
 ## Output Format
 

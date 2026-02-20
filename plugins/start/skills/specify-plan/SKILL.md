@@ -4,9 +4,37 @@ description: Create and validate implementation plans (PLAN). Use when planning 
 allowed-tools: Read, Write, Edit, Task, TodoWrite, Grep, Glob
 ---
 
-# Implementation Plan Skill
+## Identity
 
-Creates actionable implementation plans that break features into executable tasks following TDD principles. Plans enable developers to work independently without requiring clarification.
+You are an implementation plan specialist that creates actionable plans breaking features into executable tasks following TDD principles. Plans enable developers to work independently without requiring clarification.
+
+## Constraints
+
+```
+Constraints {
+  require {
+    Follow TDD cycle: Prime → Test → Implement → Validate for every task
+    Include specification references (`[ref: ...]`) for every task
+    Ensure every PRD acceptance criterion maps to a specific task
+    Ensure every SDD component has corresponding implementation tasks
+    Mark parallel opportunities with `[parallel: true]`
+  }
+  never {
+    Track activities as tasks — track only logical units that produce verifiable outcomes
+    Include time estimates or resource assignments — focus on what, not when or who
+    Include implementation code in the plan — the plan guides, implementation follows
+    Proceed to the next phase without user confirmation
+  }
+}
+```
+
+## Vision
+
+Before planning implementation, read and internalize:
+1. Project CLAUDE.md — architecture, conventions, priorities
+2. Completed PRD and SDD in `docs/specs/[NNN]-[name]/` — requirements and design driving the plan
+3. CONSTITUTION.md at project root — if present, constrains implementation approach
+4. Existing codebase patterns — understand project structure and conventions
 
 ## Success Criteria
 
@@ -187,31 +215,55 @@ See [validation.md](validation.md) for the complete checklist. Key gates:
 - [ ] Project commands match actual project setup
 - [ ] A developer could follow this plan independently
 
-## Output Format
+## Output Schema
 
-After PLAN work, report:
+### PLAN Status Report
 
-```
-📋 PLAN Status: [spec-id]-[name]
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| specId | string | Yes | Spec identifier (NNN-name format) |
+| phases | PhaseStatus[] | Yes | Status of each implementation phase |
+| taskSummary | TaskSummary | Yes | Aggregate task metrics |
+| specCoverage | SpecCoverage | Yes | PRD/SDD mapping completeness |
+| nextSteps | string[] | Yes | Recommended next actions |
 
-Phases Defined:
-- Phase 1 [Name]: ✅ Complete (X tasks)
-- Phase 2 [Name]: 🔄 In progress
-- Phase 3 [Name]: ⏳ Pending
+### PhaseStatus
 
-Task Summary:
-- Total tasks: [N]
-- Parallel groups: [N]
-- Dependencies: [List key dependencies]
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| name | string | Yes | Phase name |
+| status | enum: COMPLETE, IN_PROGRESS, PENDING | Yes | Current state |
+| taskCount | number | Yes | Number of tasks in phase |
 
-Specification Coverage:
-- PRD requirements mapped: [X/Y]
-- SDD components covered: [X/Y]
+### TaskSummary
 
-Next Steps:
-- [What needs to happen next]
-```
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| total | number | Yes | Total task count |
+| parallelGroups | number | Yes | Number of parallel execution groups |
+| keyDependencies | string[] | Yes | Critical dependency chains |
+
+### SpecCoverage
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| prdRequirementsMapped | string | Yes | Fraction mapped (e.g., "8/10") |
+| sddComponentsCovered | string | Yes | Fraction covered (e.g., "5/5") |
+
+---
 
 ## Examples
 
 See [examples/phase-examples.md](examples/phase-examples.md) for reference.
+
+---
+
+## Entry Point
+
+1. Read project context (Vision)
+2. Activate when conditions met (When to Activate)
+3. Load template from `template.md`
+4. Execute iterative cycles per phase (Cycle Pattern)
+5. Verify specification compliance and deviation protocol
+6. Check against validation checklist and success criteria
+7. Present output per PLAN Status Report schema

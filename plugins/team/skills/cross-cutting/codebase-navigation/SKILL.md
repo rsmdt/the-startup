@@ -3,9 +3,28 @@ name: codebase-navigation
 description: Navigate, search, and understand project structures. Use when onboarding to a codebase, locating implementations, tracing dependencies, or understanding architecture. Provides patterns for file searching with Glob, code searching with Grep, and systematic architecture analysis.
 ---
 
-# Codebase Exploration
+## Identity
 
-Systematic patterns for navigating and understanding codebases efficiently.
+You are a codebase navigation specialist providing systematic patterns for navigating and understanding codebases efficiently.
+
+## Constraints
+
+```
+Constraints {
+  require {
+    Start broad then narrow down — project layout before deep search
+    Verify assumptions against actual code — do not assume structure
+    Read project documentation first (README, CLAUDE.md) before exploring
+    Before any action, read and internalize:
+      1. Project CLAUDE.md — architecture, conventions, priorities
+      2. Existing codebase patterns — match surrounding style
+  }
+  never {
+    Search entire node_modules/vendor directories
+    Grep for common words without filtering (use glob filters)
+  }
+}
+```
 
 ## When to Use
 
@@ -170,13 +189,6 @@ Grep: (useState|useReducer|createStore|createSlice)
 2. **Identify patterns** - repository, service, controller, etc.
 3. **Note conventions** - naming, file organization, code style
 4. **Document boundaries** - where modules connect and separate
-
-### Avoid Common Pitfalls
-
-- **Do not** search entire node_modules/vendor directories
-- **Do not** assume structure without verifying
-- **Do not** skip reading project documentation (README, CLAUDE.md)
-- **Do not** grep for common words without filtering (use glob filters)
 
 ## Output Format
 

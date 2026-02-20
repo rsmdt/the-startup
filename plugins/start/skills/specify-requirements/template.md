@@ -29,6 +29,30 @@ version: "1.0"
 
 ---
 
+## Output Schema
+
+### PRD Status Report
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| specId | string | Yes | Spec identifier (NNN-name format) |
+| title | string | Yes | Feature title |
+| status | enum: `DRAFT`, `IN_REVIEW`, `COMPLETE` | Yes | Document readiness |
+| sections | SectionStatus[] | Yes | Status of each PRD section |
+| clarificationsRemaining | number | Yes | Count of `[NEEDS CLARIFICATION]` markers |
+| acceptanceCriteria | number | Yes | Total testable acceptance criteria defined |
+| openQuestions | string[] | No | Unresolved items requiring stakeholder input |
+
+### SectionStatus
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| name | string | Yes | Section name |
+| status | enum: `COMPLETE`, `NEEDS_CLARIFICATION`, `IN_PROGRESS` | Yes | Current state |
+| detail | string | No | What clarification is needed or what's in progress |
+
+---
+
 ## Product Overview
 
 ### Vision

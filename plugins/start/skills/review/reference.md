@@ -298,22 +298,95 @@ TERMINATION: Analysis complete OR code context insufficient
 
 ## Synthesis Protocol
 
-### Deduplication
+### Deduplication Algorithm
 
-If multiple agents flag the same issue:
-1. Keep the finding with highest severity
-2. Merge context from all agents
-3. Note which perspectives flagged it
+#### Typed I/O
 
-Example:
 ```
-[🔐+⚡ Security/Performance] **Unvalidated User Input** (CRITICAL)
-📍 Location: `src/api/search.ts:34`
-🔍 Flagged by: Security Reviewer, Performance Reviewer
-❌ Issue:
-  - Security: Potential injection vulnerability
-  - Performance: Unvalidated input could cause DoS
-✅ Fix: Add input validation and length limits
+deduplicate(findings: Finding[]) -> Finding[]
+```
+
+**Input**: Raw findings from all review perspectives (may contain overlaps when multiple perspectives flag the same code location).
+
+**Output**: Deduplicated, sorted, ID-assigned findings ready for presentation.
+
+#### Algorithm Steps
+
+```
+deduplicate(findings: Finding[]) -> Finding[] {
+  findings
+    |> groupBy(f => f.location)          // Step 1: Group
+    |> merge(group => {                   // Step 2: Merge
+        severity: max(group.severities),
+        descriptions: combine(group.descriptions),
+        perspectives: union(group.perspectives)
+       })
+    |> sortBy(severity DESC, confidence DESC, filePath ASC)  // Step 3: Sort
+    |> assignIds(prefix: severity letter, start: 1)           // Step 4: Assign IDs
+}
+```
+
+#### Step 1: Group by Location
+
+Group findings by `location` field. Two findings overlap if their file:line ranges are within **5 lines** of each other.
+
+| Finding A Location | Finding B Location | Overlap? |
+|---|---|---|
+| `auth/service.ts:42` | `auth/service.ts:44` | Yes (2 lines apart) |
+| `auth/service.ts:42` | `auth/service.ts:48` | No (6 lines apart) |
+| `auth/service.ts:42-50` | `auth/service.ts:47` | Yes (within range) |
+| `auth/service.ts:42` | `api/routes.ts:42` | No (different files) |
+
+#### Step 2: Merge Overlapping Findings
+
+For each group of overlapping findings, produce a single merged finding:
+
+| Field | Merge Rule |
+|-------|-----------|
+| severity | `max()` — keep the highest severity from any finding in the group |
+| confidence | `max()` — keep the highest confidence |
+| title | Use the title from the highest-severity finding |
+| location | Use the most specific location (narrowest line range) |
+| finding | Combine descriptions from all perspectives, labeled by perspective |
+| recommendation | Use the most actionable recommendation; append complementary recommendations from other perspectives |
+| diff | Keep the most complete diff; prefer diffs from the highest-severity finding |
+| principle | Union of all principles cited |
+| perspectives | List all perspectives that flagged this location |
+
+**Conflict Resolution**: When two findings in the same group have equal severity but different recommendations:
+- If recommendations are complementary (address different aspects), combine them
+- If recommendations conflict (suggest opposite approaches), keep the one from the more specialized perspective (e.g., Security > Quality for auth-related code)
+
+#### Step 3: Sort
+
+Sort merged findings by:
+1. Severity: CRITICAL > HIGH > MEDIUM > LOW
+2. Confidence: HIGH > MEDIUM > LOW (tiebreaker)
+3. File path: Alphabetical ASC (secondary tiebreaker)
+
+#### Step 4: Assign IDs
+
+Assign sequential IDs using severity-letter prefix:
+- CRITICAL findings: C1, C2, C3, ...
+- HIGH findings: H1, H2, H3, ...
+- MEDIUM findings: M1, M2, M3, ...
+- LOW findings: L1, L2, L3, ...
+
+#### Merged Finding Example
+
+```
+Before dedup:
+  Finding A (Security):  severity=CRITICAL, location=src/api/search.ts:34, "SQL injection risk"
+  Finding B (Performance): severity=HIGH, location=src/api/search.ts:35, "Unvalidated input causes DoS"
+
+After dedup:
+  Finding C1: severity=CRITICAL, location=src/api/search.ts:34-35
+    perspectives: [Security, Performance]
+    finding:
+      - Security: SQL injection risk via unescaped user input
+      - Performance: Unvalidated input could trigger expensive queries (DoS)
+    recommendation: Add input validation and use parameterized queries
+    principle: OWASP Injection Prevention
 ```
 
 ### Grouping
