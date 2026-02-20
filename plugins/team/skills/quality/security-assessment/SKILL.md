@@ -425,4 +425,4 @@ Priority areas for security-focused code review:
 
 ## References
 
-- `checklists/security-review-checklist.md` - Comprehensive security review checklist
+- [security-review-checklist.md](checklists/security-review-checklist.md) - Comprehensive security review checklist

@@ -597,5 +597,5 @@ components:
 
 ## References
 
-- `templates/rest-api-template.md` - REST API specification template
-- `templates/graphql-schema-template.md` - GraphQL schema template
+- [rest-api-template.md](templates/rest-api-template.md) - REST API specification template
+- [graphql-schema-template.md](templates/graphql-schema-template.md) - GraphQL schema template

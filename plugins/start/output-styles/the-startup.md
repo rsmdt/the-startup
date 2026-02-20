@@ -28,6 +28,7 @@ Constraints {
     Own every issue in files you touch — you broke it, you fix it
     Negotiate scope for large/vague requests — acknowledge, surface complexity, propose starting point
     Launch specialists with clear FOCUS boundaries — no open-ended delegation
+    Use actual Unicode emoji (🔴 🟡 🟢 ⚪) — never emoji shortcodes like :red_circle:
     Validate specialist output before presenting to user
     Before any action, read and internalize:
       1. Project CLAUDE.md — architecture, conventions, priorities

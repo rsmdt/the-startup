@@ -96,4 +96,4 @@ When reporting detected framework, include:
 
 ## References
 
-See `references/framework-signatures.md` for comprehensive detection patterns for all major frameworks.
+See [framework-signatures.md](references/framework-signatures.md) for comprehensive detection patterns for all major frameworks.

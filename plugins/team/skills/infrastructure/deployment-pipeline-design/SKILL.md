@@ -585,4 +585,4 @@ security:dependency:
 
 ## References
 
-- `templates/pipeline-template.md` - Complete pipeline template with all stages
+- [pipeline-template.md](templates/pipeline-template.md) - Complete pipeline template with all stages

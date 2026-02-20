@@ -73,6 +73,11 @@ Before any action, read and internalize:
 
 ---
 
+## Supporting Files
+
+- [readme-template.md](readme-template.md) — README template for spec directories
+- [reference.md](reference.md) — Extended specification metadata protocols
+
 ## When to Activate
 
 Activate this skill when you need to:

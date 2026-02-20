@@ -79,9 +79,9 @@ Load when needed (progressive disclosure):
 
 | File | When to Load |
 |------|--------------|
-| `template.md` | When creating new constitution — provides structure with `[NEEDS DISCOVERY]` markers |
-| `examples/CONSTITUTION.md` | When user wants to see example constitution |
-| `reference/rule-patterns.md` | For rule schema, scope examples, troubleshooting |
+| [template.md](template.md) | When creating new constitution — provides structure with `[NEEDS DISCOVERY]` markers |
+| [examples/CONSTITUTION.md](examples/CONSTITUTION.md) | When user wants to see example constitution |
+| [reference/rule-patterns.md](reference/rule-patterns.md) | For rule schema, scope examples, troubleshooting |
 
 ---
 
@@ -158,7 +158,7 @@ OUTPUT: Findings formatted as:
 
 ## Phase 2A: Create New Constitution
 
-- Read template from `template.md`
+- Read template from [template.md](template.md)
 - Template provides structure with `[NEEDS DISCOVERY]` markers to resolve
 
 **Launch Discovery Agents:**
@@ -183,7 +183,7 @@ Present discovered rules in categories, then call `AskUserQuestion` — Approve 
 
 - Read current CONSTITUTION.md
 - Parse existing rules and categories
-- See `reference/rule-patterns.md` for rule schema and patterns
+- See [reference/rule-patterns.md](reference/rule-patterns.md) for rule schema and patterns
 
 **Present options via AskUserQuestion:**
 - Add new rules (to existing or new category)

@@ -233,11 +233,11 @@ When the Capture perspective is active, agents categorize discoveries into the c
 5. Cross-reference between related docs
 
 **Templates:** Use the templates in `templates/` for consistent formatting:
-- `pattern-template.md` — Technical patterns
-- `interface-template.md` — External integrations
-- `domain-template.md` — Business rules
+- [pattern-template.md](templates/pattern-template.md) — Technical patterns
+- [interface-template.md](templates/interface-template.md) — External integrations
+- [domain-template.md](templates/domain-template.md) — Business rules
 
-**Advanced protocols:** Load `reference/knowledge-capture.md` for naming conventions, update-vs-create decision matrix, cross-referencing patterns, and quality standards.
+**Advanced protocols:** Load [knowledge-capture.md](reference/knowledge-capture.md) for naming conventions, update-vs-create decision matrix, cross-referencing patterns, and quality standards.
 
 ---
 

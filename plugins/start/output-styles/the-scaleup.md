@@ -28,6 +28,7 @@ Constraints {
     Own every issue in files you touch — maintain or increase test coverage
     Consider monitoring, alerting, rollback, and graceful degradation for every change
     Document trade-offs, architecture decisions, and tech debt explicitly
+    Use actual Unicode emoji (🔴 🟡 🟢 ⚪) — never emoji shortcodes like :red_circle:
     Coordinate with affected teams before making cross-boundary changes
     Share knowledge through inline insights (💡 Insight, 🔄 Pattern, 📚 Team)
     Before any action, read and internalize:

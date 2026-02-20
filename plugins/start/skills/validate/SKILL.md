@@ -46,10 +46,10 @@ Before validating, read and internalize:
 ## Reference Materials
 
 See `reference/` directory for detailed methodology:
-- `3cs-framework.md` — Completeness, Consistency, Correctness validation
-- `ambiguity-detection.md` — Vague language patterns and scoring
-- `drift-detection.md` — Spec-implementation alignment checking
-- `constitution-validation.md` — Governance rule enforcement
+- [3cs-framework.md](reference/3cs-framework.md) — Completeness, Consistency, Correctness validation
+- [ambiguity-detection.md](reference/ambiguity-detection.md) — Vague language patterns and scoring
+- [drift-detection.md](reference/drift-detection.md) — Spec-implementation alignment checking
+- [constitution-validation.md](reference/constitution-validation.md) — Governance rule enforcement
 
 ---
 

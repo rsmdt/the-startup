@@ -191,4 +191,4 @@ Identify documentation conventions:
 
 ## References
 
-- `examples/common-patterns.md` - Concrete examples of pattern recognition in action
+- [common-patterns.md](examples/common-patterns.md) - Concrete examples of pattern recognition in action

@@ -503,4 +503,4 @@ APPENDIX
 
 ## References
 
-- `templates/research-plan-template.md` - Planning template for research studies
+- [research-plan-template.md](templates/research-plan-template.md) - Planning template for research studies

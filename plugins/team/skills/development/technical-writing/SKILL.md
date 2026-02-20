@@ -56,7 +56,7 @@ ADRs capture the context, options considered, and rationale behind significant a
 - Deprecating existing approaches in favor of new ones
 - Any decision that a future developer might question
 
-See: `templates/adr-template.md`
+See: [adr-template.md](templates/adr-template.md)
 
 ### System Documentation
 
@@ -70,7 +70,7 @@ System documentation provides a comprehensive view of how a system works, its co
 - Deployment architecture
 - Operational requirements
 
-See: `templates/system-doc-template.md`
+See: [system-doc-template.md](templates/system-doc-template.md)
 
 ### API Documentation
 
@@ -194,5 +194,5 @@ When superseding an ADR:
 
 ## References
 
-- `templates/adr-template.md` - Architecture Decision Record template
-- `templates/system-doc-template.md` - System documentation template
+- [adr-template.md](templates/adr-template.md) - Architecture Decision Record template
+- [system-doc-template.md](templates/system-doc-template.md) - System documentation template

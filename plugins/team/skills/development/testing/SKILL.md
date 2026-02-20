@@ -247,3 +247,7 @@ Always test:
 | Implementation testing | Breaks on refactoring |
 | Shared state | Test order affects results |
 | Test duplication | Use parameterized tests instead |
+
+## References
+
+- [test-pyramid.md](examples/test-pyramid.md) - Test pyramid strategy and examples

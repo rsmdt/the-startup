@@ -113,7 +113,7 @@ classifySeverity = match (finding) {
 
 ## Reference Materials
 
-See `reference.md` for:
+See [reference.md](reference.md) for:
 - Detailed per-perspective review checklists (Security, Performance, Quality, Testing, Simplification)
 - Severity and confidence classification matrices
 - Agent prompt templates with FOCUS/EXCLUDE structure
@@ -280,7 +280,7 @@ Apply dedup algorithm to collected findings. Concise summary:
 4. Sort by severity (Critical > High > Medium > Low) then confidence
 5. Assign finding IDs (C1, C2, H1, H2, M1, M2, L1, etc.)
 
-See `reference.md` — Synthesis Protocol → Deduplication Algorithm — for step-by-step grouping, merging, and ID assignment logic.
+See [reference.md](reference.md) — Synthesis Protocol → Deduplication Algorithm — for step-by-step grouping, merging, and ID assignment logic.
 
 ### Presentation
 

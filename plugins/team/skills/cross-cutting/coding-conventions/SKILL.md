@@ -44,19 +44,19 @@ Constraints {
 
 Covers common vulnerability prevention aligned with OWASP Top 10. Apply these checks to any code that handles user input, authentication, data storage, or external communications.
 
-See: `checklists/security-checklist.md`
+See: [security-checklist.md](checklists/security-checklist.md)
 
 ### Performance
 
 Covers optimization patterns for frontend, backend, and database operations. Apply these checks when performance is a concern or during code review.
 
-See: `checklists/performance-checklist.md`
+See: [performance-checklist.md](checklists/performance-checklist.md)
 
 ### Accessibility
 
 Covers WCAG 2.1 Level AA compliance. Apply these checks to all user-facing components to ensure inclusive design.
 
-See: `checklists/accessibility-checklist.md`
+See: [accessibility-checklist.md](checklists/accessibility-checklist.md)
 
 ## Error Handling Patterns
 
@@ -180,6 +180,6 @@ async function fetchWithRetry(url, maxAttempts = 3) {
 
 ## References
 
-- `checklists/security-checklist.md` - OWASP-aligned security checks
-- `checklists/performance-checklist.md` - Performance optimization checklist
-- `checklists/accessibility-checklist.md` - WCAG 2.1 AA compliance checklist
+- [security-checklist.md](checklists/security-checklist.md) - OWASP-aligned security checks
+- [performance-checklist.md](checklists/performance-checklist.md) - Performance optimization checklist
+- [accessibility-checklist.md](checklists/accessibility-checklist.md) - WCAG 2.1 AA compliance checklist

@@ -96,6 +96,10 @@ interface AnalysisFinding {
 }
 ```
 
+## Supporting Files
+
+- [code-smells.md](reference/code-smells.md) — Code smell catalog and refactoring strategies
+
 ## Decision: Analysis Mode
 
 Evaluate $ARGUMENTS. First match wins.
