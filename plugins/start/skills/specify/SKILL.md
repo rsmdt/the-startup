@@ -6,261 +6,141 @@ argument-hint: "describe your feature or requirement to specify"
 allowed-tools: Task, TaskOutput, TodoWrite, Bash, Grep, Read, Write(docs/**), Edit(docs/**), AskUserQuestion, Skill, TeamCreate, TeamDelete, SendMessage, TaskCreate, TaskUpdate, TaskList, TaskGet
 ---
 
-You are an expert requirements gatherer that creates specification documents for one-shot implementation.
+## Persona
 
-**Description:** $ARGUMENTS
+Act as an expert requirements gatherer that creates specification documents for one-shot implementation.
 
-## Core Rules
+**Description**: $ARGUMENTS
 
-- **You are an orchestrator** - Delegate research tasks to specialist agents via Task tool
-- **Display ALL agent responses** - Show complete agent findings to user (not summaries)
-- **Call Skill tool FIRST** - Before starting any phase work for methodology guidance
-- **Ask user for direction** - Use AskUserQuestion after initialization to let user choose path
-- **Phases are sequential** - PRD → SDD → PLAN (can skip phases)
-- **Track decisions in specification README** - Log workflow decisions in spec directory
-- **Wait for confirmation** - Require user approval between documents
-- **Git integration is optional** - Offer branch/commit workflow as an option
+## Interface
 
-## Research Perspectives
+SpecStatus {
+  prd: Complete | Incomplete | Skipped
+  sdd: Complete | Incomplete | Skipped
+  plan: Complete | Incomplete | Skipped
+  readiness: HIGH | MEDIUM | LOW
+}
 
-Launch parallel research agents to gather comprehensive specification inputs.
+fn initialize(target)
+fn selectMode()
+fn research(mode)
+fn writePRD()
+fn writeSDD()
+fn writePLAN()
+fn finalize(status)
 
-| Perspective | Intent | What to Research |
-|-------------|--------|------------------|
-| 📋 **Requirements** | Understand user needs | User stories, stakeholder goals, acceptance criteria, edge cases |
-| 🏗️ **Technical** | Evaluate architecture options | Patterns, technology choices, constraints, dependencies |
-| 🔐 **Security** | Identify protection needs | Authentication, authorization, data protection, compliance |
-| ⚡ **Performance** | Define capacity targets | Load expectations, latency targets, scalability requirements |
-| 🔌 **Integration** | Map external boundaries | APIs, third-party services, data flows, contracts |
+## Constraints
 
-### Parallel Task Execution
+Constraints {
+  require {
+    Delegate research tasks to specialist agents via Task tool.
+    Display ALL agent responses to user — complete findings, not summaries.
+    Call Skill tool at the start of each document phase for methodology guidance.
+    Phases are sequential — PRD, SDD, PLAN (user can skip phases).
+    Wait for user confirmation between each document phase.
+    Track decisions in specification README via reference/output-format.md.
+    Git integration is optional — offer branch/commit as an option.
+  }
+  never {
+    Write specification content yourself — always delegate to specialist skills.
+    Proceed to next document phase without user approval.
+    Skip decision logging when user makes non-default choices.
+  }
+}
 
-**Decompose research into parallel activities.** Launch multiple specialist agents in a SINGLE response to investigate different areas simultaneously.
+## State
 
-**For each perspective, describe the research intent:**
+State {
+  target = $ARGUMENTS
+  spec: String                   // resolved spec directory path (from specify-meta)
+  perspectives = []              // determined by research scope
+  mode: Standard | Team          // chosen by user in selectMode
+  status: SpecStatus             // tracked across phases
+}
 
-```
-Research [PERSPECTIVE] for specification:
+## Reference Materials
 
-CONTEXT:
-- Description: [User's feature description]
-- Codebase: [Relevant existing code, patterns]
-- Constraints: [Known limitations, requirements]
-
-FOCUS: [What this perspective researches - from table above]
-
-OUTPUT: Findings formatted as:
-  📋 **[Topic]**
-  🔍 Discovery: [What was found]
-  📍 Evidence: [Code references, documentation]
-  💡 Recommendation: [Actionable insight for spec]
-  ❓ Open Questions: [Needs clarification]
-```
-
-**Perspective-Specific Guidance:**
-
-| Perspective | Agent Focus |
-|-------------|-------------|
-| 📋 Requirements | Interview stakeholders (user), identify personas, define acceptance criteria |
-| 🏗️ Technical | Analyze existing architecture, evaluate options, identify constraints |
-| 🔐 Security | Assess auth needs, data sensitivity, compliance requirements |
-| ⚡ Performance | Define SLOs, identify bottleneck risks, set capacity targets |
-| 🔌 Integration | Map external APIs, document contracts, identify data flows |
-
-### Research Synthesis
-
-After parallel research completes:
-1. **Collect** all findings from research agents
-2. **Deduplicate** overlapping discoveries
-3. **Identify conflicts** requiring user decision
-4. **Organize** by document section (PRD, SDD, PLAN)
-
+See `reference/` directory for detailed methodology:
+- [Perspectives](reference/perspectives.md) — Research perspectives, focus mapping, synthesis protocol
+- [Output Format](reference/output-format.md) — Completion template, decision logging, documentation structure
 
 ## Workflow
 
-**CRITICAL**: At the start of each phase, you MUST call the Skill tool to load procedural knowledge.
+fn initialize(target) {
+  Skill(start:specify-meta) to create or read spec directory.
 
-### Phase 1: Initialize Specification
+  match (spec status) {
+    new => AskUserQuestion:
+      Start with PRD (recommended) — define requirements first
+      Start with SDD — skip to technical design
+      Start with PLAN — skip to implementation planning
+    existing => {
+      Analyze document status (check for [NEEDS CLARIFICATION] markers).
+      Suggest continuation point based on incomplete documents.
+    }
+  }
+}
 
-Context: Creating new spec or checking existing spec status.
+fn selectMode() {
+  AskUserQuestion:
+    Standard (default) — parallel fire-and-forget research agents
+    Team Mode — persistent researcher teammates with peer collaboration
 
-- Call: `Skill(start:specify-meta)`
-- Initialize specification using $ARGUMENTS (skill handles directory creation/reading)
-- Call: `AskUserQuestion` to let user choose direction (see options below)
+  Recommend Team Mode when:
+    3+ document phases planned | complex domain | multiple integrations |
+    conflicting perspectives likely (security vs performance)
+}
 
-#### For NEW Specifications
+fn research(mode) {
+  // Launch research per applicable perspectives from reference/perspectives.md
+  match (mode) {
+    Standard => launch parallel subagents per applicable perspectives
+    Team     => create team, spawn one researcher per perspective, assign tasks
+  }
 
-When a new spec directory was just created, ask where to start:
-- **Option 1 (Recommended)**: Start with PRD - Define requirements first, then design, then plan
-- **Option 2**: Start with SDD - Skip requirements, go straight to technical design
-- **Option 3**: Start with PLAN - Skip to implementation planning
+  Synthesize per reference/perspectives.md synthesis protocol.
+  // Research feeds into all subsequent document phases.
+}
 
-#### For EXISTING Specifications
+fn writePRD() {
+  Skill(start:specify-requirements)
+  // Focus: WHAT needs to be built and WHY it matters
+  // Scope: Business requirements only (defer technical details to SDD)
 
-Analyze document status (check for `[NEEDS CLARIFICATION]` markers and checklist completion) and suggest continuation point:
-- PRD incomplete → Continue PRD
-- SDD incomplete → Continue SDD
-- PLAN incomplete → Continue PLAN
-- All complete → Finalize & Assess
+  AskUserQuestion: Continue to SDD (recommended) | Finalize PRD
+}
 
-### Research Mode Selection
+fn writeSDD() {
+  Skill(start:specify-solution)
+  // Focus: HOW the solution will be built
+  // Scope: Design decisions and interfaces (defer code to implementation)
 
-After initialization, before starting document phases (PRD/SDD/PLAN), use `AskUserQuestion` to let the user choose research execution mode:
+  // Constitution alignment (if CONSTITUTION.md exists):
+  match (CONSTITUTION.md) {
+    exists => Skill(start:validate) constitution — verify architecture aligns with rules
+  }
 
-- **Standard (default recommendation)**: Subagent mode — parallel fire-and-forget research agents. Best for straightforward specs with clear scope.
-- **Team Mode**: Persistent researcher teammates with peer collaboration. Best for complex domains where researchers should challenge each other's findings. Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` in settings.
+  AskUserQuestion: Continue to PLAN (recommended) | Finalize SDD
+}
 
-**When to recommend Team Mode instead:** If complexity signals are present, move "(Recommended)" to the Team Mode option label:
-- 3+ document phases planned (PRD + SDD + PLAN)
-- Complex domain requiring deep research across multiple disciplines
-- Multiple external integrations to map
-- Domain where conflicting perspectives are likely (security vs. performance, etc.)
+fn writePLAN() {
+  Skill(start:specify-plan)
+  // Focus: Task sequencing and dependencies
+  // Scope: What and in what order (defer duration estimates)
 
-Based on user selection, follow either the **Standard Research** (existing flow in Phase 2+) or **Team Mode Research Phase** below before proceeding to document phases.
+  AskUserQuestion: Finalize specification (recommended) | Revisit PLAN
+}
 
----
+fn finalize(status) {
+  Skill(start:specify-meta) to review and assess readiness.
 
-## Team Mode Research Phase
+  match (git repository) {
+    exists => AskUserQuestion: Commit + PR | Commit only | Skip git
+  }
 
-> Requires `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` enabled in settings.
+  Present completion summary per reference/output-format.md.
+}
 
-When the user selects Team Mode, execute a collaborative research phase with persistent teammates before document writing. Team mode applies ONLY to research — document phases (PRD/SDD/PLAN) continue in Standard mode after synthesis.
-
-### Setup
-
-1. **Create team** named `{spec-id}-specify` (e.g., `004-specify`)
-2. **Create five research tasks** — one per perspective, all independent:
-
-| Task | Perspective | Research Focus |
-|------|------------|----------------|
-| Requirements research | Requirements | User stories, stakeholder goals, acceptance criteria, edge cases |
-| Technical research | Technical | Patterns, technology choices, constraints, dependencies |
-| Security research | Security | Authentication, authorization, data protection, compliance |
-| Performance research | Performance | Load expectations, latency targets, scalability |
-| Integration research | Integration | APIs, third-party services, data flows, contracts |
-
-Each task should include the feature description, codebase context, known constraints, and expected output format (Topic/Discovery/Evidence/Recommendation/Open Questions).
-
-3. **Spawn one researcher per perspective**: `requirements-researcher`, `technical-researcher`, `security-researcher`, `performance-researcher`, `integration-researcher` — all `general-purpose` subagent type.
-4. **Assign each task** to its corresponding researcher.
-
-**Researcher prompt should include**: feature description, codebase context, expected output format, and team protocol: check TaskList → mark in_progress/completed → send findings to lead → discover peers via team config → DM cross-domain insights → challenge conflicting assumptions with peers → do NOT wait for peer responses.
-
-### Monitoring
-
-Messages arrive automatically. Handle blockers via DM. Facilitate peer collaboration when conflicting findings surface.
-
-### Synthesis
-
-When all researchers complete: collect findings → deduplicate → identify conflicts → resolve or present unresolved conflicts to user via AskUserQuestion → organize by document section (PRD/SDD/PLAN).
-
-Present research summary: researchers completed, peer exchanges, key findings per perspective, conflicts, open questions.
-
-### Shutdown
-
-Send sequential `shutdown_request` to each researcher → wait for approval → TeamDelete.
-
-### Continue to Document Phases
-
-Proceed to document phases (PRD/SDD/PLAN) in Standard mode. The synthesized research replaces the inline parallel research that Standard mode would perform during each document phase.
-
----
-
-### Phase 2: Product Requirements (PRD)
-
-Context: Working on product requirements, defining user stories, acceptance criteria.
-
-- Call: `Skill(start:specify-requirements)`
-- Focus: WHAT needs to be built and WHY it matters
-- Scope: Business requirements only (defer technical details to SDD)
-- Deliverable: Complete Product Requirements
-
-**After PRD completion:**
-- Call: `AskUserQuestion` - Continue to SDD (recommended) or Finalize PRD
-
-### Phase 3: Solution Design (SDD)
-
-Context: Working on solution design, designing architecture, defining interfaces.
-
-- Call: `Skill(start:specify-solution)`
-- Focus: HOW the solution will be built
-- Scope: Design decisions and interfaces (defer code to implementation)
-- Deliverable: Complete Solution Design
-
-**Constitution Alignment (if CONSTITUTION.md exists):**
-- Call: `Skill(start:validate) constitution`
-- Verify proposed architecture aligns with constitutional rules
-- Ensure ADRs are consistent with L1/L2 constitution rules
-- Report any potential conflicts for resolution before finalizing SDD
-
-**After SDD completion:**
-- Call: `AskUserQuestion` - Continue to PLAN (recommended) or Finalize SDD
-
-### Phase 4: Implementation Plan (PLAN)
-
-Context: Working on implementation plan, planning phases, sequencing tasks.
-
-- Call: `Skill(start:specify-plan)`
-- Focus: Task sequencing and dependencies
-- Scope: What and in what order (defer duration estimates)
-- Deliverable: Complete Implementation Plan
-
-**After PLAN completion:**
-- Call: `AskUserQuestion` - Finalize Specification (recommended) or Revisit PLAN
-
-### Phase 5: Finalization
-
-Context: Reviewing all documents, assessing implementation readiness.
-
-- Call: `Skill(start:specify-meta)`
-- Review documents and assess context drift between them
-- Generate readiness and confidence assessment
-
-**Git Finalization (if user requested git integration):**
-- Offer to commit specification with conventional message (`docs(spec-[id]): ...`)
-- Offer to create spec review PR via `gh pr create`
-- Handle push and PR creation
-
-**Present summary:**
-```
-✅ Specification Complete
-
-Spec: [NNN]-[name]
-Documents: PRD ✓ | SDD ✓ | PLAN ✓
-
-Readiness: [HIGH/MEDIUM/LOW]
-Confidence: [N]%
-
-Next Steps:
-1. /start:validate [ID] - Validate specification quality
-2. /start:implement [ID] - Begin implementation
-```
-
-## Documentation Structure
-
-```
-docs/specs/[NNN]-[name]/
-├── README.md                 # Decisions and progress
-├── product-requirements.md   # What and why
-├── solution-design.md        # How
-└── implementation-plan.md    # Execution sequence
-```
-
-## Decision Logging
-
-When user skips a phase or makes a non-default choice, log it in README.md:
-
-```markdown
-## Decisions Log
-
-| Date | Decision | Rationale |
-|------|----------|-----------|
-| [date] | PRD skipped | User chose to start directly with SDD |
-| [date] | Started from PLAN | Requirements and design already documented elsewhere |
-```
-
-## Important Notes
-
-- **Git integration is optional** - Offer branch creation (`spec/[id]-[name]`) and PR workflow when user requests it
-- **User confirmation required** - Wait for user approval between each document phase
-- **Log all decisions** - Record skipped phases and non-default choices in README.md
+specify(target) {
+  initialize(target) |> selectMode |> research |> writePRD |> writeSDD |> writePLAN |> finalize
+}

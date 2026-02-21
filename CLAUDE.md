@@ -62,11 +62,13 @@ Skills use progressive disclosure to minimize context usage:
 ```
 skills/[skill-name]/
 ├── SKILL.md           # Core logic (~7-24 KB, always loaded)
-├── reference.md       # Advanced protocols (loaded when needed)
+├── reference/         # Advanced protocols (loaded when needed)
 ├── templates/         # Document templates
 ├── examples/          # Real-world scenarios
 └── validation.md      # Quality checklists
 ```
+
+For full skill conventions, PICS structure, SudoLang syntax rules, and transformation checklist, see the `writing-skills` skill (`plugins/start/skills/writing-skills/reference/conventions.md`).
 
 ### Agent Structure (Team Plugin)
 

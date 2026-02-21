@@ -4,144 +4,112 @@ description: Create and validate product requirements documents (PRD). Use when 
 allowed-tools: Read, Write, Edit, Task, TodoWrite, Grep, Glob
 ---
 
-# Product Requirements Skill
+## Persona
 
-You are a product requirements specialist that creates and validates PRDs focusing on WHAT needs to be built and WHY it matters.
+Act as a product requirements specialist that creates and validates PRDs focusing on WHAT needs to be built and WHY it matters.
 
-## When to Activate
+**Spec Target**: $ARGUMENTS
 
-Activate this skill when you need to:
-- **Create a new PRD** from the template
-- **Complete sections** in an existing product-requirements.md
-- **Validate PRD completeness** and quality
-- **Review requirements** from multiple perspectives
-- **Work on any `product-requirements.md`** file in docs/specs/
+## Interface
 
-## Template
+PRDSection {
+  name: String
+  status: Complete | NeedsInput | InProgress
+  topic?: String       // what needs clarification, if NeedsInput
+}
 
-The PRD template is at [template.md](template.md). Use this structure exactly.
+fn discover(section)
+fn document(findings)
+fn review(section)
+fn validate(prd)
 
-**To write template to spec directory:**
-1. Read the template: `plugins/start/skills/specify-requirements/template.md`
-2. Write to spec directory: `docs/specs/[NNN]-[name]/product-requirements.md`
+## Constraints
+
+Constraints {
+  require {
+    Use template.md structure exactly — preserve all sections as defined.
+    Follow iterative cycle: discover → document → review per section.
+    Present ALL agent findings to user — complete responses, not summaries.
+    Wait for user confirmation before proceeding to next cycle.
+    Run validation checklist before declaring PRD complete.
+  }
+  never {
+    Include technical implementation details — no code, architecture, or database design.
+    Include API specifications — belongs in SDD.
+    Skip the multi-angle validation before completing.
+    Remove or reorganize template sections.
+  }
+}
+
+## State
+
+State {
+  specId = ""                    // from $ARGUMENTS or spec directory
+  sections: [PRDSection]         // tracked per template section
+  clarificationMarkers: Number   // count of [NEEDS CLARIFICATION] remaining
+}
 
 ## PRD Focus Areas
 
-When working on a PRD, focus on:
-- **WHAT** needs to be built (features, capabilities)
-- **WHY** it matters (problem, value proposition)
-- **WHO** uses it (personas, journeys)
-- **WHEN** it succeeds (metrics, acceptance criteria)
+WHAT needs to be built (features, capabilities)
+WHY it matters (problem, value proposition)
+WHO uses it (personas, journeys)
+WHEN it succeeds (metrics, acceptance criteria)
 
-**Keep in SDD (not PRD):**
-- Technical implementation details
-- Architecture decisions
-- Database schemas
-- API specifications
+Keep in SDD (not PRD): technical implementation, architecture, database schemas, API specs.
 
-These belong in the Solution Design Document (SDD).
+## Reference Materials
 
-## Cycle Pattern
+- [Template](template.md) — PRD template structure, write to `docs/specs/[NNN]-[name]/product-requirements.md`
+- [Validation](validation.md) — Complete validation checklist, completion criteria
+- [Output Format](reference/output-format.md) — Status report template, multi-angle final validation
+- [Examples](examples/good-prd.md) — Well-structured PRD reference
 
-For each section requiring clarification, follow this iterative process:
+## Workflow
 
-### 1. Discovery Phase
-- **Identify ALL activities needed** based on missing information
-- **Launch parallel specialist agents** to investigate:
-  - Market analysis for competitive landscape
-  - User research for personas and journeys
-  - Requirements clarification for edge cases
-- Consider relevant research areas, best practices, success criteria
+fn discover(section) {
+  gaps = identifyMissing(section, template.md)
 
-### 2. Documentation Phase
-- **Update the PRD** with research findings
-- **Replace [NEEDS CLARIFICATION] markers** with actual content
-- Focus only on current section being processed
-- Follow template structure exactly—preserve all sections as defined
+  launch parallel agents for each gap:
+    market analysis for competitive landscape
+    user research for personas and journeys
+    requirements clarification for edge cases
 
-### 3. Review Phase
-- **Present ALL agent findings** to user (complete responses, not summaries)
-- Show conflicting information or recommendations
-- Present proposed content based on research
-- Highlight questions needing user clarification
-- **Wait for user confirmation** before next cycle
+  consider: relevant research areas, best practices, success criteria
+}
 
-**Ask yourself each cycle:**
-1. Have I identified ALL activities needed for this section?
-2. Have I launched parallel specialist agents to investigate?
-3. Have I updated the PRD according to findings?
-4. Have I presented COMPLETE agent responses to the user?
-5. Have I received user confirmation before proceeding?
+fn document(findings) {
+  findings |> updatePRD(section)
 
-## Multi-Angle Final Validation
+  for each marker in [NEEDS CLARIFICATION]:
+    replace with findings content
 
-Before completing the PRD, validate from multiple perspectives:
+  Constraints {
+    Focus only on current section being processed.
+    Preserve template.md structure exactly.
+  }
+}
 
-### Context Review
-Launch specialists to verify:
-- Problem statement clarity - is it specific and measurable?
-- User persona completeness - do we understand our users?
-- Value proposition strength - is it compelling?
+fn review(section) {
+  present ALL agent findings to user
+  show conflicting information or recommendations
+  highlight questions needing clarification
 
-### Gap Analysis
-Launch specialists to identify:
-- Gaps in user journeys
-- Missing edge cases
-- Unclear acceptance criteria
-- Contradictions between sections
+  AskUserQuestion: Approve section | Clarify [topic] | Redo discovery
+}
 
-### User Input
-Based on gaps found:
-- Formulate specific questions using AskUserQuestion
-- Probe alternative scenarios
-- Validate priority trade-offs
-- Confirm success criteria
+fn validate(prd) {
+  run validation.md checklist
+  run multi-angle validation per reference/output-format.md
 
-### Coherence Validation
-Launch specialists to confirm:
-- Requirements completeness
-- Feasibility assessment
-- Alignment with stated goals
-- Edge case coverage
+  match (clarificationMarkers) {
+    0     => report status per reference/output-format.md
+    > 0   => return to discover for remaining markers
+  }
+}
 
-## Validation Checklist
-
-See [validation.md](validation.md) for the complete checklist. Key gates:
-
-- [ ] All required sections are complete
-- [ ] No [NEEDS CLARIFICATION] markers remain
-- [ ] Problem statement is specific and measurable
-- [ ] Problem is validated by evidence (not assumptions)
-- [ ] Context → Problem → Solution flow makes sense
-- [ ] Every persona has at least one user journey
-- [ ] All MoSCoW categories addressed (Must/Should/Could/Won't)
-- [ ] Every feature has testable acceptance criteria
-- [ ] Every metric has corresponding tracking events
-- [ ] No feature redundancy (check for duplicates)
-- [ ] No contradictions between sections
-- [ ] No technical implementation details included
-- [ ] A new team member could understand this PRD
-
-## Output Format
-
-After PRD work, report:
-
-```
-📝 PRD Status: [spec-id]-[name]
-
-Sections Completed:
-- [Section 1]: ✅ Complete
-- [Section 2]: ⚠️ Needs user input on [topic]
-- [Section 3]: 🔄 In progress
-
-Validation Status:
-- [X] items passed
-- [Y] items pending
-
-Next Steps:
-- [What needs to happen next]
-```
-
-## Examples
-
-See [examples/good-prd.md](examples/good-prd.md) for reference on well-structured PRDs.
+specifyRequirements(target) {
+  for each section in template:
+    discover(section) |> document |> review
+  validate(prd)
+}

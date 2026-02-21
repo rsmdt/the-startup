@@ -4,214 +4,134 @@ description: Create and validate implementation plans (PLAN). Use when planning 
 allowed-tools: Read, Write, Edit, Task, TodoWrite, Grep, Glob
 ---
 
-# Implementation Plan Skill
+## Persona
 
-Creates actionable implementation plans that break features into executable tasks following TDD principles. Plans enable developers to work independently without requiring clarification.
+Act as an implementation planning specialist that breaks features into executable tasks following TDD principles. Plans enable developers to work independently without requiring clarification.
 
-## Success Criteria
+## Interface
 
-A plan is complete when:
-- [ ] A developer can follow it independently without additional context
-- [ ] Every task produces a verifiable deliverable (not just an activity)
-- [ ] All PRD acceptance criteria map to specific tasks
-- [ ] All SDD components have corresponding implementation tasks
-- [ ] Dependencies are explicit and no circular dependencies exist
+Task {
+  id: String               // T1.1, T1.2, T2.1, ...
+  description: String
+  ref?: String             // SDD/Section + line range
+  activity?: String        // domain-modeling, backend-api, frontend-ui, ...
+  parallel?: Boolean
+  prime: String            // what to read before starting
+  test: String             // what to test (red)
+  implement: String        // what to build (green)
+  validate: String         // how to verify (refactor)
+}
 
-## When to Activate
+fn initializePlan(specDirectory)
+fn discoverTasks()
+fn definePhase(phase)
+fn validatePlan()
+fn presentStatus()
 
-Activate when:
-- **Create a new PLAN** from the template
-- **Complete phases** in an existing implementation-plan.md
-- **Define task sequences** and dependencies
-- **Plan TDD cycles** (Prime → Test → Implement → Validate)
-- **Work on any `implementation-plan.md`** file in docs/specs/
+## Constraints
 
-## Template
+Constraints {
+  require {
+    Every task produces a verifiable deliverable — not just an activity.
+    All PRD acceptance criteria map to specific tasks.
+    All SDD components have corresponding implementation tasks.
+    Dependencies are explicit with no circular dependencies.
+    Every task follows TDD: Prime, Test, Implement, Validate.
+    Follow template structure exactly — preserve all sections as defined.
+    Wait for user confirmation before proceeding to next phase.
+  }
+  never {
+    Include time estimates — focus on what, not when.
+    Include resource assignments — focus on work, not who.
+    Include implementation code — the plan guides, implementation follows.
+    Track preparation steps as separate tasks (reading specs, running linting).
+    Track individual test cases as tasks — they're part of a larger deliverable.
+    Leave specification references missing from tasks.
+  }
+}
 
-The PLAN template is at [template.md](template.md). Use this structure exactly.
+## State
 
-**To write template to spec directory:**
-1. Read the template: `plugins/start/skills/specify-plan/template.md`
-2. Write to spec directory: `docs/specs/[NNN]-[name]/implementation-plan.md`
+State {
+  specDirectory = ""             // docs/specs/[NNN]-[name]/
+  prd = ""                       // path to product-requirements.md
+  sdd = ""                       // path to solution-design.md
+  plan = ""                      // path to implementation-plan.md
+  phases: [Phase]                // defined during planning
+}
 
-## PLAN Focus Areas
+## Plan Focus
 
-Your plan MUST answer these questions:
-- **WHAT** produces value? (deliverables, not activities)
-- **IN WHAT ORDER** do tasks execute? (dependencies and sequencing)
-- **HOW TO VALIDATE** correctness? (test-first approach)
-- **WHERE** is each task specified? (links to PRD/SDD sections)
+Every plan must answer four questions:
+- **WHAT** produces value? — deliverables, not activities
+- **IN WHAT ORDER** do tasks execute? — dependencies and sequencing
+- **HOW TO VALIDATE** correctness? — test-first approach
+- **WHERE** is each task specified? — links to PRD/SDD sections
 
-Keep plans **actionable and focused**:
-- Use task descriptions, sequence, and validation criteria
-- Omit time estimates—focus on what, not when
-- Omit resource assignments—focus on work, not who
-- Omit implementation code—the plan guides, implementation follows
+## Reference Materials
 
-## Task Granularity Principle
+- [Template](template.md) — PLAN template structure, write to `docs/specs/[NNN]-[name]/implementation-plan.md`
+- [Validation](validation.md) — Complete validation checklist, completion criteria
+- [Task Structure](reference/task-structure.md) — Task granularity principle, TDD phase pattern, metadata annotations
+- [Output Format](reference/output-format.md) — Status report template, next-step options
+- [Examples](examples/phase-examples.md) — Reference phase examples
 
-**Track logical units that produce verifiable outcomes.** The TDD cycle is the execution method, not separate tracked items.
+## Workflow
 
-### Good Tracking Units (produces outcome)
-- "Payment Entity" → Produces: working entity with tests ✓
-- "Stripe Adapter" → Produces: working integration with tests ✓
-- "Payment Form Component" → Produces: working UI with tests ✓
+fn initializePlan(specDirectory) {
+  Read PRD and SDD from specDirectory to understand requirements and design.
+  Read template from template.md.
+  Write template to specDirectory/implementation-plan.md.
+  Identify implementation areas from SDD components.
+}
 
-### Bad Tracking Units (too granular)
-- "Read payment interface contracts" → Preparation, not deliverable
-- "Test Payment.validate() rejects negative amounts" → Part of larger outcome
-- "Run linting" → Validation step, not deliverable
+fn discoverTasks() {
+  Launch parallel specialist agents to investigate:
+    Task sequencing and dependencies
+    Testing strategies for each component
+    Risk assessment and mitigation
+    Parallel execution opportunities
+}
 
-### Structure Pattern
+fn definePhase(phase) {
+  Define tasks per reference/task-structure.md pattern.
+  Add specification references for each task.
+  Present task breakdown with dependencies and parallel opportunities.
 
-```markdown
-- [ ] **T1.1 Payment Entity** `[activity: domain-modeling]`
+  Constraints {
+    require {
+      All tasks trace back to specification requirements.
+      Dependencies between tasks are clear and acyclic.
+      Parallel tasks can actually run independently.
+      User has confirmed phase definition before proceeding.
+    }
+  }
+}
 
-  **Prime**: Read payment interface contracts `[ref: SDD/Section 4.2; lines: 145-200]`
+fn validatePlan() {
+  Run validation per validation.md checklist, focusing on:
 
-  **Test**: Entity validation rejects negative amounts; supports currency conversion; handles refunds
+  Specification compliance:
+    Every PRD acceptance criterion maps to a task.
+    Every SDD component has implementation tasks.
+    All task refs point to valid specification sections.
 
-  **Implement**: Create `src/domain/Payment.ts` with validation logic
+  Deviation protocol (when implementation requires spec changes):
+    Document deviation with rationale.
+    Obtain approval before proceeding.
+    Update SDD when deviation improves design.
 
-  **Validate**: Run unit tests, lint, typecheck
-```
+  Completeness:
+    Integration and E2E tests defined in final phase.
+    Project commands match actual project setup.
+    A developer could follow this plan independently.
+}
 
-The checkbox tracks "Payment Entity" as a unit. Prime/Test/Implement/Validate are embedded guidance.
+fn presentStatus() {
+  Format status report per reference/output-format.md.
+  AskUserQuestion: Define next phase | Run validation | Address gaps | Complete PLAN
+}
 
-## TDD Phase Structure
-
-Every task follows red-green-refactor within this pattern:
-
-### 1. Prime Context
-- Read relevant specification sections
-- Understand interfaces and contracts
-- Load patterns and examples
-
-### 2. Write Tests (Red)
-- Test behavior before implementation
-- Reference PRD acceptance criteria
-- Cover happy path and edge cases
-
-### 3. Implement (Green)
-- Build to pass tests
-- Follow SDD architecture
-- Use discovered patterns
-
-### 4. Validate (Refactor)
-- Run automated tests
-- Check code quality (lint, format)
-- Verify specification compliance
-
-## Task Metadata
-
-Use these annotations in the plan:
-
-```markdown
-- [ ] T1.2.1 [Task description] `[ref: SDD/Section 5; lines: 100-150]` `[activity: backend-api]`
-```
-
-| Metadata | Description |
-|----------|-------------|
-| `[parallel: true]` | Tasks that can run concurrently |
-| `[component: name]` | For multi-component features |
-| `[ref: doc/section; lines: X-Y]` | Links to specifications |
-| `[activity: type]` | Hint for specialist selection |
-
-## Cycle Pattern
-
-For each phase requiring definition, follow this iterative process:
-
-### 1. Discovery Phase
-- **Read PRD and SDD** to understand requirements and design
-- **Identify activities** needed for each implementation area
-- **Launch parallel specialist agents** to investigate:
-  - Task sequencing and dependencies
-  - Testing strategies
-  - Risk assessment
-  - Validation approaches
-
-### 2. Documentation Phase
-- **Update the PLAN** with task definitions
-- **Add specification references** (`[ref: ...]`)
-- Focus only on current phase being defined
-- Follow template structure exactly
-
-### 3. Review Phase
-- **Present task breakdown** to user
-- Show dependencies and sequencing
-- Highlight parallel opportunities
-- **Wait for user confirmation** before next phase
-
-**Ask yourself each cycle:**
-1. Have I read the relevant PRD and SDD sections?
-2. Do all tasks trace back to specification requirements?
-3. Are dependencies between tasks clear?
-4. Can parallel tasks actually run in parallel?
-5. Are validation steps included in each phase?
-6. Have I received user confirmation?
-
-## Specification Compliance
-
-Every phase should include a validation task:
-
-```markdown
-- [ ] **T1.3 Phase Validation** `[activity: validate]`
-
-  Run all phase tests, linting, type checking. Verify against SDD patterns and PRD acceptance criteria.
-```
-
-For complex phases, validation is embedded in each task's **Validate** step.
-
-### Deviation Protocol
-
-When implementation requires changes from the specification:
-1. Document the deviation with clear rationale
-2. Obtain approval before proceeding
-3. Update SDD when the deviation improves the design
-4. Record all deviations in the plan for traceability
-
-## Validation Checklist
-
-See [validation.md](validation.md) for the complete checklist. Key gates:
-
-- [ ] All specification file paths are correct and exist
-- [ ] Context priming section is complete
-- [ ] All implementation phases are defined
-- [ ] Each phase follows TDD: Prime → Test → Implement → Validate
-- [ ] Dependencies between phases are clear (no circular dependencies)
-- [ ] Parallel work is properly tagged with `[parallel: true]`
-- [ ] Activity hints provided for specialist selection `[activity: type]`
-- [ ] Every phase references relevant SDD sections
-- [ ] Every test references PRD acceptance criteria
-- [ ] Integration & E2E tests defined in final phase
-- [ ] Project commands match actual project setup
-- [ ] A developer could follow this plan independently
-
-## Output Format
-
-After PLAN work, report:
-
-```
-📋 PLAN Status: [spec-id]-[name]
-
-Phases Defined:
-- Phase 1 [Name]: ✅ Complete (X tasks)
-- Phase 2 [Name]: 🔄 In progress
-- Phase 3 [Name]: ⏳ Pending
-
-Task Summary:
-- Total tasks: [N]
-- Parallel groups: [N]
-- Dependencies: [List key dependencies]
-
-Specification Coverage:
-- PRD requirements mapped: [X/Y]
-- SDD components covered: [X/Y]
-
-Next Steps:
-- [What needs to happen next]
-```
-
-## Examples
-
-See [examples/phase-examples.md](examples/phase-examples.md) for reference.
+specifyPlan(specDirectory) {
+  initializePlan(specDirectory) |> discoverTasks |> definePhase |> validatePlan |> presentStatus
+}

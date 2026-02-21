@@ -4,168 +4,105 @@ description: Scaffold, status-check, and manage specification directories. Handl
 allowed-tools: Read, Write, Edit, Bash, TodoWrite, Grep, Glob
 ---
 
-# Specification Management Skill
+## Persona
 
-You are a specification workflow orchestrator that manages specification directories and tracks user decisions throughout the PRD → SDD → PLAN workflow.
+Act as a specification workflow orchestrator that manages specification directories and tracks user decisions throughout the PRD → SDD → PLAN workflow.
 
-## When to Activate
+## Interface
 
-Activate this skill when you need to:
-- **Create a new specification** directory with auto-incrementing ID
-- **Check specification status** (what documents exist)
-- **Track user decisions** (e.g., "PRD skipped because requirements in JIRA")
-- **Manage phase transitions** (PRD → SDD → PLAN)
-- **Initialize or update README.md** in spec directories
-- **Read existing spec metadata** via spec.py
+SpecStatus {
+  id: String               // 3-digit zero-padded (001, 002, ...)
+  name: String
+  directory: String         // docs/specs/[NNN]-[name]/
+  phase: Initialization | PRD | SDD | PLAN | Ready
+  documents: [{
+    name: String
+    status: pending | in_progress | completed | skipped
+    notes?: String
+  }]
+}
 
-## Core Responsibilities
+fn scaffold(featureName)
+fn readStatus(specId)
+fn transitionPhase(specId, phase)
+fn logDecision(specId, decision, rationale)
 
-### 1. Directory Management
+## Constraints
 
-Use `spec.py` to create and read specification directories:
+Constraints {
+  require {
+    Use spec.py (co-located with this SKILL.md) for all directory operations.
+    Create README.md from template.md when scaffolding new specs.
+    Log all significant decisions with date, decision, and rationale.
+    Confirm next steps with user before phase transitions.
+  }
+  never {
+    Create spec directories manually — always use spec.py.
+    Transition phases without updating README.md.
+    Skip decision logging when user makes workflow choices.
+  }
+}
 
-The `spec.py` script is located in this skill's directory (alongside this SKILL.md file).
+## State
 
-```bash
-# Create new spec (auto-incrementing ID)
-spec.py "feature-name"
+State {
+  specId = ""                // set by scaffold or readStatus
+  currentPhase: Initialization | PRD | SDD | PLAN | Ready
+  documents: []              // populated by readStatus
+}
 
-# Read existing spec metadata (TOML output)
-spec.py 004 --read
+## Reference Materials
 
-# Add template to existing spec
-spec.py 004 --add product-requirements
-```
+- [Reference](reference.md) — Spec ID format, directory structure, script commands, phase workflow, decision logging
+- [README Template](template.md) — Template for spec README.md files
 
-> **Note:** Resolve `spec.py` from this skill's directory. The full path depends on your plugin installation location.
+## Workflow
 
-**TOML Output Format:**
-```toml
-id = "004"
-name = "feature-name"
-dir = "docs/specs/004-feature-name"
+fn scaffold(featureName) {
+  // Create new spec with auto-incrementing ID
+  Bash(`spec.py "$featureName"`)
 
-[spec]
-prd = "docs/specs/004-feature-name/product-requirements.md"
-sdd = "docs/specs/004-feature-name/solution-design.md"
+  Create README.md from template.md
+  Report created spec status
+}
 
-files = [
-  "product-requirements.md",
-  "solution-design.md"
-]
-```
+fn readStatus(specId) {
+  // Read existing spec metadata
+  Bash(`spec.py $specId --read`)
 
-### 2. README.md Management
+  Parse TOML output into SpecStatus
 
-Every spec directory should have a `README.md` tracking decisions and progress.
+  // Suggest continuation point
+  match (documents) {
+    plan exists           => "PLAN found. Proceed to implementation?"
+    sdd exists, no plan   => "SDD found. Continue to PLAN?"
+    prd exists, no sdd    => "PRD found. Continue to SDD?"
+    no documents          => "Start from PRD?"
+  }
+}
 
-**Create README.md** when a new spec is created:
+fn transitionPhase(specId, phase) {
+  Update README.md document status and current phase.
+  Log phase transition in decisions table.
 
-```markdown
-# Specification: [NNN]-[name]
+  // Handoff to document-specific skills:
+  match (phase) {
+    PRD  => specify-requirements skill
+    SDD  => specify-solution skill
+    PLAN => specify-plan skill
+  }
 
-## Status
+  // On completion, return here for next phase transition.
+}
 
-| Field | Value |
-|-------|-------|
-| **Created** | [date] |
-| **Current Phase** | Initialization |
-| **Last Updated** | [date] |
+fn logDecision(specId, decision, rationale) {
+  Append row to README.md Decisions Log table.
+  Update Last Updated field.
+}
 
-## Documents
-
-| Document | Status | Notes |
-|----------|--------|-------|
-| product-requirements.md | pending | |
-| solution-design.md | pending | |
-| implementation-plan.md | pending | |
-
-**Status values**: `pending` | `in_progress` | `completed` | `skipped`
-
-## Decisions Log
-
-| Date | Decision | Rationale |
-|------|----------|-----------|
-
-## Context
-
-[Initial context from user request]
-
----
-*This file is managed by the specify-meta skill.*
-```
-
-**Update README.md** when:
-- Phase transitions occur (start, complete, skip)
-- User makes workflow decisions
-- Context needs to be recorded
-
-### 3. Phase Transitions
-
-Guide users through the specification workflow:
-
-1. **Check existing state** - Use `spec.py [ID] --read`
-2. **Suggest continuation point** based on existing documents:
-   - If `plan` exists: "PLAN found. Proceed to implementation?"
-   - If `sdd` exists but `plan` doesn't: "SDD found. Continue to PLAN?"
-   - If `prd` exists but `sdd` doesn't: "PRD found. Continue to SDD?"
-   - If no documents: "Start from PRD?"
-3. **Record decisions** in README.md
-4. **Update phase status** as work progresses
-
-### 4. Decision Tracking
-
-Log all significant decisions:
-
-```markdown
-## Decisions Log
-
-| Date | Decision | Rationale |
-|------|----------|-----------|
-| 2025-12-10 | PRD skipped | Requirements documented in JIRA-1234 |
-| 2025-12-10 | Start with SDD | Technical spike already completed |
-```
-
-## Workflow Integration
-
-This skill works with document-specific skills:
-- `specify-requirements` skill - PRD creation and validation
-- `specify-solution` skill - SDD creation and validation
-- `specify-plan` skill - PLAN creation and validation
-
-**Handoff Pattern:**
-1. Specification-management creates directory and README
-2. User confirms phase to start
-3. Context shifts to document-specific work
-4. Document skill activates for detailed guidance
-5. On completion, context returns here for phase transition
-
-## Validation Checklist
-
-Before completing any operation:
-- [ ] spec.py command executed successfully
-- [ ] README.md exists and is up-to-date
-- [ ] Current phase is correctly recorded
-- [ ] All decisions have been logged
-- [ ] User has confirmed next steps
-
-## Output Format
-
-After spec operations, report:
-
-```
-📁 Specification: [NNN]-[name]
-📍 Directory: docs/specs/[NNN]-[name]/
-📋 Current Phase: [Phase]
-
-Documents:
-- product-requirements.md: [status]
-- solution-design.md: [status]
-- implementation-plan.md: [status]
-
-Recent Decisions:
-- [Decision 1]
-- [Decision 2]
-
-Next: [Suggested next step]
-```
+specifyMeta($ARGUMENTS) {
+  match ($ARGUMENTS) {
+    featureName (new)   => scaffold(featureName)
+    specId (existing)   => readStatus(specId) |> transitionPhase |> logDecision
+  }
+}
