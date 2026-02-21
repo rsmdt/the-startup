@@ -2,6 +2,14 @@
 
 Advanced patterns, rule types, and examples for constitution authoring.
 
+## Level System (L1/L2/L3)
+
+| Level | Name | Blocking | Autofix | Use Case |
+|-------|------|----------|---------|----------|
+| **L1** | Must | Yes | AI auto-corrects | Critical rules — security, correctness, architecture |
+| **L2** | Should | Yes | No (needs human judgment) | Important rules requiring manual attention |
+| **L3** | May | No | No | Advisory/optional — style preferences, suggestions |
+
 ## Rule Types
 
 ### Pattern Rules
