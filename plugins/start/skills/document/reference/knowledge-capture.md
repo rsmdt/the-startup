@@ -350,27 +350,6 @@ Documentation skill captures discovered patterns:
 - Deviations discovered → Update documentation
 - New patterns emerge → Document for reuse
 
-## Automation Support
-
-### Pre-documentation Checks
-Automate the search process:
-```bash
-# Check if topic exists
-./scripts/check-doc-exists.sh "authentication"
-
-# List related docs
-./scripts/find-related-docs.sh "payment"
-```
-
-### Post-documentation Validation
-```bash
-# Verify no duplicates
-./scripts/validate-docs.sh
-
-# Check cross-references
-./scripts/check-links.sh
-```
-
 ## Summary
 
 The documentation skill ensures:

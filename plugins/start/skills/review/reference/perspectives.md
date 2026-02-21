@@ -20,6 +20,6 @@ Perspective definitions and activation rules for the review skill.
 |-------------|--------|-----------------|
 | 🧵 **Concurrency** | Find race conditions and async issues | Code uses async/await, threading, shared state, parallel operations |
 | 📦 **Dependencies** | Assess supply chain security | Changes to package.json, requirements.txt, go.mod, Cargo.toml, etc. |
-| 🔄 **Compatibility** | Detect breaking changes | Modifications to public APIs, database schemas, config formats |
+| 🔄 **Compatibility** | Detect breaking changes | Modifications to public APIs, database schemas, config formats, migration files |
 | ♿ **Accessibility** | Ensure inclusive design | Frontend/UI component changes |
 | 📜 **Constitution** | Check project rules compliance | Project has CONSTITUTION.md |

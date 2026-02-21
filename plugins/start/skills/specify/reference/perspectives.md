@@ -13,6 +13,7 @@ Perspective definitions and focus area mapping for specification research.
 | 🔐 **Security** | Identify protection needs | Authentication, authorization, data protection, compliance |
 | ⚡ **Performance** | Define capacity targets | Load expectations, latency targets, scalability requirements |
 | 🔌 **Integration** | Map external boundaries | APIs, third-party services, data flows, contracts |
+| 🎨 **UX** | Define user experience requirements | User flows, interaction patterns, accessibility requirements, error and empty states, responsive behavior |
 
 ## Perspective-Specific Focus
 
@@ -23,6 +24,7 @@ Perspective definitions and focus area mapping for specification research.
 | 🔐 Security | Assess auth needs, data sensitivity, compliance requirements |
 | ⚡ Performance | Define SLOs, identify bottleneck risks, set capacity targets |
 | 🔌 Integration | Map external APIs, document contracts, identify data flows |
+| 🎨 UX | Define user flows, identify interaction patterns, specify accessibility requirements (conditional — skip if no UI) |
 
 ## Research Synthesis
 

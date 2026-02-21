@@ -48,6 +48,9 @@ $ARGUMENTS[0]           // First argument
 ${CLAUDE_SESSION_ID}    // Current session ID
 !`shell command`        // Execute command, insert output (preprocessing)
 
+### Security Note
+Never combine `!`shell command`` preprocessing with `$ARGUMENTS` — this executes user input as a shell command at skill load time. Use `Bash()` in the Workflow section instead, where the AI mediates the execution.
+
 ---
 
 ## Skill Body: PICS + Workflow

@@ -8,7 +8,9 @@ Perspective definitions, activation rules, and detailed focus areas for the vali
 
 ### ✅ Completeness
 
-**Intent**: Ensure nothing is missing from specifications or implementations.
+**Intent**: Ensure nothing is missing from specifications or implementations. *(Structural presence: do required sections, markers, and artifacts exist?)*
+
+**Does NOT cover**: Whether content is deep enough (acceptance criteria specificity, edge case enumeration) — that's Coverage.
 
 **What to validate**:
 - All required sections exist and are non-empty
@@ -35,7 +37,9 @@ Perspective definitions, activation rules, and detailed focus areas for the vali
 
 ### 📍 Alignment
 
-**Intent**: Verify that documented patterns actually exist in code.
+**Intent**: Verify that documented patterns actually exist in code. *(Snapshot match: is the current implementation consistent with documented contracts?)*
+
+**Does NOT cover**: Whether implementation has diverged from specification requirements over time — that's Drift.
 
 **What to validate**:
 - Documented architectural patterns present in implementation
@@ -48,7 +52,9 @@ Perspective definitions, activation rules, and detailed focus areas for the vali
 
 ### 📐 Coverage
 
-**Intent**: Assess specification depth and completeness of coverage.
+**Intent**: Assess specification depth and completeness of coverage. *(Content depth: are criteria specific, edge cases enumerated, targets measurable?)*
+
+**Does NOT cover**: Whether required sections and artifacts structurally exist — that's Completeness.
 
 **What to validate**:
 - All functional requirements have acceptance criteria
@@ -62,7 +68,9 @@ Perspective definitions, activation rules, and detailed focus areas for the vali
 
 ### 📊 Drift
 
-**Intent**: Detect divergence between specifications and implementation.
+**Intent**: Detect divergence between specifications and implementation. *(Delta analysis: has implementation diverged from spec requirements — scope creep, missing features, contradictions?)*
+
+**Does NOT cover**: Whether current code matches documented interfaces and schemas — that's Alignment.
 
 **What to validate**:
 - Scope creep — implementation adds features not in spec

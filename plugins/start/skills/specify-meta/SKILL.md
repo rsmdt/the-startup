@@ -53,7 +53,8 @@ State {
 
 ## Reference Materials
 
-- [Reference](reference.md) — Spec ID format, directory structure, script commands, phase workflow, decision logging
+See `reference/` directory for detailed methodology:
+- [Spec Management](reference/spec-management.md) — Spec ID format, directory structure, script commands, phase workflow, decision logging
 - [README Template](template.md) — Template for spec README.md files
 
 ## Workflow
@@ -68,7 +69,7 @@ fn scaffold(featureName) {
 
 fn readStatus(specId) {
   // Read existing spec metadata
-  Bash(`spec.py $specId --read`)
+  Bash(`spec.py "$specId" --read`)
 
   Parse TOML output into SpecStatus
 

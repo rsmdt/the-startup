@@ -56,10 +56,11 @@ State {
 
 ## Reference Materials
 
+See `reference/` directory for detailed methodology:
 - [Perspectives](reference/perspectives.md) — Discovery perspectives, focus area mapping, framework interpretation
 - [Rule Patterns](reference/rule-patterns.md) — Level system, rule types, scope patterns, common rules
 - [Output Format](reference/output-format.md) — Proposed rules presentation, constitution summary
-- [Examples](reference/examples.md) — Create, create with focus, update scenarios
+- [Scenarios](reference/scenarios.md) — Create, create with focus, update scenarios
 - [Template](template.md) — Constitution template with `[NEEDS DISCOVERY]` markers
 - [Example Constitution](examples/CONSTITUTION.md) — Complete constitution example
 

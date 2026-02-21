@@ -13,6 +13,7 @@ Perspective definitions, activation rules, and focus area mapping.
 | 🔐 **Security** | Identify security model | Auth flows, authorization rules, data protection, input validation |
 | ⚡ **Performance** | Find optimization opportunities | Bottlenecks, caching patterns, query patterns, resource usage |
 | 🔌 **Integration** | Map external boundaries | External APIs, webhooks, data flows, third-party services |
+| 💾 **Data** | Map persistence layer | Data models, schemas, relationships, migrations, storage patterns, indexing strategies |
 
 ## Focus Area Mapping
 
@@ -23,6 +24,7 @@ Perspective definitions, activation rules, and focus area mapping.
 | "security" | 🔐 Security |
 | "performance" | ⚡ Performance |
 | "integration" or "api" | 🔌 Integration |
+| "data" or "schema" or "database" | 💾 Data |
 | Empty or broad request | All relevant perspectives |
 
 ## Perspective-Specific Agent Focus
@@ -34,3 +36,4 @@ Perspective definitions, activation rules, and focus area mapping.
 | 🔐 Security | Trace auth flows, document sensitive paths, identify protection mechanisms | `docs/research/` |
 | ⚡ Performance | Find hot paths, caching opportunities, expensive operations, resource usage | `docs/research/` |
 | 🔌 Integration | Map external APIs, trace data flows, document third-party service contracts | `docs/interfaces/` |
+| 💾 Data | Map data models, trace schema relationships, document storage patterns and migration history | `docs/patterns/` |

@@ -11,8 +11,9 @@ Perspective definitions, target mapping, and documentation standards.
 | 📖 **Code** | Make code self-explanatory | Functions, classes, interfaces, types with JSDoc/TSDoc/docstrings |
 | 🔌 **API** | Enable integration | Endpoints, request/response schemas, authentication, error codes, OpenAPI spec |
 | 📘 **README** | Enable quick start | Features, installation, configuration, usage examples, troubleshooting |
-| 📊 **Audit** | Identify gaps | Coverage metrics, stale docs, missing documentation, prioritized backlog |
+| 📊 **Audit** | Identify documentation gaps | Coverage metrics, stale docs, missing documentation, prioritized backlog *(meta-action: informs which other perspectives to run, not a parallel work stream)* |
 | 🗂️ **Capture** | Preserve discoveries | Business rules → `docs/domain/`, technical patterns → `docs/patterns/`, external integrations → `docs/interfaces/` |
+| 🏛️ **Architecture** | Document system design decisions | ADRs for key decisions, module/component overviews, data flow diagrams, integration topology, technology rationale |
 
 ## Target Mapping
 
@@ -23,6 +24,7 @@ Perspective definitions, target mapping, and documentation standards.
 | `readme` | 📘 README |
 | `audit` | 📊 Audit (all areas) |
 | `capture` or pattern/rule/interface discovery | 🗂️ Capture |
+| `architecture` or `adr` | 🏛️ Architecture |
 | `all` or empty | All applicable perspectives |
 
 ## Documentation Standards

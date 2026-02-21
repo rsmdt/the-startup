@@ -13,6 +13,7 @@ Perspective definitions for parallel hypothesis testing during debugging.
 | 🔗 **Dependencies** | Check external factors | External services, database queries, API calls, network issues |
 | 📊 **State** | Inspect runtime values | Variable values, object states, race conditions, timing issues |
 | 🌍 **Environment** | Compare contexts | Configuration, versions, deployment differences, env variables |
+| 🕐 **Recent Changes** | Identify regression source | Recent commits, git blame at failure site, dependency updates, recently modified config |
 
 ## Bug Type Investigation Patterns
 
@@ -32,3 +33,4 @@ Not all perspectives are needed for every bug. Select based on hypotheses from P
 - External service involved → 🔗 Dependencies
 - Intermittent or timing-related → 📊 State
 - Works locally but not in CI/prod → 🌍 Environment
+- Regression or "worked before" → 🕐 Recent Changes
