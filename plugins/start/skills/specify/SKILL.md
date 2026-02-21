@@ -62,7 +62,8 @@ State {
 
 See `reference/` directory for detailed methodology:
 - [Perspectives](reference/perspectives.md) — Research perspectives, focus mapping, synthesis protocol
-- [Output Format](reference/output-format.md) — Completion template, decision logging, documentation structure
+- [Output Format](reference/output-format.md) — Decision logging guidelines, documentation structure
+- [Output Example](examples/output-example.md) — Concrete example of expected output format
 
 ## Workflow
 

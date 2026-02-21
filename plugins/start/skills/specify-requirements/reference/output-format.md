@@ -1,28 +1,6 @@
 # Output Format Reference
 
-Status report and multi-angle validation for PRD work.
-
----
-
-## PRD Status Report
-
-Present after PRD work:
-
-```markdown
-📝 PRD Status: [spec-id]-[name]
-
-Sections Completed:
-- [Section 1]: ✅ Complete
-- [Section 2]: ⚠️ Needs user input on [topic]
-- [Section 3]: 🔄 In progress
-
-Validation Status:
-- [X] items passed
-- [Y] items pending
-
-Next Steps:
-- [What needs to happen next]
-```
+Guidelines for PRD output. See `examples/output-example.md` for a concrete rendered example.
 
 ---
 

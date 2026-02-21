@@ -73,7 +73,8 @@ Every plan must answer four questions:
 - [Template](template.md) — PLAN template structure, write to `docs/specs/[NNN]-[name]/implementation-plan.md`
 - [Validation](validation.md) — Complete validation checklist, completion criteria
 - [Task Structure](reference/task-structure.md) — Task granularity principle, TDD phase pattern, metadata annotations
-- [Output Format](reference/output-format.md) — Status report template, next-step options
+- [Output Format](reference/output-format.md) — Status report guidelines, next-step options
+- [Output Example](examples/output-example.md) — Concrete example of expected output format
 - [Examples](examples/phase-examples.md) — Reference phase examples
 
 ## Workflow

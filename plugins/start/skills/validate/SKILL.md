@@ -66,7 +66,8 @@ See `reference/` directory for detailed methodology:
 - [Ambiguity Detection](reference/ambiguity-detection.md) — Vague language patterns and scoring
 - [Drift Detection](reference/drift-detection.md) — Spec-implementation alignment checking
 - [Constitution Validation](reference/constitution-validation.md) — Governance rule enforcement
-- [Output Format](reference/output-format.md) — Report template, assessment levels, next-step options
+- [Output Format](reference/output-format.md) — Assessment level definitions, next-step options
+- [Output Example](examples/output-example.md) — Concrete example of expected output format
 
 ## Workflow
 

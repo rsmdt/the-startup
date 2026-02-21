@@ -72,7 +72,8 @@ See `reference/` and `examples/` for detailed methodology:
 - [Gold-Standard Conventions](reference/conventions.md) — Skill structure, PICS layout, SudoLang syntax, frontmatter spec, transformation checklist
 - [SudoLang Quick Reference](reference/sudolang-quick-reference.md) — Compact syntax reference for writing SudoLang blocks
 - [Common Failures](reference/common-failures.md) — Failure patterns, anti-patterns, symptoms and fixes
-- [Output Format](reference/output-format.md) — Report templates, audit checklist, issue categories
+- [Output Format](reference/output-format.md) — Audit checklist guidelines, issue categories
+- [Output Example](examples/output-example.md) — Concrete example of expected output format
 - [Testing with Subagents](reference/testing-with-subagents.md) — Pressure scenarios for discipline-enforcing skills
 - [Persuasion Principles](reference/persuasion-principles.md) — Language patterns for rule-enforcement skills
 - [Canonical Skill Example](examples/canonical-skill.md) — Fully annotated review skill demonstrating all conventions

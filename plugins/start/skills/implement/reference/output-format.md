@@ -1,59 +1,22 @@
 # Output Format Reference
 
-Task result templates, phase summary, and completion summary for the implement skill.
+Guidelines for implementation output. See `examples/output-example.md` for concrete rendered examples.
 
 ---
 
-## Task Result Templates
+## Report Types
 
-### Success
+Three report types used during implementation:
 
-```
-✅ Task [N]: [Name]
+1. **Task Result** — after each agent completes a task (success or blocked)
+2. **Phase Summary** — at each phase checkpoint before user confirmation
+3. **Completion Summary** — after all phases complete
 
-Files: src/services/auth.ts, src/routes/auth.ts
-Summary: Implemented JWT authentication with bcrypt password hashing
-Tests: 5 passing
-```
+## Phase Summary Guidelines
 
-### Blocked
-
-```
-⚠️ Task [N]: [Name]
-
-Status: Blocked
-Reason: Missing User model - need src/models/User.ts
-Options: [present via AskUserQuestion]
-```
-
----
-
-## Phase Summary
-
-Present at each phase checkpoint:
-
-```
-Phase [N] Complete
-
-Tasks: [X/Y] completed
-Files Changed: [list of paths]
-Tests: [All passing / X failing]
-Blockers: [none / list]
-Drift: [none detected / issues found]
-```
-
----
-
-## Completion Summary
-
-```
-✅ Implementation Complete
-
-Spec: [NNN]-[name]
-Phases Completed: [N/N]
-Tasks Executed: [X] total
-Tests: [All passing / X failing]
-Mode: [Standard / Team]
-
-Files Changed: [N] files (+[additions] -[deletions])
-```
+Always include:
+- Task completion ratio
+- Files changed (list paths)
+- Test status (passing count or failure details)
+- Blockers (if any)
+- Drift detection results

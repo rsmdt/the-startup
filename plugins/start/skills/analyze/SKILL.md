@@ -61,7 +61,8 @@ State {
 
 See `reference/` directory for detailed methodology:
 - [Perspectives](reference/perspectives.md) — Perspective definitions, focus area mapping, per-perspective agent focus
-- [Output Format](reference/output-format.md) — Cycle summary template, analysis summary, next-step options
+- [Output Format](reference/output-format.md) — Cycle summary guidelines, next-step options
+- [Output Example](examples/output-example.md) — Concrete example of expected output format
 
 ## Workflow
 

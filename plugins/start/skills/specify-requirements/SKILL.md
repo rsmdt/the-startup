@@ -62,7 +62,8 @@ Keep in SDD (not PRD): technical implementation, architecture, database schemas,
 
 - [Template](template.md) — PRD template structure, write to `docs/specs/[NNN]-[name]/product-requirements.md`
 - [Validation](validation.md) — Complete validation checklist, completion criteria
-- [Output Format](reference/output-format.md) — Status report template, multi-angle final validation
+- [Output Format](reference/output-format.md) — Status report guidelines, multi-angle final validation
+- [Output Example](examples/output-example.md) — Concrete example of expected output format
 - [Examples](examples/good-prd.md) — Well-structured PRD reference
 
 ## Workflow

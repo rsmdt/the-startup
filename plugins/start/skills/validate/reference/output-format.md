@@ -1,52 +1,6 @@
 # Output Format Reference
 
-Report template, assessment levels, and verdict-based next steps for the validate skill.
-
----
-
-## Report Template
-
-```markdown
-## Validation: [target]
-
-**Mode**: [Spec | File | Drift | Constitution | Comparison | Understanding]
-**Assessment**: ✅ Excellent | 🟢 Good | 🟡 Needs Attention | 🔴 Critical
-
-### Summary
-
-| Perspective | Pass | Warn | Fail |
-|-------------|------|------|------|
-| ✅ Completeness | X | X | X |
-| 🔗 Consistency | X | X | X |
-| 📍 Alignment | X | X | X |
-| 📐 Coverage | X | X | X |
-| 📊 Drift | X | X | X |
-| 📜 Constitution | X | X | X |
-| **Total** | X | X | X |
-
-*🔴 Failures (Must Fix)*
-
-| ID | Finding | Recommendation |
-|----|---------|----------------|
-| F1 | Brief title *(file:line)* | Fix recommendation *(issue description)* |
-
-*🟡 Warnings (Should Fix)*
-
-| ID | Finding | Recommendation |
-|----|---------|----------------|
-| W1 | Brief title *(file:line)* | Fix recommendation *(issue description)* |
-
-*✅ Passes*
-
-| Perspective | Verified |
-|-------------|----------|
-| Completeness | All sections populated, no TODO markers |
-| Consistency | Terminology consistent across docs |
-
-### Verdict
-
-[What was validated and key conclusions]
-```
+Guidelines for validation output. See `examples/output-example.md` for a concrete rendered example.
 
 ---
 

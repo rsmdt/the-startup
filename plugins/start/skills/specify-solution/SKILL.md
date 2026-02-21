@@ -73,7 +73,8 @@ When designing, address four dimensions:
 
 - [Template](template.md) — SDD template structure, write to `docs/specs/[NNN]-[name]/solution-design.md`
 - [Validation](validation.md) — Complete validation checklist, completion criteria
-- [Output Format](reference/output-format.md) — Status report template, next-step options
+- [Output Format](reference/output-format.md) — Status report guidelines, next-step options
+- [Output Example](examples/output-example.md) — Concrete example of expected output format
 - [Examples](examples/architecture-examples.md) — Reference architecture examples
 
 ## Workflow

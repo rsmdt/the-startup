@@ -84,7 +84,8 @@ State {
 See `reference/` directory for detailed methodology:
 - [Perspectives](reference/perspectives.md) — Standard and simplification perspectives, focus area mapping
 - [Code Smells](reference/code-smells.md) — Code smell patterns, complexity indicators, refactoring opportunities
-- [Output Format](reference/output-format.md) — Baseline, analysis summary, error recovery, completion templates
+- [Output Format](reference/output-format.md) — Baseline, analysis, error recovery, completion guidelines
+- [Output Example](examples/output-example.md) — Concrete example of expected output format
 
 ## Workflow
 

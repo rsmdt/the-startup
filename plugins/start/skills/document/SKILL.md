@@ -57,7 +57,8 @@ State {
 
 See `reference/` directory for detailed methodology:
 - [Perspectives](reference/perspectives.md) — Documentation perspectives, target mapping, documentation standards
-- [Output Format](reference/output-format.md) — Summary template, coverage metrics, next-step options
+- [Output Format](reference/output-format.md) — Next-step options, coverage guidelines
+- [Output Example](examples/output-example.md) — Concrete example of expected output format
 - [Knowledge Capture](reference/knowledge-capture.md) — Naming conventions, update-vs-create matrix, cross-referencing
 
 Templates in `templates/` for knowledge capture:

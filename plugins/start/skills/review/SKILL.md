@@ -61,7 +61,8 @@ State {
 
 See `reference/` directory for detailed methodology:
 - [Perspectives](reference/perspectives.md) — Perspective definitions, intent, activation rules
-- [Output Format](reference/output-format.md) — Report template, table guidelines, verdict-based next steps
+- [Output Format](reference/output-format.md) — Table guidelines, severity rules, verdict-based next steps
+- [Output Example](examples/output-example.md) — Concrete example of expected output format
 - [Checklist](reference/checklists.md) — Security, Performance, Quality, Test coverage checklists
 - [Classification](reference/classification.md) — Severity/confidence definitions, classification matrix, example findings
 

@@ -62,7 +62,8 @@ State {
 ## Reference Materials
 
 See `reference/` directory for detailed methodology:
-- [Output Format](reference/output-format.md) — Task result templates, phase summary, completion summary
+- [Output Format](reference/output-format.md) — Task result guidelines, phase summary, completion summary
+- [Output Example](examples/output-example.md) — Concrete example of expected output format
 - [Perspectives](reference/perspectives.md) — Implementation perspectives and work stream mapping
 
 ## Workflow

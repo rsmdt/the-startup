@@ -1,44 +1,17 @@
 # Output Format Reference
 
-Templates for specification completion and decision logging.
+Guidelines for specification output. See `examples/output-example.md` for concrete rendered examples.
 
 ---
 
-## Specification Complete Template
+## Documentation Structure
 
-```markdown
-Specification Complete
-
-Spec: [NNN]-[name]
-Documents: PRD [status] | SDD [status] | PLAN [status]
-
-Readiness: [HIGH/MEDIUM/LOW]
-Confidence: [N]%
-
-Next Steps:
-1. /start:validate [ID] - Validate specification quality
-2. /start:implement [ID] - Begin implementation
-```
+Specifications live in `docs/specs/[NNN]-[name]/`:
+- `README.md` — Decisions and progress tracking
+- `product-requirements.md` — What and why
+- `solution-design.md` — How
+- `implementation-plan.md` — Execution sequence
 
 ## Decision Logging
 
-When user skips a phase or makes a non-default choice, log it in the spec README.md:
-
-```markdown
-## Decisions Log
-
-| Date | Decision | Rationale |
-|------|----------|-----------|
-| [date] | PRD skipped | User chose to start directly with SDD |
-| [date] | Started from PLAN | Requirements and design already documented elsewhere |
-```
-
-## Documentation Structure
-
-```
-docs/specs/[NNN]-[name]/
-├── README.md                 # Decisions and progress
-├── product-requirements.md   # What and why
-├── solution-design.md        # How
-└── implementation-plan.md    # Execution sequence
-```
+When user skips a phase or makes a non-default choice, log it in the spec README.md decisions table with date, decision, and rationale.

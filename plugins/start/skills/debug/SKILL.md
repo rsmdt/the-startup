@@ -61,7 +61,8 @@ State {
 
 See `reference/` directory for detailed methodology:
 - [Perspectives](reference/perspectives.md) — Investigation perspectives, bug type patterns, perspective selection guide
-- [Output Format](reference/output-format.md) — Conversational templates for each phase
+- [Output Format](reference/output-format.md) — Conversational guidelines for each phase
+- [Output Example](examples/output-example.md) — Concrete example of expected output format
 
 ## Workflow
 

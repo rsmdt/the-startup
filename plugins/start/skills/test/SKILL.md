@@ -82,7 +82,8 @@ State {
 
 See `reference/` directory for detailed methodology:
 - [Discovery Protocol](reference/discovery-protocol.md) — Runner identification, test file patterns, quality commands
-- [Output Format](reference/output-format.md) — Discovery, baseline, execution, escalation, and final report templates
+- [Output Format](reference/output-format.md) — Report types, failure categories
+- [Output Example](examples/output-example.md) — Concrete examples of all five report types
 - [Failure Investigation](reference/failure-investigation.md) — Failure categories, fix protocol, escalation rules, ownership phrases
 
 ## Workflow
