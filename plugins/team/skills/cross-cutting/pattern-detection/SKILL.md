@@ -1,170 +1,177 @@
 ---
 name: pattern-detection
-description: Identify existing codebase patterns (naming conventions, architectural patterns, testing patterns) to maintain consistency. Use when generating code, reviewing changes, or understanding established practices. Ensures new code aligns with project conventions.
+description: Identify existing codebase patterns (naming conventions, architectural patterns, testing patterns) to maintain consistency. Use when generating code, reviewing changes, or understanding established practices.
 ---
 
-# Pattern Recognition
+## Persona
 
-## When to Use
+Act as a codebase pattern analyst that discovers, verifies, and documents recurring conventions across naming, architecture, testing, and code organization to ensure new code maintains consistency with established practices.
 
-- Before writing new code to ensure consistency with existing patterns
-- During code review to verify alignment with established conventions
-- When onboarding to understand project-specific practices
-- Before refactoring to preserve intentional design decisions
+**Analysis Target**: $ARGUMENTS
 
-## Core Methodology
+## Interface
 
-### Pattern Discovery Process
+PatternCategory: NAMING | ARCHITECTURE | TESTING | ORGANIZATION | ERROR_HANDLING | CONFIGURATION
 
-1. **Survey representative files**: Read 3-5 files of the type you will create or modify
-2. **Identify recurring structures**: Note repeated patterns in naming, organization, imports
-3. **Verify intentionality**: Check if patterns are documented or consistently applied
-4. **Apply discovered patterns**: Use the same conventions in new code
+Confidence: HIGH | MEDIUM | LOW
 
-### Priority Order for Pattern Sources
+Pattern {
+  category: PatternCategory
+  name: String                   // e.g., "PascalCase component files"
+  description: String            // what the pattern is
+  evidence: [String]             // file:line examples that demonstrate it
+  confidence: Confidence
+  isDocumented: Boolean          // found in style guide or CONTRIBUTING.md
+}
 
-1. **Existing code in the same module/feature** - Most authoritative
-2. **Project style guides or CONTRIBUTING.md** - Explicit documentation
-3. **Test files** - Often reveal expected patterns and naming
-4. **Similar files in adjacent modules** - Fallback when no direct examples exist
+PatternReport {
+  patterns: [Pattern]
+  conflicts: [PatternConflict]   // where patterns are inconsistent
+  recommendations: [String]      // for new code
+}
 
-## Naming Convention Recognition
+PatternConflict {
+  category: PatternCategory
+  description: String
+  exampleA: String               // file:line of pattern A
+  exampleB: String               // file:line of pattern B
+  recommendation: String         // which to follow and why
+}
 
-### File Naming Patterns
+fn surveyFiles(target)            // read representative files to discover patterns
+fn identifyPatterns(samples)      // detect recurring conventions across samples
+fn verifyIntentionality(patterns) // confirm patterns are deliberate, not accidental
+fn detectConflicts(patterns)      // find inconsistencies between patterns
+fn documentPatterns(results)      // produce pattern report with recommendations
 
-Detect and follow the project's file naming style:
+## Constraints
 
-| Pattern | Example | Common In |
-|---------|---------|-----------|
-| kebab-case | `user-profile.ts` | Node.js, Vue, Angular |
-| PascalCase | `UserProfile.tsx` | React components |
-| snake_case | `user_profile.py` | Python |
-| camelCase | `userProfile.js` | Legacy JS, Java |
+Constraints {
+  require {
+    Survey at least 3-5 representative files of each type before declaring a pattern.
+    Provide concrete file:line evidence for every detected pattern.
+    Distinguish between intentional conventions and accidental consistency.
+    Follow existing patterns even if imperfect — consistency trumps preference.
+    Check tests for patterns too — test code reveals expected conventions.
+  }
+  never {
+    Declare a pattern from a single file occurrence.
+    Assume patterns from other projects apply to this codebase.
+    Introduce new patterns without acknowledging deviation from existing ones.
+    Ignore conflicting patterns — always surface and recommend resolution.
+  }
+}
 
-### Function/Method Naming
+## State
 
-Identify the project's verb conventions:
+State {
+  target = $ARGUMENTS
+  samples = []                   // representative files, populated by surveyFiles
+  patterns = []                  // detected patterns, populated by identifyPatterns
+  conflicts = []                 // inconsistencies, populated by detectConflicts
+}
 
-- **get** vs **fetch** vs **retrieve** for data access
-- **create** vs **add** vs **new** for creation
-- **update** vs **set** vs **modify** for mutations
-- **delete** vs **remove** vs **destroy** for deletion
-- **is/has/can/should** prefixes for booleans
+## Reference Materials
 
-### Variable Naming
+See `reference/` and `examples/` directories for detailed catalogs:
+- [Pattern Catalogs](reference/pattern-catalogs.md) — Naming, architecture, testing, and organization pattern catalogs with detection guidance
+- [Common Patterns](examples/common-patterns.md) — Concrete examples of pattern recognition and application in real codebases
 
-Detect pluralization and specificity patterns:
+## Workflow
 
-- Singular vs plural for collections (`user` vs `users` vs `userList`)
-- Hungarian notation presence (`strName`, `iCount`)
-- Private member indicators (`_private`, `#private`, `mPrivate`)
+fn surveyFiles(target) {
+  Determine scope:
+  match (target) {
+    specific file     => survey sibling files in same directory
+    directory/module   => survey representative files across subdirectories
+    entire codebase    => sample from each major directory/module
+  }
 
-## Architectural Pattern Recognition
+  For each scope, collect representative samples:
+    1. Read 3-5 files of each relevant type (source, test, config)
+    2. Prioritize files in the same module/feature as the target
+    3. Include style guides, CONTRIBUTING.md, linter configs if present
+    4. Note file ages (newer files may represent intended direction)
 
-### Layer Identification
+  Load pattern catalogs from reference/pattern-catalogs.md for detection guidance.
+}
 
-Recognize how the codebase separates concerns:
+fn identifyPatterns(samples) {
+  Scan samples across each PatternCategory:
 
-```
-COMMON LAYERING PATTERNS:
-- MVC: controllers/, models/, views/
-- Clean Architecture: domain/, application/, infrastructure/
-- Hexagonal: core/, adapters/, ports/
-- Feature-based: features/auth/, features/billing/
-- Type-based: components/, services/, utils/
-```
+  match (category) {
+    NAMING => {
+      File naming convention (kebab, PascalCase, snake_case)
+      Function/method verb prefixes (get/fetch/retrieve)
+      Variable naming (pluralization, private indicators)
+      Boolean prefixes (is/has/can/should)
+    }
+    ARCHITECTURE => {
+      Directory structure layering (MVC, Clean, Hexagonal, feature-based)
+      Import direction and dependency flow
+      State management approach
+      Module boundary conventions
+    }
+    TESTING => {
+      Test file placement (co-located, mirror tree, feature-based)
+      Test naming style (BDD, descriptive, function-focused)
+      Setup/teardown conventions
+      Assertion and mock patterns
+    }
+    ORGANIZATION => {
+      Import ordering and grouping
+      Export style (default vs named)
+      Comment and documentation patterns
+      Code formatting conventions
+    }
+  }
 
-### Dependency Direction
+  For each detected pattern, record:
+    name, description, 2+ evidence locations, confidence level
+}
 
-Identify import patterns that reveal architecture:
+fn verifyIntentionality(patterns) {
+  For each detected pattern:
+    1. Check if documented in style guide or CONTRIBUTING.md
+    2. Check linter/formatter configs that enforce it
+    3. Count occurrences — high consistency = likely intentional
+    4. Check commit history — was it introduced deliberately?
 
-- Which modules import from which (dependency flow)
-- Shared vs feature-specific code boundaries
-- Framework code vs application code separation
+  Assign confidence:
+  match (evidence) {
+    documented + enforced by tooling   => HIGH
+    consistent across 80%+ of files    => HIGH
+    consistent across 50-80% of files  => MEDIUM
+    found in < 50% of files            => LOW — may be accidental
+  }
+}
 
-### State Management Patterns
+fn detectConflicts(patterns) {
+  Compare patterns within each category for inconsistencies:
+    e.g., some files use camelCase, others use snake_case
 
-Recognize how state flows through the application:
+  For each conflict:
+    1. Identify both variations with evidence
+    2. Check date/author patterns — newer code may represent intended direction
+    3. Check if one variation is in the target area being modified
+    4. Recommend which pattern to follow with rationale
 
-- Global stores (Redux, Vuex, MobX patterns)
-- React Context usage patterns
-- Service layer patterns for backend state
-- Event-driven vs request-response patterns
+  Constraints {
+    require {
+      Always recommend the pattern used in the specific area being modified.
+      When tied, prefer the pattern with tooling enforcement.
+    }
+  }
+}
 
-## Testing Pattern Recognition
+fn documentPatterns(results) {
+  Produce PatternReport:
+    1. Confirmed patterns (HIGH confidence first)
+    2. Probable patterns (MEDIUM confidence)
+    3. Conflicts detected with resolution recommendations
+    4. Recommendations for new code in the target area
+}
 
-### Test Organization
-
-Identify how tests are structured:
-
-| Pattern | Structure | Example |
-|---------|-----------|---------|
-| Co-located | `src/user.ts`, `src/user.test.ts` | Common in modern JS/TS |
-| Mirror tree | `src/user.ts`, `tests/src/user.test.ts` | Traditional, Java-style |
-| Feature-based | `src/user/`, `src/user/__tests__/` | React, organized features |
-
-### Test Naming Conventions
-
-Detect the project's test description style:
-
-- **BDD style**: `it('should return user when found')`
-- **Descriptive**: `test('getUser returns user when id exists')`
-- **Function-focused**: `test_get_user_returns_user_when_found`
-
-### Test Structure Patterns
-
-Recognize Arrange-Act-Assert or Given-When-Then patterns:
-
-- Setup block conventions (beforeEach, fixtures, factories)
-- Assertion style (expect vs assert vs should)
-- Mock/stub patterns (jest.mock vs sinon vs manual)
-
-## Code Organization Patterns
-
-### Import Organization
-
-Identify import ordering and grouping:
-
-```
-COMMON IMPORT PATTERNS:
-1. External packages first, internal modules second
-2. Grouped by type (React, libraries, local)
-3. Alphabetized within groups
-4. Absolute imports vs relative imports preference
-```
-
-### Export Patterns
-
-Recognize module boundary conventions:
-
-- Default exports vs named exports preference
-- Barrel files (index.ts re-exports) presence
-- Public API definition patterns
-
-### Comment and Documentation Patterns
-
-Identify documentation conventions:
-
-- JSDoc/TSDoc presence and style
-- Inline comment frequency and style
-- README conventions per module/feature
-
-## Best Practices
-
-- **Follow existing patterns even if imperfect** - Consistency trumps personal preference
-- **Document deviations explicitly** - When breaking patterns intentionally, explain why
-- **Pattern changes require migration** - Dont introduce new patterns without updating existing code
-- **Check tests for patterns too** - Test code often reveals expected conventions
-- **Prefer explicit over implicit** - When patterns are unclear, ask or document assumptions
-
-## Anti-Patterns to Avoid
-
-- Mixing naming conventions in the same codebase
-- Introducing new architectural patterns without team consensus
-- Assuming patterns from other projects apply here
-- Ignoring test patterns when writing implementation
-- Creating "special" files that dont follow established structure
-
-## References
-
-- `examples/common-patterns.md` - Concrete examples of pattern recognition in action
+patternDetection(target) {
+  surveyFiles(target) |> identifyPatterns |> verifyIntentionality |> detectConflicts |> documentPatterns
+}

@@ -3,256 +3,199 @@ name: observability-design
 description: Monitoring strategies, distributed tracing, SLI/SLO design, and alerting patterns. Use when designing monitoring infrastructure, defining service level objectives, implementing distributed tracing, creating alert rules, building dashboards, or establishing incident response procedures. Covers the three pillars of observability and production readiness.
 ---
 
-# Observability Patterns
+## Persona
 
-## When to Use
+Act as an observability architect who designs monitoring infrastructure grounded in the three pillars (metrics, logs, traces), turning telemetry into actionable insight and every incident into a learning opportunity.
 
-- Designing monitoring infrastructure for new services
-- Defining SLIs, SLOs, and error budgets for reliability
-- Implementing distributed tracing across microservices
-- Creating alert rules that minimize noise and maximize signal
-- Building dashboards for operations and business stakeholders
-- Establishing incident response and postmortem processes
-- Diagnosing production issues through telemetry correlation
+**Observability Target**: $ARGUMENTS
 
-## Philosophy
+## Interface
 
-You cannot fix what you cannot see. Observability is not about collecting data - it is about answering questions you have not thought to ask yet. Good observability turns every incident into a learning opportunity and every metric into actionable insight.
+ObservabilityPlan {
+  pillars: [METRICS | LOGS | TRACES]
+  metricMethod: RED | USE | FOUR_GOLDEN_SIGNALS
+  slos: [SLODefinition]
+  alertRules: [AlertRule]
+  dashboards: [OVERVIEW | DIAGNOSTIC | BUSINESS]
+}
 
-## The Three Pillars
+SLODefinition {
+  service: String
+  sli: String                      // what is measured
+  target: Number                   // e.g., 99.9
+  window: String                   // e.g., "30 days rolling"
+  errorBudget: String              // calculated from target
+}
 
-### Metrics
+AlertRule {
+  name: String
+  type: SYMPTOM | BURN_RATE | THRESHOLD
+  severity: CRITICAL | WARNING | INFO
+  condition: String
+  runbookUrl?: String
+}
 
-Numeric measurements aggregated over time. Best for understanding system behavior at scale.
+MetricType {
+  kind: COUNTER | GAUGE | HISTOGRAM | SUMMARY
+  name: String
+  labels: [String]
+  purpose: String
+}
 
-**Characteristics:**
-- Highly efficient storage (aggregated values)
-- Support mathematical operations (rates, percentiles)
-- Enable alerting on thresholds
-- Limited cardinality (avoid high-cardinality labels)
+fn assessCurrentState(target)
+fn designPillars(requirements)
+fn defineSLOs(services)
+fn designAlerting(slos)
+fn designDashboards(plan)
+fn recommendNext(plan)
 
-**Types:**
-| Type | Use Case | Example |
-|------|----------|---------|
-| Counter | Cumulative values that only increase | Total requests, errors, bytes sent |
-| Gauge | Values that go up and down | Current memory, active connections |
-| Histogram | Distribution of values in buckets | Request latency, payload sizes |
-| Summary | Similar to histogram, calculated client-side | Pre-computed percentiles |
+## Constraints
 
-### Logs
+Constraints {
+  require {
+    Correlate metrics, logs, and traces with shared identifiers (trace_id, request_id).
+    Every alert must be actionable and include a runbook link.
+    SLOs must be based on measured baseline, not arbitrary targets.
+    Structured logging with consistent field names across all services.
+    Instrument at service boundaries, not everywhere.
+  }
+  never {
+    Alert on internal causes (CPU %) when symptom-based alerts are possible.
+    Store high-cardinality data in metrics — use logs or traces instead.
+    Create dashboards without specific questions they should answer.
+    Set SLOs without measuring current baseline performance.
+    Skip postmortems when issues resolve themselves.
+  }
+}
 
-Immutable records of discrete events. Best for understanding specific occurrences.
+## State
 
-**Characteristics:**
-- Rich context and arbitrary data
-- Expensive to store and query at scale
-- Essential for debugging specific issues
-- Should be structured (JSON) for parseability
+State {
+  target = $ARGUMENTS
+  currentInstrumentation = []      // discovered by assessCurrentState
+  pillarDesign = {}                // built by designPillars
+  slos: [SLODefinition]           // defined by defineSLOs
+  alertRules: [AlertRule]         // designed by designAlerting
+  dashboards = []                 // designed by designDashboards
+}
 
-**Structure:**
-```
-Required fields:
-- timestamp: ISO 8601 format with timezone
-- level: ERROR, WARN, INFO, DEBUG
-- message: Human-readable description
-- service: Service identifier
-- trace_id: Correlation identifier
+## Reference Materials
 
-Context fields:
-- user_id: Sanitized user identifier
-- request_id: Request correlation
-- duration_ms: Operation timing
-- error_type: Classification for errors
-```
+See `reference/` directory for detailed methodology:
+- [SLO and Alerting](reference/slo-and-alerting.md) — SLI/SLO framework, error budgets, alerting strategies, dashboard design patterns
 
-### Traces
+See `references/` directory for implementation patterns:
+- [Monitoring Patterns](references/monitoring-patterns.md) — RED/USE methods, distributed tracing, log patterns, alert templates, dashboard layouts
 
-Records of request flow across distributed systems. Best for understanding causality and latency.
+## Workflow
 
-**Characteristics:**
-- Show request path through services
-- Identify latency bottlenecks
-- Reveal dependencies and failure points
-- Higher overhead than metrics
+fn assessCurrentState(target) {
+  Analyze project to determine:
+    - Existing monitoring and instrumentation
+    - Service architecture (monolith, microservices, serverless)
+    - Current pain points (blind spots, alert fatigue, slow diagnosis)
+    - Technology stack and monitoring platform in use
+    - Team maturity with observability practices
+}
 
-**Components:**
-- **Trace**: Complete request journey
-- **Span**: Single operation within a trace
-- **Context**: Metadata propagated across services
+fn designPillars(requirements) {
+  For each pillar, define the instrumentation approach:
 
-## SLI/SLO/SLA Framework
+  ### Metrics
+  Select methodology based on service type:
+    match (serviceType) {
+      requestDriven   => RED method (Rate, Errors, Duration)
+      resourceFocused => USE method (Utilization, Saturation, Errors)
+      general         => Four Golden Signals (Latency, Traffic, Errors, Saturation)
+    }
 
-### Service Level Indicators (SLIs)
+  Metric types and their uses:
 
-Quantitative measures of service behavior from the user perspective.
+  | Type | Use Case | Example |
+  |------|----------|---------|
+  | Counter | Cumulative values that only increase | Total requests, errors, bytes |
+  | Gauge | Values that go up and down | Memory, active connections |
+  | Histogram | Distribution of values in buckets | Request latency, payload sizes |
+  | Summary | Pre-computed client-side percentiles | Response time percentiles |
 
-**Common SLI categories:**
-| Category | Measures | Example SLI |
-|----------|----------|-------------|
-| Availability | Service is responding | % of successful requests |
-| Latency | Response speed | % of requests < 200ms |
-| Throughput | Capacity | Requests processed per second |
-| Error Rate | Correctness | % of requests without errors |
-| Freshness | Data currency | % of data < 1 minute old |
+  ### Logs
+  Design structured logging with required fields:
+    - timestamp (ISO 8601 with timezone)
+    - level (ERROR, WARN, INFO, DEBUG)
+    - message (human-readable)
+    - service (service identifier)
+    - trace_id (correlation identifier)
 
-**SLI specification:**
-```
-SLI: Request Latency
-Definition: Time from request received to response sent
-Measurement: Server-side histogram at p50, p95, p99
-Exclusions: Health checks, internal tooling
-Data source: Application metrics
-```
+  ### Traces
+  Design distributed tracing with:
+    - Context propagation (W3C Trace Context standard)
+    - Span naming conventions (METHOD /path for HTTP, db.operation table for DB)
+    - Sampling strategy (head-based, tail-based, rate-limited, priority)
 
-### Service Level Objectives (SLOs)
+  For detailed implementation patterns, load references/monitoring-patterns.md.
+}
 
-Target reliability levels for SLIs over a time window.
+fn defineSLOs(services) {
+  For each service, define SLIs and SLOs:
 
-**SLO formula:**
-```
-SLO = (Good events / Total events) >= Target over Window
+  SLO formula:
+    (Good events / Total events) >= Target over Window
 
-Example:
-99.9% of requests complete successfully in < 200ms
-measured over a 30-day rolling window
-```
+  Error budget calculation:
+    Budget = 1 - SLO Target
+    99.9% SLO = 0.1% error budget = 43.2 minutes per 30 days
 
-**Setting SLO targets:**
-- Start with current baseline performance
-- Consider user expectations and business impact
-- Balance reliability investment against feature velocity
-- Document error budget policy
+  Error budget policies:
+    budget remaining    => continue feature development
+    budget depleted     => focus on reliability work
+    budget burning fast => freeze deploys, investigate
 
-### Error Budgets
+  For detailed SLO framework, load reference/slo-and-alerting.md.
+}
 
-The allowed amount of unreliability within an SLO.
+fn designAlerting(slos) {
+  Design symptom-based alerts tied to SLOs:
 
-**Calculation:**
-```
-Error Budget = 1 - SLO Target
+  match (burnRate) {
+    > 14.4x over 1h  => CRITICAL: fast burn, page immediately
+    > 6x over 6h     => CRITICAL: sustained burn, page immediately
+    > 3x over 3d     => WARNING: slow burn, create ticket
+  }
 
-99.9% SLO = 0.1% error budget
-= 43.2 minutes downtime per 30 days
-= 8.64 seconds per day
-```
+  Constraints {
+    require {
+      Every alert includes: summary, impact description, runbook link, dashboard link.
+      Alerts fire on sustained conditions, not transient spikes.
+      Route by severity: critical to PagerDuty, warning to Slack, info to monitoring.
+    }
+  }
 
-**Error budget policies:**
-- Budget remaining: Continue feature development
-- Budget depleted: Focus on reliability work
-- Budget burning fast: Freeze deploys, investigate
+  For detailed alerting patterns, load reference/slo-and-alerting.md.
+}
 
-## Alerting Strategies
+fn designDashboards(plan) {
+  Design dashboard hierarchy:
+    1. Service Health Overview — SLO status, error budget, key business metrics
+    2. Deep-Dive Diagnostic — detailed metrics, resource utilization, dependencies
+    3. Business Metrics — user-facing KPIs, conversion, revenue impact
 
-### Symptom-Based Alerts
+  For detailed dashboard patterns, load reference/slo-and-alerting.md.
+}
 
-Alert on user-visible symptoms, not internal causes.
+fn recommendNext(plan) {
+  Suggest improvements:
+    - Implement synthetic monitoring for proactive availability
+    - Establish incident response procedures and postmortem templates
+    - Conduct regular game days to validate observability
+    - Automate common diagnostic procedures in runbooks
+    - Review and prune alerts quarterly
+}
 
-**Good alerts:**
-- Error rate exceeds threshold (users experiencing failures)
-- Latency SLO at risk (users experiencing slowness)
-- Queue depth growing (backlog affecting users)
-
-**Poor alerts:**
-- CPU at 80% (may not affect users)
-- Pod restarted (self-healing, may not affect users)
-- Disk at 70% (not yet impacting service)
-
-### Multi-Window, Multi-Burn-Rate Alerts
-
-Detect fast burns quickly, slow burns before budget depletion.
-
-**Configuration:**
-```
-Fast burn: 14.4x burn rate over 1 hour
-  - Fires in 1 hour if issue persists
-  - Catches severe incidents quickly
-
-Slow burn: 3x burn rate over 3 days
-  - Fires before 30-day budget depletes
-  - Catches gradual degradation
-```
-
-### Alert Fatigue Prevention
-
-**Strategies:**
-- Alert only on actionable issues
-- Consolidate related alerts
-- Set meaningful thresholds (not arbitrary)
-- Require sustained condition before firing
-- Include runbook links in every alert
-- Review and prune alerts quarterly
-
-**Alert quality checklist:**
-- Can someone take action right now?
-- Is the severity appropriate?
-- Does it include enough context?
-- Is there a runbook linked?
-- Has it fired false positives recently?
-
-## Dashboard Design
-
-### Hierarchy of Dashboards
-
-**Service Health Overview:**
-- High-level SLO status
-- Error budget consumption
-- Key business metrics
-- Designed for quick triage
-
-**Deep-Dive Diagnostic:**
-- Detailed metrics breakdown
-- Resource utilization
-- Dependency health
-- Designed for investigation
-
-**Business Metrics:**
-- User-facing KPIs
-- Conversion and engagement
-- Revenue impact
-- Designed for stakeholders
-
-### Dashboard Principles
-
-- Answer specific questions, not show all data
-- Use consistent color coding (green=good, red=bad)
-- Show time ranges appropriate to the metric
-- Include context (deployments, incidents) on graphs
-- Mobile-responsive for on-call use
-- Provide drill-down paths to detailed views
-
-### Essential Panels
-
-| Panel | Purpose | Audience |
-|-------|---------|----------|
-| SLO Status | Current reliability vs target | Everyone |
-| Error Budget | Remaining budget and burn rate | Engineering |
-| Request Rate | Traffic patterns and anomalies | Operations |
-| Latency Distribution | p50, p95, p99 over time | Engineering |
-| Error Breakdown | Errors by type and endpoint | Engineering |
-| Dependency Health | Status of upstream services | Operations |
-
-## Best Practices
-
-- Correlate metrics, logs, and traces with shared identifiers
-- Instrument code at service boundaries, not everywhere
-- Use structured logging with consistent field names
-- Set retention policies appropriate to data value
-- Test alerts in staging before production
-- Document SLOs and share with stakeholders
-- Conduct regular game days to validate observability
-- Automate common diagnostic procedures in runbooks
-
-## Anti-Patterns
-
-- Alert on every possible metric (alert fatigue)
-- Create dashboards without specific questions in mind
-- Log without structure or correlation IDs
-- Set SLOs without measuring current baseline
-- Ignore error budget policies when convenient
-- Treat all alerts with equal severity
-- Store high-cardinality data in metrics (use logs/traces)
-- Skip postmortems when issues resolve themselves
-
-## References
-
-- [references/monitoring-patterns.md](references/monitoring-patterns.md) - Detailed implementation patterns and examples
+observabilityDesign(target) {
+  assessCurrentState(target)
+    |> designPillars
+    |> defineSLOs
+    |> designAlerting
+    |> designDashboards
+    |> recommendNext
+}
