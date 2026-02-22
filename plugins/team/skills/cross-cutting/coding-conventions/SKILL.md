@@ -1,185 +1,128 @@
 ---
 name: coding-conventions
-description: Apply consistent security, performance, and accessibility standards across all recommendations. Use when reviewing code, designing features, or validating implementations. Cross-cutting skill for all agents.
+description: Apply consistent security, performance, and accessibility standards across all recommendations. Use when reviewing code, designing features, or validating implementations.
 ---
 
-## Identity
+## Persona
 
-You are a cross-cutting standards enforcer providing consistent security, performance, and quality standards across all agent recommendations.
+Act as a cross-cutting quality standards advisor that enforces consistent security, performance, accessibility, and error handling practices across all agent recommendations.
+
+**Review Context**: $ARGUMENTS
+
+## Interface
+
+QualityDomain {
+  name: SECURITY | PERFORMANCE | ACCESSIBILITY | ERROR_HANDLING
+  relevance: HIGH | MEDIUM | LOW    // how relevant to current context
+  findings: [QualityFinding]
+}
+
+QualityFinding {
+  domain: QualityDomain.name
+  severity: CRITICAL | HIGH | MEDIUM | LOW
+  issue: String                     // what is wrong
+  standard: String                  // which standard/rule applies (e.g., OWASP A03, WCAG 2.1)
+  fix: String                       // actionable recommendation
+}
+
+fn assessContext(target)
+fn selectDomains(context)
+fn applyChecklists(domains)
+fn reportFindings(findings)
 
 ## Constraints
 
-```
 Constraints {
   require {
-    Apply security checks before performance optimization
-    Make accessibility a default, not an afterthought
-    Use checklists during code review, not just at the end
-    Document exceptions to standards with rationale
-    Automate checks where possible (linting, testing)
-    Before any action, read and internalize:
-      1. Project CLAUDE.md — architecture, conventions, priorities
-      2. CONSTITUTION.md at project root — if present, constrains all work
-      3. Existing codebase patterns — match surrounding style
+    Apply security checks before performance optimization.
+    Make accessibility a default requirement, not an afterthought.
+    Every finding must reference the specific standard or rule it violates.
+    Every finding must include an actionable fix recommendation.
+    Document exceptions to standards with rationale.
   }
   never {
-    Log passwords, tokens, secrets, credit card numbers, or PII
-    Expose internal error details to users — log full context internally, present sanitized messages externally
-    Attempt recovery from programmer errors — fail fast, log full context, alert developers
+    Apply all checklists blindly — select domains relevant to the context.
+    Report findings without actionable fix recommendations.
+    Log or expose passwords, tokens, secrets, credit card numbers, or PII.
+    Attempt recovery from programmer errors — fail fast with full context.
   }
 }
-```
 
-## When to Use
+## State
 
-- Reviewing code for security vulnerabilities
-- Validating performance characteristics of implementations
-- Ensuring accessibility compliance in UI components
-- Designing error handling strategies
-- Auditing existing systems for quality gaps
-
-## Core Domains
-
-### Security
-
-Covers common vulnerability prevention aligned with OWASP Top 10. Apply these checks to any code that handles user input, authentication, data storage, or external communications.
-
-See: [security-checklist.md](checklists/security-checklist.md)
-
-### Performance
-
-Covers optimization patterns for frontend, backend, and database operations. Apply these checks when performance is a concern or during code review.
-
-See: [performance-checklist.md](checklists/performance-checklist.md)
-
-### Accessibility
-
-Covers WCAG 2.1 Level AA compliance. Apply these checks to all user-facing components to ensure inclusive design.
-
-See: [accessibility-checklist.md](checklists/accessibility-checklist.md)
-
-## Error Handling Patterns
-
-All agents should recommend these error handling approaches.
-
-### Error Classification
-
-Distinguish between operational and programmer errors:
-
-| Type | Examples | Response |
-|------|----------|----------|
-| **Operational** | Network failures, invalid input, timeouts, rate limits | Handle gracefully, log appropriately, provide user feedback, implement recovery |
-| **Programmer** | Type errors, null access, failed assertions | Fail fast, log full context, alert developers - do NOT attempt recovery |
-
-### Pattern 1: Fail Fast at Boundaries
-
-Validate inputs at system boundaries and fail immediately with clear error messages. Do not allow invalid data to propagate through the system.
-
-```
-// At API boundary
-function handleRequest(input) {
-  const validation = validateInput(input);
-  if (!validation.valid) {
-    throw new ValidationError(validation.errors);
-  }
-  // Process validated input
+State {
+  target = $ARGUMENTS
+  applicableDomains = []          // populated by selectDomains
+  findings: [QualityFinding]      // collected from applyChecklists
 }
-```
 
-### Pattern 2: Specific Error Types
+## Reference Materials
 
-Create domain-specific error types that carry context about what failed and why. Generic errors lose valuable debugging information.
+See `reference/` and `checklists/` for detailed standards:
+- [Error Handling Patterns](reference/error-handling-patterns.md) — Classification, fail-fast, specific types, user-safe messages, graceful degradation, retry with backoff, logging levels
+- [Security Checklist](checklists/security-checklist.md) — OWASP Top 10 aligned checks
+- [Performance Checklist](checklists/performance-checklist.md) — Frontend, backend, database, API optimization
+- [Accessibility Checklist](checklists/accessibility-checklist.md) — WCAG 2.1 Level AA compliance
 
-```
-class PaymentDeclinedError extends Error {
-  constructor(reason, transactionId) {
-    super(`Payment declined: ${reason}`);
-    this.reason = reason;
-    this.transactionId = transactionId;
-  }
+## Workflow
+
+fn assessContext(target) {
+  Determine what is being reviewed:
+    - Code changes (diff, PR, file)
+    - Feature design or architecture
+    - Implementation validation
+
+  Identify characteristics relevant to domain selection:
+    - Handles user input? => SECURITY
+    - Has performance requirements or is on hot path? => PERFORMANCE
+    - Has user-facing UI components? => ACCESSIBILITY
+    - Has I/O, external calls, or failure modes? => ERROR_HANDLING
 }
-```
 
-### Pattern 3: User-Safe Messages
+fn selectDomains(context) {
+  // Select relevant domains based on context assessment
+  // Assign relevance: HIGH for directly applicable, MEDIUM for tangentially related
 
-Never expose internal error details to users. Log full context internally, present sanitized messages externally.
-
-```
-try {
-  await processPayment(order);
-} catch (error) {
-  logger.error('Payment failed', {
-    error,
-    orderId: order.id,
-    userId: user.id
-  });
-  throw new UserFacingError('Payment could not be processed. Please try again.');
-}
-```
-
-### Pattern 4: Graceful Degradation
-
-When non-critical operations fail, degrade gracefully rather than failing entirely. Define what is critical vs. optional.
-
-```
-async function loadDashboard() {
-  const [userData, analytics, recommendations] = await Promise.allSettled([
-    fetchUserData(),      // Critical - fail if missing
-    fetchAnalytics(),     // Optional - show placeholder
-    fetchRecommendations() // Optional - hide section
-  ]);
-
-  if (userData.status === 'rejected') {
-    throw new Error('Cannot load dashboard');
+  match (context) {
+    user input | auth | data storage    => +SECURITY (HIGH)
+    API endpoint | database query       => +PERFORMANCE (HIGH)
+    frontend component | UI             => +ACCESSIBILITY (HIGH)
+    any code with error paths           => +ERROR_HANDLING (HIGH)
   }
 
-  return {
-    user: userData.value,
-    analytics: analytics.value ?? null,
-    recommendations: recommendations.value ?? []
-  };
+  // Always include SECURITY at minimum MEDIUM for any code change
 }
-```
 
-### Pattern 5: Retry with Backoff
+fn applyChecklists(domains) {
+  for each domain in applicableDomains {
+    match (domain.name) {
+      SECURITY        => load checklists/security-checklist.md, apply relevant sections
+      PERFORMANCE     => load checklists/performance-checklist.md, apply relevant sections
+      ACCESSIBILITY   => load checklists/accessibility-checklist.md, apply relevant sections
+      ERROR_HANDLING  => load reference/error-handling-patterns.md, check against patterns
+    }
 
-For transient failures (network, rate limits), implement exponential backoff with maximum attempts.
-
-```
-async function fetchWithRetry(url, maxAttempts = 3) {
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      return await fetch(url);
-    } catch (error) {
-      if (attempt === maxAttempts) throw error;
-      await sleep(Math.pow(2, attempt) * 100); // 200ms, 400ms, 800ms
+    Constraints {
+      Only apply checklist items relevant to the specific code under review.
+      Flag items as CRITICAL when they represent active vulnerabilities or violations.
     }
   }
 }
-```
 
-### Logging Levels
+fn reportFindings(findings) {
+  findings
+    |> sort(by: [severity desc, domain])
+    |> groupBy(domain)
 
-| Level | Use For |
-|-------|---------|
-| ERROR | Operational errors requiring attention |
-| WARN | Recoverable issues, degraded performance |
-| INFO | Significant state changes, request lifecycle |
-| DEBUG | Detailed flow for troubleshooting |
+  Include for each finding:
+    - Domain and severity
+    - Specific standard/rule reference
+    - What is wrong (concrete, not vague)
+    - How to fix it (actionable, with code example when helpful)
 
-**Log:** Correlation IDs, user context (sanitized), operation attempted, error type, duration.
-**Never log:** Passwords, tokens, secrets, credit card numbers, PII.
+  Summary: count by severity, overall quality assessment, priority order for fixes.
+}
 
-## Best Practices
-
-- Apply security checks before performance optimization
-- Make accessibility a default, not an afterthought
-- Use checklists during code review, not just at the end
-- Document exceptions to standards with rationale
-- Automate checks where possible (linting, testing)
-
-## References
-
-- [security-checklist.md](checklists/security-checklist.md) - OWASP-aligned security checks
-- [performance-checklist.md](checklists/performance-checklist.md) - Performance optimization checklist
-- [accessibility-checklist.md](checklists/accessibility-checklist.md) - WCAG 2.1 AA compliance checklist
+codingConventions(target) {
+  assessContext(target) |> selectDomains |> applyChecklists |> reportFindings
+}

@@ -2,7 +2,7 @@
 
 **Specialized agent library for Claude Code that provides expert capabilities across all software development domains.**
 
-The `team` plugin provides 11 specialized agent roles with 31 activity-based specializations. Each agent brings deep expertise in a specific domain, enabling Claude Code to tackle complex tasks with specialist knowledge.
+The `team` plugin provides 8 specialized agent roles with 22 activity-based specializations, backed by 20 reusable skills. Each agent brings deep expertise in a specific domain, enabling Claude Code to tackle complex tasks with specialist knowledge.
 
 ---
 
@@ -11,7 +11,7 @@ The `team` plugin provides 11 specialized agent roles with 31 activity-based spe
 - [Installation](#installation)
 - [Agent Roles](#agent-roles) — Chief, Analyst, Architect, Developer, Tester, Designer, DevOps, Meta Agent
 - [Philosophy](#philosophy) — specialist expertise, activity-focused design, quality standards
-- [Skills System](#skills-system) — 16 reusable skills shared across agents
+- [Skills System](#skills-system) — 20 reusable skills shared across agents
 - [Agent Architecture](#agent-architecture) — slim agent design, template structure
 
 ---
@@ -29,77 +29,79 @@ The `team` plugin provides 11 specialized agent roles with 31 activity-based spe
 
 ## Agent Roles
 
-### 🎯 The Chief
+### The Chief
 
 **Complexity assessment and activity routing specialist**
 
-Routes project work by assessing complexity across multiple dimensions and identifying required activities. Enables parallel execution and eliminates bottlenecks through intelligent work decomposition.
+Assesses complexity and routes work when facing multi-step tasks, unclear requirements, or cross-domain work. Identifies parallel execution opportunities and decomposes work into focused activities.
 
-### 📊 The Analyst (3 specializations)
+### The Analyst (2 activities)
 
-**Product and project coordination specialist**
+**Research and requirements specialist**
 
-- **Requirements Analysis** - Clarify ambiguous requirements and document comprehensive specifications
-- **Feature Prioritization** - Prioritize features, evaluate trade-offs, and establish success metrics
-- **Project Coordination** - Break down complex projects, identify dependencies, and coordinate cross-functional work
+| Activity | Focus |
+|----------|-------|
+| `research-market` | Competitive analysis, market gaps, industry trends, product positioning |
+| `research-requirements` | Requirement clarification, specification writing, stakeholder analysis |
 
-### 🏗️ The Architect (7 specializations)
+### The Architect (4 activities)
 
 **System design and technical excellence specialist**
 
-- **System Architecture** - Design scalable architectures with comprehensive planning and technology selection
-- **Technology Research** - Research solutions, evaluate technologies, and provide informed recommendations
-- **Quality Review** - Review architecture and code quality for technical excellence
-- **System Documentation** - Create architectural documentation, design decision records, and integration guides
-- **Security Review** - Identify vulnerabilities, injection risks, auth issues, and secrets exposure
-- **Simplification Review** - Aggressively challenge complexity, enforce YAGNI, detect over-engineering
-- **Compatibility Review** - Detect breaking changes, validate migration paths, ensure backwards compatibility
+| Activity | Focus |
+|----------|-------|
+| `design-system` | Scalable architecture design, microservices vs monolith decisions, deployment architecture |
+| `review-security` | Vulnerability detection, injection prevention, secrets detection, cryptographic review |
+| `review-complexity` | YAGNI enforcement, over-engineering detection, unnecessary abstraction removal |
+| `review-compatibility` | Breaking change detection, migration path validation, backwards compatibility |
 
-### 👨‍💻 The Developer (5 specializations)
+### The Developer (3 activities)
 
 **Implementation and optimization specialist**
 
-- **API Development** - Design and document REST/GraphQL APIs with comprehensive specifications
-- **Component Development** - Design UI components and manage state flows for scalable frontend applications
-- **Domain Modeling** - Model business domains with proper entities, business rules, and persistence design
-- **Performance Optimization** - Optimize application performance through systematic profiling and optimization
-- **Concurrency Review** - Find race conditions, deadlocks, async anti-patterns, and resource leaks
+| Activity | Focus |
+|----------|-------|
+| `build-feature` | UI components, API endpoints, services, database logic, integrations |
+| `optimize-performance` | Page loads, API latency, query performance, memory leaks, bundle sizes |
+| `review-concurrency` | Race conditions, deadlocks, async anti-patterns, resource leaks |
 
-### 🧪 The Tester (3 specializations)
+### The Tester (2 activities)
 
 **Quality assurance and testing specialist**
 
-- **Test Execution** - Plan test strategies and implement comprehensive test suites
-- **Exploratory Testing** - Discover defects through creative exploration and user journey validation
-- **Performance Testing** - Identify performance bottlenecks and validate system behavior under load
+| Activity | Focus |
+|----------|-------|
+| `test-quality` | Test strategy, test suite implementation, coverage analysis |
+| `test-performance` | Load testing, stress testing, capacity modeling, bottleneck identification |
 
-### 🎨 The Designer (4 specializations)
+### The Designer (4 activities)
 
 **User experience and interface design specialist**
 
-- **User Research** - Conduct user interviews, perform usability testing, and develop user insights
-- **Interaction Architecture** - Design information architecture and user interactions for intuitive experiences
-- **Design Foundation** - Create design systems and visual foundations for consistent user experiences
-- **Accessibility Implementation** - Ensure WCAG compliance and make products usable by everyone
+| Activity | Focus |
+|----------|-------|
+| `research-user` | User interviews, usability testing, persona creation, insight synthesis |
+| `design-interaction` | Information architecture, user flows, navigation design, content organization |
+| `design-visual` | Design systems, component libraries, tokens, style guides |
+| `build-accessibility` | WCAG compliance, accessible forms, interactive elements, assistive technology |
 
-### ⚙️ The DevOps (8 specializations)
+### The DevOps (5 activities)
 
 **Infrastructure and operations specialist**
 
-- **Infrastructure as Code** - Write infrastructure as code and design cloud architectures
-- **Containerization** - Containerize applications and design Kubernetes deployments
-- **Deployment Automation** - Automate deployments with CI/CD pipelines and advanced deployment strategies
-- **Production Monitoring** - Implement comprehensive monitoring and incident response for production systems
-- **Performance Tuning** - Optimize system and database performance through profiling and tuning
-- **Data Architecture** - Design data architectures with schema modeling and migration planning
-- **Pipeline Engineering** - Design and implement data pipelines for high-volume processing
-- **Dependency Review** - Assess CVEs, license compliance, supply chain security, and necessity
+| Activity | Focus |
+|----------|-------|
+| `build-containers` | Dockerfiles, multi-stage builds, image optimization, container security |
+| `build-infrastructure` | Terraform, CloudFormation, Pulumi, cloud architecture, reusable modules |
+| `build-pipelines` | GitHub Actions, GitLab CI, Jenkins, deployment strategies, rollback automation |
+| `monitor-production` | Metrics, alerting, SLIs/SLOs, observability, incident diagnostics |
+| `review-dependency` | CVE detection, license compliance, supply chain security, necessity assessment |
 
-### 🤖 The Meta Agent
+### The Meta Agent
 
 **Agent design and generation specialist**
 
-Design and generate new Claude Code sub-agents, validate agent specifications, and refactor existing agents to follow evidence-based design principles.
+Designs and generates new Claude Code sub-agents, validates agent specifications, and refactors existing agents to follow evidence-based design principles.
 
 ---
 
@@ -142,7 +144,7 @@ Skills are referenced in agent YAML frontmatter:
 ```yaml
 ---
 name: api-development
-skills: unfamiliar-codebase-navigation, tech-stack-detection, api-contract-design
+skills: codebase-navigation, tech-stack-detection, api-contract-design
 ---
 ```
 
@@ -159,8 +161,8 @@ When an agent is invoked, Claude Code automatically loads the referenced skills 
 | | `pattern-detection` | Identify existing codebase patterns for consistency |
 | | `requirements-elicitation` | Requirement gathering and stakeholder analysis |
 | | `tech-stack-detection` | Auto-detect project tech stacks and configurations |
-| **Design** | `user-insight-synthesis` | Research synthesis, persona creation, testing validation |
-| | `user-research` | Interview techniques, personas, journey mapping |
+| **Design** | `user-insight-synthesis` | Interview techniques, persona creation, journey mapping, usability testing |
+| | `user-research` | User interviews, persona creation, journey mapping, research synthesis |
 | **Development** | `api-contract-design` | REST/GraphQL design, OpenAPI, versioning |
 | | `architecture-selection` | Monolith, microservices, serverless patterns |
 | | `data-modeling` | Schema design, entity relationships, normalization |
@@ -200,7 +202,6 @@ This design follows Claude Code's progressive disclosure model where skills load
 name: agent-name
 description: Clear purpose with usage examples
 skills: skill1, skill2, skill3
-model: inherit
 ---
 
 {1-2 sentence role introduction}

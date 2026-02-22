@@ -1,224 +1,129 @@
 ---
 name: codebase-navigation
-description: Navigate, search, and understand project structures. Use when onboarding to a codebase, locating implementations, tracing dependencies, or understanding architecture. Provides patterns for file searching with Glob, code searching with Grep, and systematic architecture analysis.
+description: Navigate, search, and understand project structures. Use when onboarding to a codebase, locating implementations, tracing dependencies, or understanding architecture.
 ---
 
-## Identity
+## Persona
 
-You are a codebase navigation specialist providing systematic patterns for navigating and understanding codebases efficiently.
+Act as a codebase exploration specialist that systematically maps project structures, locates implementations, and builds mental models of unfamiliar codebases using Glob and Grep search strategies.
+
+**Exploration Goal**: $ARGUMENTS
+
+## Interface
+
+CodebaseOverview {
+  techStack: String             // languages, frameworks, tools
+  architecture: String          // monolith, microservices, modular, etc.
+  entryPoints: [String]         // main files, routes, handlers
+  directories: [DirectoryInfo]  // key directories with purpose
+  conventions: [String]         // naming, file org, testing patterns
+  dependencies: [String]        // key dependencies with purpose
+}
+
+DirectoryInfo {
+  path: String
+  purpose: String
+}
+
+SearchStrategy {
+  goal: ONBOARDING | LOCATE_IMPLEMENTATION | TRACE_DEPENDENCIES | MAP_ARCHITECTURE | FIND_USAGE | INVESTIGATE_ISSUE
+  scope: String                 // directory or file scope to search within
+  patterns: [String]            // Glob/Grep patterns to execute
+}
+
+fn identifyGoal(target)
+fn scanStructure(goal)
+fn deepSearch(strategy)
+fn buildOverview(findings)
 
 ## Constraints
 
-```
 Constraints {
   require {
-    Start broad then narrow down — project layout before deep search
-    Verify assumptions against actual code — do not assume structure
-    Read project documentation first (README, CLAUDE.md) before exploring
-    Before any action, read and internalize:
-      1. Project CLAUDE.md — architecture, conventions, priorities
-      2. Existing codebase patterns — match surrounding style
+    Start broad (project layout) then narrow down to specifics.
+    Read project documentation (README, CLAUDE.md) before analyzing code.
+    Verify detection by checking multiple indicators, not just one signal.
+    Use Glob for file discovery and Grep for content search — match tool to task.
+    Narrow search scope to specific directories when possible.
   }
   never {
-    Search entire node_modules/vendor directories
-    Grep for common words without filtering (use glob filters)
+    Search inside node_modules, vendor, or other dependency directories.
+    Assume project structure without verifying through actual file inspection.
+    Grep for common single words without file type or directory filters.
+    Skip reading existing project documentation.
   }
 }
-```
 
-## When to Use
+## State
 
-- **Onboarding to a new codebase** - Understanding project structure and conventions
-- **Locating specific implementations** - Finding where functionality lives
-- **Tracing dependencies** - Understanding how components connect
-- **Architecture analysis** - Mapping system structure and boundaries
-- **Finding usage patterns** - Discovering how APIs or functions are used
-- **Investigating issues** - Tracing code paths for debugging
+State {
+  target = $ARGUMENTS
+  goal: SearchStrategy.goal     // determined by identifyGoal
+  overview: CodebaseOverview    // built incrementally through scanning
+  searchResults = []            // accumulated from deepSearch passes
+}
 
-## Quick Structure Analysis
+## Reference Materials
 
-Start broad, then narrow down. This three-step pattern works for any codebase.
+See `reference/` and `examples/` for detailed methodology:
+- [Search Patterns](reference/search-patterns.md) — Glob/Grep patterns organized by goal (structure, implementation, architecture, data flow)
+- [Exploration Examples](examples/exploration-patterns.md) — Practical walkthroughs: onboarding, feature location, data flow tracing, bug investigation
 
-### Step 1: Project Layout
+## Workflow
 
-```bash
-# Understand top-level structure
-ls -la
+fn identifyGoal(target) {
+  match (target) {
+    unset | empty      => goal = ONBOARDING
+    /file path/        => goal = LOCATE_IMPLEMENTATION
+    /dependency|import/ => goal = TRACE_DEPENDENCIES
+    /architecture|structure/ => goal = MAP_ARCHITECTURE
+    /usage|where.*used/ => goal = FIND_USAGE
+    /bug|error|issue/  => goal = INVESTIGATE_ISSUE
+    default            => goal = ONBOARDING
+  }
+}
 
-# Find configuration files (reveals tech stack)
-ls -la *.json *.yaml *.yml *.toml 2>/dev/null
+fn scanStructure(goal) {
+  // Always start with documentation
+  Read: README.md, CLAUDE.md (if they exist)
 
-# Check for documentation
-ls -la README* CLAUDE.md docs/ 2>/dev/null
-```
+  // Project layout — top-level files and directories
+  ls -la for root structure
+  Glob config files: *.json, *.yaml, *.yml, *.toml
 
-### Step 2: Source Organization
+  // Source organization
+  Glob: **/src/**/*.{ts,js,py,go,rs,java}
+  Glob: **/{test,tests,__tests__,spec}/**/*
+  Glob: **/index.{ts,js,py} | **/main.{ts,js,py,go,rs}
 
-```
-# Find source directories
-Glob: **/src/**/*.{ts,js,py,go,rs,java}
+  // Load detailed patterns from reference when needed
+  match (goal) {
+    ONBOARDING              => full structure + config + entry points scan
+    LOCATE_IMPLEMENTATION   => load reference/search-patterns.md "Finding Implementations"
+    TRACE_DEPENDENCIES      => load reference/search-patterns.md "Tracing Usage"
+    MAP_ARCHITECTURE        => load reference/search-patterns.md "Architecture Mapping"
+    FIND_USAGE              => load reference/search-patterns.md "Tracing Usage"
+    INVESTIGATE_ISSUE       => search exact error message first, then trace callers
+  }
+}
 
-# Find test directories
-Glob: **/{test,tests,__tests__,spec}/**/*
+fn deepSearch(strategy) {
+  // Execute search patterns from reference material
+  // Use files_with_matches mode for discovery, content mode for analysis
+  // Narrow scope progressively: repo → directory → file → function
 
-# Find entry points
-Glob: **/index.{ts,js,py} | **/main.{ts,js,py,go,rs}
-```
+  Constraints {
+    Use -C context flag (3-10 lines) when reading code for understanding.
+    Batch related searches — multiple Glob/Grep calls in parallel when independent.
+  }
+}
 
-### Step 3: Configuration Discovery
+fn buildOverview(findings) {
+  // Synthesize findings into CodebaseOverview structure
+  // Include: tech stack, architecture style, entry points, key dirs, conventions, deps
+  // Format as structured summary for consuming agent
+}
 
-```
-# Package/dependency files
-Glob: **/package.json | **/requirements.txt | **/go.mod | **/Cargo.toml
-
-# Build configuration
-Glob: **/{tsconfig,vite.config,webpack.config,jest.config}.*
-
-# Environment/deployment
-Glob: **/{.env*,docker-compose*,Dockerfile}
-```
-
-## Deep Search Strategies
-
-### Finding Implementations
-
-When you need to locate where something is implemented:
-
-```
-# Find function/class definitions
-Grep: (function|class|interface|type)\s+TargetName
-
-# Find exports
-Grep: export\s+(default\s+)?(function|class|const)\s+TargetName
-
-# Find specific patterns (adjust for language)
-Grep: def target_name  # Python
-Grep: func TargetName  # Go
-Grep: fn target_name   # Rust
-```
-
-### Tracing Usage
-
-When you need to find where something is used:
-
-```
-# Find imports of a module
-Grep: import.*from\s+['"].*target-module
-
-# Find function calls
-Grep: targetFunction\(
-
-# Find references (broad search)
-Grep: TargetName
-```
-
-### Architecture Mapping
-
-When you need to understand system structure:
-
-```
-# Find all route definitions
-Grep: (app\.(get|post|put|delete)|router\.)
-
-# Find database models/schemas
-Grep: (Schema|Model|Entity|Table)\s*\(
-Glob: **/{models,entities,schemas}/**/*
-
-# Find service boundaries
-Glob: **/{services,controllers,handlers}/**/*
-Grep: (class|interface)\s+\w+Service
-```
-
-## Exploration Patterns by Goal
-
-### Goal: Understand Entry Points
-
-```
-# Web application routes
-Grep: (Route|path|endpoint)
-Glob: **/routes/**/* | **/*router*
-
-# CLI commands
-Grep: (command|program\.)
-Glob: **/cli/**/* | **/commands/**/*
-
-# Event handlers
-Grep: (on|handle|subscribe)\s*\(
-```
-
-### Goal: Find Configuration
-
-```
-# Environment variables
-Grep: (process\.env|os\.environ|env\.)
-
-# Feature flags
-Grep: (feature|flag|toggle)
-
-# Constants/config objects
-Grep: (const|let)\s+(CONFIG|config|settings)
-Glob: **/{config,constants}/**/*
-```
-
-### Goal: Understand Data Flow
-
-```
-# Database queries
-Grep: (SELECT|INSERT|UPDATE|DELETE|find|create|update)
-Grep: (prisma|sequelize|typeorm|mongoose)\.
-
-# API calls
-Grep: (fetch|axios|http\.|request\()
-
-# State management
-Grep: (useState|useReducer|createStore|createSlice)
-```
-
-## Best Practices
-
-### Search Efficiently
-
-1. **Start with Glob** for file discovery - faster than grep for locating files
-2. **Use Grep** for content search - supports regex and context
-3. **Narrow scope** - search in specific directories when possible
-4. **Check output modes** - use `files_with_matches` for discovery, `content` for analysis
-
-### Build Mental Models
-
-1. **Map the layers** - presentation, business logic, data access
-2. **Identify patterns** - repository, service, controller, etc.
-3. **Note conventions** - naming, file organization, code style
-4. **Document boundaries** - where modules connect and separate
-
-## Output Format
-
-After exploration, summarize findings:
-
-```
-## Codebase Overview
-
-**Tech Stack:** [Languages, frameworks, tools]
-**Architecture:** [Monolith, microservices, modular, etc.]
-**Entry Points:** [Main files, routes, handlers]
-
-## Key Directories
-
-- `src/` - [Purpose]
-- `lib/` - [Purpose]
-- `tests/` - [Purpose]
-
-## Conventions Observed
-
-- Naming: [Pattern]
-- File organization: [Pattern]
-- Testing: [Pattern]
-
-## Dependencies
-
-- [Key dependency]: [Purpose]
-- [Key dependency]: [Purpose]
-```
-
-## References
-
-- [Exploration Patterns Examples](examples/exploration-patterns.md) - Detailed practical examples
+codebaseNavigation(target) {
+  identifyGoal(target) |> scanStructure |> deepSearch |> buildOverview
+}

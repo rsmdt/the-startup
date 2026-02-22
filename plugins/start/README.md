@@ -4,7 +4,7 @@
 
 The `start` plugin provides ten user-invocable workflow skills, five autonomous skills, and two output styles to transform how you build software with Claude Code.
 
-**📖 For quick start, workflow guide, and skill selection, see the [main README](../../README.md).**
+**For quick start, workflow guide, and skill selection, see the [main README](../../README.md).**
 
 ---
 
@@ -12,8 +12,8 @@ The `start` plugin provides ten user-invocable workflow skills, five autonomous 
 
 - [User-Invocable Skills](#user-invocable-skills) — specify, implement, validate, test, review, document, analyze, refactor, debug, constitution
 - [Autonomous Skills](#autonomous-skills) — 5 context-activated skills
-- [Documentation Structure](#-documentation-structure) — specs, domain, patterns, interfaces
-- [Output Styles](#-output-styles) — The Startup, The ScaleUp
+- [Documentation Structure](#documentation-structure) — specs, domain, patterns, interfaces
+- [Output Styles](#output-styles) — The Startup, The ScaleUp
 - [Typical Development Workflow](#typical-development-workflow) — primary and maintenance flows
 - [Skills in Action](#skills-in-action) — real-world examples
 - [Templates](#templates) — PRD, SDD, PLAN, DOR, DOD
@@ -59,10 +59,10 @@ Create comprehensive specifications from brief descriptions through deep researc
 flowchart TD
     A([Your Feature Idea]) --> |initialize| B{Check<br>Existing}
     B --> |exists| C[Review and Refine]
-    C --> END[🚀 Ready for /implement 001]
-    B --> |new| D[📄 **Requirements Gathering**<br/>Create *product-requirements.md* if needed]
-    D --> E[📄 **Technical Research**<br/>Create *solution-design.md* if needed, document patterns, interfaces]
-    E --> F[📄 **Implementation Planning**<br/>Create *implementation-plan.md*]
+    C --> END[Ready for /implement 001]
+    B --> |new| D[Requirements Gathering<br/>Create product-requirements.md if needed]
+    D --> E[Technical Research<br/>Create solution-design.md if needed, document patterns, interfaces]
+    E --> F[Implementation Planning<br/>Create implementation-plan.md]
     F --> END
 ```
 
@@ -98,13 +98,13 @@ Loads implementation-plan.md and executes phase-by-phase with approval gates bet
 
 ```mermaid
 flowchart TD
-    A([📄 *implementation-plan.md*]) --> |load| B[**Initialize Plan**<br/>Parse phases & tasks]
+    A([implementation-plan.md]) --> |load| B[Initialize Plan<br/>Parse phases and tasks]
     B --> |approve| C{Phases<br>Remaining?}
-    C --> |yes| D[**Execute Phase N**<br/>⚡ *Parallel agent execution*<br/>✓ *Run tests after each task*]
-    D --> |validate| E[**Phase Review**<br/>Check test results<br/>Review changes]
+    C --> |yes| D[Execute Phase N<br/>Parallel agent execution<br/>Run tests after each task]
+    D --> |validate| E[Phase Review<br/>Check test results<br/>Review changes]
     E --> |continue| C
-    C --> |no| F[**Final Validation**<br/>Run full test suite<br/>Verify all requirements]
-    F --> END[✅ **Implementation Complete**]
+    C --> |no| F[Final Validation<br/>Run full test suite<br/>Verify all requirements]
+    F --> END[Implementation Complete]
 ```
 
 </details>
@@ -122,6 +122,8 @@ Validate specifications, implementations, or understanding through intelligent c
 /validate 001                                          # Validate spec by ID
 /validate docs/specs/001/solution-design.md            # Validate specific file
 /validate Check the auth implementation against SDD    # Compare implementation to spec
+/validate drift                                        # Check for spec-implementation drift
+/validate constitution                                 # Validate constitution compliance
 /validate Is my caching approach correct?              # Validate understanding
 ```
 
@@ -129,20 +131,23 @@ Validate specifications, implementations, or understanding through intelligent c
 - **Intelligent Mode Detection** - Automatically determines validation type from input
 - **The 3 Cs Framework** - Checks Completeness, Consistency, and Correctness
 - **Ambiguity Detection** - Scans for vague language ("should", "various", "etc.")
-- **Cross-Document Traceability** - Verifies PRD→SDD→PLAN alignment
+- **Cross-Document Traceability** - Verifies PRD to SDD to PLAN alignment
+- **Drift Detection** - Checks spec-implementation alignment
+- **Constitution Enforcement** - Validates L1/L2/L3 governance rules
 - **Advisory Only** - Provides recommendations without blocking
 - **Comparison Validation** - Compares implementations against specifications
-- **Understanding Validation** - Confirms correctness of approach or design
 
 <details>
 <summary><strong>View Details</strong></summary>
 
-**Four validation modes** automatically detected from input:
+**Six validation modes** automatically detected from input:
 
 | Input Type | Mode | What Gets Validated |
 |------------|------|---------------------|
 | Spec ID (`005`) | Specification | Full spec quality and readiness |
 | File path (`src/auth.ts`) | File | Individual file quality |
+| `drift` or `check drift` | Drift Detection | Spec-implementation alignment |
+| `constitution` | Constitution | Governance rule compliance |
 | "Check X against Y" | Comparison | Implementation vs specification |
 | Freeform text | Understanding | Approach correctness |
 
@@ -155,14 +160,18 @@ Validate specifications, implementations, or understanding through intelligent c
 ```mermaid
 flowchart TD
     A([Validation Request]) --> |parse| B{Detect Mode}
-    B --> |spec ID| C[**Specification Validation**<br/>3 Cs + Ambiguity + Readiness]
-    B --> |file path| D[**File Validation**<br/>Quality + Completeness]
-    B --> |"against"| E[**Comparison Validation**<br/>Implementation vs Spec]
-    B --> |freeform| F[**Understanding Validation**<br/>Approach Correctness]
-    C --> G[**Report**<br/>📊 Findings + 💡 Recommendations]
-    D --> G
-    E --> G
-    F --> G
+    B --> |spec ID| C[Specification Validation<br/>3 Cs + Ambiguity + Readiness]
+    B --> |file path| D[File Validation<br/>Quality + Completeness]
+    B --> |drift| E[Drift Detection<br/>Spec vs Implementation]
+    B --> |constitution| F[Constitution Validation<br/>L1/L2/L3 Rule Enforcement]
+    B --> |against| G[Comparison Validation<br/>Implementation vs Spec]
+    B --> |freeform| H[Understanding Validation<br/>Approach Correctness]
+    C --> I[Report<br/>Findings + Recommendations]
+    D --> I
+    E --> I
+    F --> I
+    G --> I
+    H --> I
 ```
 
 </details>
@@ -210,11 +219,11 @@ When tests fail, the skill enforces strict ownership:
 
 ```mermaid
 flowchart TD
-    A([Test Request]) --> |discover| B[**Find Test Runner**<br/>Config, scripts, test files]
-    B --> |execute| C[**Run Tests**<br/>Full suite or targeted]
+    A([Test Request]) --> |discover| B[Find Test Runner<br/>Config, scripts, test files]
+    B --> |execute| C[Run Tests<br/>Full suite or targeted]
     C --> |check| D{Tests Pass?}
-    D --> |yes| E[✅ **All Clear**<br/>Report results]
-    D --> |no| F[**Own the Failures**<br/>Investigate & fix each one]
+    D --> |yes| E[All Clear<br/>Report results]
+    D --> |no| F[Own the Failures<br/>Investigate and fix each one]
     F --> |fixed| C
 ```
 
@@ -224,60 +233,62 @@ flowchart TD
 
 ### `/review [target]`
 
-Multi-agent code review with security, performance, quality, and test coverage specialists running in parallel.
+Multi-agent code review with specialized perspectives running in parallel.
 
 **Purpose:** Comprehensive code review before merging, with specialized agents examining different concerns simultaneously
 
 **Usage:**
 ```bash
-/review                                    # Review current PR/staged changes
-/review --pr 123                           # Review specific PR
-/review --branch feature/auth              # Review branch changes
-/review src/auth/ src/users/               # Review specific files/directories
+/review                          # Review staged changes
+/review 123                      # Review PR number
+/review feature/auth             # Review branch changes
+/review src/auth/ src/users/     # Review specific files/directories
+/review staged                   # Explicitly review staged changes
 ```
 
 **Key Features:**
-- **4 Parallel Specialists** - Security, Performance, Quality, and Test agents review simultaneously
-- **Target Auto-Detection** - Automatically detects PR, staged changes, or branch diffs
+- **Parallel Specialists** - Security, Performance, Quality, and Test agents review simultaneously
+- **Conditional Perspectives** - Concurrency, Dependencies, Compatibility, Accessibility activate when relevant
+- **Target Auto-Detection** - Detects PR number, staged changes, file path, or branch diffs
 - **Confidence Scoring** - Each finding includes confidence level (HIGH/MEDIUM/LOW)
-- **PR Integration** - Posts comments directly to GitHub PRs via `gh` CLI
 - **Severity Classification** - CRITICAL, HIGH, MEDIUM, LOW findings
+- **Standard or Team Mode** - Fire-and-forget subagents or persistent teammates with coordination
 
 <details>
 <summary><strong>View Details</strong></summary>
 
-**Review Agents:**
+**Core Review Perspectives (always active):**
 
-| Agent | Focus Areas |
-|-------|-------------|
+| Perspective | Focus Areas |
+|-------------|-------------|
 | **Security** | SQL injection, XSS, hardcoded secrets, auth bypasses, input validation |
 | **Performance** | N+1 queries, missing indexes, memory leaks, inefficient algorithms |
 | **Quality** | Code complexity, naming, SOLID principles, error handling, duplication |
 | **Tests** | Coverage gaps, missing edge cases, test quality, assertion completeness |
 
-**Output Modes:**
+**Conditional Perspectives (activated when relevant):**
 
-- **PR Mode**: Posts inline comments to GitHub PR
-- **Local Mode**: Generates detailed findings report
-- **Both include**: Confidence scores, code locations, suggested fixes
+| Perspective | Trigger |
+|-------------|---------|
+| **Concurrency** | async/await, Promise, threading detected |
+| **Dependencies** | Dependency file changes |
+| **Compatibility** | Public API or schema changes |
+| **Accessibility** | Frontend component changes |
+| **Constitution** | CONSTITUTION.md exists in project |
 
 ```mermaid
 flowchart TD
     A([Review Request]) --> |detect| B{Detect Target}
-    B --> |PR| C[Load PR Diff]
+    B --> |PR number| C[Load PR Diff]
     B --> |staged| D[Load Staged Changes]
     B --> |branch| E[Load Branch Diff]
     B --> |files| F[Load File Contents]
-    C --> G[**Launch 4 Parallel Agents**<br/>🔒 Security<br/>⚡ Performance<br/>✨ Quality<br/>🧪 Tests]
+    C --> G[Launch Parallel Agents<br/>Security, Performance<br/>Quality, Tests + conditionals]
     D --> G
     E --> G
     F --> G
-    G --> |merge| H[**Consolidate Findings**<br/>Deduplicate<br/>Rank by severity]
-    H --> I{Post to PR?}
-    I --> |yes| J[Post Comments via gh CLI]
-    I --> |no| K[Generate Report]
-    J --> END[✅ Review Complete]
-    K --> END
+    G --> |merge| H[Consolidate Findings<br/>Deduplicate, rank by severity]
+    H --> I[Verdict + Next Steps]
 ```
 
 </details>
@@ -292,15 +303,14 @@ Generate and sync documentation including API docs, READMEs, JSDoc comments, and
 
 **Usage:**
 ```bash
-/document src/api/                         # Generate API documentation
-/document --mode readme                    # Update project README
-/document --mode code src/utils/           # Add JSDoc to code files
-/document --mode audit                     # Audit documentation coverage
-/document --mode module src/auth/          # Document entire module
+/document src/api/               # Generate API documentation
+/document readme                 # Update project README
+/document src/utils/             # Add JSDoc to code files
+/document audit                  # Audit documentation coverage
 ```
 
 **Key Features:**
-- **5 Documentation Modes** - Code, API, README, Audit, Module
+- **Multiple Documentation Modes** - Code, API, README, Audit, Module
 - **Staleness Detection** - Identifies outdated documentation
 - **Coverage Metrics** - Reports documentation completeness percentage
 - **OpenAPI Generation** - Creates OpenAPI/Swagger specs from API code
@@ -311,13 +321,12 @@ Generate and sync documentation including API docs, READMEs, JSDoc comments, and
 
 **Documentation Modes:**
 
-| Mode | Output | Use Case |
-|------|--------|----------|
-| `code` | JSDoc/TSDoc comments | Adding inline documentation |
-| `api` | OpenAPI spec, endpoint docs | API documentation |
-| `readme` | README.md updates | Project documentation |
-| `audit` | Coverage report | Finding documentation gaps |
-| `module` | Complete module docs | Full module documentation |
+| Input | Mode | Output |
+|-------|------|--------|
+| File/directory path | Code | JSDoc/TSDoc comments |
+| `api` | API | OpenAPI spec, endpoint docs |
+| `readme` | README | README.md updates |
+| `audit` | Audit | Coverage report |
 
 **Staleness Detection:**
 
@@ -329,18 +338,15 @@ The skill automatically detects when documentation is outdated by:
 ```mermaid
 flowchart TD
     A([Document Request]) --> |detect| B{Detect Mode}
-    B --> |code| C[**JSDoc Generation**<br/>Functions, types, exports]
-    B --> |api| D[**API Documentation**<br/>OpenAPI, endpoints, schemas]
-    B --> |readme| E[**README Update**<br/>Features, usage, examples]
-    B --> |audit| F[**Coverage Audit**<br/>Find gaps, staleness]
-    B --> |module| G[**Full Module Docs**<br/>All of the above]
-    C --> H[**Generate Documentation**<br/>⚡ Parallel agents when possible]
-    D --> H
-    E --> H
-    F --> H
-    G --> H
-    H --> I[**Sync & Report**<br/>📊 Coverage metrics<br/>⚠️ Staleness warnings]
-    I --> END[✅ Documentation Complete]
+    B --> |file path| C[JSDoc Generation<br/>Functions, types, exports]
+    B --> |api| D[API Documentation<br/>OpenAPI, endpoints, schemas]
+    B --> |readme| E[README Update<br/>Features, usage, examples]
+    B --> |audit| F[Coverage Audit<br/>Find gaps, staleness]
+    C --> G[Generate Documentation<br/>Parallel agents when possible]
+    D --> G
+    E --> G
+    F --> G
+    G --> H[Sync and Report<br/>Coverage metrics<br/>Staleness warnings]
 ```
 
 </details>
@@ -367,14 +373,13 @@ Uses cyclical discovery-documentation-review workflow to extract organizational 
 
 ```mermaid
 flowchart TD
-    A([Analysis Request]) --> |initialize| B[**Scope Definition**<br/>Clarify analysis area<br/>Set cycle plan]
-    B --> |start cycle| C[**Discovery Phase**<br/>⚡ *Specialist analysis*<br/>🔍 *Pattern identification*]
-    C --> |document| D[**Documentation Phase**<br/>📄 *Create domain docs*<br/>📄 *Create pattern docs*<br/>📄 *Create interface docs*]
-    D --> |review| E[**Review & Validation**<br/>Check completeness<br/>Identify gaps]
+    A([Analysis Request]) --> |initialize| B[Scope Definition<br/>Clarify analysis area<br/>Set cycle plan]
+    B --> |start cycle| C[Discovery Phase<br/>Specialist analysis<br/>Pattern identification]
+    C --> |document| D[Documentation Phase<br/>Create domain docs<br/>Create pattern docs<br/>Create interface docs]
+    D --> |review| E[Review and Validation<br/>Check completeness<br/>Identify gaps]
     E --> |continue?| F{More Cycles<br>Needed?}
     F --> |yes| C
-    F --> |no| G[**Final Summary**<br/>📊 *Analysis report*<br/>🎯 *Recommendations*<br/>📋 *Next steps*]
-    G --> END[✅ **Analysis Complete**]
+    F --> |no| G[Final Summary<br/>Analysis report<br/>Recommendations<br/>Next steps]
 ```
 
 </details>
@@ -400,13 +405,13 @@ Strictly preserves behavior through test-validated incremental changes. All test
 
 ```mermaid
 flowchart TD
-    A([Refactoring Request]) --> |analyze| B[**Goal Clarification**<br/>Define objectives<br/>Analyze codebase]
-    B --> |assess| C{**Complexity<br>Check**}
-    C --> |simple| D[**Direct Refactoring**<br/>✓ *Run tests first*<br/>🔧 *Apply changes*<br/>✓ *Validate each step*]
-    D --> |review| E[**Specialist Review**<br/>Code quality check<br/>Performance impact]
-    E --> DONE[✅ **Refactoring Complete**]
-    C --> |complex| F[**Create Specification**<br/>📄 *Generate solution-design.md*<br/>📄 *Generate implementation-plan.md*<br/>Document approach]
-    F --> |defer| G[🚀 **Ready for /implement**<br/>Execute via planned phases]
+    A([Refactoring Request]) --> |analyze| B[Goal Clarification<br/>Define objectives<br/>Analyze codebase]
+    B --> |assess| C{Complexity<br>Check}
+    C --> |simple| D[Direct Refactoring<br/>Run tests first<br/>Apply changes<br/>Validate each step]
+    D --> |review| E[Specialist Review<br/>Code quality check<br/>Performance impact]
+    E --> DONE[Refactoring Complete]
+    C --> |complex| F[Create Specification<br/>Generate solution-design.md<br/>Generate implementation-plan.md<br/>Document approach]
+    F --> |defer| G[Ready for /implement<br/>Execute via planned phases]
 ```
 
 </details>
@@ -441,12 +446,11 @@ Uses a conversational approach through five natural phases: understand the probl
 
 ```mermaid
 flowchart TD
-    A([Bug Description]) --> |understand| B[**Phase 1: Understand**<br/>Reproduce issue<br/>Gather context]
-    B --> |isolate| C[**Phase 2: Narrow Down**<br/>Form hypotheses<br/>Binary search]
-    C --> |investigate| D[**Phase 3: Root Cause**<br/>Test hypotheses<br/>Find evidence]
-    D --> |fix| E[**Phase 4: Fix & Verify**<br/>Propose fix<br/>Run tests]
-    E --> |close| F[**Phase 5: Wrap Up**<br/>Summarize if needed<br/>Suggest follow-ups]
-    F --> END[✅ **Bug Resolved**]
+    A([Bug Description]) --> |understand| B[Phase 1: Understand<br/>Reproduce issue<br/>Gather context]
+    B --> |isolate| C[Phase 2: Narrow Down<br/>Form hypotheses<br/>Binary search]
+    C --> |investigate| D[Phase 3: Root Cause<br/>Test hypotheses<br/>Find evidence]
+    D --> |fix| E[Phase 4: Fix and Verify<br/>Propose fix<br/>Run tests]
+    E --> |close| F[Phase 5: Wrap Up<br/>Summarize if needed<br/>Suggest follow-ups]
 
     D --> |stuck| G{Need More<br/>Context?}
     G --> |yes| B
@@ -472,8 +476,8 @@ Create or update a project constitution with governance rules through discovery-
 **Usage:**
 ```bash
 /constitution                                    # Create new constitution via codebase discovery
-/constitution "security and testing"             # Focus on specific areas
-/constitution "Add API patterns"                 # Update existing constitution
+/constitution security and testing               # Focus on specific areas
+/constitution Add API patterns                   # Update existing constitution
 ```
 
 **Key Features:**
@@ -496,9 +500,9 @@ Creates `CONSTITUTION.md` at project root (like README, LICENSE, CODE_OF_CONDUCT
 
 | Level | Name | Blocking | Autofix | Use Case |
 |-------|------|----------|---------|----------|
-| **L1** | Must | ✅ Yes | ✅ AI auto-corrects | Security, correctness, critical architecture |
-| **L2** | Should | ✅ Yes | ❌ No | Important rules requiring human judgment |
-| **L3** | May | ❌ No | ❌ No | Style preferences, suggestions |
+| **L1** | Must | Yes | AI auto-corrects | Security, correctness, critical architecture |
+| **L2** | Should | Yes | No | Important rules requiring human judgment |
+| **L3** | May | No | No | Style preferences, suggestions |
 
 **Rule Format Example:**
 
@@ -527,15 +531,15 @@ Secrets must never be committed to source control.
 ```mermaid
 flowchart TD
     A([/constitution]) --> |check| B{Constitution<br>Exists?}
-    B --> |no| C[**Discovery Phase**<br/>Explore codebase patterns]
-    C --> D[**Rule Generation**<br/>Create L1/L2/L3 rules]
-    D --> E[**User Confirmation**<br/>Present proposed rules]
-    E --> F[**Write CONSTITUTION.md**<br/>At project root]
+    B --> |no| C[Discovery Phase<br/>Explore codebase patterns]
+    C --> D[Rule Generation<br/>Create L1/L2/L3 rules]
+    D --> E[User Confirmation<br/>Present proposed rules]
+    E --> F[Write CONSTITUTION.md<br/>At project root]
     B --> |yes| G{Update or<br>Validate?}
     G --> |update| H[Add new rules<br/>Focus on specified areas]
     H --> E
     G --> |validate| I[Run /validate constitution]
-    F --> END[✅ Constitution Created]
+    F --> END[Constitution Created]
 ```
 
 </details>
@@ -586,7 +590,7 @@ The `start` plugin includes five autonomous skills that activate automatically b
 
 ---
 
-## 🏗️ Documentation Structure
+## Documentation Structure
 
 The plugin encourages structured knowledge management:
 
@@ -627,7 +631,7 @@ The capture workflow always checks existing documentation before creating new fi
 
 ---
 
-## 🎨 Output Styles
+## Output Styles
 
 The `start` plugin includes two output styles for different working preferences. Both share the same operational fundamentals (verification, code ownership, scope management) but express them differently.
 
@@ -635,7 +639,7 @@ The `start` plugin includes two output styles for different working preferences.
 
 ---
 
-### The Startup 🚀
+### The Startup
 
 **High-energy execution with structured momentum.**
 
@@ -658,7 +662,7 @@ The `start` plugin includes two output styles for different working preferences.
 
 ---
 
-### The ScaleUp 📈
+### The ScaleUp
 
 **Calm confidence with educational depth.**
 
@@ -682,7 +686,7 @@ The ScaleUp provides contextual explanations as it works:
 > ```typescript
 > await retry(fetchUser, { maxAttempts: 3, backoff: 'exponential' });
 > ```
-> 💡 *Insight: I used exponential backoff here because this endpoint has rate limiting. The existing `src/utils/retry.ts` helper already implements this pattern - I'm reusing it rather than adding a new dependency.*
+> *Insight: I used exponential backoff here because this endpoint has rate limiting. The existing `src/utils/retry.ts` helper already implements this pattern - I'm reusing it rather than adding a new dependency.*
 
 **Best for:**
 - Learning while building
@@ -708,35 +712,24 @@ The ScaleUp provides contextual explanations as it works:
 ### Setup (Optional)
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                             PROJECT SETUP                                    │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│   /constitution ────► Create project governance rules                 │
-│        │                    L1/L2/L3 rules auto-enforced in BUILD flow      │
-│        │                    CONSTITUTION.md at project root                  │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+/constitution ──> Create project governance rules
+                  L1/L2/L3 rules auto-enforced in BUILD flow
+                  CONSTITUTION.md at project root
 ```
 
-### Primary Workflow: Specify → Validate → Implement → Review
+### Primary Workflow: Specify > Validate > Implement > Review
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                          PRIMARY DEVELOPMENT FLOW                            │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│   /specify ──► /validate ──► /implement ──► /review │
-│        │                   │                    │                   │        │
-│   Create specs      Check quality        Execute plan        Code review    │
-│   PRD + SDD + PLAN  3 Cs framework      Phase-by-phase     Security + Perf │
-│        │                   │                    │                   │        │
-│   ↳ Constitution     ↳ Constitution      ↳ Constitution      ↳ Constitution │
-│     checked on SDD     mode available      + drift enforced    compliance   │
-│                                                                              │
-│   Optional: /document after implementation for documentation sync     │
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+/specify ──> /validate ──> /implement ──> /review
+   |              |              |              |
+Create specs  Check quality  Execute plan  Code review
+PRD+SDD+PLAN  3 Cs framework Phase-by-phase Security+Perf
+   |              |              |              |
+Constitution  Constitution   Constitution   Constitution
+checked on    mode available + drift enforced compliance
+SDD
+
+Optional: /document after implementation for documentation sync
 ```
 
 *If `CONSTITUTION.md` exists, rules are automatically checked at each stage.*
@@ -785,8 +778,7 @@ The ScaleUp provides contextual explanations as it works:
 ```
 
 **What happens:**
-- 4 parallel specialists review (Security, Performance, Quality, Tests)
-- Posts findings to PR if applicable
+- Parallel specialists review (Security, Performance, Quality, Tests + conditionals)
 - Generates consolidated report with severity rankings
 
 **5. Generate Documentation (Optional)**
@@ -831,7 +823,7 @@ Conversational investigation with observable evidence and user-driven direction.
 **Audit Documentation**
 
 ```bash
-/document --mode audit
+/document audit
 ```
 
 Reports documentation coverage and identifies stale or missing docs.
@@ -851,13 +843,11 @@ Agent output: "I implemented a retry mechanism with exponential backoff for API 
 **What happens automatically:**
 1. Document skill's Capture perspective activates
 2. Checks `docs/patterns/` for existing retry patterns
-3. Not found → Creates `docs/patterns/api-retry-strategy.md`
+3. Not found — Creates `docs/patterns/api-retry-strategy.md`
 4. Uses pattern template
-5. Reports: "📝 Created docs/patterns/api-retry-strategy.md"
+5. Reports: "Created docs/patterns/api-retry-strategy.md"
 
 **You didn't have to:** Manually request documentation or specify the path
-
----
 
 ---
 
@@ -906,5 +896,3 @@ plugins/start/skills/
 ## Further Reading
 
 - **[Main README](../../README.md)** - Project overview and installation
-- **[Claude Code Documentation](https://docs.claude.com/claude-code)** - Official Claude Code docs
-- **[Claude Code Skills Guide](https://docs.claude.com/claude-code/skills)** - How to create skills

@@ -1,99 +1,149 @@
 ---
 name: tech-stack-detection
-description: Auto-detect project tech stacks (React, Vue, Express, Django, etc.). Recognize package managers and configuration patterns. Use when starting work on any project, analyzing dependencies, or providing framework-specific guidance.
+description: Auto-detect project tech stacks (React, Vue, Express, Django, etc.). Recognize package managers and configuration patterns. Use when starting work on any project or providing framework-specific guidance.
 ---
 
-## Identity
+## Persona
 
-You are a tech stack detection specialist auto-detecting project frameworks, package managers, and configuration patterns.
+Act as a tech stack detection specialist that accurately identifies project frameworks, package managers, build tools, and architectural patterns through systematic file and dependency analysis.
+
+**Detection Target**: $ARGUMENTS
+
+## Interface
+
+TechStackReport {
+  ecosystem: String               // Node.js, Python, Rust, Go, etc.
+  packageManager: String          // npm, yarn, pnpm, pip, cargo, etc.
+  frameworks: [FrameworkDetection]
+  buildTools: [String]
+  testingTools: [String]
+  deploymentPlatform?: String
+  isMonorepo: Boolean
+  confidence: HIGH | MEDIUM | LOW
+}
+
+FrameworkDetection {
+  name: String                    // e.g., "Next.js", "Django", "Express"
+  version?: String                // if determinable from manifest
+  role: FRONTEND | BACKEND | FULLSTACK | META_FRAMEWORK | STYLING | DATABASE | STATE | AUTH
+  confidence: HIGH | MEDIUM | LOW
+  indicators: [String]            // what signals confirmed detection
+}
+
+PackageManagerIndicator {
+  file: String                    // e.g., "package-lock.json"
+  manager: String                 // e.g., "npm"
+  ecosystem: String               // e.g., "Node.js"
+}
+
+fn detectPackageManager()
+fn analyzeManifest(ecosystem)
+fn detectFrameworks(dependencies)
+fn verifyStructure(candidates)
+fn buildReport(detections)
 
 ## Constraints
 
-```
 Constraints {
   require {
-    Verify detection by checking multiple indicators (config + dependencies + structure)
-    Report confidence level when patterns are ambiguous
-    Note when multiple frameworks are present (e.g., Next.js + Tailwind + Prisma)
-    Check for meta-frameworks built on top of base frameworks
-    Consider monorepo patterns where different packages may use different frameworks
-    Before any action, read and internalize:
-      1. Project CLAUDE.md — architecture, conventions, priorities
-      2. Existing codebase patterns — match surrounding style
+    Verify detection by checking multiple indicators (config + dependencies + structure).
+    Report confidence level when patterns are ambiguous.
+    Note when multiple frameworks are present (e.g., Next.js + Tailwind + Prisma).
+    Check for meta-frameworks built on top of base frameworks.
+    Consider monorepo patterns where packages may use different frameworks.
+  }
+  never {
+    Report a framework as detected based on a single low-confidence indicator.
+    Assume directory structure implies a framework without checking dependencies.
+    Ignore lock files — they are the most reliable package manager signal.
   }
 }
-```
 
-## When to Use
+## State
 
-- Starting work on an unfamiliar project
-- Determining appropriate tooling and patterns for recommendations
-- Providing framework-specific guidance and best practices
-- Identifying package manager for dependency operations
-- Understanding project architecture before making changes
+State {
+  target = $ARGUMENTS                       // project path, defaults to cwd
+  packageManager: PackageManagerIndicator   // detected in detectPackageManager
+  ecosystem: String                         // determined from package manager
+  candidates: [FrameworkDetection]          // populated by detectFrameworks
+  report: TechStackReport                   // final output from buildReport
+}
 
-## Detection Methodology
+## Reference Materials
 
-### Step 1: Package Manager Detection
+See `references/` for comprehensive detection patterns:
+- [Framework Signatures](references/framework-signatures.md) — Detection patterns for frontend, meta-frameworks, backend, Python, build tools, CSS, database/ORM, testing, API, monorepo, mobile, deployment, state management, and authentication frameworks
 
-Check for package manager indicators in the project root:
+## Workflow
 
-| File | Package Manager | Ecosystem |
-|------|-----------------|-----------|
-| `package-lock.json` | npm | Node.js |
-| `yarn.lock` | Yarn | Node.js |
-| `pnpm-lock.yaml` | pnpm | Node.js |
-| `bun.lockb` | Bun | Node.js |
-| `requirements.txt` | pip | Python |
-| `Pipfile.lock` | pipenv | Python |
-| `poetry.lock` | Poetry | Python |
-| `uv.lock` | uv | Python |
-| `Cargo.lock` | Cargo | Rust |
-| `go.sum` | Go Modules | Go |
-| `Gemfile.lock` | Bundler | Ruby |
-| `composer.lock` | Composer | PHP |
+fn detectPackageManager() {
+  Check project root for lock files (highest confidence signal):
 
-### Step 2: Configuration File Analysis
+  match (files found) {
+    package-lock.json   => npm, Node.js
+    yarn.lock           => Yarn, Node.js
+    pnpm-lock.yaml      => pnpm, Node.js
+    bun.lockb           => Bun, Node.js
+    requirements.txt    => pip, Python
+    Pipfile.lock        => pipenv, Python
+    poetry.lock         => Poetry, Python
+    uv.lock             => uv, Python
+    Cargo.lock          => Cargo, Rust
+    go.sum              => Go Modules, Go
+    Gemfile.lock        => Bundler, Ruby
+    composer.lock       => Composer, PHP
+  }
 
-Examine root-level configuration files for framework indicators:
+  If multiple ecosystems detected => likely monorepo, flag for per-package analysis.
+}
 
-1. **Read `package.json`** - Check `dependencies` and `devDependencies` for framework packages
-2. **Read `pyproject.toml`** - Check `[project.dependencies]` or `[tool.poetry.dependencies]`
-3. **Read framework-specific configs** - `next.config.js`, `vite.config.ts`, `angular.json`, etc.
+fn analyzeManifest(ecosystem) {
+  match (ecosystem) {
+    Node.js => Read package.json — extract dependencies and devDependencies
+    Python  => Read pyproject.toml or setup.py — extract project.dependencies
+    Rust    => Read Cargo.toml — extract dependencies
+    Go      => Read go.mod — extract require directives
+    Ruby    => Read Gemfile — extract gems
+    PHP     => Read composer.json — extract require
+  }
 
-### Step 3: Directory Structure Patterns
+  Also scan for framework-specific config files:
+    Glob: **/next.config.* | **/vite.config.* | **/angular.json | **/svelte.config.* | manage.py
+}
 
-Identify framework conventions:
+fn detectFrameworks(dependencies) {
+  // Match dependencies against known framework signatures
+  // Load references/framework-signatures.md for comprehensive patterns
 
-- `app/` or `src/app/` - Next.js App Router, Angular
-- `pages/` - Next.js Pages Router, Nuxt.js
-- `components/` - React/Vue component-based architecture
-- `routes/` - Remix, SvelteKit
-- `views/` - Django, Rails, Laravel
-- `controllers/` - MVC frameworks (Rails, Laravel, NestJS)
+  For each candidate match:
+    - Record name, role, confidence, and indicators
+    - Check for version in manifest to determine major version
+    - Detect meta-framework relationships (Next.js implies React)
+}
 
-### Step 4: Framework-Specific Patterns
+fn verifyStructure(candidates) {
+  // Confirm candidates by checking directory conventions
+  match (candidate) {
+    Next.js     => verify app/ or pages/ directory exists
+    Angular     => verify src/app/ with *.component.ts files
+    Django      => verify manage.py + app dirs with models.py/views.py
+    NestJS      => verify *.controller.ts + *.module.ts files
+    SvelteKit   => verify src/routes/ with +page.svelte files
+  }
 
-Apply detection patterns from the framework signatures reference.
+  Upgrade or downgrade confidence based on structural evidence.
+}
 
-## Output Format
+fn buildReport(detections) {
+  Compile TechStackReport:
+    1. Ecosystem and package manager (with command examples)
+    2. Frameworks sorted by role (frontend, backend, fullstack, etc.)
+    3. Build tools, testing tools, deployment platform
+    4. Key configuration files to be aware of
+    5. Directory conventions the frameworks expect
+    6. Common development workflow commands
+}
 
-When reporting detected framework, include:
-
-1. **Framework name and version** (if determinable)
-2. **Package manager** (with command examples)
-3. **Key configuration files** to be aware of
-4. **Directory conventions** the framework expects
-5. **Common commands** for development workflow
-
-## Best Practices
-
-- Always verify detection by checking multiple indicators (config + dependencies + structure)
-- Report confidence level when patterns are ambiguous
-- Note when multiple frameworks are present (e.g., Next.js + Tailwind + Prisma)
-- Check for meta-frameworks built on top of base frameworks
-- Consider monorepo patterns where different packages may use different frameworks
-
-## References
-
-See [framework-signatures.md](references/framework-signatures.md) for comprehensive detection patterns for all major frameworks.
+techStackDetection(target) {
+  detectPackageManager() |> analyzeManifest |> detectFrameworks |> verifyStructure |> buildReport
+}

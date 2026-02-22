@@ -62,11 +62,13 @@ Skills use progressive disclosure to minimize context usage:
 ```
 skills/[skill-name]/
 ├── SKILL.md           # Core logic (~7-24 KB, always loaded)
-├── reference.md       # Advanced protocols (loaded when needed)
+├── reference/         # Advanced protocols (loaded when needed)
 ├── templates/         # Document templates
 ├── examples/          # Real-world scenarios
 └── validation.md      # Quality checklists
 ```
+
+For full skill conventions, PICS structure, SudoLang syntax rules, and transformation checklist, see the `writing-skills` skill (`plugins/start/skills/writing-skills/reference/conventions.md`).
 
 ### Agent Structure (Team Plugin)
 
@@ -106,7 +108,7 @@ claude plugin uninstall team@the-startup
 1. Skills are markdown files (`SKILL.md`) - edit directly
 2. Skills activate on trigger terms defined in their YAML frontmatter
 3. Keep `SKILL.md` under ~25 KB for context efficiency
-4. Move advanced content to `reference.md` (loaded on demand)
+4. Move advanced content to `reference/` directory (loaded on demand)
 
 ### Editing Commands
 
@@ -131,7 +133,7 @@ claude plugin uninstall team@the-startup
 ### Progressive Disclosure
 
 Skills load minimal context initially, then progressively load:
-- `reference.md` - Advanced protocols when complexity increases
+- `reference/` - Advanced protocols when complexity increases
 - `templates/` - Document templates when creating artifacts
 - `examples/` - Real-world scenarios when pattern matching
 

@@ -27,7 +27,7 @@ Establishes core domain entities, repository patterns, and database schema.
 
 - [ ] **T1.2 Payment Repository** `[activity: data-architecture]`
 
-  **Prime**: Review existing repository patterns and database schema `[ref: docs/patterns/repository-pattern.md]` `[ref: SDD/Section 4.3]`
+  **Prime**: Review existing repository patterns and database schema `[ref: existing repository patterns]` `[ref: SDD/Section 4.3]`
 
   **Test**: CRUD operations work correctly; queries filter by status and date range; handles concurrent updates
 
@@ -63,7 +63,7 @@ API endpoints and external service integration. These can be developed in parall
 
 - [ ] **T2.2 Stripe Integration** `[parallel: true]` `[component: backend]`
 
-  **Prime**: Read Stripe integration pattern and webhook handling `[ref: docs/interfaces/stripe-payment-integration.md]`
+  **Prime**: Read Stripe integration pattern and webhook handling `[ref: existing integration patterns]`
 
   **Test**: Charges created with correct amount; webhook validates signature; handles declined cards gracefully
 
@@ -99,7 +99,7 @@ UI components and state management for the payment flow.
 
 - [ ] **T3.2 Payment State Management** `[component: frontend]`
 
-  **Prime**: Read state management pattern and async handling `[ref: docs/patterns/state-management.md]`
+  **Prime**: Read state management pattern and async handling `[ref: existing state management patterns]`
 
   **Test**: Loading states during API calls; success state updates UI; error state shows message; retry logic works
 
@@ -205,7 +205,7 @@ Common activity types for specialist selection:
   **Validate**: Unit tests, lint, typecheck
 
 - [ ] **T1.2 Payment Repository** `[activity: data-architecture]`
-  **Prime**: Review repository patterns `[ref: docs/patterns/repository-pattern.md]`
+  **Prime**: Review repository patterns `[ref: existing repository patterns]`
   **Test**: CRUD operations, query filters, concurrency
   **Implement**: Create repository and migration
   **Validate**: Integration tests

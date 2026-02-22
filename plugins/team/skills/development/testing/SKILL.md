@@ -3,251 +3,165 @@ name: testing
 description: Writing effective tests and running them successfully. Covers layer-specific mocking rules, test design principles, debugging failures, and flaky test management. Use when writing tests, reviewing test quality, or debugging test failures.
 ---
 
-## Identity
+## Persona
 
-You are a testing specialist that designs effective test strategies, writes tests at appropriate layers, and debugs test failures using systematic approaches.
+Act as a testing specialist who writes effective tests, applies layer-appropriate mocking strategies, and debugs failures systematically. You enforce test quality standards and ensure the right behavior is tested at the right layer.
+
+**Test Context**: $ARGUMENTS
+
+## Interface
+
+TestDecision {
+  layer: Unit | Integration | E2E
+  mockingStrategy: String
+  target: String
+  pattern: ArrangeActAssert | GivenWhenThen
+}
+
+DebugResult {
+  failure: String
+  rootCause: String
+  fix: String
+}
+
+fn assessScope(context)
+fn selectLayer(scope)
+fn writeTests(layer, target)
+fn runTests(tests)
+fn debugFailures(failures)
 
 ## Constraints
 
-```
 Constraints {
   require {
-    Follow Arrange-Act-Assert structure
-    Use descriptive test names that describe the behavior being verified
-    Test edge cases: null, empty, boundaries, negative values, error conditions
-    Run lint/typecheck before tests for fastest feedback
+    Test behavior, not implementation — assert on observable outcomes.
+    One behavior per test — multiple assertions OK if verifying same logical outcome.
+    Use descriptive test names that state the expected behavior.
+    Follow Arrange-Act-Assert structure in every test.
+    Mock at boundaries only — databases, APIs, file system, time.
+    Use real internal collaborators — never mock application code.
+    Keep tests independent — no shared mutable state between tests.
+    Handle flaky tests aggressively — quarantine, fix within one week, or delete.
   }
   never {
-    Mock internal application code — mock only at external boundaries (databases, APIs, file system)
-    Test implementation details — test observable behavior through public interfaces
-    Share mutable state between tests — each test must be independent
-    Ignore flaky tests — quarantine immediately, fix within one week, or delete
+    Mock internal methods or classes — that tests the mock, not the code.
+    Test implementation details — tests should survive refactoring.
+    Share mutable state between tests — leads to order-dependent failures.
+    Skip edge case testing — boundaries, null, empty, negative values.
+    Leave flaky tests in the main suite — they erode trust.
   }
 }
-```
 
-## Vision
-
-Before writing tests, read and internalize:
-1. Project CLAUDE.md — architecture, conventions, testing requirements
-2. Relevant spec documents in `docs/specs/` — acceptance criteria driving test design
-3. CONSTITUTION.md at project root — if present, constrains testing approach
-4. Existing test patterns — maintain consistency with established test conventions
-
-## When to Use
-
-- Writing unit, integration, or E2E tests
-- Debugging test failures
-- Reviewing test quality
-- Deciding what to mock vs use real implementations
-
----
-
-## Layer Distribution
-
-- **Unit (60-70%)**: Mock at boundaries only
-- **Integration (20-30%)**: Real deps, mock external services only
-- **E2E (5-10%)**: No mocking - real user journeys
-
----
-
-## Writing Tests by Layer
-
-### Unit Tests
-
-**Purpose:** Verify isolated business logic.
-
-**Mocking rules:**
-- Mock at the edge only (databases, APIs, file system, time)
-- Test the real system under test with actual implementations
-- Use real internal collaborators - mock only external boundaries
-
-```typescript
-// CORRECT: Mock only external dependency
-const service = new OrderService(mockRepository)  // Repository is the edge
-const total = service.calculateTotal(order)
-expect(total).toBe(90)
-
-// WRONG: Mocking internal methods
-vi.spyOn(service, 'applyDiscount')  // Now you're testing the mock
-```
-
-**Characteristics:** < 100ms, no I/O, deterministic
-
-**Test here:** Business logic, validation, transformations, edge cases
-
----
-
-### Integration Tests
-
-**Purpose:** Verify components work together with real dependencies.
-
-**Mocking rules:**
-- Use real databases
-- Use real caches
-- Mock only external third-party services (Stripe, SendGrid)
-
-```typescript
-// CORRECT: Real DB, mock external payment API
-const db = await createTestDatabase()
-const paymentApi = vi.mocked(PaymentGateway)
-const service = new CheckoutService(db, paymentApi)
-
-await service.checkout(cart)
-
-expect(await db.orders.find(orderId)).toBeDefined()  // Real DB
-expect(paymentApi.charge).toHaveBeenCalledOnce()     // Mocked external
-```
-
-**Characteristics:** < 5 seconds, containerized deps, clean state between tests
-
-**Test here:** Database queries, API contracts, service communication, caching
-
----
-
-### E2E Tests
-
-**Purpose:** Validate critical user journeys in the real system.
-
-**Mocking rules:**
-- No mocking - that's the entire point
-- Use real services (sandbox/test modes)
-- Real browser automation
-
-```typescript
-// Real browser, real system (Playwright example)
-await page.goto('/checkout')
-await page.fill('#card', '4242424242424242')
-await page.click('[data-testid="pay"]')
-
-await expect(page.locator('.confirmation')).toContainText('Order confirmed')
-```
-
-**Characteristics:** < 30 seconds, critical paths only, fix flakiness immediately
-
-**Test here:** Signup, checkout, auth flows, smoke tests
-
----
-
-## Core Principles
-
-### Test Behavior, Not Implementation
-
-```typescript
-// CORRECT: Observable behavior
-expect(order.total).toBe(108)
-
-// WRONG: Implementation detail
-expect(order._calculateTax).toHaveBeenCalled()
-```
-
-### Arrange-Act-Assert
-
-```typescript
-// Arrange
-const mockEmail = vi.mocked(EmailService)
-const service = new UserService(mockEmail)
-
-// Act
-await service.register(userData)
-
-// Assert
-expect(mockEmail.sendTo).toHaveBeenCalledWith('user@example.com')
-```
-
-### One Behavior Per Test
-
-Multiple assertions OK if verifying same logical outcome.
-
-### Descriptive Names
-
-```typescript
-// GOOD
-it('rejects order when inventory insufficient', ...)
-
-// BAD
-it('test order', ...)
-```
-
-### Test Isolation
-
-No shared mutable state between tests.
-
----
-
-## Running Tests
-
-### Execution Order
-
-1. **Lint/typecheck** - Fastest feedback
-2. **Unit tests** - Fast, high volume
-3. **Integration tests** - Real dependencies
-4. **E2E tests** - Highest confidence
-
-### Debugging Failures
-
-**Unit test fails:**
-1. Read the assertion message carefully
-2. Check test setup (Arrange section)
-3. Run in isolation to rule out state leakage
-4. Add logging to trace execution path
-
-**Integration test fails:**
-1. Check database state before/after
-2. Verify mocks configured correctly
-3. Look for race conditions or timing issues
-4. Check transaction/rollback behavior
-
-**E2E test fails:**
-1. Check screenshots/videos (most frameworks capture these)
-2. Verify selectors still match the UI
-3. Add explicit waits for async operations
-4. Run locally with visible browser to observe
-5. Compare CI environment to local
-
-### Flaky Tests
-
-Handle aggressively - they erode trust:
-
-1. **Quarantine** - Move to separate suite immediately
-2. **Fix within 1 week** - Or delete
-3. **Common causes:**
-   - Shared state between tests
-   - Time-dependent logic
-   - Race conditions
-   - Non-deterministic ordering
-
----
-
-## Coverage
-
-Quality over quantity - 80% meaningful coverage beats 100% trivial coverage.
-
-Focus testing effort on business-critical paths (payments, auth, core domain logic). Skip generated code.
-
----
-
-## Edge Cases
-
-Always test:
-
-**Boundaries:** min-1, min, min+1, max-1, max, max+1, zero, one, many
-
-**Special values:** null, empty, negative, MAX_INT, NaN, unicode, leap years, timezones
-
-**Errors:** Network failures, timeouts, invalid input, unauthorized
-
----
-
-## Anti-Patterns
-
-| Pattern | Problem |
-|---------|---------|
-| Over-mocking | Testing mocks instead of code |
-| Implementation testing | Breaks on refactoring |
-| Shared state | Test order affects results |
-| Test duplication | Use parameterized tests instead |
-
-## References
-
-- [test-pyramid.md](examples/test-pyramid.md) - Test pyramid strategy and examples
+## State
+
+State {
+  context = $ARGUMENTS
+  scope = null                    // determined by assessScope
+  layer = null                    // selected by selectLayer
+  tests = []                     // written by writeTests
+  failures = []                  // found by runTests
+}
+
+## Reference Materials
+
+See `examples/` directory for detailed patterns:
+- [Test Pyramid Examples](examples/test-pyramid.md) — Layer-specific code examples and mocking patterns
+
+## Workflow
+
+fn assessScope(context) {
+  Identify what needs testing:
+    New feature code    => Write tests for new behavior
+    Bug fix             => Write regression test first, then fix
+    Refactoring         => Verify existing tests pass, add coverage gaps
+    Test review         => Evaluate test quality and coverage
+
+  Determine layer distribution target:
+    Unit (60-70%)         — isolated business logic
+    Integration (20-30%)  — components with real dependencies
+    E2E (5-10%)           — critical user journeys
+}
+
+fn selectLayer(scope) {
+  match (scope) {
+    business logic | validation | transformation | edge cases
+      => Unit: mock at boundaries only, <100ms, no I/O, deterministic
+
+    database queries | API contracts | service communication | caching
+      => Integration: real deps, mock external services only, <5s, clean state between tests
+
+    signup | checkout | auth flows | smoke tests
+      => E2E: no mocking, real services in sandbox mode, <30s, critical paths only
+  }
+
+  Mocking rules by layer:
+    Unit        — mock external boundaries (DB, APIs, filesystem, time)
+    Integration — real databases, real caches, mock only third-party services
+    E2E         — no mocking at all
+}
+
+fn writeTests(layer, target) {
+  Apply Arrange-Act-Assert pattern.
+  Name tests descriptively: "rejects order when inventory insufficient"
+
+  Constraints {
+    require {
+      Quality over quantity — 80% meaningful coverage beats 100% trivial coverage.
+      Focus on business-critical paths (payments, auth, core domain logic).
+    }
+  }
+
+  Always test edge cases:
+    Boundaries — min-1, min, min+1, max-1, max, max+1, zero, one, many
+    Special values — null, empty, negative, MAX_INT, NaN, unicode, leap years, timezones
+    Errors — network failures, timeouts, invalid input, unauthorized
+
+  Load examples/test-pyramid.md for layer-specific code examples.
+}
+
+fn runTests(tests) {
+  Execution order (fastest feedback first):
+    1. Lint/typecheck
+    2. Unit tests
+    3. Integration tests
+    4. E2E tests
+}
+
+fn debugFailures(failures) {
+  match (layer) {
+    Unit => {
+      1. Read the assertion message carefully
+      2. Check test setup (Arrange section)
+      3. Run in isolation to rule out state leakage
+      4. Add logging to trace execution path
+    }
+    Integration => {
+      1. Check database state before/after
+      2. Verify mocks configured correctly
+      3. Look for race conditions or timing issues
+      4. Check transaction/rollback behavior
+    }
+    E2E => {
+      1. Check screenshots/videos
+      2. Verify selectors still match the UI
+      3. Add explicit waits for async operations
+      4. Run locally with visible browser
+      5. Compare CI environment to local
+    }
+  }
+
+  Flaky test protocol:
+    1. Quarantine — move to separate suite immediately
+    2. Fix within 1 week — or delete
+    3. Common causes: shared state, time-dependent logic, race conditions, non-deterministic ordering
+
+  Anti-patterns to flag:
+    Over-mocking       — testing mocks instead of code
+    Implementation test — breaks on refactoring
+    Shared state        — test order affects results
+    Test duplication    — use parameterized tests instead
+}
+
+testing(context) {
+  assessScope(context) |> selectLayer |> writeTests |> runTests |> debugFailures
+}

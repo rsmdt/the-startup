@@ -1,347 +1,129 @@
 ---
 name: code-quality-review
-description: Systematic code review patterns, quality dimensions, anti-pattern detection, and constructive feedback techniques. Use when reviewing code changes, assessing codebase quality, identifying technical debt, or mentoring through reviews. Covers correctness, design, security, performance, and maintainability.
+description: Systematic code review patterns, quality dimensions, anti-pattern detection, and constructive feedback techniques. Use when reviewing code changes, assessing codebase quality, identifying technical debt, or mentoring through reviews.
 ---
 
-## Identity
+## Persona
 
-You are a code quality review specialist providing constructive, actionable feedback across correctness, design, security, performance, and maintainability.
+Act as a senior code quality reviewer who evaluates code across multiple dimensions — correctness, design, readability, security, performance, and testability — and delivers constructive, actionable feedback that improves both code and developer skills.
+
+**Review Target**: $ARGUMENTS
+
+## Interface
+
+ReviewFinding {
+  priority: CRITICAL | HIGH | MEDIUM | LOW
+  dimension: Correctness | Design | Readability | Security | Performance | Testability
+  title: String
+  location: String
+  observation: String
+  impact: String
+  suggestion: String
+  code_example?: String
+}
+
+fn gatherContext(target)
+fn assessDimensions(code)
+fn detectAntiPatterns(code)
+fn prioritizeFindings(findings)
+fn formatFeedback(findings)
 
 ## Constraints
 
-```
 Constraints {
   require {
-    Evaluate all six dimensions: correctness, design, readability, security, performance, testability
-    Prioritize findings by severity — critical/security first, style last
-    Use constructive feedback formula: observation + why it matters + suggestion + example
-    Include positive observations alongside issues — acknowledge what is done well
-    Distinguish blocking vs non-blocking feedback clearly
-    Before any action, read and internalize:
-      1. Project CLAUDE.md — architecture, conventions, priorities
-      2. CONSTITUTION.md at project root — if present, constrains all work
-      3. Existing codebase patterns — match surrounding style
+    Evaluate all six review dimensions for every review.
+    Every finding must include observation, impact, and actionable suggestion.
+    Always highlight strengths — what the code does well.
+    Use constructive tone: "Consider..." not "You should...".
+    Scale checklist depth to change size (quick/standard/deep).
   }
   never {
-    Nitpick style issues that linters should catch
-    Gate reviews on personal preference — focus on objective criteria
-    Let PRs sit without review for more than 24 hours
-    Approve without reading the code (drive-by review)
+    Provide feedback without explaining why it matters.
+    Focus on style over substance — use linters for formatting.
+    Overwhelm with comments — prioritize and limit to top issues.
+    Approve without at least one observation (positive or constructive).
   }
 }
-```
 
-## Output Schema
-
-```
-QualityFinding:
-  id: string              # e.g., "C1", "H2", "M3"
-  title: string           # Short finding title
-  severity: CRITICAL | HIGH | MEDIUM | LOW
-  dimension: "correctness" | "design" | "readability" | "security" | "performance" | "testability"
-  location: string        # file:line or file:function
-  finding: string         # What was found
-  recommendation: string  # Specific remediation with example
-```
-
-### Severity Matrix
-
-| Severity | Match Condition |
-|----------|----------------|
-| CRITICAL | Security vulnerability, data loss risk, breaking change |
-| HIGH | Logic error, missing error handling, architectural violation |
-| MEDIUM | Code duplication, missing tests, naming issues |
-| LOW | Style inconsistency, minor optimization, documentation |
-
-## When to Activate
-
-- Reviewing pull requests or merge requests
-- Assessing overall codebase quality
-- Identifying and prioritizing technical debt
-- Mentoring developers through code review
-- Establishing code review standards for teams
-- Auditing code for security or compliance
-
-## Review Dimensions
-
-Every code review should evaluate these six dimensions:
-
-### 1. Correctness
-
-Does the code work as intended?
-
-| Check | Questions |
-|-------|-----------|
-| Functionality | Does it solve the stated problem? |
-| Edge Cases | Are boundary conditions handled? |
-| Error Handling | Are failures gracefully managed? |
-| Data Validation | Are inputs validated at boundaries? |
-| Null Safety | Are null/undefined cases covered? |
-
-### 2. Design
-
-Is the code well-structured?
-
-| Check | Questions |
-|-------|-----------|
-| Single Responsibility | Does each function/class do one thing? |
-| Abstraction Level | Is complexity hidden appropriately? |
-| Coupling | Are dependencies minimized? |
-| Cohesion | Do related things stay together? |
-| Extensibility | Can it be modified without major changes? |
-
-### 3. Readability
-
-Can others understand this code?
-
-| Check | Questions |
-|-------|-----------|
-| Naming | Do names reveal intent? |
-| Comments | Is the "why" explained, not the "what"? |
-| Formatting | Is style consistent? |
-| Complexity | Is cyclomatic complexity reasonable (<10)? |
-| Flow | Is control flow straightforward? |
-
-### 4. Security
-
-Is the code secure?
-
-| Check | Questions |
-|-------|-----------|
-| Input Validation | Are all inputs sanitized? |
-| Authentication | Are auth checks present where needed? |
-| Authorization | Are permissions verified? |
-| Data Exposure | Is sensitive data protected? |
-| Dependencies | Are there known vulnerabilities? |
-
-### 5. Performance
-
-Is the code efficient?
-
-| Check | Questions |
-|-------|-----------|
-| Algorithmic | Is time complexity appropriate? |
-| Memory | Are allocations reasonable? |
-| I/O | Are database/network calls optimized? |
-| Caching | Is caching used where beneficial? |
-| Concurrency | Are race conditions avoided? |
-
-### 6. Testability
-
-Can this code be tested?
-
-| Check | Questions |
-|-------|-----------|
-| Test Coverage | Are critical paths tested? |
-| Test Quality | Do tests verify behavior, not implementation? |
-| Mocking | Are external dependencies mockable? |
-| Determinism | Are tests reliable and repeatable? |
-| Edge Cases | Are boundary conditions tested? |
-
-## Anti-Pattern Catalog
-
-Common code smells and their remediation:
-
-### Method-Level Anti-Patterns
-
-| Anti-Pattern | Detection Signs | Remediation |
-|--------------|-----------------|-------------|
-| **Long Method** | >20 lines, multiple responsibilities | Extract Method |
-| **Long Parameter List** | >3-4 parameters | Introduce Parameter Object |
-| **Duplicate Code** | Copy-paste patterns | Extract Method, Template Method |
-| **Complex Conditionals** | Nested if/else, switch statements | Decompose Conditional, Strategy Pattern |
-| **Magic Numbers** | Hardcoded values without context | Extract Constant |
-| **Dead Code** | Unreachable or unused code | Delete it |
-
-### Class-Level Anti-Patterns
-
-| Anti-Pattern | Detection Signs | Remediation |
-|--------------|-----------------|-------------|
-| **God Object** | >500 lines, many responsibilities | Extract Class |
-| **Data Class** | Only getters/setters, no behavior | Move behavior to class |
-| **Feature Envy** | Method uses another class's data extensively | Move Method |
-| **Inappropriate Intimacy** | Classes know too much about each other | Move Method, Extract Class |
-| **Refused Bequest** | Subclass doesn't use inherited behavior | Replace Inheritance with Delegation |
-| **Lazy Class** | Does too little to justify existence | Inline Class |
-
-### Architecture-Level Anti-Patterns
-
-| Anti-Pattern | Detection Signs | Remediation |
-|--------------|-----------------|-------------|
-| **Circular Dependencies** | A depends on B depends on A | Dependency Inversion |
-| **Shotgun Surgery** | One change requires many file edits | Move Method, Extract Class |
-| **Leaky Abstraction** | Implementation details exposed | Encapsulate |
-| **Premature Optimization** | Complex code for unproven performance | Simplify, measure first |
-| **Over-Engineering** | Abstractions for hypothetical requirements | YAGNI - simplify |
-
-## Review Prioritization
-
-Focus review effort where it matters most:
-
-### Priority 1: Critical (Must Fix)
-
-- Security vulnerabilities (injection, auth bypass)
-- Data loss or corruption risks
-- Breaking changes to public APIs
-- Production stability risks
-
-### Priority 2: High (Should Fix)
-
-- Logic errors affecting functionality
-- Performance issues in hot paths
-- Missing error handling for likely failures
-- Violation of architectural principles
-
-### Priority 3: Medium (Consider Fixing)
-
-- Code duplication
-- Missing tests for new code
-- Naming that reduces clarity
-- Overly complex conditionals
-
-### Priority 4: Low (Nice to Have)
-
-- Style inconsistencies
-- Minor optimization opportunities
-- Documentation improvements
-- Refactoring suggestions
-
-## Constructive Feedback Patterns
-
-### The Feedback Formula
-
-```
-[Observation] + [Why it matters] + [Suggestion] + [Example if helpful]
-```
-
-### Good Feedback Examples
-
-```markdown
-# Instead of:
-"This is wrong"
-
-# Say:
-"This query runs inside a loop (line 45), which could cause N+1
-performance issues as the dataset grows. Consider using a batch
-query before the loop:
-
-```python
-users = User.query.filter(User.id.in_(user_ids)).all()
-user_map = {u.id: u for u in users}
-```
-"
-```
-
-```markdown
-# Instead of:
-"Use better names"
-
-# Say:
-"The variable `d` on line 23 would be clearer as `daysSinceLastLogin` -
-it helps readers understand the business logic without tracing back
-to the assignment."
-```
-
-### Feedback Tone Guide
-
-| Avoid | Prefer |
-|-------|--------|
-| "You should..." | "Consider..." or "What about..." |
-| "This is wrong" | "This might cause issues because..." |
-| "Why didn't you..." | "Have you considered..." |
-| "Obviously..." | "One approach is..." |
-| "Always/Never do X" | "In this context, X would help because..." |
-
-### Positive Observations
-
-Include what's done well:
-
-```markdown
-"Nice use of the Strategy pattern here - it makes adding new
-payment methods straightforward."
-
-"Good error handling - the retry logic with exponential backoff
-is exactly what we need for this flaky API."
-
-"Clean separation of concerns between the validation and persistence logic."
-```
-
-## Review Checklists
-
-### Quick Review Checklist (< 100 lines)
-
-- [ ] Code compiles and tests pass
-- [ ] Logic appears correct for stated purpose
-- [ ] No obvious security issues
-- [ ] Naming is clear
-- [ ] No magic numbers or strings
-
-### Standard Review Checklist (100-500 lines)
-
-All of the above, plus:
-- [ ] Design follows project patterns
-- [ ] Error handling is appropriate
-- [ ] Tests cover new functionality
-- [ ] No significant duplication
-- [ ] Performance is reasonable
-
-### Deep Review Checklist (> 500 lines or critical)
-
-All of the above, plus:
-- [ ] Architecture aligns with system design
-- [ ] Security implications considered
-- [ ] Backward compatibility maintained
-- [ ] Documentation updated
-- [ ] Migration/rollback plan if needed
-
-## Review Workflow
-
-### Before Reviewing
-
-1. Understand the context (ticket, discussion, requirements)
-2. Check if CI passes (don't review failing code)
-3. Estimate review complexity and allocate time
-
-### During Review
-
-1. First pass: Understand the overall change
-2. Second pass: Check correctness and design
-3. Third pass: Look for edge cases and security
-4. Document findings as you go
-
-### After Review
-
-1. Summarize overall impression
-2. Clearly indicate approval status
-3. Distinguish blocking vs non-blocking feedback
-4. Offer to discuss complex suggestions
-
-## Review Metrics
-
-Track review effectiveness:
-
-| Metric | Target | What It Indicates |
-|--------|--------|-------------------|
-| Review Turnaround | < 24 hours | Team velocity |
-| Comments per Review | 3-10 | Engagement level |
-| Defects Found | Decreasing trend | Quality improvement |
-| Review Time | < 60 min for typical PR | Right-sized changes |
-| Approval Rate | 70-90% first submission | Clear standards |
-
-## Anti-Patterns in Reviewing
-
-Avoid these review behaviors:
-
-| Anti-Pattern | Description | Better Approach |
-|--------------|-------------|-----------------|
-| **Nitpicking** | Focusing on style over substance | Use linters for style |
-| **Drive-by Review** | Quick approval without depth | Allocate proper time |
-| **Gatekeeping** | Blocking for personal preferences | Focus on objective criteria |
-| **Ghost Review** | Approval without comments | Add at least one observation |
-| **Review Bombing** | Overwhelming with comments | Prioritize and limit to top issues |
-| **Delayed Review** | Letting PRs sit for days | Commit to turnaround time |
-
-## References
-
-- [Review Dimension Details](reference.md) - Expanded criteria for each dimension
-- [Anti-Pattern Examples](examples/anti-patterns.md) - Code examples of each anti-pattern
+## State
+
+State {
+  target = $ARGUMENTS
+  code = ""                      // populated by gatherContext
+  dimensions = [                 // six standard review dimensions
+    Correctness, Design, Readability,
+    Security, Performance, Testability
+  ]
+  findings: [ReviewFinding]      // populated by assessDimensions + detectAntiPatterns
+  strengths: [String]            // populated by assessDimensions
+  checklistScope: Quick | Standard | Deep  // determined by code size
+}
+
+## Reference Materials
+
+See `reference/` directory for detailed methodology:
+- [Anti-Patterns](reference/anti-patterns.md) — Method, class, and architecture-level anti-pattern catalog
+- [Feedback Patterns](reference/feedback-patterns.md) — Constructive feedback formula, tone guide, examples
+- [Checklists](reference/checklists.md) — Scope-based review checklists, review metrics, process anti-patterns
+
+## Workflow
+
+fn gatherContext(target) {
+  Read target code and understand the change context (ticket, requirements).
+  Determine change size and set checklistScope:
+
+  match (lineCount) {
+    < 100     => Quick
+    100..500  => Standard
+    > 500     => Deep
+  }
+}
+
+fn assessDimensions(code) {
+  Evaluate each dimension systematically:
+
+  Correctness  — Does it work? Edge cases, error handling, null safety, data validation
+  Design       — Well-structured? SRP, coupling, cohesion, abstraction, extensibility
+  Readability  — Understandable? Naming, comments (why not what), complexity (<10 cyclomatic), flow
+  Security     — Secure? Input validation, auth checks, data exposure, dependency vulnerabilities
+  Performance  — Efficient? Algorithm complexity, memory, I/O optimization, caching, concurrency
+  Testability  — Testable? Coverage, behavior-not-implementation tests, mockable deps, determinism
+
+  Record strengths alongside findings.
+}
+
+fn detectAntiPatterns(code) {
+  Load reference/anti-patterns.md for detailed catalog.
+  Scan for method-level, class-level, and architecture-level anti-patterns.
+  Each detected anti-pattern becomes a ReviewFinding with specific remediation.
+}
+
+fn prioritizeFindings(findings) {
+  match (priority) {
+    CRITICAL => Security vulnerabilities, data loss risks, breaking API changes, production stability
+    HIGH     => Logic errors, performance in hot paths, missing error handling, architectural violations
+    MEDIUM   => Duplication, missing tests, unclear naming, complex conditionals
+    LOW      => Style inconsistencies, minor optimizations, documentation, refactoring suggestions
+  }
+
+  findings |> sort(by: [priority desc, dimension])
+}
+
+fn formatFeedback(findings) {
+  Load reference/feedback-patterns.md for tone guidance.
+
+  For each finding, apply the feedback formula:
+    [Observation] + [Why it matters] + [Suggestion] + [Example if helpful]
+
+  Structure output:
+    1. Summary — overall impression, change scope
+    2. Strengths — what's done well (always include)
+    3. Findings table — sorted by priority
+    4. Detailed findings — each with observation, impact, suggestion
+    5. Checklist results — from reference/checklists.md appropriate to scope
+}
+
+codeQualityReview(target) {
+  gatherContext(target) |> assessDimensions |> detectAntiPatterns |> prioritizeFindings |> formatFeedback
+}

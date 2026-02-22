@@ -159,6 +159,60 @@ FUNCTION: handle_operation_errors(operation_result)
 | System Availability | 99.9% uptime | Health check monitoring |
 | Error Rate | < 0.1% | Errors / Total requests |
 
+## Example: UI Component Specification
+
+```markdown
+### Payment Form
+
+**Route**: `/checkout/payment`
+**Component**: `PaymentForm.tsx`
+
+┌─────────────────────────────────────────┐
+│  Payment Details                        │
+│                                         │
+│  Card Number                            │
+│  ┌─────────────────────────────────┐    │
+│  │ 4242 4242 4242 4242             │    │
+│  └─────────────────────────────────┘    │
+│                                         │
+│  Expiry          CVC                    │
+│  ┌────────────┐  ┌────────────┐         │
+│  │ 12/28      │  │ 123        │         │
+│  └────────────┘  └────────────┘         │
+│                                         │
+│  ┌─────────────────────────────────┐    │
+│  │         Pay $49.99              │    │
+│  └─────────────────────────────────┘    │
+│                                         │
+│  🔒 Secured by Stripe                  │
+└─────────────────────────────────────────┘
+
+**States**:
+- Default: Empty form, button disabled
+- Valid: All fields pass validation, button enabled
+- Loading: Button shows spinner, fields disabled
+- Error: Inline field errors (red border + message below field)
+- Success: Redirect to /checkout/confirmation
+
+**Interactions**:
+| Action | Trigger | Result |
+|--------|---------|--------|
+| Card input | Keypress | Auto-format with spaces, validate via Luhn |
+| Expiry input | Keypress | Auto-format MM/YY, reject past dates |
+| Submit | Click Pay | Disable form → Stripe tokenize → POST /api/payments |
+| Stripe error | API response | Show inline error, re-enable form |
+
+**Responsive**:
+- Desktop (>768px): Two-column layout for Expiry/CVC
+- Mobile (<768px): Single column, full-width fields
+
+**Accessibility**:
+- All fields have associated labels
+- Error messages linked via aria-describedby
+- Focus trapped within form during loading state
+- Submit button announces loading state via aria-live
+```
+
 ## What Makes Good Architecture Documentation
 
 1. **Visual + Text** - Diagrams AND written explanations
