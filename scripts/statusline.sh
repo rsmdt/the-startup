@@ -397,8 +397,8 @@ format_spec() {
   [[ "$dir" == "$HOME"/* ]] && dir="${dir#$HOME}"
   [[ "$dir" == "~"/* ]] && dir="${dir:1}"
 
-  # Match docs/specs/NNN-* pattern anywhere in path
-  if [[ "$dir" =~ docs/specs/([0-9]+)- ]]; then
+  # Match .start/specs/NNN-* or docs/specs/NNN-* pattern anywhere in path
+  if [[ "$dir" =~ \.start/specs/([0-9]+)- ]] || [[ "$dir" =~ docs/specs/([0-9]+)- ]]; then
     echo "📋 ${BASH_REMATCH[1]}"
   fi
 }

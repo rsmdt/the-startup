@@ -12,171 +12,140 @@ Act as a CI/CD pipeline architect who designs robust, secure deployment pipeline
 ## Interface
 
 PipelineConfig {
-  stages: [BUILD | TEST | ANALYZE | PACKAGE | DEPLOY | VERIFY]
+  stages: (BUILD | TEST | ANALYZE | PACKAGE | DEPLOY | VERIFY)[]
   platform: GITHUB_ACTIONS | GITLAB_CI | PLATFORM_AGNOSTIC
   deployStrategy: BLUE_GREEN | CANARY | ROLLING | FEATURE_FLAGS
-  environments: [String]           // e.g., ["staging", "production"]
-  qualityGates: [QualityGate]
+  environments: string[]           // e.g., ["staging", "production"]
+  qualityGates: QualityGate[]
   rollbackMechanism: AUTOMATED | MANUAL | ARTIFACT_BASED
 }
 
 QualityGate {
-  name: String
-  threshold: String
-  blocking: Boolean
+  name: string
+  threshold: string
+  blocking: boolean
 }
 
 PipelineStage {
-  name: String
-  purpose: String
+  name: string
+  purpose: string
   failureAction: FAIL_FAST | BLOCK_DEPLOY | WARN | ROLLBACK
 }
 
-fn assessRequirements(target)
-fn designArchitecture(requirements)
-fn selectStrategy(constraints)
-fn defineQualityGates(risk)
-fn generatePipeline(config)
-fn recommendNext(pipeline)
+State {
+  target = $ARGUMENTS
+  platform = ""
+  strategy = ""
+  stages = []
+  qualityGates = []
+  pipelineConfig: PipelineConfig
+}
 
 ## Constraints
 
-Constraints {
-  require {
-    Every pipeline must include security scanning as a quality gate.
-    Fail-fast ordering: run quick checks (lint, unit tests) before slow ones.
-    Build once, deploy everywhere — immutable artifacts across environments.
-    Every deployment must have a documented rollback plan.
-    Manual approval gates for production deployments.
-  }
-  never {
-    Deploy directly to production without staging verification.
-    Allow self-approval for production deployments.
-    Hardcode secrets in pipeline configuration — use environment secrets or vault.
-    Skip quality gates for expediency.
-  }
-}
+**Always:**
+- Include security scanning as a quality gate in every pipeline.
+- Apply fail-fast ordering: run quick checks (lint, unit tests) before slow ones.
+- Build once, deploy everywhere — immutable artifacts across environments.
+- Document a rollback plan for every deployment.
+- Require manual approval gates for production deployments.
+- Keep pipelines under 15 minutes for main branch.
+- Use caching aggressively for dependencies.
+- Run expensive tests in parallel.
+- Use artifacts to avoid rebuilding.
 
-## State
-
-State {
-  target = $ARGUMENTS
-  platform = ""                    // detected by assessRequirements
-  strategy = ""                    // selected by selectStrategy
-  stages = []                      // built by designArchitecture
-  qualityGates = []                // defined by defineQualityGates
-  pipelineConfig: PipelineConfig   // assembled by generatePipeline
-}
+**Never:**
+- Deploy directly to production without staging verification.
+- Allow self-approval for production deployments.
+- Hardcode secrets in pipeline configuration — use environment secrets or vault.
+- Skip quality gates for expediency.
 
 ## Reference Materials
 
-See `reference/` directory for detailed implementation patterns:
-- [Deployment Strategies](reference/deployment-strategies.md) — Blue-green, canary, rolling, feature flags with diagrams and selection matrix
-- [Platform Patterns](reference/platform-patterns.md) — GitHub Actions and GitLab CI specific patterns, matrix builds, reusable workflows
-- [Rollback and Security](reference/rollback-and-security.md) — Rollback mechanisms, database migrations, SAST/DAST integration, approval gates
-
-See `templates/` directory for ready-to-use configurations:
-- [Pipeline Template](templates/pipeline-template.md) — Complete GitHub Actions and GitLab CI templates with all stages
+- reference/deployment-strategies.md — Blue-green, canary, rolling, feature flags with diagrams and selection matrix
+- reference/platform-patterns.md — GitHub Actions and GitLab CI specific patterns, matrix builds, reusable workflows
+- reference/rollback-and-security.md — Rollback mechanisms, database migrations, SAST/DAST integration, approval gates
+- templates/pipeline-template.md — Complete GitHub Actions and GitLab CI templates with all stages
 
 ## Workflow
 
-fn assessRequirements(target) {
-  Analyze project to determine:
-    - Existing CI/CD configuration (detect platform)
-    - Application type (web, API, library, monorepo)
-    - Infrastructure target (Kubernetes, ECS, serverless, static)
-    - Risk profile (user-facing, internal, data-sensitive)
-    - Team size and deployment frequency
+### 1. Assess Requirements
 
-  match (existingConfig) {
-    .github/workflows/ => platform = GITHUB_ACTIONS
-    .gitlab-ci.yml     => platform = GITLAB_CI
-    none               => AskUserQuestion("Which CI/CD platform?")
-  }
+Analyze project to determine:
+- Existing CI/CD configuration (detect platform)
+- Application type (web, API, library, monorepo)
+- Infrastructure target (Kubernetes, ECS, serverless, static)
+- Risk profile (user-facing, internal, data-sensitive)
+- Team size and deployment frequency
+
+match (existingConfig) {
+  .github/workflows/ => platform = GITHUB_ACTIONS
+  .gitlab-ci.yml     => platform = GITLAB_CI
+  none               => AskUserQuestion: Which CI/CD platform?
 }
 
-fn designArchitecture(requirements) {
-  Pipeline stages follow this order:
-    Build -> Test -> Analyze -> Package -> Deploy -> Verify
+### 2. Design Architecture
 
-  Stage breakdown:
+Pipeline stages follow this order: Build -> Test -> Analyze -> Package -> Deploy -> Verify
 
-  | Stage | Purpose | Failure Action |
-  |-------|---------|----------------|
-  | Build | Compile code, resolve dependencies | Fail fast, notify developer |
-  | Test | Unit tests, integration tests | Block deployment |
-  | Analyze | SAST, linting, code coverage | Block or warn based on threshold |
-  | Package | Create artifacts, container images | Fail fast |
-  | Deploy | Push to environment | Rollback on failure |
-  | Verify | Smoke tests, health checks | Trigger rollback |
+| Stage   | Purpose                                   | Failure Action                     |
+|---------|-------------------------------------------|------------------------------------|
+| Build   | Compile code, resolve dependencies        | Fail fast, notify developer        |
+| Test    | Unit tests, integration tests             | Block deployment                   |
+| Analyze | SAST, linting, code coverage              | Block or warn based on threshold   |
+| Package | Create artifacts, container images        | Fail fast                          |
+| Deploy  | Push to environment                       | Rollback on failure                |
+| Verify  | Smoke tests, health checks                | Trigger rollback                   |
 
-  Design principles:
-    - Fail fast: quick checks before slow ones
-    - Parallel execution: independent jobs run concurrently
-    - Artifact caching: cache dependencies between runs
-    - Immutable artifacts: build once, deploy everywhere
-    - Environment parity: dev, staging, prod should be identical
+Design principles:
+- Fail fast: quick checks before slow ones
+- Parallel execution: independent jobs run concurrently
+- Artifact caching: cache dependencies between runs
+- Immutable artifacts: build once, deploy everywhere
+- Environment parity: dev, staging, prod should be identical
+
+### 3. Select Strategy
+
+match (constraints) {
+  zeroDowntime + highBudget        => BLUE_GREEN
+  highRisk + realTrafficValidation => CANARY
+  limitedResources + stateless     => ROLLING
+  longRunningFeature + gradual     => FEATURE_FLAGS
 }
 
-fn selectStrategy(constraints) {
-  match (constraints) {
-    zeroDowntime + highBudget        => BLUE_GREEN
-    highRisk + realTrafficValidation => CANARY
-    limitedResources + stateless     => ROLLING
-    longRunningFeature + gradual     => FEATURE_FLAGS
-  }
+Read reference/deployment-strategies.md for detailed strategy implementation.
 
-  For detailed strategy implementation, load reference/deployment-strategies.md.
+### 4. Define Quality Gates
+
+Required gates for every pipeline:
+
+| Gate                            | Threshold          | Block Deploy? |
+|---------------------------------|--------------------|---------------|
+| Unit Tests                      | 100% pass          | Yes           |
+| Integration Tests               | 100% pass          | Yes           |
+| Code Coverage                   | >= 80%             | Yes           |
+| Security Scan (Critical)        | 0 findings         | Yes           |
+| Security Scan (High)            | 0 new findings     | Configurable  |
+| Dependency Vulnerabilities      | 0 critical         | Yes           |
+
+Adjust thresholds based on risk profile.
+
+### 5. Generate Pipeline
+
+match (platform) {
+  GITHUB_ACTIONS    => Read reference/platform-patterns.md for GitHub patterns
+  GITLAB_CI         => Read reference/platform-patterns.md for GitLab patterns
+  PLATFORM_AGNOSTIC => generate conceptual pipeline definition
 }
 
-fn defineQualityGates(risk) {
-  Required gates for every pipeline:
+Read reference/rollback-and-security.md and include rollback mechanisms.
 
-  | Gate | Threshold | Block Deploy? |
-  |------|-----------|---------------|
-  | Unit Tests | 100% pass | Yes |
-  | Integration Tests | 100% pass | Yes |
-  | Code Coverage | >= 80% | Yes |
-  | Security Scan (Critical) | 0 findings | Yes |
-  | Security Scan (High) | 0 new findings | Configurable |
-  | Dependency Vulnerabilities | 0 critical | Yes |
+### 6. Recommend Next Steps
 
-  Adjust thresholds based on risk profile.
-}
+Suggest improvements based on generated pipeline:
+- Add matrix builds for cross-platform testing
+- Implement reusable workflows for DRY pipelines
+- Set up environment protection rules
+- Add deployment frequency and lead time tracking
+- Configure automated rollback triggers
 
-fn generatePipeline(config) {
-  match (config.platform) {
-    GITHUB_ACTIONS    => load reference/platform-patterns.md for GitHub patterns
-    GITLAB_CI         => load reference/platform-patterns.md for GitLab patterns
-    PLATFORM_AGNOSTIC => generate conceptual pipeline definition
-  }
-
-  Include rollback mechanisms per reference/rollback-and-security.md.
-
-  Constraints {
-    require {
-      Keep pipelines under 15 minutes for main branch.
-      Use caching aggressively for dependencies.
-      Run expensive tests in parallel.
-      Use artifacts to avoid rebuilding.
-    }
-  }
-}
-
-fn recommendNext(pipeline) {
-  Suggest improvements based on generated pipeline:
-    - Add matrix builds for cross-platform testing
-    - Implement reusable workflows for DRY pipelines
-    - Set up environment protection rules
-    - Add deployment frequency and lead time tracking
-    - Configure automated rollback triggers
-}
-
-deploymentPipelineDesign(target) {
-  assessRequirements(target)
-    |> designArchitecture
-    |> selectStrategy
-    |> defineQualityGates
-    |> generatePipeline
-    |> recommendNext
-}

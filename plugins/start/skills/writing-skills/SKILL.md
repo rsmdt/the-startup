@@ -1,6 +1,6 @@
 ---
 name: writing-skills
-description: Use when creating new skills, editing existing skills, auditing skill quality, converting skills to SudoLang conventions, or verifying skills before deployment. Triggers include skill authoring requests, skill review needs, or "the skill doesn't work" complaints.
+description: Use when creating new skills, editing existing skills, auditing skill quality, converting skills to markdown conventions, or verifying skills before deployment. Triggers include skill authoring requests, skill review needs, or "the skill doesn't work" complaints.
 allowed-tools: Task, Read, Write, Glob, Grep, Bash, AskUserQuestion
 ---
 
@@ -13,36 +13,30 @@ Act as a skill authoring specialist that creates, audits, converts, and maintain
 ## Interface
 
 SkillAuditResult {
-  check: String
+  check: string
   status: PASS | WARN | FAIL
-  recommendation?: String
+  recommendation?: string
 }
 
-fn selectMode(request)
-fn checkDuplicates(topic)
-fn createSkill(type)
-fn auditSkill(path)
-fn convertSkill(path)
-fn verifySkill(path)
-fn presentResult(outcome)
+State {
+  request = $ARGUMENTS
+  mode: Create | Audit | Convert
+  skillPath: string
+  type: Technique | Pattern | Reference | Coordination
+}
 
 ## Constraints
 
-Constraints {
-  require {
-    Every skill change requires verification — don't ship based on conceptual analysis alone.
-    Search for duplicates before creating any new skill.
-    Follow the gold-standard conventions defined in reference/conventions.md.
-    Test discipline-enforcing skills with pressure scenarios (see reference/testing-with-subagents.md).
-  }
-  never {
-    Create a skill without checking for duplicates first.
-    Ship a skill without verification (frontmatter, structure, entry point).
-    Leave code fences around SudoLang blocks.
-    Write a description that summarizes the workflow (agents skip the body).
-    Accept "I can see the fix is correct" — test it anyway.
-  }
-}
+**Always:**
+- Verify every skill change — don't ship based on conceptual analysis alone.
+- Search for duplicates before creating any new skill.
+- Follow the gold-standard conventions in reference/conventions.md.
+- Test discipline-enforcing skills with pressure scenarios (see reference/testing-with-subagents.md).
+
+**Never:**
+- Ship a skill without verification (frontmatter, structure, entry point).
+- Write a description that summarizes the workflow (agents skip the body).
+- Accept "I can see the fix is correct" — test it anyway.
 
 ## Red Flags — STOP
 
@@ -57,125 +51,79 @@ If you catch yourself thinking any of these, STOP and follow the full workflow:
 | "The pattern analysis shows..." | Analysis != verification |
 | "No time to test" | Untested skills waste more time when they fail |
 
-## State
-
-State {
-  request = $ARGUMENTS
-  mode: Create | Audit | Convert         // determined by selectMode
-  skillPath = ""                          // path to target SKILL.md
-  type: Technique | Pattern | Reference | Coordination  // for Create mode
-}
-
 ## Reference Materials
 
-See `reference/` and `examples/` for detailed methodology:
-- [Gold-Standard Conventions](reference/conventions.md) — Skill structure, PICS layout, SudoLang syntax, frontmatter spec, transformation checklist
-- [SudoLang Quick Reference](reference/sudolang-quick-reference.md) — Compact syntax reference for writing SudoLang blocks
-- [Common Failures](reference/common-failures.md) — Failure patterns, anti-patterns, symptoms and fixes
-- [Output Format](reference/output-format.md) — Audit checklist guidelines, issue categories
-- [Output Example](examples/output-example.md) — Concrete example of expected output format
-- [Testing with Subagents](reference/testing-with-subagents.md) — Pressure scenarios for discipline-enforcing skills
-- [Persuasion Principles](reference/persuasion-principles.md) — Language patterns for rule-enforcement skills
-- [Canonical Skill Example](examples/canonical-skill.md) — Fully annotated review skill demonstrating all conventions
+- reference/conventions.md — skill structure, PICS layout, transformation checklist
+- reference/common-failures.md — failure patterns, anti-patterns, fixes
+- reference/output-format.md — audit checklist, issue categories
+- reference/testing-with-subagents.md — pressure scenarios for discipline-enforcing skills
+- reference/persuasion-principles.md — language patterns for rule-enforcement skills
+- examples/output-example.md — concrete output example
+- examples/canonical-skill.md — annotated skill demonstrating all conventions
 
 ## Workflow
 
-fn selectMode(request) {
-  match (request) {
-    create | write | new skill  => Create
-    audit | review | fix | "doesn't work" => Audit
-    convert | transform | refactor to SudoLang => Convert
-  }
+### 1. Select Mode
+
+match ($ARGUMENTS) {
+  create | write | new skill                      => Create mode
+  audit | review | fix | "doesn't work"           => Audit mode
+  convert | transform | refactor to markdown       => Convert mode
 }
 
-fn checkDuplicates(topic) {
-  Search existing skills using Glob and Grep:
-    Glob: plugins/*/skills/*/SKILL.md
-    Grep: description fields for keyword overlap
+### 2. Check Duplicates (Create mode only)
 
-  match (overlap) {
-    > 50% functionality => propose updating existing skill
-    < 50%               => proceed with new skill, explain justification
-  }
-}
+Search existing skills:
+1. Glob: `plugins/*/skills/*/SKILL.md`
+2. Grep description fields for keyword overlap.
+3. If >50% functionality overlap: propose updating existing skill instead.
+4. If <50%: proceed with new skill, explain justification.
 
-fn createSkill(type) {
-  1. checkDuplicates(topic)
-  2. Define skill type (Technique, Pattern, Reference, Coordination)
-  3. Write SKILL.md following reference/conventions.md conventions
-  4. verifySkill(path)
+### 3. Create Skill
 
-  Constraints {
-    require {
-      Frontmatter has valid name + description.
-      Body follows PICS + Workflow structure.
-      Entry-point pipe chain present, name matches skill.
-      All SudoLang conventions applied.
-    }
-  }
-}
+1. Run step 2 (Check Duplicates).
+2. Determine skill type (Technique, Pattern, Reference, Coordination).
+3. Read reference/conventions.md for current conventions.
+4. Write SKILL.md following PICS + Workflow structure.
+5. Run step 6 (Verify Skill).
 
-fn auditSkill(path) {
-  1. Read the skill file and all reference/ files
-  2. Run audit checklist per reference/output-format.md
-  3. Identify issue category per reference/output-format.md issue table
-  4. Propose specific fix
-  5. verifySkill(path) — test the fix, don't just analyze
+### 4. Audit Skill
 
-  Constraints {
-    require {
-      Read the actual skill file before auditing.
-      Identify root cause, not just symptoms.
-      Test fix via subagent before proposing.
-    }
-  }
-}
+1. Read the skill file and all reference/ files.
+2. Read reference/output-format.md for audit checklist.
+3. Identify issue category and root cause, not just symptoms.
+4. Propose specific fix.
+5. Test fix via subagent before proposing — don't just analyze.
+6. Run step 6 (Verify Skill).
 
-fn convertSkill(path) {
-  1. Read existing skill completely
-  2. Apply transformation checklist:
-     - [ ] Remove all code fences around SudoLang blocks
-     - [ ] Restructure body into PICS + Workflow sections
-     - [ ] Add `fn` keyword to all function definitions in Workflow
-     - [ ] Create entry-point function (no `fn`, name matches skill) with pipe chain
-     - [ ] Split Constraints into `require {}` / `never {}` sub-blocks
-     - [ ] Move enforcement-worthy Persona rules into `never {}`
-     - [ ] Inline enum values into interface fields; remove `type` aliases
-     - [ ] Separate data interfaces from function signatures
-     - [ ] Replace `infer()` with concrete defaults + comments
-     - [ ] Replace `### Phase N` headings with `fn` definitions
-     - [ ] Externalize heavy content (templates, checklists, output formats) to reference/
-  3. Verify no content/logic was lost in transformation
-  4. verifySkill(path)
-}
+### 5. Convert Skill
 
-fn verifySkill(path) {
-  // Verify frontmatter
-  Read first 10 lines — valid YAML? name + description present?
+1. Read existing skill completely.
+2. Read reference/conventions.md for the transformation checklist.
+3. Apply each checklist item.
+4. Verify no content/logic was lost in transformation.
+5. Run step 6 (Verify Skill).
 
-  // Verify structure
-  Grep for ## headings — PICS sections present?
+### 6. Verify Skill
 
-  // Verify size
-  Line count < 500? If not, identify content to externalize.
+Verify frontmatter: Read first 10 lines — valid YAML? name + description present?
 
-  // Verify conventions
-  No code fences around SudoLang blocks?
-  Entry-point function present without `fn`?
-  Constraints split into require/never?
+Verify structure: Grep for `##` headings — PICS sections present?
 
-  // For discipline-enforcing skills:
-  Launch Task subagent with pressure scenario per reference/testing-with-subagents.md.
-}
+Verify size: Line count < 500? If not, identify content to externalize.
 
-fn presentResult(outcome) {
-  Format report per reference/output-format.md.
-}
+Verify conventions: Read reference/conventions.md and check compliance.
 
-writeSkill(request) {
-  selectMode(request) |> match (mode) {
-    Create  => createSkill
-    Audit   => auditSkill
-    Convert => convertSkill
-  } |> presentResult
+For discipline-enforcing skills: Launch Task subagent with pressure scenario per reference/testing-with-subagents.md.
+
+### 7. Present Result
+
+Format report per reference/output-format.md.
+
+### Entry Point
+
+match (mode) {
+  Create  => steps 2, 3, 7
+  Audit   => steps 4, 7
+  Convert => steps 5, 7
 }

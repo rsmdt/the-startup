@@ -1,7 +1,7 @@
 ---
 name: specify-requirements
-description: Create and validate product requirements documents (PRD). Use when writing requirements, defining user stories, specifying acceptance criteria, analyzing user needs, or working on product-requirements.md files in docs/specs/. Includes validation checklist, iterative cycle pattern, and multi-angle review process.
-allowed-tools: Read, Write, Edit, Task, TodoWrite, Grep, Glob
+description: Create and validate product requirements documents (PRD). Use when writing requirements, defining user stories, specifying acceptance criteria, analyzing user needs, or working on requirements.md files in .start/specs/. Includes validation checklist, iterative cycle pattern, and multi-angle review process.
+allowed-tools: Read, Write, Edit, Task, TodoWrite, Grep, Glob, Skill
 ---
 
 ## Persona
@@ -13,54 +13,45 @@ Act as a product requirements specialist that creates and validates PRDs focusin
 ## Interface
 
 PRDSection {
-  name: String
+  name: string
   status: Complete | NeedsInput | InProgress
-  topic?: String       // what needs clarification, if NeedsInput
+  topic?: string       // what needs clarification, if NeedsInput
 }
-
-fn discover(section)
-fn document(findings)
-fn review(section)
-fn validate(prd)
-
-## Constraints
-
-Constraints {
-  require {
-    Use template.md structure exactly — preserve all sections as defined.
-    Follow iterative cycle: discover → document → review per section.
-    Present ALL agent findings to user — complete responses, not summaries.
-    Wait for user confirmation before proceeding to next cycle.
-    Run validation checklist before declaring PRD complete.
-  }
-  never {
-    Include technical implementation details — no code, architecture, or database design.
-    Include API specifications — belongs in SDD.
-    Skip the multi-angle validation before completing.
-    Remove or reorganize template sections.
-  }
-}
-
-## State
 
 State {
-  specId = ""                    // from $ARGUMENTS or spec directory
-  sections: [PRDSection]         // tracked per template section
-  clarificationMarkers: Number   // count of [NEEDS CLARIFICATION] remaining
+  specId = ""
+  sections: PRDSection[]
+  clarificationMarkers: number
 }
 
 ## PRD Focus Areas
 
-WHAT needs to be built (features, capabilities)
-WHY it matters (problem, value proposition)
-WHO uses it (personas, journeys)
-WHEN it succeeds (metrics, acceptance criteria)
+When discovering and documenting, address four dimensions:
+- **WHAT** needs to be built — features, capabilities
+- **WHY** it matters — problem, value proposition
+- **WHO** uses it — personas, journeys
+- **WHEN** it succeeds — metrics, acceptance criteria
 
-Keep in SDD (not PRD): technical implementation, architecture, database schemas, API specs.
+**Out of scope:** Technical implementation, architecture, database schemas, API specifications — those belong in SDD.
+
+## Constraints
+
+**Always:**
+- Use template.md structure exactly — preserve all sections as defined.
+- Follow iterative cycle: discover → document → review per section.
+- Present ALL agent findings to user — complete responses, not summaries.
+- Wait for user confirmation before proceeding to the next cycle.
+- Run validation checklist before declaring PRD complete.
+
+**Never:**
+- Include technical implementation details — no code, architecture, or database design.
+- Include API specifications — belongs in SDD.
+- Skip the multi-angle validation before completing.
+- Remove or reorganize template sections.
 
 ## Reference Materials
 
-- [Template](template.md) — PRD template structure, write to `docs/specs/[NNN]-[name]/product-requirements.md`
+- [Template](template.md) — PRD template structure, write to `.start/specs/[NNN]-[name]/requirements.md`
 - [Validation](validation.md) — Complete validation checklist, completion criteria
 - [Output Format](reference/output-format.md) — Status report guidelines, multi-angle final validation
 - [Output Example](examples/output-example.md) — Concrete example of expected output format
@@ -68,49 +59,51 @@ Keep in SDD (not PRD): technical implementation, architecture, database schemas,
 
 ## Workflow
 
-fn discover(section) {
-  gaps = identifyMissing(section, template.md)
+### 0. Brainstorm
 
-  launch parallel agents for each gap:
-    market analysis for competitive landscape
-    user research for personas and journeys
-    requirements clarification for edge cases
+Invoke Skill(start:brainstorm) to probe the user's idea before template filling.
 
-  consider: relevant research areas, best practices, success criteria
-}
+Focus on understanding:
+- What problem this solves and for whom.
+- Key constraints and success criteria.
+- Scope boundaries — what's in and what's out.
 
-fn document(findings) {
-  findings |> updatePRD(section)
+Output feeds into the discover/document cycle with clearer context.
 
-  for each marker in [NEEDS CLARIFICATION]:
-    replace with findings content
+### 1. Discover
 
-  Constraints {
-    Focus only on current section being processed.
-    Preserve template.md structure exactly.
-  }
-}
+Identify gaps between what is known and what template.md requires for the current section.
 
-fn review(section) {
-  present ALL agent findings to user
-  show conflicting information or recommendations
-  highlight questions needing clarification
+Launch parallel agents for each gap:
+- Market analysis for competitive landscape.
+- User research for personas and journeys.
+- Requirements clarification for edge cases.
 
-  AskUserQuestion: Approve section | Clarify [topic] | Redo discovery
-}
+Consider relevant research areas, best practices, and success criteria.
 
-fn validate(prd) {
-  run validation.md checklist
-  run multi-angle validation per reference/output-format.md
+### 2. Document
 
-  match (clarificationMarkers) {
-    0     => report status per reference/output-format.md
-    > 0   => return to discover for remaining markers
-  }
-}
+Update the PRD with findings for the current section:
+1. Apply findings to the section being processed.
+2. For each `[NEEDS CLARIFICATION]` marker, replace with findings content.
 
-specifyRequirements(target) {
-  for each section in template:
-    discover(section) |> document |> review
-  validate(prd)
-}
+Focus only on the current section being processed. Preserve template.md structure exactly.
+
+### 3. Review
+
+Present ALL agent findings to user, including:
+- Conflicting information or recommendations.
+- Questions needing clarification.
+
+AskUserQuestion: Approve section | Clarify [topic] | Redo discovery
+
+### 4. Validate
+
+Read `validation.md` and run the checklist. Read `reference/output-format.md` and run multi-angle validation.
+
+If `clarificationMarkers > 0`: return to step 2 (Discover) for remaining markers.
+If `clarificationMarkers = 0`: report status per `reference/output-format.md`.
+
+### Entry Point
+
+When invoked, execute step 0 (Brainstorm) first, then repeat steps 1 through 3 for each section in template.md, then execute step 4 (Validate).

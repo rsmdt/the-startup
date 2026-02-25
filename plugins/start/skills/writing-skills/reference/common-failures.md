@@ -15,11 +15,11 @@ The security review should check for SQL injection vulnerabilities.
 
 **Good (imperative):**
 ```markdown
-fn securityReview() {
-  Search for database queries using Grep.
-  Check each query for string interpolation (vulnerability).
-  Report findings in Finding format.
-}
+### 3. Security Review
+
+Search for database queries using Grep.
+Check each query for string interpolation (vulnerability).
+Report findings in Finding format.
 ```
 
 ---
@@ -30,13 +30,13 @@ fn securityReview() {
 
 **Bad:** `allowed-tools: Task, Bash, Read` with no mention of tools in body.
 
-**Good:** Workflow functions reference tools explicitly:
-```
-fn gatherContext(target) {
-  match (target) {
-    /^\d+$/  => gh pr diff $target    // uses Bash
-    "staged" => git diff --cached     // uses Bash
-  }
+**Good:** Workflow steps reference tools explicitly:
+```markdown
+### 1. Gather Context
+
+match (target) {
+  /^\d+$/  => gh pr diff $target    // uses Bash
+  "staged" => git diff --cached     // uses Bash
 }
 ```
 
@@ -58,24 +58,30 @@ description: Use when reviewing code changes, PRs, or staged files. Handles secu
 
 ---
 
-## Failure: No Execution Entry Point
+## Failure: No Clear Starting Point
 
 **Symptom:** Skill is comprehensive reference but agent doesn't know where to start
 
-**Fix:** Add entry-point function (no `fn` keyword) with pipe chain:
-```
-review(target) {
-  gatherContext(target) |> selectMode |> launchReviews |> synthesize |> nextSteps
+**Fix for linear workflows:** Use numbered `### N. Step Name` headings — execution order is implicit.
+
+**Fix for non-linear workflows:** Add `### Entry Point` with a match block:
+```markdown
+### Entry Point
+
+match (mode) {
+  Create  => steps 2, 3, 7
+  Audit   => steps 4, 7
+  Convert => steps 5, 7
 }
 ```
 
 ---
 
-## Failure: Code Fences Around SudoLang
+## Failure: Code Fences Around Skill Syntax
 
-**Symptom:** Agent treats SudoLang as inert code block, doesn't follow it
+**Symptom:** Agent treats Interface, Constraints, or Workflow blocks as inert code rather than following them
 
-**Fix:** Remove all ` ``` ` wrappers around Interface, Constraints, State, and Workflow blocks.
+**Fix:** Remove all ` ``` ` wrappers around Interface definitions, Constraints, State, and Workflow content. These blocks are instructions, not code samples.
 
 ---
 
@@ -87,8 +93,7 @@ review(target) {
 | 400+ line SKILL.md | Agents skim, miss sections | Extract to reference/ |
 | Audit without reading file | Miss actual issues | Always read the skill |
 | Fix without testing | May not address root cause | Verify fix works |
-| Declarative-only workflow | Agents don't execute | Use imperative fn definitions |
+| Declarative-only workflow | Agents don't execute | Use imperative ### step headings |
 | Description with workflow | Agents skip body | Triggers only in description |
 | `type` aliases for enums | Extra indirection | Inline values into interface fields |
-| `infer()` in State | Opaque initialization | Concrete defaults with comments |
-| `### Phase N` headings | Markdown structure, not SudoLang | fn definitions + pipe chain |
+| Mirrored Always/Never rules | Wastes tokens | Each rule once, most natural framing |

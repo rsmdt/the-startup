@@ -1,6 +1,6 @@
 ---
 name: specify-meta
-description: Scaffold, status-check, and manage specification directories. Handles auto-incrementing IDs, README tracking, phase transitions, and decision logging in docs/specs/. Used by both specify and implement workflows.
+description: Scaffold, status-check, and manage specification directories. Handles auto-incrementing IDs, README tracking, phase transitions, and decision logging in .start/specs/. Falls back to docs/specs/ for legacy specs. Used by both specify and implement workflows.
 allowed-tools: Read, Write, Edit, Bash, TodoWrite, Grep, Glob
 ---
 
@@ -11,99 +11,89 @@ Act as a specification workflow orchestrator that manages specification director
 ## Interface
 
 SpecStatus {
-  id: String               // 3-digit zero-padded (001, 002, ...)
-  name: String
-  directory: String         // docs/specs/[NNN]-[name]/
+  id: string               // 3-digit zero-padded (001, 002, ...)
+  name: string
+  directory: string         // .start/specs/[NNN]-[name]/ (legacy: docs/specs/)
   phase: Initialization | PRD | SDD | PLAN | Ready
-  documents: [{
-    name: String
+  documents: {
+    name: string
     status: pending | in_progress | completed | skipped
-    notes?: String
-  }]
+    notes?: string
+  }[]
 }
 
-fn scaffold(featureName)
-fn readStatus(specId)
-fn transitionPhase(specId, phase)
-fn logDecision(specId, decision, rationale)
+State {
+  specId = ""
+  currentPhase: Initialization | PRD | SDD | PLAN | Ready
+  documents: []
+}
 
 ## Constraints
 
-Constraints {
-  require {
-    Use spec.py (co-located with this SKILL.md) for all directory operations.
-    Create README.md from template.md when scaffolding new specs.
-    Log all significant decisions with date, decision, and rationale.
-    Confirm next steps with user before phase transitions.
-  }
-  never {
-    Create spec directories manually — always use spec.py.
-    Transition phases without updating README.md.
-    Skip decision logging when user makes workflow choices.
-  }
-}
+**Always:**
+- Use spec.py (co-located with this SKILL.md) for all directory operations.
+- Create README.md from template.md when scaffolding new specs.
+- Log all significant decisions with date, decision, and rationale.
+- Confirm next steps with user before phase transitions.
 
-## State
-
-State {
-  specId = ""                // set by scaffold or readStatus
-  currentPhase: Initialization | PRD | SDD | PLAN | Ready
-  documents: []              // populated by readStatus
-}
+**Never:**
+- Create spec directories manually — always use spec.py.
+- Transition phases without updating README.md.
+- Skip decision logging when user makes workflow choices.
 
 ## Reference Materials
 
-See `reference/` directory for detailed methodology:
-- [Spec Management](reference/spec-management.md) — Spec ID format, directory structure, script commands, phase workflow, decision logging
+- [Spec Management](reference/spec-management.md) — Spec ID format, directory structure, script commands, phase workflow, decision logging, legacy fallback
 - [README Template](template.md) — Template for spec README.md files
 
 ## Workflow
 
-fn scaffold(featureName) {
-  // Create new spec with auto-incrementing ID
-  Bash(`spec.py "$featureName"`)
+### 1. Scaffold
 
-  Create README.md from template.md
-  Report created spec status
+Create a new spec with an auto-incrementing ID.
+
+1. Run `Bash("spec.py \"$featureName\"")`.
+2. Create README.md from template.md.
+3. Report the created spec status.
+
+### 2. Read Status
+
+Read existing spec metadata.
+
+1. Run `Bash("spec.py \"$specId\" --read")`.
+2. Parse TOML output into SpecStatus.
+3. Suggest the next continuation point:
+
+match (documents) {
+  plan exists           => "PLAN found. Proceed to implementation?"
+  sdd exists, no plan   => "SDD found. Continue to PLAN?"
+  prd exists, no sdd    => "PRD found. Continue to SDD?"
+  no documents          => "Start from PRD?"
 }
 
-fn readStatus(specId) {
-  // Read existing spec metadata
-  Bash(`spec.py "$specId" --read`)
+### 3. Transition Phase
 
-  Parse TOML output into SpecStatus
+Update the spec directory to reflect the new phase.
 
-  // Suggest continuation point
-  match (documents) {
-    plan exists           => "PLAN found. Proceed to implementation?"
-    sdd exists, no plan   => "SDD found. Continue to PLAN?"
-    prd exists, no sdd    => "PRD found. Continue to SDD?"
-    no documents          => "Start from PRD?"
-  }
+1. Update README.md document status and current phase.
+2. Log the phase transition in the decisions table.
+3. Hand off to the document-specific skill:
+
+match (phase) {
+  PRD  => specify-requirements skill
+  SDD  => specify-solution skill
+  PLAN => specify-plan skill
 }
 
-fn transitionPhase(specId, phase) {
-  Update README.md document status and current phase.
-  Log phase transition in decisions table.
+4. On completion, return here for the next phase transition.
 
-  // Handoff to document-specific skills:
-  match (phase) {
-    PRD  => specify-requirements skill
-    SDD  => specify-solution skill
-    PLAN => specify-plan skill
-  }
+### 4. Log Decision
 
-  // On completion, return here for next phase transition.
-}
+Append a row to the README.md Decisions Log table. Update the Last Updated field.
 
-fn logDecision(specId, decision, rationale) {
-  Append row to README.md Decisions Log table.
-  Update Last Updated field.
-}
+### Entry Point
 
-specifyMeta($ARGUMENTS) {
-  match ($ARGUMENTS) {
-    featureName (new)   => scaffold(featureName)
-    specId (existing)   => readStatus(specId) |> transitionPhase |> logDecision
-  }
+match ($ARGUMENTS) {
+  featureName (new)   => execute step 1 (Scaffold)
+  specId (existing)   => execute steps 2, 3, and 4 in order
 }

@@ -30,7 +30,7 @@ Constraints {
 
 Before reviewing, read and internalize:
 1. Project CLAUDE.md — architecture, conventions, priorities
-2. Relevant spec documents in `docs/specs/` — if concurrency requirements are specified
+2. Relevant spec documents in `.start/specs/` — if concurrency requirements are specified
 3. CONSTITUTION.md at project root — if present, constrains all work
 4. Existing codebase patterns — understand concurrency model in use
 

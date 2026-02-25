@@ -10,17 +10,30 @@
 ## Directory Structure
 
 ```
-docs/specs/
+.start/specs/
 ├── 001-user-authentication/
 │   ├── README.md                 # Managed by specify-meta skill
-│   ├── product-requirements.md   # Created by requirements-gathering-analysis skill
-│   ├── solution-design.md        # Created by specify-solution skill
-│   └── implementation-plan.md    # Created by specify-plan skill
+│   ├── requirements.md           # Created by specify-requirements skill
+│   ├── solution.md               # Created by specify-solution skill
+│   └── plan/                     # Created by specify-plan skill
+│       ├── README.md             # Plan manifest (phases, checklist, context)
+│       ├── phase-1.md            # Per-phase tasks and TDD structure
+│       ├── phase-2.md
+│       └── phase-3.md
 ├── 002-payment-processing/
 │   └── ...
 └── 003-notification-system/
     └── ...
 ```
+
+## Legacy Fallback
+
+The script supports backward compatibility with `docs/specs/`:
+
+- **Read**: Checks `.start/specs/` first, falls back to `docs/specs/`
+- **ID scanning**: Scans both directories, takes max ID across both
+- **File names**: Supports both new (`requirements.md`, `solution.md`) and legacy (`product-requirements.md`, `solution-design.md`)
+- **Plan**: Supports both `plan/` directory and legacy `implementation-plan.md`
 
 ## Script Commands
 
@@ -30,10 +43,12 @@ spec.py "feature name here"
 ```
 **Output:**
 ```
-Created spec directory: docs/specs/005-feature-name-here
+Created spec directory: .start/specs/005-feature-name-here
 Spec ID: 005
 Specification directory created successfully
 ```
+
+Creates the spec directory with an empty `plan/` subdirectory.
 
 ### Read Spec Metadata
 ```bash
@@ -43,25 +58,32 @@ spec.py 005 --read
 ```toml
 id = "005"
 name = "feature-name-here"
-dir = "docs/specs/005-feature-name-here"
+dir = ".start/specs/005-feature-name-here"
 
 [spec]
-prd = "docs/specs/005-feature-name-here/product-requirements.md"
-sdd = "docs/specs/005-feature-name-here/solution-design.md"
+prd = ".start/specs/005-feature-name-here/requirements.md"
+sdd = ".start/specs/005-feature-name-here/solution.md"
+plan_dir = ".start/specs/005-feature-name-here/plan"
+plan = ".start/specs/005-feature-name-here/plan/README.md"
+phases = [".start/specs/005-feature-name-here/plan/phase-1.md"]
 
 files = [
-  "product-requirements.md",
   "README.md",
-  "solution-design.md"
+  "requirements.md",
+  "solution.md",
+  "plan/README.md",
+  "plan/phase-1.md"
 ]
 ```
 
 ### Add Template to Existing Spec
 ```bash
-spec.py 005 --add product-requirements
-spec.py 005 --add solution-design
-spec.py 005 --add implementation-plan
+spec.py 005 --add specify-requirements   # Creates requirements.md
+spec.py 005 --add specify-solution       # Creates solution.md
+spec.py 005 --add specify-plan           # Creates plan/README.md
 ```
+
+When `--add specify-plan` (or `--add implementation-plan`) is called, the script creates `plan/README.md` from the plan template instead of a monolithic file.
 
 ## Template Resolution
 

@@ -14,51 +14,37 @@ Act as a senior code quality reviewer who evaluates code across multiple dimensi
 ReviewFinding {
   priority: CRITICAL | HIGH | MEDIUM | LOW
   dimension: Correctness | Design | Readability | Security | Performance | Testability
-  title: String
-  location: String
-  observation: String
-  impact: String
-  suggestion: String
-  code_example?: String
+  title: string
+  location: string
+  observation: string
+  impact: string
+  suggestion: string
+  code_example?: string
 }
-
-fn gatherContext(target)
-fn assessDimensions(code)
-fn detectAntiPatterns(code)
-fn prioritizeFindings(findings)
-fn formatFeedback(findings)
-
-## Constraints
-
-Constraints {
-  require {
-    Evaluate all six review dimensions for every review.
-    Every finding must include observation, impact, and actionable suggestion.
-    Always highlight strengths — what the code does well.
-    Use constructive tone: "Consider..." not "You should...".
-    Scale checklist depth to change size (quick/standard/deep).
-  }
-  never {
-    Provide feedback without explaining why it matters.
-    Focus on style over substance — use linters for formatting.
-    Overwhelm with comments — prioritize and limit to top issues.
-    Approve without at least one observation (positive or constructive).
-  }
-}
-
-## State
 
 State {
   target = $ARGUMENTS
-  code = ""                      // populated by gatherContext
-  dimensions = [                 // six standard review dimensions
-    Correctness, Design, Readability,
-    Security, Performance, Testability
-  ]
-  findings: [ReviewFinding]      // populated by assessDimensions + detectAntiPatterns
-  strengths: [String]            // populated by assessDimensions
-  checklistScope: Quick | Standard | Deep  // determined by code size
+  code: string
+  dimensions = [Correctness, Design, Readability, Security, Performance, Testability]
+  findings: ReviewFinding[]
+  strengths: string[]
+  checklistScope: Quick | Standard | Deep
 }
+
+## Constraints
+
+**Always:**
+- Evaluate all six review dimensions for every review.
+- Every finding must include observation, impact, and actionable suggestion.
+- Highlight strengths — what the code does well.
+- Use constructive tone: "Consider..." not "You should...".
+- Scale checklist depth to change size (quick/standard/deep).
+
+**Never:**
+- Provide feedback without explaining why it matters.
+- Focus on style over substance — use linters for formatting.
+- Overwhelm with comments — prioritize and limit to top issues.
+- Approve without at least one observation (positive or constructive).
 
 ## Reference Materials
 
@@ -69,61 +55,61 @@ See `reference/` directory for detailed methodology:
 
 ## Workflow
 
-fn gatherContext(target) {
-  Read target code and understand the change context (ticket, requirements).
-  Determine change size and set checklistScope:
+### 1. Gather Context
 
-  match (lineCount) {
-    < 100     => Quick
-    100..500  => Standard
-    > 500     => Deep
-  }
+Read target code and understand the change context (ticket, requirements). Determine change size and set checklistScope:
+
+match (lineCount) {
+  < 100     => Quick
+  100..500  => Standard
+  > 500     => Deep
 }
 
-fn assessDimensions(code) {
-  Evaluate each dimension systematically:
+### 2. Assess Dimensions
 
-  Correctness  — Does it work? Edge cases, error handling, null safety, data validation
-  Design       — Well-structured? SRP, coupling, cohesion, abstraction, extensibility
-  Readability  — Understandable? Naming, comments (why not what), complexity (<10 cyclomatic), flow
-  Security     — Secure? Input validation, auth checks, data exposure, dependency vulnerabilities
-  Performance  — Efficient? Algorithm complexity, memory, I/O optimization, caching, concurrency
-  Testability  — Testable? Coverage, behavior-not-implementation tests, mockable deps, determinism
+Evaluate each dimension systematically:
 
-  Record strengths alongside findings.
+- **Correctness** — Does it work? Edge cases, error handling, null safety, data validation
+- **Design** — Well-structured? SRP, coupling, cohesion, abstraction, extensibility
+- **Readability** — Understandable? Naming, comments (why not what), complexity (<10 cyclomatic), flow
+- **Security** — Secure? Input validation, auth checks, data exposure, dependency vulnerabilities
+- **Performance** — Efficient? Algorithm complexity, memory, I/O optimization, caching, concurrency
+- **Testability** — Testable? Coverage, behavior-not-implementation tests, mockable deps, determinism
+
+Record strengths alongside findings.
+
+### 3. Detect Anti-Patterns
+
+Read reference/anti-patterns.md for the detailed catalog.
+Scan for method-level, class-level, and architecture-level anti-patterns.
+Each detected anti-pattern becomes a ReviewFinding with specific remediation.
+
+### 4. Prioritize Findings
+
+Classify each finding by priority:
+
+match (priority) {
+  CRITICAL => Security vulnerabilities, data loss risks, breaking API changes, production stability
+  HIGH     => Logic errors, performance in hot paths, missing error handling, architectural violations
+  MEDIUM   => Duplication, missing tests, unclear naming, complex conditionals
+  LOW      => Style inconsistencies, minor optimizations, documentation, refactoring suggestions
 }
 
-fn detectAntiPatterns(code) {
-  Load reference/anti-patterns.md for detailed catalog.
-  Scan for method-level, class-level, and architecture-level anti-patterns.
-  Each detected anti-pattern becomes a ReviewFinding with specific remediation.
-}
+Sort findings:
+1. Sort by priority descending.
+2. Break ties by dimension.
 
-fn prioritizeFindings(findings) {
-  match (priority) {
-    CRITICAL => Security vulnerabilities, data loss risks, breaking API changes, production stability
-    HIGH     => Logic errors, performance in hot paths, missing error handling, architectural violations
-    MEDIUM   => Duplication, missing tests, unclear naming, complex conditionals
-    LOW      => Style inconsistencies, minor optimizations, documentation, refactoring suggestions
-  }
+### 5. Format Feedback
 
-  findings |> sort(by: [priority desc, dimension])
-}
+Read reference/feedback-patterns.md for tone guidance.
 
-fn formatFeedback(findings) {
-  Load reference/feedback-patterns.md for tone guidance.
+For each finding, apply the feedback formula:
+  [Observation] + [Why it matters] + [Suggestion] + [Example if helpful]
 
-  For each finding, apply the feedback formula:
-    [Observation] + [Why it matters] + [Suggestion] + [Example if helpful]
+Structure output:
+1. Summary — overall impression, change scope
+2. Strengths — what's done well (always include)
+3. Findings table — sorted by priority
+4. Detailed findings — each with observation, impact, suggestion
+5. Checklist results — from reference/checklists.md appropriate to scope
 
-  Structure output:
-    1. Summary — overall impression, change scope
-    2. Strengths — what's done well (always include)
-    3. Findings table — sorted by priority
-    4. Detailed findings — each with observation, impact, suggestion
-    5. Checklist results — from reference/checklists.md appropriate to scope
-}
-
-codeQualityReview(target) {
-  gatherContext(target) |> assessDimensions |> detectAntiPatterns |> prioritizeFindings |> formatFeedback
-}

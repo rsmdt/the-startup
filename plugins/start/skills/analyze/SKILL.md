@@ -16,46 +16,34 @@ Act as an analysis orchestrator that discovers and documents business rules, tec
 
 Discovery {
   category: Business | Technical | Security | Performance | Integration
-  finding: String
-  evidence: String       // file:line references
-  documentation: String  // suggested doc content
-  location: String       // docs/domain/ | docs/patterns/ | docs/interfaces/ | docs/research/
+  finding: string
+  evidence: string       // file:line references
+  documentation: string  // suggested doc content
+  location: string       // docs/domain/ | docs/patterns/ | docs/interfaces/ | docs/research/
 }
-
-fn initializeScope(target)
-fn selectMode()
-fn launchAnalysis(mode)
-fn synthesize(discoveries)
-fn presentFindings(summary)
-
-## Constraints
-
-Constraints {
-  require {
-    Delegate all investigation to specialist agents via Task tool.
-    Display ALL agent responses to user — complete findings, not summaries.
-    Launch applicable perspective agents simultaneously in a single response.
-    Work iteratively — execute discovery, documentation, review cycles.
-    Wait for user confirmation between each cycle.
-    Confirm before writing documentation to docs/ directories.
-  }
-  never {
-    Analyze code yourself — always delegate to specialist agents.
-    Summarize or filter agent findings before showing to user.
-    Proceed to next cycle without user confirmation.
-    Write documentation without asking user first.
-  }
-}
-
-## State
 
 State {
   target = $ARGUMENTS
   perspectives = []              // determined by initializeScope
-  mode: Standard | Team          // chosen by user in selectMode
-  discoveries: [Discovery]       // collected from agents
+  mode: Standard | Agent Team
+  discoveries: Discovery[]
   cycle: 1                       // current discovery cycle number
 }
+
+## Constraints
+
+**Always:**
+- Delegate all investigation to specialist agents via Task tool.
+- Display ALL agent responses to user — complete findings, not summaries.
+- Launch applicable perspective agents simultaneously in a single response.
+- Work iteratively — execute discovery, documentation, review cycles.
+- Wait for user confirmation between each cycle.
+- Confirm before writing documentation to docs/ directories.
+
+**Never:**
+- Analyze code yourself — always delegate to specialist agents.
+- Proceed to next cycle without user confirmation.
+- Write documentation without asking user first.
 
 ## Reference Materials
 
@@ -66,42 +54,34 @@ See `reference/` directory for detailed methodology:
 
 ## Workflow
 
-fn initializeScope(target) {
-  // Select perspectives per reference/perspectives.md focus area mapping
-  match (target) {
-    specific focus area => select matching perspectives
-    unclear             => AskUserQuestion to clarify focus area
-  }
-}
+### 1. Initialize Scope
 
-fn selectMode() {
-  AskUserQuestion:
-    Standard (default) — parallel fire-and-forget subagents
-    Team Mode — persistent analyst teammates with cross-domain coordination
+Determine which perspectives to use based on $ARGUMENTS. Read reference/perspectives.md for focus area mapping.
 
-  Recommend Team Mode when:
-    multiple domains | broad scope | all perspectives | complex codebase | cross-domain coordination needed
-}
+If the target maps to a specific focus area, select the matching perspectives. If the target is unclear, use AskUserQuestion to clarify the focus area before continuing.
 
-fn launchAnalysis(mode) {
-  match (mode) {
-    Standard => launch parallel subagents per applicable perspectives
-    Team     => create team, spawn one analyst per perspective, assign tasks
-  }
-}
+### 2. Select Mode
 
-fn synthesize(discoveries) {
-  discoveries
-    |> deduplicate(groupBy: evidence, merge: complementary findings)
-    |> groupBy(location)
-    |> buildCycleSummary
-}
+AskUserQuestion:
+  Standard (default) — parallel fire-and-forget subagents
+  Agent Team — persistent analyst teammates with cross-domain coordination
 
-fn presentFindings(summary) {
-  Format cycle summary per reference/output-format.md.
-  AskUserQuestion: Continue to next area | Investigate further | Persist to docs | Complete analysis
-}
+Recommend Agent Team when: multiple domains | broad scope | all perspectives | complex codebase | cross-domain coordination needed
 
-analyze(target) {
-  initializeScope(target) |> selectMode |> launchAnalysis |> synthesize |> presentFindings
-}
+### 3. Launch Analysis
+
+If Standard mode: launch parallel subagents per applicable perspectives.
+If Agent Team: create team, spawn one analyst per perspective, assign tasks.
+
+### 4. Synthesize Discoveries
+
+Process discoveries:
+1. Deduplicate by evidence — merge complementary findings with the same file:line reference.
+2. Group by documentation location.
+3. Build cycle summary.
+
+### 5. Present Findings
+
+Read reference/output-format.md and format the cycle summary accordingly.
+AskUserQuestion: Continue to next area | Investigate further | Persist to docs | Complete analysis
+

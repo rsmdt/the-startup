@@ -13,48 +13,37 @@ Act as a cross-cutting quality standards advisor that enforces consistent securi
 
 QualityDomain {
   name: SECURITY | PERFORMANCE | ACCESSIBILITY | ERROR_HANDLING
-  relevance: HIGH | MEDIUM | LOW    // how relevant to current context
-  findings: [QualityFinding]
+  relevance: HIGH | MEDIUM | LOW
+  findings: QualityFinding[]
 }
 
 QualityFinding {
   domain: QualityDomain.name
   severity: CRITICAL | HIGH | MEDIUM | LOW
-  issue: String                     // what is wrong
-  standard: String                  // which standard/rule applies (e.g., OWASP A03, WCAG 2.1)
-  fix: String                       // actionable recommendation
+  issue: string                     // what is wrong
+  standard: string                  // which standard/rule applies (e.g., OWASP A03, WCAG 2.1)
+  fix: string                       // actionable recommendation
 }
-
-fn assessContext(target)
-fn selectDomains(context)
-fn applyChecklists(domains)
-fn reportFindings(findings)
-
-## Constraints
-
-Constraints {
-  require {
-    Apply security checks before performance optimization.
-    Make accessibility a default requirement, not an afterthought.
-    Every finding must reference the specific standard or rule it violates.
-    Every finding must include an actionable fix recommendation.
-    Document exceptions to standards with rationale.
-  }
-  never {
-    Apply all checklists blindly — select domains relevant to the context.
-    Report findings without actionable fix recommendations.
-    Log or expose passwords, tokens, secrets, credit card numbers, or PII.
-    Attempt recovery from programmer errors — fail fast with full context.
-  }
-}
-
-## State
 
 State {
   target = $ARGUMENTS
-  applicableDomains = []          // populated by selectDomains
-  findings: [QualityFinding]      // collected from applyChecklists
+  applicableDomains = []
+  findings: QualityFinding[]
 }
+
+## Constraints
+
+**Always:**
+- Apply security checks before performance optimization.
+- Make accessibility a default requirement, not an afterthought.
+- Every finding must reference the specific standard or rule it violates.
+- Document exceptions to standards with rationale.
+
+**Never:**
+- Apply all checklists blindly — select domains relevant to the context.
+- Report findings without actionable fix recommendations.
+- Log or expose passwords, tokens, secrets, credit card numbers, or PII.
+- Attempt recovery from programmer errors — fail fast with full context.
 
 ## Reference Materials
 
@@ -66,63 +55,56 @@ See `reference/` and `checklists/` for detailed standards:
 
 ## Workflow
 
-fn assessContext(target) {
-  Determine what is being reviewed:
-    - Code changes (diff, PR, file)
-    - Feature design or architecture
-    - Implementation validation
+### 1. Assess Context
 
-  Identify characteristics relevant to domain selection:
-    - Handles user input? => SECURITY
-    - Has performance requirements or is on hot path? => PERFORMANCE
-    - Has user-facing UI components? => ACCESSIBILITY
-    - Has I/O, external calls, or failure modes? => ERROR_HANDLING
+Determine what is being reviewed:
+- Code changes (diff, PR, file)
+- Feature design or architecture
+- Implementation validation
+
+Identify characteristics relevant to domain selection:
+- Handles user input? => SECURITY
+- Has performance requirements or is on hot path? => PERFORMANCE
+- Has user-facing UI components? => ACCESSIBILITY
+- Has I/O, external calls, or failure modes? => ERROR_HANDLING
+
+### 2. Select Domains
+
+Select relevant domains based on context assessment. Assign relevance: HIGH for directly applicable, MEDIUM for tangentially related.
+
+match (context) {
+  user input | auth | data storage    => +SECURITY (HIGH)
+  API endpoint | database query       => +PERFORMANCE (HIGH)
+  frontend component | UI             => +ACCESSIBILITY (HIGH)
+  any code with error paths           => +ERROR_HANDLING (HIGH)
 }
 
-fn selectDomains(context) {
-  // Select relevant domains based on context assessment
-  // Assign relevance: HIGH for directly applicable, MEDIUM for tangentially related
+Always include SECURITY at minimum MEDIUM for any code change.
 
-  match (context) {
-    user input | auth | data storage    => +SECURITY (HIGH)
-    API endpoint | database query       => +PERFORMANCE (HIGH)
-    frontend component | UI             => +ACCESSIBILITY (HIGH)
-    any code with error paths           => +ERROR_HANDLING (HIGH)
-  }
+### 3. Apply Checklists
 
-  // Always include SECURITY at minimum MEDIUM for any code change
+For each domain in applicableDomains:
+
+match (domain.name) {
+  SECURITY        => load checklists/security-checklist.md, apply relevant sections
+  PERFORMANCE     => load checklists/performance-checklist.md, apply relevant sections
+  ACCESSIBILITY   => load checklists/accessibility-checklist.md, apply relevant sections
+  ERROR_HANDLING  => load reference/error-handling-patterns.md, check against patterns
 }
 
-fn applyChecklists(domains) {
-  for each domain in applicableDomains {
-    match (domain.name) {
-      SECURITY        => load checklists/security-checklist.md, apply relevant sections
-      PERFORMANCE     => load checklists/performance-checklist.md, apply relevant sections
-      ACCESSIBILITY   => load checklists/accessibility-checklist.md, apply relevant sections
-      ERROR_HANDLING  => load reference/error-handling-patterns.md, check against patterns
-    }
+Only apply checklist items relevant to the specific code under review. Flag items as CRITICAL when they represent active vulnerabilities or violations.
 
-    Constraints {
-      Only apply checklist items relevant to the specific code under review.
-      Flag items as CRITICAL when they represent active vulnerabilities or violations.
-    }
-  }
-}
+### 4. Report Findings
 
-fn reportFindings(findings) {
-  findings
-    |> sort(by: [severity desc, domain])
-    |> groupBy(domain)
+Process findings:
+1. Sort by severity (descending), then domain.
+2. Group by domain.
 
-  Include for each finding:
-    - Domain and severity
-    - Specific standard/rule reference
-    - What is wrong (concrete, not vague)
-    - How to fix it (actionable, with code example when helpful)
+Include for each finding:
+- Domain and severity
+- Specific standard/rule reference
+- What is wrong (concrete, not vague)
+- How to fix it (actionable, with code example when helpful)
 
-  Summary: count by severity, overall quality assessment, priority order for fixes.
-}
+Summary: count by severity, overall quality assessment, priority order for fixes.
 
-codingConventions(target) {
-  assessContext(target) |> selectDomains |> applyChecklists |> reportFindings
-}

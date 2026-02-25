@@ -4,9 +4,11 @@ Use this checklist to validate Implementation Plan completeness before execution
 
 ## Structure Validation
 
-- [ ] **All required sections are complete** - No empty or placeholder sections
+- [ ] **Plan manifest exists** - plan/README.md is present with phases checklist
+- [ ] **All phase files exist** - Every phase listed in README.md has a corresponding phase-N.md
+- [ ] **Phase files have frontmatter** - Each phase-N.md has title, status, version, phase number
 - [ ] **No [NEEDS CLARIFICATION] markers remain** - All markers replaced with content
-- [ ] **Template structure preserved** - No sections added, removed, or reorganized
+- [ ] **Template structure preserved** - No sections added, removed, or reorganized in manifest or phase files
 
 ## Context Priming
 
@@ -24,6 +26,7 @@ Use this checklist to validate Implementation Plan completeness before execution
   - Implement (code to pass tests)
   - Validate (quality gates)
 - [ ] **Phase boundaries are logical** - Clear separation of concerns
+- [ ] **plan/README.md phases list links to all phase files** - Every phase-N.md is referenced
 
 ## Task Quality
 
@@ -48,7 +51,7 @@ Use this checklist to validate Implementation Plan completeness before execution
 
 ## Validation Steps
 
-- [ ] **Each phase has validation step** - T*.4 Validate present in each phase
+- [ ] **Each phase has validation step** - T*.3 Validate present in each phase
 - [ ] **Code review included** - Quality gate for code standards
 - [ ] **Automated tests included** - Test execution gate
 - [ ] **Specification compliance included** - Business acceptance gate
@@ -82,5 +85,6 @@ These should NOT appear in a PLAN:
 - User has reviewed and approved the task breakdown
 - Every PRD requirement maps to at least one task
 - Every SDD component is covered by phases
+- All phase files exist and are linked from plan/README.md
 - A developer can start implementation immediately
 - Ready for `/start:implement` execution

@@ -22,7 +22,7 @@ Constraints {
     Before any action, read and internalize:
       1. Project CLAUDE.md — architecture, conventions, priorities
       2. CONSTITUTION.md at project root — if present, constrains all work
-      3. Existing project specs in docs/specs/ — understand current requirements landscape
+      3. Existing project specs in .start/specs/ — understand current requirements landscape
   }
   never {
     Jump to solutions before understanding the problem

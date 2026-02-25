@@ -1,7 +1,7 @@
 ---
 name: specify-solution
-description: Create and validate solution design documents (SDD). Use when designing architecture, defining interfaces, documenting technical decisions, analyzing system components, or working on solution-design.md files in docs/specs/. Includes validation checklist, consistency verification, and overlap detection.
-allowed-tools: Read, Write, Edit, Task, TodoWrite, Grep, Glob
+description: Create and validate solution design documents (SDD). Use when designing architecture, defining interfaces, documenting technical decisions, analyzing system components, or working on solution.md files in .start/specs/. Includes validation checklist, consistency verification, and overlap detection.
+allowed-tools: Read, Write, Edit, Task, TodoWrite, Grep, Glob, Skill
 ---
 
 ## Persona
@@ -12,54 +12,44 @@ Act as a solution design specialist that creates and validates SDDs focusing on 
 
 SddSection {
   status: Complete | NeedsDecision | InProgress | Pending
-  adrs?: [ArchitectureDecision]
+  adrs?: ArchitectureDecision[]
 }
 
 ArchitectureDecision {
-  id: String               // ADR-1, ADR-2, ...
-  name: String
-  choice: String
-  rationale: String
-  tradeoffs: String
-  confirmed: Boolean       // requires user confirmation
+  id: string               // ADR-1, ADR-2, ...
+  name: string
+  choice: string
+  rationale: string
+  tradeoffs: string
+  confirmed: boolean       // requires user confirmation
 }
 
-fn initializeDesign(specDirectory)
-fn discoverPatterns()
-fn documentSection(section)
-fn validateDesign()
-fn presentStatus()
+State {
+  specDirectory = ""       // .start/specs/[NNN]-[name]/ (or legacy docs/specs/)
+  prd = ""                 // path to requirements.md (or product-requirements.md)
+  sdd = ""                 // path to solution.md (or solution-design.md)
+  sections: SddSection[]
+  adrs: ArchitectureDecision[]
+}
 
 ## Constraints
 
-Constraints {
-  require {
-    Focus exclusively on research, design, and documentation — never implementation.
-    Follow template structure exactly — preserve all sections as defined.
-    Present ALL agent findings to user — complete responses, not summaries.
-    Obtain user confirmation for every architecture decision (ADR).
-    Wait for user confirmation before proceeding to next cycle.
-    Ensure every PRD requirement is addressable by the design.
-    Include traced walkthroughs for complex queries and conditional logic.
-  }
-  never {
-    Implement code — this skill produces specifications only.
-    Skip user confirmation on architecture decisions.
-    Remove or reorganize template sections.
-    Leave [NEEDS CLARIFICATION] markers in completed SDDs.
-    Design beyond PRD scope (no scope creep).
-  }
-}
+**Always:**
+- Focus exclusively on research, design, and documentation — never implementation.
+- Follow template structure exactly — preserve all sections as defined.
+- Present ALL agent findings to user — complete responses, not summaries.
+- Obtain user confirmation for every architecture decision (ADR).
+- Wait for user confirmation before proceeding to the next cycle.
+- Ensure every PRD requirement is addressable by the design.
+- Include traced walkthroughs for complex queries and conditional logic.
+- Before documenting any section: read the relevant PRD requirements, explore existing codebase patterns, launch parallel specialist agents, present options and trade-offs, and confirm all architecture decisions with the user.
 
-## State
-
-State {
-  specDirectory = ""             // docs/specs/[NNN]-[name]/
-  prd = ""                       // path to product-requirements.md
-  sdd = ""                       // path to solution-design.md
-  sections: [SddSection]         // tracked per template section
-  adrs: [ArchitectureDecision]   // collected during design
-}
+**Never:**
+- Implement code — this skill produces specifications only.
+- Skip user confirmation on architecture decisions.
+- Remove or reorganize template sections.
+- Leave [NEEDS CLARIFICATION] markers in completed SDDs.
+- Design beyond PRD scope (no scope creep).
 
 ## SDD Focus
 
@@ -71,7 +61,7 @@ When designing, address four dimensions:
 
 ## Reference Materials
 
-- [Template](template.md) — SDD template structure, write to `docs/specs/[NNN]-[name]/solution-design.md`
+- [Template](template.md) — SDD template structure, write to `.start/specs/[NNN]-[name]/solution.md`
 - [Validation](validation.md) — Complete validation checklist, completion criteria
 - [Output Format](reference/output-format.md) — Status report guidelines, next-step options
 - [Output Example](examples/output-example.md) — Concrete example of expected output format
@@ -79,70 +69,68 @@ When designing, address four dimensions:
 
 ## Workflow
 
-fn initializeDesign(specDirectory) {
-  Read PRD from specDirectory to understand requirements.
-  Read template from template.md.
-  Write template to specDirectory/solution-design.md.
-  Explore codebase to understand existing patterns, conventions, and constraints.
-}
+### 1. Initialize Design
 
-fn discoverPatterns() {
-  Launch parallel specialist agents to investigate:
-    Architecture patterns and best practices
-    Database and data model design
-    API design and interface contracts
-    Security implications
-    Performance characteristics
-    Integration approaches
+Read the PRD from specDirectory to understand requirements.
+Read the template from template.md.
+Write the template to specDirectory/solution.md.
+Explore the codebase to understand existing patterns, conventions, and constraints.
 
-  Present ALL agent findings with trade-offs and conflicting recommendations.
-}
+### 2. Explore Approaches
 
-fn documentSection(section) {
-  Update SDD with research findings.
-  Replace [NEEDS CLARIFICATION] markers with actual content.
-  Record architecture decisions as ADRs — present each for user confirmation.
+Invoke Skill(start:brainstorm) to evaluate technical approaches before committing to a direction.
 
-  Constraints {
-    require {
-      PRD requirements for this section are read and understood.
-      Existing codebase patterns have been explored.
-      Parallel specialist agents have been launched.
-      Options and trade-offs have been presented to the user.
-      User has confirmed all architecture decisions before proceeding.
-    }
-  }
-}
+Focus on understanding:
+- Architectural alternatives (e.g., monolith vs microservices, REST vs GraphQL).
+- Technology choices and their trade-offs.
+- Key design constraints from the PRD.
 
-fn validateDesign() {
-  // Run validation per validation.md checklist, focusing on:
+User selects an approach before step 3 invests in deep research.
 
-  Overlap detection:
-    Component overlap — duplicated responsibilities?
-    Interface conflicts — multiple interfaces serving same purpose?
-    Pattern inconsistency — conflicting architectural patterns?
+### 3. Discover Patterns
 
-  Coverage analysis:
-    PRD coverage — all requirements addressed?
-    Component completeness — UI, business logic, data, integration?
-    Cross-cutting concerns — security, error handling, logging, performance?
+Launch parallel specialist agents to investigate:
+- Architecture patterns and best practices
+- Database and data model design
+- API design and interface contracts
+- Security implications
+- Performance characteristics
+- Integration approaches
 
-  Boundary validation:
-    Layer separation — presentation, business, data properly separated?
-    Dependency direction — no circular dependencies?
-    Integration points — all system boundaries documented?
+Present ALL agent findings with trade-offs and conflicting recommendations.
 
-  Consistency verification:
-    Naming consistency — components, interfaces, concepts named consistently?
-    Pattern adherence — architectural patterns applied consistently?
-    PRD alignment — design traces back to requirements?
-}
+### 4. Document Section
 
-fn presentStatus() {
-  Format status report per reference/output-format.md.
-  AskUserQuestion: Address pending ADRs | Continue to next section | Run validation | Complete SDD
-}
+Update the SDD with research findings.
+Replace [NEEDS CLARIFICATION] markers with actual content.
+Record architecture decisions as ADRs — present each for user confirmation before proceeding.
 
-specifySolution(specDirectory) {
-  initializeDesign(specDirectory) |> discoverPatterns |> documentSection |> validateDesign |> presentStatus
-}
+### 5. Validate Design
+
+Read validation.md and run the full checklist, focusing on:
+
+Overlap detection:
+- Component overlap — duplicated responsibilities?
+- Interface conflicts — multiple interfaces serving the same purpose?
+- Pattern inconsistency — conflicting architectural patterns?
+
+Coverage analysis:
+- PRD coverage — all requirements addressed?
+- Component completeness — UI, business logic, data, integration?
+- Cross-cutting concerns — security, error handling, logging, performance?
+
+Boundary validation:
+- Layer separation — presentation, business, data properly separated?
+- Dependency direction — no circular dependencies?
+- Integration points — all system boundaries documented?
+
+Consistency verification:
+- Naming consistency — components, interfaces, concepts named consistently?
+- Pattern adherence — architectural patterns applied consistently?
+- PRD alignment — design traces back to requirements?
+
+### 6. Present Status
+
+Read reference/output-format.md and format the status report accordingly.
+AskUserQuestion: Address pending ADRs | Continue to next section | Run validation | Complete SDD
+

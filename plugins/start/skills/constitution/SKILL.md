@@ -16,103 +16,86 @@ Act as a governance orchestrator that coordinates parallel pattern discovery to 
 
 Rule {
   level: L1 | L2 | L3        // Must (autofix) | Should (manual) | May (advisory)
-  category: String            // Security, Architecture, CodeQuality, Testing, or custom
-  statement: String           // the rule itself
-  evidence: String            // file:line references supporting the rule
+  category: string            // Security, Architecture, CodeQuality, Testing, or custom
+  statement: string           // the rule itself
+  evidence: string            // file:line references supporting the rule
 }
-
-fn checkExisting()
-fn discoverPatterns(perspectives)
-fn synthesize(discoveries)
-fn presentRules(rules)
-fn writeConstitution(approved)
-fn validate()
-
-## Constraints
-
-Constraints {
-  require {
-    Delegate all discovery to specialist agents via Task tool.
-    Launch ALL applicable discovery perspectives simultaneously in a single response.
-    Discover actual codebase patterns before proposing rules.
-    Present discovered rules for user approval before writing.
-    Classify every rule with a level (L1/L2/L3).
-  }
-  never {
-    Write constitution without user approval of proposed rules.
-    Propose rules without codebase evidence.
-    Skip discovery and generate generic rules.
-  }
-}
-
-## State
 
 State {
   focusAreas = $ARGUMENTS
-  perspectives = []              // determined by focus areas per reference/perspectives.md
-  existing: Boolean              // whether CONSTITUTION.md exists
-  discoveries: [Rule]            // collected from agents
+  perspectives = []              // from reference/perspectives.md
+  existing: boolean
+  discoveries: Rule[]
 }
+
+## Constraints
+
+**Always:**
+- Delegate all discovery to specialist agents via Task tool.
+- Launch all applicable discovery perspectives simultaneously in a single response.
+- Discover actual codebase patterns before proposing rules.
+- Present discovered rules for user approval before writing.
+- Classify every rule with a level (L1/L2/L3).
+- Every proposed rule must cite specific file:line evidence.
+
+**Never:**
+- Write constitution without user approval of proposed rules.
+- Propose rules without codebase evidence.
+- Skip discovery and generate generic rules.
 
 ## Reference Materials
 
-See `reference/` directory for detailed methodology:
-- [Perspectives](reference/perspectives.md) — Discovery perspectives, focus area mapping, framework interpretation
-- [Rule Patterns](reference/rule-patterns.md) — Level system, rule types, scope patterns, common rules
-- [Output Format](reference/output-format.md) — Update mode options, presentation guidelines
-- [Output Example](examples/output-example.md) — Concrete example of expected output format
-- [Scenarios](reference/scenarios.md) — Create, create with focus, update scenarios
-- [Template](template.md) — Constitution template with `[NEEDS DISCOVERY]` markers
-- [Example Constitution](examples/CONSTITUTION.md) — Complete constitution example
+- reference/perspectives.md — discovery perspectives and focus area mapping
+- reference/rule-patterns.md — level system, rule types, scope patterns
+- reference/output-format.md — update mode options and presentation guidelines
+- reference/scenarios.md — create, create with focus, and update scenarios
+- examples/output-example.md — expected output format
+- examples/CONSTITUTION.md — complete constitution example
+- template.md — constitution template
 
 ## Workflow
 
-fn checkExisting() {
-  match (CONSTITUTION.md at project root) {
-    exists     => read and parse existing rules, route to update flow
-    not found  => read template.md, route to creation flow
-  }
+### 1. Check Existing
+
+match (CONSTITUTION.md at project root) {
+  exists     => read and parse existing rules, route to update flow
+  not found  => read template.md, route to creation flow
 }
 
-fn discoverPatterns(perspectives) {
-  select applicable perspectives per reference/perspectives.md
+### 2. Discover Patterns
 
-  launch parallel agents for each perspective
-  each agent: explore codebase, return proposed Rules with evidence
+Read reference/perspectives.md. Select applicable perspectives based on $ARGUMENTS.
 
-  Constraints {
-    Every proposed rule must cite specific file:line evidence.
-  }
+Launch parallel agents for each perspective. Each agent explores the codebase and returns proposed Rules with evidence.
+
+### 3. Synthesize
+
+Process discoveries:
+1. Deduplicate overlapping patterns.
+2. Classify each rule with level (L1/L2/L3) per reference/rule-patterns.md.
+3. Group by category.
+
+### 4. Present Rules
+
+Read reference/output-format.md and format proposed rules accordingly.
+
+AskUserQuestion: Approve rules | Modify before saving | Cancel
+
+### 5. Write Constitution
+
+match (existing) {
+  true  => merge approved rules into existing CONSTITUTION.md
+  false => write new CONSTITUTION.md from template + approved rules
 }
 
-fn synthesize(discoveries) {
-  discoveries
-    |> deduplicate(overlapping patterns)
-    |> classify(level: L1 | L2 | L3)  // per reference/rule-patterns.md level system
-    |> groupBy(category)
+Display constitution summary per reference/output-format.md.
+
+### 6. Validate
+
+AskUserQuestion: Run validation now | Skip
+
+match (choice) {
+  validate => Skill("start:validate") constitution
+  skip     => done
 }
 
-fn presentRules(rules) {
-  Format proposed rules per reference/output-format.md.
-  AskUserQuestion: Approve rules | Modify before saving | Cancel
-}
-
-fn writeConstitution(approved) {
-  match (existing) {
-    true  => merge approved rules into existing CONSTITUTION.md
-    false => write new CONSTITUTION.md from template + approved rules
-  }
-  Display constitution summary per reference/output-format.md.
-}
-
-fn validate() {
-  AskUserQuestion: Run validation now | Skip
-  match (choice) {
-    validate => Skill("start:validate") constitution
-    skip     => done
-  }
-}
-
-constitution(focusAreas) {
-  checkExisting |> discoverPatterns |> synthesize |> presentRules |> writeConstitution |> validate
-}

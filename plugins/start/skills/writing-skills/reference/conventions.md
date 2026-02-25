@@ -58,11 +58,10 @@ Never combine `!`shell command`` preprocessing with `$ARGUMENTS` — this execut
 Section order — each section is a `## ` heading:
 
 ## Persona               // Role and expertise frame
-## Interface             // Data shapes, then fn signatures
-## Constraints           // require {} and never {} blocks
-## State                 // Concrete defaults with origin comments
+## Interface             // Data shapes + State
+## Constraints           // Always / Never markdown lists
 ## Reference Materials   // Optional — links to progressive disclosure files
-## Workflow              // fn definitions + entry-point pipe chain
+## Workflow              // Numbered ### headings + entry point
 
 ### Persona
 
@@ -70,7 +69,7 @@ Sets the AI's role and expertise frame. Keep enforcement rules out — those go 
 
 ### Interface
 
-Data shapes first, then function signatures. Inline enum values directly — no `type` aliases.
+Data shapes using TypeScript-like syntax. Inline enum values directly — no `type` aliases. Include State and optional Scope blocks here.
 
 Finding {
   severity: CRITICAL | HIGH | MEDIUM | LOW
@@ -78,68 +77,81 @@ Finding {
   fix: String
 }
 
-fn gatherContext(target)       // forward declaration — body in Workflow
-fn synthesize(findings)
+State {
+  target = $ARGUMENTS
+  perspectives = []              // populated from reference/perspectives.md
+  findings: [Finding]
+}
+
+**In scope:** What this skill acts on.
+**Out of scope:** What is off-limits.
+
+**Why TypeScript-like syntax**: LLMs have extensive training on TypeScript interfaces. This format has near-zero parsing overhead and unambiguously communicates output contracts.
+
+No forward declarations — the Workflow headings serve as the function index.
 
 ### Constraints
 
-Split into `require {}` (must do) and `never {}` (must not do). Move enforcement-worthy rules from Persona into `never {}`.
+Use markdown **Always:** and **Never:** lists. Each rule appears once, in whichever framing is most natural. Move enforcement-worthy rules from Persona into **Never:**.
 
-Constraints {
-  require {
-    Every finding must have a specific, implementable fix.
-    Provide full file context to reviewers, not just diffs.
-  }
-  never {
-    Review code yourself — always delegate to specialist agents.
-    Present findings without actionable fix recommendations.
-  }
-}
+**Always:**
+- Every finding must have a specific, implementable fix.
+- Provide full file context to reviewers, not just diffs.
 
-### State
+**Never:**
+- Review code yourself — always delegate to specialist agents.
+- Present findings without actionable fix recommendations.
 
-Concrete defaults with comments explaining which function populates them. No `infer()`.
-
-State {
-  target = $ARGUMENTS
-  perspectives = []              // populated by gatherContext
-  mode: Standard | Team          // chosen by user in selectMode
-  findings: [Finding]            // collected from agents
-}
+**Why markdown over `Constraints {}`**: The words "Always" and "Never" carry the full semantic weight. Curly braces add no structural value the LLM uses — markdown headers and bold labels provide the same grouping with better training-data alignment.
 
 ### Reference Materials
 
-Links to progressive disclosure files. Only include when the skill has a `reference/` directory.
+Links to progressive disclosure files. Keep descriptions minimal — the LLM reads the file content. Only include when the skill has a `reference/` directory.
+
+- reference/perspectives.md — review perspectives
+- reference/output-format.md — output guidelines
 
 ### Workflow
 
-Define each step as `fn` (definition = not executed), then chain in an entry-point function without `fn` (execution = runs immediately). Entry-point function name matches skill name.
+Define each step as a numbered `###` heading. Use natural language for procedures. Use `match` blocks only for 3+ branch routing decisions. Use numbered sub-steps for data processing pipelines.
 
-fn gatherContext(target) {
-  match (target) {
-    /^\d+$/       => gh pr diff $target
-    "staged"      => git diff --cached
-    default       => git diff main...$target
-  }
+### 1. Gather Context
+
+Determine the review target from $ARGUMENTS.
+
+match (target) {
+  PR number     => gh pr diff $target
+  "staged"      => git diff --cached
+  default       => git diff main...$target
 }
 
-fn synthesize(findings) {
-  findings |> deduplicate |> sort |> buildSummaryTable
-}
+### 2. Synthesize Findings
 
-review(target) {
-  gatherContext(target) |> selectMode |> launchReviews |> synthesize |> nextSteps
-}
+Process findings:
+1. Deduplicate overlapping findings.
+2. Sort by severity (descending).
+3. Build summary table.
 
-**The fn convention**:
+### Entry Point (Non-Linear Workflows Only)
 
-| Pattern | Meaning | Where |
-|---------|---------|-------|
-| `fn foo()` | Forward declaration (no body) | Interface section |
-| `fn foo() { ... }` | Definition (has body, not executed) | Workflow section |
-| `foo() { ... }` | Execution (runs immediately) | Entry point |
+Include an `### Entry Point` section only when the workflow has non-linear execution — branching, looping, or step-skipping based on input. For sequential workflows, the numbered headings already communicate execution order.
 
-Functions can contain nested `Constraints {}` blocks for per-step rules.
+Examples of non-linear entry points:
+- Mode-based routing: `match (mode) { Create => steps 2, 3, 7 | Audit => steps 4, 7 }`
+- Argument-based routing: `match (target) { new => step 1 | existing => step 3 }`
+- Loop patterns: `Repeat steps 2-4 for each section`
+
+**What to use where**:
+
+| Construct | Use for | Don't use for |
+|-----------|---------|---------------|
+| `match (x) { a => b }` | 3+ branch routing decisions | Binary if/else (use prose) |
+| Numbered sub-steps | Data processing, multi-step operations | — |
+| Markdown `### N. Step Name` | Workflow steps | — |
+| `AskUserQuestion:` | User choice points | — |
+| `Read reference/X.md` | Loading progressive disclosure files | — |
+
+**Why markdown headings over `fn` definitions**: LLMs process markdown headers as their strongest structural signal. `fn` definitions trigger code-interpretation patterns and require the LLM to learn the novel `fn`/no-`fn` entry-point convention. Numbered headings are immediately parseable.
 
 ---
 
@@ -165,22 +177,69 @@ Skills that enforce rules (TDD, verification) need special attention:
 
 ---
 
+## Token Optimization
+
+Skills are loaded into context on every invocation. Every token costs money, context space, and LLM attention.
+
+### Constraint Deduplication
+
+Each rule appears once, in whichever framing (**Always** or **Never**) is most natural. Never mirror the same rule in both lists.
+
+Bad — same rule stated twice:
+```
+**Always:** Run tests after every change.
+**Never:** Skip test verification after a change.
+```
+
+Good — one rule, one location:
+```
+**Never:** Skip test verification after a change.
+```
+
+### Progressive Disclosure Enforcement
+
+Content belongs in `reference/` (not SKILL.md) when it is:
+- **Educational** — examples, catalogs, before/after patterns
+- **Conditional** — only needed for specific target types
+- **Verbose** — tables, checklists, detailed output format specs
+
+SKILL.md should contain only **behavioral instructions** — what to do, when, and how to route.
+
+### State Comments
+
+Only comment State fields when the origin is non-obvious:
+
+Bad: `mode: Standard | Team  // chosen by user in selectMode`
+Good: `perspectives = []  // from reference/perspectives.md`
+
+---
+
 ## Transformation Checklist
 
 When converting an existing skill to these conventions:
 
-- [ ] Remove all code fences around SudoLang blocks
+**Structure:**
 - [ ] Restructure body into PICS + Workflow sections
-- [ ] Add `fn` keyword to all function definitions in Workflow
-- [ ] Create entry-point function (no `fn`, name matches skill) with pipe chain
-- [ ] Split Constraints into `require {}` / `never {}` sub-blocks
-- [ ] Move enforcement-worthy Persona rules into `never {}`
 - [ ] Inline enum values into interface fields; remove `type` aliases
-- [ ] Separate data interfaces from function signatures
-- [ ] Replace `infer()` with concrete defaults + comments
-- [ ] Replace `### Phase N` headings with `fn` definitions
-- [ ] Externalize heavy content (templates, checklists, output formats) to reference/
-- [ ] Confirm no content/logic was lost in transformation
+- [ ] Merge State into Interface section
+- [ ] Replace `Constraints { require {} never {} }` with markdown **Always:** / **Never:** lists
+- [ ] Replace `fn` workflow definitions with numbered `### N. Step Name` headings
+- [ ] Replace entry-point pipe chain with `### Entry Point` section (only if workflow is non-linear)
+- [ ] Replace novel syntax blocks (prefer/avoid) with **In scope:** / **Out of scope:**
+
+**Token efficiency:**
+- [ ] Deduplicate Always/Never — no mirrored rules
+- [ ] Move enforcement-worthy Persona rules into **Never:**
+- [ ] Remove forward declarations from Interface
+- [ ] Remove self-evident State comments
+- [ ] Use explicit reference loading (`Read reference/X.md`) not implicit (`per reference/X`)
+- [ ] Trim Reference Materials descriptions to path + short label
+- [ ] Externalize educational/verbose content to reference/
+
+**Validation:**
+- [ ] `match` blocks used only for 3+ branch routing
+- [ ] No `|>` pipe chains — use numbered sub-steps instead
+- [ ] No content/logic lost in transformation
 
 ---
 
