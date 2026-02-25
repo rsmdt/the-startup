@@ -141,10 +141,10 @@ Skills load minimal context initially, then progressively load:
 
 The primary workflow: `/start:specify` → `/start:validate` → `/start:implement` → `/start:review`
 
-Specifications live in `docs/specs/[NNN]-[name]/`:
-- `product-requirements.md` - What to build
-- `solution-design.md` - How to build it
-- `implementation-plan.md` - Executable tasks
+Specifications live in `.start/specs/[NNN]-[name]/` (legacy: `docs/specs/`):
+- `requirements.md` - What to build
+- `solution.md` - How to build it
+- `plan/` - Execution sequence (README.md manifest + phase-N.md files)
 
 ### Knowledge Capture
 
@@ -168,7 +168,7 @@ Optional `CONSTITUTION.md` at project root defines checkable rules:
 | Skills | `plugins/*/skills/*/SKILL.md` | directory is skill name |
 | Agents | `plugins/team/agents/the-*/` | `the-[role]/[activity].md` |
 | Output Styles | `plugins/*/output-styles/*.md` | Title Case (e.g., `The Startup.md`) |
-| Specs | `docs/specs/[NNN]-*/` | 3-digit ID prefix |
+| Specs | `.start/specs/[NNN]-*/` | 3-digit ID prefix |
 
 ## Publishing
 

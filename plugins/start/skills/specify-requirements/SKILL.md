@@ -1,6 +1,6 @@
 ---
 name: specify-requirements
-description: Create and validate product requirements documents (PRD). Use when writing requirements, defining user stories, specifying acceptance criteria, analyzing user needs, or working on product-requirements.md files in docs/specs/. Includes validation checklist, iterative cycle pattern, and multi-angle review process.
+description: Create and validate product requirements documents (PRD). Use when writing requirements, defining user stories, specifying acceptance criteria, analyzing user needs, or working on requirements.md files in .start/specs/. Includes validation checklist, iterative cycle pattern, and multi-angle review process.
 allowed-tools: Read, Write, Edit, Task, TodoWrite, Grep, Glob
 ---
 
@@ -60,7 +60,7 @@ Keep in SDD (not PRD): technical implementation, architecture, database schemas,
 
 ## Reference Materials
 
-- [Template](template.md) — PRD template structure, write to `docs/specs/[NNN]-[name]/product-requirements.md`
+- [Template](template.md) — PRD template structure, write to `.start/specs/[NNN]-[name]/requirements.md`
 - [Validation](validation.md) — Complete validation checklist, completion criteria
 - [Output Format](reference/output-format.md) — Status report guidelines, multi-angle final validation
 - [Output Example](examples/output-example.md) — Concrete example of expected output format

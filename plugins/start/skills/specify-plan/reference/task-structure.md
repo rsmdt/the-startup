@@ -99,4 +99,4 @@ When implementation requires changes from the specification:
 1. Document the deviation with clear rationale
 2. Obtain approval before proceeding
 3. Update SDD when the deviation improves the design
-4. Record all deviations in the plan for traceability
+4. Record all deviations in the relevant phase file for traceability

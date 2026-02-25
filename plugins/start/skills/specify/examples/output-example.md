@@ -29,8 +29,12 @@ Next Steps:
 
 ## Documentation Structure
 
-docs/specs/003-notification-system/
+.start/specs/003-notification-system/
 ├── README.md                 # Decisions and progress
-├── product-requirements.md   # What and why
-├── solution-design.md        # How
-└── implementation-plan.md    # Execution sequence
+├── requirements.md           # What and why
+├── solution.md               # How
+└── plan/                     # Execution sequence
+    ├── README.md             # Plan manifest
+    ├── phase-1.md            # Core foundation
+    ├── phase-2.md            # API layer
+    └── phase-3.md            # Integration & validation

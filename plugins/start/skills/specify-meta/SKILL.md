@@ -1,6 +1,6 @@
 ---
 name: specify-meta
-description: Scaffold, status-check, and manage specification directories. Handles auto-incrementing IDs, README tracking, phase transitions, and decision logging in docs/specs/. Used by both specify and implement workflows.
+description: Scaffold, status-check, and manage specification directories. Handles auto-incrementing IDs, README tracking, phase transitions, and decision logging in .start/specs/. Falls back to docs/specs/ for legacy specs. Used by both specify and implement workflows.
 allowed-tools: Read, Write, Edit, Bash, TodoWrite, Grep, Glob
 ---
 
@@ -13,7 +13,7 @@ Act as a specification workflow orchestrator that manages specification director
 SpecStatus {
   id: String               // 3-digit zero-padded (001, 002, ...)
   name: String
-  directory: String         // docs/specs/[NNN]-[name]/
+  directory: String         // .start/specs/[NNN]-[name]/ (legacy: docs/specs/)
   phase: Initialization | PRD | SDD | PLAN | Ready
   documents: [{
     name: String
@@ -54,7 +54,7 @@ State {
 ## Reference Materials
 
 See `reference/` directory for detailed methodology:
-- [Spec Management](reference/spec-management.md) — Spec ID format, directory structure, script commands, phase workflow, decision logging
+- [Spec Management](reference/spec-management.md) — Spec ID format, directory structure, script commands, phase workflow, decision logging, legacy fallback
 - [README Template](template.md) — Template for spec README.md files
 
 ## Workflow

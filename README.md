@@ -170,10 +170,12 @@ The Agentic Startup follows **spec-driven development**: comprehensive specifica
 This creates a specification directory with three documents:
 
 ```
-docs/specs/001-notification-system/
-├── product-requirements.md   # What to build and why
-├── solution-design.md        # How to build it technically
-└── implementation-plan.md    # Executable tasks and phases
+.start/specs/001-notification-system/
+├── requirements.md           # What to build and why
+├── solution.md               # How to build it technically
+└── plan/                     # Executable tasks and phases
+    ├── README.md             # Plan manifest
+    └── phase-N.md            # Per-phase task files
 ```
 
 **The spec cycle may take 15-30 minutes.** Claude will research your codebase, ask clarifying questions, and produce comprehensive documents. The process naturally involves multiple back-and-forth exchanges.
@@ -503,7 +505,7 @@ danger = 90
 | `<context>` | Context usage bar and percentage | `🧠 ⣿⣿⡇⠀⠀ 50%` |
 | `<session>` | Duration and cost | `🕐 30m  💰 $1.50` |
 | `<lines>` | Lines added/removed | `+156/-23` |
-| `<spec>` | Active spec ID (when in docs/specs/) | `📋 005` |
+| `<spec>` | Active spec ID (when in .start/specs/) | `📋 005` |
 | `<help>` | Help text | `? for shortcuts` |
 
 **Example minimal format:**
@@ -584,9 +586,9 @@ Development often moves too fast without proper planning:
 ### Our Approach
 
 **1. Specify First** — Create comprehensive specifications before writing code
-- **product-requirements.md** — What to build and why
-- **solution-design.md** — How to build it technically
-- **implementation-plan.md** — Executable tasks and phases
+- **requirements.md** — What to build and why
+- **solution.md** — How to build it technically
+- **plan/** — Executable tasks and phases (README.md manifest + phase-N.md files)
 
 **2. Review & Refine** — Validate specifications with stakeholders
 - Catch issues during planning, not during implementation

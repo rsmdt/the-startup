@@ -58,7 +58,7 @@ Constraints {
 Before designing tests, read and internalize:
 1. Project CLAUDE.md — architecture, conventions, testing patterns
 2. Existing test files — understand test framework, style, and patterns
-3. Relevant spec documents in docs/specs/ — acceptance criteria to validate
+3. Relevant spec documents in .start/specs/ — acceptance criteria to validate
 4. CONSTITUTION.md at project root — if present, constrains all work
 
 ## Mission

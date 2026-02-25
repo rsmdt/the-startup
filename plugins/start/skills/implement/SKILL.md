@@ -1,6 +1,6 @@
 ---
 name: implement
-description: Executes the implementation plan from a specification
+description: Executes the implementation plan from a specification. Loops through plan phases, delegates tasks to specialists, updates phase status on completion. Supports resuming from partially-completed plans.
 user-invocable: true
 argument-hint: "spec ID to implement (e.g., 001), or file path"
 allowed-tools: Task, TaskOutput, TodoWrite, Bash, Write, Edit, Read, LS, Glob, Grep, MultiEdit, AskUserQuestion, Skill, TeamCreate, TeamDelete, SendMessage, TaskCreate, TaskUpdate, TaskList, TaskGet
@@ -14,9 +14,17 @@ Act as an implementation orchestrator that executes specification plans by deleg
 
 ## Interface
 
+Phase {
+  number: Number
+  title: String
+  file: String               // path to phase-N.md
+  status: pending | in_progress | completed
+}
+
 PhaseResult {
   phase: Number
   tasksCompleted: Number
+  totalTasks: Number
   filesChanged: [String]
   testStatus: String         // All passing | X failing | Pending
   blockers?: [String]
@@ -24,8 +32,10 @@ PhaseResult {
 
 fn initialize(target)
 fn selectMode()
+fn phaseLoop(phases, mode)
 fn executePhase(phase, mode)
-fn validatePhase(result)
+fn validatePhase(phase, result)
+fn updatePhaseStatus(phase, status)
 fn complete(results)
 
 ## Constraints
@@ -34,17 +44,20 @@ Constraints {
   require {
     Delegate ALL implementation tasks to subagents or teammates via Task tool.
     Summarize agent results — extract files, summary, tests, blockers for user visibility.
-    Load tasks incrementally — one phase at a time to manage cognitive load.
+    Load tasks incrementally — one phase file at a time for context efficiency.
     Wait for user confirmation at phase boundaries.
     Run Skill(start:validate) drift check at each phase checkpoint.
     Run Skill(start:validate) constitution if CONSTITUTION.md exists.
     Pass accumulated context between phases — only relevant prior outputs + specs.
+    Update phase file frontmatter AND plan/README.md checkbox on phase completion.
+    Skip already-completed phases when resuming an interrupted plan.
   }
   never {
     Implement code directly — you are an orchestrator ONLY.
     Display full agent responses — extract key outputs only.
     Skip phase boundary checkpoints.
     Proceed past a blocking constitution violation (L1/L2).
+    Load all phase files at once — load only the current phase.
   }
 }
 
@@ -53,9 +66,11 @@ Constraints {
 State {
   target = $ARGUMENTS
   spec: String                   // resolved spec directory path
-  plan: String                   // implementation-plan.md contents
+  planDirectory: String          // path to plan/ directory (empty for legacy)
+  manifest: String               // plan/README.md contents (or legacy implementation-plan.md)
+  phases: [Phase]                // discovered from manifest, with status from frontmatter
   mode: Standard | Team          // chosen by user in selectMode
-  currentPhase: 1                // current execution phase
+  currentPhase: Number           // current phase being executed
   results: [PhaseResult]         // accumulated phase results
 }
 
@@ -70,11 +85,30 @@ See `reference/` directory for detailed methodology:
 
 fn initialize(target) {
   Skill(start:specify-meta) to read spec.
-  Validate implementation-plan.md exists.
-  Identify all phases, tasks, dependencies, and metadata.
 
-  // Task metadata from PLAN.md:
-  // [activity: areas], [complexity: level], [parallel: true], [ref: SDD/Section X.Y]
+  // Discover plan structure
+  match (spec) {
+    plan/ directory exists => {
+      Read plan/README.md (the manifest).
+      Parse phase checklist lines matching: `- [x] [Phase N: Title](phase-N.md)` or `- [ ] [Phase N: Title](phase-N.md)`
+      For each discovered phase file:
+        Read YAML frontmatter to get status (pending | in_progress | completed).
+      Populate phases[] with number, title, file path, and status.
+    }
+    implementation-plan.md exists => {
+      Read legacy monolithic plan.
+      Set planDirectory to empty (legacy mode — no phase loop, no status updates).
+    }
+    neither => Error: No implementation plan found.
+  }
+
+  // Report plan status
+  Present discovered phases with their statuses.
+  Highlight any completed phases (will be skipped).
+  Highlight any in_progress phases (will be resumed).
+
+  // Task metadata from plan files:
+  // [activity: areas], [parallel: true], [ref: SDD/Section X.Y]
 
   // Offer optional git setup
   match (git repository) {
@@ -92,7 +126,33 @@ fn selectMode() {
     phases >= 3 | cross-phase dependencies | parallel tasks >= 5 | shared state across tasks
 }
 
+fn phaseLoop(phases, mode) {
+  // Core execution loop — iterate through all incomplete phases
+  for each phase in phases where phase.status != completed {
+    updatePhaseStatus(phase, in_progress)
+    executePhase(phase, mode)
+    validatePhase(phase, result)
+
+    match (user choice from validatePhase) {
+      "Continue to next phase" => continue loop
+      "Pause"                  => break loop (plan is resumable)
+      "Review output"          => present details, then re-ask
+      "Address issues"         => fix, then re-validate current phase
+    }
+  }
+
+  // All phases done (or paused)
+  match (all phases completed) {
+    true  => complete(results)
+    false => report progress, plan is resumable from next pending phase
+  }
+}
+
 fn executePhase(phase, mode) {
+  // Load ONLY current phase context
+  Read plan/phase-{phase.number}.md for current phase tasks.
+  Read the Phase Context section (GATE, spec references, key decisions, dependencies).
+
   match (mode) {
     Standard => {
       Load ONLY current phase tasks into TodoWrite.
@@ -107,20 +167,41 @@ fn executePhase(phase, mode) {
     }
   }
 
+  // As tasks complete, update task checkboxes in phase-N.md:
+  //   `- [ ]` → `- [x]` for completed tasks
+
   // Review handling: APPROVED → next task | Spec violation → must fix |
   // Revision needed → max 3 cycles | After 3 → escalate to user
 }
 
-fn validatePhase(result) {
+fn validatePhase(phase, result) {
   Skill(start:validate) drift for spec alignment.
   Skill(start:validate) constitution if CONSTITUTION.md exists.
   Verify all phase tasks complete.
+
+  // Update phase status to completed
+  updatePhaseStatus(phase, completed)
 
   // Drift types: Scope Creep, Missing, Contradicts, Extra
   // When detected: AskUserQuestion — Acknowledge | Update impl | Update spec | Defer
 
   Present phase summary per reference/output-format.md.
   AskUserQuestion: Continue to next phase | Review output | Pause | Address issues
+}
+
+fn updatePhaseStatus(phase, status) {
+  // 1. Update phase file YAML frontmatter
+  //    Change `status: pending` (or `in_progress`) → `status: {status}`
+  Edit phase file frontmatter: `status: {old}` → `status: {status}`
+
+  // 2. Update plan/README.md phase checkbox (only on completed)
+  match (status) {
+    completed => {
+      Edit plan/README.md:
+        `- [ ] [Phase {N}: {Title}](phase-{N}.md)`
+        → `- [x] [Phase {N}: {Title}](phase-{N}.md)`
+    }
+  }
 }
 
 fn complete(results) {
@@ -137,5 +218,5 @@ fn complete(results) {
 }
 
 implement(target) {
-  initialize(target) |> selectMode |> executePhase |> validatePhase |> complete
+  initialize(target) |> selectMode |> phaseLoop |> complete
 }

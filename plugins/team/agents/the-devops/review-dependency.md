@@ -31,7 +31,7 @@ Constraints {
 
 Before reviewing, read and internalize:
 1. Project CLAUDE.md — architecture, conventions, priorities
-2. Relevant spec documents in `docs/specs/` — if dependency requirements are specified
+2. Relevant spec documents in `.start/specs/` — if dependency requirements are specified
 3. CONSTITUTION.md at project root — if present, constrains dependency choices
 4. Existing dependency patterns — understand package manager and versioning strategy
 

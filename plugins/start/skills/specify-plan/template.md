@@ -19,7 +19,7 @@ version: "1.0"
 ### QUALITY CHECKS (Should Pass)
 
 - [ ] Context priming section is complete
-- [ ] All implementation phases are defined
+- [ ] All implementation phases are defined with linked phase files
 - [ ] Dependencies between phases are clear (no circular dependencies)
 - [ ] Parallel work is properly tagged with `[parallel: true]`
 - [ ] Activity hints provided for specialist selection `[activity: type]`
@@ -53,6 +53,7 @@ version: "1.0"
 | name | string | Yes | Phase name |
 | status | enum: `COMPLETE`, `NEEDS_CLARIFICATION`, `IN_PROGRESS` | Yes | Current state |
 | tasks | number | Yes | Task count in this phase |
+| file | string | Yes | Path to phase file (phase-N.md) |
 | detail | string | No | What needs clarification or what's in progress |
 
 ---
@@ -105,8 +106,8 @@ When implementation requires changes from the specification:
 **Specification**:
 
 [NEEDS CLARIFICATION: Replace with actual paths from your spec directory]
-- `docs/specs/[NNN]-[name]/product-requirements.md` - Product Requirements
-- `docs/specs/[NNN]-[name]/solution-design.md` - Solution Design
+- `.start/specs/[NNN]-[name]/requirements.md` - Product Requirements
+- `.start/specs/[NNN]-[name]/solution.md` - Solution Design
 - `docs/{patterns,interfaces,research}/[name].md`  - Optional references
 
 **Key Design Decisions**:
@@ -135,99 +136,13 @@ npm run validate           # All checks
 
 ## Implementation Phases
 
-Each task follows red-green-refactor: **Prime** (understand context), **Test** (red), **Implement** (green), **Validate** (refactor + verify).
+Each phase is defined in a separate file. Tasks follow red-green-refactor: **Prime** (understand context), **Test** (red), **Implement** (green), **Validate** (refactor + verify).
 
 > **Tracking Principle**: Track logical units that produce verifiable outcomes. The TDD cycle is the method, not separate tracked items.
 
----
-
-### Phase 1: Core Foundation
-
-[NEEDS CLARIFICATION: Describe what this phase delivers - "Establishes X capability" or "Enables Y functionality"]
-
-Establishes the foundational [domain/infrastructure/components] required for subsequent phases.
-
-- [ ] **T1.1 [Primary deliverable name]** `[activity: domain-modeling]`
-
-  1. Prime: Read [entity/component] specification `[ref: SDD/Section X; lines: Y-Z]`
-  2. Test: [Behavior 1]; [Behavior 2]; [Edge case handling]
-  3. Implement: Create `src/[path]/[File].ts` with [key capability]
-  4. Validate: Unit tests pass; lint clean; types check
-  5. Success: [Criterion 1] `[ref: PRD/AC-1.1]`; [Criterion 2] `[ref: SDD/Section]`
-
-- [ ] **T1.2 [Secondary deliverable name]** `[activity: data-architecture]`
-
-  1. Prime: Review [pattern/interface] requirements `[ref: SDD/Section X]`
-  2. Test: [CRUD operations]; [Query patterns]; [Error handling]
-  3. Implement: Create `src/[path]/[File].ts` with [key capability]
-  4. Validate: Integration tests pass; lint clean; types check
-  5. Success: [Criterion 1] `[ref: PRD/AC-1.2]`; [Criterion 2] `[ref: SDD/Section]`
-
-- [ ] **T1.3 Phase Validation** `[activity: validate]`
-
-  - Run all Phase 1 tests. Verify foundation matches SDD data models. Lint and typecheck pass.
-
----
-
-### Phase 2: [API/Integration/UI] Layer
-
-[NEEDS CLARIFICATION: Describe what this phase delivers. Mark parallel tasks for concurrent execution.]
-
-Builds the [API endpoints/integrations/UI components] that expose Phase 1 capabilities.
-
-- [ ] **T2.1 [Component A]** `[parallel: true]` `[component: backend]`
-
-  1. Prime: Read API specification `[ref: SDD/Section X]`
-  2. Test: [Endpoint behavior]; [Validation]; [Error responses]
-  3. Implement: Create `src/[path]/[Controller].ts` with routes
-  4. Validate: API tests pass; contract matches specification
-  5. Success: [Criterion] `[ref: PRD/AC-2.1]`
-
-- [ ] **T2.2 [Component B]** `[parallel: true]` `[component: backend]`
-
-  1. Prime: Read integration pattern `[ref: docs/interfaces/X.md]`
-  2. Test: [Success flow]; [Failure handling]; [Retry logic]
-  3. Implement: Create `src/[path]/[Adapter].ts` with integration
-  4. Validate: Integration tests pass with test/mock service
-  5. Success:
-      - [Success criterion 1] `[ref: PRD/AC-2.2]`
-      - [Failure handling verified] `[ref: SDD/Error Handling]`
-      - [Retry logic works with backoff] `[ref: docs/patterns/resilience.md]`
-
-- [ ] **T2.3 Phase Validation** `[activity: validate]`
-
-  Run all Phase 2 tests. Verify API contracts match SDD. Lint and typecheck pass.
-
----
-
-### Phase 3: Final Integration & Validation
-
-Full system validation ensuring all components work together correctly.
-
-- [ ] **T3.1 Integration Testing** `[activity: integration-test]`
-
-  Verify cross-component integration: [Component A] ↔ [Component B]; [Service] ↔ [Database]
-
-  `[ref: SDD/integration points]`
-
-- [ ] **T3.2 E2E User Flows** `[activity: e2e-test]`
-
-  Verify complete user journeys: [Happy path flow]; [Error handling flow]; [Edge case flow]
-
-  `[ref: PRD/acceptance criteria]`
-
-- [ ] **T3.3 Quality Gates** `[activity: validate]`
-
-  - Performance: [Specific metric] < [threshold] `[ref: SDD/Quality Requirements]`
-  - Security: [Specific check] verified
-  - Coverage: > [X]% line coverage
-
-- [ ] **T3.4 Specification Compliance** `[activity: business-acceptance]`
-
-  - All PRD acceptance criteria verified
-  - Implementation follows SDD design
-  - Documentation updated for API/interface changes
-  - Build and deployment verification complete
+- [ ] [Phase 1: Core Foundation](phase-1.md)
+- [ ] [Phase 2: [API/Integration/UI] Layer](phase-2.md)
+- [ ] [Phase 3: Final Integration & Validation](phase-3.md)
 
 ---
 
@@ -245,3 +160,4 @@ Before this plan is ready for implementation, verify:
 | Parallel opportunities are marked with `[parallel: true]` | ⬜ |
 | Each task has specification references `[ref: ...]` | ⬜ |
 | Project commands in Context Priming are accurate | ⬜ |
+| All phase files exist and are linked from this manifest as `[Phase N: Title](phase-N.md)` | ⬜ |

@@ -12,9 +12,9 @@
 
 | Document | Status | Notes |
 |----------|--------|-------|
-| product-requirements.md | {{PRD_STATUS}} | {{PRD_NOTES}} |
-| solution-design.md | {{SDD_STATUS}} | {{SDD_NOTES}} |
-| implementation-plan.md | {{PLAN_STATUS}} | {{PLAN_NOTES}} |
+| requirements.md | {{PRD_STATUS}} | {{PRD_NOTES}} |
+| solution.md | {{SDD_STATUS}} | {{SDD_NOTES}} |
+| plan/ | {{PLAN_STATUS}} | {{PLAN_NOTES}} |
 
 **Status values**: `pending` | `in_progress` | `completed` | `skipped`
 

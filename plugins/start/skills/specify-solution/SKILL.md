@@ -1,6 +1,6 @@
 ---
 name: specify-solution
-description: Create and validate solution design documents (SDD). Use when designing architecture, defining interfaces, documenting technical decisions, analyzing system components, or working on solution-design.md files in docs/specs/. Includes validation checklist, consistency verification, and overlap detection.
+description: Create and validate solution design documents (SDD). Use when designing architecture, defining interfaces, documenting technical decisions, analyzing system components, or working on solution.md files in .start/specs/. Includes validation checklist, consistency verification, and overlap detection.
 allowed-tools: Read, Write, Edit, Task, TodoWrite, Grep, Glob
 ---
 
@@ -54,9 +54,9 @@ Constraints {
 ## State
 
 State {
-  specDirectory = ""             // docs/specs/[NNN]-[name]/
-  prd = ""                       // path to product-requirements.md
-  sdd = ""                       // path to solution-design.md
+  specDirectory = ""             // .start/specs/[NNN]-[name]/ (or legacy docs/specs/)
+  prd = ""                       // path to requirements.md (or product-requirements.md)
+  sdd = ""                       // path to solution.md (or solution-design.md)
   sections: [SddSection]         // tracked per template section
   adrs: [ArchitectureDecision]   // collected during design
 }
@@ -71,7 +71,7 @@ When designing, address four dimensions:
 
 ## Reference Materials
 
-- [Template](template.md) — SDD template structure, write to `docs/specs/[NNN]-[name]/solution-design.md`
+- [Template](template.md) — SDD template structure, write to `.start/specs/[NNN]-[name]/solution.md`
 - [Validation](validation.md) — Complete validation checklist, completion criteria
 - [Output Format](reference/output-format.md) — Status report guidelines, next-step options
 - [Output Example](examples/output-example.md) — Concrete example of expected output format
@@ -82,7 +82,7 @@ When designing, address four dimensions:
 fn initializeDesign(specDirectory) {
   Read PRD from specDirectory to understand requirements.
   Read template from template.md.
-  Write template to specDirectory/solution-design.md.
+  Write template to specDirectory/solution.md.
   Explore codebase to understand existing patterns, conventions, and constraints.
 }
 

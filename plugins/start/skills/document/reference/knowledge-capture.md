@@ -343,7 +343,7 @@ Documentation skill captures discovered patterns:
 ### During Specification (`/start:specify`)
 - PRD/SDD references existing documentation
 - New patterns discovered → Document them
-- Specifications live in `docs/specs/`, reference shared docs
+- Specifications live in `.start/specs/`, reference shared docs
 
 ### During Implementation (`/start:implement`)
 - Implementation follows documented patterns

@@ -31,7 +31,7 @@ Constraints {
 
 Before designing, read and internalize:
 1. Project CLAUDE.md — architecture, conventions, priorities
-2. Relevant spec documents in `docs/specs/` — requirements that drive architecture
+2. Relevant spec documents in `.start/specs/` — requirements that drive architecture
 3. CONSTITUTION.md at project root — if present, constrains architectural choices
 4. Existing codebase patterns — understand current architecture before proposing changes
 

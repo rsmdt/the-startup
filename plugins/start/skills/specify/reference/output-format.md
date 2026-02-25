@@ -6,11 +6,11 @@ Guidelines for specification output. See `examples/output-example.md` for concre
 
 ## Documentation Structure
 
-Specifications live in `docs/specs/[NNN]-[name]/`:
+Specifications live in `.start/specs/[NNN]-[name]/`:
 - `README.md` — Decisions and progress tracking
-- `product-requirements.md` — What and why
-- `solution-design.md` — How
-- `implementation-plan.md` — Execution sequence
+- `requirements.md` — What and why
+- `solution.md` — How
+- `plan/` — Execution sequence (README.md manifest + phase-N.md files)
 
 ## Decision Logging
 

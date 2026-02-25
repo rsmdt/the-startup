@@ -49,20 +49,20 @@ Create comprehensive specifications from brief descriptions through deep researc
 <details>
 <summary><strong>View Details</strong></summary>
 
-**What you get:** Three comprehensive documents in `docs/specs/[NNN]-[name]/`:
+**What you get:** Three comprehensive documents in `.start/specs/[NNN]-[name]/`:
 
-- **product-requirements.md** - User stories, feature specifications, success criteria, non-functional requirements
-- **solution-design.md** - Technical architecture, system components, data models, technology stack, security and performance considerations
-- **implementation-plan.md** - Phased task breakdown, dependencies, acceptance criteria, risk assessment
+- **requirements.md** - User stories, feature specifications, success criteria, non-functional requirements
+- **solution.md** - Technical architecture, system components, data models, technology stack, security and performance considerations
+- **plan/** - Per-phase implementation files (README.md manifest + phase-N.md task files)
 
 ```mermaid
 flowchart TD
     A([Your Feature Idea]) --> |initialize| B{Check<br>Existing}
     B --> |exists| C[Review and Refine]
     C --> END[Ready for /implement 001]
-    B --> |new| D[Requirements Gathering<br/>Create product-requirements.md if needed]
-    D --> E[Technical Research<br/>Create solution-design.md if needed, document patterns, interfaces]
-    E --> F[Implementation Planning<br/>Create implementation-plan.md]
+    B --> |new| D[Requirements Gathering<br/>Create requirements.md if needed]
+    D --> E[Technical Research<br/>Create solution.md if needed, document patterns, interfaces]
+    E --> F[Implementation Planning<br/>Create plan/ with per-phase files]
     F --> END
 ```
 
@@ -79,26 +79,26 @@ Execute implementation plans phase-by-phase with parallel specialist agents and 
 **Usage:**
 ```bash
 /implement 001
-/implement path/to/custom/implementation-plan.md
+/implement path/to/custom/plan/
 ```
 
 **Key Features:**
 - **Parallel Execution** - Multiple agents work simultaneously within phases
 - **Sequential Phases** - Phases execute in order with validation gates
 - **Rollback on Failure** - Automatic reversion if tests fail
-- **Specification Compliance** - Continuous validation against product-requirements.md/solution-design.md
+- **Specification Compliance** - Continuous validation against requirements.md/solution.md
 - **Pattern Recognition** - Documents implementation patterns discovered
 - **Real-time Updates** - TodoWrite tracking shows live progress
-- **Custom Plans** - Can implement any implementation-plan.md file, not just specs
+- **Custom Plans** - Can implement any plan directory or legacy implementation-plan.md, not just specs
 
 <details>
 <summary><strong>View Details</strong></summary>
 
-Loads implementation-plan.md and executes phase-by-phase with approval gates between phases. Multiple specialist agents work in parallel within each phase when tasks are independent. All changes are validated against acceptance criteria and tests run after each task.
+Reads plan/README.md to discover phases, then executes phase-by-phase with approval gates between phases. Each phase is loaded individually from plan/phase-N.md for context efficiency. Multiple specialist agents work in parallel within each phase when tasks are independent. Phase status is tracked in frontmatter and the manifest checkbox. Supports resuming from partially-completed plans.
 
 ```mermaid
 flowchart TD
-    A([implementation-plan.md]) --> |load| B[Initialize Plan<br/>Parse phases and tasks]
+    A([plan/README.md]) --> |load| B[Initialize Plan<br/>Discover phases and status]
     B --> |approve| C{Phases<br>Remaining?}
     C --> |yes| D[Execute Phase N<br/>Parallel agent execution<br/>Run tests after each task]
     D --> |validate| E[Phase Review<br/>Check test results<br/>Review changes]
@@ -120,7 +120,7 @@ Validate specifications, implementations, or understanding through intelligent c
 **Usage:**
 ```bash
 /validate 001                                          # Validate spec by ID
-/validate docs/specs/001/solution-design.md            # Validate specific file
+/validate .start/specs/001/solution.md                  # Validate specific file
 /validate Check the auth implementation against SDD    # Compare implementation to spec
 /validate drift                                        # Check for spec-implementation drift
 /validate constitution                                 # Validate constitution compliance
@@ -410,7 +410,7 @@ flowchart TD
     C --> |simple| D[Direct Refactoring<br/>Run tests first<br/>Apply changes<br/>Validate each step]
     D --> |review| E[Specialist Review<br/>Code quality check<br/>Performance impact]
     E --> DONE[Refactoring Complete]
-    C --> |complex| F[Create Specification<br/>Generate solution-design.md<br/>Generate implementation-plan.md<br/>Document approach]
+    C --> |complex| F[Create Specification<br/>Generate solution.md<br/>Generate plan/<br/>Document approach]
     F --> |defer| G[Ready for /implement<br/>Execute via planned phases]
 ```
 
@@ -595,13 +595,17 @@ The `start` plugin includes five autonomous skills that activate automatically b
 The plugin encourages structured knowledge management:
 
 ```
+.start/
+└── specs/
+    └── [3-digit-number]-[feature-name]/
+        ├── README.md                        # Decisions and progress
+        ├── requirements.md                  # What to build
+        ├── solution.md                      # How to build it
+        └── plan/                            # Implementation tasks
+            ├── README.md                    # Plan manifest
+            └── phase-N.md                   # Per-phase task files
+
 docs/
-├── specs/
-│   └── [3-digit-number]-[feature-name]/
-│       ├── product-requirements.md         # What to build
-│       ├── solution-design.md              # How to build it
-│       └── implementation-plan.md          # Implementation tasks
-│
 ├── domain/                                  # Business rules
 │   ├── user-permissions.md
 │   ├── order-workflow.md
@@ -741,8 +745,8 @@ Optional: /document after implementation for documentation sync
 ```
 
 **What happens:**
-- Creates `docs/specs/001-notification-system/`
-- Generates product-requirements.md, solution-design.md, implementation-plan.md
+- Creates `.start/specs/001-notification-system/`
+- Generates requirements.md, solution.md, plan/ (with per-phase files)
 - Documents discovered patterns/interfaces
 - Optional: Creates `spec/001-notification-system` git branch
 
