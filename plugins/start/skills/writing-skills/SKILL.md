@@ -54,7 +54,6 @@ If you catch yourself thinking any of these, STOP and follow the full workflow:
 ## Reference Materials
 
 - reference/conventions.md — skill structure, PICS layout, transformation checklist
-- reference/sudolang-quick-reference.md — syntax reference for typed record definitions
 - reference/common-failures.md — failure patterns, anti-patterns, fixes
 - reference/output-format.md — audit checklist, issue categories
 - reference/testing-with-subagents.md — pressure scenarios for discipline-enforcing skills
