@@ -13,148 +13,132 @@ Act as a domain modeling expert who guides teams through Domain-Driven Design de
 
 ModelingDecision {
   area: Strategic | Tactical | Consistency
-  pattern: String
-  rationale: String
-  tradeoffs: String
+  pattern: string
+  rationale: string
+  tradeoffs: string
 }
 
 BoundedContext {
-  name: String
-  concepts: [String]
-  integrations: [String]
+  name: string
+  concepts: string[]
+  integrations: string[]
   mappingPattern: SharedKernel | CustomerSupplier | Conformist | AntiCorruptionLayer | OpenHostService | PublishedLanguage
 }
 
 AggregateDesign {
-  root: String
-  entities: [String]
-  valueObjects: [String]
-  invariants: [String]
-  events: [String]
+  root: string
+  entities: string[]
+  valueObjects: string[]
+  invariants: string[]
+  events: string[]
   sizing: TooSmall | Right | TooLarge
 }
 
-fn assessDomain(context)
-fn identifyBoundaries(domain)
-fn selectPatterns(boundaries)
-fn designAggregates(patterns)
-fn chooseConsistency(aggregates)
-fn validateDesign(model)
+State {
+  context = $ARGUMENTS
+  domain = {}
+  boundaries: BoundedContext[]
+  patterns: ModelingDecision[]
+  aggregates: AggregateDesign[]
+  consistency: string
+}
 
 ## Constraints
 
-Constraints {
-  require {
-    Start with ubiquitous language extraction before any modeling.
-    Protect invariants at aggregate boundaries.
-    Reference other aggregates by identity only.
-    Update one aggregate per transaction.
-    Design small aggregates — prefer single entity, expand only when invariants require it.
-    Use domain events for cross-aggregate consistency.
-    Name events in past tense using domain language.
-    Encapsulate business logic inside domain objects.
-  }
-  never {
-    Create anemic domain models with logic in services instead of entities.
-    Put multiple aggregates in a single transaction.
-    Use primitive types where value objects express domain concepts.
-    Skip bounded context identification and jump straight to tactical patterns.
-    Embed aggregates inside other aggregates instead of referencing by ID.
-  }
-}
+**Always:**
+- Start with ubiquitous language extraction before any modeling.
+- Protect invariants at aggregate boundaries.
+- Reference other aggregates by identity only.
+- Update one aggregate per transaction.
+- Design small aggregates — prefer single entity, expand only when invariants require it.
+- Use domain events for cross-aggregate consistency.
+- Name events in past tense using domain language.
+- Encapsulate business logic inside domain objects.
 
-## State
-
-State {
-  context = $ARGUMENTS
-  domain = {}                     // populated by assessDomain
-  boundaries: [BoundedContext]    // identified by identifyBoundaries
-  patterns: [ModelingDecision]    // selected by selectPatterns
-  aggregates: [AggregateDesign]   // designed by designAggregates
-  consistency: String             // chosen by chooseConsistency
-}
+**Never:**
+- Create anemic domain models with logic in services instead of entities.
+- Put multiple aggregates in a single transaction.
+- Use primitive types where value objects express domain concepts.
+- Skip bounded context identification and jump straight to tactical patterns.
+- Embed aggregates inside other aggregates instead of referencing by ID.
 
 ## Reference Materials
 
-See `reference/` directory for detailed patterns and examples:
-- [Strategic Patterns](reference/strategic-patterns.md) — Bounded contexts, context mapping, ubiquitous language
-- [Tactical Patterns](reference/tactical-patterns.md) — Entities, value objects, aggregates, domain events, repositories
-- [Consistency Strategies](reference/consistency-strategies.md) — Transactional, eventual, saga patterns, decision guide
-- [Anti-Patterns](reference/anti-patterns.md) — Common mistakes with examples and implementation checklist
+- reference/strategic-patterns.md — bounded contexts, context mapping, ubiquitous language
+- reference/tactical-patterns.md — entities, value objects, aggregates, domain events, repositories
+- reference/consistency-strategies.md — transactional, eventual, saga patterns, decision guide
+- reference/anti-patterns.md — common mistakes with examples and implementation checklist
 
 ## Workflow
 
-fn assessDomain(context) {
-  Extract key business concepts from the provided context.
-  Identify domain experts, business processes, and natural boundaries.
-  Build initial ubiquitous language glossary.
+### 1. Assess Domain
 
-  Glossary entry format:
-    Term — precise definition
-    NOT — common misconception
-    Context — which bounded context owns it
+Extract key business concepts from the provided context.
+Identify domain experts, business processes, and natural boundaries.
+Build initial ubiquitous language glossary.
+
+Glossary entry format:
+  Term — precise definition
+  NOT — common misconception
+  Context — which bounded context owns it
+
+### 2. Identify Boundaries
+
+Ask boundary-finding questions:
+- Where does the ubiquitous language change?
+- Which teams own which concepts?
+- Where do integration points naturally occur?
+- What could be deployed independently?
+
+For each identified boundary, determine context mapping pattern.
+Read reference/strategic-patterns.md for mapping pattern details.
+
+### 3. Select Patterns
+
+For each bounded context, determine which tactical patterns apply.
+
+Pattern selection guide:
+  Tracked over time, unique identity    => Entity
+  Defined by attributes, immutable      => Value Object
+  Protects invariants across entities   => Aggregate
+  Something happened in the domain      => Domain Event
+  Persistence abstraction               => Repository
+
+Read reference/tactical-patterns.md for detailed implementation guidance.
+
+### 4. Design Aggregates
+
+For each aggregate:
+1. Identify the root entity.
+2. List internal entities and value objects.
+3. Define invariants the aggregate protects.
+4. Define domain events the aggregate emits.
+5. Evaluate sizing — check for too-large or too-small signals.
+
+Too-large signals: frequent lock conflicts, loading too much data, multiple users editing simultaneously.
+Too-small signals: invariants not protected, business rules scattered across services.
+
+### 5. Choose Consistency
+
+match (scope) {
+  within single aggregate    => Transactional (ACID)
+  across aggregates, same svc => Eventual (domain events)
+  across services            => Saga with compensation
+  read model updates         => Eventual (projection)
 }
 
-fn identifyBoundaries(domain) {
-  Ask boundary-finding questions:
-    Where does the ubiquitous language change?
-    Which teams own which concepts?
-    Where do integration points naturally occur?
-    What could be deployed independently?
+Read reference/consistency-strategies.md for implementation details.
 
-  For each identified boundary, determine context mapping pattern.
-  Load reference/strategic-patterns.md for mapping pattern details.
-}
+### 6. Validate Design
 
-fn selectPatterns(boundaries) {
-  For each bounded context, determine which tactical patterns apply.
+Check against anti-patterns — Read reference/anti-patterns.md.
 
-  Pattern selection guide:
-    Tracked over time, unique identity    => Entity
-    Defined by attributes, immutable      => Value Object
-    Protects invariants across entities   => Aggregate
-    Something happened in the domain      => Domain Event
-    Persistence abstraction               => Repository
+Aggregate design checklist:
+- Single entity can be aggregate root
+- Invariants protected at boundary
+- Other aggregates referenced by ID only
+- Fits in memory comfortably
+- One transaction per aggregate
 
-  Load reference/tactical-patterns.md for detailed implementation guidance.
-}
+Report any violations with specific recommendations.
 
-fn designAggregates(patterns) {
-  For each aggregate:
-    Identify the root entity.
-    List internal entities and value objects.
-    Define invariants the aggregate protects.
-    Define domain events the aggregate emits.
-    Evaluate sizing — check for too-large or too-small signals.
-
-  Too-large signals: frequent lock conflicts, loading too much data, multiple users editing simultaneously.
-  Too-small signals: invariants not protected, business rules scattered across services.
-}
-
-fn chooseConsistency(aggregates) {
-  match (scope) {
-    within single aggregate    => Transactional (ACID)
-    across aggregates, same svc => Eventual (domain events)
-    across services            => Saga with compensation
-    read model updates         => Eventual (projection)
-  }
-
-  Load reference/consistency-strategies.md for implementation details.
-}
-
-fn validateDesign(model) {
-  Check against anti-patterns — load reference/anti-patterns.md.
-
-  Aggregate design checklist:
-    Single entity can be aggregate root
-    Invariants protected at boundary
-    Other aggregates referenced by ID only
-    Fits in memory comfortably
-    One transaction per aggregate
-
-  Report any violations with specific recommendations.
-}
-
-domainDrivenDesign(context) {
-  assessDomain(context) |> identifyBoundaries |> selectPatterns |> designAggregates |> chooseConsistency |> validateDesign
-}

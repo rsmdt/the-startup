@@ -17,130 +17,114 @@ Act as a validation orchestrator that ensures quality and correctness across spe
 Finding {
   status: PASS | WARN | FAIL
   severity: HIGH | MEDIUM | LOW
-  title: String            // max 40 chars
-  location: String         // file:line
-  issue: String            // one sentence
-  recommendation: String   // how to fix
+  title: string            // max 40 chars
+  location: string         // file:line
+  issue: string            // one sentence
+  recommendation: string   // how to fix
 }
-
-fn parseMode(target)
-fn gatherContext(mode)
-fn selectMode()
-fn launchValidation(mode)
-fn synthesize(findings)
-fn nextSteps(assessment)
-
-## Constraints
-
-Constraints {
-  require {
-    Delegate all validation tasks to specialist agents via Task tool.
-    Launch ALL applicable validation perspectives simultaneously.
-    Include file paths and line numbers for all findings.
-    Every finding must have a clear, actionable fix recommendation.
-    Advisory by default — provide recommendations without blocking.
-  }
-  never {
-    Validate code yourself — always delegate to specialist agents.
-    Skip constitution L1/L2 violations — these are blocking.
-    Present findings without specific file:line references.
-    Summarize agent findings — present complete results.
-  }
-}
-
-## State
 
 State {
   target = $ARGUMENTS
-  validationMode: Spec | File | Drift | Constitution | Comparison | Understanding  // determined by parseMode
-  perspectives = []          // selected based on mode
-  mode: Standard | Team      // chosen by user in selectMode
-  findings: [Finding]        // collected from agents
+  validationMode: Spec | File | Drift | Constitution | Comparison | Understanding
+  perspectives = []        // from reference/perspectives.md
+  mode: Standard | Agent Team
+  findings: Finding[]
 }
+
+## Constraints
+
+**Always:**
+- Delegate all validation tasks to specialist agents via Task tool.
+- Launch ALL applicable validation perspectives simultaneously.
+- Include file paths and line numbers for all findings.
+- Every finding must have a clear, actionable fix recommendation.
+- Advisory by default — provide recommendations without blocking.
+
+**Never:**
+- Validate code yourself — always delegate to specialist agents.
+- Skip constitution L1/L2 violations — these are blocking.
+- Present findings without specific file:line references.
+- Summarize agent findings — present complete results.
 
 ## Reference Materials
 
-See `reference/` directory for detailed methodology:
-- [Perspectives](reference/perspectives.md) — Perspective definitions, activation rules, mode-to-perspective mapping
-- [3Cs Framework](reference/3cs-framework.md) — Completeness, Consistency, Correctness validation
-- [Ambiguity Detection](reference/ambiguity-detection.md) — Vague language patterns and scoring
-- [Drift Detection](reference/drift-detection.md) — Spec-implementation alignment checking
-- [Constitution Validation](reference/constitution-validation.md) — Governance rule enforcement
-- [Output Format](reference/output-format.md) — Assessment level definitions, next-step options
-- [Output Example](examples/output-example.md) — Concrete example of expected output format
+- reference/perspectives.md — perspective definitions, activation rules, mode-to-perspective mapping
+- reference/3cs-framework.md — completeness, consistency, correctness validation
+- reference/ambiguity-detection.md — vague language patterns and scoring
+- reference/drift-detection.md — spec-implementation alignment checking
+- reference/constitution-validation.md — governance rule enforcement
+- reference/output-format.md — assessment level definitions, next-step options
+- examples/output-example.md — concrete example of expected output format
 
 ## Workflow
 
-fn parseMode(target) {
-  match (target) {
-    /^\d{3}/               => Spec Validation
-    file path              => File Validation
-    "drift" | "check drift" => Drift Detection
-    "constitution"         => Constitution Validation
-    "$X against $Y"        => Comparison Validation
-    freeform text          => Understanding Validation
-  }
+### 1. Parse Mode
+
+Determine validation mode from $ARGUMENTS:
+
+match (target) {
+  /^\d{3}/               => Spec Validation
+  file path              => File Validation
+  "drift" | "check drift" => Drift Detection
+  "constitution"         => Constitution Validation
+  "$X against $Y"        => Comparison Validation
+  freeform text          => Understanding Validation
 }
 
-fn gatherContext(mode) {
-  match (mode) {
-    Spec Validation    => load spec documents (PRD, SDD, PLAN), identify cross-references
-    Drift Detection    => load spec + identify implementation files + extract requirements
-    Constitution       => check for CONSTITUTION.md, parse rules by category
-    File Validation    => read target file + surrounding context
-    Comparison         => load both sources for comparison
-  }
+### 2. Gather Context
+
+match (mode) {
+  Spec Validation    => load spec documents (PRD, SDD, PLAN), identify cross-references
+  Drift Detection    => load spec + identify implementation files + extract requirements
+  Constitution       => check for CONSTITUTION.md, parse rules by category
+  File Validation    => read target file + surrounding context
+  Comparison         => load both sources for comparison
 }
 
-fn selectMode() {
-  AskUserQuestion:
-    Standard (default) — parallel fire-and-forget subagents
-    Team Mode — persistent teammates with shared task list and coordination
+### 3. Select Mode
 
-  Recommend Team Mode when:
-    full spec validation | drift + constitution together | 4+ perspectives | multi-document scope
+AskUserQuestion:
+  Standard (default) — parallel fire-and-forget subagents
+  Agent Team — persistent teammates with shared task list and coordination
+
+Recommend Agent Team when: full spec validation | drift + constitution together | 4+ perspectives | multi-document scope.
+
+### 4. Launch Validation
+
+Read reference/perspectives.md for the mode-to-perspective mapping.
+
+match (mode) {
+  Standard => launch parallel subagents per applicable perspectives
+  Agent Team => create team, spawn one validator per perspective, assign tasks
 }
 
-fn launchValidation(mode) {
-  // Select applicable perspectives per reference/perspectives.md mode-to-perspective mapping
-  match (mode) {
-    Standard => launch parallel subagents per applicable perspectives
-    Team     => create team, spawn one validator per perspective, assign tasks
-  }
+### 5. Synthesize Findings
+
+Process findings:
+1. Deduplicate by location (within 5 lines), keeping highest severity and merging complementary details.
+2. Sort by severity (descending).
+3. Group by category.
+
+Mode-specific synthesis:
+- Drift: Read reference/drift-detection.md and categorize by type (Scope Creep, Missing, Contradicts, Extra).
+- Constitution: Read reference/constitution-validation.md and separate by level (L1 autofix, L2 manual, L3 advisory).
+- Spec: Read reference/ambiguity-detection.md and include ambiguity score.
+
+assessment = match (failCount, warnCount) {
+  (0, 0)       => Excellent
+  (0, 1..3)    => Good
+  (0, > 3)     => Needs Attention
+  (> 0, _)     => Critical
 }
 
-fn synthesize(findings) {
-  findings
-    |> deduplicate(groupBy: location, within: 5 lines, keep: highest severity, merge: complementary details)
-    |> sort(by: [severity desc])
-    |> groupBy(category)
+Read reference/output-format.md and format the report accordingly.
 
-  // Mode-specific synthesis:
-  // Drift: categorize by type (Scope Creep, Missing, Contradicts, Extra) per reference/drift-detection.md
-  // Constitution: separate by level (L1 autofix, L2 manual, L3 advisory) per reference/constitution-validation.md
-  // Spec: include ambiguity score per reference/ambiguity-detection.md
+### 6. Next Steps
 
-  assessment = match (failCount, warnCount) {
-    (0, 0)       => ✅ Excellent
-    (0, 1..3)    => 🟢 Good
-    (0, > 3)     => 🟡 Needs Attention
-    (> 0, _)     => 🔴 Critical
-  }
-
-  Format report per reference/output-format.md.
-}
-
-fn nextSteps(assessment) {
-  // Verdict-based options per reference/output-format.md
-  match (validationMode) {
-    Constitution => AskUserQuestion: Apply autofixes (L1) | Show violations | Skip
-    Drift        => AskUserQuestion: Acknowledge | Update implementation | Update spec | Defer
-    Spec | File  => AskUserQuestion: Address failures | Show details | Continue anyway
-  }
-}
-
-validate(target) {
-  parseMode(target) |> gatherContext |> selectMode |> launchValidation |> synthesize |> nextSteps
+match (validationMode) {
+  Constitution => AskUserQuestion: Apply autofixes (L1) | Show violations | Skip
+  Drift        => AskUserQuestion: Acknowledge | Update implementation | Update spec | Defer
+  Spec | File  => AskUserQuestion: Address failures | Show details | Continue anyway
 }
 
 ## Integration with Other Skills

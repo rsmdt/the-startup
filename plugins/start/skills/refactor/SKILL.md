@@ -1,6 +1,6 @@
 ---
 name: refactor
-description: Refactor code for improved maintainability without changing business logic
+description: Refactor, simplify, or clean up code for improved maintainability without changing business logic
 user-invocable: true
 argument-hint: "describe what code needs refactoring and why"
 allowed-tools: Task, TaskOutput, TodoWrite, Grep, Glob, Bash, Read, Edit, MultiEdit, Write, AskUserQuestion, Skill, TeamCreate, TeamDelete, SendMessage, TaskCreate, TaskUpdate, TaskList, TaskGet
@@ -16,139 +16,99 @@ Act as a refactoring orchestrator that improves code quality while strictly pres
 
 Finding {
   impact: HIGH | MEDIUM | LOW
-  title: String            // max 40 chars
-  location: String         // shortest unique path + line
-  problem: String          // one sentence
-  refactoring: String      // specific technique to apply
-  risk: String             // potential complications
+  title: string            // max 40 chars
+  location: string         // shortest unique path + line
+  problem: string          // one sentence
+  refactoring: string      // specific technique to apply
+  risk: string             // potential complications
 }
-
-fn establishBaseline(target)
-fn selectMode()
-fn analyzeIssues(mode)
-fn executeChanges(plan)
-fn finalValidation(results)
-
-## Constraints
-
-Constraints {
-  require {
-    Delegate all analysis tasks to specialist agents via Task tool.
-    Establish test baseline before any changes.
-    Run tests after EVERY individual change.
-    One refactoring at a time — never batch changes before verification.
-    Revert immediately if tests fail or behavior changes.
-    Get user approval before refactoring untested code.
-  }
-  never {
-    Refactor code without a passing test baseline.
-    Batch multiple refactorings before running tests.
-    Skip test verification after applying a change.
-    Refactor untested code without explicit user approval.
-    Change external behavior, public API contracts, or business logic results.
-  }
-}
-
-RefactoringBoundaries {
-  prefer {
-    Code structure, internal implementation details.
-    Variable and function names.
-    Duplication removal.
-    Dependencies and versions.
-    Nested ternaries => `if/else` or `switch`.
-    Dense one-liners => multi-line with clear steps.
-    Clever tricks => obvious implementations.
-    Abbreviations => descriptive names.
-    Magic numbers => named constants.
-  }
-  avoid {
-    External behavior.
-    Public API contracts.
-    Business logic results.
-    Side effect ordering.
-  }
-}
-
-## State
 
 State {
   target = $ARGUMENTS
-  perspectives = []              // determined by target type per reference/perspectives.md
-  mode: Standard | Team          // chosen by user in selectMode
-  baseline: String               // test status before changes
-  findings: [Finding]            // collected from analysis agents
+  perspectives = []              // from reference/perspectives.md
+  mode: Standard | Agent Team
+  baseline: string
+  findings: Finding[]
 }
+
+**In scope:** Code structure, internal implementation, naming, duplication, readability, dependencies. Specific techniques: nested ternaries to if/else or switch, dense one-liners to multi-line with clear steps, clever tricks to obvious implementations, abbreviations to descriptive names, magic numbers to named constants.
+**Out of scope:** External behavior, public API contracts, business logic results, side effect ordering.
+
+## Constraints
+
+**Always:**
+- Delegate all analysis tasks to specialist agents via Task tool.
+- Establish test baseline before any changes.
+- Run tests after EVERY individual change.
+- One refactoring at a time — never batch changes before verification.
+- Revert immediately if tests fail or behavior changes.
+- Get user approval before refactoring untested code.
+
+**Never:**
+- Change external behavior, public API contracts, or business logic results.
 
 ## Reference Materials
 
-See `reference/` directory for detailed methodology:
-- [Perspectives](reference/perspectives.md) — Standard and simplification perspectives, focus area mapping
-- [Code Smells](reference/code-smells.md) — Code smell patterns, complexity indicators, refactoring opportunities
-- [Output Format](reference/output-format.md) — Baseline, analysis, error recovery, completion guidelines
-- [Output Example](examples/output-example.md) — Concrete example of expected output format
+- reference/perspectives.md — analysis perspectives
+- reference/code-smells.md — smell catalog
+- reference/output-format.md — output guidelines
+- examples/output-example.md — output example
 
 ## Workflow
 
-fn establishBaseline(target) {
-  Locate target code from $ARGUMENTS.
-  Run existing tests to establish baseline.
-  Report baseline per reference/output-format.md.
+### 1. Establish Baseline
 
-  match (baseline) {
-    tests failing    => stop, report to user
-    coverage gaps    => flag for user decision before proceeding
-    ready            => continue
-  }
+Locate target code from $ARGUMENTS. Run existing tests to establish baseline.
+Read reference/output-format.md and format the baseline report accordingly.
+
+match (baseline) {
+  tests failing => stop, report to user
+  coverage gaps => AskUserQuestion: Add tests first (recommended) | Proceed without coverage | Cancel
+  ready         => continue
 }
 
-fn selectMode() {
-  AskUserQuestion:
-    Standard (default) — parallel fire-and-forget analysis agents
-    Team Mode — persistent analyst teammates with coordination
+### 2. Select Mode
 
-  Recommend Team Mode when:
-    scope >= 5 files | multiple interconnected modules | large codebase
+AskUserQuestion:
+  Standard (default) — parallel fire-and-forget analysis agents
+  Agent Team — persistent analyst teammates with coordination
+
+Recommend Agent Team when scope >= 5 files, multiple interconnected modules, or large codebase.
+
+### 3. Analyze Issues
+
+Read reference/perspectives.md for perspective definitions.
+
+Determine perspectives based on target intent: use simplification perspectives for within-function readability work, standard perspectives for structural/architectural refactoring.
+
+match (mode) {
+  Standard => launch parallel subagents per applicable perspectives
+  Agent Team => create team, spawn one analyst per perspective, assign tasks
 }
 
-fn analyzeIssues(mode) {
-  perspectives = match (target) {
-    simplification keywords => simplification perspectives per reference/perspectives.md
-    default                 => standard perspectives per reference/perspectives.md
-  }
+Process findings:
+1. Deduplicate overlapping issues.
+2. Rank by impact (descending), then risk (ascending).
+3. Sequence independent items first, dependent items after.
 
-  match (mode) {
-    Standard => launch parallel subagents per applicable perspectives
-    Team     => create team, spawn one analyst per perspective, assign tasks
-  }
+Read reference/output-format.md and present analysis summary accordingly.
+AskUserQuestion: Document and proceed | Proceed without documenting | Cancel
 
-  findings
-    |> deduplicate(overlapping issues)
-    |> rank(by: [impact desc, risk asc])
-    |> sequence(independent first, dependent after)
+If Cancel: stop, report summary of findings discovered.
 
-  Present analysis summary per reference/output-format.md.
-  AskUserQuestion: Document and proceed | Proceed without documenting | Cancel
-}
+### 4. Execute Changes
 
-fn executeChanges(plan) {
-  // Always sequential regardless of mode — behavior preservation requires it
-  for each (refactoring in plan) {
-    1. Apply single change
-    2. Run tests immediately
-    match (tests) {
-      pass => mark complete, continue
-      fail => revert, present error recovery per reference/output-format.md
-    }
-  }
-}
+Apply changes sequentially — behavior preservation requires it.
 
-fn finalValidation(results) {
-  Run complete test suite.
-  Compare behavior with baseline.
-  Present completion summary per reference/output-format.md.
-  AskUserQuestion: Commit changes | Run full test suite | Address skipped items | Done
-}
+For each refactoring in findings:
+1. Apply single change.
+2. Run tests immediately.
+3. If tests pass: mark complete, continue.
+4. If tests fail: `git checkout -- <changed files>`. Read reference/output-format.md for error recovery format.
 
-refactor(target) {
-  establishBaseline(target) |> selectMode |> analyzeIssues |> executeChanges |> finalValidation
-}
+### 5. Final Validation
+
+Run complete test suite. Compare behavior with baseline.
+Read reference/output-format.md and present completion summary accordingly.
+AskUserQuestion: Commit changes | Run full test suite | Address skipped items | Done
+

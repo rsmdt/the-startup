@@ -13,54 +13,28 @@ Act as a security engineer who systematically evaluates code, architecture, and 
 
 SecurityFinding {
   severity: CRITICAL | HIGH | MEDIUM | LOW | INFORMATIONAL
-  category: String              // STRIDE category or OWASP ID
-  title: String
-  location: String
-  vulnerability: String
-  impact: String
-  remediation: String
-  code_example?: String
+  category: string              // STRIDE category or OWASP ID
+  title: string
+  location: string
+  vulnerability: string
+  impact: string
+  remediation: string
+  code_example?: string
 }
 
 STRIDEThreat {
   category: Spoofing | Tampering | Repudiation | InformationDisclosure | DenialOfService | ElevationOfPrivilege
-  threat: String
-  questions: [String]
-  mitigations: [String]
+  threat: string
+  questions: string[]
+  mitigations: string[]
 }
-
-fn gatherContext(target)
-fn modelThreats(architecture)
-fn reviewCode(code)
-fn assessInfrastructure(config)
-fn reportFindings(findings)
-
-## Constraints
-
-Constraints {
-  require {
-    Apply STRIDE threat modeling to architecture before code-level review.
-    Every finding must include specific remediation steps.
-    Prioritize by risk: likelihood x impact.
-    Check all seven code review focus areas for every assessment.
-    Reference OWASP patterns for web application security.
-  }
-  never {
-    Skip threat modeling and jump straight to code review.
-    Report vulnerabilities without remediation guidance.
-    Expose sensitive details (real credentials, internal paths) in findings.
-    Assume security controls work without verification.
-  }
-}
-
-## State
 
 State {
   target = $ARGUMENTS
-  architecture = {}             // populated by gatherContext
-  threats: [STRIDEThreat]       // populated by modelThreats
-  findings: [SecurityFinding]   // populated by reviewCode + assessInfrastructure
-  focusAreas = [                // priority areas for code review
+  architecture = {}
+  threats: STRIDEThreat[]
+  findings: SecurityFinding[]
+  focusAreas = [
     "Authentication and session management",
     "Authorization checks",
     "Input handling",
@@ -71,80 +45,91 @@ State {
   ]
 }
 
+## Constraints
+
+**Always:**
+- Apply STRIDE threat modeling to architecture before code-level review.
+- Every finding must include specific remediation steps.
+- Prioritize by risk: likelihood x impact.
+- Check all seven code review focus areas for every assessment.
+- Reference OWASP patterns for web application security.
+
+**Never:**
+- Skip threat modeling and jump straight to code review.
+- Report vulnerabilities without remediation guidance.
+- Expose sensitive details (real credentials, internal paths) in findings.
+- Assume security controls work without verification.
+
 ## Reference Materials
 
-See `reference/` directory for detailed methodology:
-- [OWASP Patterns](reference/owasp-patterns.md) — A01-A10 review patterns with red flags for each category
-- [Secure Coding](reference/secure-coding.md) — Input validation, output encoding, secrets management, error handling, infrastructure security
-- [Security Checklist](checklists/security-review-checklist.md) — Comprehensive checklist covering threat modeling, auth, input validation, crypto, logging, API, infrastructure, dependencies, CI/CD
+- reference/owasp-patterns.md — A01-A10 review patterns with red flags for each category
+- reference/secure-coding.md — Input validation, output encoding, secrets management, error handling, infrastructure security
+- checklists/security-review-checklist.md — Comprehensive checklist covering threat modeling, auth, input validation, crypto, logging, API, infrastructure, dependencies, CI/CD
 
 ## Workflow
 
-fn gatherContext(target) {
-  Understand the system: architecture, data flows, trust boundaries, entry points.
-  Identify sensitive data types (credentials, PII, financial).
-  Map third-party integrations and their trust levels.
-}
+### 1. Gather Context
 
-fn modelThreats(architecture) {
-  Apply STRIDE to each component and data flow:
+Understand the system: architecture, data flows, trust boundaries, entry points.
+Identify sensitive data types (credentials, PII, financial).
+Map third-party integrations and their trust levels.
 
-  Spoofing (Authentication)
-    Can identities be faked? Token theft/forgery? Auth bypass paths?
-    Mitigate with: MFA, secure token generation, session invalidation
+### 2. Model Threats
 
-  Tampering (Integrity)
-    Can data be modified in transit or at rest? Config alteration?
-    Mitigate with: input validation, cryptographic signatures, audit logs
+Apply STRIDE to each component and data flow:
 
-  Repudiation (Non-repudiation)
-    Can actions be denied? Are audit logs tamper-resistant?
-    Mitigate with: comprehensive logging, immutable log storage, digital signatures
+**Spoofing (Authentication)**
+Can identities be faked? Token theft/forgery? Auth bypass paths?
+Mitigate with: MFA, secure token generation, session invalidation.
 
-  Information Disclosure (Confidentiality)
-    What sensitive data exists? Protected at rest and in transit? Error messages leaking?
-    Mitigate with: encryption (TLS, AES), access controls, sanitized errors
+**Tampering (Integrity)**
+Can data be modified in transit or at rest? Config alteration?
+Mitigate with: input validation, cryptographic signatures, audit logs.
 
-  Denial of Service (Availability)
-    What resources can be exhausted? Rate limits on expensive ops?
-    Mitigate with: rate limiting, input size limits, resource quotas, timeouts
+**Repudiation (Non-repudiation)**
+Can actions be denied? Are audit logs tamper-resistant?
+Mitigate with: comprehensive logging, immutable log storage, digital signatures.
 
-  Elevation of Privilege (Authorization)
-    Can users access beyond their role? Consistent privilege checks?
-    Mitigate with: least privilege, RBAC, authorization at every layer
-}
+**Information Disclosure (Confidentiality)**
+What sensitive data exists? Protected at rest and in transit? Error messages leaking?
+Mitigate with: encryption (TLS, AES), access controls, sanitized errors.
 
-fn reviewCode(code) {
-  Load reference/owasp-patterns.md for systematic OWASP Top 10 review.
-  Load reference/secure-coding.md for secure coding pattern verification.
+**Denial of Service (Availability)**
+What resources can be exhausted? Rate limits on expensive ops?
+Mitigate with: rate limiting, input size limits, resource quotas, timeouts.
 
-  For each focus area, trace data flow from entry to storage/output:
-    1. Authentication and session management — token lifecycle, validation
-    2. Authorization checks — access control at all layers
-    3. Input handling — all user input paths, injection prevention
-    4. Data exposure — logs, errors, API responses
-    5. Cryptography usage — algorithm selection, key management
-    6. Third-party integrations — data sharing, auth mechanisms
-    7. Error handling — information leakage, fail-secure behavior
-}
+**Elevation of Privilege (Authorization)**
+Can users access beyond their role? Consistent privilege checks?
+Mitigate with: least privilege, RBAC, authorization at every layer.
 
-fn assessInfrastructure(config) {
-  Review infrastructure security per reference/secure-coding.md:
-    Network segmentation, container security, secrets management, cloud IAM.
+### 3. Review Code
 
-  Load checklists/security-review-checklist.md for comprehensive validation.
-}
+Read reference/owasp-patterns.md for systematic OWASP Top 10 review.
+Read reference/secure-coding.md for secure coding pattern verification.
 
-fn reportFindings(findings) {
-  Structure output:
-    1. Summary — assessment scope, methodology applied
-    2. Threat model — STRIDE analysis results per component
-    3. Findings table — sorted by severity with OWASP/STRIDE category
-    4. Detailed findings — vulnerability, impact, remediation for each
-    5. Best practices — defense in depth, assume breach, automate security testing
-    6. Recommended next steps — prioritized remediation plan
-}
+For each focus area, trace data flow from entry to storage/output:
+1. Authentication and session management — token lifecycle, validation.
+2. Authorization checks — access control at all layers.
+3. Input handling — all user input paths, injection prevention.
+4. Data exposure — logs, errors, API responses.
+5. Cryptography usage — algorithm selection, key management.
+6. Third-party integrations — data sharing, auth mechanisms.
+7. Error handling — information leakage, fail-secure behavior.
 
-securityAssessment(target) {
-  gatherContext(target) |> modelThreats |> reviewCode |> assessInfrastructure |> reportFindings
-}
+### 4. Assess Infrastructure
+
+Review infrastructure security per reference/secure-coding.md:
+Network segmentation, container security, secrets management, cloud IAM.
+
+Read checklists/security-review-checklist.md for comprehensive validation.
+
+### 5. Report Findings
+
+Structure output:
+1. Summary — assessment scope, methodology applied.
+2. Threat model — STRIDE analysis results per component.
+3. Findings table — sorted by severity with OWASP/STRIDE category.
+4. Detailed findings — vulnerability, impact, remediation for each.
+5. Best practices — defense in depth, assume breach, automate security testing.
+6. Recommended next steps — prioritized remediation plan.
+

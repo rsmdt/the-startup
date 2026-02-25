@@ -11,57 +11,49 @@ Act as an implementation planning specialist that breaks features into executabl
 ## Interface
 
 Task {
-  id: String               // T1.1, T1.2, T2.1, ...
-  description: String
-  ref?: String             // SDD/Section + line range
-  activity?: String        // domain-modeling, backend-api, frontend-ui, ...
-  parallel?: Boolean
-  prime: String            // what to read before starting
-  test: String             // what to test (red)
-  implement: String        // what to build (green)
-  validate: String         // how to verify (refactor)
+  id: string               // T1.1, T1.2, T2.1, ...
+  description: string
+  ref?: string             // SDD/Section + line range
+  activity?: string        // domain-modeling, backend-api, frontend-ui, ...
+  parallel?: boolean
+  prime: string            // what to read before starting
+  test: string             // what to test (red)
+  implement: string        // what to build (green)
+  validate: string         // how to verify (refactor)
 }
 
-fn initializePlan(specDirectory)
-fn discoverTasks()
-fn definePhase(phase)
-fn validatePlan()
-fn presentStatus()
+State {
+  specDirectory = ""
+  prd = ""
+  sdd = ""
+  planDirectory = ""
+  phases: Phase[]
+}
 
 ## Constraints
 
-Constraints {
-  require {
-    Every task produces a verifiable deliverable — not just an activity.
-    All PRD acceptance criteria map to specific tasks.
-    All SDD components have corresponding implementation tasks.
-    Dependencies are explicit with no circular dependencies.
-    Every task follows TDD: Prime, Test, Implement, Validate.
-    Follow template structure exactly — preserve all sections as defined.
-    Wait for user confirmation before proceeding to next phase.
-    Write each phase to a separate plan/phase-N.md file.
-    Keep plan/README.md as the manifest with phase links and checklist.
-  }
-  never {
-    Include time estimates — focus on what, not when.
-    Include resource assignments — focus on work, not who.
-    Include implementation code — the plan guides, implementation follows.
-    Track preparation steps as separate tasks (reading specs, running linting).
-    Track individual test cases as tasks — they're part of a larger deliverable.
-    Leave specification references missing from tasks.
-    Write all phases into a single monolithic file.
-  }
-}
+**Always:**
+- Every task produces a verifiable deliverable — not just an activity.
+- All PRD acceptance criteria map to specific tasks.
+- All SDD components have corresponding implementation tasks.
+- Dependencies are explicit with no circular dependencies.
+- Every task follows TDD: Prime, Test, Implement, Validate.
+- Follow template structure exactly — preserve all sections as defined.
+- Wait for user confirmation before proceeding to next phase.
+- Write each phase to a separate plan/phase-N.md file.
+- Keep plan/README.md as the manifest with phase links and checklist.
+- All tasks trace back to specification requirements.
+- Parallel tasks can actually run independently.
+- Leave the `plan/README.md` phases checklist in the exact format `- [ ] [Phase N: Title](phase-N.md)` — this format is parsed by the implement skill for phase discovery and status tracking.
 
-## State
-
-State {
-  specDirectory = ""             // .start/specs/[NNN]-[name]/ (or legacy docs/specs/)
-  prd = ""                       // path to requirements.md (or product-requirements.md)
-  sdd = ""                       // path to solution.md (or solution-design.md)
-  planDirectory = ""             // path to plan/ directory
-  phases: [Phase]                // defined during planning
-}
+**Never:**
+- Include time estimates — focus on what, not when.
+- Include resource assignments — focus on work, not who.
+- Include implementation code — the plan guides, implementation follows.
+- Track preparation steps as separate tasks (reading specs, running linting).
+- Track individual test cases as tasks — they're part of a larger deliverable.
+- Leave specification references missing from tasks.
+- Write all phases into a single monolithic file.
 
 ## Plan Focus
 
@@ -83,70 +75,56 @@ Every plan must answer four questions:
 
 ## Workflow
 
-fn initializePlan(specDirectory) {
-  Read PRD and SDD from specDirectory to understand requirements and design.
-  Read template from template.md.
-  Write template to specDirectory/plan/README.md.
-  Identify implementation areas from SDD components.
-}
+### 1. Initialize Plan
 
-fn discoverTasks() {
-  Launch parallel specialist agents to investigate:
-    Task sequencing and dependencies
-    Testing strategies for each component
-    Risk assessment and mitigation
-    Parallel execution opportunities
-}
+Read PRD and SDD from specDirectory to understand requirements and design.
+Read template from template.md.
+Write template to specDirectory/plan/README.md.
+Identify implementation areas from SDD components.
 
-fn definePhase(phase) {
-  Read phase template from templates/phase.md.
-  Define tasks per reference/task-structure.md pattern.
-  Add specification references for each task.
-  Write phase to specDirectory/plan/phase-N.md.
-  Update plan/README.md phases checklist — use exact format:
-    `- [ ] [Phase N: Title](phase-N.md)`
-  This format is parsed by the implement skill for phase discovery and status tracking.
-  Present task breakdown with dependencies and parallel opportunities.
+### 2. Discover Tasks
 
-  Constraints {
-    require {
-      All tasks trace back to specification requirements.
-      Dependencies between tasks are clear and acyclic.
-      Parallel tasks can actually run independently.
-      User has confirmed phase definition before proceeding.
-    }
-  }
-}
+Launch parallel specialist agents to investigate:
+1. Task sequencing and dependencies.
+2. Testing strategies for each component.
+3. Risk assessment and mitigation.
+4. Parallel execution opportunities.
 
-fn validatePlan() {
-  Run validation per validation.md checklist, focusing on:
+### 3. Define Phase
 
-  Specification compliance:
-    Every PRD acceptance criterion maps to a task.
-    Every SDD component has implementation tasks.
-    All task refs point to valid specification sections.
+Read phase template from templates/phase.md.
+Define tasks per reference/task-structure.md pattern.
+Add specification references for each task.
+Write phase to specDirectory/plan/phase-N.md.
+Update plan/README.md phases checklist.
+Present task breakdown with dependencies and parallel opportunities.
 
-  Multi-file structure:
-    plan/README.md exists with phases checklist.
-    All phase files listed in README.md exist.
-    Phase file frontmatter has correct status.
+### 4. Validate Plan
 
-  Deviation protocol (when implementation requires spec changes):
-    Document deviation with rationale.
-    Obtain approval before proceeding.
-    Update SDD when deviation improves design.
+Run validation per validation.md checklist, focusing on:
 
-  Completeness:
-    Integration and E2E tests defined in final phase.
-    Project commands match actual project setup.
-    A developer could follow this plan independently.
-}
+Specification compliance:
+- Every PRD acceptance criterion maps to a task.
+- Every SDD component has implementation tasks.
+- All task refs point to valid specification sections.
 
-fn presentStatus() {
-  Format status report per reference/output-format.md.
-  AskUserQuestion: Define next phase | Run validation | Address gaps | Complete PLAN
-}
+Multi-file structure:
+- plan/README.md exists with phases checklist.
+- All phase files listed in README.md exist.
+- Phase file frontmatter has correct status.
 
-specifyPlan(specDirectory) {
-  initializePlan(specDirectory) |> discoverTasks |> definePhase |> validatePlan |> presentStatus
-}
+Deviation protocol (when implementation requires spec changes):
+- Document deviation with rationale.
+- Obtain approval before proceeding.
+- Update SDD when deviation improves design.
+
+Completeness:
+- Integration and E2E tests defined in final phase.
+- Project commands match actual project setup.
+- A developer could follow this plan independently.
+
+### 5. Present Status
+
+Read reference/output-format.md and format the status report accordingly.
+AskUserQuestion: Define next phase | Run validation | Address gaps | Complete PLAN
+

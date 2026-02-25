@@ -17,120 +17,111 @@ Act as a code review orchestrator that coordinates comprehensive review feedback
 Finding {
   severity: CRITICAL | HIGH | MEDIUM | LOW
   confidence: HIGH | MEDIUM | LOW
-  title: String          // max 40 chars
-  location: String       // shortest unique path + line
-  issue: String          // one sentence
-  fix: String            // actionable recommendation
-  code_example?: String  // required for CRITICAL, optional for HIGH
+  title: string          // max 40 chars
+  location: string       // shortest unique path + line
+  issue: string          // one sentence
+  fix: string            // actionable recommendation
+  code_example?: string  // required for CRITICAL, optional for HIGH
 }
-
-fn gatherContext(target)       // Phase 1 — parse target, retrieve files, select perspectives
-fn selectMode()                // Mode gate — AskUserQuestion for Standard vs Team
-fn launchReviews(mode)         // Phase 2 — delegate to agents per mode
-fn synthesize(findings)        // Phase 3 — dedup, rank, verdict, format
-fn nextSteps(verdict)          // Phase 4 — AskUserQuestion based on verdict
-
-## Constraints
-
-Constraints {
-  require {
-    Launch ALL applicable review activities simultaneously in a single response.
-    Every finding must have a specific, implementable fix.
-    Describe what needs review; the system routes to specialists.
-    Always highlight what's done well (strengths section).
-    Provide full file context to reviewers, not just diffs.
-    Only the lead's synthesized output is visible to the user; do not forward raw reviewer messages.
-  }
-  never {
-    Review code yourself — always delegate to specialist agents.
-    Present findings without actionable fix recommendations.
-    Launch reviewers without full file context.
-  }
-}
-
-## State
 
 State {
   target = $ARGUMENTS
-  perspectives = []              // populated by gatherContext
-  mode: Standard | Team          // chosen by user in selectMode
-  findings: [Finding]            // collected from agents in launchReviews
+  perspectives = []              // from reference/perspectives.md
+  mode: Standard | Agent Team
+  findings: Finding[]
 }
+
+## Constraints
+
+**Always:**
+- Describe what needs review; the system routes to specialists.
+- Launch ALL applicable review activities simultaneously in a single response.
+- Provide full file context to reviewers, not just diffs.
+- Highlight what's done well in a strengths section.
+- Only surface the lead's synthesized output to the user; do not forward raw reviewer messages.
+
+**Never:**
+- Review code yourself — always delegate to specialist agents.
+- Present findings without actionable fix recommendations.
+- Launch reviewers without full file context.
 
 ## Reference Materials
 
-See `reference/` directory for detailed methodology:
-- [Perspectives](reference/perspectives.md) — Perspective definitions, intent, activation rules
-- [Output Format](reference/output-format.md) — Table guidelines, severity rules, verdict-based next steps
-- [Output Example](examples/output-example.md) — Concrete example of expected output format
-- [Checklist](reference/checklists.md) — Security, Performance, Quality, Test coverage checklists
-- [Classification](reference/classification.md) — Severity/confidence definitions, classification matrix, example findings
+- reference/perspectives.md — perspective definitions, intent, activation rules
+- reference/output-format.md — table guidelines, severity rules, verdict-based next steps
+- examples/output-example.md — concrete example of expected output format
+- reference/checklists.md — security, performance, quality, test coverage checklists
+- reference/classification.md — severity/confidence definitions, classification matrix, example findings
 
 ## Workflow
 
-fn gatherContext(target) {
-  match (target) {
-    /^\d+$/           => gh pr diff $target       // PR number
-    "staged"          => git diff --cached        // staged changes
-    containsSlash     => read file + recent changes  // file path
-    default           => git diff main...$target  // branch name
-  }
+### 1. Gather Context
 
-  Retrieve full file contents for context (not just diff).
+Determine the review target from $ARGUMENTS.
 
-  // Determine applicable conditional perspectives per reference/perspectives.md
-  match (changes) {
-    async/await | Promise | threading   => +Concurrency
-    dependency file changes             => +Dependencies
-    public API | schema changes         => +Compatibility
-    frontend component changes          => +Accessibility
-    CONSTITUTION.md exists              => +Constitution
-  }
+match (target) {
+  /^\d+$/       => gh pr diff $target       // PR number
+  "staged"      => git diff --cached        // staged changes
+  containsSlash => read file + recent changes  // file path
+  default       => git diff main...$target  // branch name
 }
 
-fn selectMode() {
-  AskUserQuestion:
-    Standard (default) — parallel fire-and-forget subagents
-    Team Mode — persistent teammates with peer coordination
+Retrieve full file contents for context (not just diff).
 
-  Recommend Team Mode when:
-    files > 10 | perspectives >= 4 | cross-domain | constitution active
+Read reference/perspectives.md. Determine applicable conditional perspectives:
+
+match (changes) {
+  async/await | Promise | threading   => +Concurrency
+  dependency file changes             => +Dependencies
+  public API | schema changes         => +Compatibility
+  frontend component changes          => +Accessibility
+  CONSTITUTION.md exists              => +Constitution
 }
 
-fn launchReviews(mode) {
-  match (mode) {
-    Standard => launch parallel subagents per applicable perspectives
-    Team     => create team, spawn one reviewer per perspective, assign tasks
-  }
+### 2. Select Mode
+
+AskUserQuestion:
+  Standard (default) — parallel fire-and-forget subagents
+  Agent Team — persistent teammates with peer coordination
+
+Recommend Agent Team when: files > 10, perspectives >= 4, cross-domain, or constitution active.
+
+### 3. Launch Reviews
+
+match (mode) {
+  Standard => launch parallel subagents per applicable perspectives
+  Agent Team => create team, spawn one reviewer per perspective, assign tasks
 }
 
-fn synthesize(findings) {
-  findings
-    |> deduplicate(groupBy: location, within: 5 lines, keep: highest severity, merge: complementary details)
-    |> sort(by: [severity desc, confidence desc])
-    |> assignIds(pattern: "$severityLetter$number")  // C1, C2, H1, M1, L1...
-    |> buildSummaryTable
+### 4. Synthesize Findings
 
-  verdict = match (criticalCount, highCount, mediumCount) {
-    (> 0, _, _)     => 🔴 REQUEST CHANGES
-    (0, > 3, _)     => 🔴 REQUEST CHANGES
-    (0, 1..3, _)    => 🟡 APPROVE WITH COMMENTS
-    (0, 0, > 0)     => 🟡 APPROVE WITH COMMENTS
-    (0, 0, 0)       => ✅ APPROVE
-  }
+Process findings:
+1. Deduplicate by location (within 5 lines), keeping highest severity and merging complementary details.
+2. Sort by severity descending, then confidence descending.
+3. Assign IDs using pattern `$severityLetter$number` (C1, C2, H1, M1, L1...).
+4. Build summary table.
 
-  Format report using template in reference/output-format.md.
+Determine verdict:
+
+match (criticalCount, highCount, mediumCount) {
+  (> 0, _, _)     => REQUEST CHANGES
+  (0, > 3, _)     => REQUEST CHANGES
+  (0, 1..3, _)    => APPROVE WITH COMMENTS
+  (0, 0, > 0)     => APPROVE WITH COMMENTS
+  (0, 0, 0)       => APPROVE
 }
 
-fn nextSteps(verdict) {
-  options = match (verdict) {
-    🔴 REQUEST CHANGES       => loadOptions("request-changes", "reference/output-format.md")
-    🟡 APPROVE WITH COMMENTS => loadOptions("approve-comments", "reference/output-format.md")
-    ✅ APPROVE                => loadOptions("approve", "reference/output-format.md")
-  }
-  AskUserQuestion(options)
+Read reference/output-format.md and format report accordingly.
+
+### 5. Next Steps
+
+Read reference/output-format.md for verdict-based next step options.
+
+match (verdict) {
+  REQUEST CHANGES      => loadOptions("request-changes")
+  APPROVE WITH COMMENTS => loadOptions("approve-comments")
+  APPROVE              => loadOptions("approve")
 }
 
-review(target) {
-  gatherContext(target) |> selectMode |> launchReviews |> synthesize |> nextSteps
-}
+AskUserQuestion(options)
+

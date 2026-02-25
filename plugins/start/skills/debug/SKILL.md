@@ -16,107 +16,93 @@ Act as an expert debugging partner through natural conversation. Follow the scie
 
 Investigation {
   perspective: ErrorTrace | CodePath | Dependencies | State | Environment
-  location: String       // file:line
-  checked: String        // what was verified
-  found?: String         // evidence discovered (or clear if nothing found)
-  hypothesis: String     // what this suggests
+  location: string       // file:line
+  checked: string        // what was verified
+  found?: string         // evidence discovered (or clear if nothing found)
+  hypothesis: string     // what this suggests
 }
-
-fn understand(bug)
-fn selectMode()
-fn investigate(mode)
-fn findRootCause(evidence)
-fn fixAndVerify(rootCause)
-
-## Constraints
-
-Constraints {
-  require {
-    Report only verified observations — "I read X and found Y".
-    Require evidence for all claims — trace it, don't assume it.
-    Present brief summaries first, expand on request.
-    Propose actions and await user decision — "Want me to...?"
-    Be honest when you haven't checked something or are stuck.
-    Apply minimal fix, run tests, report actual results.
-  }
-  never {
-    Claim to have analyzed code you haven't read.
-    Apply fixes without user approval.
-    Present walls of code — show only relevant sections.
-    Skip test verification after applying a fix.
-  }
-}
-
-## State
 
 State {
   bug = $ARGUMENTS
-  hypotheses = []            // formed during understand phase
-  evidence = []              // collected from investigation
-  rootCause?: String         // confirmed after investigation
-  mode: Standard | Team      // chosen by user in selectMode
+  hypotheses = []
+  evidence = []
+  rootCause?: string
+  mode: Standard | Agent Team
 }
+
+## Constraints
+
+**Always:**
+- Report only verified observations — "I read X and found Y".
+- Require evidence for all claims — trace it, don't assume it.
+- Present brief summaries first, expand on request.
+- Propose actions and await user decision — "Want me to...?"
+- Be honest when you haven't checked something or are stuck.
+- Apply minimal fix, run tests, and report actual results.
+
+**Never:**
+- Claim to have analyzed code you haven't read.
+- Apply fixes without user approval.
+- Present walls of code — show only relevant sections.
+- Skip test verification after applying a fix.
 
 ## Reference Materials
 
-See `reference/` directory for detailed methodology:
-- [Perspectives](reference/perspectives.md) — Investigation perspectives, bug type patterns, perspective selection guide
-- [Output Format](reference/output-format.md) — Conversational guidelines for each phase
-- [Output Example](examples/output-example.md) — Concrete example of expected output format
+- reference/perspectives.md — investigation perspectives, bug type patterns, perspective selection guide
+- reference/output-format.md — conversational guidelines for each phase
+- examples/output-example.md — concrete example of expected output format
 
 ## Workflow
 
-fn understand(bug) {
-  check git status, look for obvious errors, read relevant code
+### 1. Understand
 
-  observations = gather(error messages, stack traces, recent changes)
-  hypotheses = formulate(from: observations)
+Check git status, look for obvious errors, read relevant code.
 
-  present brief summary per reference/output-format.md
-}
+Gather observations from error messages, stack traces, and recent changes. Formulate initial hypotheses.
 
-fn selectMode() {
-  AskUserQuestion:
-    Standard (default) — conversational step-by-step debugging
-    Team Mode — adversarial investigation with competing hypotheses
+Present brief summary per reference/output-format.md.
 
-  Recommend Team Mode when:
-    hypotheses >= 3 | spans multiple systems | intermittent reproduction |
-    contradictory evidence | prior debugging attempts failed
-}
+### 2. Select Mode
 
-fn investigate(mode) {
-  match (mode) {
-    Standard => {
-      present theories conversationally, let user guide direction
-      track hypotheses with TodoWrite
-      narrow down through targeted investigation
-    }
-    Team => {
-      spawn investigators per relevant perspectives (reference/perspectives.md)
-      adversarial protocol: investigators challenge each other's hypotheses
-      strongest surviving hypothesis = most likely root cause
-    }
+AskUserQuestion:
+  Standard (default) — conversational step-by-step debugging
+  Agent Team — adversarial investigation with competing hypotheses
+
+Recommend Agent Team when:
+- Hypotheses >= 3
+- Bug spans multiple systems
+- Intermittent reproduction
+- Contradictory evidence
+- Prior debugging attempts failed
+
+### 3. Investigate
+
+match (mode) {
+  Standard => {
+    present theories conversationally, let user guide direction
+    track hypotheses with TodoWrite
+    narrow down through targeted investigation
+  }
+  Agent Team => {
+    spawn investigators per relevant perspectives (reference/perspectives.md)
+    adversarial protocol: investigators challenge each other's hypotheses
+    strongest surviving hypothesis = most likely root cause
   }
 }
 
-fn findRootCause(evidence) {
-  evidence
-    |> correlate(across: perspectives)
-    |> rankHypotheses(by: supporting evidence)
-    |> presentRootCause with specific file:line reference
-}
+### 4. Find Root Cause
 
-fn fixAndVerify(rootCause) {
-  propose minimal fix targeting rootCause
-  AskUserQuestion: Apply fix | Modify approach | Skip
+Process evidence:
+1. Correlate across perspectives.
+2. Rank hypotheses by supporting evidence.
+3. Present root cause with specific file:line reference.
 
-  apply change, run tests
-  report actual results honestly
+### 5. Fix and Verify
 
-  AskUserQuestion: Add test case for this bug | Check for pattern elsewhere | Done
-}
+Propose minimal fix targeting root cause.
+AskUserQuestion: Apply fix | Modify approach | Skip
 
-debug(bug) {
-  understand(bug) |> selectMode |> investigate |> findRootCause |> fixAndVerify
-}
+Apply change, run tests, report actual results honestly.
+
+AskUserQuestion: Add test case for this bug | Check for pattern elsewhere | Done
+

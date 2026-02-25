@@ -18,52 +18,42 @@ ApiStyle {
 }
 
 DesignDecision {
-  area: String              // e.g., pagination, error format, naming
-  choice: String            // selected approach
-  rationale: String         // why this choice fits
+  area: string              // e.g., pagination, error format, naming
+  choice: string            // selected approach
+  rationale: string         // why this choice fits
 }
-
-fn analyzeRequirements(target)
-fn selectApiStyle()
-fn designContract(style)
-fn validateContract(contract)
-fn recommendNextSteps(contract)
-
-## Constraints
-
-Constraints {
-  require {
-    Define the API contract before any implementation begins.
-    Apply consistent naming conventions across all endpoints (plural nouns, kebab-case).
-    Standardize error response format across all endpoints.
-    Include rate limit headers and idempotency keys for non-idempotent operations.
-    Use HTTPS exclusively.
-    Version the API from day one.
-    Document all error codes with resolution steps.
-  }
-  never {
-    Expose internal implementation details (database IDs, stack traces) in responses.
-    Use GET for operations with side effects.
-    Mix REST and RPC styles in the same API.
-    Break existing consumers without versioning.
-    Authenticate via query parameters (except OAuth callbacks).
-    Create deeply nested URLs (more than 2 levels).
-    Return different structures for success vs error responses.
-  }
-}
-
-## State
 
 State {
   target = $ARGUMENTS
-  apiStyle: ApiStyle                  // selected in selectApiStyle
-  decisions: [DesignDecision]         // accumulated during designContract
-  contract: String                    // final specification output
+  apiStyle: ApiStyle
+  decisions: DesignDecision[]
+  contract: string
 }
+
+## Constraints
+
+**Always:**
+- Define the API contract before any implementation begins.
+- Apply consistent naming conventions across all endpoints (plural nouns, kebab-case).
+- Standardize error response format across all endpoints.
+- Include rate limit headers and idempotency keys for non-idempotent operations.
+- Use HTTPS exclusively.
+- Version the API from day one.
+- Document all error codes with resolution steps.
+- Identify at least the primary consumer (web, mobile, server, third-party).
+- Map each use case to specific resource operations.
+
+**Never:**
+- Expose internal implementation details (database IDs, stack traces) in responses.
+- Use GET for operations with side effects.
+- Mix REST and RPC styles in the same API.
+- Break existing consumers without versioning.
+- Authenticate via query parameters (except OAuth callbacks).
+- Create deeply nested URLs (more than 2 levels).
+- Return different structures for success vs error responses.
 
 ## Reference Materials
 
-See `reference/` directory for detailed patterns:
 - [REST Patterns](reference/rest-patterns.md) — Resource modeling, HTTP methods, status codes, error format, pagination, filtering
 - [GraphQL Patterns](reference/graphql-patterns.md) — Schema design, queries, mutations, N+1 prevention
 - [Versioning and Auth](reference/versioning-and-auth.md) — Versioning strategies, API keys, OAuth 2.0, JWT
@@ -71,73 +61,58 @@ See `reference/` directory for detailed patterns:
 
 ## Workflow
 
-fn analyzeRequirements(target) {
-  Identify use cases and consumer needs from target context.
-  Model resources and their relationships.
-  Determine operation types (CRUD + custom actions).
-  Assess non-functional requirements (latency, throughput, caching).
+### 1. Analyze Requirements
 
-  Constraints {
-    require {
-      Identify at least the primary consumer (web, mobile, server, third-party).
-      Map each use case to specific resource operations.
-    }
-  }
+Identify use cases and consumer needs from target context. Model resources and their relationships. Determine operation types (CRUD + custom actions). Assess non-functional requirements (latency, throughput, caching).
+
+### 2. Select API Style
+
+match (requirements) {
+  multiple consumers + different data needs  => GRAPHQL or HYBRID
+  simple CRUD + broad ecosystem              => REST
+  real-time + subscriptions                  => GRAPHQL
+  public API + maximum compatibility         => REST
 }
 
-fn selectApiStyle() {
-  match (requirements) {
-    multiple consumers + different data needs  => GRAPHQL or HYBRID
-    simple CRUD + broad ecosystem              => REST
-    real-time + subscriptions                  => GRAPHQL
-    public API + maximum compatibility         => REST
-  }
+Select versioning strategy (default: DUAL — major in URL, minor in header). Select auth pattern based on consumer type.
 
-  Select versioning strategy (default: DUAL — major in URL, minor in header).
-  Select auth pattern based on consumer type.
+### 3. Design Contract
+
+match (apiStyle.type) {
+  REST     => Read reference/rest-patterns.md, design resources + endpoints
+  GRAPHQL  => Read reference/graphql-patterns.md, design schema + operations
+  HYBRID   => Read both reference files, design unified contract
 }
 
-fn designContract(style) {
-  match (style.type) {
-    REST     => load reference/rest-patterns.md, design resources + endpoints
-    GRAPHQL  => load reference/graphql-patterns.md, design schema + operations
-    HYBRID   => load both, design unified contract
-  }
+For each resource/type:
+1. Define request/response schemas.
+2. Specify error scenarios.
+3. Design pagination approach.
+4. Document query parameters / arguments.
 
-  For each resource/type:
-    1. Define request/response schemas
-    2. Specify error scenarios
-    3. Design pagination approach
-    4. Document query parameters / arguments
+Read reference/versioning-and-auth.md for auth and versioning details. Read reference/openapi-patterns.md when generating OpenAPI spec.
 
-  Load reference/versioning-and-auth.md for auth and versioning details.
-  Load reference/openapi-patterns.md when generating OpenAPI spec.
+### 4. Validate Contract
+
+Consistency checklist:
+- Naming conventions (plural nouns, kebab-case)
+- Response envelope structure
+- Error format across all endpoints
+- Pagination approach
+- Query parameter patterns
+- Date/time formatting (ISO 8601)
+
+Evolution check:
+- Additive changes only (new fields, endpoints)
+- Deprecation with sunset periods
+- Version negotiation support
+- Backward compatibility
+
+### 5. Recommend Next Steps
+
+match (contract) {
+  complete spec     => Validate with consumers before implementing
+  partial design    => Identify remaining decisions
+  review request    => List specific improvements with rationale
 }
 
-fn validateContract(contract) {
-  CONSISTENCY CHECKLIST:
-    - Naming conventions (plural nouns, kebab-case)
-    - Response envelope structure
-    - Error format across all endpoints
-    - Pagination approach
-    - Query parameter patterns
-    - Date/time formatting (ISO 8601)
-
-  EVOLUTION CHECK:
-    - Additive changes only (new fields, endpoints)
-    - Deprecation with sunset periods
-    - Version negotiation support
-    - Backward compatibility
-}
-
-fn recommendNextSteps(contract) {
-  match (contract) {
-    complete spec     => Validate with consumers before implementing
-    partial design    => Identify remaining decisions
-    review request    => List specific improvements with rationale
-  }
-}
-
-apiContractDesign(target) {
-  analyzeRequirements(target) |> selectApiStyle |> designContract |> validateContract |> recommendNextSteps
-}
