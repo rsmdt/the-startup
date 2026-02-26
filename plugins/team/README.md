@@ -1,29 +1,16 @@
 # Team Plugin - The Agentic Startup
 
-**Specialized agent library for Claude Code that provides expert capabilities across all software development domains.**
+**Specialized agent library for Claude Code with consolidated, high-signal activities for software delivery.**
 
-The `team` plugin provides 8 specialized agent roles with 22 activity-based specializations, backed by 20 reusable skills. Each agent brings deep expertise in a specific domain, enabling Claude Code to tackle complex tasks with specialist knowledge.
-
----
-
-## Table of Contents
-
-- [Installation](#installation)
-- [Agent Roles](#agent-roles) — Chief, Analyst, Architect, Developer, Tester, Designer, DevOps, Meta Agent
-- [Philosophy](#philosophy) — specialist expertise, activity-focused design, quality standards
-- [Skills System](#skills-system) — 20 reusable skills shared across agents
-- [Agent Architecture](#agent-architecture) — slim agent design, template structure
+The `team` plugin provides **8 specialized roles**, **15 activity-based agents**, and **14 reusable skills**. This consolidation keeps specialist depth while reducing overlap and context bloat.
 
 ---
 
 ## Installation
 
 ```bash
-# Install the Team plugin
 /plugin install team@the-startup
 ```
-
-**Note:** The Team plugin is optional but recommended for complex projects requiring specialist expertise.
 
 ---
 
@@ -33,198 +20,106 @@ The `team` plugin provides 8 specialized agent roles with 22 activity-based spec
 
 **Complexity assessment and activity routing specialist**
 
-Assesses complexity and routes work when facing multi-step tasks, unclear requirements, or cross-domain work. Identifies parallel execution opportunities and decomposes work into focused activities.
+- `the-chief`
 
-### The Analyst (2 activities)
+### The Analyst (1 activity)
 
-**Research and requirements specialist**
+**Product research and requirements specialist**
 
 | Activity | Focus |
 |----------|-------|
-| `research-market` | Competitive analysis, market gaps, industry trends, product positioning |
-| `research-requirements` | Requirement clarification, specification writing, stakeholder analysis |
+| `research-product` | Market analysis, requirement clarification, prioritization, stakeholder alignment |
 
 ### The Architect (4 activities)
 
-**System design and technical excellence specialist**
+**System design and technical governance specialist**
 
 | Activity | Focus |
 |----------|-------|
-| `design-system` | Scalable architecture design, microservices vs monolith decisions, deployment architecture |
-| `review-security` | Vulnerability detection, injection prevention, secrets detection, cryptographic review |
-| `review-complexity` | YAGNI enforcement, over-engineering detection, unnecessary abstraction removal |
-| `review-compatibility` | Breaking change detection, migration path validation, backwards compatibility |
+| `design-system` | Scalable architecture, service boundaries, data + deployment strategy |
+| `review-security` | Application security + dependency/supply-chain review |
+| `review-robustness` | Complexity and concurrency risk review |
+| `review-compatibility` | Breaking-change detection, migration safety, backwards compatibility |
 
-### The Developer (3 activities)
+### The Developer (2 activities)
 
 **Implementation and optimization specialist**
 
 | Activity | Focus |
 |----------|-------|
-| `build-feature` | UI components, API endpoints, services, database logic, integrations |
-| `optimize-performance` | Page loads, API latency, query performance, memory leaks, bundle sizes |
-| `review-concurrency` | Race conditions, deadlocks, async anti-patterns, resource leaks |
+| `build-feature` | Feature implementation across UI, API, services, and data layers |
+| `optimize-performance` | Bottleneck diagnosis and targeted optimization |
 
-### The Tester (2 activities)
+### The Tester (1 activity)
 
-**Quality assurance and testing specialist**
-
-| Activity | Focus |
-|----------|-------|
-| `test-quality` | Test strategy, test suite implementation, coverage analysis |
-| `test-performance` | Load testing, stress testing, capacity modeling, bottleneck identification |
-
-### The Designer (4 activities)
-
-**User experience and interface design specialist**
+**Functional and performance testing specialist**
 
 | Activity | Focus |
 |----------|-------|
-| `research-user` | User interviews, usability testing, persona creation, insight synthesis |
-| `design-interaction` | Information architecture, user flows, navigation design, content organization |
-| `design-visual` | Design systems, component libraries, tokens, style guides |
-| `build-accessibility` | WCAG compliance, accessible forms, interactive elements, assistive technology |
+| `test-strategy` | Risk-based test planning, quality coverage, load/stress validation |
 
-### The DevOps (5 activities)
+### The Designer (3 activities)
 
-**Infrastructure and operations specialist**
+**User research and UX design specialist**
 
 | Activity | Focus |
 |----------|-------|
-| `build-containers` | Dockerfiles, multi-stage builds, image optimization, container security |
-| `build-infrastructure` | Terraform, CloudFormation, Pulumi, cloud architecture, reusable modules |
-| `build-pipelines` | GitHub Actions, GitLab CI, Jenkins, deployment strategies, rollback automation |
-| `monitor-production` | Metrics, alerting, SLIs/SLOs, observability, incident diagnostics |
-| `review-dependency` | CVE detection, license compliance, supply chain security, necessity assessment |
+| `research-user` | User interviews, persona/journey insights, behavioral evidence |
+| `design-interaction` | Information architecture, user flows, interaction patterns |
+| `design-visual` | Design systems plus accessibility-by-default standards |
+
+### The DevOps (2 activities)
+
+**Platform and operations specialist**
+
+| Activity | Focus |
+|----------|-------|
+| `build-platform` | Containers + IaC + CI/CD as one delivery platform |
+| `monitor-production` | Observability, SLI/SLOs, alerting, incident diagnostics |
 
 ### The Meta Agent
 
 **Agent design and generation specialist**
 
-Designs and generates new Claude Code sub-agents, validates agent specifications, and refactors existing agents to follow evidence-based design principles.
-
----
-
-## Philosophy
-
-### Specialist Expertise
-
-Each agent is designed with:
-- **Deep domain knowledge** - Focused expertise in a specific activity
-- **Clear boundaries** - Well-defined scope to prevent overlap
-- **Proven patterns** - Built on evidence-based practices
-- **Pragmatic approach** - Balance technical excellence with delivery
-
-### Activity-Focused Design
-
-Agents are organized by **what they do**, not **who they are**:
-- Enables precise routing to the right specialist
-- Prevents scope creep and role confusion
-- Allows parallel execution of independent activities
-- Maintains clear accountability for outcomes
-
-### Quality Without Compromise
-
-Agents enforce quality standards:
-- Architectural reviews catch design issues early
-- Test strategies ensure comprehensive coverage
-- Performance profiling prevents optimization guesswork
-- Documentation keeps knowledge accessible
+- `the-meta-agent`
 
 ---
 
 ## Skills System
 
-The Team plugin includes a **skills library** that provides reusable expertise shared across multiple agents. Skills eliminate content duplication while ensuring consistent guidance.
-
-### How Skills Work
-
 Skills are referenced in agent YAML frontmatter:
 
 ```yaml
 ---
-name: api-development
-skills: codebase-navigation, tech-stack-detection, api-contract-design
+name: agent-name
+skills: project-discovery, pattern-detection, api-contract-design
 ---
 ```
 
-When an agent is invoked, Claude Code automatically loads the referenced skills into context, providing the agent with specialized knowledge without duplicating content across agent files.
-
-### Available Skills (20)
+### Available Skills (14)
 
 | Category | Skill | Description |
 |----------|-------|-------------|
-| **Cross-Cutting** | `codebase-navigation` | Navigate, search, and understand project structures |
-| | `coding-conventions` | Security, performance, accessibility, and error handling standards |
-| | `documentation-extraction` | Interpret docs, READMEs, specs, and configs |
-| | `feature-prioritization` | RICE, MoSCoW, Kano, and value-effort prioritization |
+| **Cross-Cutting** | `project-discovery` | Unified navigation, stack detection, and doc validation |
 | | `pattern-detection` | Identify existing codebase patterns for consistency |
-| | `requirements-elicitation` | Requirement gathering and stakeholder analysis |
-| | `tech-stack-detection` | Auto-detect project tech stacks and configurations |
-| **Design** | `user-insight-synthesis` | Interview techniques, persona creation, journey mapping, usability testing |
-| | `user-research` | User interviews, persona creation, journey mapping, research synthesis |
-| **Development** | `api-contract-design` | REST/GraphQL design, OpenAPI, versioning |
-| | `architecture-selection` | Monolith, microservices, serverless patterns |
-| | `data-modeling` | Schema design, entity relationships, normalization |
-| | `domain-driven-design` | DDD patterns, bounded contexts, aggregates |
-| | `technical-writing` | ADRs, system docs, API docs, runbooks |
-| | `testing` | Test pyramid, coverage targets, framework patterns |
-| **Infrastructure** | `deployment-pipeline-design` | Pipeline design, deployment strategies |
-| | `observability-design` | Monitoring, tracing, SLI/SLO design |
-| **Quality** | `code-quality-review` | Systematic code review patterns and feedback |
-| | `performance-analysis` | Measurement, profiling tools, optimization |
-| | `security-assessment` | Vulnerability review, OWASP, threat modeling |
-
-### Benefits
-
-- **Single Source of Truth**: Update a skill once, all referencing agents benefit
-- **Reduced Duplication**: Common patterns live in skills, not repeated across agents
-- **Consistent Guidance**: All agents provide uniform advice for shared concerns
-- **Modular Expertise**: Agents compose capabilities from relevant skills
+| | `feature-prioritization` | RICE/MoSCoW/Kano/value-effort prioritization |
+| | `requirements-elicitation` | Requirement gathering, conflict resolution, acceptance criteria |
+| **Design** | `user-research` | Research planning, evidence synthesis, personas, journey mapping |
+| **Development** | `api-contract-design` | REST/GraphQL contract design and versioning |
+| | `architecture-selection` | Pattern selection for monolith/microservices/serverless/event-driven |
+| | `domain-modeling` | Domain + data modeling, invariants, schema evolution |
+| | `technical-writing` | ADRs, system docs, runbooks, API docs |
+| | `testing` | Layered testing strategy and execution patterns |
+| **Infrastructure** | `platform-operations` | Pipeline design + observability + release reliability controls |
+| **Quality** | `code-quality-review` | Holistic review including security/perf/a11y/error handling |
+| | `performance-analysis` | Profiling and bottleneck identification |
+| | `security-assessment` | Threat modeling and vulnerability review |
 
 ---
 
-## Agent Architecture
+## Architecture Principles
 
-### Slim Agent Design
-
-Agents follow a **slim template** that separates concerns:
-
-- **Agents** define WHO (role), WHAT (focus areas), and WHEN (deliverables)
-- **Skills** provide HOW (procedural knowledge, patterns, checklists)
-
-This design follows Claude Code's progressive disclosure model where skills load on-demand while agent content always loads.
-
-### Agent Template Structure
-
-```markdown
----
-name: agent-name
-description: Clear purpose with usage examples
-skills: skill1, skill2, skill3
----
-
-{1-2 sentence role introduction}
-
-## Focus Areas
-{4-6 bullet points of what this agent specializes in}
-
-## Approach
-{3-5 high-level methodology steps}
-{Reference to skills for detailed patterns}
-
-## Deliverables
-{4-6 concrete outputs}
-
-## Quality Standards
-{Non-negotiable quality criteria}
-
-{Closing philosophy statement}
-```
-
-### Key Principles
-
-1. **No Duplication**: Agent content should NOT repeat what skills provide
-2. **Skill References**: Agents explicitly reference which skills to leverage
-3. **Focused Scope**: Each agent excels at one activity, not multiple domains
-4. **Concrete Deliverables**: Clear outputs the agent produces
+1. Agents define **who/what/when**.
+2. Skills provide reusable **how**.
+3. Consolidation favors clearer boundaries and lower context overhead.
+4. Deliverables stay concrete and execution-oriented.

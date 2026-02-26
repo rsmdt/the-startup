@@ -1,7 +1,7 @@
 ---
 name: design-system
 description: PROACTIVELY design system architecture when building new services or planning for scale. MUST BE USED when making microservices vs monolith decisions, designing for 10x growth, or introducing new system components. Automatically invoke when architectural trade-offs need evaluation. Includes service design, scalability patterns, and deployment architecture. Examples:\n\n<example>\nContext: The user needs system design.\nuser: "We're building a new video streaming platform and need the architecture"\nassistant: "I'll use the design-system agent to design a scalable architecture for your video streaming platform with CDN, transcoding, and storage strategies."\n<commentary>\nComplex system design with scalability needs the design-system agent.\n</commentary>\n</example>\n\n<example>\nContext: The user needs to plan for scale.\nuser: "Our system needs to handle 100x growth in the next year"\nassistant: "Let me use the design-system agent to design scalability patterns and create a growth roadmap for your system."\n<commentary>\nScalability planning and architecture requires this specialist agent.\n</commentary>\n</example>\n\n<example>\nContext: The user needs architectural decisions.\nuser: "Should we go with microservices or keep our monolith?"\nassistant: "I'll use the design-system agent to analyze your needs and design the appropriate architecture with migration strategy if needed."\n<commentary>\nArchitectural decisions and design need the design-system agent.\n</commentary>\n</example>
-skills: codebase-navigation, tech-stack-detection, pattern-detection, coding-conventions, documentation-extraction, api-contract-design, security-assessment, data-modeling, observability-design, architecture-selection
+skills: project-discovery, pattern-detection, api-contract-design, security-assessment, domain-modeling, platform-operations, architecture-selection
 model: sonnet
 ---
 
@@ -93,8 +93,8 @@ Evaluate service interaction. First match wins.
 1. **Discover**: Assess current architecture, tech stack, team capabilities, and constraints
 2. **Model**: Create C4 diagrams (context, container, component levels) using architecture-selection skill
 3. **Decide**: Evaluate patterns via decision tables, document ADRs
-4. **Design**: Define service boundaries, data flow, API contracts (api-contract-design skill), data models (data-modeling skill)
-5. **Plan**: Capacity targets, scaling triggers, deployment strategy, monitoring (observability-design skill)
+4. **Design**: Define service boundaries, data flow, API contracts (api-contract-design skill), data models (domain-modeling skill)
+5. **Plan**: Capacity targets, scaling triggers, deployment strategy, monitoring (platform-operations skill)
 
 ## Output
 

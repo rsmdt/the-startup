@@ -24,9 +24,9 @@ This document establishes the foundational principles for designing effective AI
 
 **Implementation**:
 ```
-❌ the-developer (handles API design, UI, testing, deployment)
-✅ the-developer/api-design (focused only on REST/GraphQL design)
-✅ the-developer/component-architecture (focused only on UI components)
+❌ the-developer (handles feature building, UI, testing, deployment)
+✅ the-developer/build-feature (focused only on feature implementation)
+✅ the-designer/design-visual (focused only on UI design)
 ```
 
 **Benefits**:
@@ -44,11 +44,11 @@ This document establishes the foundational principles for designing effective AI
 **Implementation**:
 ```
 Concern Separation Example:
-├── Analysis → the-analyst/codebase-analysis
-├── Design → the-architect/system-design  
-├── Implementation → the-developer/api-design
-├── Validation → the-quality-specialist/code-review
-└── Deployment → the-platform-engineer/ci-cd-pipelines
+├── Analysis → the-analyst/research-product
+├── Design → the-architect/design-system
+├── Implementation → the-developer/build-feature
+├── Validation → the-tester/test-strategy
+└── Deployment → the-devops/build-platform
 ```
 
 **Anti-Pattern**: Agents that both analyze requirements AND implement solutions create unclear boundaries and reduced effectiveness.
@@ -62,10 +62,10 @@ Concern Separation Example:
 **Implementation**:
 ```
 Team Structure → Agent Structure
-Product Manager → the-product-manager/
+Product Manager → the-analyst/
 Software Architect → the-architect/
 Developer → the-developer/
-QA Engineer → the-quality-specialist/
+QA Engineer → the-tester/
 ```
 
 **Principle**: If your human team wouldn't have one person doing both security audits and UI design, your agents shouldn't either.
@@ -89,9 +89,9 @@ Traditional Role-Based ❌:
 └── the-qa-engineer (multiple responsibilities)
 
 Activity-Based ✅:
-├── the-developer/api-design (specific activity)
-├── the-developer/component-architecture (specific activity)
-└── the-quality-specialist/code-review (specific activity)
+├── the-developer/build-feature (specific activity)
+├── the-developer/optimize-performance (specific activity)
+└── the-tester/test-strategy (specific activity)
 ```
 
 ### 5. Modular Composability
@@ -105,12 +105,12 @@ Activity-Based ✅:
 Complex Task: "Build authentication system"
 
 Composition:
-1. the-analyst/solution-research → Research auth patterns
-2. the-architect/system-design → Design auth architecture  
-3. the-security-specialist/authentication-systems → Security requirements
-4. the-developer/api-design → Auth API endpoints
-5. the-developer/component-architecture → Login UI components
-6. the-quality-specialist/security-review → Validate implementation
+1. the-analyst/research-product → Research auth patterns
+2. the-architect/design-system → Design auth architecture
+3. the-architect/review-security → Security requirements
+4. the-developer/build-feature → Auth API endpoints and UI components
+5. the-tester/test-strategy → Validate implementation
+6. the-architect/review-robustness → Review robustness
 ```
 
 ## Architectural Patterns
@@ -149,13 +149,13 @@ Specialized Agents (Workers)
 Input → Agent A → Agent B → Agent C → Output
 
 Example: Code Review Pipeline
-Requirements → the-analyst/research-requirements
+Requirements → the-analyst/research-product
          ↓
-System Design → the-architect/system-design
+System Design → the-architect/design-system
          ↓
-Implementation → the-developer/api-design
+Implementation → the-developer/build-feature
          ↓
-Quality Review → the-quality-specialist/code-review
+Quality Review → the-tester/test-strategy
 ```
 
 ### 3. Collaborative Debate Pattern
@@ -184,10 +184,10 @@ Problem → [Agent A Perspective]
 Request → Classification → Route to Specialist → Execute → Return
 
 Example: Support Ticket Routing
-Ticket → the-analyst/issue-classification → 
-       → the-security-specialist/vulnerability-assessment OR
-       → the-developer/bug-investigation OR  
-       → the-platform-engineer/infrastructure-issue
+Ticket → the-chief (routing) →
+       → the-architect/review-security OR
+       → the-developer/build-feature OR
+       → the-devops/monitor-production
 ```
 
 ## Specialization Strategies
@@ -197,9 +197,9 @@ Ticket → the-analyst/issue-classification →
 **Principle**: Agents specialized in specific knowledge domains.
 
 **Examples**:
-- `the-security-specialist/vulnerability-assessment` - OWASP expertise
-- `the-platform-engineer/kubernetes-deployment` - Container orchestration
-- `the-designer/accessibility-implementation` - WCAG guidelines
+- `the-architect/review-security` - OWASP expertise
+- `the-devops/build-platform` - Container orchestration
+- `the-designer/design-visual` - WCAG guidelines
 
 **Context Optimization**: Each agent's knowledge base contains only relevant domain information, reducing noise and improving focus.
 
@@ -208,9 +208,9 @@ Ticket → the-analyst/issue-classification →
 **Principle**: Agents specialized in specific processes or methodologies.
 
 **Examples**:
-- `the-analyst/user-research` - Interview techniques, survey design
-- `the-quality-specialist/test-planning` - Testing strategies, coverage analysis
-- `the-architect/technology-evaluation` - Selection criteria, trade-off analysis
+- `the-designer/research-user` - Interview techniques, survey design
+- `the-tester/test-strategy` - Testing strategies, coverage analysis
+- `the-architect/design-system` - Selection criteria, trade-off analysis
 
 **Benefit**: Deep expertise in how to execute specific processes correctly.
 
@@ -221,9 +221,9 @@ Ticket → the-analyst/issue-classification →
 **Pattern**: Activity-first, framework-second approach where agents maintain primary focus on the activity while applying framework-specific patterns when relevant.
 
 **Examples**:
-- `the-developer/component-architecture` - Component design that adapts to React/Vue/Angular
-- `the-platform-engineer/infrastructure-design` - IaC patterns that adapt to AWS/GCP/Azure  
-- `the-data-specialist/database-optimization` - Query optimization that adapts to PostgreSQL/MySQL/MongoDB
+- `the-developer/build-feature` - Component design that adapts to React/Vue/Angular
+- `the-devops/build-platform` - IaC patterns that adapt to AWS/GCP/Azure
+- `the-developer/optimize-performance` - Query optimization that adapts to PostgreSQL/MySQL/MongoDB
 
 **Implementation**:
 ```markdown
@@ -243,16 +243,16 @@ My primary expertise is [activity], which I apply regardless of framework.
 - Supports multi-framework projects
 - Preserves single responsibility principle
 
-**Anti-Pattern**: Creating separate agents for each framework (`the-developer/react-components`, `the-developer/vue-components`) - this violates activity-based organization.
+**Anti-Pattern**: Creating separate agents for each framework (`the-developer/react-components`, `the-developer/vue-components`) - this violates activity-based organization. These should use activity-based names like `build-feature`.
 
 ### 4. Cross-Cutting Specialization
 
 **Principle**: Agents that apply specialized knowledge across domains.
 
 **Examples**:
-- `the-security-specialist/security-review` - Security analysis for any domain
-- `the-quality-specialist/performance-review` - Performance analysis across systems
-- `the-analyst/pattern-analysis` - Pattern recognition in any codebase
+- `the-architect/review-security` - Security analysis for any domain
+- `the-developer/optimize-performance` - Performance analysis across systems
+- `pattern-detection` skill - Pattern recognition in any codebase
 
 **Value**: Ensures consistent application of specialized knowledge.
 
@@ -265,13 +265,13 @@ My primary expertise is [activity], which I apply regardless of framework.
 **Implementation**:
 ```yaml
 Agent Context Example:
-the-developer/api-design:
+the-developer/build-feature:
   context:
-    - Business requirements for API endpoints
-    - Existing API patterns in codebase
+    - Business requirements for the feature
+    - Existing patterns in codebase
     - Authentication/authorization requirements
   excludes:
-    - UI implementation details
+    - Unrelated UI implementation details
     - Database schema specifics
     - Deployment configurations
 ```
@@ -318,11 +318,11 @@ Shared Context:
 
 **Structure**:
 ```
-Strategic Level → the-architect/system-design
+Strategic Level → the-architect/design-system
        ↓
-Tactical Level → the-developer/api-design
-       ↓  
-Operational Level → the-platform-engineer/deployment
+Tactical Level → the-developer/build-feature
+       ↓
+Operational Level → the-devops/build-platform
 ```
 
 **Benefits**: Maintains appropriate abstraction levels and decision boundaries.
@@ -380,9 +380,9 @@ I automatically detect the project's technology stack and apply relevant pattern
 **Pattern**: `the-[human-role]/[activity-specialization]`
 
 **Examples**:
-- `the-developer/api-design` - Human role: developer, Activity: API design
-- `the-analyst/codebase-analysis` - Human role: analyst, Activity: codebase analysis  
-- `the-architect/system-design` - Human role: architect, Activity: system design
+- `the-developer/build-feature` - Human role: developer, Activity: feature building
+- `the-analyst/research-product` - Human role: analyst, Activity: product research
+- `the-architect/design-system` - Human role: architect, Activity: system design
 
 **Benefits**: 
 - Human-readable navigation
@@ -434,9 +434,9 @@ Agent Error Handling:
 ```python
 # Parallel execution example
 parallel_tasks = [
-    Task(agent="the-developer/api-design", context=api_context),
-    Task(agent="the-developer/component-architecture", context=ui_context), 
-    Task(agent="the-security-specialist/authentication-systems", context=auth_context)
+    Task(agent="the-developer/build-feature", context=api_context),
+    Task(agent="the-designer/design-visual", context=ui_context),
+    Task(agent="the-architect/review-security", context=auth_context)
 ]
 ```
 
