@@ -27,7 +27,7 @@ the-startup/
 │   │   │   ├── the-designer/     # research-user, design-interaction, design-visual
 │   │   │   ├── the-tester/       # test-strategy
 │   │   │   └── the-meta-agent.md # Agent design and generation
-│   │   └── skills/               # 14 consolidated cross-cutting and domain skills
+│   │   └── skills/               # 16 consolidated cross-cutting and domain skills
 │   │
 │   └── constitution/             # Project governance rules plugin (optional)
 │
