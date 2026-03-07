@@ -3,7 +3,6 @@ name: brainstorm
 description: "You MUST use this before any creative work — creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements, and design before implementation."
 user-invocable: true
 argument-hint: "describe what you want to build or explore"
-allowed-tools: Read, Glob, Grep, Task, AskUserQuestion
 ---
 
 ## Persona

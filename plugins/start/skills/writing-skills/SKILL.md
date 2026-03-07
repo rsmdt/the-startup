@@ -1,7 +1,6 @@
 ---
 name: writing-skills
 description: Use when creating new skills, editing existing skills, auditing skill quality, converting skills to markdown conventions, or verifying skills before deployment. Triggers include skill authoring requests, skill review needs, or "the skill doesn't work" complaints.
-allowed-tools: Task, Read, Write, Glob, Grep, Bash, AskUserQuestion
 ---
 
 ## Persona

@@ -3,7 +3,6 @@ name: specify
 description: Create a comprehensive specification from a brief description. Manages specification workflow including directory creation, README tracking, and phase transitions.
 user-invocable: true
 argument-hint: "describe your feature or requirement to specify"
-allowed-tools: Task, TaskOutput, TodoWrite, Bash, Grep, Read, Write(.start/**, docs/**), Edit(.start/**, docs/**), AskUserQuestion, Skill, TeamCreate, TeamDelete, SendMessage, TaskCreate, TaskUpdate, TaskList, TaskGet
 ---
 
 ## Persona
@@ -32,9 +31,10 @@ State {
 ## Constraints
 
 **Always:**
-- Delegate research tasks to specialist agents via Task tool.
-- Display ALL agent responses to user — complete findings, not summaries.
-- Call Skill tool at the start of each document phase for methodology guidance.
+- Delegate research tasks to specialist agents.
+- Display all agent responses to user — complete findings, not summaries.
+- Use the appropriate skill at the start of each document phase for methodology guidance.
+- Only write or edit files within `.start/` and `docs/` directories.
 - Run phases sequentially — PRD, SDD, PLAN (user can skip phases).
 - Wait for user confirmation between each document phase.
 - Track decisions in specification README via reference/output-format.md.

@@ -3,7 +3,6 @@ name: review
 description: Multi-agent code review with specialized perspectives (security, performance, patterns, simplification, tests)
 user-invocable: true
 argument-hint: "PR number, branch name, file path, or 'staged' for staged changes"
-allowed-tools: Task, TaskOutput, TodoWrite, Bash, Read, Glob, Grep, AskUserQuestion, Skill, TeamCreate, TeamDelete, SendMessage, TaskCreate, TaskUpdate, TaskList, TaskGet
 ---
 
 ## Persona

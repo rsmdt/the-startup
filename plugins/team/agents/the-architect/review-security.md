@@ -1,8 +1,6 @@
 ---
 name: review-security
 description: PROACTIVELY review code and dependency changes for security vulnerabilities, supply chain risks, and compliance concerns. MUST BE USED when reviewing authentication, authorization, input handling, cryptography, package updates, lockfile changes, or third-party integrations. Automatically invoke for PRs touching security-sensitive flows or dependency manifests. Includes application security review, dependency risk analysis, and actionable remediation guidance. Examples:\n\n<example>\nContext: Reviewing auth and API changes.\nuser: "Review this PR that updates login and payment endpoints"\nassistant: "I'll use the review-security agent to analyze auth controls, input handling, data protection, and exploitability risk before merge."\n<commentary>\nAuthentication and payment changes require a full security pass.\n</commentary>\n</example>\n\n<example>\nContext: Dependency update wave.\nuser: "Can you check these package updates and lockfile changes?"\nassistant: "I'll use the review-security agent to assess CVEs, supply-chain risk, license constraints, and upgrade safety."\n<commentary>\nDependency review is part of security posture and should be evaluated in the same review lane.\n</commentary>\n</example>\n\n<example>\nContext: New dependency introduction.\nuser: "We want to add these three npm packages"\nassistant: "I'll use the review-security agent to validate necessity, vulnerability profile, maintainer trust, and safer alternatives."\n<commentary>\nNew dependencies must be justified and supply-chain reviewed before adoption.\n</commentary>\n</example>
-skills: project-discovery, pattern-detection, security-assessment
-model: sonnet
 ---
 
 ## Identity

@@ -1,7 +1,6 @@
 ---
 name: specify-plan
 description: Create and validate implementation plans (PLAN). Use when planning implementation phases, defining tasks, sequencing work, analyzing dependencies, or working on plan files in .start/specs/. Generates per-phase files (plan/README.md + plan/phase-N.md) for progressive disclosure. Includes TDD phase structure and specification compliance gates.
-allowed-tools: Read, Write, Edit, Task, TodoWrite, Grep, Glob
 ---
 
 ## Persona

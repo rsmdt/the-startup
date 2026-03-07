@@ -3,7 +3,6 @@ name: implement
 description: Executes the implementation plan from a specification. Loops through plan phases, delegates tasks to specialists, updates phase status on completion. Supports resuming from partially-completed plans.
 user-invocable: true
 argument-hint: "spec ID to implement (e.g., 001), or file path"
-allowed-tools: Task, TaskOutput, TodoWrite, Bash, Write, Edit, Read, LS, Glob, Grep, MultiEdit, AskUserQuestion, Skill, TeamCreate, TeamDelete, SendMessage, TaskCreate, TaskUpdate, TaskList, TaskGet
 ---
 
 ## Persona

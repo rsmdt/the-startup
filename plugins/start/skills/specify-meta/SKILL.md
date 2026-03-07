@@ -1,7 +1,6 @@
 ---
 name: specify-meta
 description: Scaffold, status-check, and manage specification directories. Handles auto-incrementing IDs, README tracking, phase transitions, and decision logging in .start/specs/. Falls back to docs/specs/ for legacy specs. Used by both specify and implement workflows.
-allowed-tools: Read, Write, Edit, Bash, TodoWrite, Grep, Glob
 ---
 
 ## Persona

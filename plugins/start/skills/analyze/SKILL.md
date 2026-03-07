@@ -3,7 +3,6 @@ name: analyze
 description: Discover and document business rules, technical patterns, and system interfaces through iterative analysis
 user-invocable: true
 argument-hint: "area to analyze (business, technical, security, performance, integration, or specific domain)"
-allowed-tools: Task, TodoWrite, Bash, Grep, Glob, Read, Write, Edit, AskUserQuestion, Skill, TeamCreate, TeamDelete, SendMessage, TaskCreate, TaskUpdate, TaskList, TaskGet
 ---
 
 ## Persona

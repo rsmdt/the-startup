@@ -1,7 +1,6 @@
 ---
 name: specify-requirements
 description: Create and validate product requirements documents (PRD). Use when writing requirements, defining user stories, specifying acceptance criteria, analyzing user needs, or working on requirements.md files in .start/specs/. Includes validation checklist, iterative cycle pattern, and multi-angle review process.
-allowed-tools: Read, Write, Edit, Task, TodoWrite, Grep, Glob, Skill
 ---
 
 ## Persona

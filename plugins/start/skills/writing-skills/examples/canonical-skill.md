@@ -12,8 +12,8 @@ description: Multi-agent code review  # trigger-focused, no workflow details
 user-invocable: true
 argument-hint: "PR number, branch     # shown in / menu
   name, file path, or 'staged'"
-allowed-tools: Task, TaskOutput, ...  # tools used without permission prompts
 ---
+# Note: allowed-tools is deprecated — tools are available by default
 ```
 
 ## Persona                             <!-- PICS: P -->
@@ -82,7 +82,7 @@ match (changes) {                      <!-- conditional perspective activation -
 
 ### 2. Select Mode
 
-AskUserQuestion:
+Ask the user to choose between:
   Standard (default) -- parallel fire-and-forget subagents
   Agent Team -- persistent teammates with peer coordination
 
@@ -107,7 +107,7 @@ verdict = match (criticalCount, highCount, mediumCount) {
 
 ### 5. Next Steps
 
-Read reference/output-format.md and present verdict-based options via AskUserQuestion.
+Read reference/output-format.md and present verdict-based options — ask the user to choose.
 
 ### Entry Point
 

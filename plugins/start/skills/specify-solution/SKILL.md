@@ -1,7 +1,6 @@
 ---
 name: specify-solution
 description: Create and validate solution design documents (SDD). Use when designing architecture, defining interfaces, documenting technical decisions, analyzing system components, or working on solution.md files in .start/specs/. Includes validation checklist, consistency verification, and overlap detection.
-allowed-tools: Read, Write, Edit, Task, TodoWrite, Grep, Glob, Skill
 ---
 
 ## Persona

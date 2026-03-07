@@ -26,12 +26,15 @@ description: What it does and when to use it  // Max 1024 chars
 
 Optional fields:
 
-allowed-tools: Task, Bash, Read              // Tools without permission prompts
 user-invocable: true                         // false = hides from / menu
 argument-hint: "description of arguments"    // Shown in / menu
 disable-model-invocation: false              // true = only user can invoke
 context: fork                                // Run in subagent
 agent: Explore                               // Subagent type when context: fork
+
+Deprecated fields (do not use in new skills):
+
+allowed-tools: Task, Bash, Read              // Platform-specific; tools are available by default
 
 ### Description Guidelines
 
@@ -49,7 +52,56 @@ ${CLAUDE_SESSION_ID}    // Current session ID
 !`shell command`        // Execute command, insert output (preprocessing)
 
 ### Security Note
-Never combine `!`shell command`` preprocessing with `$ARGUMENTS` — this executes user input as a shell command at skill load time. Use `Bash()` in the Workflow section instead, where the AI mediates the execution.
+Never combine `!`shell command`` preprocessing with `$ARGUMENTS` — this executes user input as a shell command at skill load time. Use shell execution in the Workflow section instead, where the AI mediates the execution.
+
+---
+
+## Cross-Platform Compatibility
+
+Skills should be written for cross-platform compatibility. SKILL.md is an emerging open standard supported by Claude Code, Codex CLI, Cursor, OpenCode, and GitHub Copilot.
+
+### Intent-Based Language
+
+Write instructions that describe WHAT to accomplish, not WHICH tool to use. Platform-native agents map intent to their available tools.
+
+| Instead of | Write |
+|------------|-------|
+| "Use the Grep tool to search" | "Search the codebase for..." |
+| "Use Read to load the file" | "Read the file at..." |
+| "Use Bash to run tests" | "Run the test suite in the terminal" |
+| "Use AskUserQuestion to present options" | "Ask the user to choose between..." |
+| "Delegate via Task tool" | "Delegate to a specialist agent" |
+| "Update TodoWrite with progress" | "Track progress on current tasks" |
+| "Use Write to create the file" | "Create the file with the following content" |
+
+### Skill References
+
+Reference other skills by name, not by invocation syntax.
+
+| Instead of | Write |
+|------------|-------|
+| `Skill(start:validate)` | "Use the validate skill" |
+| `Invoke Skill(start:specify-meta)` | "Use the specify-meta skill" |
+| `/start:implement` | "The implement skill" |
+
+### Project Instructions Reference
+
+Reference project instructions generically — not all platforms use `CLAUDE.md`.
+
+| Instead of | Write |
+|------------|-------|
+| "Read CLAUDE.md" | "Read the project instructions file (CLAUDE.md, AGENTS.md, or equivalent)" |
+| "Project CLAUDE.md" | "Project instructions file" |
+
+### What Stays Platform-Specific
+
+These patterns are safe to keep — they either work cross-platform or degrade gracefully:
+
+- **`$ARGUMENTS`** — Supported by Claude Code and Codex CLI. Others treat as literal text. Always add contextual description alongside.
+- **`match()` blocks** — Human-readable pseudo-code. Any LLM processes it as structured routing.
+- **Progressive disclosure** (`reference/`, `templates/`, `examples/`) — File-based, works on any platform that can read files.
+- **PICS + Workflow structure** — Pure markdown headings, universally understood.
+- **Decision tables** — Markdown tables, universally rendered.
 
 ---
 
@@ -148,8 +200,8 @@ Examples of non-linear entry points:
 | `match (x) { a => b }` | 3+ branch routing decisions | Binary if/else (use prose) |
 | Numbered sub-steps | Data processing, multi-step operations | — |
 | Markdown `### N. Step Name` | Workflow steps | — |
-| `AskUserQuestion:` | User choice points | — |
-| `Read reference/X.md` | Loading progressive disclosure files | — |
+| "Ask the user to choose:" | User choice points | — |
+| "Read reference/X.md" | Loading progressive disclosure files | — |
 
 **Why markdown headings over `fn` definitions**: LLMs process markdown headers as their strongest structural signal. `fn` definitions trigger code-interpretation patterns and require the LLM to learn the novel `fn`/no-`fn` entry-point convention. Numbered headings are immediately parseable.
 
@@ -240,6 +292,13 @@ When converting an existing skill to these conventions:
 - [ ] `match` blocks used only for 3+ branch routing
 - [ ] No `|>` pipe chains — use numbered sub-steps instead
 - [ ] No content/logic lost in transformation
+
+**Cross-platform compatibility:**
+- [ ] No `allowed-tools` in frontmatter
+- [ ] No `Skill()` invocation syntax — use "Use the X skill" instead
+- [ ] No tool-specific names in body text — use intent-based language
+- [ ] No `CLAUDE.md` hardcoded — use "project instructions file"
+- [ ] Constraints describe behavior, not tool mechanisms
 
 ---
 

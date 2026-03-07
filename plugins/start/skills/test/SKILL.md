@@ -3,7 +3,6 @@ name: test
 description: Use when completing implementation, fixing bugs, refactoring code, or any time you need to verify the test suite passes. Also use when tests fail and you hear "pre-existing" or "not my changes" — enforces strict code ownership.
 user-invocable: true
 argument-hint: "'all' to run full suite, file path for targeted tests, or 'baseline' to capture current state"
-allowed-tools: Task, TaskOutput, Bash, Read, Glob, Grep, Edit, Write, AskUserQuestion, TodoWrite, TeamCreate, TeamDelete, SendMessage, TaskCreate, TaskUpdate, TaskList, TaskGet
 ---
 
 ## Persona

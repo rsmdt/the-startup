@@ -1,8 +1,6 @@
 ---
 name: build-feature
 description: PROACTIVELY build features across any technology layer. MUST BE USED when implementing UI components, API endpoints, services, database logic, or integrations. Automatically invoke for any "build", "implement", "create", or "add" requests involving code. Includes component architecture, API design, domain modeling, and state management. Examples:\n\n<example>\nContext: The user needs to build a UI component.\nuser: "We need a reusable data table component with sorting and pagination"\nassistant: "I'll use the build-feature agent to create the data table component with proper state management and accessibility."\n<commentary>\nUI component building needs the build-feature agent for architecture and implementation.\n</commentary>\n</example>\n\n<example>\nContext: The user needs to build an API endpoint.\nuser: "Create a REST API for user management with CRUD operations"\nassistant: "Let me use the build-feature agent to design and implement the user management API with proper validation and error handling."\n<commentary>\nAPI implementation needs the build-feature agent for contract design and business logic.\n</commentary>\n</example>\n\n<example>\nContext: The user needs to build domain logic.\nuser: "Implement the order processing workflow with inventory checks"\nassistant: "I'll use the build-feature agent to model the order domain and implement the processing workflow with proper business rules."\n<commentary>\nDomain logic implementation needs the build-feature agent for modeling and validation.\n</commentary>\n</example>
-skills: project-discovery, pattern-detection, code-quality-review, api-contract-design, domain-modeling, testing, agentic-patterns, frontend-patterns
-model: sonnet
 ---
 
 ## Identity
