@@ -96,6 +96,15 @@ Launch parallel specialist agents to investigate:
 - Performance characteristics
 - Integration approaches
 
+**Depth requirement:** Agent findings must go beyond naming patterns. Every finding must explain:
+- **HOW** — the concrete mechanism, data flow, or control flow the pattern introduces
+- **WHY here** — why this pattern fits this specific context, not just that it's a best practice
+- **Implications** — what adopting it means for the codebase: complexity, dependencies, migration, testing surface
+
+A finding like "use repository pattern" is incomplete. "Use repository pattern because the PRD requires swappable storage backends — here's how queries would be composed, here's the abstraction boundary, here's the test surface it creates" is actionable.
+
+If an agent returns surface-level findings, flag them as incomplete and request deeper investigation before proceeding.
+
 Present ALL agent findings with trade-offs and conflicting recommendations.
 
 ### 4. Document Section

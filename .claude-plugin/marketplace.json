@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Comprehensive agentic framework for Claude Code",
-    "version": "3.2.1",
+    "version": "3.3.0",
     "homepage": "https://github.com/rsmdt/the-startup"
   },
   "plugins": [
@@ -17,7 +17,7 @@
     {
       "name": "team",
       "source": "./plugins/team",
-      "description": "Engineering team consisting of specialized agents for software development"
+      "description": "Team consisting of specialized agents for software development"
     }
   ]
 }
