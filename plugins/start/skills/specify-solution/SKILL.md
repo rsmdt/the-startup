@@ -42,6 +42,7 @@ State {
 - Ensure every PRD requirement is addressable by the design.
 - Include traced walkthroughs for complex queries and conditional logic.
 - Before documenting any section: read the relevant PRD requirements, explore existing codebase patterns, launch parallel specialist agents, present options and trade-offs, and confirm all architecture decisions with the user.
+- Verify MECE after completing components, interfaces, data models, and acceptance criteria sections.
 
 **Never:**
 - Implement code — this skill produces specifications only.
@@ -49,6 +50,8 @@ State {
 - Remove or reorganize template sections.
 - Leave [NEEDS CLARIFICATION] markers in completed SDDs.
 - Design beyond PRD scope (no scope creep).
+- Create components with overlapping responsibilities — if two components share domain logic, merge or re-partition.
+- Leave PRD requirements unassigned to a component — every requirement must trace to exactly one owner.
 
 ## SDD Focus
 
@@ -57,6 +60,22 @@ When designing, address four dimensions:
 - **WHERE** code lives — directory structure, components, layers
 - **WHAT** interfaces exist — APIs, data models, integrations
 - **WHY** decisions were made — ADRs with rationale and trade-offs
+
+## MECE Principle
+
+All structural decompositions in the SDD must be **Mutually Exclusive, Collectively Exhaustive** (MECE):
+
+| Section | Mutually Exclusive | Collectively Exhaustive |
+|---------|-------------------|------------------------|
+| **Components** | Each component has a single, distinct responsibility. No two components should own the same domain logic or serve the same purpose. | All system capabilities from the PRD are assigned to exactly one component. Ask: "Which component handles X?" — if the answer is ambiguous, the decomposition has overlap. |
+| **Interfaces** | Each interface serves a distinct purpose. No two interfaces should expose the same operation or data shape. | All communication paths between components, external systems, and data stores are documented. Ask: "How does component A talk to component B?" — if undocumented, there's a gap. |
+| **Data Models** | Each entity owns a distinct slice of the domain. No two entities should store the same business data. | All data required by the components and interfaces is modeled. Ask: "Where is X stored?" — if unanswerable, there's a gap. |
+| **Acceptance Criteria (EARS)** | Each criterion specifies a unique system behavior. No two criteria should verify the same thing with different triggers. | Every PRD acceptance scenario has a corresponding system-level criterion. Ask: "How does the system satisfy PRD/AC-X.Y?" — if unanswerable, there's a gap. |
+
+**How to apply:** During validation (step 5), explicitly run MECE checks:
+1. **Responsibility matrix** — Map each PRD requirement to exactly one component. Flag requirements mapped to multiple components (overlap) or zero components (gap).
+2. **Interface deduplication** — Verify no two interfaces serve the same consumer-to-provider path.
+3. **Criteria traceability** — Verify 1:1 mapping between PRD acceptance criteria and EARS criteria.
 
 ## Reference Materials
 
@@ -117,15 +136,21 @@ Record architecture decisions as ADRs — present each for user confirmation bef
 
 Read validation.md and run the full checklist, focusing on:
 
-Overlap detection:
-- Component overlap — duplicated responsibilities?
-- Interface conflicts — multiple interfaces serving the same purpose?
-- Pattern inconsistency — conflicting architectural patterns?
+**MECE Validation (run first):**
 
-Coverage analysis:
-- PRD coverage — all requirements addressed?
-- Component completeness — UI, business logic, data, integration?
-- Cross-cutting concerns — security, error handling, logging, performance?
+Mutually Exclusive — no overlap:
+- Component responsibilities — does any PRD requirement map to more than one component? If yes, re-partition.
+- Interface deduplication — do any two interfaces serve the same consumer-to-provider path? If yes, merge.
+- Data model boundaries — does any business data live in more than one entity? If yes, pick a single owner.
+- Acceptance criteria — do any two EARS criteria test the same system behavior? If yes, consolidate.
+
+Collectively Exhaustive — no gaps:
+- PRD coverage — does every PRD requirement map to at least one component? If not, assign it.
+- Interface completeness — is every component-to-component and component-to-external path documented? If not, add it.
+- Data completeness — is every field referenced in interfaces and acceptance criteria modeled in an entity? If not, add it.
+- Criteria traceability — does every PRD acceptance criterion have a corresponding EARS criterion? If not, write it.
+
+**Structural Validation:**
 
 Boundary validation:
 - Layer separation — presentation, business, data properly separated?
@@ -135,7 +160,7 @@ Boundary validation:
 Consistency verification:
 - Naming consistency — components, interfaces, concepts named consistently?
 - Pattern adherence — architectural patterns applied consistently?
-- PRD alignment — design traces back to requirements?
+- Cross-cutting concerns — security, error handling, logging, performance?
 
 ### 6. Present Status
 

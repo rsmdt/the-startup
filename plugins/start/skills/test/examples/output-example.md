@@ -4,14 +4,15 @@
 
 📋 Test Infrastructure Discovery
 
-Runner: vitest (1.6.0)
-Command: npx vitest run
-Config: vitest.config.ts
+Test Categories:
 
-Test Files: 47 files
-  - Unit: 38 (src/**/*.test.ts)
-  - Integration: 7 (tests/integration/**/*.test.ts)
-  - E2E: 2 (tests/e2e/**/*.spec.ts)
+| Category | Runner | Command | Config | Files |
+|----------|--------|---------|--------|-------|
+| Unit | vitest (1.6.0) | `npx vitest run` | vitest.config.ts | 38 (src/**/*.test.ts) |
+| Integration | vitest (1.6.0) | `npx vitest run tests/integration` | vitest.config.ts | 7 (tests/integration/**/*.test.ts) |
+| E2E | playwright (1.42.0) | `npx playwright test` | playwright.config.ts | 2 (tests/e2e/**/*.spec.ts) |
+
+Total Test Files: 47
 
 Quality Commands:
   - Lint: npx eslint .
@@ -24,10 +25,12 @@ Quality Commands:
 
 📊 Baseline Captured
 
-Total: 234 tests
-✅ Passing: 231
-❌ Failing: 3
-⏭️ Skipped: 0
+| Category | Command | Tests | ✅ | ❌ | ⏭️ |
+|----------|---------|-------|----|----|----|
+| Unit | `npx vitest run` | 195 | 193 | 2 | 0 |
+| Integration | `npx vitest run tests/integration` | 27 | 26 | 1 | 0 |
+| E2E | `npx playwright test` | 12 | 12 | 0 | 0 |
+| **Total** | | **234** | **231** | **3** | **0** |
 
 Pre-existing failures (YOU STILL OWN THESE):
 1. payment.test.ts:45 — Stripe mock returns wrong status code
@@ -74,13 +77,12 @@ Workaround: Skip integration tests with `npx vitest run --exclude tests/integrat
 
 🏁 Test Suite Report
 
-Command: npx vitest run
-Duration: 4.2s
-
-Results:
-  ✅ 234 tests passing
-  ⏭️ 0 tests skipped
-  ❌ 0 tests failing
+| Category | Command | Duration | Tests | ✅ | ❌ | ⏭️ |
+|----------|---------|----------|-------|----|----|----|
+| Unit | `npx vitest run` | 2.1s | 195 | 195 | 0 | 0 |
+| Integration | `npx vitest run tests/integration` | 1.4s | 27 | 27 | 0 | 0 |
+| E2E | `npx playwright test` | 8.7s | 12 | 12 | 0 | 0 |
+| **Total** | | **12.2s** | **234** | **234** | **0** | **0** |
 
 Quality:
   Lint: ✅ passing
@@ -91,5 +93,10 @@ Fixes Applied:
 1. payment.test.ts:45 — Updated Stripe mock to return correct 200 status
 2. auth.test.ts:89 — Replaced hardcoded timestamp with relative Date.now()
 3. user.test.ts:12 — Added missing user fixture to test setup
+
+MECE Assessment:
+  Overlaps: ⚠️ 1 found — `validateEmail` tested identically in user.test.ts:23 and user.integration.test.ts:67 (consolidate to unit)
+  Gaps: ✅ None detected
+  Status: ⚠️ Overlaps detected
 
 Suite Status: ✅ HEALTHY

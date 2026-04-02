@@ -44,6 +44,16 @@ Count and categorize:
 - **E2E tests** — browser/API end-to-end tests
 - **Other** — snapshot, performance, accessibility tests
 
+**Critical: Identify the command for EACH category.** E2E tests often use a different runner than unit tests:
+
+| Category | Common Separate Runners |
+|----------|------------------------|
+| Unit/Integration | `vitest`, `jest`, `pytest`, `go test` |
+| E2E (browser) | `playwright test`, `cypress run`, `selenium` |
+| E2E (API) | `supertest` (usually runs via unit runner), `hurl`, `bruno` |
+
+If E2E config files exist (`playwright.config.*`, `cypress.config.*`) but no E2E script is in `package.json`, flag this — the tests exist but may not be wired up. Record each command separately in State.
+
 ## Step 4: Check for Related Commands
 
 Look for additional quality commands that should pass alongside tests:

@@ -28,6 +28,10 @@ version: "1.0"
 - [ ] A developer could implement from this design
 - [ ] Implementation examples use actual schema column names (not pseudocode), verified against migration files
 - [ ] Complex queries include traced walkthroughs with example data showing how the logic evaluates
+- [ ] **MECE: Components** — each component has a single distinct responsibility, every PRD requirement maps to exactly one component
+- [ ] **MECE: Interfaces** — no duplicate interfaces serving the same path, all communication paths documented
+- [ ] **MECE: Data Models** — each entity owns a distinct slice of the domain, all required data is modeled
+- [ ] **MECE: Acceptance Criteria** — each EARS criterion is unique, every PRD criterion has a corresponding system-level criterion
 
 ---
 
@@ -296,6 +300,11 @@ graph LR
 │   └── [discovered structure]
 ```
 
+### MECE Check: Components
+- [ ] Each component has a single, distinct responsibility (no overlap)
+- [ ] Every PRD requirement maps to exactly one component (no gaps, no ambiguity)
+- [ ] No two components own the same domain logic
+
 ### Interface Specifications
 
 **Note**: Interfaces can be documented by referencing external documentation files OR specified inline. Choose the approach that best fits your project's documentation structure.
@@ -416,6 +425,12 @@ External_Service_Name:
   - integration: "Brief description of how systems connect"
   - critical_data: [data_elements_exchanged]
 ```
+
+### MECE Check: Interfaces & Data Models
+- [ ] No two interfaces serve the same consumer-to-provider path (no overlap)
+- [ ] All component-to-component and component-to-external communication paths are documented (no gaps)
+- [ ] Each data entity owns a distinct slice of the domain (no duplicate business data across entities)
+- [ ] All data referenced in interfaces and acceptance criteria is modeled in an entity
 
 ### Implementation Examples
 
@@ -736,6 +751,11 @@ Use the appropriate EARS pattern for each criterion:
 **Edge Case Criteria: [PRD/AC-X.Y - Edge case]**
 - [ ] WHILE [boundary state], THE SYSTEM SHALL [correct behavior]
 - [ ] IF [limit condition], THEN THE SYSTEM SHALL [appropriate response]
+
+### MECE Check: Acceptance Criteria
+- [ ] Each EARS criterion specifies a unique system behavior (no two criteria verify the same thing)
+- [ ] Every PRD acceptance criterion has a corresponding EARS criterion (no gaps)
+- [ ] Criteria collectively cover happy path, error handling, and edge cases for every component
 
 ## Risks and Technical Debt
 

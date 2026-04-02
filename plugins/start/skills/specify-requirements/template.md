@@ -23,9 +23,12 @@ version: "1.0"
 - [ ] Every persona has at least one user journey
 - [ ] All MoSCoW categories addressed (Must/Should/Could/Won't)
 - [ ] Every metric has corresponding tracking events
-- [ ] No feature redundancy (check for duplicates)
 - [ ] No technical implementation details included
 - [ ] A new team member could understand this PRD
+- [ ] **MECE: Personas** — each persona is distinct, all user types represented
+- [ ] **MECE: Journeys** — each journey is a unique path, all paths covered
+- [ ] **MECE: Features** — no overlapping user stories, no capability gaps
+- [ ] **MECE: Acceptance Criteria** — each criterion tests a unique condition, all paths covered
 
 ---
 
@@ -74,6 +77,10 @@ version: "1.0"
 ### Secondary Personas
 [NEEDS CLARIFICATION: Are there other user types? If yes, define them. If no, remove this section]
 
+### MECE Check: Personas
+- [ ] Each persona has distinct goals and pain points (no overlap)
+- [ ] All user types who interact with this feature are represented (no gaps)
+
 ## User Journey Maps
 
 ### Primary User Journey: [NEEDS CLARIFICATION: Journey name]
@@ -85,6 +92,11 @@ version: "1.0"
 
 ### Secondary User Journeys
 [NEEDS CLARIFICATION: Are there other user journeys? If yes, define them. If no, remove this section]
+
+### MECE Check: Journeys
+- [ ] Each journey describes a distinct path (no two journeys cover the same actions for the same persona)
+- [ ] All primary, secondary, and error/recovery paths are mapped (no gaps)
+- [ ] Every persona has at least one journey
 
 ## Feature Requirements
 
@@ -123,6 +135,12 @@ version: "1.0"
 
 ### Won't Have (This Phase)
 [NEEDS CLARIFICATION: What is explicitly out of scope for this phase? What are we NOT building?]
+
+### MECE Check: Features
+- [ ] No two user stories describe the same capability (no overlap across MoSCoW categories)
+- [ ] All capabilities needed to solve the problem for every persona are present (no gaps)
+- [ ] Every feature has testable acceptance criteria
+- [ ] "Won't Have" explicitly accounts for capabilities that could be confused with in-scope features
 
 ## Detailed Feature Specifications
 
