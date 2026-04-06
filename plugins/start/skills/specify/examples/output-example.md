@@ -5,7 +5,7 @@
 Specification Complete
 
 Spec: 003-notification-system
-Documents: PRD ✅ | SDD ✅ | PLAN ✅
+Documents: Requirements ✅ | Solution ✅ | Factory ✅
 
 Readiness: HIGH
 Confidence: 92%
@@ -22,8 +22,8 @@ Next Steps:
 
 | Date | Decision | Rationale |
 |------|----------|-----------|
-| 2026-02-10 | PRD skipped | User chose to start directly with SDD |
-| 2026-02-10 | Started from PLAN | Requirements and design already documented elsewhere |
+| 2026-02-10 | Requirements skipped | Requirements in JIRA-1234 |
+| 2026-02-10 | Started from Factory | Requirements and solution already documented |
 
 ---
 
@@ -33,8 +33,16 @@ Next Steps:
 ├── README.md                 # Decisions and progress
 ├── requirements.md           # What and why
 ├── solution.md               # How
-└── plan/                     # Execution sequence
-    ├── README.md             # Plan manifest
-    ├── phase-1.md            # Core foundation
-    ├── phase-2.md            # API layer
-    └── phase-3.md            # Integration & validation
+├── manifest.md               # Decomposition manifest
+├── units/                    # Factory-sized specs
+│   ├── dm1.md                # Data models
+│   ├── ws1.md                # WebSocket handler
+│   └── nt1.md                # Notification service
+└── scenarios/                # Holdout evaluation scenarios
+    ├── dm1/
+    │   └── schema-validation.md
+    ├── ws1/
+    │   ├── connection-lifecycle.md
+    │   └── reconnect-handling.md
+    └── nt1/
+        └── delivery-confirmation.md

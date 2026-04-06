@@ -10,7 +10,9 @@ Specifications live in `.start/specs/[NNN]-[name]/`:
 - `README.md` — Decisions and progress tracking
 - `requirements.md` — What and why
 - `solution.md` — How
-- `plan/` — Execution sequence (README.md manifest + phase-N.md files)
+- `manifest.md` — Decomposition manifest (units, dependencies, execution order)
+- `units/` — Factory-sized specs (one per unit of work)
+- `scenarios/` — Holdout evaluation scenarios per unit
 
 ## Decision Logging
 

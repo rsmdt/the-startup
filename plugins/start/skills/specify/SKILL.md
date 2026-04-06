@@ -14,9 +14,9 @@ Act as an expert requirements gatherer that creates specification documents for 
 ## Interface
 
 SpecStatus {
-  prd: Complete | Incomplete | Skipped
-  sdd: Complete | Incomplete | Skipped
-  plan: Complete | Incomplete | Skipped
+  requirements: Complete | Incomplete | Skipped
+  solution: Complete | Incomplete | Skipped
+  factory: Complete | Incomplete | Skipped
   readiness: HIGH | MEDIUM | LOW
 }
 
@@ -35,7 +35,7 @@ State {
 - Display all agent responses to user — complete findings, not summaries.
 - Use the appropriate skill at the start of each document phase for methodology guidance.
 - Only write or edit files within `.start/` and `docs/` directories.
-- Run phases sequentially — PRD, SDD, PLAN (user can skip phases).
+- Run phases sequentially — Requirements, Solution, Factory (user can skip phases).
 - Wait for user confirmation between each document phase.
 - Track decisions in specification README via reference/output-format.md.
 - Git integration is optional — offer branch/commit as an option.
@@ -59,9 +59,9 @@ Invoke `Skill(start:specify-meta)` to create or read the spec directory.
 
 match (spec status) {
   new      => AskUserQuestion:
-                Start with PRD (recommended) — define requirements first
-                Start with SDD — skip to technical design
-                Start with PLAN — skip to implementation planning
+                Start with Requirements (recommended) — define requirements first
+                Start with Solution — skip to technical design
+                Start with Factory — skip to decomposition (requires existing requirements + solution)
   existing => Analyze document status (check for [NEEDS CLARIFICATION] markers).
               Suggest continuation point based on incomplete documents.
 }
@@ -85,15 +85,15 @@ match (mode) {
 
 Synthesize findings per the synthesis protocol in reference/perspectives.md. Research feeds into all subsequent document phases.
 
-### 4. Write PRD
+### 4. Write Requirements
 
 Invoke `Skill(start:specify-requirements)`.
 
-Focus: WHAT needs to be built and WHY it matters. Scope: business requirements only — defer technical details to SDD.
+Focus: WHAT needs to be built and WHY it matters. Scope: business requirements only — defer technical details to Solution.
 
-AskUserQuestion: Continue to SDD (recommended) | Finalize PRD
+AskUserQuestion: Continue to Solution (recommended) | Finalize Requirements
 
-### 5. Write SDD
+### 5. Write Solution
 
 Invoke `Skill(start:specify-solution)`.
 
@@ -101,15 +101,17 @@ Focus: HOW the solution will be built. Scope: design decisions and interfaces �
 
 If CONSTITUTION.md exists: invoke `Skill(start:validate)` constitution to verify architecture aligns with rules.
 
-AskUserQuestion: Continue to PLAN (recommended) | Finalize SDD
+AskUserQuestion: Continue to Factory (recommended) | Finalize Solution
 
-### 6. Write PLAN
+### 6. Decompose for Factory
 
-Invoke `Skill(start:specify-plan)`.
+Invoke `Skill(start:specify-factory)`.
 
-Focus: task sequencing and dependencies. Scope: what and in what order — defer duration estimates.
+Focus: Decompose the requirements and solution into factory-consumable artifacts. Produces unit specs, holdout scenarios, and an execution manifest.
 
-AskUserQuestion: Finalize specification (recommended) | Revisit PLAN
+The factory skill reads requirements.md + solution.md, decomposes into units, generates codebase-grounded scenarios for user review, and assembles the manifest with execution order.
+
+AskUserQuestion: Finalize specification (recommended) | Revisit Factory
 
 ### 7. Finalize
 
@@ -118,4 +120,3 @@ Invoke `Skill(start:specify-meta)` to review and assess readiness.
 If git repository exists: AskUserQuestion: Commit + PR | Commit only | Skip git
 
 Read reference/output-format.md and present completion summary accordingly.
-

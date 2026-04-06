@@ -129,7 +129,7 @@ The Agentic Startup follows **spec-driven development**: comprehensive specifica
 ┌──────────────────────────────────────────────────────────┐
 │                    BUILD (primary flow)                  │
 │                                                          │
-│  /specify ────► Create specs (PRD + SDD + PLAN)          │
+│  /specify ────► Create specs (Requirements + Solution + Factory) │
 │      │           ↳ Constitution checked on SDD           │
 │      ▼                                                   │
 │  /validate ───► Check quality (3 Cs framework)           │
@@ -173,9 +173,11 @@ This creates a specification directory with three documents:
 .start/specs/001-notification-system/
 ├── requirements.md           # What to build and why
 ├── solution.md               # How to build it technically
-└── plan/                     # Executable tasks and phases
-    ├── README.md             # Plan manifest
-    └── phase-N.md            # Per-phase task files
+├── manifest.md               # Decomposition manifest (units, dependencies, execution order)
+├── units/                    # Factory-sized specs (one per unit of work)
+│   └── *.md
+└── scenarios/                # Holdout evaluation scenarios per unit
+    └── {unit-id}/*.md
 ```
 
 **The spec cycle may take 15-30 minutes.** Claude will research your codebase, ask clarifying questions, and produce comprehensive documents. The process naturally involves multiple back-and-forth exchanges.
@@ -421,7 +423,7 @@ Skills from the Start plugin are invoked directly by name (e.g., `/specify`, `/t
 | **User-invocable** | Yes | Yes | `/specify` — you trigger the spec workflow |
 | **Autonomous** | No | Yes | `specify-requirements` — loaded by `specify` when creating PRDs |
 
-The 10 user-invocable skills are the ones you interact with directly. The 5 autonomous skills activate behind the scenes when orchestrator skills need them (e.g., `specify` loads `specify-requirements`, `specify-solution`, and `specify-plan` during the specification workflow).
+The 10 user-invocable skills are the ones you interact with directly. The 5 autonomous skills activate behind the scenes when orchestrator skills need them (e.g., `specify` loads `specify-requirements`, `specify-solution`, and `specify-factory` during the specification workflow).
 
 ### Progressive Disclosure
 

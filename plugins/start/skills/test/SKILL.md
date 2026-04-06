@@ -61,6 +61,7 @@ State {
 - Evaluate test coverage against MECE — flag overlapping tests and coverage gaps in the final report.
 
 **Never:**
+- Run or manage scenarios in `scenarios/` directories — those are holdout evaluation sets managed by the implement skill's factory loop, not part of the test suite.
 - Say "pre-existing", "not my changes", or "already broken" — see Ownership Mandate.
 - Leave failing tests for the user to deal with.
 - Settle for a failing test suite as a deliverable.

@@ -1,78 +1,135 @@
-# Example Implementation Output
+# Example Factory Loop Output
 
-## Plan Discovery
+## Manifest Discovery
 
-Spec: 003-notification-system
-Plan: `.start/specs/003-notification-system/plan/`
+Spec: 002-query-engine-enhancements
+Feature: Query Engine Enhancements
+Threshold: 90% | Max Iterations: 5
 
-Phases:
-1. Core Foundation — `phase-1.md` — completed (skipping)
-2. API Layer — `phase-2.md` — in_progress (resuming)
-3. Integration & Validation — `phase-3.md` — pending
+Units:
+- dm1: Data models — no dependencies — pending
+- ve1: Validation endpoint — after: dm1 — pending
+- ve2: Input sanitization — after: ve1 — pending
+- rl1: Rate limiting — after: ve1 — pending
+- md1: Metrics dashboard — after: dm1 — pending
 
-Starting from Phase 2 (1 phase already completed).
+Execution Order:
+- Group 1 (parallel): dm1
+- Group 2 (parallel): ve1, md1
+- Group 3 (sequential): ve2
+- Group 4 (sequential): rl1
 
----
-
-## Task Result — Success
-
-✅ T2.1: Notification API Endpoints
-
-Files: src/routes/notifications.ts, src/middleware/validate.ts
-Summary: Implemented REST endpoints for notification CRUD with input validation
-Tests: 8 passing
-
-## Task Result — Blocked
-
-⚠️ T2.3: WebSocket Integration
-
-Status: Blocked
-Reason: Missing WebSocket server setup from Phase 1
-Options: [present via AskUserQuestion]
+Service: `npm start` on port 3000
+Starting from Group 1.
 
 ---
 
-## Phase Summary
+## Unit Result — Passed
 
-Phase 2 Complete: API Layer
+dm1: Data models (iteration 1 of 5)
 
-Tasks: 4/4 completed
-Files Changed: src/routes/notifications.ts, src/middleware/validate.ts, src/services/notifier.ts, src/dto/notification.ts
-Tests: All passing (12 new)
-Blockers: None
-Drift: None detected
+Satisfaction: 3/3 scenarios (100%)
+Threshold: 90%
 
-Status updates:
-- `plan/phase-2.md` frontmatter: `status: completed`
-- `plan/README.md`: `- [x] [Phase 2: API Layer](phase-2.md)`
+All scenarios passed. Unit complete.
 
-Next: Phase 3 (Integration & Validation)
+Files: src/models/query.ts, src/models/result.ts, src/migrations/001-query-tables.ts
+Tests: 14 passing
+
+Manifest updated: `- [x] dm1: Data models`
+
+---
+
+## Unit Result — Failed, Queuing Retry
+
+ve1: Validation endpoint (iteration 1 of 5)
+
+Satisfaction: 3/5 scenarios (60%)
+Threshold: 90%
+
+Passed:
+- Valid SQL accepted: 3/3
+- Column extraction: 3/3
+- Complexity score: 2/3
+
+Failed:
+- SQL injection detection: endpoint returned 500 instead of 400
+- Empty input handling: no validation response
+
+Queuing retry (iteration 2). Failure summaries extracted for code agent.
+
+---
+
+## Unit Result — Passed on Retry
+
+ve1: Validation endpoint (iteration 2 of 5)
+
+Satisfaction: 5/5 scenarios (100%)
+Threshold: 90%
+
+All scenarios passed. Unit complete.
+
+Files: src/controllers/validate.ts, src/services/sql-parser.ts, src/middleware/input-guard.ts
+Tests: 22 passing
+
+Manifest updated: `- [x] ve1: Validation endpoint`
+
+---
+
+## Unit Result — Max Iterations Reached
+
+rl1: Rate limiting (iteration 5 of 5)
+
+Satisfaction: 2/3 scenarios (67%)
+Threshold: 90%
+
+Failed:
+- Burst traffic throttling: requests not rejected after limit exceeded
+
+Max iterations reached. Escalating to user.
+Options: Retry with guidance | Skip unit | Abort
+
+---
+
+## Group Summary
+
+Group 2 Complete (parallel): ve1, md1
+
+Units: 2/2 completed
+- ve1: 100% satisfaction (2 iterations)
+- md1: 100% satisfaction (1 iteration)
+
+Total iterations: 3
+Files changed: 8 files
+Constitution: No violations
 
 ---
 
 ## Completion Summary
 
-✅ Implementation Complete
+Implementation Complete
 
-Spec: 003-notification-system
-Phases Completed: 3/3
-Tasks Executed: 11 total
-Tests: All passing (28 total)
-Mode: Standard
+Spec: 002-query-engine-enhancements
+Units Completed: 4/5
+- dm1: 100% (1 iteration)
+- ve1: 100% (2 iterations)
+- ve2: 100% (1 iteration)
+- md1: 100% (1 iteration)
+- rl1: 67% (5 iterations, skipped)
 
-Files Changed: 12 files (+634 -18)
+Total Iterations: 10
+Files Changed: 24 files (+1,204 -89)
 
-Plan status: All phase files updated to `status: completed`, all README checkboxes checked.
+Manifest status: `status: failed` (rl1 did not meet threshold)
 
 ---
 
-## Paused Summary (when user chooses Pause)
+## Paused Summary (when user chooses Abort)
 
-⏸ Implementation Paused
+Implementation Paused
 
-Spec: 003-notification-system
-Phases Completed: 2/3
-Current Phase: 3 (Integration & Validation) — pending
+Spec: 002-query-engine-enhancements
+Units Completed: 3/5
 
-Resume with: `/start:implement 003`
-The plan will pick up from Phase 3 automatically.
+Resume with: `/start:implement 002`
+The factory loop will pick up from the next pending unit automatically.

@@ -16,7 +16,7 @@ The `start` plugin provides ten user-invocable workflow skills, five autonomous 
 - [Output Styles](#output-styles) — The Startup, The ScaleUp
 - [Typical Development Workflow](#typical-development-workflow) — primary and maintenance flows
 - [Skills in Action](#skills-in-action) — real-world examples
-- [Templates](#templates) — PRD, SDD, PLAN, DOR, DOD
+- [Templates](#templates) — PRD, SDD, Factory/Manifest, DOR, DOD
 - [Philosophy](#philosophy) — spec-driven development principles
 
 ---
@@ -29,7 +29,7 @@ These skills are invoked by the user via slash commands (e.g., `/specify`). Unli
 
 Create comprehensive specifications from brief descriptions through deep research and specialist agent coordination.
 
-**Purpose:** Transform ideas into implementation-ready specifications with product requirements, solution design, and implementation plan documents
+**Purpose:** Transform ideas into implementation-ready specifications with product requirements, solution design, and factory decomposition (units, scenarios, manifest)
 
 **Usage:**
 ```bash
@@ -49,11 +49,13 @@ Create comprehensive specifications from brief descriptions through deep researc
 <details>
 <summary><strong>View Details</strong></summary>
 
-**What you get:** Three comprehensive documents in `.start/specs/[NNN]-[name]/`:
+**What you get:** Comprehensive documents in `.start/specs/[NNN]-[name]/`:
 
 - **requirements.md** - User stories, feature specifications, success criteria, non-functional requirements
 - **solution.md** - Technical architecture, system components, data models, technology stack, security and performance considerations
-- **plan/** - Per-phase implementation files (README.md manifest + phase-N.md task files)
+- **manifest.md** - Decomposition manifest with units, dependencies, execution order
+- **units/** - Factory-sized specs (one per unit of work)
+- **scenarios/** - Holdout evaluation scenarios per unit
 
 ```mermaid
 flowchart TD
@@ -62,7 +64,7 @@ flowchart TD
     C --> END[Ready for /implement 001]
     B --> |new| D[Requirements Gathering<br/>Create requirements.md if needed]
     D --> E[Technical Research<br/>Create solution.md if needed, document patterns, interfaces]
-    E --> F[Implementation Planning<br/>Create plan/ with per-phase files]
+    E --> F[Factory Decomposition<br/>Create units/, scenarios/, manifest.md]
     F --> END
 ```
 
@@ -72,39 +74,43 @@ flowchart TD
 
 ### `/implement <spec-id>`
 
-Execute implementation plans phase-by-phase with parallel specialist agents and continuous validation.
+Execute factory decompositions through code agent and evaluation agent cycles with automatic retries.
 
-**Purpose:** Transform validated specifications into working code with quality gates and progress tracking
+**Purpose:** Transform validated specifications into working code through a factory loop with independent code and evaluation agents
 
 **Usage:**
 ```bash
 /implement 001
-/implement path/to/custom/plan/
+/implement path/to/custom/spec/
 ```
 
 **Key Features:**
-- **Parallel Execution** - Multiple agents work simultaneously within phases
-- **Sequential Phases** - Phases execute in order with validation gates
-- **Rollback on Failure** - Automatic reversion if tests fail
+- **Factory Loop** - Reads manifest.md to discover units and execution order
+- **Parallel Code Agents** - Independent units within an execution group run simultaneously
+- **Blind Evaluation** - Evaluation agents see scenarios + running service, never source code
+- **Information Barrier** - Code agents see unit spec + AGENTS.md, never scenarios
+- **Retry Cycles** - Filtered failure summaries fed back until satisfaction threshold met
 - **Specification Compliance** - Continuous validation against requirements.md/solution.md
 - **Pattern Recognition** - Documents implementation patterns discovered
 - **Real-time Updates** - TodoWrite tracking shows live progress
-- **Custom Plans** - Can implement any plan directory or legacy implementation-plan.md, not just specs
 
 <details>
 <summary><strong>View Details</strong></summary>
 
-Reads plan/README.md to discover phases, then executes phase-by-phase with approval gates between phases. Each phase is loaded individually from plan/phase-N.md for context efficiency. Multiple specialist agents work in parallel within each phase when tasks are independent. Phase status is tracked in frontmatter and the manifest checkbox. Supports resuming from partially-completed plans.
+Reads manifest.md to discover units and execution order, then processes each execution group. For each group, spawns code agents in parallel for independent units, then evaluates sequentially. Code agents receive the unit spec and AGENTS.md but never see evaluation scenarios. Evaluation agents receive scenarios and access the running service but never see source code. Failed evaluations produce filtered failure summaries that are fed back to code agents for retry cycles until the satisfaction threshold is met.
 
 ```mermaid
 flowchart TD
-    A([plan/README.md]) --> |load| B[Initialize Plan<br/>Discover phases and status]
-    B --> |approve| C{Phases<br>Remaining?}
-    C --> |yes| D[Execute Phase N<br/>Parallel agent execution<br/>Run tests after each task]
-    D --> |validate| E[Phase Review<br/>Check test results<br/>Review changes]
-    E --> |continue| C
-    C --> |no| F[Final Validation<br/>Run full test suite<br/>Verify all requirements]
-    F --> END[Implementation Complete]
+    A([manifest.md]) --> |load| B[Initialize Factory<br/>Discover units and order]
+    B --> C{Execution Groups<br>Remaining?}
+    C --> |yes| D[Spawn Code Agents<br/>Parallel for independent units<br/>Unit spec + AGENTS.md only]
+    D --> E[Evaluate Sequentially<br/>Scenarios + running service<br/>No source code access]
+    E --> F{Satisfaction<br>Threshold Met?}
+    F --> |no| G[Retry with Filtered<br/>Failure Summaries]
+    G --> D
+    F --> |yes| C
+    C --> |no| H[Final Validation<br/>Run full test suite<br/>Verify all requirements]
+    H --> END[Implementation Complete]
 ```
 
 </details>
@@ -131,7 +137,7 @@ Validate specifications, implementations, or understanding through intelligent c
 - **Intelligent Mode Detection** - Automatically determines validation type from input
 - **The 3 Cs Framework** - Checks Completeness, Consistency, and Correctness
 - **Ambiguity Detection** - Scans for vague language ("should", "various", "etc.")
-- **Cross-Document Traceability** - Verifies PRD to SDD to PLAN alignment
+- **Cross-Document Traceability** - Verifies requirements to solution to manifest alignment
 - **Drift Detection** - Checks spec-implementation alignment
 - **Constitution Enforcement** - Validates L1/L2/L3 governance rules
 - **Advisory Only** - Provides recommendations without blocking
@@ -410,8 +416,8 @@ flowchart TD
     C --> |simple| D[Direct Refactoring<br/>Run tests first<br/>Apply changes<br/>Validate each step]
     D --> |review| E[Specialist Review<br/>Code quality check<br/>Performance impact]
     E --> DONE[Refactoring Complete]
-    C --> |complex| F[Create Specification<br/>Generate solution.md<br/>Generate plan/<br/>Document approach]
-    F --> |defer| G[Ready for /implement<br/>Execute via planned phases]
+    C --> |complex| F[Create Specification<br/>Generate solution.md<br/>Generate manifest.md + units/ + scenarios/<br/>Document approach]
+    F --> |defer| G[Ready for /implement<br/>Execute via factory loop]
 ```
 
 </details>
@@ -580,7 +586,7 @@ The `start` plugin includes five autonomous skills that activate automatically b
 | `specify-meta` | Spec directory creation, README tracking, phase transitions |
 | `specify-requirements` | PRD template, validation, requirements gathering |
 | `specify-solution` | SDD template, architecture design, ADR management |
-| `specify-plan` | PLAN template, task sequencing, dependency mapping |
+| `specify-factory` | Unit decomposition, scenario generation, manifest assembly |
 
 ### Methodology Skills
 
@@ -601,9 +607,11 @@ The plugin encourages structured knowledge management:
         ├── README.md                        # Decisions and progress
         ├── requirements.md                  # What to build
         ├── solution.md                      # How to build it
-        └── plan/                            # Implementation tasks
-            ├── README.md                    # Plan manifest
-            └── phase-N.md                   # Per-phase task files
+        ├── manifest.md                      # Decomposition manifest
+        ├── units/                           # Factory-sized specs
+        │   └── [unit-name].md               # One per unit of work
+        └── scenarios/                       # Holdout evaluation scenarios
+            └── [unit-name]/                 # Scenarios per unit
 
 docs/
 ├── domain/                                  # Business rules
@@ -726,8 +734,8 @@ The ScaleUp provides contextual explanations as it works:
 ```
 /specify ──> /validate ──> /implement ──> /review
    |              |              |              |
-Create specs  Check quality  Execute plan  Code review
-PRD+SDD+PLAN  3 Cs framework Phase-by-phase Security+Perf
+Create specs  Check quality  Factory loop  Code review
+PRD+SDD+Factory  3 Cs framework  Factory loop  Security+Perf
    |              |              |              |
 Constitution  Constitution   Constitution   Constitution
 checked on    mode available + drift enforced compliance
@@ -746,7 +754,7 @@ Optional: /document after implementation for documentation sync
 
 **What happens:**
 - Creates `.start/specs/001-notification-system/`
-- Generates requirements.md, solution.md, plan/ (with per-phase files)
+- Generates requirements.md, solution.md, manifest.md, units/, scenarios/
 - Documents discovered patterns/interfaces
 - Optional: Creates `spec/001-notification-system` git branch
 
@@ -770,9 +778,9 @@ Optional: /document after implementation for documentation sync
 
 **What happens:**
 - Optional: Creates `feature/001-notification-system` git branch
-- Executes phases sequentially with user approval
-- Parallel agent coordination within phases
-- Continuous test validation
+- Reads manifest.md, spawns code agents per execution group
+- Evaluation agents validate against holdout scenarios
+- Retries with filtered failure summaries until threshold met
 - Optional: Creates PR at completion
 
 **4. Review Before Merge**
@@ -863,7 +871,7 @@ Rich templates for structured documentation, co-located with their skills:
 plugins/start/skills/
 ├── specify-requirements/template.md   # Product requirements structure
 ├── specify-solution/template.md       # Solution design structure
-├── specify-plan/template.md           # Implementation plan structure
+├── specify-factory/SKILL.md           # Factory decomposition (units, scenarios, manifest)
 └── document/templates/                # Knowledge capture templates
     ├── domain-template.md             # Business rules
     ├── pattern-template.md            # Technical patterns

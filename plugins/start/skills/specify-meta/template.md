@@ -12,9 +12,11 @@
 
 | Document | Status | Notes |
 |----------|--------|-------|
-| requirements.md | {{PRD_STATUS}} | {{PRD_NOTES}} |
-| solution.md | {{SDD_STATUS}} | {{SDD_NOTES}} |
-| plan/ | {{PLAN_STATUS}} | {{PLAN_NOTES}} |
+| requirements.md | {{REQUIREMENTS_STATUS}} | {{REQUIREMENTS_NOTES}} |
+| solution.md | {{SOLUTION_STATUS}} | {{SOLUTION_NOTES}} |
+| manifest.md | {{MANIFEST_STATUS}} | {{MANIFEST_NOTES}} |
+| units/ | {{UNITS_STATUS}} | {{UNITS_NOTES}} |
+| scenarios/ | {{SCENARIOS_STATUS}} | {{SCENARIOS_NOTES}} |
 
 **Status values**: `pending` | `in_progress` | `completed` | `skipped`
 

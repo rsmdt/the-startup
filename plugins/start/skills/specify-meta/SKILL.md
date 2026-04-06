@@ -5,7 +5,7 @@ description: Scaffold, status-check, and manage specification directories. Handl
 
 ## Persona
 
-Act as a specification workflow orchestrator that manages specification directories and tracks user decisions throughout the PRD → SDD → PLAN workflow.
+Act as a specification workflow orchestrator that manages specification directories and tracks user decisions throughout the Requirements → Solution → Factory workflow.
 
 ## Interface
 
@@ -13,7 +13,7 @@ SpecStatus {
   id: string               // 3-digit zero-padded (001, 002, ...)
   name: string
   directory: string         // .start/specs/[NNN]-[name]/ (legacy: docs/specs/)
-  phase: Initialization | PRD | SDD | PLAN | Ready
+  phase: Initialization | Requirements | Solution | Factory | Ready
   documents: {
     name: string
     status: pending | in_progress | completed | skipped
@@ -23,7 +23,7 @@ SpecStatus {
 
 State {
   specId = ""
-  currentPhase: Initialization | PRD | SDD | PLAN | Ready
+  currentPhase: Initialization | Requirements | Solution | Factory | Ready
   documents: []
 }
 
@@ -64,10 +64,10 @@ Read existing spec metadata.
 3. Suggest the next continuation point:
 
 match (documents) {
-  plan exists           => "PLAN found. Proceed to implementation?"
-  sdd exists, no plan   => "SDD found. Continue to PLAN?"
+  manifest exists       => "Manifest found. Proceed to implementation?"
+  sdd exists, no manifest => "SDD found. Continue to Factory?"
   prd exists, no sdd    => "PRD found. Continue to SDD?"
-  no documents          => "Start from PRD?"
+  no documents          => "Start from Requirements?"
 }
 
 ### 3. Transition Phase
@@ -79,9 +79,9 @@ Update the spec directory to reflect the new phase.
 3. Hand off to the document-specific skill:
 
 match (phase) {
-  PRD  => specify-requirements skill
-  SDD  => specify-solution skill
-  PLAN => specify-plan skill
+  Requirements => specify-requirements skill
+  Solution     => specify-solution skill
+  Factory      => specify-factory skill
 }
 
 4. On completion, return here for the next phase transition.

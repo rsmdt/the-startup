@@ -39,7 +39,7 @@ the-startup/
 │   ├── PHILOSOPHY.md             # Activity-based architecture rationale
 │   ├── PRINCIPLES.md             # Core development principles
 │   ├── patterns/                 # Technical patterns documentation
-│   └── specs/                    # Feature specifications (PRD/SDD/PLAN)
+│   └── specs/                    # Feature specifications (requirements, solution, factory artifacts)
 │
 ├── install.sh                    # One-line installer script
 └── README.md                     # User-facing documentation
@@ -144,7 +144,9 @@ The primary workflow: `/start:specify` → `/start:validate` → `/start:impleme
 Specifications live in `.start/specs/[NNN]-[name]/` (legacy: `docs/specs/`):
 - `requirements.md` - What to build
 - `solution.md` - How to build it
-- `plan/` - Execution sequence (README.md manifest + phase-N.md files)
+- `manifest.md` - Decomposition manifest (units, dependencies, execution order)
+- `units/` - Factory-sized specs (one per unit of work)
+- `scenarios/` - Holdout evaluation scenarios per unit
 
 ### Knowledge Capture
 

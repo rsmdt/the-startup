@@ -32,4 +32,4 @@ After parallel research completes:
 1. **Collect** all findings from research agents
 2. **Deduplicate** overlapping discoveries
 3. **Identify conflicts** requiring user decision
-4. **Organize** by document section (PRD, SDD, PLAN)
+4. **Organize** by document section (Requirements, Solution, Factory)

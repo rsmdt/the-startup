@@ -1,51 +1,66 @@
 # Output Format Reference
 
-Guidelines for implementation output. See `examples/output-example.md` for concrete rendered examples.
+Guidelines for factory loop output. See `examples/output-example.md` for concrete rendered examples.
 
 ---
 
 ## Report Types
 
-Four report types used during implementation:
+Four report types used during the factory loop:
 
-1. **Plan Discovery** — after reading plan/README.md, before execution starts
-2. **Task Result** — after each agent completes a task (success or blocked)
-3. **Phase Summary** — at each phase checkpoint before user confirmation
-4. **Completion Summary** — after all phases complete (or paused with progress)
+1. **Manifest Discovery** — after parsing manifest.md, before execution starts
+2. **Unit Result** — after each code agent + evaluation agent cycle completes
+3. **Group Summary** — after all units in an execution group are resolved
+4. **Completion Summary** — after all execution groups complete (or aborted with progress)
 
-## Plan Discovery Guidelines
+## Manifest Discovery Guidelines
 
 Always include:
 - Spec ID and feature name
-- Total phases discovered and their statuses
-- Which phases will be skipped (already completed)
-- Which phase will be resumed (if in_progress)
-- Next phase to execute
+- Threshold and max iterations
+- Units with statuses (completed units will be skipped)
+- Execution groups with their modes (parallel/sequential)
+- Service start command and port
+- Next group to execute
 
-## Phase Summary Guidelines
+## Unit Result Guidelines
 
 Always include:
-- Phase number and title
-- Task completion ratio (completed/total)
-- Files changed (list paths)
-- Test status (passing count or failure details)
-- Blockers (if any)
-- Drift detection results
-- Updated status: phase file frontmatter and README checkbox
+- Unit ID and title
+- Iteration number (e.g., "iteration 2 of 5")
+- Satisfaction percentage and threshold
+- Passed scenario count
+- Failed scenarios with one-line summaries
+- Decision: completed, queued for retry, or escalated
+
+For completed units, also include:
+- Files changed by the code agent
+- Test results (passing count)
+
+## Group Summary Guidelines
+
+Always include:
+- Group number and mode (parallel/sequential)
+- Units completed / total in group
+- Per-unit satisfaction percentages
+- Total iterations used across all units in group
+- Files changed across all units
+- Constitution check results (if applicable)
 
 ## Completion Summary Guidelines
 
 Always include:
 - Spec ID and feature name
-- Total phases completed / total phases
-- Total tasks executed across all phases
-- Test status (all passing or failure details)
-- Files changed (total count with additions/deletions)
-- Mode used (Standard or Team)
+- Units completed / total units
+- Total iterations across all units
+- Final satisfaction percentage per unit
+- Files changed (total count)
+- Manifest status update (completed or failed)
 
-## Phase Status Updates
+## Manifest Status Updates
 
-When a phase transitions status, document the file changes:
-- **Starting phase**: `phase-N.md` frontmatter `status: pending` → `status: in_progress`
-- **Completing phase**: `phase-N.md` frontmatter `status: in_progress` → `status: completed`, `plan/README.md` checkbox `- [ ]` → `- [x]`
-- **Pausing mid-plan**: Report which phases are completed and which remain pending
+When updating manifest.md, document the changes:
+- **Starting implementation**: frontmatter `status: pending` -> `status: in_progress`
+- **Unit passes**: checkbox `- [ ] {id}:` -> `- [x] {id}:`
+- **All units pass**: frontmatter `status: in_progress` -> `status: completed`
+- **Aborted or failed**: frontmatter `status: in_progress` -> `status: failed`
