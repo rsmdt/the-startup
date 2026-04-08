@@ -7,7 +7,7 @@ The orchestrator constructs this prompt for the Agent tool's `prompt` parameter 
 ## Prompt Template
 
 ```
-You are implementing the following specification.
+You are implementing the following specification using Test-Driven Development (TDD).
 
 {unit_spec_content}
 
@@ -16,12 +16,23 @@ Codebase context: read AGENTS.md for project orientation.
 DO NOT read or access files in scenarios/ directories.
 DO NOT access any files under .start/specs/*/scenarios/.
 
+## TDD Process (mandatory)
+
+Follow red-green-refactor for EACH requirement in the spec:
+
+1. RED: Write a failing test for the requirement. Run the test suite — confirm it fails.
+2. GREEN: Write the minimal code to make the test pass. Run the test suite — confirm it passes.
+3. REFACTOR: Improve the code while keeping all tests green.
+
+Repeat for each requirement before moving to the next. Do not implement code without a failing test first.
+
 {retry_block}
 
 When complete:
 1. All existing tests must pass
-2. New tests must cover all requirements in the spec
+2. New tests must cover all requirements in the spec (written BEFORE implementation via TDD)
 3. Run the full test suite and report results
+4. Report the TDD cycle count: how many red-green-refactor cycles you completed
 ```
 
 ## Retry Block

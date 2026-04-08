@@ -26,6 +26,14 @@ Use this checklist to validate factory artifacts before marking the spec as read
 - [ ] **No implementation details** — Scenarios don't reference class names, function signatures, file paths
 - [ ] **User reviewed** — All scenarios have been presented to and approved by the user
 
+## E2E Stub Quality (when generated)
+
+- [ ] **Framework detected** — Test framework identified from project configuration
+- [ ] **One stub per scenario** — Every scenario has a corresponding executable test stub
+- [ ] **Uses project conventions** — Stubs use the project's assertion library, HTTP client, naming patterns
+- [ ] **Marked pending** — All stubs are skipped/pending until evaluation phase
+- [ ] **Tests external interface** — Stubs make HTTP/browser/CLI calls, never import internal modules
+
 ## Manifest Quality
 
 - [ ] **All units listed** — Every unit in units/ appears in the manifest

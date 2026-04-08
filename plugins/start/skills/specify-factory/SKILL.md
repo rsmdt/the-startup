@@ -72,6 +72,7 @@ State {
 **Templates:**
 - [Unit Template](templates/unit.md) — Unit spec template, write to `specDirectory/units/{id}.md`
 - [Scenario Template](templates/scenario.md) — Scenario template, write to `specDirectory/scenarios/{unit-id}/{name}.md`
+- [E2E Stubs Template](templates/e2e-stubs.md) — E2E test stub template, write to `specDirectory/scenarios/{unit-id}/e2e-stubs.md`
 - [Manifest Template](templates/manifest.md) — Manifest template, write to `specDirectory/manifest.md`
 
 **References:**
@@ -114,7 +115,7 @@ Present unit decomposition to user:
 
 AskUserQuestion: Approve units | Adjust decomposition | Add/remove units
 
-### 3. Generate Scenarios
+### 3. Generate Scenarios and E2E Stubs
 
 Read reference/scenario-guide.md for scenario authorship guidance.
 
@@ -127,12 +128,29 @@ For each unit, generate holdout scenarios:
 
 Write each scenario using templates/scenario.md to specDirectory/scenarios/{unit-id}/{name}.md.
 
-Present ALL generated scenarios to user for review:
+#### 3a. Generate E2E Test Stubs
+
+For each unit, generate an E2E test stub file that the evaluation agent will use during the factory loop:
+
+1. Detect the project's test framework from AGENTS.md, package.json, or project structure.
+2. For each scenario in the unit, write an executable test stub:
+   - Test name derived from scenario name (match project naming conventions)
+   - Test body asserts the scenario's expected outcomes through the external interface
+   - Use the project's assertion library and HTTP client patterns
+   - Mark all tests as pending/skipped (they run during evaluation, not during specification)
+3. Write the aggregated stubs to specDirectory/scenarios/{unit-id}/e2e-stubs.md.
+
+Use templates/e2e-stubs.md for the stub file format.
+
+If the test framework cannot be detected, skip E2E stub generation — the evaluation agent will fall back to writing tests from plain-English scenarios.
+
+Present ALL generated scenarios and E2E stubs to user for review:
 - Scenarios grouped by unit
+- E2E test stubs shown alongside their scenarios
 - Coverage: which unit requirements are tested by which scenarios
 - Gaps: any requirements without scenario coverage
 
-AskUserQuestion: Approve scenarios | Edit scenarios | Add missing scenarios | Regenerate
+AskUserQuestion: Approve scenarios and stubs | Edit scenarios | Edit E2E stubs | Add missing scenarios | Regenerate
 
 CRITICAL: User must approve scenarios before proceeding. The factory loop cannot run with unreviewed scenarios.
 

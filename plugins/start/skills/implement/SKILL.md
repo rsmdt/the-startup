@@ -146,7 +146,7 @@ For each execution group in ascending order:
 
 Skip the group entirely if all its units are already completed.
 
-#### 2a. Implementation Phase
+#### 2a. Implementation Phase (TDD)
 
 For each unit in this group where unit.status != completed:
 
@@ -156,8 +156,9 @@ For each unit in this group where unit.status != completed:
    - Include the full unit spec content.
    - Include instruction to read AGENTS.md for project orientation.
    - Include "DO NOT read or access files in scenarios/ directories."
+   - Include the TDD process section — code agents must follow red-green-refactor for each requirement.
    - If this is a retry (unit.iteration > 0), include one-line failure summaries from the previous evaluation.
-   - Exclude: scenario text, evaluation reports, evaluation agent output.
+   - Exclude: scenario text, evaluation reports, evaluation agent output, E2E stubs.
 4. Spawn the code agent via the Agent tool.
 
 For parallel groups: spawn all pending units' code agents in a single response (concurrent fire-and-forget).
@@ -195,21 +196,23 @@ The service stays running for all evaluations in this group.
 
 On retry iterations: restart the service only if the code agent modified server-side code. Otherwise, leave it running.
 
-#### 2c. Evaluation Phase
+#### 2c. Evaluation Phase (E2E Automation)
 
 For each unit in this group, sequentially (shared running service):
 
 1. Read all scenario files: `{specDirectory}/scenarios/{unit.id}/*.md`
-2. Read reference/eval-agent.md for the prompt template.
-3. Construct the evaluation agent prompt:
+2. Check for pre-generated E2E stubs: `{specDirectory}/scenarios/{unit.id}/e2e-stubs.md`
+3. Read reference/eval-agent.md for the prompt template.
+4. Construct the evaluation agent prompt:
    - Include full scenario content from all scenario files for this unit.
+   - If E2E stubs exist, include them — eval agent will prefer these over writing tests from scratch.
    - Include `localhost:{servicePort}` as the service URL.
-   - Include the evaluation method priority: E2E tests > browser automation > curl/CLI.
+   - Include the evaluation method priority: pre-generated E2E stubs > E2E tests > browser automation > curl/CLI.
    - Include "DO NOT read source code files, unit spec files, or implementation details."
    - Include the reporting format (run each scenario 3 times, 2/3 must pass).
    - Exclude: unit spec content, AGENTS.md content, code agent output.
-4. Spawn the evaluation agent via the Agent tool.
-5. Wait for the evaluation agent to complete.
+5. Spawn the evaluation agent via the Agent tool.
+6. Wait for the evaluation agent to complete.
 
 #### 2d. Parse Evaluation and Decide
 
