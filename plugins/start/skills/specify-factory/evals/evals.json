@@ -1,0 +1,70 @@
+{
+  "skill_name": "specify-factory",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Decompose spec 002 into factory artifacts. The spec has requirements.md and solution.md already written.",
+      "expected_output": "Unit specs in units/, scenarios in scenarios/, and a manifest.md with execution order",
+      "expectations": [
+        "Read requirements.md before decomposing",
+        "Read solution.md before decomposing",
+        "Read AGENTS.md for codebase context",
+        "Created at least one unit spec file in units/ directory",
+        "Each unit spec has YAML frontmatter with id, title, type, and dependencies fields",
+        "Each unit spec has Goal, Requirements, and Constraints sections",
+        "Unit specs do NOT contain acceptance criteria or implementation approach",
+        "Created at least one scenario file per unit in scenarios/{unit-id}/ directory",
+        "Each scenario has YAML frontmatter with unit, feature, and priority fields",
+        "Scenarios describe observable behavior through external interfaces only",
+        "Scenarios do NOT reference internal implementation details like class names or file paths",
+        "Created manifest.md with YAML frontmatter containing title, status, threshold, and max_iterations",
+        "Manifest contains Units section with checklist format: - [ ] id: Title — dependency clause",
+        "Manifest contains Execution Order section with Group N (parallel|sequential) format",
+        "No circular dependencies in the dependency graph",
+        "Presented scenarios to user for review before finalizing",
+        "Attempted to detect the project's test framework for E2E stub generation",
+        "Generated or attempted to generate E2E test stubs alongside scenarios",
+        "E2E stubs reference observable behavior through external interfaces, not internal code"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Decompose a feature with no external APIs — a pure refactoring of internal skill files. The requirements and solution docs describe changes to 3 SKILL.md files.",
+      "expected_output": "Units decomposed by skill file, scenarios test skill behavior, manifest shows independent units",
+      "expectations": [
+        "Units are factory-sized — each can be implemented by a single code agent",
+        "Independent units (no shared dependencies) are in the same parallel execution group",
+        "Scenarios are grounded in the actual codebase — reference real file paths and patterns",
+        "At least one P0 scenario per unit",
+        "Manifest threshold defaults to 0.90",
+        "Manifest max_iterations defaults to 5",
+        "E2E test stubs generated or gracefully skipped if framework undetectable"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "The spec directory has requirements.md but no solution.md. Decompose into factory artifacts.",
+      "expected_output": "Skill detects the missing file, informs the user, and proceeds with available input",
+      "expectations": [
+        "Detected that solution.md is missing",
+        "Informed the user that solution.md is absent",
+        "Proceeded with decomposition using requirements.md",
+        "Created unit specs, scenarios, and manifest despite missing solution.md",
+        "Units are derived from requirements since no architecture is available to inform boundaries"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Decompose a complex feature with 8+ components and deep dependency chains between them.",
+      "expected_output": "Well-structured decomposition with clear dependency graph and multiple execution groups",
+      "expectations": [
+        "Every requirement from requirements.md maps to at least one unit",
+        "No unit is too large — each should be implementable in a single session",
+        "Dependencies are minimized — shared resources extracted into their own units",
+        "Execution groups respect dependency ordering",
+        "Coverage matrix shows which requirements map to which units",
+        "User was asked to review and approve the decomposition before proceeding to scenarios"
+      ]
+    }
+  ]
+}
