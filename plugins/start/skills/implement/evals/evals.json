@@ -1,0 +1,97 @@
+{
+  "skill_name": "implement",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Implement spec 003 which has a manifest.md with 3 units (dm1, ve1, rl1) and scenarios for each.",
+      "expected_output": "Factory loop executes: code agents implement units via TDD, evaluation agents verify scenarios, satisfaction tracked",
+      "expectations": [
+        "Read manifest.md and parsed units with dependencies",
+        "Read manifest.md YAML frontmatter for threshold and max_iterations",
+        "Resolved execution order from dependency graph",
+        "Presented manifest discovery to user before starting",
+        "Spawned code agent via Agent tool for each unit",
+        "Code agent prompt includes full unit spec content",
+        "Code agent prompt includes instruction to read AGENTS.md",
+        "Code agent prompt includes DO NOT read scenarios/ instruction",
+        "Code agent prompt includes TDD process section with red-green-refactor instructions",
+        "Code agent prompt does NOT contain scenario text",
+        "Code agent prompt does NOT contain E2E stubs content",
+        "Started service before evaluation phase",
+        "Health-checked service before spawning evaluation agent",
+        "Spawned evaluation agent via Agent tool for each unit",
+        "Evaluation agent prompt includes full scenario content",
+        "Evaluation agent prompt includes localhost URL with port",
+        "Evaluation agent prompt includes evaluation method priority",
+        "Evaluation agent prompt includes DO NOT read source code instruction",
+        "Evaluation agent prompt does NOT contain unit spec content or AGENTS.md",
+        "Parsed satisfaction report from evaluation agent",
+        "Updated manifest.md checkbox when unit completed"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Implement spec where the first unit fails evaluation with 60% satisfaction (below 90% threshold). Max iterations is 3.",
+      "expected_output": "Retry with filtered failure summaries, not raw evaluation output",
+      "expectations": [
+        "Extracted one-line failure summaries from evaluation report",
+        "Failure summaries describe observable symptoms only",
+        "Failure summaries do NOT include scenario text or expected behavior",
+        "Failure summaries do NOT include the evaluation agent's raw output",
+        "Next code agent iteration includes the one-line failure summaries",
+        "Next code agent iteration still includes TDD process section",
+        "Retry block shows iteration count and max iterations",
+        "Incremented iteration counter",
+        "Did not re-evaluate passing units from the same group"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Implement spec where a unit reaches max iterations (5) without meeting the satisfaction threshold.",
+      "expected_output": "Escalate to user with options",
+      "expectations": [
+        "Detected that max iterations was reached",
+        "Presented failure summaries to user",
+        "Offered options: Retry with guidance, Skip unit, Abort",
+        "Did NOT continue looping past max_iterations without user input"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Implement spec with 2 independent units in the same execution group (parallel).",
+      "expected_output": "Code agents spawned in parallel, evaluation sequential",
+      "expectations": [
+        "Spawned both code agents in a single response (parallel)",
+        "Both code agent prompts include TDD process section",
+        "Waited for both code agents to complete before evaluation",
+        "Started service once for the evaluation phase",
+        "Evaluated each unit sequentially (not in parallel)",
+        "Service stayed running across both evaluations"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Resume implementation of spec where manifest shows dm1 as [x] completed and ve1 as [ ] pending.",
+      "expected_output": "Skip completed unit, continue from pending",
+      "expectations": [
+        "Detected dm1 as already completed",
+        "Skipped dm1 — did not spawn code agent or evaluation agent for it",
+        "Started factory loop from ve1"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Implement spec where scenarios include pre-generated E2E test stubs (e2e-stubs.md exists in each unit's scenarios directory).",
+      "expected_output": "Evaluation agent receives E2E stubs and uses them as primary evaluation method",
+      "expectations": [
+        "Checked for e2e-stubs.md in each unit's scenarios directory",
+        "Read e2e-stubs.md content for units that have it",
+        "Evaluation agent prompt includes pre-generated E2E stubs content",
+        "Evaluation method priority lists pre-generated stubs first",
+        "Code agent prompt does NOT include E2E stubs content (information barrier preserved)",
+        "Code agent prompt includes TDD process section (tests from spec, not stubs)",
+        "Evaluation agent prompt does NOT include unit spec content (information barrier preserved)"
+      ]
+    }
+  ]
+}
