@@ -554,21 +554,19 @@ flowchart TD
 
 ### Installation
 
-Install The Agentic Startup framework using the one-line installer:
+Install The Agentic Startup framework with the interactive installer:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/rsmdt/the-startup/main/install.sh | sh
+npx the-startup
 ```
 
 **What it does:**
-- Adds the `rsmdt/the-startup` marketplace
-- Installs `team@the-startup` and `start@the-startup` plugins
-- Configures `start:The Startup` as the default output style
-- Optionally installs the git-aware statusline
+- Supports both Claude marketplace installs and file-based installs for other harnesses
+- Prompts for plugin multi-select
+- Prompts for harness + installation path when using file install mode
+- Copies file-install artifacts from the remote GitHub repository
 
 **Flags:**
-- `--yes` - Skip all confirmation prompts
-- `--no-statusline` - Skip statusline installation
 - `--help` - Show usage information
 
 **Note:** Output styles are available immediately via `/output-style` - no additional setup required.
