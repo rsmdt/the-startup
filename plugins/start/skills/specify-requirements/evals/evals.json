@@ -1,0 +1,63 @@
+{
+  "skill_name": "specify-requirements",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Write requirements for a real-time notification system with WebSocket support, email fallback, and user preferences.",
+      "expected_output": "A complete requirements.md covering problem, personas, journeys, features, and acceptance criteria",
+      "expectations": [
+        "Invoked brainstorm skill before template filling",
+        "Wrote output to requirements.md in the spec directory",
+        "Followed template.md structure exactly — all sections present",
+        "No [NEEDS CLARIFICATION] markers remain in completed document",
+        "Defined at least 2 distinct user personas with different goals",
+        "User personas are MECE — no two personas overlap in role or motivation",
+        "Defined user journeys for each persona",
+        "User journeys cover both happy path and error/recovery paths",
+        "Feature requirements use MoSCoW prioritization (Must/Should/Could/Won't)",
+        "Feature requirements are MECE — no two stories describe the same capability",
+        "Each feature has acceptance criteria",
+        "Acceptance criteria are MECE — no two criteria test the same condition",
+        "Document contains NO technical implementation details (no code, architecture, or database design)",
+        "Document contains NO API specifications",
+        "Waited for user confirmation between sections",
+        "Ran validation checklist before declaring complete"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Write requirements for a CLI tool that has no UI — a batch data migration script.",
+      "expected_output": "Requirements adapted for non-UI context — no user journeys through a GUI, focus on inputs/outputs/error handling",
+      "expectations": [
+        "Personas reflect actual users (DevOps engineer, DBA) not generic end-users",
+        "Journeys describe CLI invocation patterns, not UI flows",
+        "Acceptance criteria are testable via command-line output, exit codes, and log files",
+        "No UI-specific language (no 'the user sees', 'the page displays')",
+        "Features address error handling, idempotency, and recovery"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Write requirements, but the user provides very little context — just 'build a todo app'.",
+      "expected_output": "Skill probes for clarification before writing, does not assume scope",
+      "expectations": [
+        "Invoked brainstorm to explore the user's intent before template filling",
+        "Asked clarifying questions about target users, scale, and key features",
+        "Did NOT fill in requirements with generic assumptions without user input",
+        "Waited for user responses before proceeding to documentation"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Continue requirements for spec 002 which has a partially completed requirements.md with 3 [NEEDS CLARIFICATION] markers.",
+      "expected_output": "Resume from existing state, address clarification markers",
+      "expectations": [
+        "Read existing requirements.md from the spec directory",
+        "Identified the 3 [NEEDS CLARIFICATION] markers",
+        "Addressed each marker through discovery and user interaction",
+        "Did NOT rewrite sections that were already complete",
+        "Replaced all markers with actual content"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "skill_name": "specify-solution",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Design the solution for spec 003 which has a requirements.md describing a payment processing system with Stripe integration.",
+      "expected_output": "A complete solution.md with architecture, components, interfaces, ADRs, and acceptance criteria",
+      "expectations": [
+        "Read requirements.md before designing",
+        "Explored the existing codebase for patterns and conventions",
+        "Invoked brainstorm to evaluate technical approaches before committing",
+        "Wrote output to solution.md in the spec directory",
+        "Followed template.md structure exactly — all sections present",
+        "No [NEEDS CLARIFICATION] markers remain in completed document",
+        "Architecture pattern is clearly stated with rationale",
+        "Components are MECE — each has a single distinct responsibility",
+        "Every PRD requirement maps to exactly one component",
+        "No two components own the same domain logic",
+        "All interfaces specified — endpoints, data models, contracts",
+        "All ADRs presented to user for confirmation before proceeding",
+        "Every ADR has rationale and trade-offs documented",
+        "Acceptance criteria use EARS format (UBIQUITOUS, EVENT-DRIVEN, STATE-DRIVEN, etc.)",
+        "Every PRD acceptance criterion has a corresponding EARS criterion",
+        "Document contains NO implementation code",
+        "Launched parallel specialist agents for research (architecture, security, performance)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Design a solution, but the user rejects the first proposed architecture (microservices) and wants a monolith instead.",
+      "expected_output": "Skill adapts to user's architecture choice without pushing the rejected approach",
+      "expectations": [
+        "Presented architecture options during brainstorm phase",
+        "Recorded user's rejection of microservices as an ADR",
+        "Redesigned components for monolith architecture",
+        "Did NOT continue with microservices after user rejected it",
+        "ADR documents the trade-offs of choosing monolith over microservices"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Design a solution for a feature that requires no database changes, no new APIs, and no external integrations — just internal refactoring of business logic.",
+      "expected_output": "SDD adapts scope appropriately — omits irrelevant sections rather than filling them with N/A",
+      "expectations": [
+        "Database schema section is minimal or marked as no change",
+        "External interfaces section reflects no new integrations",
+        "Component design focuses on internal restructuring",
+        "Solution does NOT invent unnecessary infrastructure",
+        "Design stays within PRD scope — no scope creep"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Design a solution where two proposed components have overlapping responsibilities (both handle user validation).",
+      "expected_output": "MECE validation catches the overlap and resolves it",
+      "expectations": [
+        "Ran MECE check on components",
+        "Detected that two components overlap in responsibility",
+        "Resolved the overlap by merging or re-partitioning",
+        "Final design has no two components owning the same domain logic",
+        "Documented the MECE resolution in the design"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Continue solution design for spec 002 which has a partially completed solution.md with 2 pending ADRs.",
+      "expected_output": "Resume from existing state, present pending ADRs for confirmation",
+      "expectations": [
+        "Read existing solution.md from the spec directory",
+        "Identified the 2 pending ADRs",
+        "Presented each pending ADR to user for confirmation",
+        "Did NOT rewrite sections that were already complete",
+        "Updated ADR status from Pending to Confirmed after user approval"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "skill_name": "specify",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Specify a real-time notification system with WebSocket support",
+      "expected_output": "Full specification workflow: requirements, solution, factory decomposition",
+      "expectations": [
+        "Invoked specify-meta to scaffold the spec directory",
+        "Created .start/specs/NNN-*/ directory structure",
+        "Ran research phase with parallel agents",
+        "Invoked specify-requirements skill for requirements.md",
+        "Waited for user approval before proceeding to solution",
+        "Invoked specify-solution skill for solution.md",
+        "Waited for user approval before proceeding to factory",
+        "Invoked specify-factory skill for units, scenarios, and manifest",
+        "Logged decisions in spec README.md"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Specify a feature, but skip requirements — start directly from solution design",
+      "expected_output": "Skip requirements phase, start from solution, continue to factory",
+      "expectations": [
+        "Offered user the choice to start from Requirements, Solution, or Factory",
+        "Accepted user's choice to skip requirements",
+        "Logged the skip decision in spec README.md",
+        "Proceeded directly to specify-solution",
+        "Still continued to specify-factory after solution"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Resume spec 002 which has requirements.md and solution.md completed but no factory artifacts",
+      "expected_output": "Detect existing state and suggest continuing to factory decomposition",
+      "expectations": [
+        "Invoked specify-meta to read spec status",
+        "Detected requirements.md and solution.md as completed",
+        "Detected no manifest.md, units/, or scenarios/",
+        "Suggested continuing to Factory phase",
+        "Did NOT re-run requirements or solution phases"
+      ]
+    }
+  ]
+}
