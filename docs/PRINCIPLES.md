@@ -257,7 +257,7 @@ Three invocation patterns ([Subagents — Work with subagents][subagents]):
 
 ## 5. Composition
 
-### 5.1 Skill vs Subagent vs Agent Team vs Hook
+### 5.1 Mechanism reference
 
 | Mechanism | When to use | Context | Communication |
 |-----------|-------------|---------|---------------|
@@ -270,7 +270,67 @@ Sources: [Claude Code skills docs][skills-doc], [Create custom subagents][subage
 
 2026 trend note: slash commands and skills have been unified — `.claude/commands/` and `.claude/skills/` both work, and skill frontmatter (`argument-hint`, `disable-model-invocation`, `user-invocable`) subsumes what used to require separate command definitions ([Claude Code skills docs][skills-doc]).
 
-### 5.2 Agent Teams
+### 5.2 Deciding between a skill and a subagent
+
+The two mechanisms overlap in apparent capability but diverge sharply in runtime contract. Ask these questions **in order** — stop at the first one that produces a decisive answer.
+
+**1. Should the output remain visible in the parent conversation after the work is done?**
+- **Yes** → Skill. The body and any produced content stay in the conversation; the user and Claude can reference them later.
+- **No, a summary is enough** → Subagent. The subagent's intermediate reads and tool calls are walled off; only its final message returns.
+
+This is the load-bearing question — § 2.3 context isolation and § 2.2 progressive disclosure both flow from it. Most confusion between the two mechanisms collapses once you answer this honestly.
+
+**2. Does this work need to run in parallel with other independent work?**
+- **Yes** → Subagent. Skills execute inline, so a skill blocks the parent until it returns. Subagents can be dispatched concurrently in a single response.
+- **No** → either is viable; continue.
+
+**3. Would the verbose intermediate output bloat the parent context?**
+- **Yes** (e.g., scanning a large codebase, running a test suite, reading dozens of files) → Subagent, with Haiku for read-heavy passes (§ 2.6).
+- **No** → Skill is lighter weight.
+
+**4. Is this reusable procedural or domain knowledge the user or Claude will want to invoke by name?**
+- **Yes** → Skill. Slash-invocable, discoverable via `/skills`, versioned as a first-class artifact.
+- **No, it's an opportunistic delegation pattern** → Subagent, triggered automatically by description match.
+
+**5. Do you need an enforced information barrier (e.g., an evaluator that must not see the source it's grading)?**
+- **Yes** → Subagent. Context isolation is enforced at dispatch; a skill runs in the parent's context and cannot provide this barrier.
+- **No** → Skill may suffice.
+
+**6. Is this a side-effect operation (deploy, commit, send-message) the user must authorize explicitly?**
+- **Yes** → Skill with `disable-model-invocation: true` (subject to bug #26251, § 3.4).
+- **No** → continue with earlier answers.
+
+**7. Is this peer-to-peer coordination between multiple in-flight agents?**
+- **Yes** → Agent Team, not a skill or a plain subagent.
+- **No** → the answer is skill or subagent per the earlier questions.
+
+**Tie-breaker:** when both mechanisms genuinely fit, prefer the **skill**. Skills are cheaper to author, easier to test (`skill-creator` benchmarks per § 2.7), visible in context, and user-invocable. Escalate to a subagent only when context economy, parallelism, or information isolation demands it.
+
+### 5.3 Worked examples
+
+| Situation | Choice | Primary reason |
+|-----------|--------|----------------|
+| "Review this PR for security issues" | Subagent (`review-security`) | Read-heavy; findings return as summary; runs in parallel with other reviewers |
+| "How should we structure a REST API?" | Skill (`designing-apis`) | Domain knowledge; output must stay visible for follow-up design work |
+| "Deploy to staging" | Skill, `disable-model-invocation: true` | User-authorized side-effect; not a research task |
+| "Find all uses of feature flag X across the repo" | Subagent (`Explore`, Haiku) | Verbose output; summary suffices; Haiku fits read-only scanning |
+| "Run the test suite and fix any failures" | Subagent with `tools: Bash, Read, Edit`, `isolation: worktree` | Multi-turn side task; parent doesn't need the transcript |
+| "Explain the auth flow in this repo" | Skill (`reading-codebase`) | Inline walk-through; user wants to see it unfold |
+| "Three researchers investigate competing hypotheses about this bug" | Agent Team | Peer coordination required; fire-and-forget can't express it |
+| "Onboarding checklist for the auth module" | Skill | Reusable reference; must remain visible inline |
+| "Evaluate candidate implementations against scenarios without seeing the source" | Subagent | Information barrier required — only subagents enforce isolation |
+| "Design a database schema for multi-tenant billing" | Skill (`designing-schemas`) | Produces an artifact the user reads, critiques, and iterates on |
+| "Lint, type-check, and run tests before marking done" | Subagent (or a hook chain) | Verbose output; deterministic gate |
+
+### 5.4 Common confusions
+
+- **"The code-reviewer does such-a-specific job — shouldn't it be a skill?"** No. A reviewer produces a summary verdict; its intermediate reads should not clutter the parent, and it benefits from parallel dispatch alongside other reviewers. Subagent.
+- **"Our deploy workflow has many steps — isn't that a subagent?"** No. The user must explicitly trigger it, and the outcome (success, failure, which environment) must remain visible in the parent. Skill, with model-invocation disabled.
+- **"API design conventions are just knowledge — why not a subagent?"** A subagent would isolate the knowledge to its fork and return a summary, losing the point. The user wants the conventions in their conversation to reason against. Skill.
+- **"Exploratory codebase search sounds like a skill."** Exploration produces tens of reads and grep calls most of which are noise to the parent. Subagent (the built-in `Explore` agent on Haiku is the reference pattern).
+- **"The onboarding playbook is invoked once, then never again."** Frequency is the wrong axis. If the output should stay in context and be user-invokable, it's a skill regardless of how often you invoke it.
+
+### 5.5 Agent Teams
 
 Agent Teams are experimental as of April 2026 and gated behind `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` ([Agent Teams][agent-teams]).
 
@@ -280,7 +340,7 @@ Agent Teams are experimental as of April 2026 and gated behind `CLAUDE_CODE_EXPE
 - Appropriate for: cross-domain research where findings challenge each other; multi-phase work with coordinated hand-offs; long-running investigations.
 - **Not** appropriate for: simple delegate-and-summarize work — regular subagents are lighter weight.
 
-### 5.3 Information barriers
+### 5.6 Information barriers
 
 The value of isolation depends on it being respected by design:
 
