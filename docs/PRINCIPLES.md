@@ -1,730 +1,411 @@
-# Agent Design Principles
+# Principles
 
-**Evidence-Based Guidelines for AI Agent Architecture**
+**The Agentic Startup — design principles for Claude Code skills, subagents, and plugins.**
 
-This document establishes the foundational principles for designing effective AI agent systems, based on peer-reviewed research, industry best practices, and proven patterns from leading multi-agent frameworks.
+This document is grounded in the primary sources listed under [§ Sources](#sources), the majority of which are Anthropic official documentation from late 2025 and 2026 covering Agent Skills, subagents, Agent Teams, and model selection. Where a claim is inherited from general software-engineering theory rather than a Claude-Code-specific source, that is stated explicitly.
 
-## Table of Contents
-
-- [Core Principles](#core-principles)
-- [Architectural Patterns](#architectural-patterns)
-- [Specialization Strategies](#specialization-strategies)
-- [Coordination Mechanisms](#coordination-mechanisms)
-- [Implementation Guidelines](#implementation-guidelines)
-- [Performance Optimization](#performance-optimization)
-- [Research Foundation](#research-foundation)
-
-## Core Principles
-
-### 1. Single Responsibility Principle (SRP)
-
-**Definition**: Each agent should have exactly one reason to change and one area of expertise.
-
-**Research Basis**: Multi-agent systems that decompose tasks into specialized subtasks show 2.86%-21.88% performance improvements over monolithic agents ([Multi-Agent Collaboration Mechanisms, 2025](https://arxiv.org/html/2501.06322v1)).
-
-**Implementation**:
-```
-❌ the-developer (handles feature building, UI, testing, deployment)
-✅ the-developer/build-feature (focused only on feature implementation)
-✅ the-designer/design-visual (focused only on UI design)
-```
-
-**Benefits**:
-- Reduced context pollution
-- Clearer error boundaries  
-- Better parallel execution
-- Improved maintainability
-
-### 2. Separation of Concerns
-
-**Definition**: Different aspects of functionality should be managed by different agents with minimal overlap.
-
-**Research Basis**: Microsoft Azure research shows "clear separation of concerns between creation and validation" enables better orchestration patterns ([AI Agent Orchestration Patterns, 2024](https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns)).
-
-**Implementation**:
-```
-Concern Separation Example:
-├── Analysis → the-analyst/research-product
-├── Design → the-architect/design-system
-├── Implementation → the-developer/build-feature
-├── Validation → the-tester/test-strategy
-└── Deployment → the-devops/build-platform
-```
-
-**Anti-Pattern**: Agents that both analyze requirements AND implement solutions create unclear boundaries and reduced effectiveness.
-
-### 3. Conway's Law Application
-
-**Definition**: Agent structure should mirror the communication patterns of effective software teams.
-
-**Research Basis**: MIT and Harvard studies show "strong evidence to support the mirroring hypothesis" - loosely-coupled organizations produce significantly more modular products ([Conway's Law and Microservices, 2024](https://www.techtarget.com/searchapparchitecture/tip/The-enduring-link-between-Conways-Law-and-microservices)).
-
-**Implementation**:
-```
-Team Structure → Agent Structure
-Product Manager → the-analyst/
-Software Architect → the-architect/
-Developer → the-developer/
-QA Engineer → the-tester/
-```
-
-**Principle**: If your human team wouldn't have one person doing both security audits and UI design, your agents shouldn't either.
-
-### 4. Activity-Based Organization
-
-**Definition**: Organize agents by what they DO (activities) rather than WHO they are (roles).
-
-**Research Basis**: Leading frameworks (CrewAI, AutoGen, LangGraph) unanimously use capability-driven organization rather than traditional job titles.
-
-**Evidence**:
-- **CrewAI**: Uses "Senior Market Analyst", "Data Researcher" (expertise-based)
-- **AutoGen**: Uses "math expert", "chemistry expert" (knowledge-based)
-- **LangGraph**: Uses functional roles with specialized tools (capability-based)
-
-**Implementation**:
-```
-Traditional Role-Based ❌:
-├── the-backend-engineer (too broad)
-├── the-frontend-engineer (artificial boundary)
-└── the-qa-engineer (multiple responsibilities)
-
-Activity-Based ✅:
-├── the-developer/build-feature (specific activity)
-├── the-developer/optimize-performance (specific activity)
-└── the-tester/test-strategy (specific activity)
-```
-
-### 5. Modular Composability
-
-**Definition**: Agents should be composable building blocks that can be combined for complex workflows.
-
-**Research Basis**: JM Family's implementation with specialized BAQA agents cut requirements and test design from weeks to days, saving 60% of QA time ([Agent Factory Patterns, 2024](https://azure.microsoft.com/en-us/blog/agent-factory-the-new-era-of-agentic-ai-common-use-cases-and-design-patterns/)).
-
-**Pattern Example**:
-```
-Complex Task: "Build authentication system"
-
-Composition:
-1. the-analyst/research-product → Research auth patterns
-2. the-architect/design-system → Design auth architecture
-3. the-architect/review-security → Security requirements
-4. the-developer/build-feature → Auth API endpoints and UI components
-5. the-tester/test-strategy → Validate implementation
-6. the-architect/review-robustness → Review robustness
-```
-
-## Architectural Patterns
-
-### 1. Orchestrator-Worker Pattern
-
-**Definition**: Central coordination with distributed specialized execution.
-
-**When to Use**: Complex tasks requiring multiple specializations with dependencies.
-
-**Structure**:
-```
-Main Agent (Orchestrator)
-├── Analyzes task complexity
-├── Decomposes into specialized activities
-├── Coordinates parallel execution
-└── Synthesizes results
-
-Specialized Agents (Workers)
-├── Receive focused context
-├── Execute specific activities
-├── Return domain-specific results
-└── Operate independently
-```
-
-**Research Backing**: Azure's orchestration patterns show this enables "agility, scalability, and easy evolution, while keeping responsibilities and governance clear."
-
-### 2. Pipeline Pattern
-
-**Definition**: Sequential processing through specialized stages.
-
-**When to Use**: Tasks with clear sequential dependencies.
-
-**Structure**:
-```
-Input → Agent A → Agent B → Agent C → Output
-
-Example: Code Review Pipeline
-Requirements → the-analyst/research-product
-         ↓
-System Design → the-architect/design-system
-         ↓
-Implementation → the-developer/build-feature
-         ↓
-Quality Review → the-tester/test-strategy
-```
-
-### 3. Collaborative Debate Pattern
-
-**Definition**: Multiple agents work on the same problem with different perspectives.
-
-**When to Use**: Complex decisions requiring multiple viewpoints.
-
-**Research Basis**: Feedback loop collaboration shows improved accuracy through multi-agent evaluation and self-reflection ([Multi-Agent Collaboration, 2025](https://arxiv.org/html/2501.06322v1)).
-
-**Structure**:
-```
-Problem → [Agent A Perspective]
-       → [Agent B Perspective] → Synthesis → Decision
-       → [Agent C Perspective]
-```
-
-### 4. Dynamic Handoff Pattern
-
-**Definition**: Real-time routing based on task characteristics.
-
-**When to Use**: Unpredictable task types requiring different specializations.
-
-**Structure**:
-```
-Request → Classification → Route to Specialist → Execute → Return
-
-Example: Support Ticket Routing
-Ticket → the-chief (routing) →
-       → the-architect/review-security OR
-       → the-developer/build-feature OR
-       → the-devops/monitor-production
-```
-
-## Specialization Strategies
-
-### 1. Domain Knowledge Specialization
-
-**Principle**: Agents specialized in specific knowledge domains.
-
-**Examples**:
-- `the-architect/review-security` - OWASP expertise
-- `the-devops/build-platform` - Container orchestration
-- `the-designer/design-visual` - WCAG guidelines
-
-**Context Optimization**: Each agent's knowledge base contains only relevant domain information, reducing noise and improving focus.
-
-### 2. Process Specialization
-
-**Principle**: Agents specialized in specific processes or methodologies.
-
-**Examples**:
-- `the-designer/research-user` - Interview techniques, survey design
-- `the-tester/test-strategy` - Testing strategies, coverage analysis
-- `the-architect/design-system` - Selection criteria, trade-off analysis
-
-**Benefit**: Deep expertise in how to execute specific processes correctly.
-
-### 3. Framework-Aware Activity Specialization  
-
-**Principle**: Agents specialized in activities that adapt to detected frameworks/technologies.
-
-**Pattern**: Activity-first, framework-second approach where agents maintain primary focus on the activity while applying framework-specific patterns when relevant.
-
-**Examples**:
-- `the-developer/build-feature` - Component design that adapts to React/Vue/Angular
-- `the-devops/build-platform` - IaC patterns that adapt to AWS/GCP/Azure
-- `the-developer/optimize-performance` - Query optimization that adapts to PostgreSQL/MySQL/MongoDB
-
-**Implementation**:
-```markdown
-## Framework Detection
-I automatically detect the project's technology stack and apply relevant patterns:
-- Frontend: React hooks/JSX, Vue composition API, Angular services
-- Backend: Django ORM, Express middleware, Spring Boot annotations
-- Database: PostgreSQL indexes, MySQL partitioning, MongoDB aggregation
-
-## Core Expertise
-My primary expertise is [activity], which I apply regardless of framework.
-```
-
-**Benefits**:
-- Avoids agent proliferation (no need for separate React/Vue/Angular agents)
-- Maintains focused context for better LLM performance
-- Supports multi-framework projects
-- Preserves single responsibility principle
-
-**Anti-Pattern**: Creating separate agents for each framework (`the-developer/react-components`, `the-developer/vue-components`) - this violates activity-based organization. These should use activity-based names like `build-feature`.
-
-### 4. Cross-Cutting Specialization
-
-**Principle**: Agents that apply specialized knowledge across domains.
-
-**Examples**:
-- `the-architect/review-security` - Security analysis for any domain
-- `the-developer/optimize-performance` - Performance analysis across systems
-- `pattern-detection` skill - Pattern recognition in any codebase
-
-**Value**: Ensures consistent application of specialized knowledge.
-
-## Coordination Mechanisms
-
-### 1. Context Isolation
-
-**Principle**: Each agent receives only the context relevant to its specialization.
-
-**Implementation**:
-```yaml
-Agent Context Example:
-the-developer/build-feature:
-  context:
-    - Business requirements for the feature
-    - Existing patterns in codebase
-    - Authentication/authorization requirements
-  excludes:
-    - Unrelated UI implementation details
-    - Database schema specifics
-    - Deployment configurations
-```
-
-**Benefits**: Reduced token usage, improved focus, faster processing.
-
-### 2. Interface Contracts
-
-**Principle**: Clear input/output contracts between agents.
-
-**Structure**:
-```yaml
-Agent Interface:
-  inputs:
-    - requirements: string
-    - constraints: []string
-    - existing_patterns: object
-  outputs:
-    - design: object
-    - recommendations: []string
-    - next_steps: []string
-```
-
-**Purpose**: Ensures predictable agent interactions and composability.
-
-### 3. Shared State Management
-
-**Principle**: Common state accessible to multiple agents when needed.
-
-**Implementation**:
-```yaml
-Shared Context:
-  project_requirements: # Accessible to all agents
-  technical_constraints: # Accessible to technical agents
-  user_research: # Accessible to product and design agents
-  security_requirements: # Accessible to all agents
-```
-
-**Research Basis**: Theory of Mind research shows shared belief state representation improves collaborative outcomes ([Multi-Agent Collaboration, 2025](https://arxiv.org/html/2501.06322v1)).
-
-### 4. Hierarchical Communication
-
-**Principle**: Information flows through appropriate authority layers.
-
-**Structure**:
-```
-Strategic Level → the-architect/design-system
-       ↓
-Tactical Level → the-developer/build-feature
-       ↓
-Operational Level → the-devops/build-platform
-```
-
-**Benefits**: Maintains appropriate abstraction levels and decision boundaries.
-
-## Implementation Guidelines
-
-### 1. Agent Definition Structure
-
-**Standard Format**:
-```yaml
----
-name: the-[role]/[specialization]
-description: Single-sentence description of specific capability
-expertise: [narrow domain of knowledge]
-inputs: [expected input format]
-outputs: [expected output format]
-excludes: [what this agent does NOT handle]
----
-
-## Framework Detection
-
-I automatically detect the project's technology stack and apply relevant patterns:
-- [Framework Category]: [Specific adaptations]
-- [Another Category]: [Other adaptations]
-
-## Core Expertise
-
-[Detailed description of narrow expertise area - framework-agnostic principles]
-
-## Approach
-
-[Specific methodology for this specialization]
-
-## Framework-Specific Patterns
-
-[How core expertise adapts to different frameworks when detected]
-
-## Anti-Patterns
-
-[What NOT to do in this specialization]
-
-## Success Criteria
-
-[How to measure successful completion]
-```
-
-**Framework Detection Section Guidelines**:
-- List 2-4 framework categories relevant to the specialization
-- Provide specific adaptations, not generic statements
-- Keep frameworks secondary to core activity expertise
-- Include "My primary expertise is [activity], which I apply regardless of framework"
-
-### 2. Naming Conventions
-
-**Pattern**: `the-[human-role]/[activity-specialization]`
-
-**Examples**:
-- `the-developer/build-feature` - Human role: developer, Activity: feature building
-- `the-analyst/research-product` - Human role: analyst, Activity: product research
-- `the-architect/design-system` - Human role: architect, Activity: system design
-
-**Benefits**: 
-- Human-readable navigation
-- Clear specialization boundaries
-- Scalable organization structure
-
-### 3. Context Preparation
-
-**Principle**: Provide focused, relevant context for each specialization.
-
-**Template**:
-```
-FOCUS: [Specific task and constraints]
-CONTEXT: [Only information relevant to this specialization]
-EXCLUDE: [What NOT to consider or implement] 
-SUCCESS: [Clear completion criteria]
-```
-
-**Example**:
-```
-FOCUS: Design REST API endpoints for user management
-CONTEXT: Existing auth patterns, database User model, rate limiting requirements
-EXCLUDE: UI implementation, database migrations, deployment strategy
-SUCCESS: Complete API specification with request/response examples
-```
-
-### 4. Error Boundaries
-
-**Principle**: Clear boundaries for error handling and escalation.
-
-**Structure**:
-```yaml
-Agent Error Handling:
-  validation_errors: # Handle within agent
-  knowledge_gaps: # Escalate to orchestrator
-  dependency_failures: # Retry with fallback
-  out_of_scope: # Delegate to appropriate agent
-```
-
-## Performance Optimization
-
-### 1. Parallel Execution
-
-**Principle**: Execute independent activities concurrently.
-
-**Research Basis**: Multi-agent systems show 40% reduction in communication overhead and 20% improvement in response latency ([Performance Studies, 2024](https://springsapps.com/knowledge/everything-you-need-to-know-about-multi-ai-agents-in-2024-explanation-examples-and-challenges)).
-
-**Implementation**:
-```python
-# Parallel execution example
-parallel_tasks = [
-    Task(agent="the-developer/build-feature", context=api_context),
-    Task(agent="the-designer/design-visual", context=ui_context),
-    Task(agent="the-architect/review-security", context=auth_context)
-]
-```
-
-**When NOT to Use**: Tasks with sequential dependencies or shared state modifications.
-
-### 2. Context Optimization
-
-**Principle**: Minimize irrelevant context to improve processing speed.
-
-**Strategies**:
-- Filter context by agent specialization
-- Use focused prompts with clear boundaries  
-- Exclude out-of-scope information
-- Provide only necessary background
-
-### 3. Result Caching
-
-**Principle**: Cache results of expensive agent operations.
-
-**Implementation**:
-```yaml
-Cacheable Operations:
-  - Pattern analysis of large codebases
-  - Technology evaluation matrices
-  - Best practice research
-  - Code review templates
-```
-
-### 4. Smart Routing
-
-**Principle**: Route requests to the most appropriate specialist.
-
-**Algorithm**:
-```
-1. Analyze request complexity and domain
-2. Identify required specializations
-3. Route to most specific capable agent
-4. Escalate to broader agent if needed
-```
-
-## Research Foundation
-
-### Academic Sources
-
-1. **[Multi-Agent Collaboration Mechanisms: A Survey of LLMs (2025)](https://arxiv.org/html/2501.06322v1)**
-   - 2.86%-21.88% performance improvement with specialized agents
-   - Theory of Mind improves collaborative outcomes
-   - Task decomposition enables better specialization
-
-2. **[LLM-Based Multi-Agent Systems for Software Engineering (2024)](https://arxiv.org/html/2404.04834v3)**
-   - MASAI modular architecture principles
-   - Specialization through task decomposition
-   - von Neumann architecture inspiration for agent systems
-
-3. **[Practical Considerations for Agentic LLM Systems (2024)](https://arxiv.org/html/2412.04093v1)**
-   - Handcraft specialist roles for well-defined tasks
-   - Importance of clear task descriptions
-   - Error propagation in multi-agent systems
-
-4. **[Multi-Agent System Design Principles (2024)](https://link.springer.com/article/10.1007/s40903-015-0013-x)**
-   - Resilient coordination patterns
-   - Hierarchical vs. distributed architectures
-   - Communication overhead optimization
-
-### Industry Patterns
-
-1. **Microsoft Azure Agent Factory (2024)**
-   - JM Family case study: 60% QA time savings
-   - Orchestration patterns: sequential, concurrent, dynamic handoff
-   - Business analyst/QA agent specialization success
-
-2. **CrewAI Framework**
-   - 32,000+ GitHub stars, 1M+ monthly downloads
-   - Expertise-based agents ("Senior Market Analyst")
-   - Role + goal + backstory pattern
-
-3. **Microsoft AutoGen**
-   - Domain knowledge specialization ("math expert")
-   - Generic assistant coordination pattern
-   - Modular, composable agent architecture
-
-4. **LangGraph**
-   - Functional roles with specialized tools
-   - Capability-driven design philosophy
-   - Stateful agent workflows
-
-### Key Performance Metrics
-
-- **40% reduction** in communication overhead (multi-agent vs single agent)
-- **20% improvement** in average response latency
-- **60% time savings** in QA processes (JM Family implementation)
-- **2.86%-21.88%** accuracy improvement with task specialization
-
-### Emerging Trends (2024-2025)
-
-1. **Model Context Protocol (MCP)** - Standardized agent communication
-2. **Sparse Expert Models** - Activate only relevant parameters per task
-3. **Dynamic Agent Creation** - Lead agents spawning specialized subagents
-4. **Coopetitive Frameworks** - Competition and cooperation hybrid models
-
-## Validation Criteria
-
-Use these criteria to evaluate agent design decisions:
-
-### ✅ Good Agent Design
-
-- [ ] Single, well-defined responsibility
-- [ ] Clear input/output contracts
-- [ ] Focused expertise domain
-- [ ] Composable with other agents
-- [ ] Error boundaries defined
-- [ ] Context optimized for specialization
-- [ ] Measurable success criteria
-
-### ❌ Poor Agent Design
-
-- [ ] Multiple unrelated responsibilities
-- [ ] Vague or broad expertise area
-- [ ] Overlapping concerns with other agents
-- [ ] Framework-specific instead of activity-specific
-- [ ] Unclear success criteria
-- [ ] Context pollution from irrelevant information
-- [ ] No error handling strategy
-- [ ] Cannot operate independently
-- [ ] Framework knowledge primary instead of secondary
-
-## Conclusion
-
-Effective agent design follows proven software engineering principles adapted for AI systems. The evidence overwhelmingly supports activity-based specialization over role-based organization, with clear separation of concerns and modular composability as foundational requirements.
-
-**Key Takeaway**: Design agents like you would design software modules - with single responsibilities, clear interfaces, and focused expertise domains. The research shows this approach delivers measurable performance improvements and better maintainability.
-
-**Next Steps**: Apply these principles to create agent architectures that are both human-comprehensible and AI-optimized, following the patterns proven successful by leading frameworks and academic research.
-
-## Agent Design Principles for Implementation
-
-### Primary Design Philosophy: Focus on WHAT
-
-**Core Principle**: Agents should be defined by **what they focus on** (activities) rather than rigid structural compliance or role definitions.
-
-### 1. Activity-Oriented Focus
-
-**✅ DO - Focus on WHAT:**
-- `api-design.md`: What they focus on - designing clear, maintainable API contracts
-- `database-design.md`: What they focus on - creating schemas balancing consistency and performance  
-- `user-research.md`: What they focus on - understanding user needs and translating to product decisions
-
-**❌ DON'T - Focus on WHO or HOW:**
-- `backend-specialist.md`: Role definition rather than activity focus
-- `react-component-expert.md`: Technology-specific rather than activity-focused
-- `senior-developer.md`: Seniority level rather than specific expertise area
-
-### 2. Flexible Structure Guidelines
-
-Agents **generally follow** existing patterns but can expand where it enhances the activity focus:
-
-**Common Structure Elements:**
-- **YAML frontmatter** - name, description, model
-- **Personality opener** - pragmatic focus on delivered outcomes
-- **Focus Areas** - what they concentrate on (expand beyond common count if needed)
-- **Approach** - their methodology (flexible length based on complexity)
-- **Rules reference** - domain-appropriate practices  
-- **Anti-Patterns** - what to avoid (as many as relevant)
-- **Expected Output** - what they deliver (expand as needed for clarity)
-- **Closing tagline** - action-oriented summary
-
-**Key Flexibility Principle:**
-- **Expand sections if it adds value** to the activity focus
-- **Adapt structure** to specific specialization needs
-- **Prioritize clarity and usefulness** over rigid formatting
-- **Structure serves content**, not the reverse
-
-### 3. Framework-Agnostic Activity Focus
-
-Each agent focuses on **what they do** across different frameworks:
-
-**Pattern**: Activity-first, framework-second approach where agents maintain primary focus on the activity while applying framework-specific patterns when relevant.
-
-**Example - Component Architecture:**
-- **Primary Focus**: Creating reusable, maintainable UI components
-- **NOT**: React-specific implementation details  
-- **Approach**: Patterns that work across Vue, React, Angular, etc.
-- **Framework Adaptation**: When React detected, applies hooks patterns; when Vue detected, applies composition API
-
-**Example - API Design:**
-- **Primary Focus**: Creating clear contracts and versioning strategies
-- **NOT**: Express.js or Fastify specifics
-- **Approach**: REST/GraphQL patterns that work across frameworks
-- **Framework Adaptation**: Applies middleware patterns for Express, decorator patterns for NestJS
-
-### 4. Outcome-Driven Personality Integration
-
-**Formula**: `"You are a pragmatic [specialization] who [specific valuable outcome]."`
-
-The outcome should be:
-- **Business/user value focused** - clear impact on end results
-- **Activity-specific** - not role-generic descriptions
-- **Measurable when possible** - quantifiable or observable outcomes
-
-**Examples**:
-- API Design: "creates interfaces developers love to use"
-- User Research: "turns user insights into product decisions"
-- Security Incident Response: "stops breaches before they become headlines"
-
-### 5. Content Quality Over Structural Compliance
-
-**Focus on:**
-- ✅ **Clear activity boundaries** - what this agent focuses on vs what it doesn't
-- ✅ **Implementation readiness** - outputs that lead to actionable next steps
-- ✅ **Framework adaptability** - principles that work across tech choices
-- ✅ **Business value connection** - why this specialization matters to users/business
-
-**NOT:**
-- ❌ Exact section counts or uniform formatting requirements
-- ❌ Structural compliance over content effectiveness
-- ❌ Template adherence over practical usefulness
-
-### 6. Specialization Boundary Guidelines
-
-Each specialized agent should:
-- **Have clear scope** - specific enough to provide deep expertise
-- **Avoid overlap** - distinct from other agents in the domain
-- **Stay activity-focused** - concentrate on what they DO
-- **Connect to outcomes** - link activities to business/user value
-- **Be appropriately granular** - neither too broad nor too narrow for practical use
-
-**Example of Clear Boundaries**:
-- `api-design.md` focuses on **designing** APIs (contracts, versioning, documentation structure)
-- `api-documentation.md` focuses on **documenting** APIs (developer guides, examples, integration tutorials)
-- Both are valid specializations with clear activity boundaries and no overlap
-
-### 7. Content Expansion Guidelines
-
-Agents can expand any section if it **enhances the WHAT focus**:
-
-**When to expand Focus Areas:**
-- Specialization genuinely requires more areas for clarity
-- Additional areas help distinguish from related specializations  
-- Broader scope is necessary for the activity to be practically useful
-
-**When to expand Approach:**
-- Complex specialization needs more methodological guidance
-- Activity requires specific sequencing or dependencies
-- Multiple decision points need clear guidance for practitioners
-
-**When to expand Expected Output:**
-- Specialization produces diverse deliverable types
-- Multiple integration points or handoff formats needed
-- Clarifies the specific value this specialization provides
-
-### 8. Validation Based on Intent, Not Rules
-
-**Quality Assessment Questions:**
-
-1. **Clear Activity Focus**: Is it immediately obvious what this agent specializes in?
-2. **Framework Agnostic**: Would this guidance work across different technology stacks?
-3. **Implementation Ready**: Do the outputs lead to clear, actionable next steps?
-4. **Business Connected**: Is the value to users/business clearly articulated?
-5. **Appropriately Scoped**: Neither too broad to be useful nor too narrow to be practical?
-6. **Distinct Boundaries**: Clear what this agent does vs doesn't do?
-
-**NOT Rules-Based Validation:**
-- Does it have exactly X sections?
-- Are all sections uniform in length?
-- Does it match a template precisely?
-- Does it follow a rigid structural pattern?
-
-### 9. Implementation Strategy for Specialization
-
-When creating specialized agents:
-
-1. **Start with activity identification** - What specific activity does this agent focus on?
-2. **Define clear boundaries** - What's explicitly included and excluded?
-3. **Ensure framework agnosticism** - Will this work across different tech choices?
-4. **Structure for maximum clarity** - Use common patterns but expand where it helps
-5. **Validate against intent** - Does this serve the activity-based specialization goal?
-
-### 10. Success Criteria
-
-**Effective Specialized Agent Indicators:**
-- Developers immediately understand when to use this agent
-- Framework-specific projects benefit from the activity focus
-- Clear handoff points to other specialized agents
-- Produces actionable, implementation-ready outputs
-- Business value is obvious and measurable
-
-**Goal**: Create agents that excel at **what they do** rather than conforming to **how they're structured**.
+Older drafts of this repo's principles (pre-2026) leaned on CrewAI / AutoGen / LangGraph research, framework-detection agent templates, and multiplier metrics ("10× planning", "3× fewer bugs") that do not survive citation-checking against current Anthropic guidance. Those claims have been dropped rather than relabeled.
 
 ---
 
-*This document is based on peer-reviewed research and industry best practices as of 2025. Update regularly as new research and patterns emerge.*
+## 1. Positioning
+
+The Agentic Startup is a Claude Code marketplace project that ships:
+
+- **Workflow skills** — spec-driven development, analysis, review, implementation
+- **Specialized subagents** — activity-scoped delegates for research, design, implementation, review
+- **Plugins** — bundled distributions composing the above
+
+Every design decision in this repo maps to one of three mechanisms exposed by Claude Code in 2026: **Skills**, **Subagents**, or **Agent Teams**. Each mechanism has a distinct runtime contract, and this document is organized around those contracts rather than around analogies to human team structures.
+
+---
+
+## 2. Core Design Principles
+
+These seven principles apply to both skills and subagents and are the load-bearing rules for the rest of this document.
+
+### 2.1 Description is the activation contract
+
+Both skills and subagents are selected by Claude performing text reasoning against their `description` frontmatter — not embedding retrieval, not keyword matching, not a classifier ([Anthropic Engineering, Equipping agents for the real world with Agent Skills, Dec 2025][eng-skills]; [Lee Han Chung, Claude Agent Skills Deep Dive, Oct 2025][leehan]).
+
+Consequences:
+
+- **Every skill and subagent must front-load its trigger scenario in the first ~50 characters of `description`.** The Claude Code `/skills` UI truncates at 250 characters; the field is hard-capped at 1,024 characters; combined `description + when_to_use` is capped at 1,536 characters for context efficiency ([Skill authoring best practices][skill-best], [Create custom subagents][subagents]).
+- **Descriptions are third-person and scenario-anchored.** "Extracts text and tables from PDF files. Use when the user mentions PDFs, forms, or document extraction." — not "Helps with documents."
+- **Expect under-triggering by default.** Anthropic explicitly notes that Claude tends to not invoke skills when it probably should, and recommends "slightly pushy" phrasing with `Use PROACTIVELY when…` and `MUST BE USED when…` patterns ([Skill authoring best practices][skill-best]).
+
+### 2.2 Progressive disclosure is the enforced context-economy pattern
+
+Skills load in three tiers, not as one monolithic prompt ([Agent Skills overview][skills-overview]):
+
+| Tier | Content | When loaded | Cost |
+|------|---------|-------------|------|
+| L1 Metadata | `name` + `description` | Always, at session start | ~100 tokens per skill |
+| L2 Body | Full `SKILL.md` | When model self-triggers the skill | ≤5,000 tokens budgeted |
+| L3 Resources | `reference/`, `scripts/`, `templates/` | Read on demand via filesystem | Unbounded if unused |
+
+The load boundary is enforced by the runtime — Claude reads L3 files with ordinary Read/Bash tool calls, so anything you bundle has zero context cost until it is explicitly referenced.
+
+**Implications:**
+
+- Keep `SKILL.md` body **≤500 lines** ([Skill authoring best practices][skill-best]). Split longer content into `reference/` files.
+- Keep references **one level deep** from `SKILL.md`. Nested references (SKILL.md → advanced.md → details.md) cause Claude to fall back on `head -N` preview reads, yielding incomplete information ([Skill authoring best practices][skill-best]).
+- Long reference files (>100 lines) should lead with a table of contents so preview reads still surface scope.
+
+### 2.3 Subagent context isolation is the feature, not a side effect
+
+A subagent receives only: its own system prompt, the Agent-tool delegated task prompt, project `CLAUDE.md`, and its allowlisted tools. It does **not** receive the parent's conversation history, tool results, or system prompt ([Create custom subagents][subagents]).
+
+The only parent→child channel is the Agent-tool prompt string. Anything the subagent needs — file paths, error messages, prior decisions, constraints — must be passed through that string.
+
+**Implications:**
+
+- Design the delegation prompt like a brief for a colleague who just walked into the room. Include targets, decisions, and constraints inline.
+- Do not write subagents that assume they can "see what we discussed." They cannot.
+- Use isolation deliberately: spawn a subagent when you want the exploration output to stay out of the parent context; invoke a skill inline when you want the result to remain visible.
+
+### 2.4 Activity specialization beats role mega-agents
+
+Anthropic's own agent library and the community consensus ([VoltAgent awesome-claude-code-subagents][voltagent]; [Subagents — Work with subagents][subagents]) favor many small activity-scoped agents (`review-security`, `design-system`, `optimize-performance`) over single role-agents that do everything.
+
+Rationale:
+
+- Focused system prompts raise accuracy; bloated prompts lower it.
+- Activity agents are parallel-dispatchable when independent — wall-clock time drops roughly proportional to parallelism on independent work.
+- Smaller tool allowlists are easier to audit and produce fewer unnecessary permission prompts.
+- Failure in one activity doesn't halt the others.
+
+Single-Responsibility is an inherited principle from general software engineering; its specific application to Claude Code subagents is empirically supported by the structure of Anthropic's shipped examples and the context-isolation mechanism in § 2.3.
+
+### 2.5 Least-privilege tool scoping is enforced at dispatch
+
+For subagents, `tools` in frontmatter is a whitelist applied before the first turn — tools not in the list are stripped from the catalog at dispatch time ([Create custom subagents — Available tools][subagents]). For skills, `allowed-tools` in frontmatter is a pre-approval list, not a restriction — other tools remain callable subject to normal permission flow ([Claude Code skills docs][skills-doc]).
+
+**Rules:**
+
+- Default to **`Read`, `Grep`, `Glob`** for research / analysis agents.
+- Add `Edit`, `Write` only for implementer agents.
+- Add `Bash` sparingly; when needed, pair with a `PreToolUse` hook that validates commands (e.g., SELECT-only for a DB query agent) ([Subagents — Conditional rules with hooks][subagents]).
+- Never use `tools: *`. Never use `tools: inherit` unless explicitly justified — subagents lose the parent's approval history, so inherited dangerous tools re-prompt on every call.
+- Restrict sub-subagent spawning with `tools: Agent(name1, name2)` syntax.
+
+### 2.6 Model selection is a tactical cost and latency lever
+
+April 2026 pricing and capability (per [Models overview][models]):
+
+| Model | Input $/M | Output $/M | SWE-bench |
+|-------|-----------|------------|-----------|
+| Haiku | 0.80 | 4.00 | ~73% |
+| Sonnet | 3.00 | 15.00 | ~80% |
+| Opus | 15.00 | 75.00 | ~89% |
+
+**Guidance ([Model configuration][model-config]):**
+
+- **Haiku** for high-volume read-heavy work — codebase search, file discovery, pattern matching. Anthropic's built-in `Explore` agent uses Haiku for exactly this reason.
+- **Sonnet** default for general coding and implementation.
+- **Opus** for complex reasoning — architectural review, security analysis, hard refactors.
+- Omit the `model` field to inherit the parent's model when no tactical reason to override.
+
+### 2.7 Evaluation-first authoring
+
+For skills, Anthropic's March 2026 `skill-creator` tool ships benchmarking, blind A/B comparison, and "outgrowth" detection (when the base model has caught up and the skill is redundant) ([Improving skill-creator, Mar 2026][skill-creator]).
+
+Recommended authoring flow:
+
+1. Run Claude on representative tasks **without** the skill/agent; record specific failures.
+2. Write 3+ eval scenarios capturing those failures with input/expected-behavior pairs.
+3. Write the minimal skill/agent body needed to pass the evals.
+4. Benchmark against the unprompted baseline to confirm improvement.
+5. Re-run periodically — if the base model has absorbed the behavior, retire the skill.
+
+Subagents currently have no official eval framework; transcript inspection at `~/.claude/projects/{project}/{session}/subagents/agent-{id}.jsonl` and manual golden-path checks are the 2026 state of the art ([Subagents — Detecting subagent invocation][sdk-subagents]).
+
+---
+
+## 3. Skills
+
+### 3.1 Canonical structure
+
+```
+plugins/<plugin>/skills/<skill-name>/
+├── SKILL.md                 # frontmatter + body, ≤500 lines
+├── reference/               # one level deep from SKILL.md
+│   └── <topic>.md           # >100 lines → lead with TOC
+├── templates/               # static boilerplate
+├── examples/                # 3+ I/O pairs suitable for evals
+└── scripts/                 # executable helpers (security-reviewed)
+```
+
+Skills are discovered from these scopes, highest precedence first ([Claude Code skills docs][skills-doc]):
+
+1. **Enterprise** — managed settings, org-wide
+2. **Personal** — `~/.claude/skills/<skill>/SKILL.md`
+3. **Project** — `.claude/skills/<skill>/SKILL.md`
+4. **Plugin** — `<plugin>/skills/<skill>/SKILL.md`, namespaced as `<plugin>:<skill>`
+
+### 3.2 Frontmatter discipline
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `name` | Yes | lowercase-kebab, ≤64 chars; gerund form preferred (`reviewing-prs`) |
+| `description` | Yes (effectively) | Front-load trigger in first 50 chars. Max 1,024 chars; truncated at 250 in the `/skills` UI |
+| `when_to_use` | No | Combined with `description` capped at 1,536 chars |
+| `disable-model-invocation` | No | `true` for side-effect skills (`/deploy`, `/commit`) — **see § 3.4 known bug** |
+| `user-invocable` | No | `false` to hide from `/` menu while keeping auto-trigger (background-knowledge skills) |
+| `context` | No | `fork` to run in isolated subagent context; requires `agent:` field |
+| `allowed-tools` | No | Pre-approval list — **not** a restriction |
+| `model` | No | Override session model while skill is active |
+| `paths` | No | Glob patterns; activates skill only when editing matching files |
+
+Sources: [Claude Code skills docs][skills-doc], [Skill authoring best practices][skill-best].
+
+### 3.3 Writing conventions
+
+- **Concise body.** Assume Claude is competent; only include context Claude doesn't have.
+- **Consistent terminology.** Pick one term per concept and use it throughout.
+- **Match degrees of freedom to task fragility.** Strict sequences → exact scripts; judgment calls → text guidelines; middle ground → pseudocode with parameters.
+- **Avoid time-sensitive phrasing** ("until 2025, then…"). Use explicit "old pattern" sections if legacy information must survive.
+- **Dynamic context injection** via `` !`<command>` `` is available for injecting live repo state into the prompt at load time ([Claude Code skills — Advanced patterns][skills-doc]).
+
+### 3.4 Known anti-patterns and bugs
+
+- **Oversized SKILL.md** (>500 lines) — split into references.
+- **Vague descriptions** — never trigger; Claude can't infer intent from "Helps with documents".
+- **Buried keywords** — truncation at 250 chars means trigger phrases in sentence 3 are lost.
+- **Nested references** — Claude uses `head -N` preview reads on multi-level chains; information is incomplete.
+- **Hardcoded absolute paths** in scripts — use `${CLAUDE_SKILL_DIR}`.
+- **Undocumented tool dependencies** — state required packages and installation commands.
+- **Bug #26251** — `disable-model-invocation: true` currently also blocks *user* invocation, contrary to intended behavior ([anthropics/claude-code issue tracker][gh-issues]). Skills relying on this pattern are partially broken for explicit invocation. Plan accordingly.
+- **#22345** — plugin-delivered skills do not currently respect `disable-model-invocation`. Gate side-effect operations some other way in plugins.
+
+---
+
+## 4. Subagents
+
+### 4.1 Canonical structure
+
+```
+plugins/<plugin>/agents/<role>/<activity>.md
+```
+
+Activity-per-file, not role-per-file. Naming: lowercase-kebab. The agent name becomes the `subagent_type` parameter at dispatch.
+
+Discovery precedence, highest first ([Subagents — File and directory precedence][subagents]):
+
+1. Managed settings (organization-wide)
+2. `--agents` CLI flag (session-only JSON)
+3. `.claude/agents/` (project, checked into git)
+4. `~/.claude/agents/` (user, all projects)
+5. Plugin `agents/` directory (read-only, enabled plugins)
+
+### 4.2 Frontmatter discipline
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `name` | Yes | Matches filename stem, lowercase-kebab |
+| `description` | Yes | Routing contract — when and why Claude delegates. Include `Use PROACTIVELY when…` and 2–3 `<example>` blocks for reliable triggering |
+| `tools` | No | Whitelist; enforced at dispatch. Default to `Read, Grep, Glob` for research agents |
+| `disallowedTools` | No | Denylist applied to inherited set; can coexist with `tools` |
+| `model` | No | `haiku` \| `sonnet` \| `opus` \| specific ID. Omit to inherit parent |
+| `permissionMode` | No | `default` \| `acceptEdits` \| `auto` \| `plan` \| etc. Parent mode overrides if stricter |
+| `maxTurns` | No | Hard cap on agentic turns |
+| `skills` | No | Preloads listed skills into the subagent at startup (full body, not just availability) |
+| `mcpServers` | No | Name reference (share parent connection) or inline definition (scoped to subagent) |
+| `hooks` | No | Fires only while subagent is active |
+| `memory` | No | `user` \| `project` \| `local` for persistent cross-session memory |
+| `background` | No | `true` for concurrent execution; auto-denies un-pre-approved tools |
+| `isolation` | No | `worktree` runs agent in a fresh git worktree; auto-cleaned on no-op |
+| `initialPrompt` | No | Auto-submitted first turn when running as main session via `--agent` |
+
+Source: [Create custom subagents][subagents], [Subagents SDK docs][sdk-subagents].
+
+### 4.3 Writing conventions
+
+- **Open with role + purpose.** One or two sentences. "You are a senior code reviewer ensuring high standards of code quality and security."
+- **Explicit numbered workflow** beats open-ended directions. Subagents have no conversation history to infer from.
+- **State negative constraints explicitly.** Read-only agents should declare "You cannot modify data. If asked, explain the limitation."
+- **Keep body ≤25 KB** for context efficiency; defer bulk reference to `skills:` preload or external files.
+- **Include 2–3 `<example>` blocks** in the `description` showing concrete invocation scenarios — this improves parent-side delegation accuracy.
+
+### 4.4 Delegation patterns
+
+Three invocation patterns ([Subagents — Work with subagents][subagents]):
+
+1. **Automatic delegation** — description-matched, parent chooses.
+2. **Explicit @-mention** — `@agent-name do X` forces a specific agent.
+3. **Session-wide** — `claude --agent name` replaces the session's system prompt with the agent's, for a full interactive session.
+
+**Parallel vs sequential:**
+
+- Independent research / review tasks → spawn N agents in a single response; they run concurrently.
+- Dependent phases → spawn sequentially; include earlier results in the next prompt.
+- Sustained peer coordination → escalate to Agent Teams (§ 5.2).
+
+**Resuming a subagent** requires Agent Teams (`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`) plus `SendMessage` with the agent's ID. Otherwise, each invocation is stateless.
+
+### 4.5 Anti-patterns
+
+- **`tools: *`** — grants Bash, Write, everything; loses parent approvals; every call re-prompts.
+- **Mega-role god-agents** — single agent with 50+ KB prompt and ten responsibilities; low accuracy, un-parallelizable, hard to audit.
+- **Assuming parent context is visible** — it isn't. Include what you need in the task prompt.
+- **Parallel agents with implicit inter-dependencies** — siblings don't see each other; they return to the parent independently.
+- **Headless write-capable agents with no review gate** — run plan mode first, or require human review between read and write phases.
+- **Context bloat from verbose subagent returns** — ask for key findings, not exhaustive details.
+- **Permission-mode confusion** — parent mode overrides subagent; stricter-than-parent is honored, looser-than-parent is not.
+
+---
+
+## 5. Composition
+
+### 5.1 Skill vs Subagent vs Agent Team vs Hook
+
+| Mechanism | When to use | Context | Communication |
+|-----------|-------------|---------|---------------|
+| **Skill** | Reusable workflow, domain knowledge, checklist, slash command | Parent's own context (unless `context: fork`) | Inline — content becomes conversation |
+| **Subagent** | Isolated exploration, parallel specialized work, summary-returning research | Fresh fork; parent unseen | One-way: parent → task prompt → summary |
+| **Agent Team** | Sustained peer coordination, competing hypotheses, cross-layer debugging | Persistent per-teammate contexts | Bidirectional mailbox; peer-to-peer |
+| **Hook** | Deterministic gate on a specific tool call (e.g., block writes, validate queries) | Runs as shell process | Exit code / stdout / stderr |
+
+Sources: [Claude Code skills docs][skills-doc], [Create custom subagents][subagents], [Agent Teams][agent-teams].
+
+2026 trend note: slash commands and skills have been unified — `.claude/commands/` and `.claude/skills/` both work, and skill frontmatter (`argument-hint`, `disable-model-invocation`, `user-invocable`) subsumes what used to require separate command definitions ([Claude Code skills docs][skills-doc]).
+
+### 5.2 Agent Teams
+
+Agent Teams are experimental as of April 2026 and gated behind `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` ([Agent Teams][agent-teams]).
+
+- Each teammate runs in its own session with its own context window.
+- Teammates have mailboxes and can message each other directly via `SendMessage`.
+- A shared task list is accessible to all teammates.
+- Appropriate for: cross-domain research where findings challenge each other; multi-phase work with coordinated hand-offs; long-running investigations.
+- **Not** appropriate for: simple delegate-and-summarize work — regular subagents are lighter weight.
+
+### 5.3 Information barriers
+
+The value of isolation depends on it being respected by design:
+
+- A code-writing agent should **not** see the evaluation scenarios it's being graded against.
+- An evaluation agent should **not** see the source code it's grading.
+- The orchestrator owns any service lifecycle (start / health-check / restart / stop).
+- Filtered one-line failure summaries cross barriers; raw transcripts do not.
+
+These patterns come from the repo's own prior experience with factory-style implementation loops and are consistent with context-isolation guidance in the Claude Code docs.
+
+---
+
+## 6. Quality and Evaluation
+
+### 6.1 Skills
+
+Use `skill-creator` ([Improving skill-creator, Mar 2026][skill-creator]) for:
+
+- **Evals** — define input prompts + "what good looks like"; run pass/fail.
+- **Benchmarks** — pass rate, elapsed time, token usage over full suite.
+- **Blind A/B** — comparator agent doesn't know which variant produced which output.
+- **Outgrowth detection** — flags when the base model passes evals without the skill, indicating the skill's behavior has been absorbed.
+
+### 6.2 Subagents
+
+No official eval framework in 2026. Practical techniques ([Subagents SDK — Detecting subagent invocation][sdk-subagents]):
+
+- **Trigger testing** — invoke with natural language matching the description; verify delegation.
+- **Transcript inspection** — read `~/.claude/projects/{project}/{session}/subagents/agent-{id}.jsonl`.
+- **Tool enforcement** — attempt a non-allowlisted tool; verify clean failure, not a permission prompt.
+- **Cost tracking** — verify custom-model agents are actually running on the declared model.
+
+---
+
+## 7. Known Gaps and Open Questions
+
+Current limitations worth tracking:
+
+- **Bug #26251** — `disable-model-invocation: true` blocks user invocation too.
+- **#22345** — plugin skills miss `disable-model-invocation` entirely.
+- **Cross-surface skill portability** — skills uploaded to claude.ai, the API, and Claude Code do not sync.
+- **Agent Teams maturity** — experimental; real-world patterns still emerging.
+- **Subagent nesting** — officially unsupported; `context: fork` inside a subagent-loaded skill is an undocumented workaround.
+- **Outgrowth detection mechanism** — Anthropic claims the signal but doesn't document the threshold.
+- **Subagent eval tooling** — no official framework; each team reinvents.
+- **Size-limit empiricism** — Anthropic publishes ≤500 lines for SKILL.md; community reports range up to ~5,000 words with good progressive disclosure. Lacking public benchmarks.
+
+---
+
+## 8. Validation Checklist
+
+Apply this checklist to every skill, subagent, and plugin change in this repo.
+
+**Skills:**
+
+- [ ] `SKILL.md` ≤ 500 lines; references one level deep
+- [ ] `description` front-loads trigger in first 50 chars; third-person; ≤250 chars safe
+- [ ] 3+ eval scenarios exist in `examples/`
+- [ ] `allowed-tools` lists only what's needed (or is omitted)
+- [ ] `disable-model-invocation` used on side-effect skills only, with bug #26251 noted
+- [ ] No time-sensitive phrasing, no absolute paths
+
+**Subagents:**
+
+- [ ] Activity-scoped, not role-scoped
+- [ ] `description` contains trigger scenarios and 2–3 examples
+- [ ] `tools` is an explicit least-privilege list (never `*`)
+- [ ] `model` is tactically chosen (Haiku for read-only research; Sonnet default; Opus only for hard reasoning)
+- [ ] Body ≤ 25 KB; bulk reference deferred to `skills:` or external files
+- [ ] Does not assume visibility of parent context
+- [ ] Golden-path trigger test performed; transcript reviewed
+
+**Composition:**
+
+- [ ] Each behavior placed in the right mechanism (skill vs subagent vs team vs hook)
+- [ ] Independent work is parallelized; only dependent phases are sequential
+- [ ] Information barriers are intact where relied upon (evaluator ≠ code-writer)
+
+---
+
+## Sources
+
+Primary sources used to ground this document. Preferential weight given to Anthropic official docs from 2025–2026.
+
+### Anthropic Official
+
+- [Extend Claude with skills — Claude Code docs][skills-doc] — canonical skill structure, discovery, frontmatter, invocation control, advanced patterns
+- [Agent Skills overview — Platform / API docs][skills-overview] — architecture, progressive disclosure, limitations, cross-surface constraints
+- [Skill authoring best practices — Platform / API docs][skill-best] — naming, description writing, content guidelines, anti-patterns, evaluation-first workflow
+- [Equipping agents for the real world with Agent Skills — Engineering Blog, Dec 2025][eng-skills] — design rationale for progressive disclosure
+- [Improving skill-creator: Test, measure, and refine Agent Skills — Blog, Mar 2026][skill-creator] — evals, benchmarking, A/B, outgrowth
+- [Create custom subagents — Claude Code docs][subagents] — subagent frontmatter schema, tool gating, examples
+- [Subagents in the SDK — Claude API / Agent SDK docs][sdk-subagents] — programmatic definition, tool restriction enforcement, invocation detection
+- [Orchestrate teams of Claude Code sessions — Claude Code docs][agent-teams] — Agent Teams experimental feature
+- [Best practices for Claude Code — docs][best-practices] — general anti-patterns
+- [Model configuration — Claude Code docs][model-config] — per-session / per-subagent model selection
+- [Models overview — API docs][models] — April 2026 pricing and capability table
+- [anthropics/claude-code issue tracker][gh-issues] — bugs #19141, #22345, #26251, #30355, #40121
+
+### Community and Third-Party
+
+- [Lee Han Chung, Claude Agent Skills: Mechanisms and Patterns, Oct 2025][leehan] — deep-dive on dual-message injection, meta-tool architecture, activation
+- [Dean Blank, A Mental Model for Claude Code: Skills, Subagents, Plugins, Mar 2026][mentalmodel] — decision-boundary synthesis
+- [Steve Kinney, Common Sub-Agent Anti-Patterns and Pitfalls][kinney] — curated anti-patterns
+- [VoltAgent, awesome-claude-code-subagents][voltagent] — 100+ activity-scoped agent examples
+- [cc-plugin-eval][eval-framework] — community evaluation framework for plugins
+
+[skills-doc]: https://code.claude.com/docs/en/skills
+[skills-overview]: https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview
+[skill-best]: https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices
+[eng-skills]: https://www.anthropic.com/engineering/equipping-agents-for-the-real-world-with-agent-skills
+[skill-creator]: https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills
+[subagents]: https://code.claude.com/docs/en/sub-agents
+[sdk-subagents]: https://code.claude.com/docs/en/agent-sdk/subagents
+[agent-teams]: https://code.claude.com/docs/en/agent-teams
+[best-practices]: https://code.claude.com/docs/en/best-practices
+[model-config]: https://code.claude.com/docs/en/model-config
+[models]: https://platform.claude.com/docs/en/about-claude/models/overview
+[gh-issues]: https://github.com/anthropics/claude-code/issues
+[leehan]: https://leehanchung.github.io/blogs/2025/10/26/claude-skills-deep-dive/
+[mentalmodel]: https://levelup.gitconnected.com/a-mental-model-for-claude-code-skills-subagents-and-plugins-3dea9924bf05
+[kinney]: https://stevekinney.com/courses/ai-development/subagent-anti-patterns
+[voltagent]: https://github.com/VoltAgent/awesome-claude-code-subagents
+[eval-framework]: https://github.com/sjnims/cc-plugin-eval
+
+---
+
+*Document grounded in primary sources listed above. When these sources are updated or contradicted by newer Anthropic guidance, update this document accordingly rather than preserving stale claims.*
