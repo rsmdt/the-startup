@@ -30,7 +30,7 @@ State {
 ## Constraints
 
 **Always:**
-- Delegate all documentation tasks to specialist agents via Task tool.
+- Delegate all documentation tasks to specialist agents.
 - Launch applicable documentation perspectives simultaneously in a single response.
 - Check for existing documentation first — update rather than duplicate.
 - Match project documentation style and conventions.

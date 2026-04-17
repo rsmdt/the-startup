@@ -1,0 +1,47 @@
+{
+  "skill_name": "analyze",
+  "evals": [
+    {
+      "id": 1,
+      "name": "mechanism-depth-focused-target",
+      "prompt": "I want to understand how the specify-factory skill decomposes specs into units and scenarios. Walk me through the actual mechanism — I need to know not just what it does, but how the decomposition logic actually works and why.",
+      "expected_output": "Mechanism-level findings with What/How/Why layers, file:line evidence, delegated investigation, grouped cycle summary.",
+      "expectations": [
+        "Delegated investigation to at least one specialist subagent (Explore or team:the-architect:design-system)",
+        "Spawned parallel subagents in a single response if more than one perspective applies",
+        "Surfaced at least 2 findings with explicit What / How / Why layers",
+        "Included file:line evidence for findings (e.g., 'plugins/start/skills/specify-factory/SKILL.md:42')",
+        "Did not stay at surface level — no findings are just 'uses pattern X' without mechanism explanation",
+        "Presented a cycle summary grouped by theme (Mechanism Findings / Cross-Cutting / Recommendations / Open Questions)",
+        "Asked the user how to proceed at the end (continue | go deeper | persist | complete)"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "scope-disambiguation-broad-target",
+      "prompt": "analyze the specify workflow",
+      "expected_output": "Skill recognizes the target is broad, clarifies perspective scope via AskUserQuestion, then launches the agreed perspectives.",
+      "expectations": [
+        "Recognized the target is broad / multi-perspective",
+        "Used AskUserQuestion to clarify scope before diving in, OR explicitly enumerated multiple perspectives with the mapping from perspectives.md",
+        "Did not assume a single perspective without justification",
+        "Referenced named agents (Explore, team:the-*) when describing delegation plan",
+        "Did not spawn investigation agents before scope was confirmed"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "solution-first-recommendation",
+      "prompt": "Analyze the error handling in the implement skill. If you find issues, I want to know how to fix them properly.",
+      "expected_output": "Mechanism-depth error-handling analysis. If problems surface, recommendations lead with the clean approach including scope/files/migration path — no hybrid-first recommendations.",
+      "expectations": [
+        "Produced mechanism-level findings about error handling paths (what is caught, what is swallowed, what propagates, retry behavior)",
+        "Referenced specific file:line evidence from implement SKILL.md or its references",
+        "If problems were identified, led the recommendation with the architecturally clean approach (not a hybrid or 'pragmatic middle ground')",
+        "Recommendation included scope estimate, affected files, and migration path",
+        "Surfaced open questions the user needs to answer before committing",
+        "Did not preemptively list hybrid / minimal-change / quick-win alternatives"
+      ]
+    }
+  ]
+}

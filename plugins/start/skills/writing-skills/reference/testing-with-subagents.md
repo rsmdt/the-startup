@@ -49,7 +49,7 @@ Don't test:
 
 ### How to Run a Baseline Test
 
-Use the Task tool to launch a subagent:
+Launch a subagent to run the test scenario:
 
 ```markdown
 IMPORTANT: This is a real scenario. You must choose and act.

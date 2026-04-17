@@ -36,7 +36,7 @@ State {
 ## Constraints
 
 **Always:**
-- Delegate all analysis tasks to specialist agents via Task tool.
+- Delegate all analysis tasks to specialist agents.
 - Establish test baseline before any changes.
 - Run tests after EVERY individual change.
 - One refactoring at a time — never batch changes before verification.

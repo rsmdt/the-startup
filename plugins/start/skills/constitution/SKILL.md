@@ -30,7 +30,7 @@ State {
 ## Constraints
 
 **Always:**
-- Delegate all discovery to specialist agents via Task tool.
+- Delegate all discovery to specialist agents.
 - Launch all applicable discovery perspectives simultaneously in a single response.
 - Discover actual codebase patterns before proposing rules.
 - Present discovered rules for user approval before writing.

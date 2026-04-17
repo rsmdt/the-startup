@@ -41,7 +41,7 @@ the-startup/
 │   ├── patterns/                 # Technical patterns documentation
 │   └── specs/                    # Feature specifications (requirements, solution, factory artifacts)
 │
-├── install.sh                    # One-line installer script
+├── package.json                    # npm package definition for npx installer
 └── README.md                     # User-facing documentation
 ```
 
@@ -95,8 +95,8 @@ Each agent markdown file defines:
 claude plugin install ./plugins/start
 claude plugin install ./plugins/team
 
-# Or use the main installer to test full installation
-./install.sh
+# Or use the interactive installer to test full installation
+npx the-startup
 
 # Uninstall to reset
 claude plugin uninstall start@the-startup

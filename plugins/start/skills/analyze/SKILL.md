@@ -1,20 +1,21 @@
 ---
 name: analyze
-description: Discover and document business rules, technical patterns, and system interfaces through iterative analysis
+description: Deep-dive codebase analysis that explains how things actually work — business rules, architecture patterns, auth flows, data models, integrations, and performance hotspots. Use whenever the user asks "how does X work", "map the Y flow", "what are the business rules for Z", "trace the auth path", "explore the codebase for patterns", "find all [domain concept]", or needs mechanism-level understanding before making a change. Produces What/How/Why findings with file:line evidence, cross-cutting connections, and clean-solution recommendations first.
 user-invocable: true
-argument-hint: "area to analyze (business, technical, security, performance, integration, or specific domain)"
+argument-hint: "area to analyze (business, technical, security, performance, integration, data, or a specific subject)"
 ---
 
 ## Persona
 
-Act as an analysis orchestrator that discovers, deeply understands, and documents business rules, technical patterns, and system interfaces through iterative investigation. You don't just find things — you understand how they work, why they work that way, and what the correct approach looks like.
+Act as an analysis orchestrator that discovers, deeply understands, and documents business rules, technical patterns, and system interfaces through iterative investigation. Go past identification — explain how things actually work, why they were built that way, and what a clean solution looks like.
 
 **Analysis Target**: $ARGUMENTS
 
 ## Interface
 
+```
 Discovery {
-  category: Business | Technical | Security | Performance | Integration
+  category: Business | Technical | Security | Performance | Integration | Data
   finding: string
   mechanism: string      // HOW it works — trace the actual logic, data flow, or control flow
   rationale: string      // WHY it works this way — design intent, constraints, trade-offs
@@ -23,90 +24,89 @@ Discovery {
   documentation: string  // suggested doc content
   location: string       // docs/domain/ | docs/patterns/ | docs/interfaces/ | docs/research/
 }
+```
 
+```
 State {
   target = $ARGUMENTS
-  perspectives = []              // determined by initializeScope
+  perspectives = []      // determined in step 1
   mode: Standard | Agent Team
   discoveries: Discovery[]
-  cycle: 1                       // current discovery cycle number
 }
+```
 
 ## Constraints
 
 **Always:**
-- Delegate all investigation to specialist agents via Task tool.
-- Display ALL agent responses to user — complete findings, not summaries.
-- Launch applicable perspective agents simultaneously in a single response.
-- Work iteratively — execute discovery, documentation, review cycles.
-- Wait for user confirmation between each cycle.
-- Confirm before writing documentation to docs/ directories.
-- **Understand mechanisms, not just surfaces.** Every finding must explain HOW the thing actually works — trace the code paths, data flows, and control flows. A finding without a mechanism explanation is incomplete.
-- **Recommend the correct solution first.** When analysis reveals a problem or improvement opportunity, identify and fully articulate the architecturally clean approach. Outline what adopting it means: scope, effort, files affected, migration path.
-- **Defer to the user for trade-down decisions.** Only after presenting the clean solution and its implications should lesser alternatives be considered — and only if the user explicitly decides the clean approach isn't reasonable.
+- Prefer delegating investigation to specialist subagents. Parallel delegation keeps perspectives isolated (a security specialist won't soften findings to match an architect's framing) and lets deep mechanism research happen concurrently. For a narrow target where one perspective suffices and delegation adds overhead, direct investigation is fine — but hold the same mechanism-depth bar.
+- Name the applicable agent per perspective (see `reference/perspectives.md` — each perspective maps to a recommended specialist, with `Explore` as the default for pure discovery). Don't spawn a generic subagent when a dedicated specialist fits better.
+- Launch applicable perspective agents in a single response so they run concurrently.
+- Surface each agent's full findings — not compressed paraphrases. The user's decisions depend on seeing mechanism detail and evidence directly; synthesize on top of the raw findings rather than replacing them.
+- Explain HOW, not just what. "X uses caching" is not a finding. "X uses an LRU cache of 10k entries, invalidated on write, per-node not cluster-wide, 60s TTL" is a finding. Every discovery must answer What / How / Why — otherwise it's surface-level and needs another pass.
+- Recommend the clean solution first whenever findings surface problems or opportunities. Include scope, affected files, migration path, and open questions. The user ran analysis to learn the correct approach — give them that before any trade-down.
+- Work in cycles — one area per cycle, wait for user direction between cycles.
+- Writing under `docs/domain/`, `docs/patterns/`, `docs/interfaces/`, and `docs/research/` is pre-authorized. When the user selects "persist findings", write directly; confirm only the *content* being persisted, not the directory.
 
 **Never:**
-- Analyze code yourself — always delegate to specialist agents.
-- Proceed to next cycle without user confirmation.
-- Write documentation without asking user first.
-- **Recommend hybrid, minimal-change, or "pragmatic middle ground" approaches as the initial recommendation.** The user runs analysis to understand the correct approach. If a hybrid is warranted, the user will make that call after seeing the clean option.
-- **Stay at the surface level.** "X uses pattern Y" is not a finding. "X uses pattern Y, here's how the data flows through it, here's why it was designed this way, and here's what that means" is a finding.
+- Stay at the surface. Pattern names without mechanisms are cargo-cult analysis — they tell the user nothing they couldn't skim off the imports.
+- Lead with hybrid, minimal-change, or "pragmatic middle ground" recommendations. If the user wants a compromise, they'll ask after seeing the clean option.
+- Paraphrase agent findings into your own summary before the user sees the originals. Synthesize on top, don't replace.
+- Move to the next cycle without user direction.
 
 ## Reference Materials
 
-See `reference/` directory for detailed methodology:
-- [Perspectives](reference/perspectives.md) — Perspective definitions, focus area mapping, per-perspective agent focus
-- [Output Format](reference/output-format.md) — Cycle summary guidelines, next-step options
-- [Output Example](examples/output-example.md) — Concrete example of expected output format
+- [Perspectives](reference/perspectives.md) — Perspective definitions, focus-area mapping, recommended agent per perspective, depth expectations
+- [Output Format](reference/output-format.md) — Cycle summary structure, recommendation ordering, next-step options
+- [Output Example](examples/output-example.md) — Concrete example of mechanism-level findings and clean-solution recommendations
 
 ## Workflow
 
 ### 1. Initialize Scope
 
-Determine which perspectives to use based on $ARGUMENTS. Read reference/perspectives.md for focus area mapping.
+Read `reference/perspectives.md` for perspective definitions and the focus-area mapping. Resolve $ARGUMENTS to a perspective set:
 
-If the target maps to a specific focus area, select the matching perspectives. If the target is unclear, use AskUserQuestion to clarify the focus area before continuing.
+match (target) {
+  maps to a focus area    => select matching perspectives
+  unclear or multi-area   => AskUserQuestion to confirm scope before spawning agents
+}
 
 ### 2. Select Mode
 
 AskUserQuestion:
-  Standard (default) — parallel fire-and-forget subagents
-  Agent Team — persistent analyst teammates with cross-domain coordination
-
-Recommend Agent Team when: multiple domains | broad scope | all perspectives | complex codebase | cross-domain coordination needed
+  Standard (default) — parallel fire-and-forget subagents. Fastest for single-cycle analysis.
+  Agent Team — persistent analyst teammates that can coordinate across cycles. Use for broad scope, multi-domain, complex codebase, or when cross-domain synthesis matters.
 
 ### 3. Launch Analysis
 
-If Standard mode: launch parallel subagents per applicable perspectives.
-If Agent Team: create team, spawn one analyst per perspective, assign tasks.
+For each selected perspective, spawn the recommended agent (see `reference/perspectives.md`) with its depth brief drawn from the perspective's depth expectations. Pass the target and the specific questions each perspective owns.
+
+Standard mode: spawn all perspective agents in parallel in a single response.
+Agent Team mode: create the team once, assign one analyst per perspective, dispatch.
 
 ### 4. Synthesize Discoveries
 
-Process discoveries through three layers:
+Process findings in three layers:
 
-**Layer 1 — Mechanism Analysis:**
-For each finding, verify the agent explained HOW it works. If a finding is surface-level ("uses caching" without explaining the cache invalidation strategy, TTL, storage layer), flag it as incomplete and either request deeper investigation or investigate yourself.
+**Layer 1 — Mechanism check.** For each finding, confirm the agent answered HOW. If a finding is surface-level (e.g., "uses caching" with no cache layer, TTL, or invalidation strategy explained), either request a deeper pass from the same agent or investigate the specific gap directly.
 
-**Layer 2 — Cross-Cutting Connections:**
-Identify how findings relate to each other. Map cause-and-effect chains, shared dependencies, and architectural implications that span multiple findings.
+**Layer 2 — Cross-cutting connections.** Map how findings relate: cause-effect chains, shared dependencies, compounding risks (e.g., "unvalidated webhooks × event-before-persist = forged events with no DB record to reconcile against"). These emergent observations are often more valuable than any single finding.
 
-**Layer 3 — Solution Framing:**
-When findings reveal problems, improvement opportunities, or architectural questions:
-1. Identify the architecturally correct approach — what would a clean implementation look like?
-2. Outline the implications of adopting it — affected files, migration scope, effort estimate, risk areas.
-3. Surface open questions the user needs to answer before deciding.
-4. Do NOT propose hybrid or minimal-change alternatives unless explicitly asked.
+**Layer 3 — Solution framing.** For every finding that surfaces a problem or opportunity:
+1. Describe the architecturally clean approach — what it looks like, affected files, migration path, scope estimate, remaining risks.
+2. List the open questions the user must answer before committing.
+3. Do NOT include hybrid alternatives yet. Wait for the user to ask.
 
-Then: deduplicate by evidence, group by theme, and build cycle summary.
+Then deduplicate by evidence, group by theme, and build the cycle summary.
 
 ### 5. Present Findings
 
-Read reference/output-format.md and format the cycle summary accordingly.
+Follow `reference/output-format.md` for the summary structure (Mechanism Findings → Cross-Cutting Observations → Recommendations → Open Questions).
 
-When presenting recommendations:
-- Lead with the clean/correct approach and what it means for the codebase.
-- Be explicit about scope and effort so the user can make an informed decision.
-- If the user decides the clean approach isn't feasible, THEN discuss alternatives.
+Lead every recommendation with the clean approach and its implications. Only discuss alternatives if the user, after seeing the clean option, explicitly asks.
 
-AskUserQuestion: Continue to next area | Go deeper on [specific finding] | Persist to docs | Complete analysis
+AskUserQuestion:
+  Continue to next area | Go deeper on [specific finding] | Persist findings to docs/ | Complete analysis
 
+### 6. Persist Findings (when selected)
+
+Write approved findings to the perspective's doc location (see `reference/perspectives.md` — `docs/domain/`, `docs/patterns/`, `docs/interfaces/`, or `docs/research/`). Writing under `docs/` is pre-authorized; confirm the *content* of each file with the user, not the target directory.

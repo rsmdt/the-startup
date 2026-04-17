@@ -33,7 +33,7 @@ State {
 ## Constraints
 
 **Always:**
-- Delegate all validation tasks to specialist agents via Task tool.
+- Delegate all validation tasks to specialist agents.
 - Launch ALL applicable validation perspectives simultaneously.
 - Include file paths and line numbers for all findings.
 - Every finding must have a clear, actionable fix recommendation.
