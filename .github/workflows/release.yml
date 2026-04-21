@@ -121,6 +121,57 @@ jobs:
           VERSION=$(python3 -c "import json; print(json.load(open('.claude-plugin/marketplace.json'))['metadata']['version'])")
           echo "plugin_version=${VERSION}" >> $GITHUB_OUTPUT
 
+      - name: Build release body from CHANGELOG
+        id: body
+        env:
+          TAG_NAME: ${{ github.event.inputs.version || github.ref_name }}
+        run: |
+          set -euo pipefail
+          # Strip leading 'v' to match '## [X.Y.Z]' heading in CHANGELOG.md.
+          VERSION="${TAG_NAME#v}"
+          BODY_FILE="$(mktemp)"
+
+          # Extract the entry between '## [VERSION]' and the next '## ' heading,
+          # without the heading line itself (the release name already carries the version).
+          ENTRY=$(awk -v v="$VERSION" '
+              $0 ~ "^## \\[" v "\\]" { in_entry = 1; next }
+              in_entry && /^## / { exit }
+              in_entry { print }
+          ' CHANGELOG.md | sed -e '1{/^$/d;}' -e '${/^$/d;}')
+
+          if [ -z "$ENTRY" ]; then
+              echo "::warning::No CHANGELOG entry found for ${VERSION}; falling back to generic body."
+              ENTRY="See [CHANGELOG.md](https://github.com/rsmdt/the-startup/blob/main/CHANGELOG.md) for detailed changes."
+          fi
+
+          cat > "$BODY_FILE" <<EOF
+          ## 🚀 The Agentic Startup ${TAG_NAME}
+
+          ${ENTRY}
+
+          ---
+
+          ### Installation
+
+          #### Via Claude Code Marketplace (Recommended)
+          \`\`\`bash
+          /plugin marketplace add rsmdt/the-startup
+          /plugin install start@the-startup
+          /plugin install team@the-startup   # optional
+          \`\`\`
+
+          #### Manual Installation
+          Download the archive for your platform:
+          - \`the-startup-${TAG_NAME}.tar.gz\` — Linux/macOS
+          - \`the-startup-${TAG_NAME}.zip\` — Windows
+
+          SHA256 checksums are available in \`checksums.txt\`.
+
+          **Requirements**: Claude Code v2.0+ with marketplace support.
+          EOF
+
+          echo "body_path=${BODY_FILE}" >> "$GITHUB_OUTPUT"
+
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
@@ -131,45 +182,4 @@ jobs:
           files: |
             release/the-startup-*
             release/checksums.txt
-          body: |
-            ## 🚀 The Agentic Startup ${{ github.event.inputs.version || github.ref_name }}
-
-            **Plugin Version**: ${{ steps.version.outputs.plugin_version }}
-
-            ### Installation
-
-            #### Via Claude Code Marketplace (Recommended)
-            ```bash
-            # Add The Agentic Startup marketplace
-            /plugin marketplace add rsmdt/the-startup
-
-            # Install the Start plugin (core workflows)
-            /plugin install start@the-startup
-
-            # (Optional) Install the Team plugin (specialized agents)
-            /plugin install team@the-startup
-            ```
-
-            #### Manual Installation
-            Download the archive for your platform:
-            - `the-startup-${{ github.event.inputs.version || github.ref_name }}.tar.gz` - For Linux/macOS
-            - `the-startup-${{ github.event.inputs.version || github.ref_name }}.zip` - For Windows
-
-            Extract and follow the manual installation instructions in the README.
-
-            ### What's Included
-
-            - **start@the-startup** - Core workflow commands and productivity tools
-            - **team@the-startup** - Specialized agent team (optional)
-
-            ### Changes
-
-            See [CHANGELOG.md](https://github.com/rsmdt/the-startup/blob/main/CHANGELOG.md) for detailed changes.
-
-            ### Checksums
-
-            SHA256 checksums are available in `checksums.txt`
-
-            ---
-
-            **Requirements**: Claude Code v2.0+ with marketplace support
+          body_path: ${{ steps.body.outputs.body_path }}
