@@ -9,6 +9,13 @@ Entries are added only when a release is cut. Work in progress is not tracked he
 
 This file retains detailed entries for the last 10 minor releases plus their patch revisions. Older release notes are linked to their [GitHub release page](https://github.com/rsmdt/the-startup/releases).
 
+## [3.6.1] - 2026-04-22
+
+### Changed
+- Rewrote core principles against 2026 Claude Code primary sources, consolidating PHILOSOPHY.md into PRINCIPLES.md and removing pre-2026 framework-era guidance that no longer held up to citation checking.
+- Added a skill-vs-subagent decision framework to the principles doc to help users choose the right primitive when extending their workflows.
+- Restructured CHANGELOG.md with a retained history window and links out to older releases for easier navigation.
+
 ## [3.6.0] - 2026-04-17
 
 ### Changed

@@ -1,0 +1,18 @@
+{
+  "name": "consultant",
+  "version": "3.6.1",
+  "description": "MBB-style management consulting engagement framework with structured problem definition",
+  "author": {
+    "name": "Rudolf S."
+  },
+  "homepage": "https://github.com/rsmdt/the-startup",
+  "repository": "https://github.com/rsmdt/the-startup",
+  "license": "MIT",
+  "keywords": [
+    "consulting",
+    "strategy",
+    "problem-definition",
+    "issue-tree",
+    "SCQA"
+  ]
+}
