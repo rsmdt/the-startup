@@ -1,0 +1,44 @@
+{
+  "skill_name": "specify-standard",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Decompose spec 002 into a linear standard plan. The spec has requirements.md and solution.md describing a single-feature notification API.",
+      "expected_output": "plan/README.md manifest with phase checklist and one or more plan/phase-N.md files containing TDD-structured tasks",
+      "expectations": [
+        "Read requirements.md before defining tasks",
+        "Read solution.md before defining tasks",
+        "Read AGENTS.md for codebase context",
+        "Wrote plan/README.md from the standard template",
+        "plan/README.md frontmatter has title, status, version fields",
+        "plan/README.md Context Priming section includes paths to requirements.md and solution.md",
+        "plan/README.md phases checklist uses exact format: - [ ] [Phase N: Title](phase-N.md)",
+        "Wrote at least one plan/phase-N.md file",
+        "Each phase-N.md has YAML frontmatter with title, status, version, phase fields",
+        "Each phase-N.md status is pending on creation",
+        "Tasks follow TDD pattern: Prime, Test, Implement, Validate",
+        "Tasks have specification references using [ref: solution/Section X] or [ref: requirements/AC-Y] format",
+        "Tasks use [activity: type] hints for specialist selection",
+        "Parallel-eligible tasks are marked with [parallel: true]",
+        "Final phase includes integration and E2E test tasks",
+        "No time estimates appear in any phase file",
+        "No implementation code appears in any phase file",
+        "Did NOT create units/ or scenarios/ directories"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Validate the standard plan in spec 003. The plan has missing [ref: ...] annotations on several tasks and a phase file is not linked from plan/README.md.",
+      "expected_output": "Validation report identifying the missing references and the orphan phase file, with the plan flagged as incomplete",
+      "expectations": [
+        "Read plan/README.md and parsed the phases checklist",
+        "Read each phase-N.md file referenced in the checklist",
+        "Detected at least one task without [ref: ...] annotation",
+        "Detected the phase file that is not linked from plan/README.md",
+        "Reported plan status as DRAFT or IN_REVIEW (not COMPLETE)",
+        "Listed actionable next steps to address the gaps",
+        "Did not auto-fix issues without user approval"
+      ]
+    }
+  ]
+}
