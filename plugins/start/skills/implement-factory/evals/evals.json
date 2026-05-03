@@ -1,5 +1,5 @@
 {
-  "skill_name": "implement",
+  "skill_name": "implement-factory",
   "evals": [
     {
       "id": 1,
@@ -91,6 +91,44 @@
         "Code agent prompt does NOT include E2E stubs content (information barrier preserved)",
         "Code agent prompt includes TDD process section (tests from spec, not stubs)",
         "Evaluation agent prompt does NOT include unit spec content (information barrier preserved)"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Implement spec 008 which has a manifest.md and the project root has a CONSTITUTION.md with L1 rule 'no direct database access from controllers'. The first unit's code agent introduces a controller that bypasses the repository layer.",
+      "expected_output": "Constitution check at group boundary detects the L1 violation and blocks progression",
+      "expectations": [
+        "Ran Skill(start:validate) constitution check at the group boundary",
+        "Detected the L1 violation introduced by the code agent",
+        "Did NOT mark the unit complete despite scenarios passing",
+        "Did NOT proceed to the next execution group while the L1 violation was unresolved",
+        "Surfaced the violation to the user with options to fix or escalate"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Run /start:implement on spec 010 which has only requirements.md and solution.md but no manifest.md.",
+      "expected_output": "Reports that this skill expects a factory manifest and refers the user to the dispatcher or to specify-factory",
+      "expectations": [
+        "Detected that manifest.md is missing from the spec directory",
+        "Did NOT spawn code agents or evaluation agents",
+        "Did NOT start a service",
+        "Reported the missing artifact clearly to the user",
+        "Suggested the user run /start:implement (which dispatches by tier) or re-run /start:specify to produce a manifest"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Complete a factory implementation where all 3 units passed on the first iteration.",
+      "expected_output": "Completion summary with the required fields per reference/output-format.md",
+      "expectations": [
+        "Updated manifest.md frontmatter status to completed",
+        "Completion summary includes spec ID and feature name",
+        "Completion summary includes units completed / total units",
+        "Completion summary includes total iterations across all units",
+        "Completion summary includes per-unit final satisfaction percentage",
+        "Completion summary includes total files changed count",
+        "Offered next-step options (Commit + PR / Commit only / Skip, or Run tests / Manual review)"
       ]
     }
   ]
