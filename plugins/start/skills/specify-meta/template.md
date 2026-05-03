@@ -14,11 +14,21 @@
 |----------|--------|-------|
 | requirements.md | {{REQUIREMENTS_STATUS}} | {{REQUIREMENTS_NOTES}} |
 | solution.md | {{SOLUTION_STATUS}} | {{SOLUTION_NOTES}} |
-| manifest.md | {{MANIFEST_STATUS}} | {{MANIFEST_NOTES}} |
-| units/ | {{UNITS_STATUS}} | {{UNITS_NOTES}} |
-| scenarios/ | {{SCENARIOS_STATUS}} | {{SCENARIOS_NOTES}} |
 
 **Status values**: `pending` | `in_progress` | `completed` | `skipped`
+
+## Decomposition
+
+| Field | Value |
+|-------|-------|
+| **Tier** | {{DECOMPOSITION_TIER}} |
+| **Status** | {{DECOMPOSITION_STATUS}} |
+
+**Tier values**: `Direct` (no artifacts) | `Standard` (plan/) | `Factory` (manifest.md + units/ + scenarios/) | `None` (not yet chosen)
+
+For Standard tier, see `plan/README.md`.
+For Factory tier, see `manifest.md`, `units/`, `scenarios/`.
+For Direct tier, no decomposition artifacts are produced — implement-direct reads requirements.md and solution.md directly.
 
 ## Decisions Log
 

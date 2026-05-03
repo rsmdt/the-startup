@@ -1,11 +1,11 @@
 ---
 name: specify-meta
-description: Scaffold, status-check, and manage specification directories. Handles auto-incrementing IDs, README tracking, phase transitions, and decision logging in .start/specs/. Falls back to docs/specs/ for legacy specs. Used by both specify and implement workflows.
+description: Scaffold, status-check, and manage specification directories.
 ---
 
 ## Persona
 
-Act as a specification workflow orchestrator that manages specification directories and tracks user decisions throughout the Requirements → Solution → Factory workflow.
+Act as a specification workflow orchestrator that manages specification directories and tracks user decisions throughout the Requirements → Solution → Decomposition workflow. The Decomposition phase produces one of three artifact families based on the tier chosen by the specify classifier: Direct (no artifacts), Standard (plan/ directory), or Factory (manifest.md + units/ + scenarios/).
 
 ## Interface
 
@@ -13,7 +13,8 @@ SpecStatus {
   id: string               // 3-digit zero-padded (001, 002, ...)
   name: string
   directory: string         // .start/specs/[NNN]-[name]/ (legacy: docs/specs/)
-  phase: Initialization | Requirements | Solution | Factory | Ready
+  phase: Initialization | Requirements | Solution | Decomposition | Ready
+  decomposition_tier: Direct | Standard | Factory | None
   documents: {
     name: string
     status: pending | in_progress | completed | skipped
@@ -23,7 +24,8 @@ SpecStatus {
 
 State {
   specId = ""
-  currentPhase: Initialization | Requirements | Solution | Factory | Ready
+  currentPhase: Initialization | Requirements | Solution | Decomposition | Ready
+  decompositionTier: Direct | Standard | Factory | None
   documents: []
 }
 
@@ -64,10 +66,11 @@ Read existing spec metadata.
 3. Suggest the next continuation point:
 
 match (documents) {
-  manifest exists       => "Manifest found. Proceed to implementation?"
-  sdd exists, no manifest => "SDD found. Continue to Factory?"
-  prd exists, no sdd    => "PRD found. Continue to SDD?"
-  no documents          => "Start from Requirements?"
+  manifest exists                 => "Factory manifest found. Proceed to implementation?"
+  plan exists                     => "Standard plan found. Proceed to implementation?"
+  solution exists, no decomposition => "Solution found. Continue to Decomposition (classifier will recommend Direct, Standard, or Factory)?"
+  requirements exists, no solution => "Requirements found. Continue to Solution?"
+  no documents                    => "Start from Requirements?"
 }
 
 ### 3. Transition Phase
@@ -79,9 +82,12 @@ Update the spec directory to reflect the new phase.
 3. Hand off to the document-specific skill:
 
 match (phase) {
-  Requirements => specify-requirements skill
-  Solution     => specify-solution skill
-  Factory      => specify-factory skill
+  Requirements  => specify-requirements skill
+  Solution      => specify-solution skill
+  Decomposition => route by tier:
+                     Direct   => no skill invocation (no artifacts written)
+                     Standard => specify-standard skill
+                     Factory  => specify-factory skill
 }
 
 4. On completion, return here for the next phase transition.

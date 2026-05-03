@@ -150,6 +150,18 @@ def read_spec(spec_id: str) -> None:
     if sdd:
         print(f'sdd = "{sdd}"')
 
+    # Standard plan artifacts: plan/ directory with README.md and phase-N.md files
+    plan_dir = spec_dir / "plan"
+    if plan_dir.is_dir():
+        print(f'plan_dir = "{plan_dir}"')
+        plan_readme = plan_dir / "README.md"
+        if plan_readme.exists():
+            print(f'plan = "{plan_readme}"')
+        phase_files = sorted(plan_dir.glob("phase-*.md"))
+        if phase_files:
+            phases_str = ", ".join(f'"{f}"' for f in phase_files)
+            print(f"phases = [{phases_str}]")
+
     # Factory artifacts: manifest, units, scenarios
     manifest = spec_dir / "manifest.md"
     if manifest.exists():
@@ -187,10 +199,13 @@ def read_spec(spec_id: str) -> None:
             if (spec_dir / file).exists():
                 print(f'{key} = "{spec_dir / file}"')
 
-    # List all files (including units/ and scenarios/ directory contents)
+    # List all files (including plan/, units/, and scenarios/ directory contents)
     print()
     print("files = [")
     files = sorted([f.name for f in spec_dir.iterdir() if f.is_file()])
+    if (spec_dir / "plan").is_dir():
+        plan_files = sorted([f"plan/{f.name}" for f in (spec_dir / "plan").iterdir() if f.is_file()])
+        files.extend(plan_files)
     if (spec_dir / "units").is_dir():
         unit_files = sorted([f"units/{f.name}" for f in (spec_dir / "units").iterdir() if f.is_file()])
         files.extend(unit_files)
@@ -206,10 +221,28 @@ def read_spec(spec_id: str) -> None:
 
 
 def create_factory_directories(spec_dir: Path) -> None:
-    """Create units/ and scenarios/ directories for Dark Factory specs."""
+    """Create units/ and scenarios/ directories for Factory-tier specs."""
     (spec_dir / "units").mkdir(parents=True, exist_ok=True)
     (spec_dir / "scenarios").mkdir(parents=True, exist_ok=True)
     print("Created factory directories: units/, scenarios/")
+
+
+def create_plan_directory(spec_dir: Path, template_name: str = "specify-standard") -> None:
+    """Create plan/ directory with README.md from the standard plan template.
+
+    Used for Standard-tier specs (linear phase-by-phase implementation plan).
+    """
+    plan_dir = spec_dir / "plan"
+    plan_dir.mkdir(parents=True, exist_ok=True)
+
+    try:
+        template_file = get_template_path(template_name)
+        dest_file = plan_dir / "README.md"
+        dest_file.write_text(template_file.read_text())
+        print(f"Generated template: plan/README.md")
+    except FileNotFoundError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
 
 
 def create_spec(feature_name: str, template: Optional[str] = None) -> None:
@@ -224,9 +257,12 @@ def create_spec(feature_name: str, template: Optional[str] = None) -> None:
         if spec_dir:
             print(f"Adding template to existing spec: {spec_dir}")
 
-            # Special handling for factory directories
+            # Decomposition-tier handling
             if template == "specify-factory":
                 create_factory_directories(spec_dir)
+                return
+            if template == "specify-standard":
+                create_plan_directory(spec_dir, "specify-standard")
                 return
 
             # Map template names to short filenames
@@ -257,30 +293,35 @@ def create_spec(feature_name: str, template: Optional[str] = None) -> None:
     sanitized_name = sanitize_name(feature_name)
     spec_dir = SPECS_DIR / f"{spec_id}-{sanitized_name}"
 
-    # Create spec directory with factory subdirectories
+    # Create spec directory only — defer decomposition-tier dirs until tier is chosen
     spec_dir.mkdir(parents=True, exist_ok=True)
-    create_factory_directories(spec_dir)
 
     print(f"Created spec directory: {spec_dir}")
     print(f"Spec ID: {spec_id}")
 
     # Copy template if requested
     if template:
-        filename_map = {
-            "specify-requirements": "requirements.md",
-            "product-requirements": "requirements.md",
-            "specify-solution": "solution.md",
-            "solution-design": "solution.md",
-        }
-        dest_name = filename_map.get(template, f"{template}.md")
+        # Decomposition-tier templates create directories instead of single files
+        if template == "specify-factory":
+            create_factory_directories(spec_dir)
+        elif template == "specify-standard":
+            create_plan_directory(spec_dir, "specify-standard")
+        else:
+            filename_map = {
+                "specify-requirements": "requirements.md",
+                "product-requirements": "requirements.md",
+                "specify-solution": "solution.md",
+                "solution-design": "solution.md",
+            }
+            dest_name = filename_map.get(template, f"{template}.md")
 
-        try:
-            template_file = get_template_path(template)
-            dest_file = spec_dir / dest_name
-            dest_file.write_text(template_file.read_text())
-            print(f"Generated template: {dest_name}")
-        except FileNotFoundError as e:
-            print(f"Warning: {e}", file=sys.stderr)
+            try:
+                template_file = get_template_path(template)
+                dest_file = spec_dir / dest_name
+                dest_file.write_text(template_file.read_text())
+                print(f"Generated template: {dest_name}")
+            except FileNotFoundError as e:
+                print(f"Warning: {e}", file=sys.stderr)
 
     print("Specification directory created successfully")
 
