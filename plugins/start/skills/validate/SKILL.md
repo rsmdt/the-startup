@@ -1,6 +1,6 @@
 ---
 name: validate
-description: Validate specifications, implementations, constitution compliance, or understanding. Includes spec quality checks, drift detection, and constitution enforcement.
+description: Validate in any of six modes — spec quality, single-file review, spec-to-implementation drift, constitution rule enforcement, comparison between two artifacts, or sanity-checking your understanding. Use when checking a spec by ID, validating a file by path, detecting drift, enforcing constitution rules, comparing two sources ("$X against $Y"), or asking a freeform validation question.
 user-invocable: true
 argument-hint: "spec ID (e.g., 005), file path, 'constitution', 'drift', or description of what to validate"
 ---

@@ -7,7 +7,9 @@ argument-hint: "spec ID to decompose (e.g., 002)"
 
 ## Persona
 
-Act as an implementation planning specialist that breaks a single-feature specification into executable phases following TDD principles. Plans enable a developer (or implement-standard orchestrator) to work independently without requiring clarification.
+Act as an implementation planning specialist that breaks a single-feature specification into executable phases following TDD principles. Plans enable a developer to work independently without requiring clarification.
+
+Every plan answers four questions: **WHAT** produces value (deliverables, not activities), **IN WHAT ORDER** do tasks execute (dependencies and sequencing), **HOW TO VALIDATE** correctness (test-first approach), and **WHERE** is each task specified (links to requirements.md / solution.md sections).
 
 **Spec Target**: $ARGUMENTS
 
@@ -65,14 +67,6 @@ State {
 - Track individual test cases as tasks — they're part of a larger deliverable.
 - Leave specification references missing from tasks.
 - Write all phases into a single monolithic file.
-
-## Plan Focus
-
-Every plan must answer four questions:
-- **WHAT** produces value? — deliverables, not activities
-- **IN WHAT ORDER** do tasks execute? — dependencies and sequencing
-- **HOW TO VALIDATE** correctness? — test-first approach
-- **WHERE** is each task specified? — links to requirements.md / solution.md sections
 
 ## Reference Materials
 
@@ -137,4 +131,4 @@ Completeness:
 ### 5. Present Status
 
 Read reference/output-format.md and format the status report accordingly.
-AskUserQuestion: Define next phase | Run validation | Address gaps | Complete plan
+Ask the user to choose between *Define next phase*, *Run validation*, *Address gaps*, or *Complete plan*.

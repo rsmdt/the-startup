@@ -53,32 +53,9 @@ State {
 - Create components with overlapping responsibilities — if two components share domain logic, merge or re-partition.
 - Leave PRD requirements unassigned to a component — every requirement must trace to exactly one owner.
 
-## SDD Focus
-
-When designing, address four dimensions:
-- **HOW** it will be built — architecture, patterns, approach
-- **WHERE** code lives — directory structure, components, layers
-- **WHAT** interfaces exist — APIs, data models, integrations
-- **WHY** decisions were made — ADRs with rationale and trade-offs
-
-## MECE Principle
-
-All structural decompositions in the SDD must be **Mutually Exclusive, Collectively Exhaustive** (MECE):
-
-| Section | Mutually Exclusive | Collectively Exhaustive |
-|---------|-------------------|------------------------|
-| **Components** | Each component has a single, distinct responsibility. No two components should own the same domain logic or serve the same purpose. | All system capabilities from the PRD are assigned to exactly one component. Ask: "Which component handles X?" — if the answer is ambiguous, the decomposition has overlap. |
-| **Interfaces** | Each interface serves a distinct purpose. No two interfaces should expose the same operation or data shape. | All communication paths between components, external systems, and data stores are documented. Ask: "How does component A talk to component B?" — if undocumented, there's a gap. |
-| **Data Models** | Each entity owns a distinct slice of the domain. No two entities should store the same business data. | All data required by the components and interfaces is modeled. Ask: "Where is X stored?" — if unanswerable, there's a gap. |
-| **Acceptance Criteria (EARS)** | Each criterion specifies a unique system behavior. No two criteria should verify the same thing with different triggers. | Every PRD acceptance scenario has a corresponding system-level criterion. Ask: "How does the system satisfy PRD/AC-X.Y?" — if unanswerable, there's a gap. |
-
-**How to apply:** During validation (step 5), explicitly run MECE checks:
-1. **Responsibility matrix** — Map each PRD requirement to exactly one component. Flag requirements mapped to multiple components (overlap) or zero components (gap).
-2. **Interface deduplication** — Verify no two interfaces serve the same consumer-to-provider path.
-3. **Criteria traceability** — Verify 1:1 mapping between PRD acceptance criteria and EARS criteria.
-
 ## Reference Materials
 
+- [Focus and MECE](reference/focus-and-mece.md) — SDD focus dimensions and MECE rules for components, interfaces, data models, acceptance criteria
 - [Template](template.md) — SDD template structure, write to `.start/specs/[NNN]-[name]/solution.md`
 - [Validation](validation.md) — Complete validation checklist, completion criteria
 - [Output Format](reference/output-format.md) — Status report guidelines, next-step options
@@ -96,7 +73,7 @@ Explore the codebase to understand existing patterns, conventions, and constrain
 
 ### 2. Explore Approaches
 
-Invoke Skill(start:brainstorm) to evaluate technical approaches before committing to a direction.
+Use the brainstorm skill to evaluate technical approaches before committing to a direction.
 
 Focus on understanding:
 - Architectural alternatives (e.g., monolith vs microservices, REST vs GraphQL).
@@ -165,5 +142,5 @@ Consistency verification:
 ### 6. Present Status
 
 Read reference/output-format.md and format the status report accordingly.
-AskUserQuestion: Address pending ADRs | Continue to next section | Run validation | Complete SDD
+Ask the user to choose between *Address pending ADRs*, *Continue to next section*, *Run validation*, or *Complete SDD*.
 

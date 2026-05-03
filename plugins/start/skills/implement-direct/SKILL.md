@@ -42,12 +42,12 @@ State {
 ## Constraints
 
 **Always:**
-- Delegate ALL implementation to specialist subagents via the Task tool — never edit code directly.
-- Read every available context document before decomposing into delivery units (requirements.md, solution.md, AGENTS.md, any referenced patterns/interfaces docs).
+- Delegate ALL implementation to specialist subagents — never edit code directly.
+- Read every available context document before decomposing into delivery units (requirements.md, solution.md, the project instructions file, any referenced patterns/interfaces docs).
 - Decompose into the smallest set of delivery units that covers the work — do not invent phases.
 - Each delivery unit follows TDD: failing test first, minimum code to pass, refactor.
-- Run Skill(start:validate) drift check after delegation completes.
-- Run Skill(start:validate) constitution check if CONSTITUTION.md exists.
+- Use the validate skill in drift mode after delegation completes.
+- Use the validate skill in constitution mode if a CONSTITUTION.md exists at the project root.
 - Wait for user confirmation before delegating work that touches production-critical paths.
 - Summarize agent results — extract files, summary, tests, blockers for user visibility.
 
@@ -67,13 +67,13 @@ State {
 
 ### 1. Initialize
 
-Invoke Skill(start:specify-meta) to resolve the spec directory if `$ARGUMENTS` is a spec ID.
+Use the specify-meta skill to resolve the spec directory if `$ARGUMENTS` is a spec ID.
 
 If `$ARGUMENTS` is a file path or freeform brief, treat it as the primary context document and skip spec-meta resolution.
 
 Discover available context:
 - requirements.md and solution.md from spec directory (if present)
-- AGENTS.md from project root for codebase orientation
+- The project instructions file (CLAUDE.md, AGENTS.md, or equivalent) for codebase orientation
 - Any other documents referenced in `$ARGUMENTS`
 
 If none of these are available, report: this skill requires at least one context document. Ask the user for a brief or file path.
@@ -86,7 +86,7 @@ Present what was discovered:
 Offer optional git setup:
 
 match (git repository) {
-  exists => AskUserQuestion: Create feature branch | Skip git integration
+  exists => ask the user to choose between *Create feature branch* and *Skip git integration*
   none   => proceed without version control
 }
 
@@ -97,15 +97,16 @@ Read all discovered context documents.
 Decompose the work into the smallest set of delivery units that covers all acceptance criteria:
 - Each unit has a clear title, area, references back to requirements/solution sections, and acceptance bar.
 - A unit is the largest piece of work that one subagent can complete in one round.
-- Aim for 1–3 units. If the natural decomposition exceeds 3 units, this work is not low-complexity — recommend the user re-run `/start:specify` and choose Standard or Factory.
+- Aim for 1–3 units. If the natural decomposition exceeds 3 units, this work is not low-complexity — recommend the user re-run the specify skill and choose Standard or Factory.
 
-Present the decomposition. AskUserQuestion: Approve | Adjust | Add units | Recommend higher-tier mode.
+Present the decomposition. Ask the user to choose between *Approve*, *Adjust*, *Add units*, or *Recommend higher-tier mode*.
 
 ### 3. Select Mode
 
-AskUserQuestion:
-  Standard (default) — parallel fire-and-forget subagents with TodoWrite tracking
-  Agent Team — persistent teammates with shared TaskList and coordination
+Ask the user to choose:
+
+- **Standard** (default) — parallel fire-and-forget subagents with progress tracked on a shared task list
+- **Agent Team** — persistent teammates with shared task list and coordination
 
 Recommend Agent Team only when units >= 3 and they share state. Otherwise Standard is sufficient.
 
@@ -115,13 +116,13 @@ For each delivery unit:
 
 match (mode) {
   Standard => {
-    Load units into TodoWrite.
+    Load units onto the task list.
     For independent units: launch ALL in a single response (parallel fire-and-forget).
     For dependent units: launch sequentially.
-    Update TodoWrite status as results arrive.
+    Update the task list as results arrive.
   }
   Agent Team => {
-    Create tasks via TaskCreate with unit metadata.
+    Create tasks for the team with unit metadata.
     Spawn teammates per area (backend, frontend, etc.).
     Assign tasks. Monitor via automatic messages.
   }
@@ -129,7 +130,7 @@ match (mode) {
 
 Each subagent prompt includes:
 - The relevant requirements/solution sections (full text, not just refs)
-- AGENTS.md for project conventions
+- The project instructions file for project conventions
 - Explicit TDD instruction: failing test → minimum code → refactor
 - Acceptance criteria as concrete observable outcomes
 
@@ -137,11 +138,11 @@ Extract from each result: files changed, test status, blockers.
 
 ### 5. Validate
 
-1. Run Skill(start:validate) drift check against requirements.md and solution.md (whichever are present).
-2. Run Skill(start:validate) constitution check if CONSTITUTION.md exists.
+1. Use the validate skill in drift mode against requirements.md and solution.md (whichever are present).
+2. Use the validate skill in constitution mode if a CONSTITUTION.md exists at the project root.
 3. Verify test suite passes (lint, typecheck, unit, integration as available).
 
-Drift handling: AskUserQuestion — Acknowledge | Update impl | Update spec | Defer.
+Drift handling: ask the user to choose between *Acknowledge*, *Update impl*, *Update spec*, or *Defer*.
 
 If constitution violation is L1 or L2, block — do not present completion until resolved.
 
@@ -150,8 +151,8 @@ If constitution violation is L1 or L2, block — do not present completion until
 Read reference/output-format.md and present completion summary.
 
 match (git integration) {
-  active => AskUserQuestion: Commit + PR | Commit only | Skip
-  none   => AskUserQuestion: Run tests | Manual review | Done
+  active => ask the user to choose between *Commit + PR*, *Commit only*, or *Skip*
+  none   => ask the user to choose between *Run tests*, *Manual review*, or *Done*
 }
 
-In Agent Team: send sequential shutdown_request to each teammate, then TeamDelete.
+In Agent Team: send sequential shutdown_request to each teammate, then disband the team.

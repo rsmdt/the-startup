@@ -43,12 +43,12 @@ State {
 ## Constraints
 
 **Always:**
-- Delegate ALL implementation tasks to subagents or teammates via Task tool.
+- Delegate ALL implementation tasks to specialist subagents or teammates.
 - Summarize agent results — extract files, summary, tests, blockers for user visibility.
 - Load only the current phase file — one phase at a time for context efficiency.
 - Wait for user confirmation at phase boundaries.
-- Run Skill(start:validate) drift check at each phase checkpoint.
-- Run Skill(start:validate) constitution if CONSTITUTION.md exists.
+- Use the validate skill in drift mode at each phase checkpoint.
+- Use the validate skill in constitution mode if a CONSTITUTION.md exists at the project root.
 - Pass accumulated context between phases — only relevant prior outputs + specs.
 - Update phase file frontmatter AND plan/README.md checkbox on phase completion.
 - Skip already-completed phases when resuming an interrupted plan.
@@ -69,7 +69,7 @@ State {
 
 ### 1. Initialize
 
-Invoke Skill(start:specify-meta) to read the spec.
+Use the specify-meta skill to read the spec.
 
 Discover the plan structure:
 
@@ -79,7 +79,7 @@ For each discovered phase file:
   Read YAML frontmatter to get status (pending | in_progress | completed).
 Populate phases[] with number, title, file path, and status.
 
-If plan/README.md does not exist, report an error: this skill requires a plan/ directory. Refer the user to `specify-standard` to create one, or to `/start:implement` for tier auto-detection.
+If plan/README.md does not exist, report an error: this skill requires a plan/ directory. Refer the user to the specify-standard skill to create one, or to the implement skill (which auto-detects tier).
 
 Present discovered phases with their statuses. Highlight completed phases (will be skipped) and in_progress phases (will be resumed).
 
@@ -88,15 +88,16 @@ Task metadata found in plan files uses: `[activity: areas]`, `[parallel: true]`,
 Offer optional git setup:
 
 match (git repository) {
-  exists => AskUserQuestion: Create feature branch | Skip git integration
+  exists => ask the user to choose between *Create feature branch* and *Skip git integration*
   none   => proceed without version control
 }
 
 ### 2. Select Mode
 
-AskUserQuestion:
-  Standard (default) — parallel fire-and-forget subagents with TodoWrite tracking
-  Agent Team — persistent teammates with shared TaskList and coordination
+Ask the user to choose:
+
+- **Standard** (default) — parallel fire-and-forget subagents with progress tracked on the task list
+- **Agent Team** — persistent teammates with shared task list and coordination
 
 Recommend Agent Team when:
   phases >= 3 | cross-phase dependencies | parallel tasks >= 5 | shared state across tasks
@@ -107,7 +108,7 @@ For each phase in phases where phase.status != completed:
 1. Mark phase status as in_progress (call step 6).
 2. Execute the phase (step 4).
 3. Validate the phase (step 5).
-4. AskUserQuestion after validation:
+4. After validation, ask the user how to proceed:
 
 match (user choice) {
   "Continue to next phase" => continue loop
@@ -130,15 +131,15 @@ Read the Phase Context section: GATE, spec references, key decisions, dependenci
 
 match (mode) {
   Standard => {
-    Load ONLY current phase tasks into TodoWrite.
+    Load ONLY current phase tasks onto the task list.
     Parallel tasks (marked [parallel: true]): launch ALL in a single response.
     Sequential tasks: launch one, await result, then next.
-    Update TodoWrite status after each task.
+    Update task list status after each task.
   }
   Agent Team => {
-    Create tasks via TaskCreate with phase/task metadata and dependency chains.
+    Create tasks for the team with phase/task metadata and dependency chains.
     Spawn teammates by work stream — only roles needed for current phase.
-    Assign tasks. Monitor via automatic messages and TaskList.
+    Assign tasks. Monitor via automatic messages and the shared task list.
   }
 }
 
@@ -148,16 +149,16 @@ Review handling: APPROVED → next task | Spec violation → must fix | Revision
 
 ### 5. Validate Phase
 
-1. Run Skill(start:validate) drift check for spec alignment.
-2. Run Skill(start:validate) constitution check if CONSTITUTION.md exists.
+1. Use the validate skill in drift mode for spec alignment.
+2. Use the validate skill in constitution mode if a CONSTITUTION.md exists at the project root.
 3. Verify all phase tasks are complete.
 4. Mark phase status as completed (call step 6).
 
 Drift types: Scope Creep, Missing, Contradicts, Extra.
-When drift is detected: AskUserQuestion — Acknowledge | Update impl | Update spec | Defer
+When drift is detected: ask the user to choose between *Acknowledge*, *Update impl*, *Update spec*, or *Defer*.
 
 Read reference/output-format.md and present the phase summary accordingly.
-AskUserQuestion: Continue to next phase | Review output | Pause | Address issues
+Ask the user to choose between *Continue to next phase*, *Review output*, *Pause*, or *Address issues*.
 
 ### 6. Update Phase Status
 
@@ -167,12 +168,12 @@ AskUserQuestion: Continue to next phase | Review output | Pause | Address issues
 
 ### 7. Complete
 
-1. Run Skill(start:validate) for final validation (comparison mode).
+1. Use the validate skill in comparison mode for final validation.
 2. Read reference/output-format.md and present completion summary accordingly.
 
 match (git integration) {
-  active => AskUserQuestion: Commit + PR | Commit only | Skip
-  none   => AskUserQuestion: Run tests | Deploy to staging | Manual review
+  active => ask the user to choose between *Commit + PR*, *Commit only*, or *Skip*
+  none   => ask the user to choose between *Run tests*, *Deploy to staging*, or *Manual review*
 }
 
-In Agent Team: send sequential shutdown_request to each teammate, then TeamDelete.
+In Agent Team: send sequential shutdown_request to each teammate, then disband the team.

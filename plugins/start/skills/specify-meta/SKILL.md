@@ -1,6 +1,6 @@
 ---
 name: specify-meta
-description: Scaffold, status-check, and manage specification directories.
+description: Scaffold, status-check, and manage specification directories. Use when creating a new spec, reading spec status, transitioning between phases, or logging decisions on a spec in .start/specs/.
 ---
 
 ## Persona

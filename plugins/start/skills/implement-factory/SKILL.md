@@ -54,15 +54,15 @@ State {
   target = $ARGUMENTS
   specDirectory: string         // resolved .start/specs/NNN-name/ path
   manifest: Manifest
-  servicePort: number           // discovered from AGENTS.md or package.json
-  startCommand: string          // discovered from AGENTS.md or package.json
+  servicePort: number           // discovered from project instructions or package.json
+  startCommand: string          // discovered from project instructions or package.json
   serviceProcess: active | stopped
 }
 
 ## Constraints
 
 **Always:**
-- Delegate ALL implementation to code agents and ALL evaluation to evaluation agents via the Agent tool.
+- Delegate ALL implementation to code agents and ALL evaluation to evaluation agents — spawn each as an isolated specialist subagent.
 - Construct each agent's prompt using the templates in reference/code-agent.md and reference/eval-agent.md.
 - Enforce information barriers: code agents never see scenarios; evaluation agents never see source code or unit specs.
 - Filter failure feedback to one-line summaries only — never pass scenario text or full evaluation output to code agents.
@@ -73,12 +73,12 @@ State {
 - Skip already-completed units when resuming an interrupted manifest.
 - Present satisfaction metrics to the user after each evaluation.
 - Escalate to the user when max iterations is reached for any unit.
-- Run Skill(start:validate) constitution check if CONSTITUTION.md exists, at group boundaries.
+- Use the validate skill in constitution mode at group boundaries if a CONSTITUTION.md exists at the project root.
 
 **Never:**
 - Implement code directly — you are an orchestrator ONLY.
 - Include scenario text in code agent prompts.
-- Include unit specs, AGENTS.md content, or code agent output in evaluation agent prompts.
+- Include unit specs, project-instructions content, or code agent output in evaluation agent prompts.
 - Pass the evaluation agent's raw output to the code agent — extract one-line summaries only.
 - Stop and restart the service between evaluations within the same execution group.
 - Display full agent responses — extract key outputs only.
@@ -94,7 +94,7 @@ State {
 
 ### 1. Initialize
 
-Invoke Skill(start:specify-meta) to resolve the spec directory.
+Use the specify-meta skill to resolve the spec directory.
 
 Read manifest.md from the spec directory. Parse it as follows:
 
@@ -120,10 +120,10 @@ Validate the manifest:
 - Dependencies must respect group ordering (a unit's dependencies must be in earlier groups).
 - If validation fails, report errors and stop.
 
-**Discover service configuration.** Read the project's AGENTS.md and package.json (or equivalent) to find:
+**Discover service configuration.** Read the project instructions file (CLAUDE.md, AGENTS.md, or equivalent) and package.json (or equivalent) to find:
 - The start command (e.g., `npm start`, `python manage.py runserver`)
 - The service port (e.g., 3000, 8000)
-- If not discoverable, AskUserQuestion for the start command and port.
+- If not discoverable, ask the user for the start command and port.
 
 Present manifest discovery to the user:
 - Feature name, threshold, max iterations
@@ -134,7 +134,7 @@ Present manifest discovery to the user:
 Offer optional git setup:
 
 match (git repository) {
-  exists => AskUserQuestion: Create feature branch | Skip git integration
+  exists => ask the user to choose between *Create feature branch* and *Skip git integration*
   none   => proceed without version control
 }
 
@@ -154,12 +154,12 @@ For each unit in this group where unit.status != completed:
 2. Read reference/code-agent.md for the prompt template.
 3. Construct the code agent prompt:
    - Include the full unit spec content.
-   - Include instruction to read AGENTS.md for project orientation.
+   - Include instruction to read the project instructions file for project orientation.
    - Include "DO NOT read or access files in scenarios/ directories."
    - Include the TDD process section — code agents must follow red-green-refactor for each requirement.
    - If this is a retry (unit.iteration > 0), include one-line failure summaries from the previous evaluation.
    - Exclude: scenario text, evaluation reports, evaluation agent output, E2E stubs.
-4. Spawn the code agent via the Agent tool.
+4. Spawn the code agent as a specialist subagent.
 
 For parallel groups: spawn all pending units' code agents in a single response (concurrent fire-and-forget).
 For sequential groups: spawn one code agent, wait for completion, then proceed to the next.
@@ -187,10 +187,9 @@ Before the first evaluation in this group:
      sleep $((i * 2))
    done
    ```
-   If the health endpoint is not `/health`, adapt based on AGENTS.md or project conventions.
+   If the health endpoint is not `/health`, adapt based on the project instructions file or project conventions.
 
-3. If health check fails after 5 retries, AskUserQuestion:
-   - Provide manual start command | Retry | Abort
+3. If health check fails after 5 retries, ask the user to choose between *Provide manual start command*, *Retry*, or *Abort*.
 
 The service stays running for all evaluations in this group.
 
@@ -210,8 +209,8 @@ For each unit in this group, sequentially (shared running service):
    - Include the evaluation method priority: pre-generated E2E stubs > E2E tests > browser automation > curl/CLI.
    - Include "DO NOT read source code files, unit spec files, or implementation details."
    - Include the reporting format (run each scenario 3 times, 2/3 must pass).
-   - Exclude: unit spec content, AGENTS.md content, code agent output.
-5. Spawn the evaluation agent via the Agent tool.
+   - Exclude: unit spec content, project-instructions content, code agent output.
+5. Spawn the evaluation agent as a specialist subagent.
 6. Wait for the evaluation agent to complete.
 
 #### 2d. Parse Evaluation and Decide
@@ -240,8 +239,7 @@ match (evaluation result) {
   }
   unit.iteration >= manifest.maxIterations => {
     Mark unit failed.
-    AskUserQuestion:
-      Retry with guidance (user provides hints) | Skip unit | Abort factory loop
+    Ask the user to choose between *Retry with guidance* (user provides hints), *Skip unit*, or *Abort factory loop*.
     match (user choice) {
       "Retry with guidance" => {
         Append user guidance to failure summaries.
@@ -296,7 +294,7 @@ After all units in this group are resolved (completed, failed, or skipped):
    ```bash
    kill %1    # or equivalent process cleanup
    ```
-2. Run Skill(start:validate) constitution check if CONSTITUTION.md exists.
+2. Use the validate skill in constitution mode if a CONSTITUTION.md exists at the project root.
 3. Report group summary to user:
    - Units completed / total in group
    - Satisfaction percentages per unit
@@ -309,14 +307,14 @@ After all units in this group are resolved (completed, failed, or skipped):
 After all execution groups are resolved:
 
 1. Update manifest.md frontmatter: `status: completed` (or `failed` if any units failed).
-2. Run Skill(start:validate) for final validation if constitution exists.
+2. Use the validate skill for final validation if a CONSTITUTION.md exists.
 3. Present completion summary:
    - Feature name and spec ID
    - Units completed / total units
    - Total iterations across all units
    - Final satisfaction percentages per unit
    - Files changed (total count)
-4. AskUserQuestion:
+4. Ask the user how to finalize:
 
 match (git integration) {
   active => Commit + PR | Commit only | Skip

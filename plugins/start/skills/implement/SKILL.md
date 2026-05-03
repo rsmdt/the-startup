@@ -1,6 +1,6 @@
 ---
 name: implement
-description: Implementation entry point. Use to execute a completed specification.
+description: Implementation entry point. Use to execute a completed specification. Auto-detects the decomposition tier (Direct, Standard, or Factory) from spec artifacts and dispatches to the matching execution sub-skill.
 user-invocable: true
 argument-hint: "spec ID to implement (e.g., 002), or file path"
 ---
@@ -34,7 +34,7 @@ State {
 ## Constraints
 
 **Always:**
-- Resolve the spec via Skill(start:specify-meta) before inspecting artifacts.
+- Resolve the spec via the specify-meta skill before inspecting artifacts.
 - Detect artifacts before dispatching — do not assume a tier.
 - Pass `$ARGUMENTS` through unchanged to the sub-skill.
 - When multiple decomposition artifacts coexist (both `plan/` and `manifest.md`), ask the user which to run.
@@ -58,7 +58,7 @@ Each sub-skill owns its references, examples, and templates:
 
 ### 1. Resolve Spec
 
-Invoke `Skill(start:specify-meta)` with `$ARGUMENTS` to resolve `specDirectory`. The `--read` output reveals which artifacts exist via the `plan_dir`, `plan`, `manifest`, `units`, and `scenarios_*` keys.
+Use the specify-meta skill with `$ARGUMENTS` to resolve `specDirectory`. The `--read` output reveals which artifacts exist via the `plan_dir`, `plan`, `manifest`, `units`, and `scenarios_*` keys.
 
 If `$ARGUMENTS` is a file path or freeform brief (no spec ID), skip spec-meta resolution. Treat this as a direct-mode invocation and route to `implement-direct`.
 
@@ -79,16 +79,16 @@ Apply the routing rules:
 
 ```
 match (artifacts) {
-  manifest_md exists AND NOT plan_readme   => Skill(start:implement-factory)
-  plan_readme exists AND NOT manifest_md   => Skill(start:implement-standard)
-  manifest_md exists AND plan_readme       => AskUserQuestion (header "Pipeline"):
+  manifest_md exists AND NOT plan_readme   => use the implement-factory skill
+  plan_readme exists AND NOT manifest_md   => use the implement-standard skill
+  manifest_md exists AND plan_readme       => ask the user under header "Pipeline":
                                                 Factory   — run factory loop on manifest.md
                                                 Standard  — run phase loop on plan/
                                                 Abort     — exit without action
   none of the above
-    AND (requirements OR solution exists)  => Skill(start:implement-direct)
+    AND (requirements OR solution exists)  => use the implement-direct skill
   none of the above AND no specs           => Error: no specification artifacts found.
-                                              Run /start:specify first, or pass a brief.
+                                              Run the specify skill first, or pass a brief.
 }
 ```
 
@@ -108,10 +108,10 @@ Detected: only requirements.md and solution.md → routing to implement-direct
 
 ### 4. Hand Off
 
-Invoke the chosen sub-skill via `Skill(start:implement-{tier})` with the same `$ARGUMENTS`.
+Use the chosen sub-skill (`implement-direct`, `implement-standard`, or `implement-factory`) with the same `$ARGUMENTS`.
 
 Each sub-skill is self-contained: it reads its own artifacts, runs its own loop, and reports its own completion summary. The dispatcher does not post-process sub-skill output.
 
 ### Notes on tier mismatch
 
-If the spec README decision log records a tier (e.g., "Decomposition tier: Standard") but the corresponding artifact is missing (e.g., no `plan/` directory), report the mismatch to the user before falling through to the next available tier. This typically indicates an interrupted `specify` run — the user should re-run `/start:specify` for that spec to complete decomposition, or explicitly choose a different tier.
+If the spec README decision log records a tier (e.g., "Decomposition tier: Standard") but the corresponding artifact is missing (e.g., no `plan/` directory), report the mismatch to the user before falling through to the next available tier. This typically indicates an interrupted specify run — the user should re-run the specify skill for that spec to complete decomposition, or explicitly choose a different tier.

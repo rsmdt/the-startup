@@ -47,7 +47,7 @@ State {
 
 **Always:**
 - Attempt to read both requirements.md and solution.md before decomposing. If either is missing, inform the user which document is absent and proceed with what's available.
-- Read AGENTS.md and the current codebase to ground scenarios in real project conventions.
+- Read the project instructions file (CLAUDE.md, AGENTS.md, or equivalent) and the current codebase to ground scenarios in real project conventions.
 - Each unit must be self-contained: goal + requirements + constraints. A single code agent must be able to implement it.
 - Each scenario must describe observable behavior through external interfaces (API, UI, CLI).
 - Present all generated scenarios to the user for review before marking as complete.
@@ -90,7 +90,7 @@ State {
 ### 1. Initialize
 
 Read requirements.md and solution.md from specDirectory.
-Read AGENTS.md for codebase context.
+Read the project instructions file for codebase context.
 Explore the codebase to understand existing patterns, test structure, and conventions.
 
 Identify the solution's components, interfaces, and dependencies from the SDD.
@@ -113,7 +113,7 @@ Present unit decomposition to user:
 - Coverage matrix: which requirements map to which units
 - Dependency graph
 
-AskUserQuestion: Approve units | Adjust decomposition | Add/remove units
+Ask the user to choose between *Approve units*, *Adjust decomposition*, or *Add/remove units*.
 
 ### 3. Generate Scenarios and E2E Stubs
 
@@ -132,7 +132,7 @@ Write each scenario using templates/scenario.md to specDirectory/scenarios/{unit
 
 For each unit, generate an E2E test stub file that the evaluation agent will use during the factory loop:
 
-1. Detect the project's test framework from AGENTS.md, package.json, or project structure.
+1. Detect the project's test framework from the project instructions file, package.json, or project structure.
 2. For each scenario in the unit, write an executable test stub:
    - Test name derived from scenario name (match project naming conventions)
    - Test body asserts the scenario's expected outcomes through the external interface
@@ -150,7 +150,7 @@ Present ALL generated scenarios and E2E stubs to user for review:
 - Coverage: which unit requirements are tested by which scenarios
 - Gaps: any requirements without scenario coverage
 
-AskUserQuestion: Approve scenarios and stubs | Edit scenarios | Edit E2E stubs | Add missing scenarios | Regenerate
+Ask the user to choose between *Approve scenarios and stubs*, *Edit scenarios*, *Edit E2E stubs*, *Add missing scenarios*, or *Regenerate*.
 
 CRITICAL: User must approve scenarios before proceeding. The factory loop cannot run with unreviewed scenarios.
 
@@ -169,7 +169,7 @@ Present manifest to user:
 - Threshold and max_iterations settings
 - Total units and scenario counts
 
-AskUserQuestion: Approve manifest | Adjust execution order | Change settings
+Ask the user to choose between *Approve manifest*, *Adjust execution order*, or *Change settings*.
 
 ### 5. Validate
 
@@ -194,4 +194,4 @@ Format checks:
 ### 6. Present Status
 
 Read reference/output-format.md and format status report.
-AskUserQuestion: Finalize | Revisit units | Revisit scenarios | Adjust manifest
+Ask the user to choose between *Finalize*, *Revisit units*, *Revisit scenarios*, or *Adjust manifest*.
