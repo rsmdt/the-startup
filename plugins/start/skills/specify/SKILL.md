@@ -1,6 +1,6 @@
 ---
 name: specify
-description: Create a comprehensive specification from a brief description. Manages specification workflow including directory creation, README tracking, and phase transitions.
+description: Create a comprehensive specification from a brief description.
 user-invocable: true
 argument-hint: "describe your feature or requirement to specify"
 ---
@@ -15,8 +15,11 @@ Act as an expert requirements gatherer that creates specification documents for 
 
 SpecStatus {
   requirements: Complete | Incomplete | Skipped
-  solution: Complete | Incomplete | Skipped
-  factory: Complete | Incomplete | Skipped
+  solution:     Complete | Incomplete | Skipped
+  decomposition: {
+    tier:   Direct | Standard | Factory | None
+    status: Complete | Incomplete | Skipped
+  }
   readiness: HIGH | MEDIUM | LOW
 }
 
@@ -25,6 +28,7 @@ State {
   spec: string                   // resolved spec directory path (from specify-meta)
   perspectives = []
   mode: Standard | Agent Team
+  classification: Direct | Standard | Factory   // from reference/classifier.md
   status: SpecStatus
 }
 
@@ -35,7 +39,7 @@ State {
 - Display all agent responses to user — complete findings, not summaries.
 - Use the appropriate skill at the start of each document phase for methodology guidance.
 - Only write or edit files within `.start/` and `docs/` directories.
-- Run phases sequentially — Requirements, Solution, Factory (user can skip phases).
+- Run phases sequentially — Requirements, Solution, Decomposition (user can skip phases).
 - Wait for user confirmation between each document phase.
 - Track decisions in specification README via reference/output-format.md.
 - Git integration is optional — offer branch/commit as an option.
@@ -48,6 +52,7 @@ State {
 ## Reference Materials
 
 - [Perspectives](reference/perspectives.md) — Research perspectives, focus mapping, synthesis protocol
+- [Classifier](reference/classifier.md) — Complexity heuristic for routing to Direct, Standard, or Factory tier
 - [Output Format](reference/output-format.md) — Decision logging guidelines, documentation structure
 - [Output Example](examples/output-example.md) — Concrete example of expected output format
 
@@ -61,7 +66,7 @@ match (spec status) {
   new      => AskUserQuestion:
                 Start with Requirements (recommended) — define requirements first
                 Start with Solution — skip to technical design
-                Start with Factory — skip to decomposition (requires existing requirements + solution)
+                Start with Decomposition — skip to tier classification (requires existing requirements + solution)
   existing => Analyze document status (check for [NEEDS CLARIFICATION] markers).
               Suggest continuation point based on incomplete documents.
 }
@@ -101,17 +106,38 @@ Focus: HOW the solution will be built. Scope: design decisions and interfaces �
 
 If CONSTITUTION.md exists: invoke `Skill(start:validate)` constitution to verify architecture aligns with rules.
 
-AskUserQuestion: Continue to Factory (recommended) | Finalize Solution
+AskUserQuestion: Continue to Decomposition (recommended) | Finalize Solution
 
-### 6. Decompose for Factory
+### 6. Decompose
 
-Invoke `Skill(start:specify-factory)`.
+Read `reference/classifier.md` and apply the complexity heuristic to requirements.md and solution.md.
 
-Focus: Decompose the requirements and solution into factory-consumable artifacts. Produces unit specs, holdout scenarios, and an execution manifest.
+Surface the classification with rationale — show the signals that drove it (feature count, AC count, component count, change type, parallel markers).
 
-The factory skill reads requirements.md + solution.md, decomposes into units, generates codebase-grounded scenarios for user review, and assembles the manifest with execution order.
+AskUserQuestion (header "Decompose"):
+  Direct      — implement straight from requirements + solution
+                (recommended for fixes, refactors, single-AC changes)
+  Standard    — linear plan with phases, parallel sections, TDD per task
+                (recommended for single-feature work)
+  Factory     — parallel units + holdout scenarios + retry loop
+                (recommended for multi-feature or multi-component work)
 
-AskUserQuestion: Finalize specification (recommended) | Revisit Factory
+Highlight the classifier's recommendation. The user may override freely.
+
+Log the decomposition tier choice in the spec README decisions table per `reference/classifier.md` decision-logging guidance.
+
+match (user choice) {
+  Direct   => skip to step 7 (no decomposition artifact written; implement-direct
+              will read requirements.md and solution.md directly).
+  Standard => Invoke `Skill(start:specify-standard)`.
+              Focus: Decompose the single-feature solution into linear phases with
+              embedded TDD tasks. Produces plan/README.md and plan/phase-N.md files.
+  Factory  => Invoke `Skill(start:specify-factory)`.
+              Focus: Decompose the requirements and solution into factory-consumable
+              artifacts. Produces unit specs, holdout scenarios, and a manifest.
+}
+
+AskUserQuestion: Finalize specification (recommended) | Revisit Decomposition
 
 ### 7. Finalize
 

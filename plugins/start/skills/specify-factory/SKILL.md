@@ -1,6 +1,6 @@
 ---
 name: specify-factory
-description: Decompose a specified feature into factory-consumable artifacts. Reads requirements.md and solution.md, then produces unit specs (units/*.md), holdout scenarios (scenarios/**/*.md), and a decomposition manifest (manifest.md). Replaces specify-plan for Dark Factory workflow.
+description: Decompose a multi-feature or multi-component specification into factory-consumable artifacts. Use this for high-complexity work — multiple features, three or more components, or parallel-eligible workstreams.
 user-invocable: true
 argument-hint: "spec ID to decompose (e.g., 002)"
 ---

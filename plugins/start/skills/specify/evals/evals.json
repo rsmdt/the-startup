@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "Specify a real-time notification system with WebSocket support",
-      "expected_output": "Full specification workflow: requirements, solution, factory decomposition",
+      "expected_output": "Full specification workflow: requirements, solution, classifier-driven decomposition",
       "expectations": [
         "Invoked specify-meta to scaffold the spec directory",
         "Created .start/specs/NNN-*/ directory structure",
@@ -12,33 +12,75 @@
         "Invoked specify-requirements skill for requirements.md",
         "Waited for user approval before proceeding to solution",
         "Invoked specify-solution skill for solution.md",
-        "Waited for user approval before proceeding to factory",
-        "Invoked specify-factory skill for units, scenarios, and manifest",
-        "Logged decisions in spec README.md"
+        "Waited for user approval before proceeding to decomposition",
+        "Read reference/classifier.md and surfaced rationale before tier selection",
+        "Presented Direct, Standard, and Factory options via AskUserQuestion at step 6",
+        "Invoked specify-standard or specify-factory based on user choice (or skipped if Direct)",
+        "Logged the decomposition tier choice in spec README decisions table"
       ]
     },
     {
       "id": 2,
       "prompt": "Specify a feature, but skip requirements — start directly from solution design",
-      "expected_output": "Skip requirements phase, start from solution, continue to factory",
+      "expected_output": "Skip requirements phase, start from solution, continue to decomposition",
       "expectations": [
-        "Offered user the choice to start from Requirements, Solution, or Factory",
+        "Offered user the choice to start from Requirements, Solution, or Decomposition",
         "Accepted user's choice to skip requirements",
         "Logged the skip decision in spec README.md",
         "Proceeded directly to specify-solution",
-        "Still continued to specify-factory after solution"
+        "Still continued to decomposition step after solution"
       ]
     },
     {
       "id": 3,
-      "prompt": "Resume spec 002 which has requirements.md and solution.md completed but no factory artifacts",
-      "expected_output": "Detect existing state and suggest continuing to factory decomposition",
+      "prompt": "Resume spec 002 which has requirements.md and solution.md completed but no decomposition artifacts",
+      "expected_output": "Detect existing state and route to classifier for tier selection",
       "expectations": [
         "Invoked specify-meta to read spec status",
         "Detected requirements.md and solution.md as completed",
-        "Detected no manifest.md, units/, or scenarios/",
-        "Suggested continuing to Factory phase",
+        "Detected no plan/, manifest.md, units/, or scenarios/",
+        "Suggested continuing to decomposition step",
         "Did NOT re-run requirements or solution phases"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Run the specify orchestrator on spec 005 (a single-line rate-limit middleware fix). The fixture has requirements.md and solution.md already complete. Reach step 6 and surface the classifier rationale.",
+      "expected_output": "Classifier recommends Direct tier; rationale cites change_type=fix and minimal surface area",
+      "expectations": [
+        "Read requirements.md before classifying",
+        "Read solution.md before classifying",
+        "Computed feature_count, ac_count, component_count, change_type",
+        "Surfaced the classifier rationale to the user",
+        "Recommended Direct tier",
+        "Presented all three options (Direct, Standard, Factory) via AskUserQuestion",
+        "Did not auto-invoke specify-standard or specify-factory without user confirmation"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Run the specify orchestrator on spec 003 (a single-feature notification API with 2 components). Reach step 6.",
+      "expected_output": "Classifier recommends Standard tier; rationale cites single feature and 2 components",
+      "expectations": [
+        "Read requirements.md and solution.md before classifying",
+        "feature_count == 1 detected",
+        "component_count <= 2 detected",
+        "Recommended Standard tier",
+        "Surfaced rationale with the specific signals",
+        "Presented all three options via AskUserQuestion"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Run the specify orchestrator on spec 006 (multi-feature auth with 4 components, 8 ACs across 3 features). Reach step 6.",
+      "expected_output": "Classifier recommends Factory tier; rationale cites multi-feature and 4 components",
+      "expectations": [
+        "Read requirements.md and solution.md before classifying",
+        "feature_count >= 2 detected",
+        "component_count >= 3 detected",
+        "Recommended Factory tier",
+        "Surfaced rationale with the specific signals",
+        "Presented all three options via AskUserQuestion"
       ]
     }
   ]
