@@ -1,0 +1,104 @@
+{
+  "skill_name": "implement-standard",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Implement spec 003 which has a plan/ directory with three phase files (phase-1.md, phase-2.md, phase-3.md), all status: pending.",
+      "expected_output": "Phase loop executes: each phase file processed in order, tasks delegated to specialist subagents via TDD, frontmatter status transitions tracked, README checkbox flips on completion",
+      "expectations": [
+        "Read plan/README.md and parsed phase checklist",
+        "Read each phase file's YAML frontmatter to recover status",
+        "Presented phase discovery before starting execution",
+        "Marked phase 1 status as in_progress in phase-1.md frontmatter",
+        "Loaded only phase 1 tasks into TodoWrite (one phase at a time)",
+        "Spawned subagents via the Agent or Task tool for phase 1 task delegation",
+        "Did not implement code directly in the orchestrator",
+        "Ran Skill(start:validate) drift check at phase boundary",
+        "Updated phase-1.md frontmatter to status: completed after phase 1",
+        "Updated plan/README.md checkbox from - [ ] to - [x] for phase 1",
+        "Asked user via AskUserQuestion before continuing to phase 2",
+        "Repeated for phases 2 and 3",
+        "Presented completion summary after all phases done"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Implement spec 004 which has a plan/ directory where phase-1.md is status: completed and phase-2.md is status: in_progress. Resume from where it left off.",
+      "expected_output": "Skips phase 1, resumes phase 2 mid-flight, continues to phase 3",
+      "expectations": [
+        "Detected phase 1 status: completed and skipped it (did not re-execute)",
+        "Detected phase 2 status: in_progress and resumed it",
+        "Did not modify phase 1 file or its README checkbox",
+        "Phase 2 task subagent prompt did not include phase 1 work as fresh",
+        "After phase 2 completion, updated frontmatter and README checkbox",
+        "Continued to phase 3",
+        "Final summary reports phases 1, 2, 3 all completed"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Implement spec 005 whose phase-2.md has three tasks: T2.1 and T2.2 marked [parallel: true], T2.3 with no parallel marker.",
+      "expected_output": "Parallel tasks fan out in a single response; sequential task runs after they complete",
+      "expectations": [
+        "Spawned subagents for T2.1 and T2.2 in a single response (parallel fan-out)",
+        "Did NOT wait for T2.1 to finish before spawning T2.2",
+        "Waited for both T2.1 and T2.2 results before launching T2.3",
+        "T2.3 spawned only after both parallel tasks resolved",
+        "Updated task checkboxes in phase-2.md as each task completed",
+        "Did not implement code directly in the orchestrator"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Implement spec 006 where phase-1 completes successfully but the validate skill reports drift: a function 'computeFee' was added that is not specified in solution.md.",
+      "expected_output": "Drift surfaced with options; orchestrator does not silently proceed",
+      "expectations": [
+        "Ran Skill(start:validate) drift check after phase 1 task delegation",
+        "Detected the unplanned 'computeFee' addition (Extra drift type)",
+        "Presented drift findings to the user",
+        "Offered options via AskUserQuestion: Acknowledge, Update impl, Update spec, Defer",
+        "Did NOT mark the phase completed before the drift was resolved",
+        "Did NOT flip the README checkbox before the drift was resolved"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Implement spec 007 which has a plan/ directory and the project root has a CONSTITUTION.md with L1 rule 'no console.log in production code'. A subagent's implementation introduces console.log calls.",
+      "expected_output": "Constitution check at phase boundary blocks progression",
+      "expectations": [
+        "Ran Skill(start:validate) constitution check at the phase boundary",
+        "Detected the L1 violation",
+        "Did NOT mark the phase completed",
+        "Did NOT proceed to the next phase while the L1 violation was unresolved",
+        "Surfaced the violation to the user with options to fix"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Run /start:implement-standard on spec 008 which has only requirements.md and solution.md but no plan/ directory.",
+      "expected_output": "Reports that this skill expects a plan/ directory and points the user to specify-standard or the dispatcher",
+      "expectations": [
+        "Detected that plan/README.md is missing",
+        "Did NOT spawn task subagents",
+        "Reported the missing plan/ directory clearly",
+        "Suggested the user run /start:specify (then choose Standard) or /start:implement (autodetect)"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Complete a standard implementation where all phases finished successfully. Show the final summary.",
+      "expected_output": "Completion summary with the required fields per reference/output-format.md",
+      "expectations": [
+        "All phase-N.md files have frontmatter status: completed",
+        "All plan/README.md phase checkboxes are - [x]",
+        "Completion summary includes spec ID and feature name",
+        "Completion summary includes phases completed / total phases",
+        "Completion summary includes total tasks executed",
+        "Completion summary includes test status (passing or failure details)",
+        "Completion summary includes total files changed count",
+        "Completion summary includes mode used (Standard or Agent Team)",
+        "Offered git integration options (Commit + PR / Commit only / Skip)"
+      ]
+    }
+  ]
+}
