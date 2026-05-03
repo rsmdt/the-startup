@@ -1,0 +1,98 @@
+{
+  "skill_name": "implement-direct",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Implement spec 005 which is a small bug fix. The spec has only requirements.md and solution.md describing a one-line fix in rate-limit middleware. No plan/ or manifest.md exist.",
+      "expected_output": "Single delivery unit decomposed, delegated via TDD to a subagent, drift check run, completion summary presented",
+      "expectations": [
+        "Read requirements.md before decomposing",
+        "Read solution.md before decomposing",
+        "Read AGENTS.md for codebase orientation",
+        "Did NOT create plan/, manifest.md, units/, or scenarios/ artifacts",
+        "Decomposed into 1-3 delivery units (not phases)",
+        "Presented decomposition to user before delegating",
+        "Spawned at least one subagent via the Agent or Task tool",
+        "Subagent prompt included relevant requirements/solution sections",
+        "Subagent prompt included TDD instruction (failing test first, minimal code, refactor)",
+        "Did not implement code directly in the orchestrator",
+        "Ran Skill(start:validate) drift check after delegation completed",
+        "Presented completion summary with files changed, test status, drift findings"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Implement spec 006 which has requirements.md with 8 acceptance criteria across 3 features and solution.md describing 4 components. No plan/ or manifest.md exist.",
+      "expected_output": "Recommend the user re-run /start:specify and choose Standard or Factory tier rather than proceed with direct mode",
+      "expectations": [
+        "Read requirements.md and solution.md before recommending",
+        "Detected that decomposition would yield more than 3 delivery units",
+        "Recommended re-running /start:specify with Standard or Factory tier",
+        "Did not proceed with delegation",
+        "Did not create plan/ or manifest.md artifacts"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Implement based on this freeform brief: 'Add a /version endpoint that returns the package.json version number. There is no spec for this — just do it.' The argument passed is the brief text, not a spec ID.",
+      "expected_output": "Treats the argument as a context document; produces 1 delivery unit; delegates with TDD; runs drift/constitution checks where applicable",
+      "expectations": [
+        "Did NOT invoke specify-meta to look up a spec ID (because none was provided)",
+        "Treated the argument text as the primary context document",
+        "Read AGENTS.md for project orientation",
+        "Decomposed into 1 delivery unit (single endpoint)",
+        "Spawned a subagent with the brief and AGENTS.md as context",
+        "Subagent prompt included TDD instruction (failing test first, minimal code, refactor)",
+        "Did NOT create plan/, manifest.md, units/, or scenarios/ artifacts",
+        "Presented completion summary including drift findings (or noted that no spec exists to drift against)"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Implement spec 007 (a small fix). The subagent's implementation introduces a regression: an existing passing test now fails.",
+      "expected_output": "Drift / regression detected; orchestrator does not declare completion silently",
+      "expectations": [
+        "Verified test status after delegation",
+        "Detected the regression in the existing test suite",
+        "Reported the regression with the specific failing test names",
+        "Did NOT report the implementation as complete with passing tests",
+        "Offered options to address: re-delegate with the failure as guidance, or escalate to user"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Implement spec 008 (a small fix). The project root has a CONSTITUTION.md with L1 rule 'all new modules must export a typed interface'. The subagent's implementation adds a new module with no type declarations.",
+      "expected_output": "Constitution check blocks completion until the L1 violation is resolved",
+      "expectations": [
+        "Ran Skill(start:validate) constitution check after delegation",
+        "Detected the L1 violation",
+        "Did NOT present the work as complete",
+        "Surfaced the violation to the user with options to fix"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Run /start:implement-direct with no argument and no detectable context (no spec ID, no brief, no requirements/solution).",
+      "expected_output": "Reports that this skill needs at least one context document and asks the user for a brief or path",
+      "expectations": [
+        "Did NOT spawn subagents",
+        "Did NOT create any artifacts",
+        "Reported clearly that no context was found",
+        "Asked the user for a brief or file path to proceed"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Implement spec 009 which decomposes into exactly 2 delivery units where unit B depends on unit A's output. Show the orchestrator handles the dependency.",
+      "expected_output": "Sequential delegation respecting the dependency; A completes before B is delegated",
+      "expectations": [
+        "Decomposed into 2 delivery units with the dependency declared",
+        "Did NOT spawn both subagents in parallel (dependency forces sequential)",
+        "Spawned subagent for unit A first, waited for completion",
+        "Spawned subagent for unit B with A's relevant output included as context",
+        "Updated TodoWrite as each unit completed",
+        "Ran drift check once after both units completed (not after each)"
+      ]
+    }
+  ]
+}
