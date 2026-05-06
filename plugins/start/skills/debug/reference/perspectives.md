@@ -34,3 +34,7 @@ Not all perspectives are needed for every bug. Select based on hypotheses from P
 - Intermittent or timing-related → 📊 State
 - Works locally but not in CI/prod → 🌍 Environment
 - Regression or "worked before" → 🕐 Recent Changes
+
+## When reading the source isn't enough
+
+The perspectives above orient *what* to look at. When reading the code at the suspected site doesn't reveal the cause, see `investigation-ladder.md` for *how* to escalate — probe logging, state capture, failing tests, bisection. Forming a third hypothesis instead of descending the ladder is the most common debugging failure.
