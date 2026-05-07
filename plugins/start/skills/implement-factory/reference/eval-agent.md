@@ -32,6 +32,17 @@ Test each scenario through the external interface only.
 DO NOT read source code files, unit spec files, or implementation details.
 DO NOT access any files under plugins/, src/, or .start/specs/*/units/.
 
+## File naming
+
+When you write evaluation tests (translating stubs or authoring from scenarios),
+name the files and test functions after the **feature or component under test**.
+Do NOT include the unit ID anywhere in file paths, file names, or test function
+names — the unit ID is an internal orchestration label and must not leak into
+the codebase.
+
+  ✅ tests/integration/features/runs/test_audit_logger_eval.py
+  ❌ tests/integration/features/runs/test_al1_eval.py
+
 ## Reporting
 
 For each scenario, run 3 times. Report:

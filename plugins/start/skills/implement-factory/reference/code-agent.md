@@ -16,6 +16,16 @@ Codebase context: read AGENTS.md for project orientation.
 DO NOT read or access files in scenarios/ directories.
 DO NOT access any files under .start/specs/*/scenarios/.
 
+## File naming
+
+When you create test files (TDD red-green or supporting integration tests),
+name them after the **feature or component under test**. Do NOT embed the
+unit ID in file paths, file names, or test function names — the unit ID is
+an internal orchestration label and must not leak into the codebase.
+
+  ✅ tests/unit/features/runs/test_run_repository.py
+  ❌ tests/unit/features/runs/test_rr1_repository.py
+
 ## TDD Process (mandatory)
 
 Follow red-green-refactor for EACH requirement in the spec:

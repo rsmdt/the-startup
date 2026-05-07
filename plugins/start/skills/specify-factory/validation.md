@@ -33,6 +33,7 @@ Use this checklist to validate factory artifacts before marking the spec as read
 - [ ] **Uses project conventions** — Stubs use the project's assertion library, HTTP client, naming patterns
 - [ ] **Marked pending** — All stubs are skipped/pending until evaluation phase
 - [ ] **Tests external interface** — Stubs make HTTP/browser/CLI calls, never import internal modules
+- [ ] **No unit IDs in paths or names** — File paths, file names, and test function names are derived from the feature/component under test, never from the unit ID. Run: `grep -E 'test_[a-z]{1,3}\d+_' specDirectory/scenarios/*/e2e-stubs.md` — should return no matches.
 
 ## Manifest Quality
 

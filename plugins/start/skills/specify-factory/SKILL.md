@@ -64,6 +64,7 @@ State {
 - Write scenarios that reference internal implementation details — scenarios test observable behavior only.
 - Create units that depend on each other circularly.
 - Proceed past scenario generation without user review.
+- Embed unit IDs in stub file paths, test file names, or test function names. Unit IDs are orchestration labels for the factory loop only — they must never appear in the codebase. Name files after the feature/component under test (e.g. `test_audit_logger.py`, not `test_al1_audit.py`).
 
 ## Reference Materials
 
