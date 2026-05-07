@@ -1,5 +1,5 @@
 {
-  "skill_name": "implement-standard",
+  "skill_name": "implement-incremental",
   "evals": [
     {
       "id": 1,
@@ -75,18 +75,18 @@
     },
     {
       "id": 6,
-      "prompt": "Run /start:implement-standard on spec 008 which has only requirements.md and solution.md but no plan/ directory.",
-      "expected_output": "Reports that this skill expects a plan/ directory and points the user to specify-standard or the dispatcher",
+      "prompt": "Run /start:implement-incremental on spec 008 which has only requirements.md and solution.md but no plan/ directory.",
+      "expected_output": "Reports that this skill expects a plan/ directory and points the user to specify-incremental or the dispatcher",
       "expectations": [
         "Detected that plan/README.md is missing",
         "Did NOT spawn task subagents",
         "Reported the missing plan/ directory clearly",
-        "Suggested the user run /start:specify (then choose Standard) or /start:implement (autodetect)"
+        "Suggested the user run /start:specify (then choose Incremental) or /start:implement (autodetect)"
       ]
     },
     {
       "id": 7,
-      "prompt": "Complete a standard implementation where all phases finished successfully. Show the final summary.",
+      "prompt": "Complete an incremental implementation where all phases finished successfully. Show the final summary.",
       "expected_output": "Completion summary with the required fields per reference/output-format.md",
       "expectations": [
         "All phase-N.md files have frontmatter status: completed",

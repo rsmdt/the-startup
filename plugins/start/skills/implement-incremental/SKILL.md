@@ -1,5 +1,5 @@
 ---
-name: implement-standard
+name: implement-incremental
 description: Linear phase-loop orchestrator for single-feature implementation plans. Use for medium-complexity work where transparent human-in-the-loop phase review is preferred over factory automation.
 user-invocable: false
 argument-hint: "spec ID to implement (e.g., 002), or file path"
@@ -79,7 +79,7 @@ For each discovered phase file:
   Read YAML frontmatter to get status (pending | in_progress | completed).
 Populate phases[] with number, title, file path, and status.
 
-If plan/README.md does not exist, report an error: this skill requires a plan/ directory. Refer the user to the specify-standard skill to create one, or to the implement skill (which auto-detects tier).
+If plan/README.md does not exist, report an error: this skill requires a plan/ directory. Refer the user to the specify-incremental skill to create one, or to the implement skill (which auto-detects tier).
 
 Present discovered phases with their statuses. Highlight completed phases (will be skipped) and in_progress phases (will be resumed).
 

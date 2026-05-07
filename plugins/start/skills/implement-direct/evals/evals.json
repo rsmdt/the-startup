@@ -23,11 +23,11 @@
     {
       "id": 2,
       "prompt": "Implement spec 006 which has requirements.md with 8 acceptance criteria across 3 features and solution.md describing 4 components. No plan/ or manifest.md exist.",
-      "expected_output": "Recommend the user re-run /start:specify and choose Standard or Factory tier rather than proceed with direct mode",
+      "expected_output": "Recommend the user re-run /start:specify and choose Incremental or Factory tier rather than proceed with direct mode",
       "expectations": [
         "Read requirements.md and solution.md before recommending",
         "Detected that decomposition would yield more than 3 delivery units",
-        "Recommended re-running /start:specify with Standard or Factory tier",
+        "Recommended re-running /start:specify with Incremental or Factory tier",
         "Did not proceed with delegation",
         "Did not create plan/ or manifest.md artifacts"
       ]

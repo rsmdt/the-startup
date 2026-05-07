@@ -1,6 +1,6 @@
 ---
 name: specify
-description: Create a comprehensive specification from a brief description. Runs requirements gathering, solution design, and decomposition — routing decomposition to one of three tiers based on a complexity classifier: Direct (no plan), Standard (linear phase plan), or Factory (parallel units with holdout scenarios).
+description: Create a comprehensive specification from a brief description. Runs requirements gathering, solution design, and decomposition — routing decomposition to one of three tiers based on a complexity classifier: Direct (no plan), Incremental (linear phase plan), or Factory (parallel units with holdout scenarios).
 user-invocable: true
 argument-hint: "describe your feature or requirement to specify"
 ---
@@ -17,7 +17,7 @@ SpecStatus {
   requirements: Complete | Incomplete | Skipped
   solution:     Complete | Incomplete | Skipped
   decomposition: {
-    tier:   Direct | Standard | Factory | None
+    tier:   Direct | Incremental | Factory | None
     status: Complete | Incomplete | Skipped
   }
   readiness: HIGH | MEDIUM | LOW
@@ -28,7 +28,7 @@ State {
   spec: string                   // resolved spec directory path (from specify-meta)
   perspectives = []
   mode: Standard | Agent Team
-  classification: Direct | Standard | Factory   // from reference/classifier.md
+  classification: Direct | Incremental | Factory   // from reference/classifier.md
   status: SpecStatus
 }
 
@@ -52,7 +52,7 @@ State {
 ## Reference Materials
 
 - [Perspectives](reference/perspectives.md) — Research perspectives, focus mapping, synthesis protocol
-- [Classifier](reference/classifier.md) — Complexity heuristic for routing to Direct, Standard, or Factory tier
+- [Classifier](reference/classifier.md) — Complexity heuristic for routing to Direct, Incremental, or Factory tier
 - [Output Format](reference/output-format.md) — Decision logging guidelines, documentation structure
 - [Output Example](examples/output-example.md) — Concrete example of expected output format
 
@@ -117,7 +117,7 @@ Surface the classification with rationale — show the signals that drove it (fe
 Ask the user to choose the decomposition tier (under header "Decompose"):
 
 - **Direct** — implement straight from requirements + solution (recommended for fixes, refactors, single-AC changes)
-- **Standard** — linear plan with phases, parallel sections, TDD per task (recommended for single-feature work)
+- **Incremental** — linear plan with phases, parallel sections, TDD per task (recommended for single-feature work)
 - **Factory** — parallel units + holdout scenarios + retry loop (recommended for multi-feature or multi-component work)
 
 Highlight the classifier's recommendation. The user may override freely.
@@ -127,7 +127,7 @@ Log the decomposition tier choice in the spec README decisions table per `refere
 match (user choice) {
   Direct   => skip to step 7 (no decomposition artifact written; implement-direct
               will read requirements.md and solution.md directly).
-  Standard => Use the specify-standard skill.
+  Incremental => Use the specify-incremental skill.
               Focus: Decompose the single-feature solution into linear phases with
               embedded TDD tasks.
   Factory  => Use the specify-factory skill.
