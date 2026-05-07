@@ -29,7 +29,7 @@ These skills are invoked by the user via slash commands (e.g., `/specify`). Unli
 
 Create comprehensive specifications from brief descriptions through deep research and specialist agent coordination, then route to one of three decomposition tiers based on complexity.
 
-**Purpose:** Transform ideas into implementation-ready specifications with product requirements, solution design, and a tier-appropriate decomposition (Direct, Standard, or Factory)
+**Purpose:** Transform ideas into implementation-ready specifications with product requirements, solution design, and a tier-appropriate decomposition (Direct, Incremental, or Factory)
 
 **Usage:**
 ```bash
@@ -40,7 +40,7 @@ Create comprehensive specifications from brief descriptions through deep researc
 **Key Features:**
 - **Auto-incrementing Spec IDs** - Automatically creates numbered directories (001, 002, etc.)
 - **Resume Capability** - Can resume work on existing specifications by ID
-- **Complexity Classifier** - Inspects requirements.md and solution.md and recommends Direct, Standard, or Factory tier with rationale
+- **Complexity Classifier** - Inspects requirements.md and solution.md and recommends Direct, Incremental, or Factory tier with rationale
 - **Three-Tier Routing** - User confirms or overrides; orchestrator dispatches to the matching decomposition skill
 - **Pattern Documentation** - Automatically documents discovered patterns in `docs/patterns/`
 - **Interface Documentation** - Captures external service contracts in `docs/interfaces/`
@@ -52,7 +52,7 @@ Create comprehensive specifications from brief descriptions through deep researc
 | Tier | When | Artifact |
 |------|------|----------|
 | **Direct** | Fixes, refactors, doc changes, single-AC features | _none — implement reads requirements + solution directly_ |
-| **Standard** | Single feature with one or two components | `plan/README.md` + `plan/phase-N.md` |
+| **Incremental** | Single feature with one or two components | `plan/README.md` + `plan/phase-N.md` |
 | **Factory** | Multi-feature, multi-component, parallel work | `manifest.md` + `units/{id}.md` + `scenarios/{unit-id}/{name}.md` |
 
 <details>
@@ -64,7 +64,7 @@ Create comprehensive specifications from brief descriptions through deep researc
 - **solution.md** - Technical architecture, system components, data models, technology stack, security and performance considerations
 - **Decomposition (one of three families):**
   - Direct: no extra files
-  - Standard: `plan/README.md` (manifest) + `plan/phase-N.md` (per-phase TDD tasks with parallel markers and spec references)
+  - Incremental: `plan/README.md` (manifest) + `plan/phase-N.md` (per-phase TDD tasks with parallel markers and spec references)
   - Factory: `manifest.md` (execution graph) + `units/` (atomic implementation specs) + `scenarios/` (holdout evaluation cases)
 
 ```mermaid
@@ -74,9 +74,9 @@ flowchart TD
     C --> END[Ready for /implement 001]
     B --> |new| D[Requirements Gathering<br/>Create requirements.md if needed]
     D --> E[Technical Research<br/>Create solution.md if needed, document patterns, interfaces]
-    E --> F[Classify Complexity<br/>Direct vs Standard vs Factory]
+    E --> F[Classify Complexity<br/>Direct vs Incremental vs Factory]
     F --> |Direct| END
-    F --> |Standard| G[Standard Decomposition<br/>Create plan/README.md + phase-N.md]
+    F --> |Incremental| G[Incremental Decomposition<br/>Create plan/README.md + phase-N.md]
     F --> |Factory| H[Factory Decomposition<br/>Create units/, scenarios/, manifest.md]
     G --> END
     H --> END
@@ -90,7 +90,7 @@ flowchart TD
 
 Execute a specification by autodetecting the decomposition tier and dispatching to the matching execution sub-skill.
 
-**Purpose:** Transform validated specifications into working code via the tier-appropriate orchestrator — Direct (no plan), Standard (phase loop), or Factory (parallel units with information-barrier agents and retry).
+**Purpose:** Transform validated specifications into working code via the tier-appropriate orchestrator — Direct (no plan), Incremental (phase loop), or Factory (parallel units with information-barrier agents and retry).
 
 **Usage:**
 ```bash
@@ -105,13 +105,13 @@ The `/implement` entry point inspects the spec directory and routes to the match
 | Detected artifact | Routes to | Behavior |
 |-------------------|-----------|----------|
 | `manifest.md` | `implement-factory` | Factory loop with information barriers, holdout scenarios, retry, satisfaction threshold |
-| `plan/README.md` | `implement-standard` | Linear phase loop with TDD-driven task delegation, drift checks, frontmatter status state machine |
+| `plan/README.md` | `implement-incremental` | Linear phase loop with TDD-driven task delegation, drift checks, frontmatter status state machine |
 | Only `requirements.md` and `solution.md` | `implement-direct` | Lightweight orchestration: 1–3 delivery units, drift check, no intermediate artifact |
 | Both `manifest.md` and `plan/` | _user is asked which pipeline to run_ | Ambiguous; explicit choice required |
 
 **Key Features (across tiers):**
 - **Tier-appropriate orchestration** - Each sub-skill is optimized for its complexity bracket
-- **Resumability** - All tiers support pausing and resuming (Standard via frontmatter status, Factory via manifest checkboxes)
+- **Resumability** - All tiers support pausing and resuming (Incremental via frontmatter status, Factory via manifest checkboxes)
 - **Drift Detection** - All tiers run `Skill(start:validate)` drift checks
 - **Constitution Enforcement** - L1/L2 violations block completion in all tiers
 - **Real-time Updates** - TodoWrite or TaskList tracking shows live progress
@@ -138,7 +138,7 @@ flowchart TD
 </details>
 
 <details>
-<summary><strong>View Details — Standard tier</strong></summary>
+<summary><strong>View Details — Incremental tier</strong></summary>
 
 Reads plan/README.md to discover phase files, executes each phase in order, and uses frontmatter status (`pending` / `in_progress` / `completed`) plus README checkboxes to track progress. For each phase, parallel-marked tasks are delegated concurrently and sequential tasks run in order. Phase boundaries are confirmation gates — drift detection runs after every phase, and the user can pause and resume at will.
 
@@ -162,7 +162,7 @@ flowchart TD
 <details>
 <summary><strong>View Details — Direct tier</strong></summary>
 
-Reads requirements.md and solution.md (and any other context document), decomposes into 1–3 delivery units, delegates each to a specialist subagent with TDD instructions, then runs drift and constitution checks. No plan/, manifest.md, units/, or scenarios/ artifacts are created. If decomposition would yield more than 3 delivery units, the orchestrator recommends re-running `/specify` and choosing Standard or Factory tier instead.
+Reads requirements.md and solution.md (and any other context document), decomposes into 1–3 delivery units, delegates each to a specialist subagent with TDD instructions, then runs drift and constitution checks. No plan/, manifest.md, units/, or scenarios/ artifacts are created. If decomposition would yield more than 3 delivery units, the orchestrator recommends re-running `/specify` and choosing Incremental or Factory tier instead.
 
 ```mermaid
 flowchart TD
@@ -645,16 +645,16 @@ The `start` plugin includes five autonomous skills that activate automatically b
 | `specify-meta` | Spec directory creation, README tracking, phase transitions |
 | `specify-requirements` | Product requirements template, validation, requirements gathering |
 | `specify-solution` | Solution design template, architecture design, ADR management |
-| `specify-standard` | Linear phase plan decomposition (single-feature work) |
+| `specify-incremental` | Linear phase plan decomposition (single-feature work) |
 | `specify-factory` | Unit decomposition, scenario generation, manifest assembly (multi-feature work) |
 
 ### Implementation Skills
 
 | Skill | Purpose |
 |-------|---------|
-| `implement` | Entry-point dispatcher; routes to implement-direct, implement-standard, or implement-factory |
+| `implement` | Entry-point dispatcher; routes to implement-direct, implement-incremental, or implement-factory |
 | `implement-direct` | Lightweight orchestration for fixes and small features (no plan or manifest) |
-| `implement-standard` | Linear phase loop for single-feature plans (`plan/` directory) |
+| `implement-incremental` | Linear phase loop for single-feature plans (`plan/` directory) |
 | `implement-factory` | Factory loop with information barriers and retry (`manifest.md` + `units/` + `scenarios/`) |
 
 ### Methodology Skills
@@ -940,8 +940,8 @@ Rich templates for structured documentation, co-located with their skills:
 plugins/start/skills/
 ├── specify-requirements/template.md     # Product requirements structure
 ├── specify-solution/template.md         # Solution design structure
-├── specify-standard/template.md         # Standard plan manifest (plan/README.md)
-├── specify-standard/templates/phase.md  # Per-phase template (plan/phase-N.md)
+├── specify-incremental/template.md         # Incremental plan manifest (plan/README.md)
+├── specify-incremental/templates/phase.md  # Per-phase template (plan/phase-N.md)
 ├── specify-factory/SKILL.md             # Factory decomposition (units, scenarios, manifest)
 └── document/templates/                  # Knowledge capture templates
     ├── domain-template.md               # Business rules

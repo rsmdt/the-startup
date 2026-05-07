@@ -97,7 +97,7 @@ Read all discovered context documents.
 Decompose the work into the smallest set of delivery units that covers all acceptance criteria:
 - Each unit has a clear title, area, references back to requirements/solution sections, and acceptance bar.
 - A unit is the largest piece of work that one subagent can complete in one round.
-- Aim for 1–3 units. If the natural decomposition exceeds 3 units, this work is not low-complexity — recommend the user re-run the specify skill and choose Standard or Factory.
+- Aim for 1–3 units. If the natural decomposition exceeds 3 units, this work is not low-complexity — recommend the user re-run the specify skill and choose Incremental or Factory.
 
 Present the decomposition. Ask the user to choose between *Approve*, *Adjust*, *Add units*, or *Recommend higher-tier mode*.
 

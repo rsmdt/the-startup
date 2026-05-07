@@ -1,6 +1,6 @@
 ---
 name: implement
-description: Implementation entry point. Use to execute a completed specification. Auto-detects the decomposition tier (Direct, Standard, or Factory) from spec artifacts and dispatches to the matching execution sub-skill.
+description: Implementation entry point. Use to execute a completed specification. Auto-detects the decomposition tier (Direct, Incremental, or Factory) from spec artifacts and dispatches to the matching execution sub-skill.
 user-invocable: true
 argument-hint: "spec ID to implement (e.g., 002), or file path"
 ---
@@ -14,8 +14,8 @@ Act as the implementation entry-point dispatcher. Resolve the spec, detect which
 ## Interface
 
 DispatchTarget {
-  tier: Direct | Standard | Factory
-  skill: implement-direct | implement-standard | implement-factory
+  tier: Direct | Incremental | Factory
+  skill: implement-direct | implement-incremental | implement-factory
   artifact: string                // path that triggered the dispatch
 }
 
@@ -51,7 +51,7 @@ This skill is a thin dispatcher and has no reference materials of its own.
 Each sub-skill owns its references, examples, and templates:
 
 - [implement-direct](../implement-direct/SKILL.md) — phase-less orchestrator for low-complexity work
-- [implement-standard](../implement-standard/SKILL.md) — linear phase loop for single-feature plans
+- [implement-incremental](../implement-incremental/SKILL.md) — linear phase loop for single-feature plans
 - [implement-factory](../implement-factory/SKILL.md) — factory loop with information barriers and retry
 
 ## Workflow
@@ -80,11 +80,11 @@ Apply the routing rules:
 ```
 match (artifacts) {
   manifest_md exists AND NOT plan_readme   => use the implement-factory skill
-  plan_readme exists AND NOT manifest_md   => use the implement-standard skill
+  plan_readme exists AND NOT manifest_md   => use the implement-incremental skill
   manifest_md exists AND plan_readme       => ask the user under header "Pipeline":
-                                                Factory   — run factory loop on manifest.md
-                                                Standard  — run phase loop on plan/
-                                                Abort     — exit without action
+                                                Factory      — run factory loop on manifest.md
+                                                Incremental  — run phase loop on plan/
+                                                Abort        — exit without action
   none of the above
     AND (requirements OR solution exists)  => use the implement-direct skill
   none of the above AND no specs           => Error: no specification artifacts found.
@@ -99,7 +99,7 @@ Detected: manifest.md → routing to implement-factory
 ```
 
 ```
-Detected: plan/README.md → routing to implement-standard
+Detected: plan/README.md → routing to implement-incremental
 ```
 
 ```
@@ -108,10 +108,10 @@ Detected: only requirements.md and solution.md → routing to implement-direct
 
 ### 4. Hand Off
 
-Use the chosen sub-skill (`implement-direct`, `implement-standard`, or `implement-factory`) with the same `$ARGUMENTS`.
+Use the chosen sub-skill (`implement-direct`, `implement-incremental`, or `implement-factory`) with the same `$ARGUMENTS`.
 
 Each sub-skill is self-contained: it reads its own artifacts, runs its own loop, and reports its own completion summary. The dispatcher does not post-process sub-skill output.
 
 ### Notes on tier mismatch
 
-If the spec README decision log records a tier (e.g., "Decomposition tier: Standard") but the corresponding artifact is missing (e.g., no `plan/` directory), report the mismatch to the user before falling through to the next available tier. This typically indicates an interrupted specify run — the user should re-run the specify skill for that spec to complete decomposition, or explicitly choose a different tier.
+If the spec README decision log records a tier (e.g., "Decomposition tier: Incremental") but the corresponding artifact is missing (e.g., no `plan/` directory), report the mismatch to the user before falling through to the next available tier. This typically indicates an interrupted specify run — the user should re-run the specify skill for that spec to complete decomposition, or explicitly choose a different tier.

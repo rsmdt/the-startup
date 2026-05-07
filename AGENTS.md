@@ -146,7 +146,7 @@ Specifications live in `.start/specs/[NNN]-[name]/` (legacy: `docs/specs/`):
 - `solution.md` - How to build it
 - One of three decomposition artifact families based on tier (chosen at `specify` step 6):
   - **Direct** — no decomposition artifact; `implement-direct` reads requirements + solution directly
-  - **Standard** — `plan/README.md` + `plan/phase-N.md` (linear phase plan with TDD-structured tasks)
+  - **Incremental** — `plan/README.md` + `plan/phase-N.md` (linear phase plan with TDD-structured tasks)
   - **Factory** — `manifest.md` + `units/{id}.md` + `scenarios/{unit-id}/{name}.md` (factory loop with information barriers and holdout scenarios)
 
 #### Tier selection
@@ -156,7 +156,7 @@ Specifications live in `.start/specs/[NNN]-[name]/` (legacy: `docs/specs/`):
 | Tier | When | Decomposition skill | Implementation skill |
 |------|------|---------------------|----------------------|
 | **Direct** | Fixes, refactors, doc changes, single-AC features | _none_ | `implement-direct` |
-| **Standard** | Single feature with one or two components | `specify-standard` | `implement-standard` |
+| **Incremental** | Single feature with one or two components | `specify-incremental` | `implement-incremental` |
 | **Factory** | Multi-feature, multi-component, parallel work | `specify-factory` | `implement-factory` |
 
 `/start:implement` autodetects which tier was chosen (by inspecting which artifacts exist) and dispatches to the matching execution sub-skill. Users always invoke `/start:specify` and `/start:implement` — sub-skills are called internally.

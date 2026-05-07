@@ -150,7 +150,7 @@ def read_spec(spec_id: str) -> None:
     if sdd:
         print(f'sdd = "{sdd}"')
 
-    # Standard plan artifacts: plan/ directory with README.md and phase-N.md files
+    # Incremental plan artifacts: plan/ directory with README.md and phase-N.md files
     plan_dir = spec_dir / "plan"
     if plan_dir.is_dir():
         print(f'plan_dir = "{plan_dir}"')
@@ -227,10 +227,10 @@ def create_factory_directories(spec_dir: Path) -> None:
     print("Created factory directories: units/, scenarios/")
 
 
-def create_plan_directory(spec_dir: Path, template_name: str = "specify-standard") -> None:
-    """Create plan/ directory with README.md from the standard plan template.
+def create_plan_directory(spec_dir: Path, template_name: str = "specify-incremental") -> None:
+    """Create plan/ directory with README.md from the incremental plan template.
 
-    Used for Standard-tier specs (linear phase-by-phase implementation plan).
+    Used for Incremental-tier specs (linear phase-by-phase implementation plan).
     """
     plan_dir = spec_dir / "plan"
     plan_dir.mkdir(parents=True, exist_ok=True)
@@ -261,8 +261,8 @@ def create_spec(feature_name: str, template: Optional[str] = None) -> None:
             if template == "specify-factory":
                 create_factory_directories(spec_dir)
                 return
-            if template == "specify-standard":
-                create_plan_directory(spec_dir, "specify-standard")
+            if template == "specify-incremental":
+                create_plan_directory(spec_dir, "specify-incremental")
                 return
 
             # Map template names to short filenames
@@ -304,8 +304,8 @@ def create_spec(feature_name: str, template: Optional[str] = None) -> None:
         # Decomposition-tier templates create directories instead of single files
         if template == "specify-factory":
             create_factory_directories(spec_dir)
-        elif template == "specify-standard":
-            create_plan_directory(spec_dir, "specify-standard")
+        elif template == "specify-incremental":
+            create_plan_directory(spec_dir, "specify-incremental")
         else:
             filename_map = {
                 "specify-requirements": "requirements.md",

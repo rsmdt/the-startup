@@ -1,5 +1,5 @@
 ---
-name: specify-standard
+name: specify-incremental
 description: Decompose a single-feature specification into a linear, phase-by-phase implementation plan. Use this for medium-complexity work — single feature, one or two components — where transparent human-in-the-loop phase review is preferred over factory automation.
 user-invocable: false
 argument-hint: "spec ID to decompose (e.g., 002)"
@@ -57,7 +57,7 @@ State {
 - Keep plan/README.md as the manifest with phase links and checklist.
 - All tasks trace back to requirements.md or solution.md.
 - Parallel tasks can actually run independently.
-- Leave the `plan/README.md` phases checklist in the exact format `- [ ] [Phase N: Title](phase-N.md)` — this format is parsed by the implement-standard skill for phase discovery and status tracking.
+- Leave the `plan/README.md` phases checklist in the exact format `- [ ] [Phase N: Title](phase-N.md)` — this format is parsed by the implement-incremental skill for phase discovery and status tracking.
 
 **Never:**
 - Include time estimates — focus on what, not when.

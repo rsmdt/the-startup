@@ -20,7 +20,7 @@ Always include:
 - Context documents missing (note as advisory, not blocking)
 - Recommended decomposition (number of delivery units)
 
-If decomposition would yield more than 3 units, recommend the user re-run `/start:specify` and select Standard or Factory tier.
+If decomposition would yield more than 3 units, recommend the user re-run `/start:specify` and select Incremental or Factory tier.
 
 ## Unit Result Guidelines
 

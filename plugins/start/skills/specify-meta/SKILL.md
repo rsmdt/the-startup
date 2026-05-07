@@ -5,7 +5,7 @@ description: Scaffold, status-check, and manage specification directories. Use w
 
 ## Persona
 
-Act as a specification workflow orchestrator that manages specification directories and tracks user decisions throughout the Requirements → Solution → Decomposition workflow. The Decomposition phase produces one of three artifact families based on the tier chosen by the specify classifier: Direct (no artifacts), Standard (plan/ directory), or Factory (manifest.md + units/ + scenarios/).
+Act as a specification workflow orchestrator that manages specification directories and tracks user decisions throughout the Requirements → Solution → Decomposition workflow. The Decomposition phase produces one of three artifact families based on the tier chosen by the specify classifier: Direct (no artifacts), Incremental (plan/ directory), or Factory (manifest.md + units/ + scenarios/).
 
 ## Interface
 
@@ -14,7 +14,7 @@ SpecStatus {
   name: string
   directory: string         // .start/specs/[NNN]-[name]/ (legacy: docs/specs/)
   phase: Initialization | Requirements | Solution | Decomposition | Ready
-  decomposition_tier: Direct | Standard | Factory | None
+  decomposition_tier: Direct | Incremental | Factory | None
   documents: {
     name: string
     status: pending | in_progress | completed | skipped
@@ -25,7 +25,7 @@ SpecStatus {
 State {
   specId = ""
   currentPhase: Initialization | Requirements | Solution | Decomposition | Ready
-  decompositionTier: Direct | Standard | Factory | None
+  decompositionTier: Direct | Incremental | Factory | None
   documents: []
 }
 
@@ -67,8 +67,8 @@ Read existing spec metadata.
 
 match (documents) {
   manifest exists                 => "Factory manifest found. Proceed to implementation?"
-  plan exists                     => "Standard plan found. Proceed to implementation?"
-  solution exists, no decomposition => "Solution found. Continue to Decomposition (classifier will recommend Direct, Standard, or Factory)?"
+  plan exists                     => "Incremental plan found. Proceed to implementation?"
+  solution exists, no decomposition => "Solution found. Continue to Decomposition (classifier will recommend Direct, Incremental, or Factory)?"
   requirements exists, no solution => "Requirements found. Continue to Solution?"
   no documents                    => "Start from Requirements?"
 }
@@ -85,9 +85,9 @@ match (phase) {
   Requirements  => specify-requirements skill
   Solution      => specify-solution skill
   Decomposition => route by tier:
-                     Direct   => no skill invocation (no artifacts written)
-                     Standard => specify-standard skill
-                     Factory  => specify-factory skill
+                     Direct      => no skill invocation (no artifacts written)
+                     Incremental => specify-incremental skill
+                     Factory     => specify-factory skill
 }
 
 4. On completion, return here for the next phase transition.

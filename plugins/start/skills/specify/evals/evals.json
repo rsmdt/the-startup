@@ -14,8 +14,8 @@
         "Invoked specify-solution skill for solution.md",
         "Waited for user approval before proceeding to decomposition",
         "Read reference/classifier.md and surfaced rationale before tier selection",
-        "Presented Direct, Standard, and Factory options via AskUserQuestion at step 6",
-        "Invoked specify-standard or specify-factory based on user choice (or skipped if Direct)",
+        "Presented Direct, Incremental, and Factory options via AskUserQuestion at step 6",
+        "Invoked specify-incremental or specify-factory based on user choice (or skipped if Direct)",
         "Logged the decomposition tier choice in spec README decisions table"
       ]
     },
@@ -53,19 +53,19 @@
         "Computed feature_count, ac_count, component_count, change_type",
         "Surfaced the classifier rationale to the user",
         "Recommended Direct tier",
-        "Presented all three options (Direct, Standard, Factory) via AskUserQuestion",
-        "Did not auto-invoke specify-standard or specify-factory without user confirmation"
+        "Presented all three options (Direct, Incremental, Factory) via AskUserQuestion",
+        "Did not auto-invoke specify-incremental or specify-factory without user confirmation"
       ]
     },
     {
       "id": 5,
       "prompt": "Run the specify orchestrator on spec 003 (a single-feature notification API with 2 components). Reach step 6.",
-      "expected_output": "Classifier recommends Standard tier; rationale cites single feature and 2 components",
+      "expected_output": "Classifier recommends Incremental tier; rationale cites single feature and 2 components",
       "expectations": [
         "Read requirements.md and solution.md before classifying",
         "feature_count == 1 detected",
         "component_count <= 2 detected",
-        "Recommended Standard tier",
+        "Recommended Incremental tier",
         "Surfaced rationale with the specific signals",
         "Presented all three options via AskUserQuestion"
       ]

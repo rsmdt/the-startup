@@ -24,9 +24,9 @@
 | **Tier** | {{DECOMPOSITION_TIER}} |
 | **Status** | {{DECOMPOSITION_STATUS}} |
 
-**Tier values**: `Direct` (no artifacts) | `Standard` (plan/) | `Factory` (manifest.md + units/ + scenarios/) | `None` (not yet chosen)
+**Tier values**: `Direct` (no artifacts) | `Incremental` (plan/) | `Factory` (manifest.md + units/ + scenarios/) | `None` (not yet chosen)
 
-For Standard tier, see `plan/README.md`.
+For Incremental tier, see `plan/README.md`.
 For Factory tier, see `manifest.md`, `units/`, `scenarios/`.
 For Direct tier, no decomposition artifacts are produced — implement-direct reads requirements.md and solution.md directly.
 
