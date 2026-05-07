@@ -52,7 +52,8 @@
 **10 slash commands across 3 phases.** Specify first, then build with confidence.
 
 **Key Features:**
-- **Spec-Driven Development** — PRD → SDD → Implementation Plan → Code
+- **Spec-Driven Development** — PRD → SDD → tier-appropriate decomposition → Code
+- **Three Decomposition Tiers** — Direct, Standard, Factory — `/specify` classifies complexity and `/implement` auto-dispatches
 - **Parallel Agent Execution** — Multiple specialists work simultaneously
 - **Quality Gates** — Built-in validation at every stage
 - **Zero Configuration** — Marketplace plugins, one-line install
@@ -129,13 +130,15 @@ The Agentic Startup follows **spec-driven development**: comprehensive specifica
 ┌──────────────────────────────────────────────────────────┐
 │                    BUILD (primary flow)                  │
 │                                                          │
-│  /specify ────► Create specs (Requirements + Solution + Factory) │
+│  /specify ────► Create specs (Requirements + Solution)   │
+│      │           ↳ Classifies complexity: Direct / Standard / Factory │
 │      │           ↳ Constitution checked on SDD           │
 │      ▼                                                   │
 │  /validate ───► Check quality (3 Cs framework)           │
 │      │           ↳ Constitution mode available           │
 │      ▼                                                   │
-│  /implement ──► Execute plan phase-by-phase              │
+│  /implement ──► Auto-dispatch by tier, then execute      │
+│      │           ↳ Direct (no plan) / Standard (phase loop) / Factory (parallel units) │
 │      │           ↳ Constitution + drift enforced         │
 │      ▼                                                   │
 │  /test ───────► Run tests, enforce ownership             │
@@ -167,20 +170,42 @@ The Agentic Startup follows **spec-driven development**: comprehensive specifica
 /specify Add real-time notification system with WebSocket support
 ```
 
-This creates a specification directory with three documents:
+This creates a specification directory with two foundational documents plus tier-specific decomposition artifacts:
 
 ```
 .start/specs/001-notification-system/
-├── requirements.md           # What to build and why
-├── solution.md               # How to build it technically
-├── manifest.md               # Decomposition manifest (units, dependencies, execution order)
-├── units/                    # Factory-sized specs (one per unit of work)
-│   └── *.md
-└── scenarios/                # Holdout evaluation scenarios per unit
-    └── {unit-id}/*.md
+├── requirements.md           # What to build and why  (always)
+├── solution.md               # How to build it technically  (always)
+│
+│  # Then ONE of these, chosen by the complexity classifier:
+│
+├── (Direct tier)             # Fixes, refactors, single-AC features
+│   └── no decomposition artifacts — implement reads requirements + solution directly
+│
+├── plan/                     # (Standard tier) — single feature, 1–2 components
+│   ├── README.md             #   Plan manifest
+│   └── phase-N.md            #   Per-phase TDD tasks
+│
+└── manifest.md               # (Factory tier) — multi-feature, parallel work
+    ├── units/                #   Atomic implementation specs
+    │   └── *.md
+    └── scenarios/            #   Holdout evaluation scenarios per unit
+        └── {unit-id}/*.md
 ```
 
 **The spec cycle may take 15-30 minutes.** Claude will research your codebase, ask clarifying questions, and produce comprehensive documents. The process naturally involves multiple back-and-forth exchanges.
+
+#### Three Decomposition Tiers
+
+`/specify` runs a complexity classifier at step 6 and recommends a tier. You can override the recommendation if you want a different level of ceremony.
+
+| Tier | When to use | Decomposition output | Implementation flow |
+|------|-------------|----------------------|---------------------|
+| **Direct** | Fixes, refactors, doc changes, single-AC features | _none_ — `requirements.md` + `solution.md` only | `implement-direct`: lightweight 1–3 unit orchestration, drift check, no intermediate artifact |
+| **Standard** | Single feature with one or two components | `plan/README.md` + `plan/phase-N.md` (linear phase plan with TDD tasks) | `implement-standard`: phase-by-phase loop with frontmatter status, human-in-the-loop review |
+| **Factory** | Multi-feature, multi-component, parallel-eligible work | `manifest.md` + `units/{id}.md` + `scenarios/{unit-id}/{name}.md` | `implement-factory`: parallel unit dispatch with information barriers, holdout scenarios, and retry to a satisfaction threshold |
+
+You always invoke `/specify` and `/implement` — the sub-skills (`specify-standard`, `specify-factory`, `implement-direct`, `implement-standard`, `implement-factory`) are dispatched internally. `/specify` selects a decomposition sub-skill based on the chosen tier (Direct creates no extra artifact); `/implement` autodetects the tier by inspecting which artifacts exist.
 
 #### Step 2: Handle Context Limits (Resume Pattern)
 
@@ -219,10 +244,10 @@ Validation is advisory—it provides recommendations but doesn't block you.
 ```
 
 Claude will:
-1. Parse the implementation plan
-2. Execute phases sequentially (with your approval between phases)
-3. Run tests after each task
-4. Use parallel agents within phases for speed
+1. Autodetect the decomposition tier by inspecting the spec directory (`plan/` → Standard, `manifest.md` → Factory, neither → Direct)
+2. Dispatch to the matching execution sub-skill (`implement-direct`, `implement-standard`, or `implement-factory`)
+3. Execute the work — phase-by-phase with approval gates (Standard), parallel units with information barriers and holdout scenarios (Factory), or lightweight 1–3 unit orchestration (Direct)
+4. Run tests after each task and use parallel specialist agents where the tier supports it
 
 **Large implementations may also need context resets.** Simply run `/implement 001` again in a fresh conversation—Claude tracks progress in the spec files.
 
@@ -271,8 +296,8 @@ What do you need to do?
 | Skill | Purpose | When to Use |
 |---------|---------|-------------|
 | `/constitution` | Create governance rules | Establish project-wide guardrails |
-| `/specify` | Create specifications | New features, complex changes |
-| `/implement` | Execute plans | After spec is validated |
+| `/specify` | Create specifications, classify complexity, decompose at the chosen tier | New features, fixes, refactors — any work that benefits from a written spec |
+| `/implement` | Auto-dispatch by tier (Direct / Standard / Factory) and execute | After spec is validated |
 | `/validate` | Check quality | Before implementation, after specs |
 | `/test` | Run tests, enforce ownership | After implementation, fixing bugs |
 | `/review` | Multi-agent code review | Before merging PRs |
@@ -552,7 +577,7 @@ Not just for specs created with `/specify`. `/implement` works with any markdown
 
 ### Non-Linear Specs
 
-Skip what you don't need. Start with a solution design, jump to the plan, or go full PRD → SDD → PLAN. Skipped phases are logged as decisions, not gaps.
+Skip what you don't need. Start with a solution design, jump straight to decomposition, or go full PRD → SDD → tier-appropriate decomposition. Skipped phases are logged as decisions, not gaps.
 
 ### Adversarial Debugging
 
