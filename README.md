@@ -53,7 +53,7 @@
 
 **Key Features:**
 - **Spec-Driven Development** — PRD → SDD → tier-appropriate decomposition → Code
-- **Three Decomposition Tiers** — Direct, Standard, Factory — `/specify` classifies complexity and `/implement` auto-dispatches
+- **Three Decomposition Tiers** — Direct, Incremental, Factory — `/specify` classifies complexity and `/implement` auto-dispatches
 - **Parallel Agent Execution** — Multiple specialists work simultaneously
 - **Quality Gates** — Built-in validation at every stage
 - **Zero Configuration** — Marketplace plugins, one-line install
@@ -131,14 +131,14 @@ The Agentic Startup follows **spec-driven development**: comprehensive specifica
 │                    BUILD (primary flow)                  │
 │                                                          │
 │  /specify ────► Create specs (Requirements + Solution)   │
-│      │           ↳ Classifies complexity: Direct / Standard / Factory │
+│      │           ↳ Classifies complexity: Direct / Incremental / Factory │
 │      │           ↳ Constitution checked on SDD           │
 │      ▼                                                   │
 │  /validate ───► Check quality (3 Cs framework)           │
 │      │           ↳ Constitution mode available           │
 │      ▼                                                   │
 │  /implement ──► Auto-dispatch by tier, then execute      │
-│      │           ↳ Direct (no plan) / Standard (phase loop) / Factory (parallel units) │
+│      │           ↳ Direct (no plan) / Incremental (phase loop) / Factory (parallel units) │
 │      │           ↳ Constitution + drift enforced         │
 │      ▼                                                   │
 │  /test ───────► Run tests, enforce ownership             │
@@ -182,7 +182,7 @@ This creates a specification directory with two foundational documents plus tier
 ├── (Direct tier)             # Fixes, refactors, single-AC features
 │   └── no decomposition artifacts — implement reads requirements + solution directly
 │
-├── plan/                     # (Standard tier) — single feature, 1–2 components
+├── plan/                     # (Incremental tier) — single feature, 1–2 components
 │   ├── README.md             #   Plan manifest
 │   └── phase-N.md            #   Per-phase TDD tasks
 │
@@ -202,10 +202,10 @@ This creates a specification directory with two foundational documents plus tier
 | Tier | When to use | Decomposition output | Implementation flow |
 |------|-------------|----------------------|---------------------|
 | **Direct** | Fixes, refactors, doc changes, single-AC features | _none_ — `requirements.md` + `solution.md` only | `implement-direct`: lightweight 1–3 unit orchestration, drift check, no intermediate artifact |
-| **Standard** | Single feature with one or two components | `plan/README.md` + `plan/phase-N.md` (linear phase plan with TDD tasks) | `implement-standard`: phase-by-phase loop with frontmatter status, human-in-the-loop review |
+| **Incremental** | Single feature with one or two components | `plan/README.md` + `plan/phase-N.md` (linear phase plan with TDD tasks) | `implement-incremental`: phase-by-phase loop with frontmatter status, human-in-the-loop review |
 | **Factory** | Multi-feature, multi-component, parallel-eligible work | `manifest.md` + `units/{id}.md` + `scenarios/{unit-id}/{name}.md` | `implement-factory`: parallel unit dispatch with information barriers, holdout scenarios, and retry to a satisfaction threshold |
 
-You always invoke `/specify` and `/implement` — the sub-skills (`specify-standard`, `specify-factory`, `implement-direct`, `implement-standard`, `implement-factory`) are dispatched internally. `/specify` selects a decomposition sub-skill based on the chosen tier (Direct creates no extra artifact); `/implement` autodetects the tier by inspecting which artifacts exist.
+You always invoke `/specify` and `/implement` — the sub-skills (`specify-incremental`, `specify-factory`, `implement-direct`, `implement-incremental`, `implement-factory`) are dispatched internally. `/specify` selects a decomposition sub-skill based on the chosen tier (Direct creates no extra artifact); `/implement` autodetects the tier by inspecting which artifacts exist.
 
 #### Step 2: Handle Context Limits (Resume Pattern)
 
@@ -244,9 +244,9 @@ Validation is advisory—it provides recommendations but doesn't block you.
 ```
 
 Claude will:
-1. Autodetect the decomposition tier by inspecting the spec directory (`plan/` → Standard, `manifest.md` → Factory, neither → Direct)
-2. Dispatch to the matching execution sub-skill (`implement-direct`, `implement-standard`, or `implement-factory`)
-3. Execute the work — phase-by-phase with approval gates (Standard), parallel units with information barriers and holdout scenarios (Factory), or lightweight 1–3 unit orchestration (Direct)
+1. Autodetect the decomposition tier by inspecting the spec directory (`plan/` → Incremental, `manifest.md` → Factory, neither → Direct)
+2. Dispatch to the matching execution sub-skill (`implement-direct`, `implement-incremental`, or `implement-factory`)
+3. Execute the work — phase-by-phase with approval gates (Incremental), parallel units with information barriers and holdout scenarios (Factory), or lightweight 1–3 unit orchestration (Direct)
 4. Run tests after each task and use parallel specialist agents where the tier supports it
 
 **Large implementations may also need context resets.** Simply run `/implement 001` again in a fresh conversation—Claude tracks progress in the spec files.
@@ -297,7 +297,7 @@ What do you need to do?
 |---------|---------|-------------|
 | `/constitution` | Create governance rules | Establish project-wide guardrails |
 | `/specify` | Create specifications, classify complexity, decompose at the chosen tier | New features, fixes, refactors — any work that benefits from a written spec |
-| `/implement` | Auto-dispatch by tier (Direct / Standard / Factory) and execute | After spec is validated |
+| `/implement` | Auto-dispatch by tier (Direct / Incremental / Factory) and execute | After spec is validated |
 | `/validate` | Check quality | Before implementation, after specs |
 | `/test` | Run tests, enforce ownership | After implementation, fixing bugs |
 | `/review` | Multi-agent code review | Before merging PRs |
