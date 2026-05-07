@@ -9,6 +9,25 @@ Entries are added only when a release is cut. Work in progress is not tracked he
 
 This file retains detailed entries for the last 10 minor releases plus their patch revisions. Older release notes are linked to their [GitHub release page](https://github.com/rsmdt/the-startup/releases).
 
+## [3.7.0] - 2026-05-07
+
+### Added
+- **Tiered decomposition workflow**: `/start:specify` now classifies complexity at step 6 and recommends one of three tiers — Direct (fixes, refactors, single-AC features), Standard (single feature with linear phase plan), or Factory (multi-feature parallel work with holdout scenarios) — replacing the previous factory-only path.
+- **New implementation sub-skills**: `implement-direct` ships changes from requirements + solution without intermediate artifacts; `implement-standard` walks linear phase plans with TDD tasks and human-in-the-loop review; `implement-factory` retains the existing factory-loop orchestrator. `/start:implement` auto-detects which tier was used and dispatches accordingly.
+- **New decomposition sub-skill**: `specify-standard` produces `plan/README.md` plus `phase-N.md` files for medium-complexity single-feature work.
+- **Audit mode and signal-bearing tests**: The test skill extends MECE to MECES — every test must produce signal a caller's test wouldn't already catch. Adds a `NOISE_TEST` failure category (tautologies, framework re-verification, identity mocks, call-sequence-only assertions), an `audit` target for design-quality assessment without execution, and a `test-design-rules` reference covering mocks-vs-fakes and outcomes-vs-call-sequences.
+- **Reproduction gate and hypothesis hygiene in debug skill**: New Phase 0 reproduction requirement, evidence-graded hypothesis vocabulary (`[hypothesis]` / `[supported]` / `[ruled out]` / `[demonstrated]`), and an investigation ladder for escalating beyond code reading. Agent Team mode is now required (not advisory) when hypotheses multiply or evidence contradicts.
+
+### Changed
+- **BREAKING**: `/start:implement` is now a thin dispatcher rather than the factory-loop orchestrator. The previous implementation logic moved to `implement-factory`. Users continue to invoke `/start:implement` unchanged, but the active sub-skill is selected automatically based on which decomposition artifacts exist (`plan/`, `manifest.md`, or neither).
+- **BREAKING**: Tier-dispatch sub-skills (`specify-standard`, `specify-factory`, `implement-direct`, `implement-standard`, `implement-factory`) are no longer user-invocable. They function purely as internal targets from `/start:specify` and `/start:implement`.
+- `specify-meta` lifecycle now records the chosen decomposition tier (Direct, Standard, Factory, None) in place of the Factory-only phase. Spec scaffolding detects `plan/` directories alongside `manifest.md`/`units/` and creates the correct artifact tree for the selected tier.
+- Skill descriptions across the spec/implement family rewritten to surface tier and mode routing for matcher accuracy, with PRD/SDD focus and MECE content extracted to `reference/focus-and-mece.md` for progressive disclosure.
+- `plugins/start/README.md` rewritten to document the Direct/Standard/Factory tier table and step-6 selection, replacing prior factory-only guidance.
+
+### Fixed
+- Factory-generated test files no longer embed orchestration unit IDs (e.g. `test_al1_audit.py`, `test_rr1_eval.py`) in their paths or names. `specify-factory`, `implement-factory` code agents, and eval agents now receive explicit path-naming guidance with examples, and `specify-factory` validation includes a grep check to catch leaks before they ship.
+
 ## [3.6.1] - 2026-04-22
 
 ### Changed
