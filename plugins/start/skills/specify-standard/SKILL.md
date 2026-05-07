@@ -1,7 +1,7 @@
 ---
 name: specify-standard
 description: Decompose a single-feature specification into a linear, phase-by-phase implementation plan. Use this for medium-complexity work — single feature, one or two components — where transparent human-in-the-loop phase review is preferred over factory automation.
-user-invocable: true
+user-invocable: false
 argument-hint: "spec ID to decompose (e.g., 002)"
 ---
 

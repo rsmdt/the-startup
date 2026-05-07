@@ -1,7 +1,7 @@
 ---
 name: implement-factory
 description: Factory loop orchestrator for multi-feature or multi-component implementation manifests. Use for high-complexity work with parallel-eligible workstreams and holdout-scenario evaluation.
-user-invocable: true
+user-invocable: false
 argument-hint: "spec ID to implement (e.g., 002), or file path"
 ---
 

@@ -1,7 +1,7 @@
 ---
 name: implement-direct
 description: Lightweight implementation orchestrator for low-complexity work — fixes, refactors, doc changes, or single-AC features that do not warrant a phase plan or factory decomposition.
-user-invocable: true
+user-invocable: false
 argument-hint: "spec ID to implement (e.g., 002), or file path"
 ---
 

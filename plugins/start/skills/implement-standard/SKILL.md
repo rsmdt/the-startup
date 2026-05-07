@@ -1,7 +1,7 @@
 ---
 name: implement-standard
 description: Linear phase-loop orchestrator for single-feature implementation plans. Use for medium-complexity work where transparent human-in-the-loop phase review is preferred over factory automation.
-user-invocable: true
+user-invocable: false
 argument-hint: "spec ID to implement (e.g., 002), or file path"
 ---
 

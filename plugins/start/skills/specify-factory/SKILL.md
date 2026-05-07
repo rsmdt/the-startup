@@ -1,7 +1,7 @@
 ---
 name: specify-factory
 description: Decompose a multi-feature or multi-component specification into factory-consumable artifacts. Use this for high-complexity work — multiple features, three or more components, or parallel-eligible workstreams.
-user-invocable: true
+user-invocable: false
 argument-hint: "spec ID to decompose (e.g., 002)"
 ---
 
