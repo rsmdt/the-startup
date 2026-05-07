@@ -9,6 +9,13 @@ Entries are added only when a release is cut. Work in progress is not tracked he
 
 This file retains detailed entries for the last 10 minor releases plus their patch revisions. Older release notes are linked to their [GitHub release page](https://github.com/rsmdt/the-startup/releases).
 
+## [3.8.0] - 2026-05-07
+
+### Changed
+
+- **BREAKING**: Renamed the middle decomposition tier from "Standard" to "Incremental" across the workflow. The skills `specify-standard` and `implement-standard` are now `specify-incremental` and `implement-incremental`. If you invoke these skills directly or reference the tier by name in custom commands or scripts, update to the new names. The unrelated "Standard" execution mode (Standard vs Agent Team) is preserved — only the decomposition tier was renamed.
+- Updated the start plugin README, root README, AGENTS.md, complexity classifier reference, and tier-selection guidance throughout to reflect the Incremental naming. The `/start:specify` and `/start:implement` dispatchers, `specify-meta` lifecycle, and `implement-direct` fallback messaging now recommend "Incremental or Factory" when prompting users to re-run with a higher tier.
+
 ## [3.7.0] - 2026-05-07
 
 ### Added
