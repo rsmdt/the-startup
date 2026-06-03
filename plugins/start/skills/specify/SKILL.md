@@ -124,15 +124,17 @@ Highlight the classifier's recommendation. The user may override freely.
 
 Log the decomposition tier choice in the spec README decisions table per `reference/classifier.md` decision-logging guidance.
 
+**Slicing principle (applies to whichever tier is chosen):** decomposition slices **vertically** (tracer-bullet), never horizontally. Each phase (Incremental) or unit (Factory) is one user-observable capability delivered end-to-end — through every layer it needs — and independently validatable against a requirements.md acceptance criterion on its own. There are no layer-only phases/units (no "database phase", "API unit", "UI phase"); when slices share foundational work, the first slice that needs it builds it and later slices extend it. The classifier decides *how much* to decompose; it never licenses slicing by layer. The sub-skills enforce this in detail.
+
 match (user choice) {
   Direct   => skip to step 7 (no decomposition artifact written; implement-direct
               will read requirements.md and solution.md directly).
   Incremental => Use the specify-incremental skill.
               Focus: Decompose the single-feature solution into linear phases with
-              embedded TDD tasks.
+              embedded TDD tasks — each phase a vertical capability slice.
   Factory  => Use the specify-factory skill.
               Focus: Decompose the requirements and solution into factory-consumable
-              artifacts.
+              artifacts — each unit a vertical capability slice.
 }
 
 Ask the user to choose between *Finalize specification* (recommended) and *Revisit Decomposition*.

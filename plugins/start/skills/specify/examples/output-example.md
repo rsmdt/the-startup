@@ -34,15 +34,13 @@ Next Steps:
 ├── requirements.md           # What and why
 ├── solution.md               # How
 ├── manifest.md               # Decomposition manifest
-├── units/                    # Factory-sized specs
-│   ├── dm1.md                # Data models
-│   ├── ws1.md                # WebSocket handler
-│   └── nt1.md                # Notification service
+├── units/                    # Factory-sized specs (vertical capability slices)
+│   ├── nt1.md                # Send a notification (owns the notification model)
+│   └── ws1.md                # Stream notifications over WebSocket (after: nt1)
 └── scenarios/                # Holdout evaluation scenarios
-    ├── dm1/
-    │   └── schema-validation.md
-    ├── ws1/
-    │   ├── connection-lifecycle.md
-    │   └── reconnect-handling.md
-    └── nt1/
-        └── delivery-confirmation.md
+    ├── nt1/
+    │   ├── delivery-confirmation.md
+    │   └── persistence.md
+    └── ws1/
+        ├── connection-lifecycle.md
+        └── reconnect-handling.md

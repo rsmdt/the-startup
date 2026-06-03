@@ -14,7 +14,7 @@ Read after `requirements.md` and `solution.md` exist:
 |--------|--------|----------------|
 | `feature_count` | requirements.md | Count distinct user-facing capabilities. A "feature" is a coherent user-visible behavior with its own acceptance criteria. Multiple ACs serving one capability count as one feature. |
 | `ac_count` | requirements.md | Count of acceptance criteria across all features. |
-| `component_count` | solution.md | Count of distinct top-level components or services described in the design. A component is a unit with its own files, module boundary, or service. Modifications to existing components count toward the existing surface — they do not increase `component_count`. |
+| `component_count` | solution.md | Count of distinct top-level components or services described in the design. A component is a unit with its own files, module boundary, or service. Modifications to existing components count toward the existing surface — they do not increase `component_count`. *Note: components in an SDD are often architectural layers (data, API, UI). This count is a sizing signal only — it sets the tier, not the slicing axis. Downstream decomposition always slices vertically by user capability, never by these layers.* |
 | `change_type` | requirements.md framing or `$ARGUMENTS` | One of `feature`, `fix`, `refactor`, `doc`. Inferred from how the request is framed. |
 | `parallel_markers` | solution.md | Boolean. True if the design explicitly calls out parallel work, concurrent execution, or independent service boundaries. |
 
