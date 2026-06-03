@@ -46,6 +46,8 @@ State {
 ## Constraints
 
 **Always:**
+- Slice phases **vertically** (tracer-bullet): each phase delivers at least one user-observable behavior end-to-end — through every layer it needs (data → logic → interface → tests) — and is independently validatable against a requirements.md acceptance criterion on its own, not only after later phases land.
+- When phases share foundational work (a shared entity, schema, migration, or scaffolding), the **first** phase that needs it builds that foundation as part of its own end-to-end slice; later phases depend on that phase and **extend** it. There is never a foundation-only phase.
 - Every task produces a verifiable deliverable — not just an activity.
 - All requirements.md acceptance criteria map to specific tasks.
 - All solution.md components have corresponding implementation tasks.
@@ -60,6 +62,7 @@ State {
 - Leave the `plan/README.md` phases checklist in the exact format `- [ ] [Phase N: Title](phase-N.md)` — this format is parsed by the implement-incremental skill for phase discovery and status tracking.
 
 **Never:**
+- Slice phases **horizontally** by layer — a database/schema phase, then a backend/API phase, then a frontend/UI phase. Horizontal slicing defers all PRD validation to the final integration phase and produces phases that deliver no user-observable behavior and cannot be reviewed in isolation.
 - Include time estimates — focus on what, not when.
 - Include resource assignments — focus on work, not who.
 - Include implementation code — the plan guides, implementation follows.
@@ -85,7 +88,7 @@ State {
 Read requirements.md and solution.md from specDirectory to understand requirements and design.
 Read template from template.md.
 Write template to specDirectory/plan/README.md.
-Identify implementation areas from solution.md components.
+Identify **vertical capability slices**: map each requirements.md acceptance criterion to the end-to-end behavior that satisfies it, then to the solution.md components that behavior touches. Phases are these capability slices — sliced by user-observable behavior, never by layer or component.
 
 ### 2. Discover Tasks
 
@@ -98,6 +101,7 @@ Launch parallel specialist agents to investigate:
 ### 3. Define Phase
 
 Read phase template from templates/phase.md.
+Each phase is a vertical slice (see Constraints): order phases so the first phase to need shared foundation builds it end-to-end, and later phases depend on that phase and extend it.
 Define tasks per reference/task-structure.md pattern.
 Add specification references for each task.
 Write phase to specDirectory/plan/phase-N.md.

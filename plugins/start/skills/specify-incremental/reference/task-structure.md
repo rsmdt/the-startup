@@ -1,6 +1,27 @@
 # Task Structure Reference
 
-Task granularity principle, TDD phase pattern, and metadata annotations.
+Phase slicing axis, task granularity principle, TDD phase pattern, and metadata annotations.
+
+---
+
+## Phase Slicing Axis: Vertical, Not Horizontal
+
+Slice phases by **capability**, not by **layer**. Each phase is a tracer-bullet: a thin, end-to-end path through whatever layers the behavior needs, delivering one user-observable outcome that can be validated against a requirements.md acceptance criterion on its own.
+
+✅ **Vertical (correct)** — phase = capability:
+- *Phase 1: Create a payment* → Payment entity + `POST /payments` + payment form + e2e creation test
+- *Phase 2: Refund a payment* → extends entity + `POST /payments/:id/refund` + refund button + e2e refund test
+
+❌ **Horizontal (wrong)** — phase = layer:
+- *Phase 1: Database schema* (no API, no UI, satisfies no acceptance criterion alone)
+- *Phase 2: API endpoints* (cannot be validated without the UI)
+- *Phase 3: Frontend* (feature only works once all three land)
+
+**Why vertical:** every phase is independently reviewable and PRD-validatable. Horizontal slicing defers all acceptance verification to the final phase — a database-only phase *cannot* satisfy "user can submit a payment" because that behavior needs all layers.
+
+**Shared foundation:** when several phases need the same entity, schema, or scaffolding, the first phase that needs it builds it as part of its own end-to-end slice; later phases depend on that phase and extend the foundation. Never carve out a foundation-only phase.
+
+**Activities are specialist hints, not phase boundaries.** A single vertical phase normally spans several activities (`domain-modeling` + `backend-api` + `frontend-ui` + `e2e-test`). Do not group all tasks of one activity into their own phase — that recreates horizontal slicing.
 
 ---
 

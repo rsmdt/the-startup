@@ -28,6 +28,14 @@ Use this checklist to validate Implementation Plan completeness before execution
 - [ ] **Phase boundaries are logical** - Clear separation of concerns
 - [ ] **plan/README.md phases list links to all phase files** - Every phase-N.md is referenced
 
+## Vertical Slicing (Tracer-Bullet Gate)
+
+- [ ] **Every phase is a vertical slice** - Each phase delivers at least one user-observable behavior end-to-end (through every layer it needs), not a single layer
+- [ ] **No layer-only phases** - No phase delivers only a schema/migration, only API endpoints, or only UI with no user-observable behavior
+- [ ] **Each phase maps to ≥1 acceptance criterion** - Every phase (except a final cross-cutting hardening phase) can be validated against at least one requirements.md acceptance criterion on its own
+- [ ] **Shared foundation owned by first slice** - Shared entities/schemas/scaffolding are built by the first phase that needs them; later phases depend on that phase and extend it — there is no foundation-only phase
+- [ ] **Dependencies point to slices, not layers** - A phase's dependencies are earlier capability slices, never a separate "data layer" or "backend layer" phase
+
 ## Task Quality
 
 - [ ] **Tasks are actionable** - Clear what needs to be done
@@ -58,11 +66,13 @@ Use this checklist to validate Implementation Plan completeness before execution
 
 ## Final Phase
 
+The final phase is for **cross-cutting hardening** (full-suite integration, performance, security), not first-time acceptance. Each earlier vertical phase already verified its own acceptance criteria; the final phase confirms they still hold together.
+
 - [ ] **Integration tests defined** - Cross-component testing
 - [ ] **E2E tests defined** - Complete user flow testing
 - [ ] **Performance validation included** - If performance requirements exist
 - [ ] **Security validation included** - If security requirements exist
-- [ ] **All requirements.md acceptance criteria verified** - Final acceptance criteria check
+- [ ] **All requirements.md acceptance criteria re-verified** - Final regression check that per-phase acceptance still holds (not the first place each criterion is checked)
 
 ## Practical Validation
 

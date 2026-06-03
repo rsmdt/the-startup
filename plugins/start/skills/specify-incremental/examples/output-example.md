@@ -2,10 +2,10 @@
 
 Plan Status: 003-notification-system
 
-Phases Defined:
-- Phase 1 Foundation: Complete (4 tasks)
-- Phase 2 Core Logic: In progress
-- Phase 3 Integration: Pending
+Phases Defined (vertical capability slices):
+- Phase 1 Send a notification (end-to-end): Complete (4 tasks)
+- Phase 2 Notification preferences: In progress
+- Phase 3 Hardening & cross-cutting validation: Pending
 
 Task Summary:
 - Total tasks: 12

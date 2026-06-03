@@ -139,10 +139,12 @@ npm run validate            # All checks
 Each phase is defined in a separate file. Tasks follow red-green-refactor: **Prime** (understand context), **Test** (red), **Implement** (green), **Validate** (refactor + verify).
 
 > **Tracking Principle**: Track logical units that produce verifiable outcomes. The TDD cycle is the method, not separate tracked items.
+>
+> **Slicing Principle**: Each phase is a **vertical slice** — one user-observable capability delivered end-to-end (through every layer it needs) and validatable against a requirements.md acceptance criterion on its own. Name phases after capabilities, never after layers (no "Database phase", "API phase", "UI phase"). The first phase to need shared foundation builds it; later phases extend it.
 
-- [ ] [Phase 1: Core Foundation](phase-1.md)
-- [ ] [Phase 2: [API/Integration/UI] Layer](phase-2.md)
-- [ ] [Phase 3: Final Integration & Validation](phase-3.md)
+- [ ] [Phase 1: [First end-to-end capability]](phase-1.md)
+- [ ] [Phase 2: [Next capability — extends Phase 1]](phase-2.md)
+- [ ] [Phase 3: [Further capability + cross-cutting hardening]](phase-3.md)
 
 ---
 
@@ -153,6 +155,7 @@ Before this plan is ready for implementation, verify:
 | Criterion | Status |
 |-----------|--------|
 | A developer can follow this plan without additional clarification | ⬜ |
+| Every phase is a vertical slice — one user-observable capability end-to-end, mapping to ≥1 acceptance criterion (no layer-only phases) | ⬜ |
 | Every task produces a verifiable deliverable | ⬜ |
 | All requirements.md acceptance criteria map to specific tasks | ⬜ |
 | All solution.md components have implementation tasks | ⬜ |
