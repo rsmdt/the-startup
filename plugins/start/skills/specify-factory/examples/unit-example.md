@@ -1,6 +1,6 @@
 # Example: Unit Decomposition
 
-Example unit decomposition from a SQL validation feature.
+Example unit decomposition for a SQL Tools API. Every unit is a **vertical slice** — one user-observable capability, end-to-end.
 
 ---
 
@@ -8,36 +8,44 @@ Example unit decomposition from a SQL validation feature.
 
 | ID | Title | Dependencies | Requirements Covered |
 |----|-------|--------------|---------------------|
-| dm1 | Data models | none | R1 (schema), R2 (entities) |
-| ve1 | Validation endpoint | dm1 | R3 (validate), R4 (extract), R5 (complexity) |
-| ve2 | Input sanitization | ve1 | R6 (injection), R7 (error handling) |
-| rl1 | Rate limiting | ve1 | R8 (throttle), R9 (headers) |
+| vq1 | Validate a query | none | R1 (persist analysis), R2 (syntax + reject non-SELECT), R3 (injection + structured errors), R4 (extract refs), R5 (complexity score) |
+| eq1 | Explain a query | vq1 | R6 (human-readable cost explanation) |
+| oq1 | Optimize a query | vq1 | R7 (index/rewrite suggestions) |
 
-**Coverage**: 9/9 requirements mapped (100%)
+**Coverage**: 7/7 requirements mapped (100%)
 
-## Example Unit Spec (ve1)
+> **Why this is vertical, not horizontal.** A tempting horizontal cut would be `dm1` (data models) → `ve1` (validation logic) → `ve2` (input sanitization) → `rl1` (rate limiting). That produces four units, but only the data unit and the logic unit are runnable alone — `ve2` and `rl1` can't pass scenarios without `ve1`'s endpoint, so they're layers, not slices.
+>
+> Sliced vertically, the *first capability* (`vq1`) builds the data model and folds sanitization in — it owns its shared foundation. The next two capabilities (`eq1`, `oq1`) depend on `vq1` and **extend** the model. Each unit's scenarios hit its own endpoint and pass independently. Same coverage, every unit independently evaluable, and `eq1`/`oq1` run in parallel.
+
+## Example Unit Spec (vq1)
 
 ```markdown
 ---
-id: ve1
-title: SQL Validation Endpoint
+id: vq1
+title: Validate a Query
 type: feature
-dependencies: [dm1]
+dependencies: []
 ---
-# SQL Validation Endpoint
+# Validate a Query
 
 ## Goal
-POST /api/v1/sql/validate — validates SQL without executing it.
+POST /api/v1/sql/validate — validates SQL without executing it and returns a structured analysis.
 
 ## Requirements
-- Validate syntax, reject non-SELECT statements, detect injection patterns
+- Persist a QueryAnalysis record for each request (this unit owns the QueryAnalysis model; later units extend it)
+- Validate syntax and reject non-SELECT statements
+- Detect injection patterns and reject them with structured errors (sanitization is part of this slice, not a separate unit)
 - Extract table and column references from valid queries
-- Compute complexity score based on joins, subqueries, aggregations
-- Return structured JSON response with all findings
+- Compute a complexity score based on joins, subqueries, and aggregations
+- Return a structured JSON response with all findings
 
 ## Constraints
 - Follow existing controller patterns (see AGENTS.md)
 - Full test coverage for all validation rules
 - No new dependencies
 - Use existing JSQLParser for parsing
+
+## Interfaces
+- Defines the QueryAnalysis model and the /api/v1/sql/validate response shape, both consumed and extended by eq1 and oq1.
 ```

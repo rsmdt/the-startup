@@ -14,7 +14,7 @@ Act as a decomposition specialist that transforms requirements and solution desi
 ## Interface
 
 Unit {
-  id: string               // short alphanumeric (dm1, ve1, rl1)
+  id: string               // short alphanumeric, named after a capability (vq1, eq1, oq1)
   title: string
   type: feature | fix | refactor
   dependencies: string[]   // unit IDs this depends on
@@ -46,6 +46,8 @@ State {
 ## Constraints
 
 **Always:**
+- Slice units **vertically** (tracer-bullet): each unit is one user-observable capability, end-to-end through every layer it needs, whose holdout scenarios can pass when only that unit (plus its declared dependencies) is built. Never create a layer-only unit (data-models-only, service-only, middleware-only).
+- When units share foundational work (a shared entity, schema, or scaffolding), the **first** unit that needs it builds that foundation inside its own slice; later units depend on that unit and **extend** it. Dependency edges point to real, independently-validatable slices — never to a standalone foundation layer.
 - Attempt to read both requirements.md and solution.md before decomposing. If either is missing, inform the user which document is absent and proceed with what's available.
 - Read the project instructions file (CLAUDE.md, AGENTS.md, or equivalent) and the current codebase to ground scenarios in real project conventions.
 - Each unit must be self-contained: goal + requirements + constraints. A single code agent must be able to implement it.
@@ -63,6 +65,8 @@ State {
 - Include acceptance criteria in unit specs — those are scenarios (invisible to code agent).
 - Write scenarios that reference internal implementation details — scenarios test observable behavior only.
 - Create units that depend on each other circularly.
+- Slice units **horizontally** by layer — a data-models unit, a service-layer unit, a middleware unit. These can't be evaluated independently (their scenarios require sibling units to exist) and defer all integration to the end.
+- Carve cross-cutting concerns (auth, sanitization, rate limiting, logging) into their own units — fold them into the capability slice they protect, unless the concern is itself an independently user-observable capability.
 - Proceed past scenario generation without user review.
 - Embed unit IDs in stub file paths, test file names, or test function names. Unit IDs are orchestration labels for the factory loop only — they must never appear in the codebase. Name files after the feature/component under test (e.g. `test_audit_logger.py`, not `test_al1_audit.py`).
 
@@ -101,11 +105,13 @@ These inform unit boundaries.
 
 Read reference/decomposition.md for decomposition principles.
 
-Break the solution into factory-sized units:
+Break the solution into factory-sized **vertical slices**:
+- Each unit is one user-observable capability, end-to-end — not a layer
 - Each unit is atomic — one code agent can implement it
 - Each unit has a clear goal, focused requirements, and explicit constraints
+- Shared foundation is owned by the first unit that needs it; later units depend on that unit and extend it (no standalone foundation unit)
 - Dependencies between units are declared, not implicit
-- Unit IDs are short alphanumeric (dm1, ve1, rl1) — position-independent
+- Unit IDs are short alphanumeric, named after the capability (vq1, eq1, oq1) — position-independent
 
 Write each unit spec using templates/unit.md to specDirectory/units/{id}.md.
 

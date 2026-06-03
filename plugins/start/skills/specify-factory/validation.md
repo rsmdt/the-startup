@@ -18,6 +18,15 @@ Use this checklist to validate factory artifacts before marking the spec as read
 - [ ] **Dependencies are explicit** — Every dependency references an existing unit ID
 - [ ] **No circular dependencies** — Dependency graph is a DAG
 
+## Vertical Slicing (Tracer-Bullet Gate)
+
+- [ ] **Every unit is a vertical slice** — Each unit is one user-observable capability delivered end-to-end (through every layer it needs), not a single layer
+- [ ] **Independently evaluable** — Each unit's scenarios can pass when only that unit plus its declared dependencies is built. Run the test: *if a unit's scenarios require a sibling unit to exist, it is a horizontal layer — re-slice*
+- [ ] **No layer-only units** — No data-models-only, service-only, or middleware-only unit
+- [ ] **Cross-cutting concerns folded in** — Auth, sanitization, rate limiting, and logging live inside the capability slice they protect, unless the concern is itself an independently observable capability
+- [ ] **Shared foundation owned by the first slice** — Shared entities/schemas are built by the first unit that needs them; later units depend on that unit and extend it. No standalone foundation unit; every dependency edge points to a validatable slice
+- [ ] **Scenarios hit the unit's own interface** — Each unit's scenarios exercise that unit's own endpoint/surface, not a sibling's
+
 ## Scenario Quality
 
 - [ ] **Observable behavior only** — Scenarios test through external interfaces (API, UI, CLI)

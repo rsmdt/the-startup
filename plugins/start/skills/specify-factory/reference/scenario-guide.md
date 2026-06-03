@@ -10,6 +10,7 @@ A scenario is a plain-English description of expected system behavior, tested th
 
 **Good scenarios**:
 - Test observable behavior through the API, UI, or CLI
+- Exercise **the unit's own** external interface, so the unit is evaluable independently of sibling units (a scenario that has to call another unit's endpoint is a signal the unit is a horizontal layer, not a vertical slice)
 - Reference actual endpoints, data shapes, and conventions from the codebase
 - Are specific enough that pass/fail is unambiguous
 - Each test one thing
