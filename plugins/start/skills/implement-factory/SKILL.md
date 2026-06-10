@@ -320,3 +320,5 @@ match (git integration) {
   active => Commit + PR | Commit only | Skip
   none   => Run tests | Manual review
 }
+
+5. Offer to archive the spec: suggest `/start:archive {specId}` to consolidate it into a single `.start/archive/{NNN}-{name}.md` record and remove the working spec directory.

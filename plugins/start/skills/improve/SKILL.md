@@ -11,6 +11,8 @@ Act as an architecture orchestrator that surfaces architectural friction and pro
 
 Work in the vocabulary of depth, seams, leverage, and locality (see reference/language.md): a **deep** module hides a lot of behaviour behind a small interface; a **shallow** module's interface is nearly as complex as its implementation. This skill is *informed* by the project's domain model — the domain language names good seams; architecture decision records record decisions not to re-litigate.
 
+Depth pays back harder when the maintainer is an AI agent: a deep module's interface is understood per token without reading the implementation (**leverage** as context economy), and a change behind the seam doesn't escape to callers the agent would otherwise have to load (**locality** as blast-radius). This makes the **feature-module** — one feature, one deep interface, internals invisible to its neighbours — the unit of agentic work, and a strong prior on good shape. See reference/agentic-coding.md.
+
 **Improvement Target**: $ARGUMENTS
 
 ## Interface
@@ -42,6 +44,7 @@ State {
 **Always:**
 - Read the project's domain glossary (CONTEXT.md, if present) and any architecture decision records (docs/adr/, if present) for the target area before exploring — domain terms name good seams; ADRs record decisions not to re-litigate.
 - Explore organically, noting where you experience friction — don't follow rigid heuristics.
+- Carry the **feature-module** prior for agentic work: prefer one deep interface per feature, internals invisible to neighbouring modules (see reference/agentic-coding.md). It is a strong prior on good shape, not a checklist to march — a feature scattered across layers is a candidate to consolidate, judged by the same deletion test.
 - Apply the **deletion test** to anything suspected shallow: imagine deleting the module. Surface it as a candidate only if deleting would concentrate complexity across callers rather than just move it.
 - Use the vocabulary in reference/language.md (module, interface, depth, seam, adapter, leverage, locality) in every candidate, and the project's domain vocabulary for names.
 - Present candidates as a markdown report written to `.start/architecture-reviews/`, then ask the user which to explore.
@@ -58,6 +61,7 @@ State {
 ## Reference Materials
 
 - reference/language.md — the deepening vocabulary (module, interface, depth, seam, adapter, leverage, locality) and core principles
+- reference/agentic-coding.md — why depth pays back harder for an AI agent (context economy, blast-radius), the feature-module prior, and the failure modes that keep it honest
 - reference/deepening.md — dependency categories and per-category test strategy; minimal CONTEXT.md and ADR formats
 - reference/output-format.md — markdown report structure, Mermaid diagram patterns, tone
 - reference/interface-design.md — "Design It Twice" parallel interface-exploration pattern
@@ -75,6 +79,7 @@ Delegate a codebase walk to a discovery-focused agent (Explore). Brief it to exp
 - Where are modules **shallow** — interface nearly as complex as the implementation?
 - Where have pure functions been extracted just for testability, but the real bugs hide in how they're called (no **locality**)?
 - Where do tightly-coupled modules leak across their seams?
+- Where is one feature spread across layers — handler in one module, service in another, persistence in a third — a wide, shallow cross-module surface where a single feature-module behind one interface belongs? (See reference/agentic-coding.md.)
 - Which parts are untested, or hard to test through their current interface?
 
 Apply the **deletion test** to anything suspected shallow: would deleting it concentrate complexity, or just move it? "Concentrates" is the signal.

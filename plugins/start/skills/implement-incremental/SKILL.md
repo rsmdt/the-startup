@@ -177,3 +177,5 @@ match (git integration) {
 }
 
 In Agent Team: send sequential shutdown_request to each teammate, then disband the team.
+
+Finally, offer to archive the spec: suggest `/start:archive {specId}` to consolidate it into a single `.start/archive/{NNN}-{name}.md` record and remove the working spec directory. Skip this offer for freeform or file-path targets with no spec ID.
