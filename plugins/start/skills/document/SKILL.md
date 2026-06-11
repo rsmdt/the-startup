@@ -30,7 +30,6 @@ State {
 ## Constraints
 
 **Always:**
-- Delegate all documentation tasks to specialist agents.
 - Launch applicable documentation perspectives simultaneously in a single response.
 - Check for existing documentation first — update rather than duplicate.
 - Match project documentation style and conventions.
@@ -38,8 +37,6 @@ State {
 
 **Never:**
 - Write documentation yourself — always delegate to specialist agents.
-- Create duplicate documentation when existing docs can be updated.
-- Generate docs without checking existing documentation first.
 
 ## Reference Materials
 
@@ -70,11 +67,11 @@ match (target) {
 
 Scan target for existing documentation. Identify gaps and stale docs.
 
-AskUserQuestion: Generate all | Focus on gaps | Update stale | Show analysis
+Ask the user to choose: Generate all | Focus on gaps | Update stale | Show analysis
 
 ### 2. Select Mode
 
-AskUserQuestion:
+Ask the user to choose:
   Standard (default) — parallel fire-and-forget subagents
   Agent Team — persistent teammates with shared task list and coordination
 
@@ -101,5 +98,5 @@ Process results:
 
 Read reference/output-format.md and format summary accordingly.
 
-AskUserQuestion: Address remaining gaps | Review stale docs | Done
+Ask the user to choose: Address remaining gaps | Review stale docs | Done
 

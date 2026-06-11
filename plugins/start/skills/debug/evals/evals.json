@@ -1,0 +1,29 @@
+{
+  "skill_name": "debug",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Our checkout endpoint returned a 500 once yesterday. The retry succeeded and it hasn't happened again. Find the root cause.",
+      "expected_output": "Phase 0 discipline: no hypothesis chains on a single observation; instrument or find trigger",
+      "expectations": [
+        "Did not proceed past reproduction (Phase 0) on a single observation",
+        "Attempted to find a trigger or proposed instrumentation (failing test, probe logging, assertions) so the next recurrence is diagnosable",
+        "Used epistemic prefixes like [hypothesis] and [evidence: X] when reporting claims",
+        "Did not declare the bug transient or fixed without evidence",
+        "Did not present a plausible-sounding root cause without demonstration"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "This test fails reliably: `test_invoice_total` expects 110.00 but gets 100.00. The stack trace points to billing/totals.py line 42.",
+      "expected_output": "End-to-end code read, demonstrated root cause, user-approved minimal fix, tests run",
+      "expectations": [
+        "Read the relevant code path end-to-end rather than sampling fragments",
+        "Tracked hypotheses explicitly and closed them before moving on",
+        "Only declared a root cause once demonstrated (toggling the condition switches the bug on and off)",
+        "Asked the user for approval before applying the fix",
+        "Ran tests after applying the fix and reported actual results"
+      ]
+    }
+  ]
+}

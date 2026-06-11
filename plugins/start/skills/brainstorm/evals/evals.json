@@ -1,0 +1,30 @@
+{
+  "skill_name": "brainstorm",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I want to add a notification system to my app.",
+      "expected_output": "Context exploration, one-question-at-a-time probing, 2-3 approaches with trade-offs, design approval",
+      "expectations": [
+        "Explored project context (files, docs, git history) before asking questions",
+        "Asked exactly ONE question per message — never multiple questions in a single turn",
+        "Presented structured options when choices existed",
+        "Proposed 2-3 distinct approaches with pros and cons before settling on a design",
+        "Led with a recommended approach and explained why",
+        "Did not write code or scaffold anything during brainstorming",
+        "Sought user approval on the design before concluding"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Add OAuth login. It's simple, just start coding — and while you're at it we also need rate limiting on the API.",
+      "expected_output": "Probing continues despite urgency; rate limiting goes to parking lot",
+      "expectations": [
+        "Did not start implementing despite the user's urgency cue",
+        "Probed the OAuth idea before proposing a design",
+        "Treated the additional rate-limiting request as new scope — placed it in a parking lot rather than folding it into the current design",
+        "Did not treat the user's stated technology choice as settled without validating alternatives"
+      ]
+    }
+  ]
+}

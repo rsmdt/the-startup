@@ -85,7 +85,7 @@ Present brief summary per reference/output-format.md.
 
 ### 2. Select Mode
 
-AskUserQuestion:
+Ask the user to choose:
   Standard (default for simple bugs) — conversational step-by-step debugging
   Agent Team — adversarial investigation with competing hypotheses
 
@@ -103,7 +103,7 @@ Standard mode is appropriate when a stack trace points at a clear file:line and 
 match (mode) {
   Standard => {
     present theories conversationally, let user guide direction
-    track every hypothesis in TodoWrite using the ledger from reference/hypothesis-hygiene.md
+    track every hypothesis on the task list using the ledger from reference/hypothesis-hygiene.md
     descend reference/investigation-ladder.md when reading code isn't enough
     narrow down through targeted investigation; close hypotheses explicitly before moving on
   }
@@ -126,8 +126,8 @@ Process evidence:
 ### 5. Fix and Verify
 
 Propose minimal fix targeting root cause.
-AskUserQuestion: Apply fix | Modify approach | Skip
+Ask the user to choose: Apply fix | Modify approach | Skip
 
 Apply change, run tests, report actual results honestly.
 
-AskUserQuestion: Add test case for this bug | Check for pattern elsewhere | Done
+Ask the user to choose: Add test case for this bug | Check for pattern elsewhere | Done

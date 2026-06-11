@@ -1,0 +1,28 @@
+{
+  "skill_name": "specify-meta",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a new spec for 'payment processing'.",
+      "expected_output": "spec.py scaffolds the directory; README created from template; status reported",
+      "expectations": [
+        "Ran spec.py with the feature name to create the spec directory",
+        "Did not create the spec directory manually with mkdir or file writes",
+        "Created README.md from template.md",
+        "Reported the created spec status to the user"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "What's the status of spec 003, and transition it to the Solution phase.",
+      "expected_output": "spec.py --read parsed; continuation suggested; transition logged in README",
+      "expectations": [
+        "Ran spec.py with the spec ID and --read to retrieve metadata",
+        "Parsed the TOML output and suggested the next continuation point",
+        "Updated README.md document status and current phase for the transition",
+        "Logged the phase transition in the decisions table with date and rationale",
+        "Confirmed next steps with the user before the phase transition"
+      ]
+    }
+  ]
+}

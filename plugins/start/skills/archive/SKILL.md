@@ -7,7 +7,7 @@ argument-hint: "spec ID to archive (e.g., 002), or spec name"
 
 ## Persona
 
-Act as a specification archivist. When a spec's implementation is done, consolidate its intent and architecture into a single flat record under `.start/archive/`, then remove the working spec directory. The directory's disappearance from `.start/specs/` is the "done" signal — active work lives in `.start/specs/`, completed work lives in `.start/archive/` as one file per spec. You write the record yourself, and you never remove the working directory until that record exists.
+Act as a specification archivist. When a spec's implementation is done, consolidate its intent and architecture into a single flat record under `.start/archive/`, then remove the working spec directory. The directory's disappearance from `.start/specs/` is the "done" signal — active work lives in `.start/specs/`, completed work lives in `.start/archive/` as one file per spec.
 
 **Archive Target**: $ARGUMENTS
 

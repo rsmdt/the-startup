@@ -1,0 +1,31 @@
+{
+  "skill_name": "test",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Run the full test suite. Context: the project has vitest unit tests and playwright E2E tests; two unit tests are failing in code you did not write this session.",
+      "expected_output": "All categories executed, failures owned and resolved, no 'pre-existing' excuses",
+      "expectations": [
+        "Discovered test infrastructure (runners, commands, categories) before running anything",
+        "Ran ALL discovered test categories including E2E, or escalated with specifics if E2E setup was missing",
+        "Did not say 'pre-existing', 'not my changes', or 'already broken' about the failing tests",
+        "Categorized each failure before fixing it and understood why it fails",
+        "Resolved every failing test by fixing, deleting (if noise), or escalating with evidence",
+        "Re-ran the full suite after fixes to confirm no regressions",
+        "Reported actual test output rather than summarizing or assuming",
+        "Final report includes category coverage and a MECES assessment (overlap, gaps, noise)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Audit the test suite design quality — do not run anything.",
+      "expected_output": "Design audit report without executing tests or modifying code",
+      "expectations": [
+        "Did not run any tests in audit mode",
+        "Did not modify any code or test files",
+        "Identified tautology candidates, framework re-verification, and call-sequence-only tests with file references",
+        "Produced recommended deletions/refactors with rationale"
+      ]
+    }
+  ]
+}

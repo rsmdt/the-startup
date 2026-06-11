@@ -1,0 +1,29 @@
+{
+  "skill_name": "document",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Document the src/services/ directory.",
+      "expected_output": "Existing docs checked first, parallel delegation, updates over duplicates, user choice on scope",
+      "expectations": [
+        "Scanned the target for existing documentation before generating anything",
+        "Asked the user to choose a scope (generate all, focus on gaps, update stale, or show analysis)",
+        "Delegated documentation work to specialist agents launched simultaneously",
+        "Updated existing documentation rather than creating duplicates",
+        "Linked to actual file paths and line numbers in produced docs",
+        "Presented a summary with next-step options at the end"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Run a documentation audit on this project.",
+      "expected_output": "Audit perspective selected; gaps and stale docs identified without blind regeneration",
+      "expectations": [
+        "Selected the Audit perspective based on the target",
+        "Identified documentation gaps and stale documents",
+        "Presented the analysis to the user before making changes",
+        "Did not regenerate documentation that only needed updating"
+      ]
+    }
+  ]
+}

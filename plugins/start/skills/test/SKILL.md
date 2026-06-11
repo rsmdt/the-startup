@@ -61,8 +61,7 @@ State {
 - Discover test infrastructure before running anything — Read reference/discovery-protocol.md.
 - Re-run the full suite after every fix to confirm no regressions.
 - Resolve EVERY failing test — fix, delete (if noise), or escalate. Per the Ownership Mandate.
-- Respect test intent — understand why a test fails before fixing it. Apply reference/test-design-rules.md to decide whether the test pins behavior or implementation.
-- Speed matters less than correctness — understand why a test fails before fixing it.
+- Respect test intent — understand why a test fails before fixing it; speed matters less than correctness. Apply reference/test-design-rules.md to decide whether the test pins behavior or implementation.
 - Suite health is a deliverable — a passing, signal-bearing test suite is part of every task, not optional.
 - Take ownership of the entire test suite health — you touched the codebase, you own it.
 - Execute ALL discovered test categories — unit, integration, AND E2E. Each category may have its own runner and command. Discover and run each one.
@@ -108,7 +107,7 @@ Read reference/output-format.md and present discovery results accordingly.
 
 If target == "audit": skip mode selection and proceed to step 7 (Audit).
 
-AskUserQuestion:
+Ask the user to choose:
   Standard (default) — sequential test execution, discover-run-fix-verify
   Agent Team — parallel runners per test category (unit, integration, E2E, quality)
 

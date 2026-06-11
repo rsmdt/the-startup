@@ -1,6 +1,6 @@
 ---
 name: brainstorm
-description: "You MUST use this before any creative work — creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements, and design before implementation."
+description: "Required first step before any creative work — creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements, and design before implementation."
 user-invocable: true
 argument-hint: "describe what you want to build or explore"
 ---
@@ -39,7 +39,6 @@ State {
 **Always:**
 - Explore project context before asking questions.
 - Ask ONE question per message — break complex topics into multiple turns.
-- Use AskUserQuestion with structured options when choices exist.
 - Propose 2-3 approaches with trade-offs before settling on a design.
 - Lead with your recommended approach and explain why.
 - Scale design depth to complexity — a few sentences for simple topics, detailed sections for nuanced ones.
@@ -48,7 +47,6 @@ State {
 
 **Never:**
 - Write code, scaffold projects, or invoke implementation skills during brainstorming.
-- Ask multiple questions in a single message.
 - Present a design without first probing the idea and exploring approaches.
 - Assume requirements — when uncertain, ask.
 - Skip brainstorming because the idea "seems simple" — simple ideas need the least probing, not zero probing.
@@ -88,7 +86,7 @@ Ask questions ONE AT A TIME to understand:
 - Constraints — budget, timeline, technical limitations?
 - Success criteria — how do we know it works?
 
-Prefer AskUserQuestion with structured options when choices exist. Use open-ended questions when the space is too broad for options.
+Prefer structured options when choices exist. Use open-ended questions when the space is too broad for options.
 
 Continue until you have enough context to propose approaches.
 
@@ -98,7 +96,7 @@ Propose 2-3 distinct approaches, each with clear trade-offs (pros, cons). Lead w
 
 Present conversationally, not as a formal document.
 
-AskUserQuestion: [Approach 1 (Recommended)] | [Approach 2] | [Approach 3] | Hybrid
+Ask the user to choose: [Approach 1 (Recommended)] | [Approach 2] | [Approach 3] | Hybrid
 
 ### 4. Present Design
 
@@ -124,8 +122,8 @@ If the user introduces new requirements during revision, acknowledge them and ad
 
 Present complete design summary.
 
-AskUserQuestion:
+Ask the user to choose:
   Save design to file — write to .start/ideas/YYYY-MM-DD-<topic>.md
-  Start specification — invoke /start:specify with design context
+  Start specification — continue with the specify skill using the design context
   Done — keep design in conversation only
 

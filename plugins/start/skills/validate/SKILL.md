@@ -33,7 +33,6 @@ State {
 ## Constraints
 
 **Always:**
-- Delegate all validation tasks to specialist agents.
 - Launch ALL applicable validation perspectives simultaneously.
 - Include file paths and line numbers for all findings.
 - Every finding must have a clear, actionable fix recommendation.
@@ -82,7 +81,7 @@ match (mode) {
 
 ### 3. Select Mode
 
-AskUserQuestion:
+Ask the user to choose:
   Standard (default) — parallel fire-and-forget subagents
   Agent Team — persistent teammates with shared task list and coordination
 
@@ -121,9 +120,9 @@ Read reference/output-format.md and format the report accordingly.
 ### 6. Next Steps
 
 match (validationMode) {
-  Constitution => AskUserQuestion: Apply autofixes (L1) | Show violations | Skip
-  Drift        => AskUserQuestion: Acknowledge | Update implementation | Update spec | Defer
-  Spec | File  => AskUserQuestion: Address failures | Show details | Continue anyway
+  Constitution => ask the user to choose: Apply autofixes (L1) | Show violations | Skip
+  Drift        => ask the user to choose: Acknowledge | Update implementation | Update spec | Defer
+  Spec | File  => ask the user to choose: Address failures | Show details | Continue anyway
 }
 
 ## Integration with Other Skills

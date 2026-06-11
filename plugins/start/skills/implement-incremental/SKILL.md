@@ -43,7 +43,6 @@ State {
 ## Constraints
 
 **Always:**
-- Delegate ALL implementation tasks to specialist subagents or teammates.
 - Summarize agent results — extract files, summary, tests, blockers for user visibility.
 - Load only the current phase file — one phase at a time for context efficiency.
 - Wait for user confirmation at phase boundaries.
@@ -54,7 +53,7 @@ State {
 - Skip already-completed phases when resuming an interrupted plan.
 
 **Never:**
-- Implement code directly — you are an orchestrator ONLY.
+- Implement code directly — delegate ALL implementation tasks to specialist subagents or teammates; you are an orchestrator ONLY.
 - Display full agent responses — extract key outputs only.
 - Skip phase boundary checkpoints.
 - Proceed past a blocking constitution violation (L1/L2).
@@ -85,12 +84,7 @@ Present discovered phases with their statuses. Highlight completed phases (will 
 
 Task metadata found in plan files uses: `[activity: areas]`, `[parallel: true]`, `[ref: solution/Section X.Y]`
 
-Offer optional git setup:
-
-match (git repository) {
-  exists => ask the user to choose between *Create feature branch* and *Skip git integration*
-  none   => proceed without version control
-}
+Offer optional git setup: if a git repository exists, ask the user to choose between *Create feature branch* and *Skip git integration*; otherwise proceed without version control.
 
 ### 2. Select Mode
 
@@ -171,10 +165,7 @@ Ask the user to choose between *Continue to next phase*, *Review output*, *Pause
 1. Use the validate skill in comparison mode for final validation.
 2. Read reference/output-format.md and present completion summary accordingly.
 
-match (git integration) {
-  active => ask the user to choose between *Commit + PR*, *Commit only*, or *Skip*
-  none   => ask the user to choose between *Run tests*, *Deploy to staging*, or *Manual review*
-}
+With git integration active, ask the user to choose between *Commit + PR*, *Commit only*, or *Skip*; without it, choose between *Run tests*, *Deploy to staging*, or *Manual review*.
 
 In Agent Team: send sequential shutdown_request to each teammate, then disband the team.
 

@@ -38,7 +38,6 @@ State {
 - Confirm next steps with user before phase transitions.
 
 **Never:**
-- Create spec directories manually — always use spec.py.
 - Transition phases without updating README.md.
 - Skip decision logging when user makes workflow choices.
 
@@ -53,7 +52,7 @@ State {
 
 Create a new spec with an auto-incrementing ID.
 
-1. Run `Bash("spec.py \"$featureName\"")`.
+1. Run `spec.py "$featureName"` in the terminal.
 2. Create README.md from template.md.
 3. Report the created spec status.
 
@@ -61,7 +60,7 @@ Create a new spec with an auto-incrementing ID.
 
 Read existing spec metadata.
 
-1. Run `Bash("spec.py \"$specId\" --read")`.
+1. Run `spec.py "$specId" --read` in the terminal.
 2. Parse TOML output into SpecStatus.
 3. Suggest the next continuation point:
 

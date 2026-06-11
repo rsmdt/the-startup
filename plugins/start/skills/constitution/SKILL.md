@@ -37,11 +37,6 @@ State {
 - Classify every rule with a level (L1/L2/L3).
 - Every proposed rule must cite specific file:line evidence.
 
-**Never:**
-- Write constitution without user approval of proposed rules.
-- Propose rules without codebase evidence.
-- Skip discovery and generate generic rules.
-
 ## Reference Materials
 
 - reference/perspectives.md — discovery perspectives and focus area mapping
@@ -78,7 +73,7 @@ Process discoveries:
 
 Read reference/output-format.md and format proposed rules accordingly.
 
-AskUserQuestion: Approve rules | Modify before saving | Cancel
+Ask the user to choose: Approve rules | Modify before saving | Cancel
 
 ### 5. Write Constitution
 
@@ -91,10 +86,10 @@ Display constitution summary per reference/output-format.md.
 
 ### 6. Validate
 
-AskUserQuestion: Run validation now | Skip
+Ask the user to choose: Run validation now | Skip
 
 match (choice) {
-  validate => Skill("start:validate") constitution
+  validate => use the validate skill in constitution mode
   skip     => done
 }
 

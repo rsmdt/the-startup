@@ -84,7 +84,7 @@ match (changes) {
 
 ### 2. Select Mode
 
-AskUserQuestion:
+Ask the user to choose:
   Standard (default) — parallel fire-and-forget subagents
   Agent Team — persistent teammates with peer coordination
 
@@ -129,5 +129,5 @@ match (verdict) {
   APPROVE              => loadOptions("approve")
 }
 
-AskUserQuestion(options)
+Ask the user to choose between the loaded options.
 

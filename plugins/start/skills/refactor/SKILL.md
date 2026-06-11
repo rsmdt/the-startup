@@ -62,13 +62,13 @@ Read reference/output-format.md and format the baseline report accordingly.
 
 match (baseline) {
   tests failing => stop, report to user
-  coverage gaps => AskUserQuestion: Add tests first (recommended) | Proceed without coverage | Cancel
+  coverage gaps => ask the user to choose: Add tests first (recommended) | Proceed without coverage | Cancel
   ready         => continue
 }
 
 ### 2. Select Mode
 
-AskUserQuestion:
+Ask the user to choose:
   Standard (default) — parallel fire-and-forget analysis agents
   Agent Team — persistent analyst teammates with coordination
 
@@ -91,7 +91,7 @@ Process findings:
 3. Sequence independent items first, dependent items after.
 
 Read reference/output-format.md and present analysis summary accordingly.
-AskUserQuestion: Document and proceed | Proceed without documenting | Cancel
+Ask the user to choose: Document and proceed | Proceed without documenting | Cancel
 
 If Cancel: stop, report summary of findings discovered.
 
@@ -109,5 +109,5 @@ For each refactoring in findings:
 
 Run complete test suite. Compare behavior with baseline.
 Read reference/output-format.md and present completion summary accordingly.
-AskUserQuestion: Commit changes | Run full test suite | Address skipped items | Done
+Ask the user to choose: Commit changes | Run full test suite | Address skipped items | Done
 

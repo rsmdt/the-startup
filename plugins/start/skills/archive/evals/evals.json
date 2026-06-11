@@ -1,0 +1,30 @@
+{
+  "skill_name": "archive",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Archive spec 002 — its implementation is complete. The spec directory contains requirements.md and solution.md.",
+      "expected_output": "Archive record written to .start/archive/002-*.md, then spec directory removed",
+      "expectations": [
+        "Resolved the spec via the specify-meta skill (spec.py --read) before reading anything",
+        "Read requirements.md and solution.md and distilled them rather than copying verbatim",
+        "Wrote the archive record to .start/archive/[NNN]-[name].md BEFORE removing anything",
+        "Archive record contains only What this is, Architecture, and Implementation sections — no user stories, Gherkin, or decision logs",
+        "Verified the archive record exists and is non-empty before removing the source directory",
+        "Removed the entire spec working directory in a single step after the record was confirmed",
+        "Wrote the record directly without spawning a subagent"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Archive spec 007. The spec directory exists but contains neither requirements.md nor solution.md.",
+      "expected_output": "User asked whether to remove the directory anyway or abort; nothing fabricated",
+      "expectations": [
+        "Detected that there is nothing to distill",
+        "Asked the user whether to remove the directory anyway or abort",
+        "Did not fabricate an archive record from nonexistent documents",
+        "Did not remove the directory without user confirmation"
+      ]
+    }
+  ]
+}

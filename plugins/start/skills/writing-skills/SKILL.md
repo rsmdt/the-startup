@@ -73,7 +73,7 @@ match ($ARGUMENTS) {
 ### 2. Check Duplicates (Create mode only)
 
 Search existing skills:
-1. Glob: `plugins/*/skills/*/SKILL.md`
+1. Find all skill files matching `plugins/*/skills/*/SKILL.md`.
 2. Grep description fields for keyword overlap.
 3. If >50% functionality overlap: propose updating existing skill instead.
 4. If <50%: proceed with new skill, explain justification.

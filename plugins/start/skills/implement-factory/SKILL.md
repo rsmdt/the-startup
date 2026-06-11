@@ -76,7 +76,6 @@ State {
 - Use the validate skill in constitution mode at group boundaries if a CONSTITUTION.md exists at the project root.
 
 **Never:**
-- Implement code directly — you are an orchestrator ONLY.
 - Include scenario text in code agent prompts.
 - Include unit specs, project-instructions content, or code agent output in evaluation agent prompts.
 - Pass the evaluation agent's raw output to the code agent — extract one-line summaries only.
@@ -131,12 +130,7 @@ Present manifest discovery to the user:
 - Execution groups with their modes
 - Next group to execute
 
-Offer optional git setup:
-
-match (git repository) {
-  exists => ask the user to choose between *Create feature branch* and *Skip git integration*
-  none   => proceed without version control
-}
+Offer optional git setup: if a git repository exists, ask the user to choose between *Create feature branch* and *Skip git integration*; otherwise proceed without version control.
 
 If manifest status is `pending`, update it to `in_progress`.
 
@@ -314,11 +308,6 @@ After all execution groups are resolved:
    - Total iterations across all units
    - Final satisfaction percentages per unit
    - Files changed (total count)
-4. Ask the user how to finalize:
-
-match (git integration) {
-  active => Commit + PR | Commit only | Skip
-  none   => Run tests | Manual review
-}
+4. Ask the user how to finalize: with git integration active, offer *Commit + PR*, *Commit only*, or *Skip*; without it, offer *Run tests* or *Manual review*.
 
 5. Offer to archive the spec: suggest `/start:archive {specId}` to consolidate it into a single `.start/archive/{NNN}-{name}.md` record and remove the working spec directory.

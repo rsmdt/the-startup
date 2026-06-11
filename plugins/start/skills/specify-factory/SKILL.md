@@ -46,7 +46,7 @@ State {
 ## Constraints
 
 **Always:**
-- Slice units **vertically** (tracer-bullet): each unit is one user-observable capability, end-to-end through every layer it needs, whose holdout scenarios can pass when only that unit (plus its declared dependencies) is built. Never create a layer-only unit (data-models-only, service-only, middleware-only).
+- Slice units **vertically** (tracer-bullet): each unit is one user-observable capability, end-to-end through every layer it needs, whose holdout scenarios can pass when only that unit (plus its declared dependencies) is built.
 - When units share foundational work (a shared entity, schema, or scaffolding), the **first** unit that needs it builds that foundation inside its own slice; later units depend on that unit and **extend** it. Dependency edges point to real, independently-validatable slices — never to a standalone foundation layer.
 - Attempt to read both requirements.md and solution.md before decomposing. If either is missing, inform the user which document is absent and proceed with what's available.
 - Read the project instructions file (CLAUDE.md, AGENTS.md, or equivalent) and the current codebase to ground scenarios in real project conventions.

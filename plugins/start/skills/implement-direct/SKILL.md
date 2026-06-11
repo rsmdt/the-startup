@@ -42,7 +42,6 @@ State {
 ## Constraints
 
 **Always:**
-- Delegate ALL implementation to specialist subagents — never edit code directly.
 - Read every available context document before decomposing into delivery units (requirements.md, solution.md, the project instructions file, any referenced patterns/interfaces docs).
 - Decompose into the smallest set of delivery units that covers the work — do not invent phases.
 - Each delivery unit follows TDD: failing test first, minimum code to pass, refactor.
@@ -52,7 +51,7 @@ State {
 - Summarize agent results — extract files, summary, tests, blockers for user visibility.
 
 **Never:**
-- Implement code directly — you are an orchestrator ONLY.
+- Implement code directly — delegate ALL implementation to specialist subagents; you are an orchestrator ONLY.
 - Create plan/, manifest.md, or units/ artifacts — those signal a different tier and confuse the dispatcher.
 - Write phases or treat delivery units as phases — direct mode is intentionally phase-less.
 - Skip the drift check at the end.
@@ -83,12 +82,7 @@ Present what was discovered:
 - Documents found
 - Documents missing (note absence; do not block)
 
-Offer optional git setup:
-
-match (git repository) {
-  exists => ask the user to choose between *Create feature branch* and *Skip git integration*
-  none   => proceed without version control
-}
+Offer optional git setup: if a git repository exists, ask the user to choose between *Create feature branch* and *Skip git integration*; otherwise proceed without version control.
 
 ### 2. Decompose
 
@@ -150,10 +144,7 @@ If constitution violation is L1 or L2, block — do not present completion until
 
 Read reference/output-format.md and present completion summary.
 
-match (git integration) {
-  active => ask the user to choose between *Commit + PR*, *Commit only*, or *Skip*
-  none   => ask the user to choose between *Run tests*, *Manual review*, or *Done*
-}
+With git integration active, ask the user to choose between *Commit + PR*, *Commit only*, or *Skip*; without it, choose between *Run tests*, *Manual review*, or *Done*.
 
 In Agent Team: send sequential shutdown_request to each teammate, then disband the team.
 

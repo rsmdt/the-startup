@@ -67,12 +67,12 @@ Read `reference/perspectives.md` for perspective definitions and the focus-area 
 
 match (target) {
   maps to a focus area    => select matching perspectives
-  unclear or multi-area   => AskUserQuestion to confirm scope before spawning agents
+  unclear or multi-area   => ask the user to confirm scope before spawning agents
 }
 
 ### 2. Select Mode
 
-AskUserQuestion:
+Ask the user to choose:
   Standard (default) — parallel fire-and-forget subagents. Fastest for single-cycle analysis.
   Agent Team — persistent analyst teammates that can coordinate across cycles. Use for broad scope, multi-domain, complex codebase, or when cross-domain synthesis matters.
 
@@ -104,7 +104,7 @@ Follow `reference/output-format.md` for the summary structure (Mechanism Finding
 
 Lead every recommendation with the clean approach and its implications. Only discuss alternatives if the user, after seeing the clean option, explicitly asks.
 
-AskUserQuestion:
+Ask the user to choose:
   Continue to next area | Go deeper on [specific finding] | Persist findings to docs/ | Complete analysis
 
 ### 6. Persist Findings (when selected)

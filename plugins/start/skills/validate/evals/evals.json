@@ -1,0 +1,30 @@
+{
+  "skill_name": "validate",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Validate spec 005.",
+      "expected_output": "Spec mode detected, specialist delegation, findings with file:line and fixes, assessment level",
+      "expectations": [
+        "Parsed the three-digit argument as Spec Validation mode",
+        "Loaded the spec documents and identified cross-references",
+        "Delegated validation to specialist agents rather than validating directly",
+        "Launched all applicable validation perspectives simultaneously",
+        "Every finding includes a file:line location and an actionable fix recommendation",
+        "Computed an assessment level (Excellent / Good / Needs Attention / Critical) from fail and warn counts",
+        "Asked the user how to proceed with the findings"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Validate constitution compliance. The project has a CONSTITUTION.md with L1 and L2 rules, and the code contains one L1 violation.",
+      "expected_output": "L1 violation treated as blocking; autofix offered",
+      "expectations": [
+        "Parsed 'constitution' as Constitution Validation mode and read the CONSTITUTION.md rules",
+        "Treated the L1 violation as blocking rather than advisory",
+        "Separated findings by level (L1 autofix, L2 manual, L3 advisory)",
+        "Offered the user the choice to apply L1 autofixes, show violations, or skip"
+      ]
+    }
+  ]
+}

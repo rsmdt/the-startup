@@ -1,0 +1,29 @@
+{
+  "skill_name": "writing-skills",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a new skill for generating database migration files.",
+      "expected_output": "Duplicate search first, PICS structure, verification before shipping",
+      "expectations": [
+        "Searched existing skills for duplicates before creating anything",
+        "Read the conventions reference before writing the skill",
+        "Wrote SKILL.md with valid frontmatter (name + description) and PICS + Workflow structure",
+        "Description states what the skill does and when to use it without summarizing the workflow",
+        "Verified the result after writing: frontmatter, section structure, and size under limits"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Audit the skill at plugins/start/skills/refactor — users report it doesn't work reliably.",
+      "expected_output": "Root-cause audit against conventions with tested fix proposals",
+      "expectations": [
+        "Read the skill file and its reference files before judging",
+        "Checked compliance against the conventions reference, not invented criteria",
+        "Identified issue categories and root causes, not just symptoms",
+        "Proposed specific fixes rather than vague recommendations",
+        "Did not ship or claim a fix as correct based on analysis alone"
+      ]
+    }
+  ]
+}

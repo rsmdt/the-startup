@@ -37,7 +37,6 @@ State {
 - Include technical implementation details — no code, architecture, or database design.
 - Include API specifications — belongs in SDD.
 - Skip the multi-angle validation before completing.
-- Remove or reorganize template sections.
 - Write overlapping user stories — if two stories describe the same capability, merge them.
 - Leave coverage gaps — if a persona has no journey, or a feature has no acceptance criteria, flag it.
 

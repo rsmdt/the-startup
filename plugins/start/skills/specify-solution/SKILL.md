@@ -34,7 +34,6 @@ State {
 ## Constraints
 
 **Always:**
-- Focus exclusively on research, design, and documentation — never implementation.
 - Follow template structure exactly — preserve all sections as defined.
 - Present ALL agent findings to user — complete responses, not summaries.
 - Obtain user confirmation for every architecture decision (ADR).
@@ -46,8 +45,6 @@ State {
 
 **Never:**
 - Implement code — this skill produces specifications only.
-- Skip user confirmation on architecture decisions.
-- Remove or reorganize template sections.
 - Leave [NEEDS CLARIFICATION] markers in completed SDDs.
 - Design beyond PRD scope (no scope creep).
 - Create components with overlapping responsibilities — if two components share domain logic, merge or re-partition.

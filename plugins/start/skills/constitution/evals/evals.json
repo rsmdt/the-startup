@@ -1,0 +1,30 @@
+{
+  "skill_name": "constitution",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a project constitution focused on security and testing.",
+      "expected_output": "Discovery-driven rules with evidence, user approval before writing, validation offered",
+      "expectations": [
+        "Checked for an existing CONSTITUTION.md at the project root before anything else",
+        "Launched discovery agents for the applicable perspectives simultaneously in a single response",
+        "Every proposed rule cites specific file:line evidence from the codebase",
+        "Classified each rule with a level (L1/L2/L3)",
+        "Presented discovered rules for user approval before writing CONSTITUTION.md",
+        "Did not generate generic rules without codebase evidence",
+        "Offered to run validation after writing"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Update our constitution — a CONSTITUTION.md already exists at the project root.",
+      "expected_output": "Existing rules parsed, new discoveries merged after approval",
+      "expectations": [
+        "Read and parsed the existing CONSTITUTION.md rules",
+        "Routed to the update flow rather than creating from template",
+        "Merged approved rules into the existing file rather than overwriting it",
+        "Presented proposed changes for user approval before saving"
+      ]
+    }
+  ]
+}
