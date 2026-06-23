@@ -42,6 +42,7 @@ State {
 - Include traced walkthroughs for complex queries and conditional logic.
 - Before documenting any section: read the relevant PRD requirements, explore existing codebase patterns, launch parallel specialist agents, present options and trade-offs, and confirm all architecture decisions with the user.
 - Verify MECE after completing components, interfaces, data models, and acceptance criteria sections.
+- Follow the MDX block discipline (see MDX Blocks reference): prefer fenced `mermaid` diagrams over ASCII for architecture/data-flow, `> [!IMPORTANT]` decision callouts for ADRs, and tables for comparisons — structured MDX that degrades to readable Markdown, over flat prose. Keep a stable heading spine.
 
 **Never:**
 - Implement code — this skill produces specifications only.
@@ -53,7 +54,8 @@ State {
 ## Reference Materials
 
 - [Focus and MECE](reference/focus-and-mece.md) — SDD focus dimensions and MECE rules for components, interfaces, data models, acceptance criteria
-- [Template](template.md) — SDD template structure, write to `.start/specs/[NNN]-[name]/solution.md`
+- [MDX Blocks](../specify-plan/reference/mdx-blocks.md) — Block vocabulary and document-quality discipline (shared, Path C)
+- [Template](template.md) — SDD template structure, write to `.start/specs/[NNN]-[name]/solution.mdx`
 - [Validation](validation.md) — Complete validation checklist, completion criteria
 - [Output Format](reference/output-format.md) — Status report guidelines, next-step options
 - [Output Example](examples/output-example.md) — Concrete example of expected output format

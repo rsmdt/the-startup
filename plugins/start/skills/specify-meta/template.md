@@ -12,23 +12,22 @@
 
 | Document | Status | Notes |
 |----------|--------|-------|
-| requirements.md | {{REQUIREMENTS_STATUS}} | {{REQUIREMENTS_NOTES}} |
-| solution.md | {{SOLUTION_STATUS}} | {{SOLUTION_NOTES}} |
+| requirements.mdx | {{REQUIREMENTS_STATUS}} | WHY — {{REQUIREMENTS_NOTES}} |
+| solution.mdx | {{SOLUTION_STATUS}} | WHAT (design) — {{SOLUTION_NOTES}} |
+| plan.mdx | {{PLAN_STATUS}} | WHAT (completion contract: target state, quality gates, completion criteria) — {{PLAN_NOTES}} |
 
 **Status values**: `pending` | `in_progress` | `completed` | `skipped`
 
-## Decomposition
+## Implementation
+
+The specification describes the target state. **How** to implement it is decided by `/implement`,
+which selects an execution strategy and records it (with any generated decomposition) under `.impl/`.
 
 | Field | Value |
 |-------|-------|
-| **Tier** | {{DECOMPOSITION_TIER}} |
-| **Status** | {{DECOMPOSITION_STATUS}} |
+| **Strategy** | {{IMPL_STRATEGY}} |
 
-**Tier values**: `Direct` (no artifacts) | `Incremental` (plan/) | `Factory` (manifest.md + units/ + scenarios/) | `None` (not yet chosen)
-
-For Incremental tier, see `plan/README.md`.
-For Factory tier, see `manifest.md`, `units/`, `scenarios/`.
-For Direct tier, no decomposition artifacts are produced — implement-direct reads requirements.md and solution.md directly.
+**Strategy values**: `Direct` | `Iterative` | `Decompose` | `None` (not yet implemented). Chosen at implementation time, not specification time. See `.impl/strategy.md` once `/implement` has run.
 
 ## Decisions Log
 

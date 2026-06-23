@@ -5,7 +5,7 @@ description: Scaffold, status-check, and manage specification directories. Use w
 
 ## Persona
 
-Act as a specification workflow orchestrator that manages specification directories and tracks user decisions throughout the Requirements → Solution → Decomposition workflow. The Decomposition phase produces one of three artifact families based on the tier chosen by the specify classifier: Direct (no artifacts), Incremental (plan/ directory), or Factory (manifest.md + units/ + scenarios/).
+Act as a specification workflow orchestrator that manages specification directories and tracks user decisions throughout the Requirements (WHY) → Solution (WHAT — design) → Plan (WHAT — completion contract) workflow. The Plan phase produces plan.mdx plus scenarios/ (holdout completion criteria). The specification describes the target state; how to implement it (Direct, Iterative, or Decompose) is decided later by /implement, which writes its decomposition under .impl/. (Legacy specs may still carry Incremental plan/ or Factory manifest.md artifacts; these remain readable.)
 
 ## Interface
 
@@ -13,8 +13,7 @@ SpecStatus {
   id: string               // 3-digit zero-padded (001, 002, ...)
   name: string
   directory: string         // .start/specs/[NNN]-[name]/ (legacy: docs/specs/)
-  phase: Initialization | Requirements | Solution | Decomposition | Ready
-  decomposition_tier: Direct | Incremental | Factory | None
+  phase: Initialization | Requirements | Solution | Plan | Ready
   documents: {
     name: string
     status: pending | in_progress | completed | skipped
@@ -24,8 +23,7 @@ SpecStatus {
 
 State {
   specId = ""
-  currentPhase: Initialization | Requirements | Solution | Decomposition | Ready
-  decompositionTier: Direct | Incremental | Factory | None
+  currentPhase: Initialization | Requirements | Solution | Plan | Ready
   documents: []
 }
 
@@ -65,11 +63,12 @@ Read existing spec metadata.
 3. Suggest the next continuation point:
 
 match (documents) {
-  manifest exists                 => "Factory manifest found. Proceed to implementation?"
-  plan exists                     => "Incremental plan found. Proceed to implementation?"
-  solution exists, no decomposition => "Solution found. Continue to Decomposition (classifier will recommend Direct, Incremental, or Factory)?"
-  requirements exists, no solution => "Requirements found. Continue to Solution?"
-  no documents                    => "Start from Requirements?"
+  plan_doc exists (plan.mdx)        => "Plan found. Proceed to implementation? (/implement selects Direct, Iterative, or Decompose.)"
+  manifest exists (legacy)          => "Legacy Factory manifest found. Proceed to implementation?"
+  plan exists (legacy plan/)        => "Legacy Incremental plan found. Proceed to implementation?"
+  solution exists, no plan          => "Solution found. Continue to Plan (define the completion contract)?"
+  requirements exists, no solution  => "Requirements found. Continue to Solution?"
+  no documents                      => "Start from Requirements?"
 }
 
 ### 3. Transition Phase
@@ -83,10 +82,7 @@ Update the spec directory to reflect the new phase.
 match (phase) {
   Requirements  => specify-requirements skill
   Solution      => specify-solution skill
-  Decomposition => route by tier:
-                     Direct      => no skill invocation (no artifacts written)
-                     Incremental => specify-incremental skill
-                     Factory     => specify-factory skill
+  Plan          => specify-plan skill (writes plan.mdx + scenarios/)
 }
 
 4. On completion, return here for the next phase transition.

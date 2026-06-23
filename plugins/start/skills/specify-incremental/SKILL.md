@@ -1,6 +1,6 @@
 ---
 name: specify-incremental
-description: Decompose a single-feature specification into a linear, phase-by-phase implementation plan. Use this for medium-complexity work — single feature, one or two components — where transparent human-in-the-loop phase review is preferred over factory automation.
+description: Phase-decomposition methodology for single-feature work — vertical-slice phases with embedded TDD tasks. Used by the implement-incremental (Iterative) engine to generate a phase plan at implementation time, and to read legacy plan/ artifacts. Not invoked during specification; the spec's plan.mdx defines completion criteria, not phases.
 user-invocable: false
 argument-hint: "spec ID to decompose (e.g., 002)"
 ---

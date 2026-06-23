@@ -32,6 +32,7 @@ State {
 - Wait for user confirmation before proceeding to the next cycle.
 - Run validation checklist before declaring PRD complete.
 - Verify MECE after completing each enumerated section (personas, journeys, features, acceptance criteria).
+- Follow the MDX block discipline (see MDX Blocks reference): structured, scannable MDX that degrades to readable Markdown — `> [!NOTE]` callouts, GitHub task lists, tables — over flat prose. Keep a stable heading spine.
 
 **Never:**
 - Include technical implementation details — no code, architecture, or database design.
@@ -43,7 +44,8 @@ State {
 ## Reference Materials
 
 - [Focus and MECE](reference/focus-and-mece.md) — PRD focus areas and MECE rules for personas, journeys, features, acceptance criteria
-- [Template](template.md) — PRD template structure, write to `.start/specs/[NNN]-[name]/requirements.md`
+- [MDX Blocks](../specify-plan/reference/mdx-blocks.md) — Block vocabulary and document-quality discipline (shared, Path C)
+- [Template](template.md) — PRD template structure, write to `.start/specs/[NNN]-[name]/requirements.mdx`
 - [Validation](validation.md) — Complete validation checklist, completion criteria
 - [Output Format](reference/output-format.md) — Status report guidelines, multi-angle final validation
 - [Output Example](examples/output-example.md) — Concrete example of expected output format

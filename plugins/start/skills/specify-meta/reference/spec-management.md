@@ -13,26 +13,26 @@
 .start/specs/
 ├── 001-user-authentication/
 │   ├── README.md                 # Managed by specify-meta skill
-│   ├── requirements.md           # Created by specify-requirements skill
-│   ├── solution.md               # Created by specify-solution skill
-│   ├── manifest.md               # Created by specify-factory skill
-│   ├── units/                    # Created by specify-factory skill
-│   │   ├── dm1.md
-│   │   ├── ve1.md
-│   │   └── rl1.md
-│   └── scenarios/                # Created by specify-factory skill
-│       ├── dm1/
-│       │   └── schema-validation.md
-│       ├── ve1/
-│       │   ├── sql-injection.md
-│       │   └── empty-input.md
-│       └── rl1/
-│           └── burst-traffic.md
+│   ├── requirements.mdx           # WHY — created by specify-requirements skill
+│   ├── solution.mdx               # WHAT (design) — created by specify-solution skill
+│   ├── plan.mdx                   # WHAT (completion contract) — created by specify-plan skill
+│   ├── scenarios/                 # Holdout completion criteria — created by specify-plan skill
+│   │   ├── login/
+│   │   │   ├── valid-credentials.md
+│   │   │   └── locked-account.md
+│   │   └── password-reset/
+│   │       └── expired-token.md
+│   └── .impl/                     # Implementation-time, written by /implement (resumable)
+│       ├── strategy.md            # Chosen strategy: Direct | Iterative | Decompose
+│       ├── phases/                # Iterative strategy: generated phase plan
+│       └── units/ + manifest.md   # Decompose strategy: generated units + execution order
 ├── 002-payment-processing/
 │   └── ...
 └── 003-notification-system/
     └── ...
 ```
+
+Legacy specs may instead carry an Incremental `plan/` directory or Factory `manifest.md` + `units/` + `scenarios/{unit-id}/` at the spec root; `/implement` still reads these.
 
 ## Script Commands
 
@@ -42,13 +42,12 @@ spec.py "feature name here"
 ```
 **Output:**
 ```
-Created factory directories: units/, scenarios/
 Created spec directory: .start/specs/005-feature-name-here
 Spec ID: 005
 Specification directory created successfully
 ```
 
-Creates the spec directory with `units/` and `scenarios/` subdirectories.
+Creates the spec directory only. Document artifacts are added per phase via `--add`.
 
 ### Read Spec Metadata
 ```bash
@@ -61,29 +60,27 @@ name = "feature-name-here"
 dir = ".start/specs/005-feature-name-here"
 
 [spec]
-prd = ".start/specs/005-feature-name-here/requirements.md"
-sdd = ".start/specs/005-feature-name-here/solution.md"
-manifest = ".start/specs/005-feature-name-here/manifest.md"
-units = [".start/specs/005-feature-name-here/units/dm1.md", ...]
-scenarios_dm1 = [".start/specs/005-feature-name-here/scenarios/dm1/schema-validation.md"]
+prd = ".start/specs/005-feature-name-here/requirements.mdx"
+sdd = ".start/specs/005-feature-name-here/solution.mdx"
+plan_doc = ".start/specs/005-feature-name-here/plan.mdx"
+scenarios_login = [".start/specs/005-feature-name-here/scenarios/login/valid-credentials.md"]
+impl_strategy = ".start/specs/005-feature-name-here/.impl/strategy.md"   # present after /implement runs
 
 files = [
   "README.md",
-  "requirements.md",
-  "solution.md",
-  "manifest.md",
-  "units/dm1.md",
-  "units/ve1.md",
-  "scenarios/dm1/schema-validation.md",
-  "scenarios/ve1/sql-injection.md"
+  "requirements.mdx",
+  "solution.mdx",
+  "plan.mdx",
+  "scenarios/login/valid-credentials.md"
 ]
 ```
 
 ### Add Template to Existing Spec
 ```bash
-spec.py 005 --add specify-requirements   # Creates requirements.md
+spec.py 005 --add specify-requirements   # Creates requirements.md (rename to .mdx per discipline)
 spec.py 005 --add specify-solution       # Creates solution.md
-spec.py 005 --add specify-factory        # Creates units/ and scenarios/ directories
+spec.py 005 --add specify-plan           # Creates plan.mdx + scenarios/ directory
+# Legacy (back-compat): specify-incremental creates plan/, specify-factory creates units/ + scenarios/
 ```
 
 ## Template Resolution
@@ -107,13 +104,13 @@ Templates are resolved in this order:
 ```
 Initialization
     ↓
-Requirements (specify-requirements)
+Requirements (specify-requirements → requirements.mdx)   [WHY]
     ↓
-Solution (specify-solution)
+Solution (specify-solution → solution.mdx)               [WHAT — design]
     ↓
-Factory (specify-factory → units, scenarios, manifest)
+Plan (specify-plan → plan.mdx + scenarios/)              [WHAT — completion contract]
     ↓
-Ready for Implementation
+Ready for Implementation   (/implement selects Direct | Iterative | Decompose → .impl/)
 ```
 
 Each phase can be:
