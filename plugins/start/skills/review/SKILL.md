@@ -1,133 +1,93 @@
 ---
 name: review
-description: Multi-agent code review with specialized perspectives (security, performance, patterns, simplification, tests)
+description: Multi-agent code review with specialized perspectives (security, performance, patterns, simplification, tests). Use when asked to review a PR, a branch, staged changes, a diff, or specific files before merge.
 user-invocable: true
 argument-hint: "PR number, branch name, file path, or 'staged' for staged changes"
 ---
 
-## Persona
-
-Act as a code review orchestrator that coordinates comprehensive review feedback across multiple specialized perspectives.
-
-**Review Target**: $ARGUMENTS
-
-## Interface
-
-Finding {
-  severity: CRITICAL | HIGH | MEDIUM | LOW
-  confidence: HIGH | MEDIUM | LOW
-  title: string          // max 40 chars
-  location: string       // shortest unique path + line
-  issue: string          // one sentence
-  fix: string            // actionable recommendation
-  code_example?: string  // required for CRITICAL, optional for HIGH
-  breaking?: {           // set when the change alters an external contract
-    consumers: string    // what depends on the contract being changed
-    migration: string    // what consumers must do to adapt
-  }
-}
-
-State {
-  target = $ARGUMENTS
-  perspectives = []              // from reference/perspectives.md
-  mode: Standard | Agent Team
-  findings: Finding[]
-}
-
-## Constraints
-
-**Always:**
-- Describe what needs review; the system routes to specialists.
-- Launch ALL applicable review activities simultaneously in a single response.
-- Provide full file context to reviewers, not just diffs.
-- Highlight what's done well in a strengths section.
-- Lead the report with breaking changes when any exist. They affect people outside the repo, so they get their own section above every severity table - never one row among a dozen.
-- Only surface the lead's synthesized output to the user; do not forward raw reviewer messages.
-
-**Never:**
-- Review code yourself — always delegate to specialist agents.
-- Present findings without actionable fix recommendations.
-- Launch reviewers without full file context.
-
-## Reference Materials
-
-- reference/perspectives.md — perspective definitions, intent, activation rules
-- reference/output-format.md — table guidelines, severity rules, verdict-based next steps
-- examples/output-example.md — concrete example of expected output format
-- reference/checklists.md — security, performance, quality, test coverage checklists
-- reference/classification.md — severity/confidence definitions, classification matrix, example findings
+Orchestrate a multi-perspective review of **$ARGUMENTS**. Specialist agents do the reviewing — never review the code yourself. Only your synthesized report reaches the user, never raw reviewer output.
 
 ## Workflow
 
-### 1. Gather Context
-
-Determine the review target from $ARGUMENTS.
+### 1. Resolve Target
 
 match (target) {
-  /^\d+$/       => gh pr diff $target       // PR number
-  "staged"      => git diff --cached        // staged changes
+  /^\d+$/       => gh pr diff $target          // PR number
+  "staged"      => git diff --cached           // staged changes
   containsSlash => read file + recent changes  // file path
-  default       => git diff main...$target  // branch name
+  default       => git diff main...$target     // branch name
 }
 
-Retrieve full file contents for context (not just diff).
+Retrieve the **full contents of every changed file**, not just the diff — reviewers without surrounding context produce shallow findings. If the target resolves to no changes, say so and stop.
 
-Read reference/perspectives.md. Determine applicable conditional perspectives:
+### 2. Activate Perspectives
 
-match (changes) {
-  async/await | Promise | threading   => +Concurrency
-  dependency file changes             => +Dependencies
-  public API | schema changes         => +Compatibility
-  frontend component changes          => +Accessibility
-  CONSTITUTION.md exists              => +Constitution
-}
+Always active:
 
-### 2. Select Mode
+| Perspective | Intent | What to Look For |
+|-------------|--------|------------------|
+| 🔐 Security | Find vulnerabilities before production | Auth/authz gaps, injection risks, hardcoded secrets, input validation, CSRF, cryptographic weaknesses |
+| 🔧 Simplification | Challenge unnecessary complexity | YAGNI violations, over-engineering, premature abstraction, dead code, "clever" code that should be obvious |
+| ⚡ Performance | Identify efficiency issues | N+1 queries, algorithm complexity, resource leaks, blocking operations, caching opportunities |
+| 📝 Quality | Ensure code meets standards | SOLID violations, naming issues, error handling gaps, pattern inconsistencies, code smells |
+| 🧪 Testing | Verify adequate coverage | Missing tests for new code paths, uncovered edge cases, test quality issues |
 
-Ask the user to choose:
-  Standard (default) — parallel fire-and-forget subagents
-  Agent Team — persistent teammates with peer coordination
+Add when the changes match:
 
-Recommend Agent Team when: files > 10, perspectives >= 4, cross-domain, or constitution active.
+| Perspective | Activation Rule |
+|-------------|-----------------|
+| 🧵 Concurrency | Any use of async/await, Promises, threading, shared state, or parallel operations — one match suffices |
+| 📦 Dependencies | Changes to package.json, requirements.txt, go.mod, Cargo.toml, etc. |
+| 🔄 Compatibility | Public API, database schema, config format, or migration changes |
+| ♿ Accessibility | Frontend/UI component changes |
+| 📜 Constitution | Project has CONSTITUTION.md |
 
 ### 3. Launch Reviews
 
-match (mode) {
-  Standard => launch parallel subagents per applicable perspectives
-  Agent Team => create team, spawn one reviewer per perspective, assign tasks
-}
+Ask the user to choose:
+  Standard (default) — parallel fire-and-forget subagents
+  Agent Team — persistent teammates with peer coordination (recommend when files > 10, perspectives >= 4, cross-domain, or constitution active)
+
+Launch ALL applicable perspectives **simultaneously in a single response**. Each reviewer receives the full file contents, the diff, and its perspective row (intent + what to look for). For a reviewer's domain-specific checklist, point it at reference/checklists.md.
 
 ### 4. Synthesize Findings
 
-Process findings:
-1. Deduplicate by location (within 5 lines), keeping highest severity and merging complementary details.
+1. Deduplicate by location (same file, within 5 lines) — keep the highest severity, merge complementary details.
 2. Sort by severity descending, then confidence descending.
-3. Assign IDs using pattern `$severityLetter$number` (C1, C2, H1, M1, L1...).
-4. Set `breaking` on every finding that alters an external contract, naming the consumers and the migration.
-5. Build summary table.
+3. Assign IDs: severity letter + number (C1, C2, H1, M1, L1...).
+4. Determine the verdict:
 
-Determine verdict:
-
-match (breakingCount, criticalCount, highCount, mediumCount) {
-  (> 0, _, _, _)     => REQUEST CHANGES
-  (_, > 0, _, _)     => REQUEST CHANGES
-  (0, 0, > 3, _)     => REQUEST CHANGES
-  (0, 0, 1..3, _)    => APPROVE WITH COMMENTS
-  (0, 0, 0, > 0)     => APPROVE WITH COMMENTS
-  (0, 0, 0, 0)       => APPROVE
+match (criticalCount, highCount, mediumCount) {
+  (> 0, _, _)     => REQUEST CHANGES
+  (0, > 3, _)     => REQUEST CHANGES
+  (0, 1..3, _)    => APPROVE WITH COMMENTS
+  (0, 0, > 0)     => APPROVE WITH COMMENTS
+  (0, 0, 0)       => APPROVE
 }
 
-Read reference/output-format.md and format report accordingly.
+Report with: verdict, findings table, code examples, strengths. One example row sets the format:
+
+| ID | Severity | Confidence | Finding | Remediation |
+|----|----------|------------|---------|-------------|
+| C1 | CRITICAL | HIGH | SQL injection *(api/users.ts:42)* | Use parameterized query *(user input concatenated into SQL)* |
+
+- Every finding needs an actionable remediation — a finding without a fix is noise.
+- Code examples (before/after): REQUIRED for Critical, include for High when the fix is non-obvious, omit for Medium/Low.
+- Always close with a **Strengths** section highlighting what the code does well.
+- When unsure how to grade a finding, read reference/classification.md.
 
 ### 5. Next Steps
 
-Read reference/output-format.md for verdict-based next step options.
+Ask the user to choose, based on verdict:
 
 match (verdict) {
-  REQUEST CHANGES      => loadOptions("request-changes")
-  APPROVE WITH COMMENTS => loadOptions("approve-comments")
-  APPROVE              => loadOptions("approve")
+  REQUEST CHANGES       => Address critical issues first | Show fixes for [issue] | Explain [finding] in detail
+  APPROVE WITH COMMENTS => Apply suggested fixes | Create follow-up issues | Proceed without changes
+  APPROVE               => Add to PR comments (if PR review) | Done
 }
 
-Ask the user to choose between the loaded options.
+## Deeper Reference (load only when needed)
 
+- reference/checklists.md — per-domain checklists (security, performance, quality, test coverage) for reviewers that need them
+- reference/classification.md — severity/confidence definitions and edge-case classification matrix
+- examples/output-example.md — a full rendered report
