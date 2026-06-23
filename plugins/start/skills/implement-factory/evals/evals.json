@@ -107,14 +107,17 @@
     },
     {
       "id": 8,
-      "prompt": "Run /start:implement on spec 010 which has only requirements.md and solution.md but no manifest.md.",
-      "expected_output": "Reports that this skill expects a factory manifest and refers the user to the dispatcher or to specify-factory",
+      "prompt": "Run /start:implement-factory on spec 010 which has requirements.md, solution.md, plan.mdx, and scenarios/ but no manifest.md and no .impl/manifest.md.",
+      "expected_output": "Generates units + manifest at execution time into .impl/, reusing the plan's scenarios/ as the holdout set, then runs the factory loop",
       "expectations": [
-        "Detected that manifest.md is missing from the spec directory",
-        "Did NOT spawn code agents or evaluation agents",
-        "Did NOT start a service",
-        "Reported the missing artifact clearly to the user",
-        "Suggested the user run /start:implement (which dispatches by tier) or re-run /start:specify to produce a manifest"
+        "Detected no legacy manifest.md and no .impl/manifest.md",
+        "Read requirements, solution, and plan.mdx to decompose into vertical-slice units",
+        "Wrote unit specs to .impl/units/ and assembled .impl/manifest.md with execution groups",
+        "Set the manifest threshold from plan.mdx frontmatter",
+        "Did NOT regenerate scenarios — reused the spec's existing scenarios/ as the holdout set",
+        "Mapped each generated unit to its plan capability's scenarios directory",
+        "Presented the generated decomposition for user approval before running the loop",
+        "Did NOT error or claim a manifest is required"
       ]
     },
     {

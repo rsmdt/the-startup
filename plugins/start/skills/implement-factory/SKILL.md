@@ -1,6 +1,6 @@
 ---
 name: implement-factory
-description: Factory loop orchestrator for multi-feature or multi-component implementation manifests. Use for high-complexity work with parallel-eligible workstreams and holdout-scenario evaluation.
+description: Decompose engine — factory loop for multi-feature or multi-component work. Generates units + manifest at execution time from the specification (requirements + solution + plan) into .impl/, using the spec's plan scenarios/ as the holdout set, or runs a pre-built legacy manifest.md. Parallel-eligible workstreams with holdout-scenario evaluation and retry.
 user-invocable: false
 argument-hint: "spec ID to implement (e.g., 002), or file path"
 ---
@@ -53,6 +53,9 @@ Manifest {
 State {
   target = $ARGUMENTS
   specDirectory: string         // resolved .start/specs/NNN-name/ path
+  manifestPath: string          // legacy: spec/manifest.md  |  generated: spec/.impl/manifest.md
+  unitsDir: string              // legacy: spec/units/        |  generated: spec/.impl/units/
+  scenariosBase: string         // spec/scenarios/ — the holdout set (keyed by unit/capability)
   manifest: Manifest
   servicePort: number           // discovered from project instructions or package.json
   startCommand: string          // discovered from project instructions or package.json
@@ -69,7 +72,7 @@ State {
 - Start the service once per execution group; keep it running across all evaluations in that group.
 - Health-check before every evaluation phase.
 - Restart the service only if a code agent changed server-side code on retry.
-- Update manifest.md checkboxes and frontmatter status as units complete.
+- Update the manifestPath checkboxes and frontmatter status as units complete.
 - Skip already-completed units when resuming an interrupted manifest.
 - Present satisfaction metrics to the user after each evaluation.
 - Escalate to the user when max iterations is reached for any unit.
@@ -95,7 +98,24 @@ State {
 
 Use the specify-meta skill to resolve the spec directory.
 
-Read manifest.md from the spec directory. Parse it as follows:
+Resolve the manifest source. Choose `manifestPath`, `unitsDir`, and `scenariosBase`:
+
+```
+match (artifacts) {
+  exists(spec / "manifest.md")            => manifestPath = spec/manifest.md;        unitsDir = spec/units/;        scenariosBase = spec/scenarios/   (legacy, pre-built)
+  exists(spec / ".impl" / "manifest.md")  => manifestPath = spec/.impl/manifest.md;  unitsDir = spec/.impl/units/;  scenariosBase = spec/scenarios/   (resume generated)
+  otherwise                               => generate the manifest (step 1a) into spec/.impl/
+}
+```
+
+**Step 1a — Generate units + manifest (new-layout specs).** When no manifest exists yet:
+1. Read requirements.md(x), solution.md(x), and plan.mdx (the completion contract — target state, quality gates, completion criteria, `threshold`).
+2. Decompose the solution into factory-sized **vertical-slice** units following the specify-factory skill's methodology (reference/decomposition.md): each unit is one user-observable capability, end-to-end, atomic for one code agent; shared foundation owned by the first unit that needs it; dependencies declared, never circular; unit IDs named after the capability. **Map each unit to the matching plan capability** so its holdout set is `scenariosBase/{capability}/`.
+3. **Do NOT generate scenarios.** The holdout completion criteria already exist in the spec's `scenariosBase` (authored by specify-plan). Units reference them; the information barrier is preserved because code agents never read `scenariosBase`.
+4. Write each unit to `unitsDir/{id}.md` (templates/unit.md from specify-factory) and assemble `manifestPath` (templates/manifest.md), setting `threshold` from plan.mdx frontmatter and `max_iterations` to the default (5). Topologically sort into execution groups.
+5. Present the generated decomposition (units, dependency graph, execution groups, threshold) and the coverage map (each unit → its plan capability's scenarios). Ask the user to choose between *Approve decomposition*, *Adjust units*, or *Switch strategy* (re-run /implement to pick Direct or Iterative).
+
+Read manifestPath. Parse it as follows:
 
 **Frontmatter** (YAML between `---` fences):
 - `title`: feature name
@@ -144,7 +164,7 @@ Skip the group entirely if all its units are already completed.
 
 For each unit in this group where unit.status != completed:
 
-1. Read the unit spec file: `{specDirectory}/units/{unit.id}.md`
+1. Read the unit spec file: `{unitsDir}/{unit.id}.md`
 2. Read reference/code-agent.md for the prompt template.
 3. Construct the code agent prompt:
    - Include the full unit spec content.
@@ -193,8 +213,8 @@ On retry iterations: restart the service only if the code agent modified server-
 
 For each unit in this group, sequentially (shared running service):
 
-1. Read all scenario files: `{specDirectory}/scenarios/{unit.id}/*.md`
-2. Check for pre-generated E2E stubs: `{specDirectory}/scenarios/{unit.id}/e2e-stubs.md`
+1. Read all scenario files: `{scenariosBase}/{unit.id}/*.md` (for generated units, `unit.id` is the plan capability slug, so this is the plan's holdout set for that capability)
+2. Check for pre-generated E2E stubs: `{scenariosBase}/{unit.id}/e2e-stubs.md`
 3. Read reference/eval-agent.md for the prompt template.
 4. Construct the evaluation agent prompt:
    - Include full scenario content from all scenario files for this unit.
@@ -223,7 +243,7 @@ Extract passed and failed scenario details.
 match (evaluation result) {
   satisfaction >= manifest.threshold => {
     Mark unit complete:
-      Update manifest.md: `- [ ] {id}:` => `- [x] {id}:`
+      Update manifestPath: `- [ ] {id}:` => `- [x] {id}:`
     Report to user: unit passed with satisfaction percentage.
   }
   satisfaction < manifest.threshold AND unit.iteration < manifest.maxIterations => {
@@ -294,13 +314,13 @@ After all units in this group are resolved (completed, failed, or skipped):
    - Satisfaction percentages per unit
    - Total iterations used
    - Files changed across all units in this group
-4. Update manifest.md frontmatter status if all groups are done.
+4. Update manifestPath frontmatter status if all groups are done.
 
 ### 3. Complete
 
 After all execution groups are resolved:
 
-1. Update manifest.md frontmatter: `status: completed` (or `failed` if any units failed).
+1. Update manifestPath frontmatter: `status: completed` (or `failed` if any units failed).
 2. Use the validate skill for final validation if a CONSTITUTION.md exists.
 3. Present completion summary:
    - Feature name and spec ID

@@ -1,0 +1,32 @@
+---
+title: "Spec without pre-built decomposition"
+status: completed
+threshold: 0.90
+version: 0.1.0
+---
+
+# Plan: Status endpoint
+
+> [!NOTE]
+> Completion contract only. /implement (Iterative strategy) generates the phase plan
+> into .impl/phases/ at execution time.
+
+## Target State
+
+The service exposes a `GET /status` endpoint that returns HTTP 200 with a JSON body
+indicating the service is healthy. No other behavior changes.
+
+## Quality Gates
+
+- [ ] All existing tests pass; new behavior covered by a test
+- [ ] Lint and type checks pass
+
+## Completion Criteria
+
+### Status
+
+- [P0] [Status returns 200](scenarios/status/returns-200.md)
+
+## Open Questions
+
+None — all completion criteria are settled.

@@ -1,32 +1,36 @@
 ---
 name: implement
-description: Implementation entry point. Use to execute a completed specification. Auto-detects the decomposition tier (Direct, Incremental, or Factory) from spec artifacts and dispatches to the matching execution sub-skill.
+description: Implementation entry point. Use to execute a completed specification. Reads the spec (requirements, solution, plan) and selects an execution strategy — Direct, Iterative, or Decompose — then hands off to the matching engine. Also runs legacy specs (plan/ or manifest.md) by back-compatible detection.
 user-invocable: true
 argument-hint: "spec ID to implement (e.g., 002), or file path"
 ---
 
 ## Persona
 
-Act as the implementation entry-point dispatcher. Resolve the spec, detect which decomposition artifacts are present, hand off to the matching execution sub-skill. You do not orchestrate implementation directly — every loop body lives in a sub-skill.
+Act as the implementation entry point. You read the specification, decide **how** to execute it (Direct, Iterative, or Decompose), record that decision, and hand off to the matching engine skill. The specification tells you the target state and what "done" looks like; you choose the execution shape. You do not implement code directly — every loop body lives in an engine skill.
 
 **Implementation Target**: $ARGUMENTS
 
 ## Interface
 
+Strategy = Direct | Iterative | Decompose
+
 DispatchTarget {
-  tier: Direct | Incremental | Factory
-  skill: implement-direct | implement-incremental | implement-factory
-  artifact: string                // path that triggered the dispatch
+  strategy: Strategy
+  skill: implement-direct | implement-incremental | implement-factory   // incremental=Iterative, factory=Decompose
+  reason: string                  // why this strategy (selector rationale or legacy detection)
 }
 
 State {
   target = $ARGUMENTS
   specDirectory: string           // resolved .start/specs/NNN-name/ path
   artifacts: {
-    plan?: string                 // path to plan/README.md if present
-    manifest?: string             // path to manifest.md if present
-    requirements?: string         // path to requirements.md
-    solution?: string             // path to solution.md
+    requirements?: string         // requirements.md(x)
+    solution?: string             // solution.md(x)
+    plan?: string                 // plan.mdx (new) — completion contract
+    scenarios?: string            // scenarios/ dir (new) — holdout completion criteria
+    legacyPlanDir?: string        // plan/README.md (legacy incremental)
+    legacyManifest?: string       // manifest.md (legacy factory)
   }
   dispatch: DispatchTarget
 }
@@ -35,83 +39,91 @@ State {
 
 **Always:**
 - Resolve the spec via the specify-meta skill before inspecting artifacts.
-- Detect artifacts before dispatching — do not assume a tier.
-- Pass `$ARGUMENTS` through unchanged to the sub-skill.
-- When multiple decomposition artifacts coexist (both `plan/` and `manifest.md`), ask the user which to run.
-- Surface what was detected so the user can confirm the dispatch target.
+- Detect artifacts before selecting — legacy artifacts route by back-compat; new specs route by the strategy selector.
+- Run the strategy selector (reference/strategy-selector.md) on requirements + solution + plan when no legacy decomposition artifact exists.
+- Record the chosen strategy in `.impl/strategy.md` and the spec README decisions log before handing off.
+- Surface what was detected and the recommended strategy so the user can confirm or override.
+- Pass `$ARGUMENTS` and the chosen strategy through to the engine skill.
 
 **Never:**
-- Implement code directly — sub-skills own all execution logic.
-- Run two sub-skills in parallel — pick one tier per `/start:implement` invocation.
-- Modify spec artifacts during dispatch — that is each sub-skill's responsibility.
+- Implement code directly — engine skills own all execution logic.
+- Run two engines in parallel — pick one strategy per `/start:implement` invocation.
+- Author or modify specification artifacts (requirements/solution/plan/scenarios) — those are the spec's, and the engine writes only working-tree code plus `.impl/`.
+- Choose a strategy without showing the user the rationale.
 
 ## Reference Materials
 
-This skill is a thin dispatcher and has no reference materials of its own.
-Each sub-skill owns its references, examples, and templates:
+- [Strategy Selector](reference/strategy-selector.md) — Heuristic for choosing Direct, Iterative, or Decompose
 
-- [implement-direct](../implement-direct/SKILL.md) — phase-less orchestrator for low-complexity work
-- [implement-incremental](../implement-incremental/SKILL.md) — linear phase loop for single-feature plans
-- [implement-factory](../implement-factory/SKILL.md) — factory loop with information barriers and retry
+Each engine skill owns its own loop, references, and templates:
+- [implement-direct](../implement-direct/SKILL.md) — Direct: small, phase-less work
+- [implement-incremental](../implement-incremental/SKILL.md) — Iterative: linear phase loop (generated at exec time)
+- [implement-factory](../implement-factory/SKILL.md) — Decompose: parallel units + holdout-scenario retry loop (generated at exec time)
 
 ## Workflow
 
 ### 1. Resolve Spec
 
-Use the specify-meta skill with `$ARGUMENTS` to resolve `specDirectory`. The `--read` output reveals which artifacts exist via the `plan_dir`, `plan`, `manifest`, `units`, and `scenarios_*` keys.
+Use the specify-meta skill with `$ARGUMENTS` to resolve `specDirectory`.
 
-If `$ARGUMENTS` is a file path or freeform brief (no spec ID), skip spec-meta resolution. Treat this as a direct-mode invocation and route to `implement-direct`.
+If `$ARGUMENTS` is a file path or freeform brief (no spec ID), skip spec-meta resolution, set strategy = Direct, and route to implement-direct.
 
 ### 2. Detect Artifacts
 
-Inspect the resolved spec directory for decomposition artifacts:
+Inspect the resolved spec directory:
 
 ```
-manifest_md    = exists(specDirectory / "manifest.md")
-plan_readme    = exists(specDirectory / "plan" / "README.md")
-requirements   = exists(specDirectory / "requirements.md")
-solution       = exists(specDirectory / "solution.md")
+# New layout (completion contract)
+plan_mdx       = exists(specDirectory / "plan.mdx")
+scenarios_dir  = exists(specDirectory / "scenarios")
+requirements   = exists(specDirectory / "requirements.md") or "requirements.mdx"
+solution       = exists(specDirectory / "solution.md")     or "solution.mdx"
+
+# Legacy layout (pre-built decomposition)
+legacy_plan    = exists(specDirectory / "plan" / "README.md")
+legacy_manifest= exists(specDirectory / "manifest.md")
 ```
 
-### 3. Dispatch
-
-Apply the routing rules:
+### 3. Select Strategy
 
 ```
 match (artifacts) {
-  manifest_md exists AND NOT plan_readme   => use the implement-factory skill
-  plan_readme exists AND NOT manifest_md   => use the implement-incremental skill
-  manifest_md exists AND plan_readme       => ask the user under header "Pipeline":
-                                                Factory      — run factory loop on manifest.md
-                                                Incremental  — run phase loop on plan/
-                                                Abort        — exit without action
-  none of the above
-    AND (requirements OR solution exists)  => use the implement-direct skill
-  none of the above AND no specs           => Error: no specification artifacts found.
-                                              Run the specify skill first, or pass a brief.
+  legacy_manifest exists AND NOT legacy_plan  => Decompose (back-compat: run factory loop on manifest.md)
+  legacy_plan exists AND NOT legacy_manifest  => Iterative (back-compat: run phase loop on plan/)
+  legacy_manifest AND legacy_plan             => ask the user under header "Strategy":
+                                                   Decompose — run factory loop on manifest.md
+                                                   Iterative — run phase loop on plan/
+                                                   Abort     — exit without action
+
+  no legacy artifacts                         => run the Strategy Selector:
+       Read reference/strategy-selector.md and apply it to requirements + solution + plan.
+       Surface the recommendation with its signals (feature/capability count, AC count,
+       component count, change type, parallel markers).
+       Ask the user to choose under header "Strategy" — Direct, Iterative, or Decompose —
+       with the recommendation highlighted. The user may override freely.
+
+  no specs at all                             => Error: no specification found.
+                                                 Run the specify skill first, or pass a brief.
 }
 ```
 
-Before invoking the sub-skill, present a one-line dispatch summary to the user:
+When a new-layout spec has a `plan.mdx`, the plan's `scenarios/` are the holdout completion criteria. Iterative and Decompose engines validate against them; they are not re-authored at implement time.
+
+### 4. Record the Decision
+
+Write `.impl/strategy.md` capturing: chosen strategy, the selector rationale (or legacy-detection note), and the source artifacts. Append the decision to the spec README decisions log per reference/strategy-selector.md.
+
+The `.impl/` directory holds all implementation-time artifacts (strategy, generated phases/units, manifest) — kept separate from the specification, and resumable across sessions.
+
+### 5. Hand Off
+
+Present a one-line dispatch summary, then invoke the engine:
 
 ```
-Detected: manifest.md → routing to implement-factory
+Strategy: Iterative (single capability, 2 components) → implement-incremental
+Strategy: Decompose (4 components, parallel flagged) → implement-factory
+Strategy: Direct (fix, existing surface) → implement-direct
+Detected legacy manifest.md → Decompose → implement-factory
 ```
 
-```
-Detected: plan/README.md → routing to implement-incremental
-```
-
-```
-Detected: only requirements.md and solution.md → routing to implement-direct
-```
-
-### 4. Hand Off
-
-Use the chosen sub-skill (`implement-direct`, `implement-incremental`, or `implement-factory`) with the same `$ARGUMENTS`.
-
-Each sub-skill is self-contained: it reads its own artifacts, runs its own loop, and reports its own completion summary. The dispatcher does not post-process sub-skill output.
-
-### Notes on tier mismatch
-
-If the spec README decision log records a tier (e.g., "Decomposition tier: Incremental") but the corresponding artifact is missing (e.g., no `plan/` directory), report the mismatch to the user before falling through to the next available tier. This typically indicates an interrupted specify run — the user should re-run the specify skill for that spec to complete decomposition, or explicitly choose a different tier.
+Use the chosen engine skill with the same `$ARGUMENTS` and the selected strategy. Each engine is self-contained: for new-layout specs it generates its own decomposition into `.impl/` from requirements + solution + plan; for legacy specs it reads the pre-built `plan/` or `manifest.md`. The engine reads its artifacts, runs its loop, and reports its own completion summary.

@@ -1,0 +1,76 @@
+{
+  "skill_name": "implement",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Implement spec 005 — a single-line rate-limit middleware fix. The spec has requirements, solution, and plan.mdx; no .impl/ yet.",
+      "expected_output": "Strategy selector recommends Direct; records the decision; routes to implement-direct",
+      "expectations": [
+        "Invoked specify-meta to resolve the spec directory",
+        "Read requirements, solution, and plan.mdx before selecting a strategy",
+        "Read reference/strategy-selector.md and surfaced the rationale (change_type=fix, minimal surface)",
+        "Recommended the Direct strategy and presented Direct/Iterative/Decompose via AskUserQuestion",
+        "Wrote .impl/strategy.md recording the chosen strategy and rationale",
+        "Routed to implement-direct",
+        "Did NOT author or modify any specification artifact (requirements/solution/plan/scenarios)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Implement spec 003 — a single-feature notification API with 2 components. New layout (plan.mdx + scenarios/).",
+      "expected_output": "Strategy selector recommends Iterative; routes to implement-incremental",
+      "expectations": [
+        "Read requirements, solution, and plan before selecting a strategy",
+        "Surfaced selector rationale citing single capability and <= 2 components",
+        "Recommended the Iterative strategy",
+        "Presented all three strategies via AskUserQuestion with Iterative highlighted",
+        "Wrote .impl/strategy.md",
+        "Routed to implement-incremental"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Implement spec 006 — multi-feature auth with 4 components across 3 capabilities. New layout.",
+      "expected_output": "Strategy selector recommends Decompose; routes to implement-factory",
+      "expectations": [
+        "Surfaced selector rationale citing >= 2 features and >= 3 components",
+        "Recommended the Decompose strategy",
+        "Wrote .impl/strategy.md",
+        "Routed to implement-factory",
+        "Noted the plan's scenarios/ will serve as the holdout evaluation set"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Implement spec 002 which has a legacy plan/ directory (plan/README.md + phase-N.md) and no plan.mdx.",
+      "expected_output": "Back-compat: detect legacy plan/, route to implement-incremental as Iterative",
+      "expectations": [
+        "Detected the legacy plan/README.md artifact",
+        "Selected the Iterative strategy by back-compat detection (did not require the strategy selector)",
+        "Routed to implement-incremental",
+        "Did not error on the absence of plan.mdx"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Implement spec 004 which has a legacy manifest.md + units/ + scenarios/ and no plan.mdx.",
+      "expected_output": "Back-compat: detect legacy manifest.md, route to implement-factory as Decompose",
+      "expectations": [
+        "Detected the legacy manifest.md artifact",
+        "Selected the Decompose strategy by back-compat detection",
+        "Routed to implement-factory",
+        "Did not regenerate units or scenarios"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Implement spec 099 which does not exist / has no specification artifacts.",
+      "expected_output": "Error: no specification found; suggest running specify first or passing a brief",
+      "expectations": [
+        "Reported that no specification artifacts were found",
+        "Suggested running the specify skill first or passing a brief/file path",
+        "Did NOT fabricate a strategy or invoke an engine skill"
+      ]
+    }
+  ]
+}

@@ -75,13 +75,15 @@
     },
     {
       "id": 6,
-      "prompt": "Run /start:implement-incremental on spec 008 which has only requirements.md and solution.md but no plan/ directory.",
-      "expected_output": "Reports that this skill expects a plan/ directory and points the user to specify-incremental or the dispatcher",
+      "prompt": "Run /start:implement-incremental on spec 008 which has requirements.md, solution.md, and plan.mdx but no plan/ directory and no .impl/phases/.",
+      "expected_output": "Generates a phase plan at execution time into .impl/phases/ from the specification, then runs the phase loop",
       "expectations": [
-        "Detected that plan/README.md is missing",
-        "Did NOT spawn task subagents",
-        "Reported the missing plan/ directory clearly",
-        "Suggested the user run /start:specify (then choose Incremental) or /start:implement (autodetect)"
+        "Detected no legacy plan/README.md and no .impl/phases/README.md",
+        "Read requirements, solution, and plan.mdx to decompose into vertical-slice phases",
+        "Wrote .impl/phases/README.md (phase manifest) and at least one .impl/phases/phase-N.md",
+        "Followed the specify-incremental methodology (TDD-structured tasks, spec refs) for the generated phases",
+        "Presented the generated phase plan to the user for approval before executing",
+        "Did NOT error or claim a plan/ directory is required"
       ]
     },
     {

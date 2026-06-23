@@ -1,6 +1,6 @@
 ---
 name: implement-incremental
-description: Linear phase-loop orchestrator for single-feature implementation plans. Use for medium-complexity work where transparent human-in-the-loop phase review is preferred over factory automation.
+description: Iterative engine — linear phase loop for single-feature work. Generates a phase plan at execution time from the specification (requirements + solution + plan) into .impl/, or runs a pre-built legacy plan/ directory. Human-in-the-loop phase checkpoints.
 user-invocable: false
 argument-hint: "spec ID to implement (e.g., 002), or file path"
 ---
@@ -32,8 +32,8 @@ PhaseResult {
 State {
   target = $ARGUMENTS
   spec: string                   // resolved spec directory path
-  planDirectory: string          // path to plan/ directory
-  manifest: string               // plan/README.md contents
+  planDirectory: string          // legacy: plan/  |  generated: .impl/phases/
+  manifest: string               // README.md (phase manifest) contents
   phases: Phase[]                // discovered from manifest, with status from frontmatter
   mode: Standard | Agent Team
   currentPhase: number
@@ -49,7 +49,7 @@ State {
 - Use the validate skill in drift mode at each phase checkpoint.
 - Use the validate skill in constitution mode if a CONSTITUTION.md exists at the project root.
 - Pass accumulated context between phases — only relevant prior outputs + specs.
-- Update phase file frontmatter AND plan/README.md checkbox on phase completion.
+- Update phase file frontmatter AND the planDirectory/README.md checkbox on phase completion.
 - Skip already-completed phases when resuming an interrupted plan.
 
 **Never:**
@@ -70,19 +70,33 @@ State {
 
 Use the specify-meta skill to read the spec.
 
-Discover the plan structure:
+Resolve the phase-plan source. Choose `planDirectory`:
 
-Read plan/README.md (the manifest).
+```
+match (artifacts) {
+  exists(spec / "plan" / "README.md")        => planDirectory = spec/plan/   (legacy, pre-built)
+  exists(spec / ".impl" / "phases" / "README.md") => planDirectory = spec/.impl/phases/  (resume generated)
+  otherwise                                  => generate the phase plan (step 1a) into spec/.impl/phases/
+}
+```
+
+**Step 1a — Generate the phase plan (new-layout specs).** When no phase manifest exists yet:
+1. Read requirements.md(x), solution.md(x), and plan.mdx (the completion contract — target state, quality gates, completion criteria).
+2. Decompose into linear **vertical-slice** phases: each phase delivers one user-observable capability end-to-end (data → logic → interface → tests) and is validatable against the plan's completion criteria for that capability. Shared foundation is built by the first phase that needs it and extended by later phases. Never slice by layer.
+3. Follow the methodology in the specify-incremental skill (reference/task-structure.md and the phase template) to structure phases and TDD tasks. Write `.impl/phases/README.md` (the manifest checklist) and `.impl/phases/phase-N.md` per phase.
+4. Present the generated phase plan to the user. Ask the user to choose between *Approve plan*, *Adjust phases*, or *Switch strategy* (re-run /implement to pick Direct or Decompose).
+
+Discover the phase structure from `planDirectory`:
+
+Read planDirectory/README.md (the manifest).
 Parse phase checklist lines matching: `- [x] [Phase N: Title](phase-N.md)` or `- [ ] [Phase N: Title](phase-N.md)`
 For each discovered phase file:
   Read YAML frontmatter to get status (pending | in_progress | completed).
 Populate phases[] with number, title, file path, and status.
 
-If plan/README.md does not exist, report an error: this skill requires a plan/ directory. Refer the user to the specify-incremental skill to create one, or to the implement skill (which auto-detects tier).
-
 Present discovered phases with their statuses. Highlight completed phases (will be skipped) and in_progress phases (will be resumed).
 
-Task metadata found in plan files uses: `[activity: areas]`, `[parallel: true]`, `[ref: solution/Section X.Y]`
+Task metadata found in phase files uses: `[activity: areas]`, `[parallel: true]`, `[ref: solution/Section X.Y]`
 
 Offer optional git setup: if a git repository exists, ask the user to choose between *Create feature branch* and *Skip git integration*; otherwise proceed without version control.
 
@@ -120,7 +134,7 @@ match (all phases completed) {
 
 ### 4. Execute Phase
 
-Read plan/phase-{phase.number}.md for current phase tasks.
+Read planDirectory/phase-{phase.number}.md for current phase tasks.
 Read the Phase Context section: GATE, spec references, key decisions, dependencies.
 
 match (mode) {
@@ -157,7 +171,7 @@ Ask the user to choose between *Continue to next phase*, *Review output*, *Pause
 ### 6. Update Phase Status
 
 1. Edit phase file frontmatter: `status: {old}` → `status: {new}`
-2. If status is completed, edit plan/README.md:
+2. If status is completed, edit planDirectory/README.md:
    `- [ ] [Phase {N}: {Title}](phase-{N}.md)` → `- [x] [Phase {N}: {Title}](phase-{N}.md)`
 
 ### 7. Complete

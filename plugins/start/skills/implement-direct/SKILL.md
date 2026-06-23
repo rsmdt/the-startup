@@ -71,7 +71,8 @@ Use the specify-meta skill to resolve the spec directory if `$ARGUMENTS` is a sp
 If `$ARGUMENTS` is a file path or freeform brief, treat it as the primary context document and skip spec-meta resolution.
 
 Discover available context:
-- requirements.md and solution.md from spec directory (if present)
+- requirements.md(x) and solution.md(x) from spec directory (if present)
+- plan.mdx (if present) — the completion contract: target state, quality gates, and completion criteria. Treat its quality gates and completion criteria as the acceptance bar for the delivery units, and its `scenarios/` as the behaviors to verify.
 - The project instructions file (CLAUDE.md, AGENTS.md, or equivalent) for codebase orientation
 - Any other documents referenced in `$ARGUMENTS`
 
@@ -91,9 +92,9 @@ Read all discovered context documents.
 Decompose the work into the smallest set of delivery units that covers all acceptance criteria:
 - Each unit has a clear title, area, references back to requirements/solution sections, and acceptance bar.
 - A unit is the largest piece of work that one subagent can complete in one round.
-- Aim for 1–3 units. If the natural decomposition exceeds 3 units, this work is not low-complexity — recommend the user re-run the specify skill and choose Incremental or Factory.
+- Aim for 1–3 units. If the natural decomposition exceeds 3 units, this work is not Direct-sized — recommend the user re-run /implement and choose the Iterative or Decompose strategy.
 
-Present the decomposition. Ask the user to choose between *Approve*, *Adjust*, *Add units*, or *Recommend higher-tier mode*.
+Present the decomposition. Ask the user to choose between *Approve*, *Adjust*, *Add units*, or *Switch strategy* (re-run /implement for Iterative or Decompose).
 
 ### 3. Select Mode
 
