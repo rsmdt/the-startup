@@ -18,6 +18,8 @@ ArchiveRecord {
   specName: string          // e.g., "payment-processing"
   archivePath: string       // .start/archive/[NNN]-[name].md
   sourceDir: string         // .start/specs/[NNN]-[name]/ — removed on completion
+  commit?: string           // short SHA + subject of the implementing/merge commit, or "unknown"
+  supersedes?: string[]     // prior archived spec stems ([NNN]-[name]) this one replaces
 }
 
 State {
@@ -26,6 +28,8 @@ State {
   requirements?: string     // path to requirements.md if present
   solution?: string         // path to solution.md if present
   archivePath: string
+  commit?: string           // resolved in step 3
+  priorArchives?: string[]  // existing .start/archive/*.md scanned for supersession in step 4
 }
 
 ## Constraints
@@ -37,6 +41,8 @@ State {
 - Verify the archive record exists and is non-empty before removing the source directory.
 - Remove the entire `.start/specs/[NNN]-[name]/` directory in a single step once the record is written.
 - Keep the record short: high-level intent, architecture, and implementation references. Nothing else.
+- Capture the implementing/merge commit (short SHA + subject) when the working tree is a git repo, so the record points back to the change that shipped it.
+- Scan `.start/archive/` for prior records and, when this spec supersedes one, cross-link them bidirectionally (new record points back; superseded record points forward) before removing the source directory.
 - Write the record yourself — do not spawn a subagent.
 
 **Never:**
@@ -45,10 +51,11 @@ State {
 - Restate requirements or solution verbatim — distill them.
 - Pad the record with ceremony, narrative, or status fields.
 - Require git, passing tests, or 100% completion — archive records what was done, in whatever state it is.
+- Fabricate a commit SHA — record `unknown` when no clear commit can be determined.
 
 ## Reference Materials
 
-This skill is intentionally self-contained; the record structure is inlined in step 3.
+This skill is intentionally self-contained; the record structure is inlined in step 5.
 
 ## Workflow
 
@@ -77,12 +84,47 @@ Read requirements.md and solution.md (whichever exist). Extract only:
 
 Distill. Do not copy sections across; rewrite them to their high-level essence.
 
-### 3. Write the Archive Record
+### 3. Identify the Implementing Commit
+
+Find the commit that implemented or merged the feature so the record points back to the shipped change. Search history for the spec ID and name:
+
+```bash
+git log -n 5 --oneline --all --regexp-ignore-case --grep "{specId}" --grep "{specName}"
+```
+
+```
+match (result) {
+  not a git repo / git unavailable   => commit = "unknown" (do not fabricate)
+  single clear match                 => commit = "{short-sha} — {subject}"
+  multiple candidates                => present them; ask the user which one (or none)
+  no match                           => ask the user for the SHA, or record "unknown"
+}
+```
+
+### 4. Check Prior Archives for Supersession
+
+List existing records in `.start/archive/` (skip if the directory does not exist yet). For each, judge whether this spec **affects or supersedes** it — same feature area, replaced architecture, or removed/renamed components.
+
+```
+match (relationship) {
+  supersedes one or more   => record their stems in `supersedes`;
+                              back-annotate each superseded record (step 5)
+  related but not replacing => no cross-link (keep the record tight)
+  none                     => no cross-link
+}
+```
+
+When uncertain whether a prior spec is truly superseded, ask the user rather than guessing.
+
+### 5. Write the Archive Record
 
 Create `.start/archive/` if it does not exist. Write `.start/archive/[NNN]-[name].md`:
 
 ```markdown
 # [NNN]-[name]
+
+**Commit:** {short-sha} — {subject}   <!-- or: unknown -->
+**Supersedes:** [NNN]-[name]   <!-- omit this line entirely when nothing is superseded -->
 
 ## What this is
 {one or two plain sentences: the feature and its intent}
@@ -97,7 +139,13 @@ Create `.start/archive/` if it does not exist. Write `.start/archive/[NNN]-[name
 
 No frontmatter. No other sections. Keep it tight.
 
-### 4. Remove the Working Directory
+For each spec named in `supersedes`, back-annotate its existing archive record by inserting a line directly under its `# [NNN]-[name]` heading (do not otherwise alter it):
+
+```markdown
+**Superseded by:** [NNN]-[name]
+```
+
+### 6. Remove the Working Directory
 
 Verify the archive record exists and is non-empty. Then remove the source directory in a single step:
 
@@ -107,8 +155,10 @@ rm -rf {sourceDir}
 
 The scaffolding (`plan/`, `units/`, `scenarios/`, `manifest.md`, `README.md`) is removed with it — it all lives inside `sourceDir`.
 
-### 5. Report
+### 7. Report
 
 Confirm to the user:
 - `Archived: [NNN]-[name] → .start/archive/[NNN]-[name].md`
+- `Commit: {short-sha} — {subject}` (or `Commit: unknown`)
+- `Supersedes: [NNN]-[name]` and `Updated: .start/archive/[NNN]-[name].md` (only when applicable)
 - `Removed: {sourceDir}`

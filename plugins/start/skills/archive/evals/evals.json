@@ -8,8 +8,9 @@
       "expectations": [
         "Resolved the spec via the specify-meta skill (spec.py --read) before reading anything",
         "Read requirements.md and solution.md and distilled them rather than copying verbatim",
+        "Searched git history for the implementing/merge commit and recorded its short SHA + subject in the record (or recorded 'unknown' if none could be determined, without fabricating a SHA)",
         "Wrote the archive record to .start/archive/[NNN]-[name].md BEFORE removing anything",
-        "Archive record contains only What this is, Architecture, and Implementation sections — no user stories, Gherkin, or decision logs",
+        "Archive record contains only the Commit/Supersedes header lines plus What this is, Architecture, and Implementation sections — no user stories, Gherkin, or decision logs",
         "Verified the archive record exists and is non-empty before removing the source directory",
         "Removed the entire spec working directory in a single step after the record was confirmed",
         "Wrote the record directly without spawning a subagent"
@@ -24,6 +25,18 @@
         "Asked the user whether to remove the directory anyway or abort",
         "Did not fabricate an archive record from nonexistent documents",
         "Did not remove the directory without user confirmation"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Archive spec 011 — a payments redesign that replaces the architecture of an earlier spec already archived at .start/archive/004-payment-processing.md.",
+      "expected_output": "New record cross-links the superseded spec, and the prior archive record is back-annotated",
+      "expectations": [
+        "Scanned .start/archive/ for prior records before writing",
+        "Recognized that spec 011 supersedes 004-payment-processing and added a 'Supersedes: 004-payment-processing' line to the new record",
+        "Back-annotated .start/archive/004-payment-processing.md with a 'Superseded by: 011-...' line directly under its heading, without otherwise rewriting it",
+        "Still captured the implementing/merge commit for spec 011",
+        "Wrote the new record before removing the source directory"
       ]
     }
   ]
