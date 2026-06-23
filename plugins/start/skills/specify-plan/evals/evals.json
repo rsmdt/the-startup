@@ -1,0 +1,55 @@
+{
+  "skill_name": "specify-plan",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Author the plan for spec 003 (a notification API) which has completed requirements.md and solution.md.",
+      "expected_output": "plan.mdx with target state, quality gates, completion criteria, and holdout scenarios; no implementation steps or tier",
+      "expectations": [
+        "Read requirements and solution before authoring",
+        "Wrote plan.mdx with a Target State section described as outcomes (not steps)",
+        "Defined Quality Gates as checkable conditions (tests pass, lint/type checks, etc.)",
+        "Defined Completion Criteria grouped by user-observable capability with links to scenarios",
+        "Set a satisfaction threshold in plan.mdx frontmatter",
+        "Did NOT prescribe implementation steps, phases, units, execution order, or a decomposition tier",
+        "Kept the machine-parseable spine (frontmatter threshold; Completion Criteria headings with scenario links)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Generate completion criteria (holdout scenarios) for the notification API plan.",
+      "expected_output": "Scenarios test observable behavior through external interfaces, grounded in the codebase, grouped by capability",
+      "expectations": [
+        "Read the codebase for actual endpoints, data shapes, and conventions",
+        "Wrote scenarios under scenarios/{capability}/{name}.md",
+        "Each scenario tests observable behavior through an external interface (API/UI/CLI)",
+        "Assigned P0/P1/P2 priorities with at least one P0 per capability",
+        "Did NOT reference internal implementation details (class names, function signatures, file paths)",
+        "Presented all scenarios for user approval before finalizing"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Validate the plan for spec 003 against its requirements.",
+      "expected_output": "Coverage and format checks; flag any requirement without a completion criterion",
+      "expectations": [
+        "Checked every requirement maps to at least one completion criterion",
+        "Checked every capability has at least one P0 scenario",
+        "Checked completion criteria test observable behavior, not implementation details",
+        "Flagged any uncovered requirement as a gap",
+        "Confirmed plan.mdx frontmatter has a valid threshold"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "The user asks specify-plan to also lay out the implementation phases and decide whether to use the factory.",
+      "expected_output": "Decline to prescribe HOW; keep the plan to WHAT (completion contract)",
+      "expectations": [
+        "Did NOT write implementation phases, units, or execution order into the plan",
+        "Did NOT choose a Direct/Iterative/Decompose strategy or a tier",
+        "Explained that execution strategy and decomposition are decided by /implement at implementation time",
+        "Kept the plan focused on target state, quality gates, and completion criteria"
+      ]
+    }
+  ]
+}
