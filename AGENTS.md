@@ -39,7 +39,7 @@ the-startup/
 │   ├── PHILOSOPHY.md             # Activity-based architecture rationale
 │   ├── PRINCIPLES.md             # Core development principles
 │   ├── patterns/                 # Technical patterns documentation
-│   └── specs/                    # Feature specifications (requirements, solution, decomposition artifacts)
+│   └── specs/                    # Feature specifications (requirements, solution, plan + scenarios)
 │
 ├── package.json                    # npm package definition for npx installer
 └── README.md                     # User-facing documentation
@@ -141,25 +141,27 @@ Skills load minimal context initially, then progressively load:
 
 The primary workflow: `/start:specify` → `/start:validate` → `/start:implement` → `/start:review`
 
+The specification describes **WHY** and **WHAT** (the target state and what "done" looks like). **HOW** to execute it is decided later, by `/start:implement`. The two concerns are split across a clean line.
+
 Specifications live in `.start/specs/[NNN]-[name]/` (legacy: `docs/specs/`):
-- `requirements.md` - What to build
-- `solution.md` - How to build it
-- One of three decomposition artifact families based on tier (chosen at `specify` step 6):
-  - **Direct** — no decomposition artifact; `implement-direct` reads requirements + solution directly
-  - **Incremental** — `plan/README.md` + `plan/phase-N.md` (linear phase plan with TDD-structured tasks)
-  - **Factory** — `manifest.md` + `units/{id}.md` + `scenarios/{unit-id}/{name}.md` (factory loop with information barriers and holdout scenarios)
+- `requirements.mdx` — **WHY**: problem, users, acceptance criteria
+- `solution.mdx` — **WHAT (design)**: target architecture, components, interfaces
+- `plan.mdx` — **WHAT (completion contract)**: target state, quality gates, and completion criteria
+- `scenarios/{capability}/{name}.md` — holdout completion criteria (authored by `specify-plan`)
 
-#### Tier selection
+The specification carries **no decomposition tier and no implementation steps**. `/start:specify` runs Requirements → Solution → Plan (a 5-step flow: init → requirements → solution → plan → finalize).
 
-`/start:specify` runs a complexity classifier (see `plugins/start/skills/specify/reference/classifier.md`) at step 6 and recommends a tier:
+#### Execution strategy (chosen at implementation time)
 
-| Tier | When | Decomposition skill | Implementation skill |
-|------|------|---------------------|----------------------|
-| **Direct** | Fixes, refactors, doc changes, single-AC features | _none_ | `implement-direct` |
-| **Incremental** | Single feature with one or two components | `specify-incremental` | `implement-incremental` |
-| **Factory** | Multi-feature, multi-component, parallel work | `specify-factory` | `implement-factory` |
+`/start:implement` reads requirements + solution + plan, runs a strategy selector (see `plugins/start/skills/implement/reference/strategy-selector.md`), and chooses **how** to execute:
 
-`/start:implement` autodetects which tier was chosen (by inspecting which artifacts exist) and dispatches to the matching execution sub-skill. Users always invoke `/start:specify` and `/start:implement` — sub-skills are called internally.
+| Strategy | When | Engine skill | Generates |
+|----------|------|--------------|-----------|
+| **Direct** | Fixes, refactors, doc changes, single-AC features | `implement-direct` | _nothing_ — builds straight to the plan's criteria |
+| **Iterative** | Single feature with one or two components | `implement-incremental` | `.impl/phases/` at exec time |
+| **Decompose** | Multi-feature, multi-component, parallel work | `implement-factory` | `.impl/units/` + `.impl/manifest.md` at exec time |
+
+The chosen strategy and any generated decomposition are written under `.impl/` (resumable, inspectable, separate from the spec). The holdout `scenarios/` from `plan.mdx` are the evaluation set the engines validate against. `specify-incremental` / `specify-factory` remain as the **decomposition methodology** the engines reuse, and to read legacy `plan/` / `manifest.md` specs (back-compat). Users invoke `/start:specify` and `/start:implement`; everything else is internal.
 
 ### Knowledge Capture
 
