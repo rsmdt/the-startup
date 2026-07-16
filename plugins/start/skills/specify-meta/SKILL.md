@@ -33,6 +33,7 @@ State {
 - Use spec.py (co-located with this SKILL.md) for all directory operations.
 - Create README.md from template.md when scaffolding new specs.
 - Log all significant decisions with date, decision, and rationale.
+- Keep the README Assumption Ledger current — status changes (Proposed → Confirmed/Corrected/Standing) are updates to this file, made when the specify skill reports them.
 - Confirm next steps with user before phase transitions.
 
 **Never:**

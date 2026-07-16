@@ -1,46 +1,75 @@
 # Example Specification Output
 
+## Clarification Ledger (presented before any document work)
+
+**What I know:** real-time notifications, WebSocket transport requested, existing Express backend.
+
+**What I need from you** (research can't answer these):
+
+| # | Question | Stake | Proposed default |
+|---|----------|-------|------------------|
+| 1 | Must notifications persist for offline users? | Decides whether a notification store + read-state model is in scope | Yes, 30-day retention |
+| 2 | Web only, or mobile push too? | Push adds vendor integration + token lifecycle to requirements | Web only |
+
+**What I'll research** (routed to perspectives, confirmed with you before use): current auth/session mechanism, existing event bus, WebSocket library fit with the Express stack.
+
+**Assumptions I'd otherwise make:**
+
+| Topic | Default | Impact if wrong | Status |
+|-------|---------|-----------------|--------|
+| Auth for socket connections | Reuse session cookie auth | Token-based auth = new AC set + security review | Proposed |
+| Delivery guarantee | At-least-once, dedupe client-side | Exactly-once changes architecture materially | Proposed |
+
+*(User answers #1 "yes, but 7 days", accepts #2 default → Corrected + Standing. Blocking unknowns resolved; document phases begin.)*
+
+---
+
+## Research Finding Disposition
+
+| Finding (perspective) | Evidence | Disposition |
+|-----------------------|----------|-------------|
+| Session auth is JWT-in-cookie, socket handshake can reuse it (Technical) | src/middleware/auth.ts:14 | Confirmed |
+| Existing Redis pub/sub used for jobs, reusable as event bus (Integration) | src/queue/bus.ts | Corrected — user: "Redis is being retired, use Postgres LISTEN/NOTIFY" |
+
+---
+
 ## Specification Complete
 
-Specification Complete
-
 Spec: 003-notification-system
-Documents: Requirements ✅ | Solution ✅ | Factory ✅
+Documents: Requirements ✅ | Solution ✅ | Plan ✅
+📄 Report: `.start/specs/003-notification-system/spec-report.mdx` (full ledger, finding dispositions, decisions — readable in any editor)
 
-Readiness: HIGH
-Confidence: 92%
+Readiness: MEDIUM
+Standing assumptions (2): Web only (no mobile push) · At-least-once delivery
+→ Readiness capped: "at-least-once delivery" is architecture-shaping. Confirm it to reach HIGH.
 
 Next Steps:
-1. /start:validate 003 - Validate specification quality
-2. /start:implement 003 - Begin implementation
+1. /start:validate 003 — Validate specification quality
+2. /start:implement 003 — Begin implementation
 
 ---
 
 ## Decision Logging
 
-## Decisions Log
-
 | Date | Decision | Rationale |
 |------|----------|-----------|
-| 2026-02-10 | Requirements skipped | Requirements in JIRA-1234 |
-| 2026-02-10 | Started from Factory | Requirements and solution already documented |
+| 2026-07-10 | Notification retention 7 days (not 30) | User corrected default during clarification |
+| 2026-07-10 | Postgres LISTEN/NOTIFY over Redis | Redis being retired — user corrected research finding |
 
 ---
 
 ## Documentation Structure
 
 .start/specs/003-notification-system/
-├── README.md                 # Decisions and progress
-├── requirements.md           # What and why
-├── solution.md               # How
-├── manifest.md               # Decomposition manifest
-├── units/                    # Factory-sized specs (vertical capability slices)
-│   ├── nt1.md                # Send a notification (owns the notification model)
-│   └── ws1.md                # Stream notifications over WebSocket (after: nt1)
-└── scenarios/                # Holdout evaluation scenarios
-    ├── nt1/
+├── README.md                 # Decisions, assumption ledger, progress
+├── requirements.mdx          # What and why (carries [ASSUMPTION] markers)
+├── solution.mdx              # How
+├── plan.mdx                  # Completion contract
+├── spec-report.mdx           # Editor-readable report (ledger, findings, documents, decisions)
+└── scenarios/                # Holdout validation scenarios
+    ├── phase-1/
     │   ├── delivery-confirmation.md
     │   └── persistence.md
-    └── ws1/
+    └── phase-2/
         ├── connection-lifecycle.md
         └── reconnect-handling.md

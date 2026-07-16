@@ -8,12 +8,16 @@
       "expectations": [
         "Invoked specify-meta to scaffold the spec directory",
         "Created .start/specs/NNN-*/ directory structure",
+        "Ran the Clarify Intent phase before any document work: presented unknowns with stakes and an assumption ledger with defaults and impact-if-wrong",
+        "Asked the user only intent/priority/scope questions; routed researchable unknowns to research agents instead",
         "Ran research phase with parallel agents",
+        "Presented research findings for user confirmation before folding them into any document",
         "Invoked specify-requirements skill for requirements",
         "Waited for user approval before proceeding to solution",
         "Invoked specify-solution skill for solution",
         "Waited for user approval before proceeding to the plan phase",
         "Invoked specify-plan skill to author plan.mdx (target state, quality gates, completion criteria) and scenarios/",
+        "Wrote spec-report.mdx from templates/spec-report.mdx with no {{...}} placeholders remaining and the ledger, findings, and decisions included",
         "Did NOT run a complexity classifier or choose a Direct/Incremental/Factory tier",
         "Did NOT present execution-strategy options (that decision belongs to /implement)"
       ]
@@ -41,6 +45,30 @@
         "Suggested continuing to the Plan phase (specify-plan)",
         "Did NOT re-run requirements or solution phases",
         "Did NOT run a complexity classifier or choose an execution strategy"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Specify: users should be able to share things with each other.",
+      "expected_output": "Clarification-first: ledger + targeted questions before any scaffolding of document content; no half-clarified draft",
+      "expectations": [
+        "Did NOT begin writing requirements from the vague brief",
+        "Presented what it needs to know to specify well — unknowns each carrying a stake (what changes downstream)",
+        "Surfaced the assumptions it would otherwise make, each with a default and impact-if-wrong",
+        "Batched at most five questions, ordered by leverage, with proposed defaults the user can accept in one action",
+        "Blocking unknowns resolved before any document phase started",
+        "Accepted defaults recorded as Standing and carried as visible [ASSUMPTION] entries, logged in the README ledger"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Specify a payments integration. When research reports the current provider, fold it in.",
+      "expected_output": "Research findings require explicit user disposition before entering documents",
+      "expectations": [
+        "Research findings presented as claims with evidence, not silently accepted",
+        "User dispositioned each material claim (confirm / correct / discard / defer) before it entered any document",
+        "A deferred finding became a Standing [ASSUMPTION] rather than an unstated fact",
+        "MECE gate verified on requirements and acceptance criteria before offering Continue to Solution"
       ]
     },
     {

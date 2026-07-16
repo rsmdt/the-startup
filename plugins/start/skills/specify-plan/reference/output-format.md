@@ -2,23 +2,25 @@
 
 How to report plan status to the user.
 
-## After scenario generation (step 3)
+## After building a phase (step 3)
 
-Present completion criteria grouped by capability:
+Present the phase with all four facets correlated:
 
 ```
-## Completion Criteria — {{FEATURE_TITLE}}
+## Phase {{N}}: {{title}}   (depends on: {{phases or none}})
+{{one-line outcome}}
 
-### {{Capability A}}
-- [P0] {{scenario title}} — {{one-line observable behavior}}
-- [P1] {{scenario title}} — {{one-line observable behavior}}
+Features (ACs):     {{AC-N.1, AC-N.2 ...}}
+Behavior (EARS):    {{count}} statements
+Quality Gates:      {{count}}
+Validation:         {{p0}} P0, {{p1}} P1, {{p2}} P2 scenarios
 
 Coverage map:
-| Requirement | Proven by |
-|-------------|-----------|
-| {{req}}     | {{capability/scenario}} |
+| Requirement AC | Behavior (EARS) | Proven by scenario |
+|----------------|-----------------|--------------------|
+| AC-N.1         | When X, shall Y | phase-N/{{name}}   |
 
-Gaps: {{requirements with no completion criterion, or "none"}}
+Gaps: {{ACs/behaviors without a scenario, or "none"}}
 ```
 
 ## Status report (step 6)
@@ -26,13 +28,14 @@ Gaps: {{requirements with no completion criterion, or "none"}}
 ```
 ## Plan Status — {{FEATURE_TITLE}}
 
-Target State:        Complete | Incomplete
-Quality Gates:       {{n}} defined
-Completion Criteria: {{n}} scenarios across {{m}} capabilities ({{p0}} P0, {{p1}} P1, {{p2}} P2)
-Threshold:           {{0.90}}
-Requirement coverage: {{x}}/{{y}} requirements ({{pct}}%)
+Target State:  Complete | Incomplete
+Phases:        {{n}} ({{vertical slices, dependency-ordered}})
+Behaviors:     {{n}} EARS statements
+Validation:    {{n}} scenarios ({{p0}} P0, {{p1}} P1, {{p2}} P2)
+Threshold:     {{0.90}}
+AC coverage:   {{x}}/{{y}} acceptance criteria mapped to a phase ({{pct}}%)
 
 Validation: {{pass | list of gaps}}
 ```
 
-Keep it scannable. Surface gaps prominently — an uncovered requirement is the most important thing for the user to see.
+Keep it scannable. Surface gaps prominently — an unmapped acceptance criterion or a phase with no P0 scenario is the most important thing for the user to see.

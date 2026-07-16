@@ -24,17 +24,50 @@ Instant mobile payment acceptance with just a smartphone. No hardware needed, no
 
 ---
 
+## Stakeholders (Example)
+
+| Stakeholder | Interest / concern | What success looks like for them |
+|-------------|--------------------|----------------------------------|
+| Support team | Payment disputes become their ticket volume | Dispute flow resolvable from the admin view without engineering |
+| Compliance officer | Card-data handling obligations | Zero card data stored on our side; processor attestation on file |
+
+---
+
 ## Feature Requirements (Example)
 
 ### Must Have Features
 
-#### Feature 1: One-Tap Payment Request
+#### FR-1: One-Tap Payment Request
 - **User Story:** As Sarah, I want to send a payment request with one tap so that I can get paid immediately after finishing a service
 - **Acceptance Criteria:**
-  - [ ] Can create payment request in under 10 seconds
-  - [ ] Customer receives request via SMS or email
-  - [ ] Payment completes within 30 seconds of customer action
-  - [ ] Confirmation shown to both parties immediately
+  - [ ] **AC-1.1** — Given a completed service entry, When Sarah taps "Request payment", Then the request is created in under 10 seconds
+  - [ ] **AC-1.2** — Given a created request, When it is sent, Then the customer receives it via SMS or email
+  - [ ] **AC-1.3** — Given the customer approves, When payment executes, Then it completes within 30 seconds and both parties see confirmation immediately
+
+> **Anti-example:** "- [ ] User can request payment" — vague, not testable, no ID. Every criterion needs Given/When/Then, an observable outcome, and a stable AC-N.M.
+
+---
+
+## Non-Functional Requirements (Example)
+
+| ID | Category | Requirement (user-observable) | Fit criterion (measurable) |
+|----|----------|-------------------------------|----------------------------|
+| NFR-1 | Performance | Payment confirmation feels immediate | p95 request→confirmation < 3s at 500 concurrent merchants |
+| NFR-2 | Security & privacy | A merchant can never see another merchant's customers | Cross-tenant access test suite passes with zero leaks |
+| NFR-3 | Accessibility | Sarah can run the whole flow one-handed outdoors | Core journey passes WCAG 2.2 AA; completable with screen reader |
+
+---
+
+## Evaluation & Validation Criteria (Example)
+
+| ID | Dataset / corpus | Measures | Gate |
+|----|------------------|----------|------|
+| EV-1 | Golden transaction set — 200 representative payment scenarios incl. declines and timeouts | End-to-end payment correctness | 100% terminal-state correctness; no payment stuck non-terminal |
+
+| ID | Behavior under test | Pass condition (observable) |
+|----|---------------------|------------------------------|
+| EV-2 | No-spam: reminders only when warranted | Zero reminders sent in the paid-on-time scenario set |
+| EV-3 | Access-off conduct: processor unreachable | Merchant sees explicit failure with retry; never a silent fake success |
 
 ---
 
@@ -60,7 +93,9 @@ Instant mobile payment acceptance with just a smartphone. No hardware needed, no
 
 1. **Specific Problem Statement** - Includes data (73%, $2,400, 1 in 4 sales)
 2. **Clear Personas** - Demographics, goals, and pain points defined
-3. **Testable Acceptance Criteria** - Time limits, specific actions, measurable outcomes
-4. **Measurable KPIs** - Numbers and timeframes specified
-5. **No Technical Details** - Doesn't mention databases, APIs, or architecture
-6. **User-Centric Language** - Written from user perspective
+3. **Testable Acceptance Criteria** - Time limits, specific actions, measurable outcomes — each with a stable AC-N.M ID that plan.mdx traces
+4. **NFRs with Fit Criteria** - Quality expectations stated as measurable, implementation-blind conditions
+5. **Evaluation Gates as Business Criteria** - Reference datasets and behavioral pass conditions (WHAT), no harness design (HOW)
+6. **Measurable KPIs** - Numbers and timeframes specified, distinct from pre-release EV gates
+7. **No Technical Details** - Doesn't mention databases, APIs, or architecture
+8. **User-Centric Language** - Written from user perspective

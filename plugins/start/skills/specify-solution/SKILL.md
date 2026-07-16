@@ -36,7 +36,9 @@ State {
 **Always:**
 - Follow template structure exactly — preserve all sections as defined.
 - Present ALL agent findings to user — complete responses, not summaries.
+- Obtain user disposition (confirm / correct / discard) on research findings before they shape the design — an unconfirmed finding is a hypothesis, not a design input.
 - Obtain user confirmation for every architecture decision (ADR).
+- Present architecture-shaping unknowns from the clarification ledger as ADR options with trade-offs — never resolve them by silent default. Carry accepted defaults as visible `[ASSUMPTION]` entries.
 - Wait for user confirmation before proceeding to the next cycle.
 - Ensure every PRD requirement is addressable by the design.
 - Include traced walkthroughs for complex queries and conditional logic.
@@ -55,7 +57,7 @@ State {
 
 - [Focus and MECE](reference/focus-and-mece.md) — SDD focus dimensions and MECE rules for components, interfaces, data models, acceptance criteria
 - [MDX Blocks](../specify-plan/reference/mdx-blocks.md) — Block vocabulary and document-quality discipline (shared, Path C)
-- [Template](template.md) — SDD template structure, write to `.start/specs/[NNN]-[name]/solution.mdx`
+- [Template](template.mdx) — SDD template structure, write to `.start/specs/[NNN]-[name]/solution.mdx`
 - [Validation](validation.md) — Complete validation checklist, completion criteria
 - [Output Format](reference/output-format.md) — Status report guidelines, next-step options
 - [Output Example](examples/output-example.md) — Concrete example of expected output format
@@ -66,8 +68,8 @@ State {
 ### 1. Initialize Design
 
 Read the PRD from specDirectory to understand requirements.
-Read the template from template.md.
-Write the template to specDirectory/solution.md.
+Read the template from template.mdx.
+Write the template to specDirectory/solution.mdx.
 Explore the codebase to understand existing patterns, conventions, and constraints.
 
 ### 2. Explore Approaches

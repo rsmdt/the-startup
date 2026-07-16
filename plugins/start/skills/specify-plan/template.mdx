@@ -1,0 +1,98 @@
+---
+title: "{{FEATURE_TITLE}}"
+status: draft
+threshold: 0.90
+version: 0.1.0
+---
+
+# Implementation Plan: {{FEATURE_TITLE}}
+
+> [!NOTE]
+> This plan is a **baseline phase-approach, not a prescription**. It correlates the
+> deliverable features (acceptance criteria from requirements), the behavior the
+> solution must exhibit (EARS), the quality gates, and the validation scenarios that
+> prove each phase. `/implement` decides how to execute it — **follow** these phases,
+> **decompose** them further into parallel units, or build **directly** to the gates
+> and scenarios. The phases describe coherent, independently shippable slices; they are
+> the recommended route, not a fixed one.
+
+## Target State
+
+{{One or two paragraphs: what the system does and looks like when every phase is
+delivered. Outcome-first, self-contained, grounded in real components from solution.mdx.
+Describe the destination — the phases below describe the route.}}
+
+## Traceability
+
+Coverage index — IDs only (the detail lives in each phase below). Every requirement AC and every
+solution EARS criterion must appear in exactly one phase; this table makes a gap or a double-map
+visible at a glance. Keep it in sync with the phases.
+
+| Source criterion | Origin | Phase |
+|------------------|--------|-------|
+| AC-1.1 | requirements.mdx | Phase 1 |
+| EARS: {{short tag}} | solution.mdx | Phase 1 |
+| AC-2.1 | requirements.mdx | Phase 2 |
+
+## Phases
+
+Each phase is a **vertical slice**: one coherent, user-observable deliverable carried
+end-to-end. A later phase may depend on an earlier one and extend its foundation. Phases
+are ordered by dependency, not by layer.
+
+### Phase 1: {{Phase title — name the deliverable, not a layer}}
+
+{{One-line outcome: what a user can do when this phase is done. Note dependencies, e.g.
+"Depends on: none" or "Depends on: Phase 1".}}
+
+#### Features — Acceptance Criteria
+
+Business deliverables this phase satisfies, traced to requirements.mdx.
+
+- [ ] **AC-1.1** — {{acceptance criterion, observable and testable}}
+- [ ] **AC-1.2** — {{acceptance criterion}}
+
+#### Behavior — EARS
+
+Technical requirements from solution.mdx, expressed in EARS (see reference/ears.md).
+
+- **When** {{trigger}}, the system shall {{response}}.
+- **While** {{state}}, the system shall {{response}}.
+- **If** {{unwanted condition}}, then the system shall {{response}}.
+- The system shall {{ubiquitous requirement}}.
+
+#### Quality Gates
+
+- [ ] All existing tests pass; new behavior is covered by tests
+- [ ] Lint and type checks pass
+- [ ] {{coverage / performance budget / security / a11y — as the solution implies}}
+
+#### Validation Scenarios
+
+Holdout completion criteria for this phase — observable behavior through external
+interfaces. `P0` critical path, `P1` important, `P2` edge case.
+
+- [P0] [{{scenario title}}](scenarios/phase-1/{{scenario-name}}.md)
+- [P1] [{{scenario title}}](scenarios/phase-1/{{scenario-name}}.md)
+
+### Phase 2: {{Phase title}}
+
+{{Outcome. Depends on: Phase 1.}}
+
+#### Features — Acceptance Criteria
+- [ ] **AC-2.1** — {{...}}
+
+#### Behavior — EARS
+- **When** {{trigger}}, the system shall {{response}}.
+
+#### Quality Gates
+- [ ] {{...}}
+
+#### Validation Scenarios
+- [P0] [{{scenario title}}](scenarios/phase-2/{{scenario-name}}.md)
+
+## Open Questions
+
+{{Any decision that changes what "done" looks like, as a single question with a
+recommended default. Otherwise: "None — all phases and completion criteria are settled."
+Do not enumerate open questions anywhere else in the document.}}

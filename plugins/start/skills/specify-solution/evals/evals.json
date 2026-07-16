@@ -10,7 +10,7 @@
         "Explored the existing codebase for patterns and conventions",
         "Invoked brainstorm to evaluate technical approaches before committing",
         "Wrote output to solution.md in the spec directory",
-        "Followed template.md structure exactly — all sections present",
+        "Followed template.mdx structure exactly — all sections present",
         "No [NEEDS CLARIFICATION] markers remain in completed document",
         "Architecture pattern is clearly stated with rationale",
         "Components are MECE — each has a single distinct responsibility",

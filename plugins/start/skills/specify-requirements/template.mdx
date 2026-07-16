@@ -1,0 +1,241 @@
+---
+title: "[NEEDS CLARIFICATION: Feature title]"
+status: draft
+version: "1.0"
+---
+
+# Product Requirements Document
+
+> [!NOTE]
+> This PRD answers **WHY** and **WHAT** — the problem, who has it, and what "done" looks like.
+> It carries no technical design (that is `solution.mdx`) and no implementation steps.
+> Unresolved decisions live in one place: the **Open Questions** table at the foot of the document.
+> **Stable IDs:** features `FR-N`, criteria `AC-N.M`, plus `NFR-N`, `EV-N`, `DR-N` — permanent once
+> assigned; `plan.mdx` traces them, so renumbering breaks traceability.
+
+<details>
+<summary>📋 Validation Checklist — the single checklist in this document; run before declaring complete</summary>
+
+### Gates (must pass)
+
+- [ ] All required sections complete; no [NEEDS CLARIFICATION] markers remain
+- [ ] Problem statement is specific, measurable, and validated by evidence — not assumptions
+- [ ] Every feature has testable acceptance criteria (Gherkin); all IDs unique and never renumbered
+- [ ] Every NFR has a measurable fit criterion; every EV gate states observable behavior + threshold (WHAT, never HOW)
+- [ ] No contradictions between sections; no technical implementation details or API specifications
+
+### Quality (should pass)
+
+- [ ] Context → Problem → Solution flow makes sense; a new team member could understand this PRD
+- [ ] All MoSCoW categories addressed; every metric has corresponding tracking events
+- [ ] Every data item carries purpose, retention, and classification; user rights addressed
+- [ ] Every dependency carries owner, need-by, and impact-if-late
+- [ ] Jargon defined in the Glossary; acronyms expanded on first use
+
+### MECE (each enumeration: no overlap, no gaps)
+
+- [ ] **Stakeholders** — one concern per row; everyone affected is represented, including support, ops, compliance, and the negatively affected
+- [ ] **Personas** — distinct goals and pain points; all user types who interact are present
+- [ ] **Journeys** — each a distinct path; primary, secondary, and error/recovery mapped; every persona has at least one journey
+- [ ] **Features** — no capability stated twice, even across MoSCoW categories; every persona's problem fully covered; Won't-Have names the confusable capabilities
+- [ ] **Acceptance criteria** — each tests a unique condition; happy, error, and edge paths covered
+- [ ] **NFRs** — one requirement per quality concern; every relevant dimension specified or rejected with a one-line reason
+- [ ] **Evaluation criteria** — no two gates pass or fail together by construction; every release-blocking behavior is gated
+- [ ] **Data** — each item listed once with a single purpose; nothing held that isn't listed
+
+</details>
+
+---
+
+## Product Overview
+
+### Vision
+[NEEDS CLARIFICATION: What is the one-sentence vision for this feature? What future state are we creating for users?]
+
+### Problem Statement
+[NEEDS CLARIFICATION: What specific problem are users facing today? Why is this painful for them? What are the consequences of not solving this?]
+
+### Value Proposition
+[NEEDS CLARIFICATION: Why will users choose this solution over alternatives? What unique value does it provide? How does it make their life better?]
+
+## Stakeholders
+
+People and functions affected by this feature who may never use it — buyers, operations, support, compliance, legal. Personas cover users; this table covers everyone else with a stake.
+
+| Stakeholder | Interest / concern | What success looks like for them |
+|-------------|--------------------|----------------------------------|
+| [NEEDS CLARIFICATION: e.g. Support team] | [What this feature changes for them] | [Their acceptance condition] |
+
+## User Personas
+
+### Primary Persona: [NEEDS CLARIFICATION: persona name]
+- **Demographics:** [Age range, role/occupation, technical expertise level]
+- **Goals:** [What are they trying to accomplish? What does success look like for them?]
+- **Pain Points:** [What frustrates them about current solutions? What obstacles do they face?]
+
+### Secondary Personas
+[NEEDS CLARIFICATION: Are there other user types? If yes, define them. If no, remove this section]
+
+## User Journey Maps
+
+### Primary User Journey: [NEEDS CLARIFICATION: Journey name]
+1. **Awareness:** [How do users discover they have this need?]
+2. **Consideration:** [What alternatives do they evaluate? What criteria matter to them?]
+3. **Adoption:** [What convinces them to try this solution?]
+4. **Usage:** [What are the key steps in using the feature?]
+5. **Retention:** [What keeps them coming back?]
+
+### Secondary User Journeys
+[NEEDS CLARIFICATION: Are there other user journeys? If yes, define them. If no, remove this section]
+
+## Feature Requirements
+
+### Must Have Features
+[NEEDS CLARIFICATION: What are the absolute minimum features needed for this to be valuable to users?]
+
+#### FR-1: [NEEDS CLARIFICATION: Feature name]
+- **User Story:** As a [user type], I want to [action] so that [benefit]
+- **Acceptance Criteria** (Gherkin — `Given / When / Then`, one testable condition per criterion):
+  - [ ] **AC-1.1** — Given [state], When [action], Then [observable outcome]
+  - [ ] **AC-1.2** — Given [state], When [action], Then [observable outcome]
+  - [ ] **AC-1.3** — Given [edge case], When [action], Then [correct behavior]
+
+#### FR-2: [NEEDS CLARIFICATION: Feature name]
+[Repeat structure as needed]
+
+### Should Have Features
+[NEEDS CLARIFICATION: What would significantly improve the experience but isn't critical for launch?]
+
+### Could Have Features
+[NEEDS CLARIFICATION: What nice-to-haves could we add if time and resources permit?]
+
+### Won't Have (This Phase)
+[NEEDS CLARIFICATION: What is explicitly out of scope for this phase? What are we NOT building?]
+
+## Detailed Feature Specifications
+
+### Feature: [NEEDS CLARIFICATION: Pick the most complex feature from above]
+**Description:** [Detailed explanation of how this feature works]
+
+**User Flow:**
+1. User [First action]
+2. System [Response]
+3. User [Next action]
+
+**Business Rules:**
+- Rule 1: [Specification - When X happens, then Y should occur]
+- Rule X: ...
+
+**Edge Cases:**
+- Scenario 1: [What could go wrong?] → Expected: [How should system handle it?]
+- Scenario X: ...
+
+## Non-Functional Requirements
+
+How well the feature must work, from the user's and business's view. One row per relevant quality concern — consider: performance & capacity, reliability & availability, security & privacy, usability & accessibility, legal & compliance, localization, supportability. Every row carries a **fit criterion** a tester can verify without knowing the implementation; realization belongs in `solution.mdx`.
+
+| ID | Category | Requirement (user-observable) | Fit criterion (measurable) |
+|----|----------|-------------------------------|----------------------------|
+| NFR-1 | [NEEDS CLARIFICATION: category] | [e.g. Requests feel instant during checkout] | [e.g. p95 response < 300ms at 1,000 concurrent users] |
+| NFR-2 | [category] | [user-observable requirement] | [measurable condition] |
+
+## Evaluation & Validation Criteria
+
+Pre-release proof, stated as business criteria: **WHAT must be demonstrably true** before shipping. The basis is a reference dataset/corpus or a scripted scenario set; the gate is an observable threshold. Harness and mechanism design belong to implementation. These gates flow into `plan.mdx` quality gates.
+
+| ID | What is proven | Reference basis | Gate (observable) |
+|----|----------------|-----------------|-------------------|
+| EV-1 | [NEEDS CLARIFICATION: e.g. Retrieval quality] | [e.g. golden corpus of representative queries, owned by product] | [e.g. recall@5 ≥ 0.9] |
+| EV-2 | [e.g. behavior under test — acts when it should, silent when it shouldn't] | [e.g. scripted trigger + no-trigger scenario sets] | [e.g. acts in ≥ N of M trigger scenarios; zero unprompted actions otherwise] |
+
+## Success Metrics
+
+Post-launch outcomes measured in production — distinct from the EV gates above, which are pre-release proof on reference data.
+
+### Key Performance Indicators
+[NEEDS CLARIFICATION: How will we measure if this feature is successful?]
+
+- **Adoption:** [Target number/percentage of users who try the feature]
+- **Engagement:** [Target frequency of use or actions per user]
+- **Quality:** [Target error rate, success rate, or satisfaction score]
+- **Business Impact:** [Revenue, retention, or other business metric]
+
+### Tracking Requirements
+[NEEDS CLARIFICATION: What user actions and data points must we track to validate our success metrics and make informed product decisions?]
+
+| Event | Properties | Purpose |
+|-------|------------|---------|
+| [User action] | [What data to capture] | [Why we track this] |
+
+---
+
+## Data & Privacy Requirements
+
+What the feature collects and keeps, from the business view: purpose, retention, and sensitivity. The technical data model belongs in `solution.mdx`; the *obligation* is a requirement.
+
+| ID | Data item | Purpose (why collected) | Source | Retention | Classification |
+|----|-----------|-------------------------|--------|-----------|----------------|
+| DR-1 | [NEEDS CLARIFICATION: e.g. Customer email] | [e.g. payment receipt delivery] | [user-entered] | [e.g. life of account + 90 days] | [PII / sensitive / internal / public] |
+
+- **User rights:** [NEEDS CLARIFICATION: How do users view, export, correct, or delete their data? Which requests must be honored, and how fast?]
+
+## Constraints, Assumptions & Dependencies
+
+### Constraints [NEEDS CLARIFICATION: What are limiting factors]
+- [Budget, timeline, or resource limitations]
+- [Technical or platform constraints]
+- [Legal or compliance requirements]
+
+### Assumptions [NEEDS CLARIFICATION: What are we assuming that is not explicitly defined]
+- [What are we assuming about users?]
+- [What are we assuming about the market?]
+
+Standing entries from the clarification ledger appear here as `[ASSUMPTION]` markers — surfaced, never erased.
+
+### Dependencies [NEEDS CLARIFICATION: What outside this feature must exist or be delivered]
+
+| Dependency | Owner | Needed by | Impact if late |
+|------------|-------|-----------|----------------|
+| [e.g. Vendor onboarding API access] | [team / vendor] | [phase or date] | [what slips or degrades] |
+
+## Risks and Mitigations
+[NEEDS CLARIFICATION: What are potential risks? How do we intend to tackle them?]
+
+| Risk | Impact | Likelihood | Mitigation |
+|------|--------|------------|------------|
+| [Risk description] | [High/Medium/Low] | [High/Medium/Low] | [How to prevent or handle] |
+
+## Glossary
+
+One term, one meaning — the MECE exclusivity check depends on it. Define every domain term and acronym a new team member would stumble on; two names for the same concept is how overlapping requirements sneak in.
+
+| Term | Definition |
+|------|------------|
+| [NEEDS CLARIFICATION: term] | [Single authoritative definition] |
+
+## Open Questions
+
+The single home for every unresolved decision in this PRD. One row per question, each with a
+recommended default so the spec can proceed if unanswered. Resolve a row by checking ☑ and
+recording the choice; an empty table ("None — all decisions settled.") is a valid, good state.
+
+| Question | Options | Recommended default | ☐ Resolved |
+|----------|---------|---------------------|:----------:|
+| [What needs stakeholder input?] | [Option A / Option B] | [Default + one-line why] | [ ] |
+| [What decision is open?] | [Option A / Option B] | [Default + one-line why] | [ ] |
+
+---
+
+<details>
+<summary>📚 Supporting Research (include only what informs a requirement; collapse otherwise)</summary>
+
+### Competitive Analysis
+[NEEDS CLARIFICATION: How do competitors solve this problem? What can we learn from them?]
+
+### User Research
+[NEEDS CLARIFICATION: What user research has been done? Key findings?]
+
+### Market Data
+[NEEDS CLARIFICATION: Any relevant market size, trends, or data points?]
+
+</details>

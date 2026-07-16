@@ -6,7 +6,14 @@ version: "1.0"
 
 # Solution Design Document
 
-## Validation Checklist
+> [!NOTE]
+> This SDD answers **WHAT (design)** — the target architecture, components, interfaces, data
+> models, and the EARS acceptance criteria that make "done" technical. It carries no code and no
+> implementation sequencing (that is `/implement`'s job). Settled choices are **Decision** blocks;
+> unresolved ones live in the **Open Questions** table at the foot of the document.
+
+<details>
+<summary>📋 Validation Checklist & Output Schema (authoring scaffolding — collapse when reviewing)</summary>
 
 ### CRITICAL GATES (Must Pass)
 
@@ -33,11 +40,7 @@ version: "1.0"
 - [ ] **MECE: Data Models** — each entity owns a distinct slice of the domain, all required data is modeled
 - [ ] **MECE: Acceptance Criteria** — each EARS criterion is unique, every PRD criterion has a corresponding system-level criterion
 
----
-
-## Output Schema
-
-### SDD Status Report
+### Output Schema — SDD Status Report
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -49,7 +52,7 @@ version: "1.0"
 | validationPending | number | Yes | Validation items pending |
 | nextSteps | string[] | Yes | Recommended next actions |
 
-### ArchitectureSummary
+### Output Schema — ArchitectureSummary
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -57,7 +60,7 @@ version: "1.0"
 | keyComponents | string[] | Yes | Main system components |
 | externalIntegrations | string[] | No | External services integrated |
 
-### SectionStatus
+### Output Schema — SectionStatus
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -65,13 +68,15 @@ version: "1.0"
 | status | enum: `COMPLETE`, `NEEDS_DECISION`, `IN_PROGRESS` | Yes | Current state |
 | detail | string | No | What decision is needed or what's in progress |
 
-### ADRStatus
+### Output Schema — ADRStatus
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | id | string | Yes | ADR identifier (e.g., ADR-1) |
 | name | string | Yes | Decision name |
 | status | enum: `CONFIRMED`, `PENDING` | Yes | Confirmation state |
+
+</details>
 
 ---
 
@@ -653,17 +658,17 @@ OUTPUT: processed_result
 
 #### UI Visualization Guide
 
-**Entry Points** — Use ASCII wireframes to show where features live:
-```
-┌─────────────────────────────────────────┐
-│  Workspace Switcher Dropdown            │
-├─────────────────────────────────────────┤
-│  ✓ Current Workspace                    │
-│    Other Workspace                      │
-│  ─────────────────────────────          │
-│  ⚙️  Settings                           │
-│  🔑 API Keys                  ← NEW     │
-└─────────────────────────────────────────┘
+**Entry Points** — Show where features live. Prefer a Mermaid tree over ASCII art (per the MDX
+block discipline) so it renders natively and stays editable:
+```mermaid
+graph TD
+    Switcher[Workspace Switcher Dropdown]
+    Switcher --> Current[✓ Current Workspace]
+    Switcher --> Other[Other Workspace]
+    Switcher --> Settings[⚙️ Settings]
+    Switcher --> ApiKeys[🔑 API Keys — NEW]
+    classDef new fill:#e6ffed,stroke:#2da44e;
+    class ApiKeys new;
 ```
 
 **Screen Flows** — Use Mermaid flowcharts for navigation:
@@ -709,15 +714,32 @@ stateDiagram-v2
 
 [NEEDS CLARIFICATION: What key architecture decisions need to be made? Each requires user confirmation.]
 
-- [ ] ADR-1 [Decision Name]: [Choice made]
-  - Rationale: [Why this over alternatives]
-  - Trade-offs: [What we accept]
-  - User confirmed: _Pending_
+Record each settled choice as a **Decision** callout with the options weighed and a confirmation
+checkbox. The checkbox is the machine-readable confirmation state (`[x]` = CONFIRMED).
 
-- [ ] ADR-2 [Decision Name]: [Choice made]
-  - Rationale: [Why this over alternatives]
-  - Trade-offs: [What we accept]
-  - User confirmed: _Pending_
+> [!IMPORTANT]
+> **Decision (ADR-1): [Decision Name] → [Choice made]**
+>
+> | Option | Trade-off / why (not) |
+> |--------|-----------------------|
+> | **[Chosen option]** | [why this wins] |
+> | [Alternative] | [why rejected] |
+>
+> **Rationale:** [Why this over alternatives] · **Accepts:** [trade-off we take on]
+>
+> - [ ] User confirmed
+
+> [!IMPORTANT]
+> **Decision (ADR-2): [Decision Name] → [Choice made]**
+>
+> | Option | Trade-off / why (not) |
+> |--------|-----------------------|
+> | **[Chosen option]** | [why this wins] |
+> | [Alternative] | [why rejected] |
+>
+> **Rationale:** [Why this over alternatives] · **Accepts:** [trade-off we take on]
+>
+> - [ ] User confirmed
 
 ## Quality Requirements
 
@@ -783,9 +805,22 @@ Use the appropriate EARS pattern for each criterion:
 - [Configuration quirks or environment-specific issues]
 - [Known issues with third-party dependencies]
 
+## Open Questions
+
+The single home for unresolved design decisions. Settled choices belong in **Architecture
+Decisions** as Decision blocks; anything still open lives here with a recommended default so
+implementation is not blocked. "None — all decisions settled." is a valid, good state.
+
+| Question | Options | Recommended default | ☐ Resolved |
+|----------|---------|---------------------|:----------:|
+| [Open design decision?] | [Option A / Option B] | [Default + one-line why] | [ ] |
+
 ## Glossary
 
 [NEEDS CLARIFICATION: Define domain-specific and technical terms used throughout this document]
+
+<details>
+<summary>📖 Term definitions (reference — collapse when reviewing the design)</summary>
 
 ### Domain Terms
 
@@ -807,3 +842,5 @@ Use the appropriate EARS pattern for each criterion:
 |------|------------|---------|
 | [API Term] | [Specific meaning in this context] | [Related endpoints or operations] |
 | [Protocol/Format] | [Technical specification] | [Where used in integrations] |
+
+</details>

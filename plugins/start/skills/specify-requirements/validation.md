@@ -35,10 +35,26 @@ Use this checklist to validate PRD completeness before proceeding to SDD.
 - [ ] **KPIs defined for business impact** - Revenue, retention targets
 - [ ] **Every metric has corresponding tracking events** - How to measure
 
+### Non-Functional Requirements & Evaluation Gates
+- [ ] **Every NFR has a measurable fit criterion** - Verifiable without knowing the implementation
+- [ ] **Rejected NFR categories carry a one-line reason** - Considered-and-rejected, not silently dropped
+- [ ] **Every evaluation criterion is business-observable** - Dataset/threshold or behavior/pass-condition; no harness or mechanism design
+- [ ] **EV gates cover every release-blocking behavior** - Nothing that could quietly regress is ungated
+
+### Stakeholders, Data & Dependencies
+- [ ] **Non-user stakeholders identified** - Support, ops, compliance, legal where affected
+- [ ] **Every data item has purpose, retention, and classification** - Nothing held without a stated why
+- [ ] **User rights addressed** - View/export/correct/delete obligations stated
+- [ ] **Dependencies have owner, need-by, and impact-if-late** - Not buried in assumptions
+
 ### Constraints & Risks
 - [ ] **Constraints identified** - Budget, timeline, technical, compliance
-- [ ] **Assumptions documented** - Explicit about what we're assuming
+- [ ] **Assumptions documented** - Explicit about what we're assuming; Standing ledger entries visible as [ASSUMPTION]
 - [ ] **Risks identified with mitigations** - What could go wrong and how to handle
+
+### Identifiers & Traceability
+- [ ] **Stable IDs assigned** - FR-N, AC-N.M, NFR-N, EV-N, DR-N; unique and never renumbered
+- [ ] **Glossary defines every domain term** - One term, one meaning
 
 ## Boundary Validation
 

@@ -35,6 +35,14 @@ which selects an execution strategy and records it (with any generated decomposi
 |------|----------|-----------|
 | {{DATE}} | {{DECISION}} | {{RATIONALE}} |
 
+## Assumption Ledger
+
+Maintained by the specify skill's Clarify Intent phase. Standing entries appear as `[ASSUMPTION]` markers in the documents.
+
+| Topic | Default | Impact if wrong | Status |
+|-------|---------|-----------------|--------|
+| {{TOPIC}} | {{DEFAULT}} | {{IMPACT}} | Proposed \| Confirmed \| Corrected \| Standing |
+
 ## Context
 
 {{CONTEXT_NOTES}}

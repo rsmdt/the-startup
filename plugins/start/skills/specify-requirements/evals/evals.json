@@ -8,7 +8,7 @@
       "expectations": [
         "Invoked brainstorm skill before template filling",
         "Wrote output to requirements.md in the spec directory",
-        "Followed template.md structure exactly — all sections present",
+        "Followed template.mdx structure exactly — all sections present",
         "No [NEEDS CLARIFICATION] markers remain in completed document",
         "Defined at least 2 distinct user personas with different goals",
         "User personas are MECE — no two personas overlap in role or motivation",

@@ -1,6 +1,6 @@
 # Scenario Guide
 
-How to write effective holdout completion criteria. A completion criterion is a holdout scenario: a plain-English description of expected system behavior, tested through external interfaces. During implementation, an evaluation agent reads it and exercises the running system to decide pass/fail.
+How to write effective holdout validation scenarios. A validation scenario is a plain-English description of expected system behavior, tested through external interfaces — typically verifying one EARS statement from its phase. During implementation, an evaluation agent reads it and exercises the running system to decide pass/fail.
 
 ---
 
@@ -8,7 +8,7 @@ How to write effective holdout completion criteria. A completion criterion is a 
 
 **Good scenarios**:
 - Test observable behavior through the API, UI, or CLI
-- Exercise **one capability's own** external interface, so it is verifiable independently
+- Exercise **one phase's own** external interface, so it is verifiable independently
 - Reference actual endpoints, data shapes, and conventions from the codebase
 - Are specific enough that pass/fail is unambiguous
 - Each test one thing
@@ -37,19 +37,19 @@ A scenario like "POST to /api/v1/sql/validate" is grounded. "POST to the validat
 | P1 | Important | Error handling, edge cases that affect users. |
 | P2 | Edge case | Boundary conditions, unusual inputs, rare paths. |
 
-Every capability should have at least one P0 scenario. P1 and P2 increase confidence.
+Every phase should have at least one P0 scenario. P1 and P2 increase confidence.
 
 ## Scenario Count Guidelines
 
-- **Minimum**: 1 scenario per capability (P0 happy path)
-- **Typical**: 3-5 scenarios per capability (P0 + P1 error cases)
-- **Thorough**: 5-10 scenarios per capability (P0 + P1 + P2 edge cases)
+- **Minimum**: 1 scenario per phase (P0 happy path)
+- **Typical**: 3-5 scenarios per phase (P0 + P1 error cases)
+- **Thorough**: 5-10 scenarios per phase (P0 + P1 + P2 edge cases)
 
 More scenarios = higher confidence but longer evaluation. Start with P0 + P1, add P2 if useful.
 
 ## Why Holdout — the Information Barrier
 
-Completion criteria are a **holdout evaluation set**. When `/implement` runs in decompose mode, the code agent that builds a capability does not see its scenarios — only the evaluation agent does. Think of it as the train/test split in ML:
+Completion criteria are a **holdout evaluation set**. When `/implement` runs in decompose mode, the code agent that builds a phase does not see its scenarios — only the evaluation agent does. Think of it as the train/test split in ML:
 
 - The requirements + solution + target state are "training data" — they tell the implementer what to build.
 - Scenarios are "evaluation data" — they verify it was built correctly.
