@@ -3,44 +3,53 @@
   "evals": [
     {
       "id": 1,
-      "name": "mechanism-depth-focused-target",
-      "prompt": "I want to understand how the specify-factory skill decomposes specs into units and scenarios. Walk me through the actual mechanism — I need to know not just what it does, but how the decomposition logic actually works and why.",
-      "expected_output": "Mechanism-level findings with What/How/Why layers, file:line evidence, delegated investigation, grouped cycle summary.",
+      "name": "plan-shown-in-chat-before-approval",
+      "prompt": "Analyze how the authentication flow works in this codebase. No .claude/workflows/analyze.js exists in the project yet.",
+      "expected_output": "Frames an analysis plan, displays it inline in the chat, and asks for approval before launching anything.",
       "expectations": [
-        "Delegated investigation to at least one specialist subagent (Explore or team:the-architect:design-system)",
-        "Spawned parallel subagents in a single response if more than one perspective applies",
-        "Surfaced at least 2 findings with explicit What / How / Why layers",
-        "Included file:line evidence for findings (e.g., 'plugins/start/skills/specify-factory/SKILL.md:42')",
-        "Did not stay at surface level — no findings are just 'uses pattern X' without mechanism explanation",
-        "Presented a cycle summary grouped by theme (Mechanism Findings / Cross-Cutting / Recommendations / Open Questions)",
-        "Asked the user how to proceed at the end (continue | go deeper | persist | complete)"
+        "Created .start/analysis/<NNN>-<name>/analysis.md with frontmatter containing name, description, a goals list, and status: draft",
+        "Displayed the full plan inline in the chat before asking for approval — the purpose (description), the goals as a numbered rubric, and the proposed research topics — not merely a path to the file",
+        "Asked the user to approve or refine the plan before launching (interactive gate)",
+        "Phrased each goal as a checkable objective a validator can rule met or unmet by evidence",
+        "Did NOT begin research, spawn research agents, or write any report itself before approval"
       ]
     },
     {
       "id": 2,
-      "name": "scope-disambiguation-broad-target",
-      "prompt": "analyze the specify workflow",
-      "expected_output": "Skill recognizes the target is broad, clarifies perspective scope via AskUserQuestion, then launches the agreed perspectives.",
+      "name": "seed-install-launch-on-approval",
+      "prompt": "Analyze the caching strategy across the services and how it invalidates. No installed analyze workflow exists yet. Assume I approve the plan you propose.",
+      "expected_output": "On approval, seeds research tasks, installs the bundled workflow, and launches analyze.js on the dynamic-workflow runtime.",
       "expectations": [
-        "Recognized the target is broad / multi-perspective",
-        "Used AskUserQuestion to clarify scope before diving in, OR explicitly enumerated multiple perspectives with the mapping from perspectives.md",
-        "Did not assume a single perspective without justification",
-        "Referenced named agents (Explore, team:the-*) when describing delegation plan",
-        "Did not spawn investigation agents before scope was confirmed"
+        "Seeded one research task per approved topic via task.js create --home .start/analysis/<...> --type research, recording the returned ids",
+        "Detected no installed .claude/workflows/analyze.js and copied the bundled reference/analyze.js into the project, reporting the installed version",
+        "Launched the Workflow tool with scriptPath pointing at .claude/workflows/analyze.js and args containing name, home, taskScript, description, goals, topics, reportPath, and maxRounds",
+        "Passed the approved goals rubric and the seeded topic ids into the workflow args",
+        "Did NOT perform the research, validation, or synthesis itself — delegated all of it to the workflow"
       ]
     },
     {
       "id": 3,
-      "name": "solution-first-recommendation",
-      "prompt": "Analyze the error handling in the implement skill. If you find issues, I want to know how to fix them properly.",
-      "expected_output": "Mechanism-depth error-handling analysis. If problems surface, recommendations lead with the clean approach including scope/files/migration path — no hybrid-first recommendations.",
+      "name": "workflow-version-upgrade-prompt",
+      "prompt": "Analyze the error-handling patterns in the payment service. An older .claude/workflows/analyze.js is already installed with version marker v1; the bundled reference is v2. Assume I approve the plan.",
+      "expected_output": "Detects the version mismatch and prompts to upgrade before launching; never clobbers the installed copy silently.",
       "expectations": [
-        "Produced mechanism-level findings about error handling paths (what is caught, what is swallowed, what propagates, retry behavior)",
-        "Referenced specific file:line evidence from implement SKILL.md or its references",
-        "If problems were identified, led the recommendation with the architecturally clean approach (not a hybrid or 'pragmatic middle ground')",
-        "Recommendation included scope estimate, affected files, and migration path",
-        "Surfaced open questions the user needs to answer before committing",
-        "Did not preemptively list hybrid / minimal-change / quick-win alternatives"
+        "Compared the installed version marker (v1) against the bundled reference (v2)",
+        "Asked the user via AskUserQuestion whether to upgrade v1 -> v2, with Upgrade recommended and Keep current as the alternative",
+        "Did not overwrite the installed .claude/workflows/analyze.js without the user's Upgrade choice",
+        "Proceeded to build args and launch the workflow after resolving the version"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "refine-goals-then-redisplay",
+      "prompt": "Analyze the database access layer. When you show me the plan, add a goal about detecting N+1 query patterns, then proceed.",
+      "expected_output": "Shows the plan, incorporates the refinement into the frontmatter, re-displays the updated plan, and only then proceeds.",
+      "expectations": [
+        "Displayed the initial plan (purpose, goals, topics) in the chat",
+        "On the refine request, edited analysis.md frontmatter to add the N+1 detection goal and re-displayed the updated plan in the chat",
+        "Preserved the other goals when adding the new one",
+        "Did not launch the workflow until the refined plan was settled",
+        "Set status to approved (or equivalent) only after the plan was finalized"
       ]
     }
   ]

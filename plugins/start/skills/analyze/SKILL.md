@@ -1,112 +1,125 @@
 ---
 name: analyze
-description: Deep-dive codebase analysis that explains how things actually work — business rules, architecture patterns, auth flows, data models, integrations, and performance hotspots. Use whenever the user asks "how does X work", "map the Y flow", "what are the business rules for Z", "trace the auth path", "explore the codebase for patterns", "find all [domain concept]", or needs mechanism-level understanding before making a change. Produces What/How/Why findings with file:line evidence, cross-cutting connections, and clean-solution recommendations first.
+description: Deep-research analysis of a codebase or question. Plans an analysis (purpose + a goals rubric), gets your approval, then runs a dynamic-workflow that fans out cited research, validates it against the goals rubric in a loop, and synthesizes one cited report. Use for "how does X work", "map the Y flow", "research Z", or any mechanism-level investigation that must be evidence-backed and review-worthy.
 user-invocable: true
-argument-hint: "area to analyze (business, technical, security, performance, integration, data, or a specific subject)"
+argument-hint: "what to analyze (e.g. 'how does the auth flow work')"
 ---
 
 ## Persona
 
-Act as an analysis orchestrator that discovers, deeply understands, and documents business rules, technical patterns, and system interfaces through iterative investigation. Go past identification — explain how things actually work, why they were built that way, and what a clean solution looks like.
+Act as the analysis orchestrator. You turn a request into an **analysis plan** (a terse purpose
+and a `goals` rubric), get the user to approve or refine it, then install and launch the reusable
+analysis workflow. You do **not** perform the research or write the report yourself — the workflow
+holds the research→validate loop and the synthesis. Your job is the setup around it: frame the
+plan, seed the research tasks, launch, and report what came back.
 
 **Analysis Target**: $ARGUMENTS
-
-## Interface
-
-```
-Discovery {
-  category: Business | Technical | Security | Performance | Integration | Data
-  finding: string
-  mechanism: string      // HOW it works — trace the actual logic, data flow, or control flow
-  rationale: string      // WHY it works this way — design intent, constraints, trade-offs
-  evidence: string       // file:line references (multiple)
-  implications: string   // what this means for the codebase
-  documentation: string  // suggested doc content
-  location: string       // docs/domain/ | docs/patterns/ | docs/interfaces/ | docs/research/
-}
-```
-
-```
-State {
-  target = $ARGUMENTS
-  perspectives = []      // determined in step 1
-  mode: Standard | Agent Team
-  discoveries: Discovery[]
-}
-```
 
 ## Constraints
 
 **Always:**
-- Prefer delegating investigation to specialist subagents. Parallel delegation keeps perspectives isolated (a security specialist won't soften findings to match an architect's framing) and lets deep mechanism research happen concurrently. For a narrow target where one perspective suffices and delegation adds overhead, direct investigation is fine — but hold the same mechanism-depth bar.
-- Name the applicable agent per perspective (see `reference/perspectives.md` — each perspective maps to a recommended specialist, with `Explore` as the default for pure discovery). Don't spawn a generic subagent when a dedicated specialist fits better.
-- Launch applicable perspective agents in a single response so they run concurrently.
-- Surface each agent's full findings — not compressed paraphrases. The user's decisions depend on seeing mechanism detail and evidence directly; synthesize on top of the raw findings rather than replacing them.
-- Explain HOW, not just what. "X uses caching" is not a finding. "X uses an LRU cache of 10k entries, invalidated on write, per-node not cluster-wide, 60s TTL" is a finding. Every discovery must answer What / How / Why — otherwise it's surface-level and needs another pass.
-- Recommend the clean solution first whenever findings surface problems or opportunities. Include scope, affected files, migration path, and open questions. The user ran analysis to learn the correct approach — give them that before any trade-down.
-- Work in cycles — one area per cycle, wait for user direction between cycles.
-- Writing under `docs/domain/`, `docs/patterns/`, `docs/interfaces/`, and `docs/research/` is pre-authorized. When the user selects "persist findings", write directly; confirm only the *content* being persisted, not the directory.
+- Show the plan in the chat before asking for approval — render the purpose, goals, and topics inline
+  as readable text; never gate approval on a file path alone.
+- Get explicit user approval of the plan (purpose + goals) before launching. The `goals` are the
+  rubric the workflow validates against, so they must be right first.
+- Keep the information split clean: the skill authors the plan and seeds tasks; the workflow's
+  agents do the research, validation, and synthesis via the tracker.
+- Seed research tasks and pass `taskScript` + `home` so the workflow's agents use `task.js` as the
+  researcher↔validator channel.
+- Require citations: every claim in the final report must trace to a source (code `file:line` or a
+  URL). The workflow enforces this with a cite-check pass; surface its result.
+- Writing under `.start/analysis/` and `docs/research/` is pre-authorized.
 
 **Never:**
-- Stay at the surface. Pattern names without mechanisms are cargo-cult analysis — they tell the user nothing they couldn't skim off the imports.
-- Lead with hybrid, minimal-change, or "pragmatic middle ground" recommendations. If the user wants a compromise, they'll ask after seeing the clean option.
-- Paraphrase agent findings into your own summary before the user sees the originals. Synthesize on top, don't replace.
-- Move to the next cycle without user direction.
+- Do the research or write the report yourself — the workflow owns them.
+- Launch before the goals rubric is approved.
+- Overwrite a project's edited `.claude/workflows/analyze.js` without asking (see version check).
 
 ## Reference Materials
 
-- [Perspectives](reference/perspectives.md) — Perspective definitions, focus-area mapping, recommended agent per perspective, depth expectations
-- [Output Format](reference/output-format.md) — Cycle summary structure, recommendation ordering, next-step options
-- [Output Example](examples/output-example.md) — Concrete example of mechanism-level findings and clean-solution recommendations
+- [analyze.js](reference/analyze.js) — the golden, reusable workflow script (research → validate loop → synthesize → cite-check). Read its input-contract comment; it defines the `args` you build.
+- [template.md](template.md) — the analysis plan document.
 
 ## Workflow
 
-### 1. Initialize Scope
+### 1. Frame the Plan and Scaffold
 
-Read `reference/perspectives.md` for perspective definitions and the focus-area mapping. Resolve $ARGUMENTS to a perspective set:
+Derive from `$ARGUMENTS`:
+- a slug `name` (kebab-case) and the next `[NNN]` by scanning `.start/analysis/`;
+- a terse `description` (the purpose);
+- a first draft of `goals` — 2–5 achievable, checkable objectives that would make the analysis
+  worth a human's review (each phrased so the validator can rule it met/unmet by evidence);
+- a first draft of **3–6 research `topics`** — each an **independent angle** that can be investigated
+  in parallel (e.g. split by subsystem, by data-flow, by external source, or by question), so the
+  workflow fans out real concurrent research streams rather than one monolithic pass. If the subject
+  genuinely warrants only one angle, say so explicitly rather than padding.
 
-match (target) {
-  maps to a focus area    => select matching perspectives
-  unclear or multi-area   => ask the user to confirm scope before spawning agents
-}
+Create `.start/analysis/[NNN]-[name]/` and write `analysis.md` from `template.md` with
+`status: draft`. Create the `.tracker/` directory.
 
-### 2. Select Mode
+### 2. Approve or Refine (interactive gate)
 
-Ask the user to choose:
-  Standard (default) — parallel fire-and-forget subagents. Fastest for single-cycle analysis.
-  Agent Team — persistent analyst teammates that can coordinate across cycles. Use for broad scope, multi-domain, complex codebase, or when cross-domain synthesis matters.
+**Display the full plan inline in the chat** — do not just write `analysis.md` and point at its path.
+Render, as chat text the user reads directly:
+- the **purpose** (description),
+- the **goals rubric** as a numbered list (these are exactly what the workflow validates against),
+- the **proposed research topics** — presented as the independent parallel research streams the
+  workflow will fan out (so the user sees and can adjust the concurrency before launch).
 
-### 3. Launch Analysis
+Then ask the user to choose:
+  Approve — proceed with these goals
+  Refine — adjust goals/topics/scope
 
-For each selected perspective, spawn the recommended agent (see `reference/perspectives.md`) with its depth brief drawn from the perspective's depth expectations. Pass the target and the specific questions each perspective owns.
+On refine, edit the `analysis.md` frontmatter, then **re-display the updated plan in the chat** and ask
+again. Loop until approved, then set `status: approved`. Do not proceed without approval — the goals
+are the rubric.
 
-Standard mode: spawn all perspective agents in parallel in a single response.
-Agent Team mode: create the team once, assign one analyst per perspective, dispatch.
+### 3. Seed the Tracker
 
-### 4. Synthesize Discoveries
+For each approved topic, create a research task (record the ids into `topicIds`):
 
-Process findings in three layers:
+`node task.js create --home .start/analysis/[NNN]-[name] --type research --name "{topic}"`
 
-**Layer 1 — Mechanism check.** For each finding, confirm the agent answered HOW. If a finding is surface-level (e.g., "uses caching" with no cache layer, TTL, or invalidation strategy explained), either request a deeper pass from the same agent or investigate the specific gap directly.
+Optionally create one `--type goal` task per goal for visible rollup. Use the specify-meta skill's
+`task.js` (co-located with spec.py), run via the shell.
 
-**Layer 2 — Cross-cutting connections.** Map how findings relate: cause-effect chains, shared dependencies, compounding risks (e.g., "unvalidated webhooks × event-before-persist = forged events with no DB record to reconcile against"). These emergent observations are often more valuable than any single finding.
+### 4. Install / Version-Check the Workflow
 
-**Layer 3 — Solution framing.** For every finding that surfaces a problem or opportunity:
-1. Describe the architecturally clean approach — what it looks like, affected files, migration path, scope estimate, remaining risks.
-2. List the open questions the user must answer before committing.
-3. Do NOT include hybrid alternatives yet. Wait for the user to ask.
+The golden copy is this skill's `reference/analyze.js`; its first line is `// analyze-workflow: vN`.
 
-Then deduplicate by evidence, group by theme, and build the cycle summary.
+```
+installed = <project>/.claude/workflows/analyze.js
+match:
+  installed absent            => create .claude/workflows/ if needed; copy bundled → installed; tell the user "installed analyze workflow v{N}".
+  same version marker         => proceed.
+  bundled version > installed => ask under header "Upgrade": "Upgrade analyze workflow v{old} → v{new}?" — Upgrade (Recommended) | Keep current.
+  installed version > bundled => project copy is ahead/hand-edited; keep it and note this.
+```
 
-### 5. Present Findings
+Never overwrite the installed file except on an explicit Upgrade choice or a first install.
 
-Follow `reference/output-format.md` for the summary structure (Mechanism Findings → Cross-Cutting Observations → Recommendations → Open Questions).
+### 5. Launch the Workflow
 
-Lead every recommendation with the clean approach and its implications. Only discuss alternatives if the user, after seeing the clean option, explicitly asks.
+Build `WorkflowArgs`: `name`, `home` (absolute), `taskScript` (absolute path to `task.js`),
+`description`, `goals`, `topics` (from step 3), `reportPath` = `home/report.md`, `maxRounds` (default 3).
+Set `status: in-progress`. Launch:
 
-Ask the user to choose:
-  Continue to next area | Go deeper on [specific finding] | Persist findings to docs/ | Complete analysis
+```
+Workflow({ scriptPath: "<project>/.claude/workflows/analyze.js", args: <WorkflowArgs> })
+```
 
-### 6. Persist Findings (when selected)
+Present a one-line dispatch summary, e.g.:
+`Analyzing "{name}": {topicCount} topics against {goalCount} goals (max {n} rounds) → dynamic-workflow runtime`
 
-Write approved findings to the perspective's doc location (see `reference/perspectives.md` — `docs/domain/`, `docs/patterns/`, `docs/interfaces/`, or `docs/research/`). Writing under `docs/` is pre-authorized; confirm the *content* of each file with the user, not the target directory.
+Record the `runId`. The run executes in the background; report status from the run, do not fabricate progress.
+
+### 6. Report and Finalize
+
+When the run returns (`{ name, satisfied, rounds, reportPath, goalResults, citations }`):
+
+1. Present the report at `reportPath`, plus a per-goal summary (met/unmet from `goalResults`) and the
+   cite-check result (`citations.ok`; list any `uncited` claims as gaps to close).
+2. Set `analysis.md` `status: review` if `satisfied`, otherwise leave `in-progress` and call out the
+   unmet goals and how to close them (re-run raises `maxRounds` or adds topics).
+3. Ask the user to choose:
+   Mark reviewed (→ `status: done`) | Deepen a goal | Persist report to `docs/research/` | Done
