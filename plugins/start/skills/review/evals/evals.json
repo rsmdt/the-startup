@@ -4,15 +4,15 @@
     {
       "id": 1,
       "prompt": "Review my staged changes — they touch an async payment handler and add a new npm dependency.",
-      "expected_output": "Parallel multi-perspective review with Concurrency and Dependencies activated, synthesized findings",
+      "expected_output": "Scoped parallel multi-perspective review with Concurrency and Dependencies activated, synthesized findings, interactive HTML report",
       "expectations": [
-        "Gathered the staged diff and retrieved full file contents for context, not just the diff",
+        "Resolved to Scoped mode and gathered the staged diff plus full file contents, not just the diff",
         "Activated the Concurrency perspective for async changes and the Dependencies perspective for the dependency change",
         "Launched all applicable review perspectives simultaneously in a single response",
         "Delegated review to specialist agents rather than reviewing directly",
-        "Deduplicated findings by location and sorted by severity",
-        "Every finding includes an actionable fix recommendation",
-        "Included a strengths section highlighting what was done well",
+        "Deduplicated findings by location and sorted by severity then confidence",
+        "Every reported finding includes file:line, a named consequence, and an actionable remediation",
+        "Generated the interactive HTML report from templates/report.html with the __REVIEW_DATA__ token replaced",
         "Computed a verdict (APPROVE / APPROVE WITH COMMENTS / REQUEST CHANGES) and offered next steps"
       ]
     },
@@ -21,10 +21,35 @@
       "prompt": "Review PR 42 — it contains a SQL query built by string concatenation from user input.",
       "expected_output": "CRITICAL finding with code example; REQUEST CHANGES verdict",
       "expectations": [
-        "Surfaced the SQL injection as a CRITICAL severity finding",
-        "Included a code example with the CRITICAL finding",
+        "Surfaced the SQL injection as a CRITICAL severity finding with a named consequence",
+        "Included a before/after code example with the CRITICAL finding",
         "Verdict was REQUEST CHANGES given a critical finding",
         "Presented only synthesized output to the user, not raw reviewer messages"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Run a full review of this codebase.",
+      "expected_output": "Audit mode: orientation + co-change by orchestrator, four parallel phase auditors, measured architecture claims, Contextually Acceptable list, 5 refactors, interactive report",
+      "expectations": [
+        "Resolved to Audit mode (no scoped target given)",
+        "Performed Phase 1 orientation and co-change archaeology before launching reviewers",
+        "Launched smell, architecture, modularization, and practices auditors in parallel in a single response",
+        "Architecture claims cite measurements (dependency arrows, amplification counts, co-change data), not principle citations",
+        "Findings lacking a named consequence were demoted to the Contextually Acceptable list rather than reported",
+        "Report includes a Contextually Acceptable section with reasoning per entry",
+        "Delivered exactly 5 ranked refactors, each tied to a Phase 3/4 measurement with an incremental migration path (no rewrites)",
+        "Verdict is a calibrated paragraph stating real risks and real strengths",
+        "Generated the interactive HTML report with findings, architecture proxies, accepted list, and refactors"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Review the ./src/utils folder for smells.",
+      "expected_output": "Scoped review constrained to the named path; consequence-tested findings only",
+      "expectations": [
+        "Constrained the review to the provided scope instead of auditing the whole codebase",
+        "Textbook smells without a nameable victim were filed as contextually acceptable, not reported as findings"
       ]
     }
   ]

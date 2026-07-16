@@ -1,6 +1,8 @@
 # Review Checklists
 
-Detailed checklists for each core review perspective.
+Detailed checklists for each core review perspective (scoped mode).
+
+A checklist hit is a lead, not a finding. Before reporting, apply the consequence test from classification.md: name the concrete bug class, future change, or comprehension cost at file:line. Hits without a nameable victim go to the Accepted list.
 
 ---
 
@@ -52,10 +54,10 @@ Detailed checklists for each core review perspective.
 ## Quality Review Checklist
 
 **Code Structure:**
-- [ ] Single responsibility principle
-- [ ] Functions are focused (< 20 lines ideal)
+- [ ] Single responsibility principle (report only with a named change that gets harder)
+- [ ] Functions are focused — mixed abstraction levels or policy tangled with I/O
 - [ ] No deep nesting (< 4 levels)
-- [ ] DRY - no duplicated logic
+- [ ] DRY - no duplicated logic that must co-evolve (identical-looking but independently-changing code is fine)
 
 **Naming & Clarity:**
 - [ ] Intention-revealing names

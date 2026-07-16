@@ -1,6 +1,20 @@
-# Severity & Confidence Classification
+# Severity, Confidence & the Consequence Test
 
-Definitions, classification matrix, and example findings at each severity level.
+Definitions, ranking rules, and example findings. Applies to both scoped reviews and audits.
+
+---
+
+## The Consequence Test (gate for every finding)
+
+A finding is valid only if it names the concrete future change, bug class, or comprehension cost it causes.
+
+| Not a finding | A finding |
+|---------------|-----------|
+| "This violates SRP" | "SRP violation at billing/invoice.ts:120 — adding a payment provider forces edits in four unrelated modules" |
+| "Function is too long" | "90-line function at sync/run.ts:40 mixes retry policy with I/O — retry changes require re-testing the network layer" |
+| "Magic number" | "Hardcoded 24h expiry at auth/config.ts:12 — ops cannot tune session length without a deploy" |
+
+If no victim can be named, the observation goes to **CONTEXTUALLY ACCEPTABLE** with one line of reasoning — not to findings, not silently dropped. Principles (SOLID, DRY, etc.) may explain a finding, never constitute one.
 
 ---
 
@@ -24,18 +38,37 @@ A clean, well-written API rename is not a bug, but it still forces REQUEST CHANG
 | **MEDIUM** | Likely issue but context-dependent | Present as probable concern |
 | **LOW** | Potential improvement, may not be applicable | Present as suggestion |
 
-## Classification Matrix
+---
 
-| Finding Type | Severity | Confidence | Priority |
-|--------------|----------|------------|----------|
-| SQL Injection | CRITICAL | HIGH | Immediate |
-| XSS Vulnerability | CRITICAL | HIGH | Immediate |
-| Hardcoded Secret | CRITICAL | HIGH | Immediate |
-| N+1 Query | HIGH | HIGH | Before merge |
-| Missing Auth Check | CRITICAL | MEDIUM | Before merge |
-| No Input Validation | MEDIUM | HIGH | Should fix |
-| Long Function | LOW | HIGH | Nice to have |
-| Missing Test | MEDIUM | MEDIUM | Should fix |
+## Ranking
+
+**Scoped mode**: sort by severity descending, then confidence descending.
+
+**Audit mode**: rank by likelihood × cost.
+
+| | Cost when it materializes: LOW | MEDIUM | HIGH |
+|---|---|---|---|
+| **Likelihood HIGH** (touched monthly, or on any feature in a hot area) | MEDIUM | HIGH | CRITICAL |
+| **Likelihood MEDIUM** (touched on a plausible roadmap item) | LOW | MEDIUM | HIGH |
+| **Likelihood LOW** (only on rare events: vendor swap, rewrite of a stable area) | Accepted | LOW | MEDIUM |
+
+Likelihood comes from the co-change data and orientation map (is the smell in a volatile or stable area?). Cost is the amplification measurement (files touched, bug class severity).
+
+---
+
+## Classification Matrix (scoped mode anchors)
+
+| Finding Type | Severity | Confidence |
+|--------------|----------|------------|
+| SQL Injection | CRITICAL | HIGH |
+| XSS Vulnerability | CRITICAL | HIGH |
+| Hardcoded Secret | CRITICAL | HIGH |
+| Missing Auth Check | CRITICAL | MEDIUM |
+| N+1 Query | HIGH | HIGH |
+| No Input Validation | MEDIUM | HIGH |
+| Missing Test | MEDIUM | MEDIUM |
+| Long Function (with named victim) | LOW–MEDIUM | HIGH |
+| Long Function (no victim) | → Contextually Acceptable | — |
 
 ---
 
@@ -44,11 +77,10 @@ A clean, well-written API rename is not a bug, but it still forces REQUEST CHANG
 ### Critical Security Finding
 
 ```
-[🔐 Security] **SQL Injection Vulnerability** (CRITICAL)
-Location: `src/api/users.ts:45`
-Confidence: HIGH
-Issue: User input directly interpolated into SQL query
-Fix: Use parameterized queries
+[🔐 Security] **SQL Injection Vulnerability** (CRITICAL, HIGH confidence)
+Location: src/api/users.ts:45
+Consequence: any caller can read or destroy the users table via crafted id
+Fix: parameterized query
 ```
 
 ```diff
@@ -56,52 +88,20 @@ Fix: Use parameterized queries
 + const result = db.query('SELECT * FROM users WHERE id = $1', [req.params.id])
 ```
 
-### High Performance Finding
+### Medium Quality Finding (passes consequence test)
 
 ```
-[⚡ Performance] **N+1 Query Pattern** (HIGH)
-Location: `src/services/orders.ts:78-85`
-Confidence: HIGH
-Issue: Each order fetches its items in a separate query
-Fix: Use eager loading or batch fetch
+[📝 Quality] **Policy mixed with I/O** (MEDIUM, HIGH confidence)
+Location: src/services/export.ts:23-89
+Consequence: pricing-rule changes cannot be unit-tested without mocking S3;
+             the team has 3 open tickets touching pricing rules this quarter
+Fix: extract computePrice() pure function; keep upload in place
 ```
 
-```diff
-- const orders = await Order.findAll()
-- for (const order of orders) {
--   order.items = await OrderItem.findByOrderId(order.id)
-- }
-+ const orders = await Order.findAll({ include: [OrderItem] })
-```
-
-### Medium Quality Finding
+### Contextually Acceptable (correctly NOT a finding)
 
 ```
-[📝 Quality] **Function Exceeds Recommended Length** (MEDIUM)
-Location: `src/utils/validator.ts:23-89`
-Confidence: HIGH
-Issue: Function is 66 lines, exceeding 20-line recommendation
-Fix: Extract validation logic into separate focused functions
-
-Suggested breakdown:
-- validateEmail() - lines 25-40
-- validatePhone() - lines 42-55
-- validateAddress() - lines 57-85
-```
-
-### Low Suggestion
-
-```
-[🧪 Testing] **Edge Case Not Tested** (LOW)
-Location: `src/utils/date.ts:12` (formatDate function)
-Confidence: MEDIUM
-Issue: No test for invalid date input
-Fix: Add test case for null/undefined/invalid dates
-```
-
-```javascript
-it('should handle invalid date input', () => {
-  expect(formatDate(null)).toBe('')
-  expect(formatDate('invalid')).toBe('')
-})
+ACCEPTED: 7-parameter constructor in test fixture builder (tests/factory.ts:12)
+Reasoning: builder is only called by tests via named helpers; no production
+caller exists to suffer the parameter-ordering bug class.
 ```
