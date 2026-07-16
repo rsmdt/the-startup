@@ -1,6 +1,6 @@
 ---
 name: specify
-description: Create a comprehensive specification from a brief description. Opens by clarifying intent — surfacing unknowns and assumptions before anything is written — then runs requirements gathering (WHY), solution design (WHAT — target architecture), and a completion plan (WHAT — quality gates and completion criteria). The specification describes the target state and what "done" looks like; how to execute it (direct, iterative, or decompose) is decided later by /implement.
+description: Create a comprehensive specification from a brief description. Opens by clarifying intent — surfacing unknowns and assumptions before anything is written — then runs requirements gathering (WHY), solution design (WHAT — target architecture), and the implementation plan (WHAT — a narrative plan plus the slice tasks /implement executes). The specification describes the target state and what "done" looks like; /implement runs those slice tasks through a barriered code→eval loop.
 user-invocable: true
 argument-hint: "describe your feature or requirement to specify"
 ---
@@ -148,11 +148,11 @@ Ask the user to choose between *Continue to Plan* (recommended) and *Finalize So
 
 ### 7. Write Plan
 
-Use the specify-plan skill. Hand it the ledger — any Standing assumption a phase depends on must be flagged in that phase, not inherited silently.
+Use the specify-plan skill. Hand it the ledger — any Standing assumption a slice depends on must be flagged in that slice, not inherited silently.
 
-Focus: WHAT "done" looks like — the target state, the quality gates every implementation must clear, and the holdout completion criteria that prove the work is delivered. Scope: outcomes only. The plan does **not** prescribe implementation steps, sequencing, phases, units, or a decomposition tier — `/implement` decides how to execute (direct, iterative, or decompose) at implementation time.
+Focus: the implementation **tasks** `/implement` executes — a narrative `plan.mdx` plus, in the spec's tracker, one **slice** task per vertical deliverable (its code brief correlates features, EARS behavior, and quality gates) with its holdout acceptance scenarios as separate **scenario child tasks**; `--depends-on` between slices is the parallelization contract. Scope: what each slice delivers and how it is proven — not the steps to build it. The loop's code agent owns HOW.
 
-The plan describes the destination, not the route. The completion criteria are observable behaviors through external interfaces, grounded in the codebase, organized by user-observable capability — never by layer.
+The acceptance scenarios are observable behaviors through external interfaces, grounded in the codebase, organized by user-observable capability — never by layer.
 
 Ask the user to choose between *Finalize specification* (recommended) and *Revisit Plan*.
 

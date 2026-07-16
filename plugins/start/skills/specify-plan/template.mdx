@@ -9,96 +9,44 @@ version: 0.1.0
 # Implementation Plan: {{FEATURE_TITLE}}
 
 > [!NOTE]
-> This plan is the **executable sequence** `/implement` runs. It is an ordered set of
-> **BEANs** (Bundled EARS + Acceptance Nodes) — self-contained vertical slices. Each BEAN
-> correlates the deliverable **features** (acceptance criteria from requirements), the
-> **behavior** the solution must exhibit (EARS), the **quality gates**, and the holdout
-> **acceptance scenarios** that prove it. `/implement` builds each BEAN through a barriered
-> code→eval loop and retries until its scenarios pass at the `threshold`. A BEAN describes
-> *what the slice delivers and how it is proven* — never the steps to build it; the loop's
-> code agent owns HOW.
+> This is the **high-level approach** for `/implement` — phases and the outcomes they achieve.
+> It is read for orientation, **not parsed for work**. The operational units are **tasks** in the
+> spec's tracker: a phase root, one **slice** task per vertical deliverable (its body is the code
+> brief — features + EARS behavior + quality gates), and under each slice its **scenario** child
+> tasks (the holdout acceptance evidence). `/implement` reads those tasks and builds each slice
+> through a barriered code→eval loop, retrying until its scenarios pass at the `threshold`.
 
 ## Target State
 
-{{One or two paragraphs: what the system does and looks like when every BEAN is delivered.
+{{One or two paragraphs: what the system does and looks like when every slice is delivered.
 Outcome-first, self-contained, grounded in real components from solution.mdx. Describe the
-destination — the BEANs below describe the route.}}
+destination — the phases below describe the route.}}
 
-## Traceability
+## Phases & Outcomes
 
-Coverage index — IDs only (the detail lives in each BEAN below). Every requirement AC and every
-solution EARS criterion must appear in exactly one BEAN; this table makes a gap or a double-map
-visible at a glance. Keep it in sync with the BEANs.
+Each slice is a **vertical deliverable**: one coherent, user-observable thing carried end-to-end,
+atomic enough for a single code agent. Order by dependency, not by layer — a later slice may extend
+an earlier one. The tracker's `--depends-on` edges are the parallelization contract; `/implement`
+runs independent slices concurrently.
 
-| Source criterion | Origin | BEAN |
-|------------------|--------|------|
-| AC-1.1 | requirements.mdx | BEAN-1 |
-| EARS: {{short tag}} | solution.mdx | BEAN-1 |
-| AC-2.1 | requirements.mdx | BEAN-2 |
+1. **{{Slice title — the deliverable, not a layer}}** — {{one line: what a user can do when done}}. _Depends on: none._
+2. **{{Slice title}}** — {{outcome}}. _Depends on: (1)._
 
-## BEANs
+{{Add phases/slices as needed. Keep each to an outcome line + its dependencies; the detail lives in
+the slice tasks, not here.}}
 
-Each BEAN is a **vertical slice**: one coherent, user-observable deliverable carried
-end-to-end, atomic enough for a single code agent to build. A later BEAN may depend on an
-earlier one and extend its foundation. `/implement` topologically sorts BEANs by their
-declared dependencies and runs independent BEANs concurrently — so order them by dependency,
-not by layer, and keep `Depends on:` accurate. It is the whole parallelization contract.
+## Tracking
 
-### BEAN-1: {{Title — name the deliverable, not a layer}}
+The operational tasks (and their live status) live in the tracker:
 
-- **Outcome:** {{one line — what a user can do when this BEAN is done}}
-- **Depends on:** none
+- Location: `.start/specs/{{NNN}}-{{slug}}/.tracker/`
+- Task tree: `node <path-to>/task.js graph --spec {{NNN}}`
+- Phase overview: `node <path-to>/task.js list --spec {{NNN}} --depth 1`
 
-#### Features — Acceptance Criteria
-
-Business deliverables this BEAN satisfies, traced to requirements.mdx.
-
-- [ ] **AC-1.1** — {{acceptance criterion, observable and testable}}
-- [ ] **AC-1.2** — {{acceptance criterion}}
-
-#### Behavior — EARS
-
-Technical requirements from solution.mdx, expressed in EARS (see reference/ears.md).
-
-- **When** {{trigger}}, the system shall {{response}}.
-- **While** {{state}}, the system shall {{response}}.
-- **If** {{unwanted condition}}, then the system shall {{response}}.
-- The system shall {{ubiquitous requirement}}.
-
-#### Quality Gates
-
-- [ ] All existing tests pass; new behavior is covered by tests
-- [ ] Lint and type checks pass
-- [ ] {{coverage / performance budget / security / a11y — as the solution implies}}
-
-#### Acceptance Scenarios
-
-Holdout completion criteria for this BEAN — observable behavior through external interfaces.
-`P0` critical path, `P1` important, `P2` edge case. The code agent never sees these; the eval
-agent proves the BEAN against them.
-
-- [P0] [{{scenario title}}](scenarios/bean-1/{{scenario-name}}.md)
-- [P1] [{{scenario title}}](scenarios/bean-1/{{scenario-name}}.md)
-
-### BEAN-2: {{Title}}
-
-- **Outcome:** {{one line}}
-- **Depends on:** BEAN-1
-
-#### Features — Acceptance Criteria
-- [ ] **AC-2.1** — {{...}}
-
-#### Behavior — EARS
-- **When** {{trigger}}, the system shall {{response}}.
-
-#### Quality Gates
-- [ ] {{...}}
-
-#### Acceptance Scenarios
-- [P0] [{{scenario title}}](scenarios/bean-2/{{scenario-name}}.md)
+Each slice task carries its code brief; its scenario child tasks carry the holdout acceptance
+evidence. `/implement` writes live status to these tasks as it runs, and the phase root rolls up.
 
 ## Open Questions
 
-{{Any decision that changes what "done" looks like, as a single question with a
-recommended default. Otherwise: "None — all BEANs and completion criteria are settled."
-Do not enumerate open questions anywhere else in the document.}}
+{{Any decision that changes what "done" looks like, as a single question with a recommended default.
+Otherwise: "None — all slices and completion criteria are settled."}}

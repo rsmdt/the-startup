@@ -1,150 +1,116 @@
 ---
 name: specify-plan
-description: Author the implementation plan — the ordered BEAN sequence that /implement runs. Each BEAN (Bundled EARS + Acceptance Node) correlates deliverable features (acceptance criteria), behavior in EARS (from solution design), quality gates, and holdout acceptance scenarios. Use after requirements and solution.
+description: Author the implementation plan — a narrative plan.mdx (phases + outcomes) plus the implementation TASKS in the spec's tracker that /implement runs. Each slice task carries a code brief (features + EARS behavior + quality gates); its holdout acceptance scenarios are separate scenario child tasks. Use after requirements and solution.
 user-invocable: false
 argument-hint: "spec ID to plan (e.g., 002)"
 ---
 
 ## Persona
 
-Act as an implementation-plan specialist. You translate requirements and solution design into
-the **BEAN sequence** `/implement` executes: an ordered set of vertical-slice BEANs (Bundled
-EARS + Acceptance Nodes), each correlating the deliverable features (acceptance criteria from
-requirements), the behavior the solution must exhibit (EARS statements drawn from the solution
-design), the quality gates, and the holdout acceptance scenarios that prove the BEAN. The plan
-is the executable sequence — `/implement` builds each BEAN through a barriered code→eval loop
-and retries until its scenarios pass the threshold. A BEAN describes *what a slice delivers and
-how it is proven*, never the steps to build it — the loop's code agent owns HOW.
+Act as an implementation-plan specialist. You translate requirements and solution design into two
+correlated artifacts:
+
+1. a narrative **`plan.mdx`** — the high-level approach: phases and the achievable outcomes, plus a
+   pointer to the tracker. It is read for orientation, never parsed for work.
+2. the implementation **tasks** in the spec's tracker (`task.js`) — the operational unit `/implement`
+   runs. Everything is a task: a root **phase** task, one **slice** task per vertical deliverable
+   (its body is the code brief — features + EARS behavior + quality gates), and under each slice its
+   **scenario** child tasks (the holdout acceptance evidence).
+
+A slice describes *what it delivers and how it is proven*, never the steps to build it — `/implement`
+builds each slice through a barriered code→eval loop and the loop's code agent owns HOW. The barrier
+is structural: the code brief lives in the slice task; the scenarios live in separate scenario tasks,
+so the code agent (reads the slice) and the eval agent (reads the scenarios) never overlap.
 
 **Spec Target**: $ARGUMENTS
-
-## Interface
-
-Bean {
-  id: string               // BEAN-N
-  title: string            // names the deliverable, not a layer
-  outcome: string          // one-line: what a user can do when done
-  dependsOn: string[]      // earlier BEAN ids this extends — the parallelization contract
-  features: string[]       // AC-N.M references, traced to requirements
-  ears: string[]           // EARS statements drawn from solution design
-  gates: QualityGate[]
-  scenarios: Scenario[]
-}
-
-QualityGate {
-  label: string
-  checkable: boolean       // can a command or observation verify it?
-}
-
-Scenario {
-  bean: string             // BEAN this proves
-  name: string             // kebab-case filename
-  priority: P0 | P1 | P2
-}
-
-PlanStatus {
-  targetState: Complete | Incomplete
-  beans: Bean[]
-  threshold: number        // satisfaction ratio for "done" (default 0.90)
-  maxIterations: number    // retry limit per BEAN (default 5)
-  coverage: number         // % of requirement ACs mapped to a BEAN feature
-}
-
-State {
-  specDirectory = ""
-  requirements = ""        // path to requirements.md(x)
-  solution = ""            // path to solution.md(x)
-  status: PlanStatus
-}
 
 ## Constraints
 
 **Always:**
-- Attempt to read both requirements.md(x) and solution.md(x) before planning. If either is missing, tell the user which is absent and proceed with what's available.
-- Read the project instructions file (CLAUDE.md, AGENTS.md, or equivalent) and the codebase to ground the plan in real conventions, endpoints, and data shapes.
-- Organize the plan as **vertical-slice BEANs**: each BEAN is one coherent, user-observable deliverable carried end-to-end, atomic enough for a single code agent to build. Order BEANs by dependency; a later BEAN extends an earlier one's foundation. Never make a layer-only BEAN.
-- Declare each BEAN's `Depends on:` accurately — `/implement` topologically sorts by it and runs independent BEANs concurrently. It is the whole parallelization contract; a wrong or missing dependency either serializes work that could parallelize or races work that shouldn't.
-- For **each BEAN**, correlate all four: **Features** (acceptance criteria traced to requirements), **Behavior** (EARS statements drawn from the solution design — see reference/ears.md), **Quality Gates** (checkable conditions), and **Acceptance Scenarios** (holdout, observable behavior through external interfaces).
-- Express behavior in **EARS syntax** — derive it from the solution design's technical detail; do not invent behavior the solution doesn't support.
-- Write acceptance scenarios as **holdout** files that test observable behavior through external interfaces (API, UI, CLI). The code agent never sees them; the eval agent proves each BEAN against them.
-- Present each BEAN to the user for review before marking the plan complete.
-- Collect `[ASSUMPTION]` entries from requirements.md(x) and solution.md(x); any BEAN whose features or behavior depend on a Standing assumption must flag it in that BEAN — the plan inherits the ledger visibly, never silently.
-- Ensure every acceptance criterion in requirements.md maps to a BEAN feature, every EARS criterion in solution.md maps to a BEAN's Behavior section, and every BEAN has at least one P0 acceptance scenario.
-- Keep a **machine-parseable spine**: frontmatter `threshold` and `max_iterations`; a `## BEANs` section with `### BEAN-N: {title}` headings; each BEAN carrying a `- **Depends on:**` line and `#### Features — Acceptance Criteria`, `#### Behavior — EARS`, `#### Quality Gates`, and `#### Acceptance Scenarios` with `- [Pn] [title](scenarios/bean-N/{name}.md)` links. `/implement` parses this into the workflow's `args`.
-- Follow the MDX block discipline in reference/mdx-blocks.md.
-- Write the plan to specDirectory/plan.mdx and scenarios to specDirectory/scenarios/bean-N/{name}.md.
+- Read requirements.md(x) and solution.md(x) before planning. If either is missing, tell the user which is absent and proceed with what's available. Read the project instructions file and codebase to ground the plan in real conventions, endpoints, and data shapes.
+- Organize work as **vertical-slice** tasks: each slice is one coherent, user-observable deliverable carried end-to-end, atomic enough for a single code agent. Order slices by dependency; a later slice extends an earlier one. Never make a layer-only slice ("data-models slice").
+- Declare each slice's dependencies accurately via `task.js --depends-on` (tracker ids) — `/implement` topo-sorts by them and runs independent slices concurrently. It is the whole parallelization contract.
+- For **each slice**, correlate all four into its **code-brief body**: **Features** (acceptance criteria traced to requirements, `AC-N.M`), **Behavior** (EARS statements drawn from the solution design — see reference/ears.md), **Quality Gates** (checkable conditions). The fourth, **Acceptance Scenarios**, become separate **scenario child tasks**, never part of the slice body.
+- Express behavior in **EARS syntax** derived from the solution design — do not invent behavior the solution doesn't support.
+- Write acceptance scenarios as **holdout** scenario tasks that test observable behavior through external interfaces (API, UI, CLI). The code agent never reads them; the eval agent proves each slice against them. Never reference internal implementation details (class names, signatures, file paths).
+- Present each slice (its brief + scenarios) to the user for review before creating the tasks. The user must approve — they are what `/implement` is held to.
+- Collect `[ASSUMPTION]` entries from requirements.md(x)/solution.md(x); any slice depending on a Standing assumption must flag it in its brief — the plan inherits the ledger visibly.
+- Ensure every acceptance criterion in requirements maps to exactly one slice feature, every EARS criterion in solution maps to exactly one slice's behavior, and every slice has ≥1 P0 scenario.
+- Set `threshold` (default 0.90) and `max_iterations` (default 5) in `plan.mdx` frontmatter — `/implement` reads them.
 
 **Never:**
-- Turn the plan into a prescription — no task-by-task instructions, file edits, code, or execution-group assignments. BEANs describe *what each slice delivers and how it is proven*, not the steps to build it, and dependencies (not hand-assigned groups) decide execution order. `/implement` owns HOW.
-- Write acceptance scenarios that reference internal implementation details (class names, function signatures, file paths) — they test observable behavior only.
-- Make layer-only BEANs ("data-models BEAN", "service-layer BEAN"). Each BEAN is a vertical deliverable slice.
-- Proceed past BEAN/scenario generation without user review.
-- Embed BEAN ids in test file names or code — they are internal orchestration labels only.
+- Turn a slice into a prescription — no task-by-task instructions, file edits, code, or execution-group assignments. Dependencies (not hand-assigned groups) decide order. `/implement` owns HOW.
+- Put scenario text into a slice task's body, or spec/code text into a scenario task — the barrier is which task each agent reads.
+- Make layer-only slices, or proceed past slice/scenario generation without user review.
+- Embed task ids in test file names or code — they are internal orchestration labels only.
 
 ## Reference Materials
 
-- [EARS Guide](reference/ears.md) — EARS syntax patterns for expressing behavior from the solution design
-- [Scenario Guide](reference/scenario-guide.md) — How to write effective holdout acceptance scenarios grounded in the codebase
-- [MDX Blocks](reference/mdx-blocks.md) — Path-C block vocabulary and document-quality discipline
+- [EARS Guide](reference/ears.md) — EARS syntax for expressing behavior from the solution design
+- [Scenario Guide](reference/scenario-guide.md) — Writing holdout acceptance scenarios grounded in the codebase
+- [MDX Blocks](reference/mdx-blocks.md) — Block vocabulary and document-quality discipline for plan.mdx
 - [Validation](reference/validation.md) — Coverage and quality checks
 
 **Templates:**
-- [Plan Template](template.mdx) — Plan document, write to `specDirectory/plan.mdx`
-- [Scenario Template](templates/scenario.md) — Holdout scenario, write to `specDirectory/scenarios/bean-N/{name}.md`
+- [Plan Template](template.mdx) — narrative plan.mdx (phases + outcomes + tracker link)
+
+> Note: the `task.js` tracker CLI is the specify-meta skill's `task.js` (co-located with spec.py), run via the shell. Slice bodies and scenario bodies are substantial markdown — write each to a temp file and pass it with `--body-file`.
 
 ## Workflow
 
 ### 1. Initialize
 
-Read requirements.md(x) and solution.md(x) from specDirectory. Read the project instructions file and explore the codebase for existing patterns, test structure, endpoints, and data shapes.
+Read requirements.md(x) and solution.md(x) from specDirectory. Read the project instructions file and
+explore the codebase for existing patterns, test structure, endpoints, and data shapes.
 
-Identify the **BEANs**: group the requirements' acceptance criteria into vertical-slice deliverables, ordered by dependency. Each BEAN is one coherent thing a user can do end-to-end, atomic enough for a single code agent; a later BEAN extends an earlier one's foundation. This slicing is the plan's backbone.
+Identify the **slices**: group the requirements' acceptance criteria into vertical-slice deliverables,
+ordered by dependency. Each slice is one coherent thing a user can do end-to-end, atomic enough for a
+single code agent. This slicing is the plan's backbone.
 
-Read template.mdx and write the plan skeleton (Target State + the BEAN headings with their `Depends on:` lines) to specDirectory/plan.mdx.
+### 2. Write the Narrative Plan
 
-### 2. Define Target State
+Read template.mdx and write `plan.mdx`: frontmatter (`threshold`, `max_iterations`), a **Target State**
+section (prose: what the system does when every slice is delivered, grounded in real components — no step
+list), a **Phases & Outcomes** section (each phase/slice as a one-line achievable outcome + its
+dependencies), and a **Tracking** section linking `.tracker/` and the `task.js graph --spec {specId}`
+command. Present the Target State and slice breakdown; ask the user to *Approve slicing*, *Adjust*, or
+*Re-slice*.
 
-Write the **Target State** section: prose describing what the system does and looks like when every BEAN is delivered. Outcome-first, self-contained, grounded in real components from solution.md(x). No step list — the BEANs describe the route.
+### 3. Create the Phase Root
 
-Present the Target State and the proposed BEAN breakdown (titles, outcomes, dependencies). Ask the user to choose between *Approve slicing*, *Adjust BEANs*, or *Re-slice*.
+`node task.js create --spec {specId} --type phase --name "Implement {specName}"` → record `rootId`.
 
-### 3. Build Each BEAN
+### 4. Build Each Slice (as tasks)
 
-For each BEAN, correlate the four facets (read reference/ears.md and reference/scenario-guide.md first):
+For each slice, in dependency order (read reference/ears.md and reference/scenario-guide.md first):
 
-1. **Features — Acceptance Criteria.** List the acceptance criteria from requirements.md(x) this BEAN delivers, as `AC-N.M`. Every requirement AC must land in exactly one BEAN.
-2. **Behavior — EARS.** Translate the relevant technical detail from solution.md(x) into EARS statements (When/While/If-then/ubiquitous). Derive from the solution — never invent behavior it doesn't support. Every EARS criterion in solution.md(x) must land in exactly one BEAN.
-3. **Quality Gates.** Checkable conditions for the BEAN. Always include the project's baseline gates (tests pass, lint/type checks clean); add what the solution implies (coverage, performance budget, security, a11y, migration safety). Carry the requirements' NFR fit criteria (NFR-N) and Evaluation & Validation gates (EV-N) into the BEANs that deliver the behavior they measure — cite the ID.
-4. **Acceptance Scenarios.** Generate holdout scenarios that test the BEAN's observable behavior through external interfaces. Assign priorities: P0 (critical path), P1 (important), P2 (edge case). Every BEAN needs at least one P0. Write each using templates/scenario.md to specDirectory/scenarios/bean-N/{name}.md and link it under the BEAN's `#### Acceptance Scenarios` heading.
+1. **Assemble the code brief** — a markdown doc with: **Features** (the `AC-N.M` this slice delivers,
+   traced to requirements); **Behavior — EARS** (EARS statements derived from solution.md(x); every EARS
+   criterion lands in exactly one slice); **Quality Gates** (baseline gates + what the solution implies;
+   carry NFR-N / EV-N with their ids). Flag any Standing assumption it depends on.
+2. **Create the slice task** with that brief as its body:
+   `node task.js create --spec {specId} --parent {rootId} --type slice --name "{title}" --depends-on {slice task ids it extends} --body-file {brief.md}` → record its id.
+3. **Create scenario child tasks** — for each holdout acceptance scenario (observable behavior through an
+   external interface; assign P0/P1/P2, every slice needs ≥1 P0), write the scenario markdown and:
+   `node task.js create --spec {specId} --parent {sliceId} --type scenario --name "{scenario title}" --body-file {scenario.md}`.
 
-Present each BEAN for review with a coverage map (which requirement ACs and which solution behaviors it covers) and any gaps. Ask the user to choose between *Approve BEAN*, *Edit features/EARS/gates*, *Edit scenarios*, or *Add missing scenarios*.
-
-CRITICAL: The user must approve the BEANs and their acceptance scenarios before the plan is finalized — they are what `/implement` is held to.
-
-### 4. Set Satisfaction Threshold
-
-Set `threshold` (default 0.90) and `max_iterations` (default 5) in plan.mdx frontmatter — the ratio of acceptance scenarios that must pass for a BEAN to be done, and the retry limit per BEAN. Present the defaults and let the user adjust.
+Present each slice for review with a coverage map (which requirement ACs and solution behaviors it covers)
+and any gaps. Ask the user to *Approve slice*, *Edit brief*, *Edit scenarios*, or *Add missing scenarios*.
+Create the tasks only after approval.
 
 ### 5. Validate
 
-Read reference/validation.md and run checks:
+Read reference/validation.md and run checks against the created tasks (`task.js graph --spec {specId}`):
 
-Coverage checks:
-- Every acceptance criterion in requirements.md(x) maps to exactly one BEAN feature.
-- Every NFR fit criterion (NFR-N) and evaluation gate (EV-N) in requirements.md(x) appears as a quality gate on at least one BEAN.
-- Every `[ASSUMPTION]` carried from requirements.md(x) or solution.md(x) is either resolved or flagged on the BEANs that depend on it.
-- Every EARS criterion in solution.md(x) maps to exactly one BEAN's Behavior section, and every BEAN has at least one EARS behavior statement traceable to solution.md(x).
-- The `## Traceability` index lists every requirement AC and every solution EARS criterion exactly once, and each row's BEAN matches where that criterion actually appears below.
-- Every BEAN has at least one P0 acceptance scenario.
-- Every acceptance scenario tests observable behavior (no internal implementation references).
-
-Dependency checks:
-- Every `Depends on:` id refers to a BEAN that exists; the dependency graph is acyclic.
-
-Format checks:
-- plan.mdx frontmatter has `threshold` and `max_iterations`; the `## BEANs` section follows the parseable spine (each BEAN carries `Depends on:` / Features / Behavior — EARS / Quality Gates / Acceptance Scenarios).
-- Scenarios follow the template and live under scenarios/bean-N/.
+- Every acceptance criterion in requirements maps to exactly one slice's Features.
+- Every NFR-N / EV-N appears as a quality gate on ≥1 slice.
+- Every `[ASSUMPTION]` is resolved or flagged on the slices that depend on it.
+- Every EARS criterion in solution maps to exactly one slice's Behavior; every slice has ≥1 EARS statement.
+- Every slice has ≥1 P0 scenario child task; scenarios test observable behavior only.
+- Every slice `--depends-on` id refers to an existing slice; the dependency graph is acyclic (task.js validates dep ids and rejects parent cycles at create time).
+- `plan.mdx` frontmatter has `threshold` and `max_iterations`; the tracker has one phase root, its slice children, and each slice's scenario children.
 
 ### 6. Present Status
 
-Read reference/output-format.md and present the status report. Ask the user to choose between *Finalize*, *Revisit a BEAN*, *Re-slice BEANs*, or *Adjust threshold*.
+Present the status report: the narrative plan, the slice/scenario task tree (`task.js list --spec {specId} --depth 1`),
+and the coverage map. Ask the user to *Finalize*, *Revisit a slice*, *Re-slice*, or *Adjust threshold*.

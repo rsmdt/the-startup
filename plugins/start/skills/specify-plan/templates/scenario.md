@@ -1,9 +1,9 @@
----
-phase: {{PHASE_NUMBER}}
-feature: {{AC_REFERENCE}}
-priority: {{P0 | P1 | P2}}
----
 # {{SCENARIO_TITLE}}
+
+> Priority: {{P0 | P1 | P2}} · Verifies: {{AC_REFERENCE or EARS tag}}
+
+This is the body of a **scenario child task** (`task.js create --type scenario --parent {sliceId}
+--body-file …`). It is holdout evidence — the eval agent reads it; the code agent never does.
 
 ## Scenario
 {{Plain-English description of the action to perform.

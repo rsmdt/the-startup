@@ -1,6 +1,6 @@
 # EARS — Easy Approach to Requirements Syntax
 
-EARS gives each behavior statement a clear trigger and an unambiguous required response. Use it in the plan's `#### Behavior — EARS` sections to express the technical requirements drawn from the solution design. Each statement is testable: a validation scenario should be able to exercise its trigger and check its response.
+EARS gives each behavior statement a clear trigger and an unambiguous required response. Use it in each slice task's **Behavior — EARS** section (part of its code brief) to express the technical requirements drawn from the solution design. Each statement is testable: a validation scenario should be able to exercise its trigger and check its response.
 
 ## The five patterns
 
@@ -36,6 +36,6 @@ Patterns compose: *"While the cache is warm, when a lookup misses, the system sh
   before computing tax.                                                         (optional feature)
 ```
 
-## EARS vs. validation scenarios
+## EARS vs. acceptance scenarios
 
-EARS states the **required behavior** (drawn from the solution). A **validation scenario** is the holdout check that the behavior is actually present, exercised through an external interface. They pair up: most P0/P1 scenarios verify one EARS statement. EARS lives inline in the plan; scenarios live as holdout files under `scenarios/phase-N/`.
+EARS states the **required behavior** (drawn from the solution). An **acceptance scenario** is the holdout check that the behavior is actually present, exercised through an external interface. They pair up: most P0/P1 scenarios verify one EARS statement. EARS lives in the slice task's code brief; scenarios live as separate holdout **scenario child tasks** under each slice.

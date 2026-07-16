@@ -1,6 +1,6 @@
 # Scenario Guide
 
-How to write effective holdout validation scenarios. A validation scenario is a plain-English description of expected system behavior, tested through external interfaces — typically verifying one EARS statement from its phase. During implementation, an evaluation agent reads it and exercises the running system to decide pass/fail.
+How to write effective holdout acceptance scenarios. An acceptance scenario is a plain-English description of expected system behavior, tested through external interfaces — typically verifying one EARS statement from its slice. During implementation, an evaluation agent reads it and exercises the running system to decide pass/fail. Each scenario is created as a **scenario child task** (`task.js --type scenario`) under its slice.
 
 ---
 
@@ -8,7 +8,7 @@ How to write effective holdout validation scenarios. A validation scenario is a 
 
 **Good scenarios**:
 - Test observable behavior through the API, UI, or CLI
-- Exercise **one phase's own** external interface, so it is verifiable independently
+- Exercise **one slice's own** external interface, so it is verifiable independently
 - Reference actual endpoints, data shapes, and conventions from the codebase
 - Are specific enough that pass/fail is unambiguous
 - Each test one thing
@@ -37,22 +37,22 @@ A scenario like "POST to /api/v1/sql/validate" is grounded. "POST to the validat
 | P1 | Important | Error handling, edge cases that affect users. |
 | P2 | Edge case | Boundary conditions, unusual inputs, rare paths. |
 
-Every phase should have at least one P0 scenario. P1 and P2 increase confidence.
+Every slice should have at least one P0 scenario. P1 and P2 increase confidence.
 
 ## Scenario Count Guidelines
 
-- **Minimum**: 1 scenario per phase (P0 happy path)
-- **Typical**: 3-5 scenarios per phase (P0 + P1 error cases)
-- **Thorough**: 5-10 scenarios per phase (P0 + P1 + P2 edge cases)
+- **Minimum**: 1 scenario per slice (P0 happy path)
+- **Typical**: 3-5 scenarios per slice (P0 + P1 error cases)
+- **Thorough**: 5-10 scenarios per slice (P0 + P1 + P2 edge cases)
 
 More scenarios = higher confidence but longer evaluation. Start with P0 + P1, add P2 if useful.
 
 ## Why Holdout — the Information Barrier
 
-Completion criteria are a **holdout evaluation set**. When `/implement` runs in decompose mode, the code agent that builds a phase does not see its scenarios — only the evaluation agent does. Think of it as the train/test split in ML:
+Acceptance scenarios are a **holdout evaluation set**. When `/implement` builds a slice, the code agent that writes the implementation never reads its scenario child tasks — only the evaluation agent does. Think of it as the train/test split in ML:
 
-- The requirements + solution + target state are "training data" — they tell the implementer what to build.
+- The requirements + solution + slice brief are "training data" — they tell the implementer what to build.
 - Scenarios are "evaluation data" — they verify it was built correctly.
 - If the implementer could optimize directly against the scenarios, it would pass them by reverse-engineering the test rather than building the right thing.
 
-This is why scenarios must test observable behavior, not implementation details — so an implementer passes them only by building the right thing. (In direct and iterative modes the barrier is softer, but writing criteria this way keeps them honest regardless of how `/implement` executes.)
+This is why scenarios must test observable behavior, not implementation details — so an implementer passes them only by building the right thing. The barrier is structural: the scenarios live in **separate scenario child tasks**; the eval agent reads those, the code agent reads only the slice task. They never overlap.
