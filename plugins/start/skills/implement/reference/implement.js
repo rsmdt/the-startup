@@ -1,67 +1,74 @@
-// implement-workflow: v1
+// implement-workflow: v4
 //
-// The Agentic Startup — single implementation loop.
+// The Agentic Startup — single implementation loop (unified task model).
 //
-// One reusable dynamic-workflow script. It is NOT regenerated per spec: /start:implement
-// installs this file to <project>/.claude/workflows/implement.js and launches it via the
-// Workflow tool, passing the spec's plan as `args`. A 1-BEAN plan and a 40-BEAN plan run
-// this same script — scale is emergent from the number of BEANs, not from a strategy choice.
+// One reusable dynamic-workflow script. /start:implement installs this file to
+// <project>/.claude/workflows/implement.js and launches it via the Workflow tool, passing the
+// spec's implementation tasks as `args`. A 1-task plan and a 40-task plan run this same script —
+// scale is emergent from the number of tasks.
 //
-// A BEAN (Bundled EARS + Acceptance Node) is one vertical slice of the plan. Each BEAN is
-// driven through a barriered code→eval retry loop:
-//   • CODE agent  — builds the BEAN via TDD. Sees the BEAN spec + filtered retry summaries.
-//                   NEVER sees the holdout scenarios.
-//   • EVAL agent  — proves the BEAN against its holdout scenarios through external interfaces.
-//                   NEVER sees the source, the BEAN spec, or the code agent's output.
-// The information barrier is STRUCTURAL: this script threads BEAN-spec content only into the
-// code prompt and scenario content only into the eval prompt. The two never cross in-script.
-// The prompts additionally carry belt-and-suspenders "do not read" instructions.
+// Everything is a task (see specify-meta/task.js). For a spec's implement phase the tracker holds:
+//   • a root phase task,
+//   • one SLICE task per unit of work — its body is the code brief (features + EARS + gates),
+//   • SCENARIO child tasks under each slice — their bodies are the holdout acceptance evidence.
+// specify-plan authors these; /start:implement reads them and passes the slice task ids here.
 //
-// Independent BEANs (no unmet dependency) run concurrently via parallel(); dependent BEANs
-// run in order. The orchestrator (/start:implement) topologically sorts them into groups and
-// passes that ordering in `args.groups`.
+// Each slice task is driven through a barriered code→eval retry loop:
+//   • CODE agent — builds the slice via TDD. Reads the SLICE task (its brief). NEVER reads the
+//                  slice's scenario child tasks.
+//   • EVAL agent — proves the slice against its SCENARIO child tasks through external interfaces.
+//                  NEVER reads the slice task, the source, or spec files.
+// The information barrier is "which task each agent reads": the script tells the code agent to read
+// the slice task and the eval agent to read the scenario child tasks — they never overlap. The
+// prompts carry belt-and-suspenders "do not read" instructions too.
 //
-// Runtime note: the script itself has no filesystem/shell access — only agents do. So each
-// EVAL agent owns the full service lifecycle (start → health-check → run 3× → tear down).
+// Independent slices run concurrently via parallel(); dependent slices run in order (the skill
+// topo-sorts them into `groups`).
+//
+// Runtime note: the script has no shell/filesystem access — only agents do. So every task.js call
+// (read/list/update/create) is made BY an agent; the script only orchestrates and branches on the
+// structured verdicts agents return.
 
 export const meta = {
   name: "implement",
-  description: "Build a spec by looping each BEAN through a barriered code→eval retry loop",
+  description: "Build a spec by looping each slice task through a barriered code→eval retry loop",
   phases: [
-    { title: "Build", detail: "code agent implements each BEAN via TDD (blind to scenarios)" },
-    { title: "Evaluate", detail: "eval agent proves each BEAN against holdout scenarios (blind to code)" },
+    { title: "Build", detail: "code agent implements each slice via TDD (reads the slice task, blind to its scenarios)" },
+    { title: "Evaluate", detail: "eval agent proves each slice against its scenario tasks (blind to the slice + source)" },
   ],
 };
 
-// ── Input contract (args, supplied by /start:implement from plan.mdx) ─────────────────
+// ── Input contract (args, supplied by /start:implement from the tracker) ───────────────
 // {
-//   title:         string,
+//   specId:        string,          // for task.js --spec
+//   taskScript:    string,          // abs path to specify-meta/task.js
 //   threshold:     number,          // satisfaction ratio for "done" (e.g. 0.90)
-//   maxIterations: number,          // retry limit per BEAN (e.g. 5)
+//   maxIterations: number,          // retry limit per slice (e.g. 5)
 //   servicePort:   number,          // discovered service port
 //   startCommand:  string,          // how the eval agent brings the service up
 //   healthPath:    string,          // e.g. "/health" (eval agent polls this)
-//   beans: [ {
-//     id:          string,          // internal orchestration label (never leaks into code)
-//     title:       string,
-//     specContent: string,          // Features (ACs) + EARS behavior + quality gates — the code agent's brief
-//     scenarioContent: string,      // concatenated holdout scenario text — the eval agent's brief
-//   } ],
-//   groups: [ { mode: "parallel" | "sequential", beanIds: string[] } ],  // topo-sorted
+//   tasks:  [ { id: string, dependsOn: string[] } ],           // slice task ids + deps (tracker ids)
+//   groups: [ { mode: "parallel" | "sequential", taskIds: string[] } ],  // topo-sorted
 // }
 
+// Background workflow launches may serialize `args`; on some runtimes it is revived as a
+// JSON string rather than an object. Parse defensively so destructuring never yields all-undefined.
+const parsedArgs = typeof args === "string" ? JSON.parse(args) : args;
+
 const {
-  title = "implementation",
+  specId,
+  taskScript,
   threshold = 0.9,
   maxIterations = 5,
   servicePort,
   startCommand,
   healthPath = "/health",
-  beans = [],
-  groups = [{ mode: "sequential", beanIds: beans.map((b) => b.id) }],
-} = args ?? {};
+  tasks = [],
+  groups = [{ mode: "sequential", taskIds: tasks.map((t) => t.id) }],
+} = parsedArgs ?? {};
 
-const byId = new Map(beans.map((b) => [b.id, b]));
+const tj = `node ${taskScript} `; // task.js prefix (with --spec appended per call)
+const spec = `--spec ${specId}`;
 
 // Structured verdict the eval agent must return, so the loop branches on data, not prose.
 const VERDICT = {
@@ -77,7 +84,7 @@ const VERDICT = {
 
 // ── Prompt builders — the two halves of the information barrier ────────────────────────
 
-function codePrompt(bean, iteration, failures) {
+function codePrompt(taskId, iteration, failures) {
   const retry =
     iteration > 0 && failures.length
       ? `\nA previous attempt did not satisfy the acceptance evidence ` +
@@ -86,22 +93,25 @@ function codePrompt(bean, iteration, failures) {
         `\nInvestigate the codebase to find and fix the root causes.\n`
       : "";
 
-  return `You are implementing the following slice of a specification using Test-Driven Development (TDD).
+  return `You are implementing one slice of a specification using Test-Driven Development (TDD).
 
-${bean.specContent}
+Read your task — it is your code brief (features / acceptance criteria, EARS behavior, quality gates):
+  ${tj}read ${taskId} ${spec}
+Mark it in progress before you start (bookkeeping only):
+  ${tj}update ${taskId} ${spec} --status building
 
 Codebase context: read AGENTS.md (or CLAUDE.md) for project orientation and conventions.
 
-DO NOT read or access any files under a scenarios/ directory, or under .start/specs/*/scenarios/.
-Those hold the holdout acceptance evidence and must not influence how you build.
+DO NOT read this slice's scenario child tasks (type: scenario), nor any files under a scenarios/
+directory. Those hold the holdout acceptance evidence and must not influence how you build.
 
 ## File naming
-Name test files after the feature or component under test — never after an internal id.
+Name test files after the feature or component under test — never after an internal task id.
   ✅ tests/features/orders/test_order_repository.py
-  ❌ tests/features/orders/test_bean3_repository.py
+  ❌ tests/features/orders/test_${taskId}.py
 
 ## TDD process (mandatory)
-For EACH acceptance criterion and EARS behavior above, follow red-green-refactor:
+For EACH acceptance criterion and EARS behavior in your brief, follow red-green-refactor:
 1. RED: write a failing test for the behavior. Run the suite — confirm it fails.
 2. GREEN: write the minimal code to make it pass. Run the suite — confirm it passes.
 3. REFACTOR: improve the code while keeping every test green.
@@ -109,14 +119,19 @@ Do not write implementation code without a failing test first.
 ${retry}
 When complete:
 1. All existing tests pass.
-2. New tests cover every acceptance criterion and EARS behavior above (written BEFORE implementation).
+2. New tests cover every acceptance criterion and EARS behavior (written BEFORE implementation).
 3. Run the full test suite and report results, plus how many red-green-refactor cycles you completed.`;
 }
 
-function evalPrompt(bean) {
-  return `You are evaluating whether an implementation satisfies the following acceptance scenarios.
+function evalPrompt(taskId) {
+  return `You are evaluating whether an implementation satisfies a slice's acceptance scenarios.
 
-${bean.scenarioContent}
+Read the acceptance scenarios — they are the scenario child tasks of this slice:
+  ${tj}list ${spec} --parent ${taskId} --type scenario
+  then read each one:  ${tj}read <scenarioId> ${spec}
+
+DO NOT read the slice task itself, its source code, spec files, or unit tests. Test ONLY through
+the external interface — the scenarios are all you are given.
 
 ## Service lifecycle (you own it)
 1. Start the service:  ${startCommand}
@@ -126,47 +141,40 @@ ${bean.scenarioContent}
 4. Tear the service down when you are done (kill the process you started).
 
 ## Evaluation method (use the first available, in priority order)
-1. E2E test automation — write and run automated end-to-end tests for the scenarios, using the project's test framework.
+1. E2E test automation — write and run automated end-to-end tests for the scenarios.
 2. Browser automation — drive the UI/API through a real browser.
 3. CLI fallback — exercise endpoints directly with curl/httpie.
 
-## Restrictions
-DO NOT read source code, specification files, unit/BEAN specs, or any implementation details.
-DO NOT access files under src/, plugins/, or .start/specs/*/ other than the scenarios you were given.
-Test only through the external interface. Name any test files after the feature under test, never an internal id.
+## Record the outcome (bookkeeping — does NOT replace your returned verdict)
+Run each scenario 3 times; a scenario passes if it passes at least 2 of 3. Then:
+- if every scenario passed:  ${tj}update ${taskId} ${spec} --status passed
+- otherwise:                 ${tj}update ${taskId} ${spec} --status failed
+  and, for EACH failed scenario, file a bug as a child task:
+                             ${tj}create ${spec} --parent ${taskId} --type bug --name "<observable symptom>"
 
-## Reporting (return the structured verdict)
-Run each scenario 3 times; a scenario passes if it passes at least 2 of 3.
-Return:
+## Return the structured verdict
 - satisfaction: passed_scenarios / total_scenarios (0.0–1.0)
 - passed: names of scenarios that passed
 - failures: for each failed scenario, ONE line stating the observable symptom (no internal detail)`;
 }
 
-// ── The BEAN loop — build → evaluate → (retry with filtered summaries) ─────────────────
+// ── The slice loop — build → evaluate → (retry with filtered summaries) ─────────────────
 
-async function buildBean(bean) {
+async function buildTask(taskId) {
   let iteration = 0;
   let failures = [];
 
   while (true) {
-    // CODE agent: sees the BEAN spec + one-line retry summaries. Never the scenarios.
-    await agent(codePrompt(bean, iteration, failures), {
-      phase: "Build",
-      label: `build:${bean.id}`,
-    });
+    // CODE agent: reads the slice task + one-line retry summaries. Never the scenario tasks.
+    await agent(codePrompt(taskId, iteration, failures), { phase: "Build", label: `build:${taskId}` });
 
-    // EVAL agent: sees the scenarios + service config. Never the source or the spec.
-    const verdict = await agent(evalPrompt(bean), {
-      phase: "Evaluate",
-      label: `eval:${bean.id}`,
-      schema: VERDICT,
-    });
+    // EVAL agent: reads the scenario child tasks + service config. Never the slice or the source.
+    const verdict = await agent(evalPrompt(taskId), { phase: "Evaluate", label: `eval:${taskId}`, schema: VERDICT });
 
     const satisfaction = verdict?.satisfaction ?? 0;
 
     if (satisfaction >= threshold) {
-      return { id: bean.id, title: bean.title, status: "completed", satisfaction, iterations: iteration + 1 };
+      return { id: taskId, status: "completed", satisfaction, iterations: iteration + 1 };
     }
 
     iteration += 1;
@@ -175,32 +183,31 @@ async function buildBean(bean) {
     failures = (verdict?.failures ?? []).slice(0, 6);
 
     if (iteration >= maxIterations) {
-      return { id: bean.id, title: bean.title, status: "failed", satisfaction, iterations: iteration, failures };
+      return { id: taskId, status: "failed", satisfaction, iterations: iteration, failures };
     }
 
-    log(`BEAN ${bean.id} at ${(satisfaction * 100).toFixed(0)}% (< ${(threshold * 100).toFixed(0)}%) — retry ${iteration}/${maxIterations}`);
+    log(`slice ${taskId} at ${(satisfaction * 100).toFixed(0)}% (< ${(threshold * 100).toFixed(0)}%) — retry ${iteration}/${maxIterations}`);
   }
 }
 
-// ── Execution: run groups in order; parallelize independent BEANs within a group ───────
+// ── Execution: run groups in order; parallelize independent slices within a group ───────
 
+const byId = new Map(tasks.map((t) => [t.id, t]));
 const results = [];
 
 for (const group of groups) {
-  const groupBeans = group.beanIds.map((id) => byId.get(id)).filter(Boolean);
-  if (!groupBeans.length) continue;
+  const ids = group.taskIds.filter((id) => byId.has(id));
+  if (!ids.length) continue;
 
   if (group.mode === "parallel") {
-    const groupResults = await parallel(groupBeans.map((b) => () => buildBean(b)));
+    const groupResults = await parallel(ids.map((id) => () => buildTask(id)));
     results.push(...groupResults.filter(Boolean));
   } else {
-    for (const b of groupBeans) {
-      results.push(await buildBean(b));
-    }
+    for (const id of ids) results.push(await buildTask(id));
   }
 }
 
 const completed = results.filter((r) => r.status === "completed").length;
-log(`${completed}/${results.length} BEANs satisfied for "${title}"`);
+log(`${completed}/${results.length} slices satisfied`);
 
-return { title, threshold, results };
+return { specId, threshold, results };

@@ -3,73 +3,71 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "Implement spec 005 — a single-line rate-limit middleware fix. The spec has requirements, solution, and plan.mdx; no .impl/ yet.",
-      "expected_output": "Strategy selector recommends Direct; records the decision; routes to implement-direct",
+      "prompt": "Implement spec 005 — a single-slice rate-limit middleware. specify-plan has authored the tracker: an implement-phase root task with one slice task (type: slice, its body is the code brief) and two scenario child tasks (type: scenario) under it. plan.mdx exists with threshold and max_iterations in its frontmatter. No .claude/workflows/implement.js exists in the project yet.",
+      "expected_output": "Reads the implementation tasks from the tracker, installs the bundled workflow, builds task-based args, and launches implement.js on the dynamic-workflow runtime.",
       "expectations": [
-        "Invoked specify-meta to resolve the spec directory",
-        "Read requirements, solution, and plan.mdx before selecting a strategy",
-        "Read reference/strategy-selector.md and surfaced the rationale (change_type=fix, minimal surface)",
-        "Recommended the Direct strategy and presented Direct/Iterative/Decompose via AskUserQuestion",
-        "Wrote .impl/strategy.md recording the chosen strategy and rationale",
-        "Routed to implement-direct",
-        "Did NOT author or modify any specification artifact (requirements/solution/plan/scenarios)"
+        "Invoked specify-meta to resolve the spec directory and specId",
+        "Read the implementation tasks from the tracker via task.js graph --spec 005 — identifying the implement-phase root task, its slice task, and the slice's scenario child tasks",
+        "Read plan.mdx only for the narrative and its threshold/max_iterations frontmatter — did NOT parse tasks or BEANs out of plan.mdx",
+        "Detected no installed .claude/workflows/implement.js and copied the bundled reference/implement.js into the project, reporting the installed version",
+        "Discovered the service startCommand, servicePort, and healthPath from the project instructions or package.json",
+        "Launched the Workflow tool with scriptPath pointing at .claude/workflows/implement.js and args containing specId, taskScript, threshold, maxIterations, service config, tasks (one {id, dependsOn} per slice, using tracker ids), and groups",
+        "Did NOT implement code directly, run the code/eval loop itself, or author/modify any specification artifact"
       ]
     },
     {
       "id": 2,
-      "prompt": "Implement spec 003 — a single-feature notification API with 2 components. New layout (plan.mdx + scenarios/).",
-      "expected_output": "Strategy selector recommends Iterative; routes to implement-incremental",
+      "prompt": "Implement spec 003 — a notification feature. The tracker has two slice tasks where slice B lists slice A in its dependsOn. An older .claude/workflows/implement.js is already installed with version marker v3; the bundled reference is v4.",
+      "expected_output": "Prompts to upgrade the workflow, then orders the dependent slices sequentially and launches.",
       "expectations": [
-        "Read requirements, solution, and plan before selecting a strategy",
-        "Surfaced selector rationale citing single capability and <= 2 components",
-        "Recommended the Iterative strategy",
-        "Presented all three strategies via AskUserQuestion with Iterative highlighted",
-        "Wrote .impl/strategy.md",
-        "Routed to implement-incremental"
+        "Compared the installed version marker (v3) against the bundled reference (v4)",
+        "Asked the user via AskUserQuestion whether to upgrade v3 -> v4, with Upgrade recommended and Keep current as the alternative",
+        "Topologically sorted slice A before slice B into dependency-ordered groups (B sequential after A)",
+        "Launched implement.js with the two slice task ids as tasks (each {id, dependsOn}) and the ordered groups",
+        "Did not overwrite the installed workflow without the user's Upgrade choice"
       ]
     },
     {
       "id": 3,
-      "prompt": "Implement spec 006 — multi-feature auth with 4 components across 3 capabilities. New layout.",
-      "expected_output": "Strategy selector recommends Decompose; routes to implement-factory",
+      "prompt": "Implement spec 006 — an auth feature. The tracker has three slice tasks, none of which lists another in its dependsOn. The installed .claude/workflows/implement.js matches the bundled version.",
+      "expected_output": "Groups the three independent slices into one parallel group and launches without a version prompt.",
       "expectations": [
-        "Surfaced selector rationale citing >= 2 features and >= 3 components",
-        "Recommended the Decompose strategy",
-        "Wrote .impl/strategy.md",
-        "Routed to implement-factory",
-        "Noted the plan's scenarios/ will serve as the holdout evaluation set"
+        "Detected the installed workflow version matches the bundled version and proceeded without prompting",
+        "Placed the three independent slice tasks into a single parallel execution group because none depend on another",
+        "Launched implement.js with a parallel group of the three slice task ids",
+        "Passed each slice's {id, dependsOn} and preserved the information barrier — the code agent reads the slice task, the eval agent reads that slice's scenario child tasks"
       ]
     },
     {
       "id": 4,
-      "prompt": "Implement spec 002 which has a legacy plan/ directory (plan/README.md + phase-N.md) and no plan.mdx.",
-      "expected_output": "Back-compat: detect legacy plan/, route to implement-incremental as Iterative",
+      "prompt": "Implement spec 002 which has a plan.mdx containing '### BEAN-N' headings and a legacy plan/ directory, but no implementation tasks in its tracker.",
+      "expected_output": "Detects the spec predates the task model, does not run legacy artifacts, and offers to re-run /start:specify to author the tracker tasks.",
       "expectations": [
-        "Detected the legacy plan/README.md artifact",
-        "Selected the Iterative strategy by back-compat detection (did not require the strategy selector)",
-        "Routed to implement-incremental",
-        "Did not error on the absence of plan.mdx"
+        "Read the tracker (task.js graph --spec 002) and found no implement-phase tasks, and/or detected the legacy ### BEAN-N / plan/ layout",
+        "Explained the spec predates the task model",
+        "Offered to re-run /start:specify (which authors the tracker tasks)",
+        "Did NOT attempt to run the legacy artifacts, fabricate tasks, install, or launch the workflow"
       ]
     },
     {
       "id": 5,
-      "prompt": "Implement spec 004 which has a legacy manifest.md + units/ + scenarios/ and no plan.mdx.",
-      "expected_output": "Back-compat: detect legacy manifest.md, route to implement-factory as Decompose",
+      "prompt": "Implement spec 004 whose tracker has a slice task with NO scenario child tasks under it.",
+      "expected_output": "Fails validation: a slice with no holdout scenarios cannot be evaluated.",
       "expectations": [
-        "Detected the legacy manifest.md artifact",
-        "Selected the Decompose strategy by back-compat detection",
-        "Routed to implement-factory",
-        "Did not regenerate units or scenarios"
+        "Read the tracker and found the slice task has zero scenario child tasks",
+        "Reported that every slice needs at least one scenario child task to be evaluated",
+        "Did NOT launch the workflow with an unprovable slice",
+        "Pointed the user back to specify-plan to author the scenario tasks"
       ]
     },
     {
       "id": 6,
-      "prompt": "Implement spec 099 which does not exist / has no specification artifacts.",
-      "expected_output": "Error: no specification found; suggest running specify first or passing a brief",
+      "prompt": "Implement spec 099 which does not exist / has no specification directory or tracker.",
+      "expected_output": "Error: no specification found; suggest running specify first.",
       "expectations": [
-        "Reported that no specification artifacts were found",
-        "Suggested running the specify skill first or passing a brief/file path",
-        "Did NOT fabricate a strategy or invoke an engine skill"
+        "Reported that no specification directory or tracker was found for spec 099",
+        "Suggested running the specify skill first",
+        "Did NOT fabricate tasks, install the workflow, or launch a run"
       ]
     }
   ]
