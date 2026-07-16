@@ -146,22 +146,22 @@ The specification describes **WHY** and **WHAT** (the target state and what "don
 Specifications live in `.start/specs/[NNN]-[name]/` (legacy: `docs/specs/`):
 - `requirements.mdx` — **WHY**: problem, users, acceptance criteria
 - `solution.mdx` — **WHAT (design)**: target architecture, components, interfaces
-- `plan.mdx` — **WHAT (completion contract)**: target state, quality gates, and completion criteria
-- `scenarios/{capability}/{name}.md` — holdout completion criteria (authored by `specify-plan`)
+- `plan.mdx` — **WHAT (phase-approach baseline)**: a sequence of vertical-slice phases, each correlating the deliverable **features** (acceptance criteria from requirements), the **behavior** in EARS (technical detail from solution), the **quality gates**, and the **validation scenarios** that prove it
+- `scenarios/phase-N/{name}.md` — holdout validation scenarios (authored by `specify-plan`)
 
-The specification carries **no decomposition tier and no implementation steps**. `/start:specify` runs Requirements → Solution → Plan (a 5-step flow: init → requirements → solution → plan → finalize).
+The specification carries **no decomposition strategy and no task-by-task instructions** — the plan's phases are a *baseline, not a prescription*. `/start:specify` runs Requirements → Solution → Plan (a 5-step flow: init → requirements → solution → plan → finalize).
 
 #### Execution strategy (chosen at implementation time)
 
-`/start:implement` reads requirements + solution + plan, runs a strategy selector (see `plugins/start/skills/implement/reference/strategy-selector.md`), and chooses **how** to execute:
+`/start:implement` reads the spec, runs a strategy selector (see `plugins/start/skills/implement/reference/strategy-selector.md`), and chooses **how to consume the plan's phases**:
 
-| Strategy | When | Engine skill | Generates |
-|----------|------|--------------|-----------|
-| **Direct** | Fixes, refactors, doc changes, single-AC features | `implement-direct` | _nothing_ — builds straight to the plan's criteria |
-| **Iterative** | Single feature with one or two components | `implement-incremental` | `.impl/phases/` at exec time |
-| **Decompose** | Multi-feature, multi-component, parallel work | `implement-factory` | `.impl/units/` + `.impl/manifest.md` at exec time |
+| Strategy | When | Engine skill | How it treats the plan's phases |
+|----------|------|--------------|----------------------------------|
+| **Direct** | Fixes, refactors, single-phase work | `implement-direct` | **ignores** phase ordering — flattens to 1–3 units, builds straight to the gates + scenarios |
+| **Iterative** | One or two phases, human-in-the-loop | `implement-incremental` | **follows** the phases — materializes them into `.impl/phases/` as TDD tasks |
+| **Decompose** | Many phases, 3+ components, parallel work | `implement-factory` | **decomposes** the phases into finer parallel units in `.impl/units/` + `.impl/manifest.md` |
 
-The chosen strategy and any generated decomposition are written under `.impl/` (resumable, inspectable, separate from the spec). The holdout `scenarios/` from `plan.mdx` are the evaluation set the engines validate against. `specify-incremental` / `specify-factory` remain as the **decomposition methodology** the engines reuse, and to read legacy `plan/` / `manifest.md` specs (back-compat). Users invoke `/start:specify` and `/start:implement`; everything else is internal.
+The chosen strategy and any derived decomposition are written under `.impl/` (resumable, inspectable, separate from the spec). The plan's holdout `scenarios/phase-N/` are the evaluation set all strategies validate against — never re-authored at implement time. `specify-incremental` / `specify-factory` remain as the **decomposition methodology** the engines reuse, and to read legacy `plan/` / `manifest.md` specs (back-compat). Users invoke `/start:specify` and `/start:implement`; everything else is internal.
 
 ### Knowledge Capture
 
