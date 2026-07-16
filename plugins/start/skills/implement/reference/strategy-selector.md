@@ -8,25 +8,27 @@ The selector produces a recommendation. The user always sees the rationale and m
 
 ## The three strategies
 
-| Strategy | Engine skill | Execution shape | Best for |
-|----------|--------------|-----------------|----------|
-| **Direct** | implement-direct | 1–3 delivery units, parallel/sequential subagents, no phase plan | fixes, refactors, doc changes, single-AC features |
-| **Iterative** | implement-incremental | linear phases generated at exec time, human-in-the-loop checkpoints | single feature with one or two components |
-| **Decompose** | implement-factory | parallel units + holdout-scenario evaluation + retry loop, generated at exec time | multi-feature, 3+ components, parallel-eligible work |
+| Strategy | Engine skill | How it treats the plan's phases | Best for |
+|----------|--------------|---------------------------------|----------|
+| **Direct** | implement-direct | **ignores** them — builds straight to the plan's quality gates + validation scenarios | fixes, refactors, doc changes, single-phase work |
+| **Iterative** | implement-incremental | **follows** them — adopts the plan's phases as the execution loop, refining each into TDD tasks | one or two phases, transparent human-in-the-loop review |
+| **Decompose** | implement-factory | **decomposes** them — splits the phases into finer parallel units with holdout-scenario evaluation + retry | many phases, 3+ components, parallel-eligible work |
+
+The specification's `plan.mdx` already carries a **phase baseline** (vertical-slice phases, each correlating features, EARS behavior, quality gates, and validation scenarios). The strategy decides how to *consume* that baseline — not whether phases exist. The plan's `scenarios/phase-N/` are the holdout set all three strategies validate against.
 
 > The engine skill names are historical (`implement-incremental` = Iterative, `implement-factory` = Decompose). A follow-up will align the names; the routing is by strategy.
 
 ## Inputs
 
-Read from requirements.md, solution.md, and plan.mdx (whichever exist):
+Read primarily from plan.mdx (the phase baseline), with solution.md and requirements.md for context:
 
 | Signal | Source | How to compute |
 |--------|--------|----------------|
-| `feature_count` | requirements.md / plan capabilities | Distinct user-facing capabilities. The plan's `### {Capability}` headings are a strong signal. |
-| `ac_count` | requirements.md / plan completion criteria | Count of acceptance criteria / completion criteria. |
-| `component_count` | solution.md | Distinct top-level components or services. Modifications to existing surface don't increase the count. *Sizing signal only — it sets the strategy, not the slicing axis. Decomposition always slices vertically by capability, never by layer.* |
+| `phase_count` | plan.mdx `### Phase N` headings | Number of phases in the plan. The strongest signal — the plan already did the vertical slicing. |
+| `ac_count` | plan.mdx phase features | Count of acceptance criteria across all phases. |
+| `component_count` | solution.md | Distinct top-level components or services. Modifications to existing surface don't increase the count. *Sizing signal only — it sets the strategy, not the slicing axis. Phases are already vertical slices.* |
 | `change_type` | requirements framing / `$ARGUMENTS` | One of `feature`, `fix`, `refactor`, `doc`. |
-| `parallel_markers` | solution.md | True if the design calls out parallel work, concurrent execution, or independent service boundaries. |
+| `parallel_markers` | solution.md / plan phase dependencies | True if the design calls out parallel work, or the plan has independent phases (no shared dependency chain). |
 
 ## Classification
 
@@ -34,31 +36,32 @@ Apply rules top-to-bottom; first match wins.
 
 ```
 Direct    if change_type in {fix, refactor, doc}
-       OR (component_count == 0 AND ac_count <= 2)
+       OR (phase_count <= 1 AND component_count == 0 AND ac_count <= 2)
        OR (solution modifies only existing surface AND no new modules)
 
-Decompose if feature_count >= 2
+Decompose if phase_count >= 3
        OR component_count >= 3
        OR parallel_markers == true
 
-Iterative otherwise
+Iterative otherwise   (typically phase_count of 1–2)
 ```
 
 ### Edge cases
-- **Single feature, 3+ components**: Decompose. The surface area benefits from parallel units.
-- **Many ACs, single component**: Iterative. ACs alone don't justify Decompose overhead.
-- **Refactor touching >2 components**: Iterative, not Direct. Breadth warrants phase boundaries.
+- **Single phase, 3+ components**: Decompose. The surface area benefits from parallel units even within one phase.
+- **Many ACs, one or two phases, single component**: Iterative. ACs alone don't justify Decompose overhead.
+- **Refactor spanning several phases**: Iterative, not Direct. Breadth warrants the phase loop.
 - **Doc-only with code examples**: Direct.
+- **Independent phases (no dependency chain)**: Decompose — they parallelize cleanly.
 
 ## Rationale Output
 
 Surface the signals that drove the recommendation. Examples:
 
-> Recommended **Decompose** — solution.md describes 4 components; plan.mdx has 12 completion criteria across 3 capabilities; parallel work flagged in §6 of solution.md.
+> Recommended **Decompose** — plan.mdx has 4 phases; solution.md describes 4 components; parallel work flagged in §6 of solution.md.
 
-> Recommended **Iterative** — single capability with 6 completion criteria, 2 components. No parallel work flagged.
+> Recommended **Iterative** — plan.mdx has 2 dependency-ordered phases, 2 components. No parallel work flagged.
 
-> Recommended **Direct** — change_type=fix; modifies existing middleware only; 1 completion criterion.
+> Recommended **Direct** — change_type=fix; single phase; modifies existing middleware only; 1 acceptance criterion.
 
 The confirmation question always shows all three strategies with the recommended one highlighted. The user may override freely.
 
@@ -69,6 +72,6 @@ Record the chosen strategy in `.impl/strategy.md` and in the spec README decisio
 ```
 | Date | Decision | Rationale |
 |------|----------|-----------|
-| YYYY-MM-DD | Execution strategy: Iterative | Selector recommended Iterative (single capability, 2 components). Accepted. |
+| YYYY-MM-DD | Execution strategy: Iterative | Selector recommended Iterative (2 phases, 2 components). Accepted. |
 | YYYY-MM-DD | Execution strategy: Decompose (override) | Selector recommended Iterative. User chose Decompose for planned parallel work. |
 ```

@@ -80,11 +80,11 @@ match (artifacts) {
 }
 ```
 
-**Step 1a — Generate the phase plan (new-layout specs).** When no phase manifest exists yet:
-1. Read requirements.md(x), solution.md(x), and plan.mdx (the completion contract — target state, quality gates, completion criteria).
-2. Decompose into linear **vertical-slice** phases: each phase delivers one user-observable capability end-to-end (data → logic → interface → tests) and is validatable against the plan's completion criteria for that capability. Shared foundation is built by the first phase that needs it and extended by later phases. Never slice by layer.
-3. Follow the methodology in the specify-incremental skill (reference/task-structure.md and the phase template) to structure phases and TDD tasks. Write `.impl/phases/README.md` (the manifest checklist) and `.impl/phases/phase-N.md` per phase.
-4. Present the generated phase plan to the user. Ask the user to choose between *Approve plan*, *Adjust phases*, or *Switch strategy* (re-run /implement to pick Direct or Decompose).
+**Step 1a — Materialize the phase plan from plan.mdx (new-layout specs).** When no phase manifest exists yet:
+1. Read plan.mdx — it already carries the **phase baseline**: a `## Phases` section where each `### Phase N` correlates features (ACs), EARS behavior, quality gates, and validation scenarios. Read requirements.md(x) and solution.md(x) for the full text behind those references.
+2. **Adopt the plan's phases as-is** — do not re-slice. The plan already defined the vertical slices and their order. For each plan phase, build `.impl/phases/phase-N.md` by expanding it into executable TDD tasks (Prime → Test → Implement → Validate) using the specify-incremental skill's methodology (reference/task-structure.md and the phase template). Carry forward the phase's features, EARS behavior (as the spec to satisfy), quality gates, and validation-scenario links so each task traces back to the plan.
+3. Write `.impl/phases/README.md` (the manifest checklist, one line per phase) and `.impl/phases/phase-N.md` per phase.
+4. Present the materialized phase plan to the user, noting it follows the plan's phases. Ask the user to choose between *Approve plan*, *Adjust tasks* (refine the TDD breakdown within phases), or *Switch strategy* (re-run /implement to pick Direct or Decompose). Re-slicing the phases themselves belongs in the spec — direct the user to revisit specify-plan if the phasing is wrong.
 
 Discover the phase structure from `planDirectory`:
 

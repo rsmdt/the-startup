@@ -55,7 +55,7 @@ State {
   specDirectory: string         // resolved .start/specs/NNN-name/ path
   manifestPath: string          // legacy: spec/manifest.md  |  generated: spec/.impl/manifest.md
   unitsDir: string              // legacy: spec/units/        |  generated: spec/.impl/units/
-  scenariosBase: string         // spec/scenarios/ — the holdout set (keyed by unit/capability)
+  scenariosBase: string         // spec/scenarios/ — the holdout set (new: keyed by phase-N; legacy: by unit id)
   manifest: Manifest
   servicePort: number           // discovered from project instructions or package.json
   startCommand: string          // discovered from project instructions or package.json
@@ -108,12 +108,12 @@ match (artifacts) {
 }
 ```
 
-**Step 1a — Generate units + manifest (new-layout specs).** When no manifest exists yet:
-1. Read requirements.md(x), solution.md(x), and plan.mdx (the completion contract — target state, quality gates, completion criteria, `threshold`).
-2. Decompose the solution into factory-sized **vertical-slice** units following the specify-factory skill's methodology (reference/decomposition.md): each unit is one user-observable capability, end-to-end, atomic for one code agent; shared foundation owned by the first unit that needs it; dependencies declared, never circular; unit IDs named after the capability. **Map each unit to the matching plan capability** so its holdout set is `scenariosBase/{capability}/`.
-3. **Do NOT generate scenarios.** The holdout completion criteria already exist in the spec's `scenariosBase` (authored by specify-plan). Units reference them; the information barrier is preserved because code agents never read `scenariosBase`.
-4. Write each unit to `unitsDir/{id}.md` (templates/unit.md from specify-factory) and assemble `manifestPath` (templates/manifest.md), setting `threshold` from plan.mdx frontmatter and `max_iterations` to the default (5). Topologically sort into execution groups.
-5. Present the generated decomposition (units, dependency graph, execution groups, threshold) and the coverage map (each unit → its plan capability's scenarios). Ask the user to choose between *Approve decomposition*, *Adjust units*, or *Switch strategy* (re-run /implement to pick Direct or Iterative).
+**Step 1a — Derive units + manifest from the plan's phases (new-layout specs).** When no manifest exists yet:
+1. Read plan.mdx — it carries the **phase baseline**: a `## Phases` section where each `### Phase N` correlates features (ACs), EARS behavior, quality gates, and validation scenarios (under `scenarios/phase-N/`). Read requirements.md(x) and solution.md(x) for the full text behind those references.
+2. **Decompose the plan's phases into factory-sized units** following the specify-factory skill's methodology (reference/decomposition.md). A phase may map to one unit, or split into several finer parallel units when its features are independently buildable; never merge across phases in a way that violates phase dependency order. Each unit is one user-observable slice, atomic for one code agent; shared foundation owned by the first unit that needs it; dependencies declared, never circular; unit IDs named after the capability. **Map each unit to its source phase** so its holdout set is `scenariosBase/phase-{N}/`.
+3. **Do NOT generate scenarios.** The holdout validation scenarios already exist under the spec's `scenariosBase/phase-N/` (authored by specify-plan). Units reference them; the information barrier is preserved because code agents never read `scenariosBase`.
+4. Write each unit to `unitsDir/{id}.md` (templates/unit.md from specify-factory) and assemble `manifestPath` (templates/manifest.md), setting `threshold` from plan.mdx frontmatter and `max_iterations` to the default (5). Topologically sort into execution groups, respecting phase dependency order.
+5. Present the derived decomposition (units, which phase each came from, dependency graph, execution groups, threshold) and the coverage map (each unit → its phase's scenarios). Ask the user to choose between *Approve decomposition*, *Adjust units*, or *Switch strategy* (re-run /implement to pick Direct or Iterative).
 
 Read manifestPath. Parse it as follows:
 
@@ -213,8 +213,8 @@ On retry iterations: restart the service only if the code agent modified server-
 
 For each unit in this group, sequentially (shared running service):
 
-1. Read all scenario files: `{scenariosBase}/{unit.id}/*.md` (for generated units, `unit.id` is the plan capability slug, so this is the plan's holdout set for that capability)
-2. Check for pre-generated E2E stubs: `{scenariosBase}/{unit.id}/e2e-stubs.md`
+1. Read all scenario files for this unit's holdout set. Legacy: `{scenariosBase}/{unit.id}/*.md`. Generated (new-layout): the unit's source-phase dir `{scenariosBase}/phase-{N}/*.md` (recorded when the unit was derived in step 1a).
+2. Check for pre-generated E2E stubs in the same directory: `e2e-stubs.md`
 3. Read reference/eval-agent.md for the prompt template.
 4. Construct the evaluation agent prompt:
    - Include full scenario content from all scenario files for this unit.

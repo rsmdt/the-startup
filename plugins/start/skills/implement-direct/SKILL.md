@@ -72,7 +72,7 @@ If `$ARGUMENTS` is a file path or freeform brief, treat it as the primary contex
 
 Discover available context:
 - requirements.md(x) and solution.md(x) from spec directory (if present)
-- plan.mdx (if present) — the completion contract: target state, quality gates, and completion criteria. Treat its quality gates and completion criteria as the acceptance bar for the delivery units, and its `scenarios/` as the behaviors to verify.
+- plan.mdx (if present) — the phase-approach baseline: target state, and per phase the features (ACs), EARS behavior, quality gates, and validation scenarios. In Direct mode you **flatten the phases** — pool all features and EARS behavior across phases into your 1–3 delivery units, and treat the union of quality gates plus the `scenarios/phase-N/` set as the acceptance bar to verify. (You ignore the phase *ordering*; you still honor every gate and scenario.)
 - The project instructions file (CLAUDE.md, AGENTS.md, or equivalent) for codebase orientation
 - Any other documents referenced in `$ARGUMENTS`
 

@@ -10,6 +10,9 @@
 node_modules/
 dist/
 
+# implement run workspaces (durable per-run memory, regenerated)
+.impl/
+
 # Python
 __pycache__/
 

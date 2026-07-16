@@ -28,7 +28,7 @@ State {
     requirements?: string         // requirements.md(x)
     solution?: string             // solution.md(x)
     plan?: string                 // plan.mdx (new) — completion contract
-    scenarios?: string            // scenarios/ dir (new) — holdout completion criteria
+    scenarios?: string            // scenarios/phase-N/ (new) — holdout validation scenarios
     legacyPlanDir?: string        // plan/README.md (legacy incremental)
     legacyManifest?: string       // manifest.md (legacy factory)
   }
@@ -96,18 +96,21 @@ match (artifacts) {
                                                    Abort     — exit without action
 
   no legacy artifacts                         => run the Strategy Selector:
-       Read reference/strategy-selector.md and apply it to requirements + solution + plan.
-       Surface the recommendation with its signals (feature/capability count, AC count,
-       component count, change type, parallel markers).
+       Read reference/strategy-selector.md and apply it to plan.mdx (the phase baseline),
+       with solution + requirements for context.
+       Surface the recommendation with its signals (phase count, AC count, component
+       count, change type, parallel markers).
        Ask the user to choose under header "Strategy" — Direct, Iterative, or Decompose —
        with the recommendation highlighted. The user may override freely.
+       The choice decides how to consume the plan's phases: Direct ignores them and builds
+       to the gates + scenarios, Iterative follows them, Decompose splits them into units.
 
   no specs at all                             => Error: no specification found.
                                                  Run the specify skill first, or pass a brief.
 }
 ```
 
-When a new-layout spec has a `plan.mdx`, the plan's `scenarios/` are the holdout completion criteria. Iterative and Decompose engines validate against them; they are not re-authored at implement time.
+When a new-layout spec has a `plan.mdx`, it already carries a **phase baseline** — vertical-slice phases, each correlating features (ACs), EARS behavior, quality gates, and validation scenarios. The plan's `scenarios/phase-N/` are the holdout set; all engines validate against them and never re-author them at implement time. Iterative follows the phases, Decompose splits them into finer units, Direct builds straight to the gates + scenarios.
 
 ### 4. Record the Decision
 
@@ -120,7 +123,7 @@ The `.impl/` directory holds all implementation-time artifacts (strategy, genera
 Present a one-line dispatch summary, then invoke the engine:
 
 ```
-Strategy: Iterative (single capability, 2 components) → implement-incremental
+Strategy: Iterative (2 phases, 2 components) → implement-incremental
 Strategy: Decompose (4 components, parallel flagged) → implement-factory
 Strategy: Direct (fix, existing surface) → implement-direct
 Detected legacy manifest.md → Decompose → implement-factory
