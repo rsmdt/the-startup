@@ -13,26 +13,26 @@
 .start/specs/
 ├── 001-user-authentication/
 │   ├── README.md                 # Managed by specify-meta skill
-│   ├── requirements.mdx           # WHY — created by specify-requirements skill
-│   ├── solution.mdx               # WHAT (design) — created by specify-solution skill
-│   ├── plan.mdx                   # WHAT (completion contract) — created by specify-plan skill
-│   ├── scenarios/                 # Holdout completion criteria — created by specify-plan skill
-│   │   ├── login/
-│   │   │   ├── valid-credentials.md
-│   │   │   └── locked-account.md
-│   │   └── password-reset/
-│   │       └── expired-token.md
-│   └── .impl/                     # Implementation-time, written by /implement (resumable)
-│       ├── strategy.md            # Chosen strategy: Direct | Iterative | Decompose
-│       ├── phases/                # Iterative strategy: generated phase plan
-│       └── units/ + manifest.md   # Decompose strategy: generated units + execution order
+│   ├── requirements.mdx          # WHY — created by specify-requirements skill
+│   ├── solution.mdx              # WHAT (design) — created by specify-solution skill
+│   ├── plan.mdx                  # WHAT (narrative) — created by specify-plan skill
+│   └── .tracker/                 # Implementation tasks — created by specify-plan via task.js
+│       ├── <phase-task>.md       #   root phase task
+│       ├── <slice-task>.md       #   slice tasks (code brief in body)
+│       └── <scenario-task>.md    #   scenario child tasks (holdout evidence)
 ├── 002-payment-processing/
 │   └── ...
 └── 003-notification-system/
     └── ...
 ```
 
-Legacy specs may instead carry an Incremental `plan/` directory or Factory `manifest.md` + `units/` + `scenarios/{unit-id}/` at the spec root; `/implement` still reads these.
+`/implement` installs the reusable workflow to the project's `.claude/workflows/implement.js` and
+runs it on the dynamic-workflow runtime, writing each slice task's status in the tracker as slices are
+satisfied (the phase root rolls up).
+
+Specs created before the task model may carry a `plan/` directory, a `manifest.md` + `units/`,
+`scenarios/phase-N/`, or a `### BEAN-N` plan spine. `/implement` does not run these; re-run
+`/start:specify` to regenerate the tracker tasks for them.
 
 ## Script Commands
 
@@ -63,24 +63,22 @@ dir = ".start/specs/005-feature-name-here"
 prd = ".start/specs/005-feature-name-here/requirements.mdx"
 sdd = ".start/specs/005-feature-name-here/solution.mdx"
 plan_doc = ".start/specs/005-feature-name-here/plan.mdx"
-scenarios_login = [".start/specs/005-feature-name-here/scenarios/login/valid-credentials.md"]
-impl_strategy = ".start/specs/005-feature-name-here/.impl/strategy.md"   # present after /implement runs
 
 files = [
   "README.md",
   "requirements.mdx",
   "solution.mdx",
-  "plan.mdx",
-  "scenarios/login/valid-credentials.md"
+  "plan.mdx"
 ]
 ```
+
+Implementation tasks live in `.tracker/` — query them with `task.js graph --spec 005`, not via `spec.py`.
 
 ### Add Template to Existing Spec
 ```bash
 spec.py 005 --add specify-requirements   # Creates requirements.md (rename to .mdx per discipline)
 spec.py 005 --add specify-solution       # Creates solution.md
-spec.py 005 --add specify-plan           # Creates plan.mdx + scenarios/ directory
-# Legacy (back-compat): specify-incremental creates plan/, specify-factory creates units/ + scenarios/
+spec.py 005 --add specify-plan           # Creates plan.mdx + ensures .tracker/
 ```
 
 ## Template Resolution
@@ -108,9 +106,9 @@ Requirements (specify-requirements → requirements.mdx)   [WHY]
     ↓
 Solution (specify-solution → solution.mdx)               [WHAT — design]
     ↓
-Plan (specify-plan → plan.mdx + scenarios/)              [WHAT — completion contract]
+Plan (specify-plan → narrative plan.mdx + tracker tasks)  [WHAT — the plan]
     ↓
-Ready for Implementation   (/implement selects Direct | Iterative | Decompose → .impl/)
+Ready for Implementation   (/implement installs .claude/workflows/implement.js and runs the slice loop)
 ```
 
 Each phase can be:
