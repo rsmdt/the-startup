@@ -13,7 +13,7 @@ the-startup/
 ├── plugins/
 │   ├── start/                    # Core workflow orchestration plugin
 │   │   ├── .claude-plugin/       # Plugin manifest (plugin.json)
-│   │   ├── skills/               # 14 skills (9 user-invocable + 5 autonomous)
+│   │   ├── skills/               # workflow skills (user-invocable) + internal spec/implement skills
 │   │   ├── output-styles/        # The Startup, The ScaleUp output styles
 │   │   └── README.md             # Detailed plugin documentation
 │   │
@@ -141,27 +141,26 @@ Skills load minimal context initially, then progressively load:
 
 The primary workflow: `/start:specify` → `/start:validate` → `/start:implement` → `/start:review`
 
-The specification describes **WHY** and **WHAT** (the target state and what "done" looks like). **HOW** to execute it is decided later, by `/start:implement`. The two concerns are split across a clean line.
+The specification describes **WHY** and **WHAT** (the target state and what "done" looks like); the implementation is a set of **tasks** in the spec's tracker. **HOW** to build each task is decided by the code agent inside the implementation loop. The two concerns are split across a clean line.
 
 Specifications live in `.start/specs/[NNN]-[name]/` (legacy: `docs/specs/`):
 - `requirements.mdx` — **WHY**: problem, users, acceptance criteria
 - `solution.mdx` — **WHAT (design)**: target architecture, components, interfaces
-- `plan.mdx` — **WHAT (phase-approach baseline)**: a sequence of vertical-slice phases, each correlating the deliverable **features** (acceptance criteria from requirements), the **behavior** in EARS (technical detail from solution), the **quality gates**, and the **validation scenarios** that prove it
-- `scenarios/phase-N/{name}.md` — holdout validation scenarios (authored by `specify-plan`)
+- `plan.mdx` — **WHAT (narrative)**: the high-level approach — phases and achievable outcomes, plus a link to the tracker. Read for orientation, not parsed for work.
+- `.tracker/` — the operational **tasks** (managed by `task.js`): a root **phase** task, one **slice** task per vertical deliverable (its body is the code brief — features + EARS behavior + quality gates), and under each slice its **scenario** child tasks (the holdout acceptance evidence). `--depends-on` edges between slices are the parallelization contract.
 
-The specification carries **no decomposition strategy and no task-by-task instructions** — the plan's phases are a *baseline, not a prescription*. `/start:specify` runs Requirements → Solution → Plan (a 5-step flow: init → requirements → solution → plan → finalize).
+The specification carries **no task-by-task instructions** — a slice says what it delivers and how it is proven, never the steps to build it. `/start:specify` runs Requirements → Solution → Plan (a 5-step flow: init → requirements → solution → plan → finalize); `specify-plan` writes the narrative `plan.mdx` and creates the tracker tasks.
 
-#### Execution strategy (chosen at implementation time)
+#### One implementation loop (the dynamic-workflow runtime)
 
-`/start:implement` reads the spec, runs a strategy selector (see `plugins/start/skills/implement/reference/strategy-selector.md`), and chooses **how to consume the plan's phases**:
+There is a single `/start:implement`, and it always runs on Claude Code's **dynamic-workflow runtime**. It reads the spec's tasks from the tracker, installs one reusable workflow into the project at `.claude/workflows/implement.js` (a bundled golden copy — `implement/reference/implement.js` — carrying a version marker; it prompts to upgrade when the bundled copy is newer), and launches it with the slice tasks as input.
 
-| Strategy | When | Engine skill | How it treats the plan's phases |
-|----------|------|--------------|----------------------------------|
-| **Direct** | Fixes, refactors, single-phase work | `implement-direct` | **ignores** phase ordering — flattens to 1–3 units, builds straight to the gates + scenarios |
-| **Iterative** | One or two phases, human-in-the-loop | `implement-incremental` | **follows** the phases — materializes them into `.impl/phases/` as TDD tasks |
-| **Decompose** | Many phases, 3+ components, parallel work | `implement-factory` | **decomposes** the phases into finer parallel units in `.impl/units/` + `.impl/manifest.md` |
+The workflow drives each slice through a **barriered code→eval retry loop**:
+- a **code agent** builds the slice via TDD — it reads the slice task (features + EARS + gates), never its scenario child tasks;
+- an **eval agent** proves the slice against its scenario child tasks through external interfaces — it reads the scenarios + service config, never the slice or the source;
+- failures are filtered to one-line summaries and fed back until the slice's scenarios pass the `threshold`, or `max_iterations` is reached; each failed scenario becomes a `type: bug` child task.
 
-The chosen strategy and any derived decomposition are written under `.impl/` (resumable, inspectable, separate from the spec). The plan's holdout `scenarios/phase-N/` are the evaluation set all strategies validate against — never re-authored at implement time. `specify-incremental` / `specify-factory` remain as the **decomposition methodology** the engines reuse, and to read legacy `plan/` / `manifest.md` specs (back-compat). Users invoke `/start:specify` and `/start:implement`; everything else is internal.
+The information barrier is *which task each agent reads* — the code agent the slice, the eval agent its scenario children. Independent slices (no unmet dependency) run concurrently via the runtime's `parallel()`; dependent slices run in order. Scale is emergent — a 1-slice plan is a short loop, a 40-slice plan fans out. Specs created before this model (legacy `### BEAN-N` plans, `plan/` / `manifest.md`) are not run; `/start:implement` offers to re-run `/start:specify` to regenerate the tasks. Users invoke `/start:specify` and `/start:implement`; everything else is internal.
 
 ### Knowledge Capture
 

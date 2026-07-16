@@ -16,7 +16,7 @@ The `start` plugin provides ten user-invocable workflow skills, five autonomous 
 - [Output Styles](#output-styles) — The Startup, The ScaleUp
 - [Typical Development Workflow](#typical-development-workflow) — primary and maintenance flows
 - [Skills in Action](#skills-in-action) — real-world examples
-- [Templates](#templates) — PRD, SDD, Factory/Manifest, DOR, DOD
+- [Templates](#templates) — PRD, SDD, Plan, Scenario
 - [Philosophy](#philosophy) — spec-driven development principles
 
 ---
@@ -27,9 +27,9 @@ These skills are invoked by the user via slash commands (e.g., `/specify`). Unli
 
 ### `/specify <description>`
 
-Create comprehensive specifications from brief descriptions through deep research and specialist agent coordination, then route to one of three decomposition tiers based on complexity.
+Create comprehensive specifications from brief descriptions through deep research and specialist agent coordination, producing a narrative plan plus the slice tasks `/implement` runs.
 
-**Purpose:** Transform ideas into implementation-ready specifications with product requirements, solution design, and a tier-appropriate decomposition (Direct, Incremental, or Factory)
+**Purpose:** Transform ideas into implementation-ready specifications with product requirements, solution design, and a plan — a narrative `plan.mdx` plus the implementation tasks in the tracker
 
 **Usage:**
 ```bash
@@ -40,46 +40,41 @@ Create comprehensive specifications from brief descriptions through deep researc
 **Key Features:**
 - **Auto-incrementing Spec IDs** - Automatically creates numbered directories (001, 002, etc.)
 - **Resume Capability** - Can resume work on existing specifications by ID
-- **Complexity Classifier** - Inspects requirements.md and solution.md and recommends Direct, Incremental, or Factory tier with rationale
-- **Three-Tier Routing** - User confirms or overrides; orchestrator dispatches to the matching decomposition skill
+- **Sliced Plan** - Slices the work into self-contained slice tasks, each correlating features (ACs), EARS behavior, and quality gates, with holdout scenarios as separate scenario child tasks
+- **Dependency-ordered** - slices declare `--depends-on` each other; that graph is the parallelization contract `/implement` uses
 - **Pattern Documentation** - Automatically documents discovered patterns in `docs/patterns/`
 - **Interface Documentation** - Captures external service contracts in `docs/interfaces/`
 - **Domain Documentation** - Records business rules in `docs/domain/`
 - **Quality Gates** - Requires user approval between major phases
 
-**Tier selection at step 6:**
+**Each slice's code brief correlates three facets:**
 
-| Tier | When | Artifact |
-|------|------|----------|
-| **Direct** | Fixes, refactors, doc changes, single-AC features | _none — implement reads requirements + solution directly_ |
-| **Incremental** | Single feature with one or two components | `plan/README.md` + `plan/phase-N.md` |
-| **Factory** | Multi-feature, multi-component, parallel work | `manifest.md` + `units/{id}.md` + `scenarios/{unit-id}/{name}.md` |
+| Facet | Source | Role |
+|-------|--------|------|
+| **Features** (acceptance criteria) | requirements.mdx | what the slice delivers |
+| **Behavior** (EARS) | solution.mdx | how it must behave |
+| **Quality Gates** | derived | checkable conditions |
+
+Its **acceptance scenarios** are separate scenario child tasks (holdout evidence) — how it is proven.
 
 <details>
 <summary><strong>View Details</strong></summary>
 
 **What you get:** Comprehensive documents in `.start/specs/[NNN]-[name]/`:
 
-- **requirements.md** - User stories, feature specifications, success criteria, non-functional requirements
-- **solution.md** - Technical architecture, system components, data models, technology stack, security and performance considerations
-- **Decomposition (one of three families):**
-  - Direct: no extra files
-  - Incremental: `plan/README.md` (manifest) + `plan/phase-N.md` (per-phase TDD tasks with parallel markers and spec references)
-  - Factory: `manifest.md` (execution graph) + `units/` (atomic implementation specs) + `scenarios/` (holdout evaluation cases)
+- **requirements.mdx** - User stories, feature specifications, success criteria, non-functional requirements
+- **solution.mdx** - Technical architecture, system components, data models, technology stack, security and performance considerations
+- **plan.mdx** - The narrative plan (phases + outcomes); the implementation tasks (slices + scenario child tasks) live in **.tracker/**
 
 ```mermaid
 flowchart TD
     A([Your Feature Idea]) --> |initialize| B{Check<br>Existing}
     B --> |exists| C[Review and Refine]
     C --> END[Ready for /implement 001]
-    B --> |new| D[Requirements Gathering<br/>Create requirements.md if needed]
-    D --> E[Technical Research<br/>Create solution.md if needed, document patterns, interfaces]
-    E --> F[Classify Complexity<br/>Direct vs Incremental vs Factory]
-    F --> |Direct| END
-    F --> |Incremental| G[Incremental Decomposition<br/>Create plan/README.md + phase-N.md]
-    F --> |Factory| H[Factory Decomposition<br/>Create units/, scenarios/, manifest.md]
-    G --> END
-    H --> END
+    B --> |new| D[Requirements Gathering<br/>Create requirements.mdx]
+    D --> E[Technical Research<br/>Create solution.mdx, document patterns, interfaces]
+    E --> F[Plan the slices<br/>Create plan.mdx + tracker tasks]
+    F --> END
 ```
 
 </details>
@@ -88,9 +83,9 @@ flowchart TD
 
 ### `/implement <spec-id>`
 
-Execute a specification by autodetecting the decomposition tier and dispatching to the matching execution sub-skill.
+Execute a specification by running its slice tasks on Claude Code's dynamic-workflow runtime.
 
-**Purpose:** Transform validated specifications into working code via the tier-appropriate orchestrator — Direct (no plan), Incremental (phase loop), or Factory (parallel units with information-barrier agents and retry).
+**Purpose:** Transform validated specifications into working code through one loop — each slice built by a code agent and proven by an eval agent, with an information barrier between them and retry to a satisfaction threshold.
 
 **Usage:**
 ```bash
@@ -98,80 +93,42 @@ Execute a specification by autodetecting the decomposition tier and dispatching 
 /implement path/to/custom/spec/
 ```
 
-**How dispatch works:**
+**How it works:**
 
-The `/implement` entry point inspects the spec directory and routes to the matching sub-skill:
+`/implement` reads the spec's slice tasks from the tracker and topologically sorts them by `--depends-on`. It installs one reusable workflow into the project and launches it:
 
-| Detected artifact | Routes to | Behavior |
-|-------------------|-----------|----------|
-| `manifest.md` | `implement-factory` | Factory loop with information barriers, holdout scenarios, retry, satisfaction threshold |
-| `plan/README.md` | `implement-incremental` | Linear phase loop with TDD-driven task delegation, drift checks, frontmatter status state machine |
-| Only `requirements.md` and `solution.md` | `implement-direct` | Lightweight orchestration: 1–3 delivery units, drift check, no intermediate artifact |
-| Both `manifest.md` and `plan/` | _user is asked which pipeline to run_ | Ambiguous; explicit choice required |
+| Step | What happens |
+|------|--------------|
+| **Read** | Read the slice tasks (`task.js graph`); each carries a code brief (features + EARS + gates) with its holdout scenarios as scenario child tasks |
+| **Install** | Copy the bundled `implement.js` to `.claude/workflows/implement.js` (prompt to upgrade if the bundled copy is newer) |
+| **Launch** | Run it on the dynamic-workflow runtime with the slice tasks as input; independent slices run via `parallel()` |
+| **Loop** | Per slice: code agent builds (reads the slice task, blind to its scenarios) → eval agent proves it (reads the scenario tasks, blind to the slice + source) → retry with filtered summaries until threshold or max iterations |
 
-**Key Features (across tiers):**
-- **Tier-appropriate orchestration** - Each sub-skill is optimized for its complexity bracket
-- **Resumability** - All tiers support pausing and resuming (Incremental via frontmatter status, Factory via manifest checkboxes)
-- **Drift Detection** - All tiers run `Skill(start:validate)` drift checks
-- **Constitution Enforcement** - L1/L2 violations block completion in all tiers
-- **Real-time Updates** - TodoWrite or TaskList tracking shows live progress
+**Key Features:**
+- **One loop, emergent scale** - A 1-slice plan is a short loop; a 40-slice plan fans out. No tier or strategy to choose
+- **Structural information barrier** - The barrier is which task each agent reads: code agent → slice task; eval agent → scenario child tasks
+- **Resumability** - The dynamic-workflow runtime resumes completed agents from cache within a session
+- **Drift Detection** - Runs `Skill(start:validate)` drift checks
+- **Constitution Enforcement** - L1/L2 violations block completion
+- **Real-time Updates** - `/workflows` shows live per-slice progress
 
 <details>
-<summary><strong>View Details — Factory tier</strong></summary>
+<summary><strong>View Details — the slice loop</strong></summary>
 
-Reads manifest.md to discover units and execution order, then processes each execution group. For each group, spawns code agents in parallel for independent units, then evaluates sequentially. Code agents receive the unit spec and AGENTS.md but never see evaluation scenarios. Evaluation agents receive scenarios and access the running service but never see source code. Failed evaluations produce filtered failure summaries that are fed back to code agents for retry cycles until the satisfaction threshold is met.
+Reads the spec's slice tasks from the tracker and topologically sorts them by `--depends-on`. Installs the reusable workflow into the project, then runs it on the dynamic-workflow runtime. Each slice goes through a barriered code→eval loop: a code agent builds it (reading the slice task's features + EARS + gates and AGENTS.md, but never its scenario child tasks), an eval agent proves it against those scenario tasks (accessing the running service, but never the slice or the source), and filtered one-line failure summaries feed the next retry until the satisfaction threshold or max iterations. Independent slices run concurrently; dependent slices run in order.
 
 ```mermaid
 flowchart TD
-    A([manifest.md]) --> |load| B[Initialize Factory<br/>Discover units and order]
-    B --> C{Execution Groups<br>Remaining?}
-    C --> |yes| D[Spawn Code Agents<br/>Parallel for independent units<br/>Unit spec + AGENTS.md only]
-    D --> E[Evaluate Sequentially<br/>Scenarios + running service<br/>No source code access]
-    E --> F{Satisfaction<br>Threshold Met?}
-    F --> |no| G[Retry with Filtered<br/>Failure Summaries]
-    G --> D
-    F --> |yes| C
-    C --> |no| H[Final Validation<br/>Run full test suite<br/>Verify all requirements]
-    H --> END[Implementation Complete]
-```
-
-</details>
-
-<details>
-<summary><strong>View Details — Incremental tier</strong></summary>
-
-Reads plan/README.md to discover phase files, executes each phase in order, and uses frontmatter status (`pending` / `in_progress` / `completed`) plus README checkboxes to track progress. For each phase, parallel-marked tasks are delegated concurrently and sequential tasks run in order. Phase boundaries are confirmation gates — drift detection runs after every phase, and the user can pause and resume at will.
-
-```mermaid
-flowchart TD
-    A([plan/README.md]) --> |parse phase checklist| B[Discover phases]
-    B --> C{Phase pending?}
-    C --> |yes| D[Mark phase in_progress<br/>Read phase-N.md]
-    D --> E[Delegate tasks<br/>parallel + sequential subagents]
-    E --> F[Drift + Constitution check]
-    F --> G[Mark phase completed<br/>Flip README checkbox]
-    G --> H{User: continue?}
-    H --> |yes| C
-    H --> |pause| END[Resumable]
-    C --> |no| I[Complete]
-    I --> END
-```
-
-</details>
-
-<details>
-<summary><strong>View Details — Direct tier</strong></summary>
-
-Reads requirements.md and solution.md (and any other context document), decomposes into 1–3 delivery units, delegates each to a specialist subagent with TDD instructions, then runs drift and constitution checks. No plan/, manifest.md, units/, or scenarios/ artifacts are created. If decomposition would yield more than 3 delivery units, the orchestrator recommends re-running `/specify` and choosing Incremental or Factory tier instead.
-
-```mermaid
-flowchart TD
-    A([requirements.md + solution.md]) --> B[Decompose into 1–3 delivery units]
-    B --> C{>3 units?}
-    C --> |yes| D[Recommend re-run /specify<br/>at higher tier]
-    C --> |no| E[Delegate units to subagents<br/>TDD: failing test → code → refactor]
-    E --> F[Drift + Constitution check]
-    F --> END[Complete]
+    A([slice tasks]) --> |read + topo-sort by --depends-on| B[Install .claude/workflows/implement.js]
+    B --> C[Launch on dynamic-workflow runtime]
+    C --> D{slices remaining?}
+    D --> |independent group| E[Code Agents build in parallel<br/>read slice task: features + EARS + gates<br/>blind to scenarios]
+    E --> F[Eval Agents prove slices<br/>read scenario tasks + running service<br/>blind to slice + source]
+    F --> G{Satisfaction<br>threshold met?}
+    G --> |no| H[Retry with filtered<br/>one-line summaries]
+    H --> E
+    G --> |yes| D
+    D --> |none| END[Implementation Complete]
 ```
 
 </details>
@@ -477,8 +434,8 @@ flowchart TD
     C --> |simple| D[Direct Refactoring<br/>Run tests first<br/>Apply changes<br/>Validate each step]
     D --> |review| E[Specialist Review<br/>Code quality check<br/>Performance impact]
     E --> DONE[Refactoring Complete]
-    C --> |complex| F[Create Specification<br/>Generate solution.md<br/>Generate manifest.md + units/ + scenarios/<br/>Document approach]
-    F --> |defer| G[Ready for /implement<br/>Execute via factory loop]
+    C --> |complex| F[Create Specification<br/>Generate solution.mdx<br/>Generate plan.mdx + scenarios/<br/>Document approach]
+    F --> |defer| G[Ready for /implement<br/>Execute via the slice loop]
 ```
 
 </details>
@@ -645,17 +602,13 @@ The `start` plugin includes five autonomous skills that activate automatically b
 | `specify-meta` | Spec directory creation, README tracking, phase transitions |
 | `specify-requirements` | Product requirements template, validation, requirements gathering |
 | `specify-solution` | Solution design template, architecture design, ADR management |
-| `specify-incremental` | Linear phase plan decomposition (single-feature work) |
-| `specify-factory` | Unit decomposition, scenario generation, manifest assembly (multi-feature work) |
+| `specify-plan` | Authors the narrative plan + the slice and scenario tasks in the tracker |
 
 ### Implementation Skills
 
 | Skill | Purpose |
 |-------|---------|
-| `implement` | Entry-point dispatcher; routes to implement-direct, implement-incremental, or implement-factory |
-| `implement-direct` | Lightweight orchestration for fixes and small features (no plan or manifest) |
-| `implement-incremental` | Linear phase loop for single-feature plans (`plan/` directory) |
-| `implement-factory` | Factory loop with information barriers and retry (`manifest.md` + `units/` + `scenarios/`) |
+| `implement` | Installs and runs the reusable slice loop (`.claude/workflows/implement.js`) on the dynamic-workflow runtime — barriered code→eval retry per slice |
 
 ### Methodology Skills
 
@@ -674,13 +627,10 @@ The plugin encourages structured knowledge management:
 └── specs/
     └── [3-digit-number]-[feature-name]/
         ├── README.md                        # Decisions and progress
-        ├── requirements.md                  # What to build
-        ├── solution.md                      # How to build it
-        ├── manifest.md                      # Decomposition manifest
-        ├── units/                           # Factory-sized specs
-        │   └── [unit-name].md               # One per unit of work
-        └── scenarios/                       # Holdout evaluation scenarios
-            └── [unit-name]/                 # Scenarios per unit
+        ├── requirements.mdx                 # What to build
+        ├── solution.mdx                     # How to build it
+        ├── plan.mdx                         # Narrative plan (phases + outcomes)
+        └── .tracker/                        # Implementation tasks (phase → slices → scenarios)
 
 docs/
 ├── domain/                                  # Business rules
@@ -803,8 +753,8 @@ The ScaleUp provides contextual explanations as it works:
 ```
 /specify ──> /validate ──> /implement ──> /review
    |              |              |              |
-Create specs  Check quality  Factory loop  Code review
-PRD+SDD+Factory  3 Cs framework  Factory loop  Security+Perf
+Create specs  Check quality  slice loop    Code review
+PRD+SDD+Plan  3 Cs framework  code↔eval     Security+Perf
    |              |              |              |
 Constitution  Constitution   Constitution   Constitution
 checked on    mode available + drift enforced compliance
@@ -823,7 +773,7 @@ Optional: /document after implementation for documentation sync
 
 **What happens:**
 - Creates `.start/specs/001-notification-system/`
-- Generates requirements.md, solution.md, manifest.md, units/, scenarios/
+- Generates requirements.mdx, solution.mdx, plan.mdx, and the tracker tasks
 - Documents discovered patterns/interfaces
 - Optional: Creates `spec/001-notification-system` git branch
 
@@ -847,9 +797,9 @@ Optional: /document after implementation for documentation sync
 
 **What happens:**
 - Optional: Creates `feature/001-notification-system` git branch
-- Reads manifest.md, spawns code agents per execution group
-- Evaluation agents validate against holdout scenarios
-- Retries with filtered failure summaries until threshold met
+- Installs and runs `.claude/workflows/implement.js` on the dynamic-workflow runtime
+- Per slice: a code agent builds it, an eval agent proves it against holdout scenario tasks
+- Retries with filtered failure summaries until the satisfaction threshold is met
 - Optional: Creates PR at completion
 
 **4. Review Before Merge**
@@ -940,9 +890,9 @@ Rich templates for structured documentation, co-located with their skills:
 plugins/start/skills/
 ├── specify-requirements/template.md     # Product requirements structure
 ├── specify-solution/template.md         # Solution design structure
-├── specify-incremental/template.md         # Incremental plan manifest (plan/README.md)
-├── specify-incremental/templates/phase.md  # Per-phase template (plan/phase-N.md)
-├── specify-factory/SKILL.md             # Factory decomposition (units, scenarios, manifest)
+├── specify-plan/template.mdx               # Plan structure (narrative: phases + outcomes)
+├── specify-plan/templates/scenario.md      # Holdout scenario-task body template
+├── implement/reference/implement.js        # The reusable slice-loop workflow
 └── document/templates/                  # Knowledge capture templates
     ├── domain-template.md               # Business rules
     ├── pattern-template.md              # Technical patterns

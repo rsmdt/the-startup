@@ -52,8 +52,8 @@
 **10 slash commands across 3 phases.** Specify first, then build with confidence.
 
 **Key Features:**
-- **Spec-Driven Development** — PRD → SDD → tier-appropriate decomposition → Code
-- **Three Decomposition Tiers** — Direct, Incremental, Factory — `/specify` classifies complexity and `/implement` auto-dispatches
+- **Spec-Driven Development** — PRD → SDD → task plan → Code
+- **One Implementation Loop** — `/implement` runs the plan's tasks through a barriered code→eval retry loop on Claude Code's dynamic-workflow runtime
 - **Parallel Agent Execution** — Multiple specialists work simultaneously
 - **Quality Gates** — Built-in validation at every stage
 - **Zero Configuration** — Marketplace plugins, one-line install
@@ -130,16 +130,16 @@ The Agentic Startup follows **spec-driven development**: comprehensive specifica
 ┌──────────────────────────────────────────────────────────┐
 │                    BUILD (primary flow)                  │
 │                                                          │
-│  /specify ────► Create specs (Requirements + Solution)   │
-│      │           ↳ Classifies complexity: Direct / Incremental / Factory │
+│  /specify ────► Create specs (Requirements + Solution + Plan) │
+│      │           ↳ Plan = ordered task sequence          │
 │      │           ↳ Constitution checked on SDD           │
 │      ▼                                                   │
 │  /validate ───► Check quality (3 Cs framework)           │
 │      │           ↳ Constitution mode available           │
 │      ▼                                                   │
-│  /implement ──► Auto-dispatch by tier, then execute      │
-│      │           ↳ Direct (no plan) / Incremental (phase loop) / Factory (parallel units) │
-│      │           ↳ Constitution + drift enforced         │
+│  /implement ──► Run the task loop (dynamic-workflow)     │
+│      │           ↳ barriered code→eval retry per task    │
+│      │           ↳ Constitution enforced                 │
 │      ▼                                                   │
 │  /test ───────► Run tests, enforce ownership             │
 │      │           ↳ No "pre-existing" excuses             │
@@ -170,42 +170,31 @@ The Agentic Startup follows **spec-driven development**: comprehensive specifica
 /specify Add real-time notification system with WebSocket support
 ```
 
-This creates a specification directory with two foundational documents plus tier-specific decomposition artifacts:
+This creates a specification directory with three documents plus its holdout scenarios:
 
 ```
 .start/specs/001-notification-system/
-├── requirements.md           # What to build and why  (always)
-├── solution.md               # How to build it technically  (always)
-│
-│  # Then ONE of these, chosen by the complexity classifier:
-│
-├── (Direct tier)             # Fixes, refactors, single-AC features
-│   └── no decomposition artifacts — implement reads requirements + solution directly
-│
-├── plan/                     # (Incremental tier) — single feature, 1–2 components
-│   ├── README.md             #   Plan manifest
-│   └── phase-N.md            #   Per-phase TDD tasks
-│
-└── manifest.md               # (Factory tier) — multi-feature, parallel work
-    ├── units/                #   Atomic implementation specs
-    │   └── *.md
-    └── scenarios/            #   Holdout evaluation scenarios per unit
-        └── {unit-id}/*.md
+├── requirements.mdx          # What to build and why
+├── solution.mdx              # How to build it technically
+├── plan.mdx                  # The high-level plan narrative (phases + outcomes)
+└── .tracker/                 # The implementation tasks /implement runs
+    ├── <phase + slice tasks> # slice = one deliverable, code brief in its body
+    └── <scenario tasks>      # holdout acceptance evidence, per slice
 ```
 
 **The spec cycle may take 15-30 minutes.** Claude will research your codebase, ask clarifying questions, and produce comprehensive documents. The process naturally involves multiple back-and-forth exchanges.
 
-#### Three Decomposition Tiers
+#### The plan: a narrative + tracker tasks
 
-`/specify` runs a complexity classifier at step 6 and recommends a tier. You can override the recommendation if you want a different level of ceremony.
+`plan.mdx` is the high-level approach — phases and their achievable outcomes, plus a link to the tracker. The operational units are **tasks** in the spec's tracker (`.start/specs/NNN/.tracker/`, via `task.js`): one **slice** task per vertical deliverable, whose body correlates:
 
-| Tier | When to use | Decomposition output | Implementation flow |
-|------|-------------|----------------------|---------------------|
-| **Direct** | Fixes, refactors, doc changes, single-AC features | _none_ — `requirements.md` + `solution.md` only | `implement-direct`: lightweight 1–3 unit orchestration, drift check, no intermediate artifact |
-| **Incremental** | Single feature with one or two components | `plan/README.md` + `plan/phase-N.md` (linear phase plan with TDD tasks) | `implement-incremental`: phase-by-phase loop with frontmatter status, human-in-the-loop review |
-| **Factory** | Multi-feature, multi-component, parallel-eligible work | `manifest.md` + `units/{id}.md` + `scenarios/{unit-id}/{name}.md` | `implement-factory`: parallel unit dispatch with information barriers, holdout scenarios, and retry to a satisfaction threshold |
+| Facet | Source | Role |
+|-------|--------|------|
+| **Features** (acceptance criteria) | `requirements.mdx` | what the slice delivers |
+| **Behavior** (EARS statements) | `solution.mdx` | how it must behave, precisely |
+| **Quality Gates** | derived | checkable conditions |
 
-You always invoke `/specify` and `/implement` — the sub-skills (`specify-incremental`, `specify-factory`, `implement-direct`, `implement-incremental`, `implement-factory`) are dispatched internally. `/specify` selects a decomposition sub-skill based on the chosen tier (Direct creates no extra artifact); `/implement` autodetects the tier by inspecting which artifacts exist.
+Its acceptance scenarios are separate **scenario child tasks** (holdout evidence — the eval agent reads them, the code agent never does). Slices declare dependencies (`--depends-on`) — that graph is the whole parallelization contract. There is no tier or strategy to choose: a 1-slice plan is a short loop, a 40-slice plan fans out. You always invoke `/specify` and `/implement`; the spec sub-skills (`specify-requirements`, `specify-solution`, `specify-plan`, `specify-meta`) are dispatched internally.
 
 #### Step 2: Handle Context Limits (Resume Pattern)
 
@@ -244,12 +233,12 @@ Validation is advisory—it provides recommendations but doesn't block you.
 ```
 
 Claude will:
-1. Autodetect the decomposition tier by inspecting the spec directory (`plan/` → Incremental, `manifest.md` → Factory, neither → Direct)
-2. Dispatch to the matching execution sub-skill (`implement-direct`, `implement-incremental`, or `implement-factory`)
-3. Execute the work — phase-by-phase with approval gates (Incremental), parallel units with information barriers and holdout scenarios (Factory), or lightweight 1–3 unit orchestration (Direct)
-4. Run tests after each task and use parallel specialist agents where the tier supports it
+1. Read the spec's slice tasks from the tracker and topologically sort them by their `--depends-on` edges
+2. Install the reusable workflow into the project at `.claude/workflows/implement.js` (prompting to upgrade if the bundled copy is newer)
+3. Launch it on the dynamic-workflow runtime — each slice driven through a barriered code→eval loop (a code agent builds it reading the slice task, blind to its scenarios; an eval agent proves it against the slice's scenario child tasks, blind to the slice and the source; failures retry until the satisfaction threshold)
+4. Run independent slices concurrently and dependent ones in order
 
-**Large implementations may also need context resets.** Simply run `/implement 001` again in a fresh conversation—Claude tracks progress in the spec files.
+**Large implementations may also need context resets.** Simply run `/implement 001` again in a fresh conversation—Claude tracks progress in the tracker.
 
 #### Step 5: Review and Ship
 
@@ -296,8 +285,8 @@ What do you need to do?
 | Skill | Purpose | When to Use |
 |---------|---------|-------------|
 | `/constitution` | Create governance rules | Establish project-wide guardrails |
-| `/specify` | Create specifications, classify complexity, decompose at the chosen tier | New features, fixes, refactors — any work that benefits from a written spec |
-| `/implement` | Auto-dispatch by tier (Direct / Incremental / Factory) and execute | After spec is validated |
+| `/specify` | Create specifications (requirements + solution + task plan) | New features, fixes, refactors — any work that benefits from a written spec |
+| `/implement` | Run the plan's tasks through the code→eval loop on the dynamic-workflow runtime | After spec is validated |
 | `/validate` | Check quality | Before implementation, after specs |
 | `/test` | Run tests, enforce ownership | After implementation, fixing bugs |
 | `/review` | Multi-agent code review | Before merging PRs |
@@ -448,7 +437,7 @@ Skills from the Start plugin are invoked directly by name (e.g., `/specify`, `/t
 | **User-invocable** | Yes | Yes | `/specify` — you trigger the spec workflow |
 | **Autonomous** | No | Yes | `specify-requirements` — loaded by `specify` when creating PRDs |
 
-The 10 user-invocable skills are the ones you interact with directly. The 5 autonomous skills activate behind the scenes when orchestrator skills need them (e.g., `specify` loads `specify-requirements`, `specify-solution`, and `specify-factory` during the specification workflow).
+The user-invocable skills are the ones you interact with directly. The autonomous skills activate behind the scenes when orchestrator skills need them (e.g., `specify` loads `specify-requirements`, `specify-solution`, and `specify-plan` during the specification workflow).
 
 ### Progressive Disclosure
 
@@ -613,16 +602,16 @@ Development often moves too fast without proper planning:
 ### Our Approach
 
 **1. Specify First** — Create comprehensive specifications before writing code
-- **requirements.md** — What to build and why
-- **solution.md** — How to build it technically
-- **plan/** — Executable tasks and phases (README.md manifest + phase-N.md files)
+- **requirements.mdx** — What to build and why
+- **solution.mdx** — How to build it technically
+- **plan.mdx** — The ordered task sequence, with holdout acceptance scenarios per task
 
 **2. Review & Refine** — Validate specifications with stakeholders
 - Catch issues during planning, not during implementation
 - Iterate on requirements and design cheaply
 - Get alignment before costly development begins
 
-**3. Implement with Confidence** — Execute validated plans phase-by-phase
+**3. Implement with Confidence** — Execute validated plans task by task
 - Clear acceptance criteria at every step
 - Parallel agent coordination for speed
 - Built-in validation gates and quality checks
