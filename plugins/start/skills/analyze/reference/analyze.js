@@ -1,4 +1,4 @@
-// analyze-workflow: v2
+// analyze-workflow: v3
 //
 // The Agentic Startup — analysis workflow (deep-research style, tracker-backed).
 //
@@ -12,9 +12,11 @@
 //   VALIDATE  — one validator scores the findings against the `goals` rubric (coverage gate,
 //               presumption-of-failure). Unmet goals → it creates gap research tasks via
 //               task.js and returns their ids; loop back to RESEARCH.
-//   SYNTHESIZE — ONCE, at the very end, after the loop converges. Writes the report,
-//               preserving every citation. (Evidence-first: validate coverage BEFORE writing.)
-//   CITE-CHECK — verifies every claim in the report traces to a source (code file:line or URL).
+//   SYNTHESIZE — after the loop converges, write the report from the validated findings.
+//               (Evidence-first: validate coverage BEFORE writing.)
+//   GRADE      — grade the written report against a quality rubric (citations, faithfulness, goal
+//               coverage, mechanism depth). Blocking issues drive a revision pass; loop synthesize↔grade
+//               until the report clears or a cap. This is a gate with teeth, not a warning label.
 //
 // Runtime note: the script has no shell/filesystem access — only its agents do. So every
 // task.js call (read/update/create/graph) is made BY an agent; the script only orchestrates
@@ -26,8 +28,8 @@ export const meta = {
   phases: [
     { title: "Research", detail: "parallel agents gather cited findings per topic (code + online)" },
     { title: "Validate", detail: "score findings against the goals rubric; spawn gap research if unmet" },
-    { title: "Synthesize", detail: "write the report once, from validated findings, preserving citations" },
-    { title: "Verify", detail: "confirm every report claim traces to a source" },
+    { title: "Synthesize", detail: "write the report from validated findings; revise it to clear the grade" },
+    { title: "Grade", detail: "grade the report against a quality rubric; block and revise on failures" },
   ],
 };
 
@@ -80,13 +82,40 @@ const VALIDATOR = {
   required: ["satisfied"],
 };
 
-const CITECHECK = {
+// Report-quality grade — a rubric of per-dimension scores (fail | partial | pass). The gate is
+// per-dimension: any dimension scored `fail` (must-fix) drives a revision pass; `partial` ships with a
+// note. `issues` localize the fixes for the reviser. The overall scalar is DERIVED from the scores by
+// the script below — not declared by the model, so there is a single source of truth. `dimensions` is a
+// rubric the grader may extend with problems it finds.
+const GRADE = {
   type: "object",
   properties: {
-    ok: { type: "boolean", description: "true iff every claim in the report carries a source" },
-    uncited: { type: "array", items: { type: "string" }, description: "claims lacking a citation" },
+    dimensions: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          name: { type: "string" },
+          score: { type: "string", description: "fail | partial | pass" },
+          note: { type: "string" },
+        },
+        required: ["name", "score"],
+      },
+    },
+    issues: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          dimension: { type: "string" },
+          detail: { type: "string", description: "the exact claim/section at fault" },
+          fix: { type: "string", description: "the concrete change that resolves it" },
+        },
+        required: ["dimension", "detail"],
+      },
+    },
   },
-  required: ["ok"],
+  required: ["dimensions"],
 };
 
 // ── Prompt builders ────────────────────────────────────────────────────────────────────
@@ -159,7 +188,18 @@ Mark research tasks that fully satisfied their goal as passed if not already.
 - nextTaskIds: ids of the gap research tasks you just created (empty if satisfied)`;
 }
 
-function synthesizePrompt() {
+function synthesizePrompt(issues) {
+  if (issues && issues.length) {
+    return `You are revising the analysis report at ${reportPath} to fix specific grading issues.
+Read the current report first.
+Fix EACH issue below, changing only what the issue requires — preserve everything else, and every
+existing citation:
+${issues.map((x) => `- ${x.dimension}: ${x.detail}${x.fix ? ` → ${x.fix}` : ""}`).join("\n")}
+If closing an issue needs a source, re-open the relevant research task to get it — list them with
+  ${tj} list --home ${home} --type research
+then  ${tj} read <id> --home ${home}. Do NOT introduce any claim that has no source in the findings.
+Rewrite the file in place. Report the path and a one-line summary of what you changed.`;
+  }
   return `You are the synthesizer for the analysis "${name}". The research is complete and validated.
 Purpose: ${description}
 
@@ -177,14 +217,32 @@ ${goalList}
 Write the file. Report the path and a one-line summary.`;
 }
 
-function citeCheckPrompt() {
-  return `You are the citation auditor for the report at ${reportPath}.
-Read the report. For EVERY substantive claim, confirm it carries a traceable source — code \`file:line\`
-or an external URL. Do not evaluate whether the claim is correct, only whether it is sourced.
-Return: ok = true iff every claim is cited; uncited = the specific claims missing a source.`;
+function gradePrompt() {
+  return `You are the report grader for the analysis "${name}". Grade the report at ${reportPath} against
+the rubric below. You do NOT fix anything — you score each dimension and list exactly what must change.
+
+Score each dimension: \`pass\` (fully meets the bar), \`partial\` (mostly there with a fixable gap), or
+\`fail\` (does not meet it). \`fail\` forces a revision; \`partial\` ships with a note.
+
+## Rubric
+1. Citations — every substantive claim carries a traceable source (code \`file:line\` or a URL).
+   \`fail\` if ANY claim is uncited.
+2. Faithfulness — no claim unsupported by the findings; nothing invented in the write-up.
+   \`fail\` if any claim is unsupported.
+3. Goal coverage — every goal below is addressed by the report's prose:
+${goalList}
+   \`fail\` if any goal is left unaddressed.
+4. Mechanism depth — explains mechanisms and cross-cutting connections, not just lists facts.
+   \`fail\` only if shallowness leaves a goal effectively unanswered; otherwise \`partial\`/\`pass\`.
+If the report shows a quality problem none of these name, add it as your own dimension and score it.
+
+## Return
+- dimensions: score EACH dimension { name, score ("fail" | "partial" | "pass"), note }.
+- issues: for every dimension scored below \`pass\`, one entry per concrete problem
+  { dimension, detail, fix } — name the exact claim or section and the change that resolves it. Be specific.`;
 }
 
-// ── Orchestration: research → validate (loop) → synthesize → cite-check ─────────────────
+// ── Orchestration: research → validate (loop) → synthesize ↔ grade (loop) ───────────────
 
 let round = 0;
 let researchIds = topics.map((t) => t.id).filter(Boolean);
@@ -210,9 +268,32 @@ while (true) {
   log(`round ${round}: ${unmet} goal(s) unmet → ${researchIds.length} new research task(s)`);
 }
 
-await agent(synthesizePrompt(), { phase: "Synthesize", label: "synthesize" });
+// Synthesize, then grade the written report; blocking issues drive a revision pass. Loop until the
+// report clears the grade or the cap — the grade gate has teeth, it does not just attach a warning.
+const maxGradeRounds = 3; // initial synthesis + up to 2 revisions
+let grade = null;
 
-const citations = await agent(citeCheckPrompt(), { phase: "Verify", label: "cite-check", schema: CITECHECK });
+for (let g = 0; ; g++) {
+  await agent(synthesizePrompt(g === 0 ? null : grade?.issues ?? []), {
+    phase: "Synthesize",
+    label: g === 0 ? "synthesize" : `revise:r${g}`,
+  });
+
+  grade = await agent(gradePrompt(), { phase: "Grade", label: `grade:r${g + 1}`, schema: GRADE });
+
+  const failing = (grade?.dimensions ?? []).filter((d) => d.score === "fail");
+  if (!failing.length || g + 1 >= maxGradeRounds) {
+    if (failing.length) log(`analysis "${name}": report graded with ${failing.length} failing dimension(s) after ${g + 1} pass(es).`);
+    break;
+  }
+  log(`grade round ${g + 1}: ${failing.length} failing dimension(s) → revising report`);
+}
+
+// Derived rubric value — single source of truth is the per-dimension scores (fail=0, partial=1, pass=2).
+if (grade?.dimensions?.length) {
+  const pts = grade.dimensions.reduce((s, d) => s + (({ fail: 0, partial: 1, pass: 2 })[d.score] ?? 0), 0);
+  grade.overall = `${pts}/${grade.dimensions.length * 2}`;
+}
 
 return {
   name,
@@ -220,5 +301,5 @@ return {
   rounds: round + 1,
   reportPath,
   goalResults: verdict?.goalResults ?? [],
-  citations,
+  grade,
 };

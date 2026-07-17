@@ -20,6 +20,9 @@ plan, seed the research tasks, launch, and report what came back.
 **Always:**
 - Show the plan in the chat before asking for approval — render the purpose, goals, and topics inline
   as readable text; never gate approval on a file path alone.
+- Lead every decision menu with the mechanism explanation and a single recommended option, written as
+  chat text first — a menu confirms a recommendation; it does not stand in for the analysis. This
+  applies to every gate in this skill (approve/refine, upgrade, finalize), not just plan approval.
 - Get explicit user approval of the plan (purpose + goals) before launching. The `goals` are the
   rubric the workflow validates against, so they must be right first.
 - Keep the information split clean: the skill authors the plan and seeds tasks; the workflow's
@@ -27,12 +30,19 @@ plan, seed the research tasks, launch, and report what came back.
 - Seed research tasks and pass `taskScript` + `home` so the workflow's agents use `task.js` as the
   researcher↔validator channel.
 - Require citations: every claim in the final report must trace to a source (code `file:line` or a
-  URL). The workflow enforces this with a cite-check pass; surface its result.
+  URL). The workflow's grade pass enforces this (among other quality dimensions) and revises the report
+  until it clears; surface the grade.
 - Writing under `.start/analysis/` and `docs/research/` is pre-authorized.
 
 **Never:**
-- Do the research or write the report yourself — the workflow owns them.
+- Do the research or write the report yourself — the workflow owns them. Concretely, once the plan is
+  approved this orchestrator thread runs **no WebSearch/WebFetch** and does **no authoring or editing of
+  the report or research findings**; those tools belong to the workflow's agents. (Copying the finished
+  report to `docs/research/` in step 6 is a file copy, not authoring — that is still fine.)
 - Launch before the goals rubric is approved.
+- Present a bare decision menu with no analysis shown first, or offer a hybrid / "Both" option you would
+  not yourself recommend — recommend one clean option and name its tradeoff instead of enumerating a
+  compromise you have already flagged as wrong.
 - Overwrite a project's edited `.claude/workflows/analyze.js` without asking (see version check).
 
 ## Reference Materials
@@ -113,12 +123,17 @@ Present a one-line dispatch summary, e.g.:
 
 Record the `runId`. The run executes in the background; report status from the run, do not fabricate progress.
 
+**Hand off at launch.** Once the workflow is dispatched, this thread only relays the run's structured
+return (step 6). Do not keep editing, researching, or holding the plan context open while agents work;
+if the run is backgrounded, end the turn rather than idling on a large prefix.
+
 ### 6. Report and Finalize
 
-When the run returns (`{ name, satisfied, rounds, reportPath, goalResults, citations }`):
+When the run returns (`{ name, satisfied, rounds, reportPath, goalResults, grade }`):
 
 1. Present the report at `reportPath`, plus a per-goal summary (met/unmet from `goalResults`) and the
-   cite-check result (`citations.ok`; list any `uncited` claims as gaps to close).
+   report grade — the derived rubric value `grade.overall` and the per-dimension `grade.dimensions`
+   scores; list any dimension still scored `fail` or `partial` (with its `grade.issues`) as gaps to close.
 2. Set `analysis.md` `status: review` if `satisfied`, otherwise leave `in-progress` and call out the
    unmet goals and how to close them (re-run raises `maxRounds` or adds topics).
 3. Ask the user to choose:
