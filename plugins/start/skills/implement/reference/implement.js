@@ -1,4 +1,4 @@
-// implement-workflow: v4
+// implement-workflow: v5
 //
 // The Agentic Startup — single implementation loop (unified task model).
 //
@@ -14,13 +14,20 @@
 // specify-plan authors these; /start:implement reads them and passes the slice task ids here.
 //
 // Each slice task is driven through a barriered code→eval retry loop:
+//   • COVERAGE auditor — a spec-completeness pre-flight: reads BOTH the slice brief and its scenarios
+//                  and reports any feature / EARS behavior that NO scenario covers. A pass-rate can't
+//                  see an absent test, so this is what stops acceptance surfaces being silently missed.
 //   • CODE agent — builds the slice via TDD. Reads the SLICE task (its brief). NEVER reads the
 //                  slice's scenario child tasks.
 //   • EVAL agent — proves the slice against its SCENARIO child tasks through external interfaces.
-//                  NEVER reads the slice task, the source, or spec files.
-// The information barrier is "which task each agent reads": the script tells the code agent to read
-// the slice task and the eval agent to read the scenario child tasks — they never overlap. The
-// prompts carry belt-and-suspenders "do not read" instructions too.
+//                  NEVER reads the slice task, the source, or spec files. Scores TWO acceptance
+//                  surfaces separately — business (requirement/feature) and technical (solution/EARS) —
+//                  and a slice is done only when BOTH clear the threshold (a flat blended ratio would
+//                  let feature passes mask EARS-behavior failures).
+// The information barrier is "which task each agent reads": the code agent reads the slice, the eval
+// agent reads the scenarios — they never overlap (belt-and-suspenders "do not read" instructions too).
+// The coverage auditor reads both, but it neither builds nor scores the implementation and its output
+// toward the build is only "surface X has no test" — so the barrier survives.
 //
 // Independent slices run concurrently via parallel(); dependent slices run in order (the skill
 // topo-sorts them into `groups`).
@@ -33,8 +40,9 @@ export const meta = {
   name: "implement",
   description: "Build a spec by looping each slice task through a barriered code→eval retry loop",
   phases: [
+    { title: "Coverage", detail: "audit that every feature + EARS behavior in the brief maps to a scenario (barrier-safe)" },
     { title: "Build", detail: "code agent implements each slice via TDD (reads the slice task, blind to its scenarios)" },
-    { title: "Evaluate", detail: "eval agent proves each slice against its scenario tasks (blind to the slice + source)" },
+    { title: "Evaluate", detail: "eval agent scores business + technical surfaces separately (blind to the slice + source)" },
   ],
 };
 
@@ -71,18 +79,67 @@ const tj = `node ${taskScript} `; // task.js prefix (with --spec appended per ca
 const spec = `--spec ${specId}`;
 
 // Structured verdict the eval agent must return, so the loop branches on data, not prose.
-const VERDICT = {
+// Two acceptance surfaces scored SEPARATELY — business (requirement/feature) and technical (solution/
+// EARS behavior) — each gated independently so one surface's passes can't mask the other's failures.
+const SURFACE = {
   type: "object",
   properties: {
-    satisfaction: { type: "number", description: "ratio 0.0–1.0 of scenarios passed" },
+    satisfaction: { type: "number", description: "passed/total for this surface; 1.0 if it has no scenarios" },
     passed: { type: "array", items: { type: "string" } },
     // one-line observable symptoms only — these become the code agent's retry guidance
     failures: { type: "array", items: { type: "string" } },
   },
   required: ["satisfaction"],
 };
+const VERDICT = {
+  type: "object",
+  properties: { business: SURFACE, technical: SURFACE },
+  required: ["business", "technical"],
+};
 
-// ── Prompt builders — the two halves of the information barrier ────────────────────────
+// Spec-completeness verdict from the coverage auditor: is every acceptance surface backed by a scenario?
+const COVERAGE = {
+  type: "object",
+  properties: {
+    covered: { type: "boolean", description: "true iff every feature and every EARS behavior maps to >= 1 scenario" },
+    gaps: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          kind: { type: "string", description: "business | technical" },
+          item: { type: "string", description: "the exact feature or EARS behavior no scenario covers" },
+          why: { type: "string" },
+        },
+        required: ["kind", "item"],
+      },
+    },
+  },
+  required: ["covered"],
+};
+
+// ── Prompt builders — the two halves of the information barrier + the coverage pre-flight ─
+
+function coveragePrompt(taskId) {
+  return `You are the coverage auditor for one slice of a specification. You confirm that every
+acceptance surface in the slice brief is backed by at least one scenario — so nothing is left untested.
+You audit spec completeness ONLY: you do not build, run, test, or edit anything.
+
+Read BOTH:
+  the slice brief (business features / acceptance criteria AND technical EARS behavior):
+    ${tj}read ${taskId} ${spec}
+  its scenario child tasks (the holdout acceptance evidence):
+    ${tj}list ${spec} --parent ${taskId} --type scenario   then read each:  ${tj}read <scenarioId> ${spec}
+
+Map every business FEATURE / acceptance criterion and every technical EARS behavior in the brief to the
+scenario(s) that would exercise it. EARS behaviors include edge and error states (WHEN/WHILE/IF … the
+system SHALL …) — those are the ones most often left uncovered. Report anything NO scenario covers.
+
+## Return
+- covered: true ONLY if every feature and every EARS behavior maps to >= 1 scenario.
+- gaps: for each uncovered item { kind ("business" | "technical"), item, why } — name the exact unmapped
+  feature or EARS behavior.`;
+}
 
 function codePrompt(taskId, iteration, failures) {
   const retry =
@@ -133,6 +190,13 @@ Read the acceptance scenarios — they are the scenario child tasks of this slic
 DO NOT read the slice task itself, its source code, spec files, or unit tests. Test ONLY through
 the external interface — the scenarios are all you are given.
 
+## Two acceptance surfaces — score them SEPARATELY
+Each scenario proves either a BUSINESS check (a requirement / feature acceptance — does it do what the
+user needs?) or a TECHNICAL check (a solution EARS behavior — the specified response to a condition or
+event, including edge and error states). Determine which from the scenario itself, or from its declared
+kind if it carries one. Keep the two tallies apart: a slice is not done until BOTH surfaces pass, so
+feature passes must never average away EARS-behavior failures.
+
 ## Service lifecycle (you own it)
 1. Start the service:  ${startCommand}
 2. Poll http://localhost:${servicePort}${healthPath} until it responds (retry with backoff, ~5 attempts).
@@ -152,15 +216,23 @@ Run each scenario 3 times; a scenario passes if it passes at least 2 of 3. Then:
   and, for EACH failed scenario, file a bug as a child task:
                              ${tj}create ${spec} --parent ${taskId} --type bug --name "<observable symptom>"
 
-## Return the structured verdict
-- satisfaction: passed_scenarios / total_scenarios (0.0–1.0)
-- passed: names of scenarios that passed
-- failures: for each failed scenario, ONE line stating the observable symptom (no internal detail)`;
+## Return the structured verdict — PER SURFACE
+- business:  { satisfaction (passed/total of BUSINESS scenarios; 1.0 if there are none), passed[], failures[] }
+- technical: { satisfaction (passed/total of TECHNICAL scenarios; 1.0 if there are none), passed[], failures[] }
+- failures (within each surface): for each failed scenario, ONE line stating the observable symptom
+  (no internal detail)`;
 }
 
 // ── The slice loop — build → evaluate → (retry with filtered summaries) ─────────────────
 
 async function buildTask(taskId) {
+  // Coverage pre-flight (barrier-safe third role): confirm every feature + EARS behavior in the brief
+  // maps to a scenario BEFORE we trust the eval's pass-rate. A pass-rate can't see an absent test, so
+  // an uncovered surface would otherwise sail through as "done".
+  const coverage = await agent(coveragePrompt(taskId), { phase: "Coverage", label: `coverage:${taskId}`, schema: COVERAGE });
+  const gaps = coverage?.covered ? [] : (coverage?.gaps ?? []);
+  if (gaps.length) log(`slice ${taskId}: ${gaps.length} acceptance surface(s) have NO scenario — coverage gap (spec incomplete)`);
+
   let iteration = 0;
   let failures = [];
 
@@ -171,22 +243,26 @@ async function buildTask(taskId) {
     // EVAL agent: reads the scenario child tasks + service config. Never the slice or the source.
     const verdict = await agent(evalPrompt(taskId), { phase: "Evaluate", label: `eval:${taskId}`, schema: VERDICT });
 
-    const satisfaction = verdict?.satisfaction ?? 0;
+    const business = verdict?.business?.satisfaction ?? 0;
+    const technical = verdict?.technical?.satisfaction ?? 0;
+    const surfacesPass = business >= threshold && technical >= threshold; // BOTH must clear — no blending
 
-    if (satisfaction >= threshold) {
-      return { id: taskId, status: "completed", satisfaction, iterations: iteration + 1 };
+    if (surfacesPass) {
+      // Both surfaces green, but a coverage gap means an untested surface — that is NOT "done".
+      const status = gaps.length ? "incomplete-coverage" : "completed";
+      return { id: taskId, status, business, technical, coverageGaps: gaps, iterations: iteration + 1 };
     }
 
     iteration += 1;
 
-    // Filter eval output down to one-line observable symptoms before it reaches the next code agent.
-    failures = (verdict?.failures ?? []).slice(0, 6);
+    // Merge both surfaces' one-line symptoms; filter before they reach the next code agent.
+    failures = [...(verdict?.business?.failures ?? []), ...(verdict?.technical?.failures ?? [])].slice(0, 6);
 
     if (iteration >= maxIterations) {
-      return { id: taskId, status: "failed", satisfaction, iterations: iteration, failures };
+      return { id: taskId, status: "failed", business, technical, coverageGaps: gaps, iterations: iteration, failures };
     }
 
-    log(`slice ${taskId} at ${(satisfaction * 100).toFixed(0)}% (< ${(threshold * 100).toFixed(0)}%) — retry ${iteration}/${maxIterations}`);
+    log(`slice ${taskId}: business ${(business * 100).toFixed(0)}% / technical ${(technical * 100).toFixed(0)}% (< ${(threshold * 100).toFixed(0)}%) — retry ${iteration}/${maxIterations}`);
   }
 }
 
@@ -208,6 +284,7 @@ for (const group of groups) {
 }
 
 const completed = results.filter((r) => r.status === "completed").length;
-log(`${completed}/${results.length} slices satisfied`);
+const withGaps = results.filter((r) => (r.coverageGaps ?? []).length);
+log(`${completed}/${results.length} slices satisfied${withGaps.length ? `; ${withGaps.length} with coverage gaps (untested acceptance surfaces)` : ""}`);
 
 return { specId, threshold, results };

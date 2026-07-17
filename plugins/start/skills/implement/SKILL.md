@@ -133,8 +133,10 @@ When the run returns its result (`{ specId, threshold, results }`):
 1. The loop already wrote live status to each slice task during the run, and the phase root rolls up
    automatically — so the tracker reflects final state. Optionally reconcile any skipped write:
    `node task.js update {sliceId} --spec {specId} --status passed|failed`.
-2. Present the satisfaction report: per slice — status, satisfaction %, iterations used. Call out any
-   `failed` slice with its one-line failure summaries (and its `type: bug` child tasks) and ask the user
-   how to proceed (retry with guidance, skip, or stop).
+2. Present the satisfaction report: per slice — status, **business %** and **technical %** (the two
+   acceptance surfaces are scored and gated separately), iterations used. Call out any `failed` slice
+   with its one-line failure summaries (and its `type: bug` child tasks), and any `incomplete-coverage`
+   slice with its `coverageGaps` (features/EARS behaviors that had **no scenario** — a spec gap, not a
+   build failure). Ask the user how to proceed (retry with guidance, add the missing scenarios, skip, or stop).
 3. Use the validate skill in constitution mode if a CONSTITUTION.md exists at the project root.
 4. If every slice is satisfied, offer to finalize (commit / PR per project convention) and to archive: `/start:archive {specId}`.

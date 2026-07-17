@@ -90,12 +90,15 @@ For each slice, in dependency order (read reference/ears.md and reference/scenar
    carry NFR-N / EV-N with their ids). Flag any Standing assumption it depends on.
 2. **Create the slice task** with that brief as its body:
    `node task.js create --spec {specId} --parent {rootId} --type slice --name "{title}" --depends-on {slice task ids it extends} --body-file {brief.md}` → record its id.
-3. **Create scenario child tasks** — for each holdout acceptance scenario (observable behavior through an
-   external interface; assign P0/P1/P2, every slice needs ≥1 P0), write the scenario markdown and:
+3. **Create scenario child tasks** — cover BOTH acceptance surfaces so nothing is left untested: every
+   **Feature** (AC) needs ≥1 `business` scenario and every **EARS behavior** (incl. edge/error states)
+   needs ≥1 `technical` scenario. Tag each scenario's **Surface** (`business` | `technical`) in its body —
+   the eval agent scores the two surfaces separately. Assign P0/P1/P2 (every slice needs ≥1 P0), then:
    `node task.js create --spec {specId} --parent {sliceId} --type scenario --name "{scenario title}" --body-file {scenario.md}`.
 
-Present each slice for review with a coverage map (which requirement ACs and solution behaviors it covers)
-and any gaps. Ask the user to *Approve slice*, *Edit brief*, *Edit scenarios*, or *Add missing scenarios*.
+Present each slice for review with a coverage map — each Feature AC and each EARS behavior mapped to the
+scenario(s) that exercise it, and any surface with **no** scenario flagged as a gap. Ask the user to
+*Approve slice*, *Edit brief*, *Edit scenarios*, or *Add missing scenarios*.
 Create the tasks only after approval.
 
 ### 5. Validate
@@ -106,7 +109,9 @@ Read reference/validation.md and run checks against the created tasks (`task.js 
 - Every NFR-N / EV-N appears as a quality gate on ≥1 slice.
 - Every `[ASSUMPTION]` is resolved or flagged on the slices that depend on it.
 - Every EARS criterion in solution maps to exactly one slice's Behavior; every slice has ≥1 EARS statement.
-- Every slice has ≥1 P0 scenario child task; scenarios test observable behavior only.
+- Every Feature (AC) maps to ≥1 `business` scenario and every EARS behavior maps to ≥1 `technical`
+  scenario — no acceptance surface is left without a scenario; every slice has ≥1 P0. Each scenario
+  carries a Surface tag and tests observable behavior only.
 - Every slice `--depends-on` id refers to an existing slice; the dependency graph is acyclic (task.js validates dep ids and rejects parent cycles at create time).
 - `plan.mdx` frontmatter has `threshold` and `max_iterations`; the tracker has one phase root, its slice children, and each slice's scenario children.
 

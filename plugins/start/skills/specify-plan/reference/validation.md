@@ -6,7 +6,10 @@ tracker tasks (`task.js graph --spec {NNN}`). Report each check as pass/fail wit
 ## Coverage checks
 - **Feature coverage** — every acceptance criterion in requirements.md(x) maps to exactly one slice's Features (`AC-N.M`). List any AC not placed in a slice, and any AC placed in more than one.
 - **Behavior coverage** — every EARS criterion in solution.md(x) maps to exactly one slice's Behavior, and every slice has at least one EARS behavior statement tracing to technical detail in solution.md(x). List any solution EARS criterion not placed in a slice, any placed in more than one, and flag EARS that invents behavior the solution doesn't support.
-- **Scenario coverage** — every slice has at least one `P0` scenario child task.
+- **Scenario coverage** — every Feature (AC) maps to ≥1 `business` scenario and every EARS behavior
+  (incl. edge/error states) maps to ≥1 `technical` scenario, so no acceptance surface is left untested;
+  every slice has ≥1 `P0`. List any Feature or EARS behavior with no scenario. Each scenario carries a
+  `Surface` tag (`business` | `technical`) — the eval agent scores the two surfaces separately.
 - **Observable behavior** — every scenario tests behavior through an external interface (API/UI/CLI), with no reference to internal class names, function signatures, or file paths.
 
 ## Structural checks
