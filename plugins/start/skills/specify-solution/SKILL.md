@@ -9,27 +9,14 @@ Act as a solution design specialist that creates and validates SDDs focusing on 
 
 ## Interface
 
-SddSection {
-  status: Complete | NeedsDecision | InProgress | Pending
-  adrs?: ArchitectureDecision[]
-}
-
-ArchitectureDecision {
-  id: string               // ADR-1, ADR-2, ...
-  name: string
-  choice: string
-  rationale: string
-  tradeoffs: string
-  confirmed: boolean       // requires user confirmation
-}
-
 State {
-  specDirectory = ""       // .start/specs/[NNN]-[name]/ (or legacy docs/specs/)
-  prd = ""                 // path to requirements.md (or product-requirements.md)
-  sdd = ""                 // path to solution.md (or solution-design.md)
-  sections: SddSection[]
-  adrs: ArchitectureDecision[]
+  specDirectory = ""       // the active spec's dir: .start/specs/[NNN]-[name]/ (legacy: docs/specs/)
+  prd = ""                 // path to requirements.mdx in specDirectory
+  sdd = ""                 // path to solution.mdx in specDirectory
 }
+
+The SDD's output contract — section statuses, the ADR (`ADRStatus`) shape, required fields — lives in
+`template.mdx`, which is authoritative. Don't restate those shapes here; a second copy only drifts.
 
 ## Constraints
 
@@ -58,7 +45,8 @@ State {
 - [Focus and MECE](reference/focus-and-mece.md) — SDD focus dimensions and MECE rules for components, interfaces, data models, acceptance criteria
 - [MDX Blocks](../specify-plan/reference/mdx-blocks.md) — Block vocabulary and document-quality discipline (shared, Path C)
 - [Template](template.mdx) — SDD template structure, write to `.start/specs/[NNN]-[name]/solution.mdx`
-- [Validation](validation.md) — Complete validation checklist, completion criteria
+- [solution.js](reference/solution.js) — the review workflow (lenses → verify → grade); read its input-contract comment for the `args`
+- [Validation](validation.md) — the MECE + traceability rubric the review workflow enforces; completion criteria
 - [Output Format](reference/output-format.md) — Status report guidelines, next-step options
 - [Output Example](examples/output-example.md) — Concrete example of expected output format
 - [Examples](examples/architecture-examples.md) — Reference architecture examples
@@ -110,35 +98,32 @@ Update the SDD with research findings.
 Replace [NEEDS CLARIFICATION] markers with actual content.
 Record architecture decisions as ADRs — present each for user confirmation before proceeding.
 
-### 5. Validate Design
+### 5. Review & Grade the Design (workflow)
 
-Read validation.md and run the full checklist, focusing on:
+The drafted SDD is human-owned; this step runs an automated review panel over it and grades it — you do
+not hand-review it yourself. The workflow enforces the MECE + traceability rubric in validation.md across
+independent lenses (requirement-coverage, AC→EARS traceability, MECE, security, robustness, compatibility),
+adversarially verifies each finding, and grades the design.
 
-**MECE Validation (run first):**
+Install / version-check the golden copy `reference/solution.js` (first line `// solution-workflow: vN`)
+into `<project>/.claude/workflows/solution.js`: absent → copy and report the version; same marker →
+proceed; bundled newer → ask to upgrade (recommended) vs keep; installed newer → keep it. Never overwrite
+except on an explicit upgrade or first install.
 
-Mutually Exclusive — no overlap:
-- Component responsibilities — does any PRD requirement map to more than one component? If yes, re-partition.
-- Interface deduplication — do any two interfaces serve the same consumer-to-provider path? If yes, merge.
-- Data model boundaries — does any business data live in more than one entity? If yes, pick a single owner.
-- Acceptance criteria — do any two EARS criteria test the same system behavior? If yes, consolidate.
+Launch with the drafted paths (`prdPath` = requirements.mdx, `sddPath` = the drafted solution.mdx,
+`reportPath` = `review.md` in the spec dir):
 
-Collectively Exhaustive — no gaps:
-- PRD coverage — does every PRD requirement map to at least one component? If not, assign it.
-- Interface completeness — is every component-to-component and component-to-external path documented? If not, add it.
-- Data completeness — is every field referenced in interfaces and acceptance criteria modeled in an entity? If not, add it.
-- Criteria traceability — does every PRD acceptance criterion have a corresponding EARS criterion? If not, write it.
+```
+Workflow({ scriptPath: "<project>/.claude/workflows/solution.js",
+           args: { name, specId, prdPath, sddPath, reportPath } })
+```
 
-**Structural Validation:**
-
-Boundary validation:
-- Layer separation — presentation, business, data properly separated?
-- Dependency direction — no circular dependencies?
-- Integration points — all system boundaries documented?
-
-Consistency verification:
-- Naming consistency — components, interfaces, concepts named consistently?
-- Pattern adherence — architectural patterns applied consistently?
-- Cross-cutting concerns — security, error handling, logging, performance?
+When it returns (`{ grade, failingDimensions, reviewReady, reportPath, confirmed }`):
+- Present the report at `reportPath`: the grade (`grade.overall` + per-dimension scores) and the confirmed
+  findings grouped by dimension.
+- For every `fail` dimension, drive the fix WITH THE USER — a design change may require an ADR confirmation.
+  Then re-run the workflow to re-grade. Do not complete the SDD while any dimension is `fail`.
+- `reviewReady` (no failing dimensions) is the gate to complete the design.
 
 ### 6. Present Status
 

@@ -1,4 +1,4 @@
-// implement-workflow: v5
+// implement-workflow: v6
 //
 // The Agentic Startup — single implementation loop (unified task model).
 //
@@ -85,7 +85,6 @@ const SURFACE = {
   type: "object",
   properties: {
     satisfaction: { type: "number", description: "passed/total for this surface; 1.0 if it has no scenarios" },
-    passed: { type: "array", items: { type: "string" } },
     // one-line observable symptoms only — these become the code agent's retry guidance
     failures: { type: "array", items: { type: "string" } },
   },
@@ -176,8 +175,8 @@ Do not write implementation code without a failing test first.
 ${retry}
 When complete:
 1. All existing tests pass.
-2. New tests cover every acceptance criterion and EARS behavior (written BEFORE implementation).
-3. Run the full test suite and report results, plus how many red-green-refactor cycles you completed.`;
+2. New tests cover every acceptance criterion and EARS behavior in your brief.
+3. Run the full test suite and confirm it is green.`;
 }
 
 function evalPrompt(taskId) {
@@ -217,8 +216,8 @@ Run each scenario 3 times; a scenario passes if it passes at least 2 of 3. Then:
                              ${tj}create ${spec} --parent ${taskId} --type bug --name "<observable symptom>"
 
 ## Return the structured verdict — PER SURFACE
-- business:  { satisfaction (passed/total of BUSINESS scenarios; 1.0 if there are none), passed[], failures[] }
-- technical: { satisfaction (passed/total of TECHNICAL scenarios; 1.0 if there are none), passed[], failures[] }
+- business:  { satisfaction (passed/total of BUSINESS scenarios; 1.0 if there are none), failures[] }
+- technical: { satisfaction (passed/total of TECHNICAL scenarios; 1.0 if there are none), failures[] }
 - failures (within each surface): for each failed scenario, ONE line stating the observable symptom
   (no internal detail)`;
 }

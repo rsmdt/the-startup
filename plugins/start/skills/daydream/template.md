@@ -6,36 +6,43 @@ dateRange:
   since: {{YYYY-MM-DD}}
   until: {{YYYY-MM-DD}}
   label: {{yesterday | last 3 days | ...}}
-applyTier: advisory   # v1 ships advisory only (bounded / eval tiers are roadmap)
 angles:
-  - {{signal angle 1 — e.g. tool-errors}}
-  - {{signal angle 2 — e.g. user-corrections}}
+  - {{signal lens 1 — e.g. friction}}
+  - {{signal lens 2 — e.g. conversation}}
 ---
 
 # Daydream: {{Title}}
 
 {{One paragraph framing the run — which range of sessions it reviews and what it is trying to improve.}}
 
-## Signal angles (parallel mine streams)
+## Signal lenses (parallel mine streams)
 
-Each angle is mined independently and in parallel over the date range:
+Each lens is a different way of reading the same sessions, mined independently and in parallel over the
+date range; each finding is tagged with the harness dimension a fix would touch. Sampling lenses are
+mined iteratively until the window is covered or the round cap:
 
-- {{angle 1}}
-- {{angle 2}}
-- {{angle 3}}
+- friction — structured markers (tool-errors, user-corrections, retries, cost)
+- conversation — semantic inefficiency in the dialogue (samples sessions)
+- router — over/under-provisioned models per role
+- capability — recurring manual work with no owning skill/subagent (→ create a new skill or subagent)
+- guardrail — recurring mistake classes + risk exposure (dangerous/sensitive ops) (→ permission rule / hook / CLAUDE.md rule)
+- instruction — CLAUDE.md/AGENTS.md hygiene (dead / contradicted / bloated rules)
 
-## Edit-target scope
+## Target scope
 
-Proposals may target git-tracked artifacts under `plugins/` only:
+Each proposal is labelled **improve** (edit an existing artifact) or **create** (a new one where no
+artifact fits). Targets are the **project harness** (all git-tracked):
 
-- Skills — `plugins/*/skills/*/SKILL.md` (+ `reference/`, `templates/`)
-- Agents — `plugins/team/agents/the-*/*.md`
+- Skills — `plugins/*/skills/*/SKILL.md` (+ `reference/`, `templates/`), or a **new skill** directory
+- Subagents — `plugins/team/agents/the-*/*.md`, or a **new subagent**
 - Workflow golden copies — `plugins/*/skills/*/reference/*.js` (bump the version marker)
-- Templates — `plugins/*/skills/*/template*.md`
 - Output styles — `plugins/*/output-styles/*.md`
+- Baseline instruction — project `CLAUDE.md` / `AGENTS.md` (improve or simplify)
+- Guardrails (preference order) — a **permission policy** (allow/deny/ask) or a **hook** in the project
+  `.claude/settings.json`, or an "Always/Never" rule in `CLAUDE.md`
 
-Never the untracked installed `.claude/workflows/*.js`. **Advisory**: proposals are reported; a human
-applies them on a branch/PR.
+Never the untracked installed `.claude/workflows/*.js`, and never the user's global `~/.claude/` files.
+**Advisory by design**: daydream reports improve/create proposals; a human applies them on a branch/PR.
 
 ## Tracker
 

@@ -1,6 +1,6 @@
 ---
 name: review
-description: Evidence-based code review. Scoped mode reviews a PR, branch, staged changes, diff, or specific files with specialized perspectives (security, performance, patterns, simplification, tests). Audit mode runs a full six-phase codebase review against engineering best practices (smells, architecture proxies, modularization). Both produce an interactive HTML report. Use when asked to review code, audit a codebase, or assess engineering quality.
+description: Evidence-based code review. Scoped mode reviews a PR, branch, staged changes, diff, or specific files — a dynamic-workflow triages which dimensions apply (correctness, security, performance, simplification, quality, testing, plus conditional ones), fans out reviewers, adversarially verifies each finding, and ranks them. Audit mode runs a full codebase review (smells, architecture proxies, modularization, practices). Both produce a markdown report. Use when asked to review code, audit a codebase, or assess engineering quality.
 user-invocable: true
 argument-hint: "PR number, branch, file path, 'staged' — or empty/'audit' for a full codebase audit"
 ---
@@ -76,10 +76,10 @@ State {
 
 ## Reference Materials
 
+- reference/review.js — the review workflow (triage → fan-out → verify → synthesize → markdown report); read its input-contract comment for the `args`
 - reference/audit-phases.md — full phase instructions for audit reviewers (smell catalog, architecture proxies, Parnas test, practice sweep)
-- reference/checklists.md — per-perspective checklists for scoped reviewers
+- reference/checklists.md — per-dimension checklists for scoped reviewers
 - reference/classification.md — severity, confidence, consequence test, likelihood×cost ranking
-- templates/report.html — interactive report template (inject JSON at `__REVIEW_DATA__`)
 - examples/output-example.md — rendered chat summaries for both modes
 
 ## Workflow
@@ -98,89 +98,63 @@ Scoped: retrieve the full contents of every changed file. If the target resolves
 
 Audit: perform Phase 1 orientation yourself (it is context-gathering, not review):
 1. Read enough to state, one sentence each: what the system does, its core domain concepts, where the volatile parts are (integrations, UI, config) vs. the stable parts (domain logic).
-2. Run co-change archaeology: parse commit history for file sets that repeatedly change together (this feeds two reviewers, so compute it once).
-3. Record both in State.proxies — every reviewer receives this map.
+2. Run co-change archaeology: parse commit history for file sets that repeatedly change together (compute it once).
+3. Pass both to the workflow as `orientation` and `coChange` — every reviewer receives this map.
 
-### 2. Scoped — Activate Perspectives and Launch
+You do not review the code yourself or pick perspectives by hand — the workflow triages the dimensions
+(dynamically, from the diff) and owns the review→verify→rank→report loop. Your job is to resolve the
+scope (step 1), launch the workflow, and present what it returns.
 
-Always active:
+### 2. Install / Version-Check the Workflow
 
-| Perspective | Intent |
-|-------------|--------|
-| 🔐 Security | Auth gaps, injection, secrets, input validation, crypto weaknesses |
-| 🔧 Simplification | YAGNI, over-engineering, premature abstraction, dead code |
-| ⚡ Performance | N+1 queries, complexity, leaks, blocking operations |
-| 📝 Quality | Naming, error handling, pattern inconsistency, smells |
-| 🧪 Testing | Missing tests for new paths, uncovered edge cases, test quality |
+The golden copy is this skill's `reference/review.js` (first line `// review-workflow: vN`).
 
-Add when the changes match:
+```
+installed = <project>/.claude/workflows/review.js
+  absent              => create .claude/workflows/ if needed; copy bundled → installed; report "installed review workflow v{N}".
+  same version         => proceed.
+  bundled > installed  => ask under "Upgrade": Upgrade v{old} → v{new}? — Upgrade (Recommended) | Keep current.
+  installed > bundled  => keep the project copy (hand-edited/ahead); note it.
+```
 
-| Perspective | Activation Rule |
-|-------------|-----------------|
-| 🧵 Concurrency | Any async/await, promises, threading, shared state — one match suffices |
-| 📦 Dependencies | Manifest changes (package.json, go.mod, Cargo.toml, ...) |
-| 🔄 Compatibility | Public API, schema, config format, or migration changes |
-| ♿ Accessibility | Frontend/UI component changes |
-| 📜 Constitution | Project has CONSTITUTION.md |
+Never overwrite the installed file except on an explicit Upgrade choice or a first install.
 
-Launch ALL applicable perspectives as parallel specialist agents in a single response. Each reviewer receives: full file contents, the diff, its perspective row, the consequence test from reference/classification.md, and a pointer to its checklist in reference/checklists.md.
+### 3. Launch the Workflow
 
-### 3. Audit — Launch Phase Reviewers
+Build the args and launch. `reportPath` is markdown: `docs/reviews/review-<target-or-audit>-<YYYY-MM-DD>.md`
+in the reviewed repo (create `docs/reviews/` if needed). The reference paths are absolute paths to THIS
+skill's `reference/` files.
 
-Launch four specialist agents in parallel, in a single response. Each receives the orientation map, the co-change data, and its phase section from reference/audit-phases.md:
+```
+Workflow({ scriptPath: "<project>/.claude/workflows/review.js", args: {
+  name, mode,                                        // from step 1 (scoped | audit)
+  diffCommand, changedFiles, hasConstitution,        // scoped
+  orientation, coChange,                             // audit — from step 1 Phase 1
+  reportPath,
+  classificationPath, checklistsPath, auditPhasesPath,
+} })
+```
 
-| Reviewer | Phase | Produces |
-|----------|-------|----------|
-| Smell auditor | 2 | Findings that pass the consequence test + Accepted list |
-| Architecture auditor | 3 | Dependency arrows, amplification table, blast radius, module responsibilities |
-| Modularization auditor | 4 | Parnas findings (what each boundary hides, leaks with exploiting callers) + proposed redraws |
-| Practices auditor | 5 | One-line mechanical findings: file:line + consequence |
+Scoped: the workflow triages the dimensions (an always-active core — correctness, security, performance,
+simplification, quality, testing — plus conditionals the diff fires, scaled by blast radius), fans out
+reviewers, adversarially verifies each finding, ranks them, and writes the markdown report. Audit: it runs
+the four fixed phase reviewers. Present a one-line dispatch summary and record the `runId`; report status
+from the run, do not fabricate progress.
 
-The modularization auditor cross-references the co-change data you computed in step 1: co-change across a boundary plus leaks equals a boundary to redraw.
+### 4. Present and Offer Next Steps
 
-### 4. Synthesize
+When the run returns (`{ mode, verdict, counts, reportPath, findings, accepted, refactors }`):
 
-1. Consequence gate: discard or demote to Accepted any finding lacking file:line + named consequence.
-2. Deduplicate by location (same file, within 5 lines) — keep highest severity, merge complementary details.
-3. Assign IDs (C1, H1, M1, L1...). Scoped: sort by severity then confidence. Audit: rank by likelihood the consequence materializes × cost when it does (see reference/classification.md).
-4. Audit only: distill the five highest-leverage refactors, each tied to a Phase 3/4 measurement with an incremental migration path.
-5. Determine the verdict.
-
-Scoped verdict:
-
-match (criticalCount, highCount, mediumCount) {
-  (> 0, _, _)     => REQUEST CHANGES
-  (0, > 3, _)     => REQUEST CHANGES
-  (0, 1..3, _)    => APPROVE WITH COMMENTS
-  (0, 0, > 0)     => APPROVE WITH COMMENTS
-  (0, 0, 0)       => APPROVE
-}
-
-Audit verdict: a paragraph stating where the codebase actually is — real risks and real strengths, no grade inflation in either direction.
-
-### 5. Generate Interactive Report
-
-1. Read templates/report.html.
-2. Build the report JSON: `{ meta: {title, mode, target, date, verdict, verdictReasoning}, summary: {critical, high, medium, low}, findings, accepted, proxies, refactors, strengths }` — field shapes per the Interface section. Scoped mode omits proxies and refactors.
-3. Escape every `<` in the JSON as `\u003c` (code snippets may contain script-closing sequences), then replace the single `__REVIEW_DATA__` token and save as `docs/reviews/review-<target-or-audit>-<YYYY-MM-DD>.html` in the reviewed repository (create the directory if needed).
-4. Verify the output file contains no remaining `__REVIEW_DATA__` token and the embedded JSON parses.
-
-### 6. Present and Offer Next Steps
-
-Present the report file, then render a concise chat summary: verdict, severity counts, critical/high findings table, strengths (scoped) or verdict paragraph + top refactors (audit). Format per examples/output-example.md.
+Present the report at `reportPath`, then a concise chat summary: verdict, severity counts, the
+critical/high findings, and strengths (scoped) or the verdict paragraph + top refactors (audit). Format
+per examples/output-example.md.
 
 Ask the user to choose:
 
 match (mode, verdict) {
-  (Scoped, REQUEST CHANGES)       => Address critical issues first | Show fixes for [issue] | Explain [finding]
-  (Scoped, APPROVE WITH COMMENTS) => Apply suggested fixes | Create follow-up issues | Proceed without changes
-  (Scoped, APPROVE)               => Add to PR comments (if PR review) | Done
-  (Audit, _)                      => Start refactor #1 | Create issues for findings | Deep-dive a finding
+  (scoped, REQUEST CHANGES)       => Address critical issues first | Show fixes for [issue] | Explain [finding]
+  (scoped, APPROVE WITH COMMENTS) => Apply suggested fixes | Create follow-up issues | Proceed without changes
+  (scoped, APPROVE)               => Add to PR comments (if PR review) | Done
+  (audit, _)                      => Start refactor #1 | Create issues for findings | Deep-dive a finding
 }
 
-### Entry Point
-
-match (mode) {
-  Scoped => steps 1, 2, 4, 5, 6
-  Audit  => steps 1, 3, 4, 5, 6
-}
