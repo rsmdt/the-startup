@@ -77,6 +77,13 @@ From the project instructions file and package.json (or equivalent), determine:
 - `startCommand` (e.g. `npm start`, `python manage.py runserver`)
 - `servicePort` (e.g. 3000, 8000)
 - `healthPath` (e.g. `/health`; default `/health`)
+- `migrateCommand` — optional; how pending DB migrations are applied (e.g. `supabase migration up --local`).
+  It must be a **directly-executable binary**: resolve it with `which <bin>` and pass the resolved command.
+  Never pass an `npx` / `pnpm dlx` / version-manager-shim form — agent shells frequently cannot resolve
+  those, and the preflight step then reports a fault (or, worse in earlier versions, silently applied
+  nothing). Run it once yourself before launching; if it errors, fix it or omit it rather than passing a
+  command that will fail inside every loop iteration.
+- `requiredEnv` — optional; env vars the acceptance scenarios depend on (feature flags, engine switches).
 
 If not discoverable, ask the user for the start command, port, and health path.
 
@@ -109,6 +116,8 @@ Build the `args` object for `implement.js` (its input-contract comment is the au
 - `taskScript` — absolute path to the specify-meta skill's `task.js`;
 - `threshold`, `maxIterations` — from plan.mdx frontmatter;
 - `servicePort`, `startCommand`, `healthPath` — from step 4;
+- `migrateCommand`, `requiredEnv` — from step 4 (omit when the project has neither);
+- `stallLimit` — optional; consecutive non-improving iterations before a slice halts as `stalled` (default 2);
 - `tasks` — one per slice: `{ id, dependsOn }` (tracker ids, from step 2);
 - `groups` — the execution groups from step 3.
 
@@ -136,7 +145,21 @@ When the run returns its result (`{ specId, threshold, results }`):
 2. Present the satisfaction report: per slice — status, **business %** and **technical %** (the two
    acceptance surfaces are scored and gated separately), iterations used. Call out any `failed` slice
    with its one-line failure summaries (and its `type: bug` child tasks), and any `incomplete-coverage`
-   slice with its `coverageGaps` (features/EARS behaviors that had **no scenario** — a spec gap, not a
-   build failure). Ask the user how to proceed (retry with guidance, add the missing scenarios, skip, or stop).
+   slice with its `coverageGaps` (features/EARS behaviors that had **no scenario**) and its
+   `notExercisable` entries (scenarios no external interface can induce, filed as `type: gap` child
+   tasks) — both are spec gaps, not build failures.
+
+   Three statuses mean the code was never judged, and each needs a different response — never report
+   them as build failures:
+   - `blocked-environment` — the harness was invalid (service down, migration unapplied, env var unset).
+     Report its `environment` faults and **stop**; no retry was spent. Do not relaunch until the user
+     confirms the environment is fixed.
+   - `stalled` — the loop halted early because it stopped converging (no score improvement, or one
+     symptom survived three attempts). Retries remain unspent deliberately. Report what was tried
+     (`history`) and ask for guidance rather than relaunching the same slice unchanged.
+   - `harness-abort` — agents stopped being served (quota / session limit). The slice was not judged and
+     its retry budget is intact; offer to re-launch the same slice ids once the harness is available.
+
+   Ask the user how to proceed (retry with guidance, add the missing scenarios, skip, or stop).
 3. Use the validate skill in constitution mode if a CONSTITUTION.md exists at the project root.
 4. If every slice is satisfied, offer to finalize (commit / PR per project convention) and to archive: `/start:archive {specId}`.
