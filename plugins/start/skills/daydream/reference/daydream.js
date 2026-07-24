@@ -1,4 +1,4 @@
-// daydream-workflow: v6
+// daydream-workflow: v7
 //
 // The Agentic Startup — daydream workflow (self-improvement from session logs, tracker-backed).
 //
@@ -103,6 +103,25 @@ const {
   maxProposals = 12,
   maxMineRounds = 2,
 } = parsedArgs ?? {};
+
+// FAIL FAST on a mis-wired launch. Every stage prompt templates these values verbatim; if any is
+// missing, agents would receive literal "undefined" paths ("node undefined … --home undefined"),
+// mine nothing, and synthesize a zero-proposal stub. Abort before any agent runs instead.
+{
+  const required = { home, taskScript, logRoot, projectRoot, editTargetsRoot, reportPath };
+  const missing = Object.entries(required)
+    .filter(([, v]) => typeof v !== "string" || !v.trim() || v === "undefined")
+    .map(([k]) => k);
+  if (!dateRange?.since || !dateRange?.until) missing.push("dateRange.since/until");
+  if (!angles.some((a) => a && a.id)) missing.push("angles");
+  if (missing.length) {
+    throw new Error(
+      `daydream: launch args missing or unresolved: ${missing.join(", ")}. ` +
+        `The /start:daydream skill must pass concrete absolute paths (see the input contract at the top of this script); ` +
+        `refusing to run — a run with unresolved args can only produce an empty report.`,
+    );
+  }
+}
 
 const tj = `node ${taskScript}`; // task.js invocation prefix agents use
 const range = `${dateRange.label ?? ""} (${dateRange.since ?? "?"} → ${dateRange.until ?? "?"})`;
