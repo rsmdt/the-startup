@@ -1,4 +1,26 @@
-// implement-workflow: v6
+// implement-workflow: v8
+//
+// v8 — schema application in the loop. When a code agent's fix is a database migration, the eval
+// tests the LIVE service — whose DB does not auto-apply new migration files. So a schema-dependent
+// fix (a new run_type, a new column, a constraint) sits unapplied, the eval keeps hitting the stale
+// schema, and the scenario fails EVERY iteration no matter how correct the code is — the loop can
+// never converge on anything requiring a migration. v8 adds a deterministic migrate step between the
+// code and eval agents (a tiny agent runs `migrateCommand`, e.g. `supabase migration up`), so the DB
+// the eval tests always matches the code under test. Gated on `migrateCommand` being supplied; a
+// no-op when there is nothing pending. This is the same lesson as v7's env pinning: do not rely on an
+// agent REMEMBERING a setup step — make it a guaranteed stage in the loop.
+//
+// v7 — eval harness determinism. The service is now PINNED: the launcher brings it up once,
+// already configured, and every eval agent evaluates against it read-only. Eval agents must not
+// start, restart, stop, or reconfigure the service (no editing .env / compose / feature flags),
+// and must isolate their own test data (own workspace/tenant) so parallel evals cannot collide.
+// This removes two non-determinism sources that let environment state masquerade as code failure:
+//   (1) agents mutating a shared .env per iteration and restoring it — a step one agent could skip,
+//       silently disabling a feature and zeroing an otherwise-passing slice;
+//   (2) parallel eval agents each owning the lifecycle of ONE shared stack on ONE port — one
+//       agent's teardown killing the service another is mid-evaluation against.
+// A service that is down or misconfigured is now REPORTED as an environment failure, never
+// "fixed" by the eval agent — so a harness problem can never be scored as a code defect.
 //
 // The Agentic Startup — single implementation loop (unified task model).
 //
@@ -52,9 +74,13 @@ export const meta = {
 //   taskScript:    string,          // abs path to specify-meta/task.js
 //   threshold:     number,          // satisfaction ratio for "done" (e.g. 0.90)
 //   maxIterations: number,          // retry limit per slice (e.g. 5)
-//   servicePort:   number,          // discovered service port
-//   startCommand:  string,          // how the eval agent brings the service up
-//   healthPath:    string,          // e.g. "/health" (eval agent polls this)
+//   servicePort:   number,          // port the (already-running) service listens on
+//   startCommand:  string,          // how the LAUNCHER started the service once, before the run —
+//                                   //   documented for humans; eval agents must NOT run it themselves
+//   healthPath:    string,          // e.g. "/health" (eval agent polls this to VERIFY readiness only)
+//   migrateCommand:string|undefined,// optional: applies pending DB migrations to the running service's
+//                                   //   DB before each eval (e.g. "npx supabase migration up --local").
+//                                   //   Omit for projects with no migration step. Must be idempotent.
 //   tasks:  [ { id: string, dependsOn: string[] } ],           // slice task ids + deps (tracker ids)
 //   groups: [ { mode: "parallel" | "sequential", taskIds: string[] } ],  // topo-sorted
 // }
@@ -71,6 +97,7 @@ const {
   servicePort,
   startCommand,
   healthPath = "/health",
+  migrateCommand,
   tasks = [],
   groups = [{ mode: "sequential", taskIds: tasks.map((t) => t.id) }],
 } = parsedArgs ?? {};
@@ -179,6 +206,17 @@ When complete:
 3. Run the full test suite and confirm it is green.`;
 }
 
+function migratePrompt() {
+  return `Apply any pending database migrations to the running service's database so the acceptance
+evaluation tests the CURRENT schema. Run exactly this command from the project root:
+
+  ${migrateCommand}
+
+This is idempotent — if nothing is pending it is a harmless no-op. Do not write code, edit files, or
+author new migrations; only apply what already exists on disk. If the command fails, report the error
+verbatim as your final message. Otherwise report the migrations applied (or "none pending").`;
+}
+
 function evalPrompt(taskId) {
   return `You are evaluating whether an implementation satisfies a slice's acceptance scenarios.
 
@@ -196,12 +234,24 @@ event, including edge and error states). Determine which from the scenario itsel
 kind if it carries one. Keep the two tallies apart: a slice is not done until BOTH surfaces pass, so
 feature passes must never average away EARS-behavior failures.
 
-## Service lifecycle (you own it)
-1. Start the service:  ${startCommand}
-2. Poll http://localhost:${servicePort}${healthPath} until it responds (retry with backoff, ~5 attempts).
-   If the service has no health endpoint, adapt using the project's conventions.
-3. Run your evaluation against http://localhost:${servicePort}.
-4. Tear the service down when you are done (kill the process you started).
+## Service (already running and configured — do NOT touch its lifecycle or config)
+The service was started ONCE by the launcher (\`${startCommand}\`) and is already configured. Other
+eval agents may be evaluating against this same instance concurrently. Therefore:
+1. VERIFY readiness only: poll http://localhost:${servicePort}${healthPath} (retry with backoff, ~5
+   attempts). If it has no health endpoint, adapt using the project's conventions.
+2. Do NOT start, restart, or stop the service, and do NOT kill any process — you did not start it and
+   others depend on it. Do NOT edit .env, compose files, feature flags, or any configuration; the
+   environment is pinned. Evaluate against http://localhost:${servicePort} exactly as it stands.
+3. If the service is unreachable after your retries, or is plainly misconfigured (a core capability the
+   scenarios need is absent), STOP and return a verdict that records this as an ENVIRONMENT failure:
+   set the affected surface's satisfaction to 0 and put a failure line beginning "ENVIRONMENT:" naming
+   what was unreachable or missing. Never reconfigure the service to make a scenario pass — a harness
+   problem must be reported as such, not scored as a code defect and not silently worked around.
+
+## Isolate your test data (parallel-safe)
+Create your own workspace/tenant (and any fixtures) for this evaluation, scoped to a unique id, so a
+concurrent eval's data can never be mistaken for yours. Do not assume an empty database or reuse shared
+records. Clean up only the data you created — never global state.
 
 ## Evaluation method (use the first available, in priority order)
 1. E2E test automation — write and run automated end-to-end tests for the scenarios.
@@ -238,6 +288,12 @@ async function buildTask(taskId) {
   while (true) {
     // CODE agent: reads the slice task + one-line retry summaries. Never the scenario tasks.
     await agent(codePrompt(taskId, iteration, failures), { phase: "Build", label: `build:${taskId}` });
+
+    // MIGRATE step (deterministic): apply any migrations the code agent just wrote to the running
+    // service's DB, so the eval tests the current schema — not a stale one that fails every iteration.
+    if (migrateCommand) {
+      await agent(migratePrompt(), { phase: "Build", label: `migrate:${taskId}` });
+    }
 
     // EVAL agent: reads the scenario child tasks + service config. Never the slice or the source.
     const verdict = await agent(evalPrompt(taskId), { phase: "Evaluate", label: `eval:${taskId}`, schema: VERDICT });
