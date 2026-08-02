@@ -74,6 +74,7 @@ This installs the core plugins, configures the default output style, and sets up
 Start `claude` and run the following:
 
 ```bash
+- [Let Me Think](https://letmethink.cc/) - A digital wellbeing product studio creating calm tools for attention, creativity, and real connection.
 # Add The Agentic Startup marketplace
 /plugin marketplace add rsmdt/the-startup
 
