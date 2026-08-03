@@ -153,7 +153,7 @@ The specification carries **no task-by-task instructions** — a slice says what
 
 #### One implementation loop (the dynamic-workflow runtime)
 
-There is a single `/start:implement`, and it always runs on Claude Code's **dynamic-workflow runtime**. It reads the spec's tasks from the tracker, installs one reusable workflow into the project at `.claude/workflows/implement.js` (a bundled golden copy — `implement/reference/implement.js` — carrying a version marker; it prompts to upgrade when the bundled copy is newer), and launches it with the slice tasks as input.
+There is a single `/start:implement`, and it always runs on Claude Code's **dynamic-workflow runtime**. It reads the spec's tasks from the tracker and launches the reusable workflow script that ships beside it — `implement/reference/implement.js`, whose `meta.name` is `run-implement` — via `Workflow({ scriptPath, args })`, with the slice tasks as input. There is no install step: the script runs where it ships.
 
 The workflow drives each slice through a **barriered code→eval retry loop**:
 - a **code agent** builds the slice via TDD — it reads the slice task (features + EARS + gates), never its scenario child tasks;
@@ -182,9 +182,48 @@ Optional `CONSTITUTION.md` at project root defines checkable rules:
 |------|----------|--------|
 | Commands | `plugins/*/commands/*.md` | lowercase-kebab (e.g., `specify.md`) |
 | Skills | `plugins/*/skills/*/SKILL.md` | directory is skill name |
+| Workflow scripts | `plugins/*/skills/*/reference/*.js` | file matches the skill; `meta.name` is **`run-<script>`** (see below) |
 | Agents | `plugins/team/agents/the-*/` | `the-[role]/[activity].md` |
 | Output Styles | `plugins/*/output-styles/*.md` | Title Case (e.g., `The Startup.md`) |
 | Specs | `.start/specs/[NNN]-*/` | 3-digit ID prefix |
+
+### Skill vs workflow naming
+
+A workflow's `meta.name` is always **`run-<script>`** — the script's filename with a `run-` prefix.
+
+| | Skill | Workflow (`meta.name`) |
+|---|---|---|
+| Shape | short noun or verb — the thing you type | `run-` + the script filename |
+| Example | `implement` | `run-implement` |
+
+| Skill | Script | Workflow |
+|---|---|---|
+| `implement` | `implement/reference/implement.js` | `run-implement` |
+| `analyze` | `analyze/reference/analyze.js` | `run-analyze` |
+| `review` | `review/reference/review.js` | `run-review` |
+| `specify-solution` | `specify-solution/reference/solution-review.js` | `run-solution-review` |
+| `daydream` | `daydream/reference/daydream.js` | `run-daydream` |
+
+The prefix is the whole convention: it is mechanically derivable (no naming judgment, so no drift), it
+sorts every workflow together, and `run-` is instantly recognizable in the `/workflows` progress view and
+the run-approval dialog. The name only has to *identify* the run — the view shows `meta.description` and
+the phase list beside it, so the name carries no burden to describe.
+
+**Never give a workflow the same `meta.name` as a skill.** Skills and workflows share one `/[plugin]:`
+namespace, so identical names collide and the workflow shadows the skill — replacing a working entry
+point with a script that cannot run standalone. The `run-` prefix makes that impossible by construction:
+no skill is named `run-*`.
+
+### Where workflow scripts live — and why not `workflows/`
+
+A plugin *can* ship workflows from a `workflows/` directory at the plugin root (or the `workflows`
+manifest field), which registers each as `/[plugin]:[meta.name]`. **Ours deliberately do not.** A script
+in `workflows/` becomes a command a user can type, and per the Claude Code docs a workflow script has
+"no direct filesystem or shell access" and cannot take mid-run user input — so none of ours can resolve
+its own `args`. They are engines their skill feeds via `Workflow({ scriptPath, args })`, not commands.
+
+Each script therefore sits beside the one skill that launches it, in that skill's `reference/`. There is
+no install step and no version marker: the script runs where it ships, and the plugin version governs.
 
 ## Publishing
 

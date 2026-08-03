@@ -1,10 +1,11 @@
-// analyze-workflow: v3
-//
 // The Agentic Startup — analysis workflow (deep-research style, tracker-backed).
 //
-// One reusable dynamic-workflow script. /start:analyze installs this to
-// <project>/.claude/workflows/analyze.js and launches it via the Workflow tool, passing an
-// approved analysis plan as `args`. It is NOT regenerated per analysis.
+// One reusable dynamic-workflow script, shipped with the `start` plugin at skills/analyze/reference/analyze.js. The
+// /start:analyze SKILL is the entry point: it gets the plan approved, seeds the tracker, and launches
+// this script in place via the Workflow tool with an `args` object. It is NOT regenerated per analysis.
+// It sits beside the skill that launches it, NOT in workflows/: a script in workflows/ registers a
+// slash command, and this one cannot be invoked directly — it needs an `args` object only the skill
+// can build (see the input contract below).
 //
 // Pipeline (grounded in deep-research literature — see SKILL.md "Synthesizer placement"):
 //   RESEARCH  — fan out one agent per open research task; each gathers CITED findings and
@@ -15,21 +16,21 @@
 //   SYNTHESIZE — after the loop converges, write the report from the validated findings.
 //               (Evidence-first: validate coverage BEFORE writing.)
 //   GRADE      — grade the written report against a quality rubric (citations, faithfulness, goal
-//               coverage, mechanism depth). Blocking issues drive a revision pass; loop synthesize↔grade
-//               until the report clears or a cap. This is a gate with teeth, not a warning label.
+//               coverage, mechanism depth) ONCE. There is no revision loop: a failing dimension is
+//               returned to the skill for the human to act on, not fed back into another synthesis.
 //
 // Runtime note: the script has no shell/filesystem access — only its agents do. So every
 // task.js call (read/update/create/graph) is made BY an agent; the script only orchestrates
 // and branches on the structured verdicts agents return.
 
 export const meta = {
-  name: "analyze",
+  name: "run-analyze",
   description: "Deep-research analysis: fan out cited research, validate against a goals rubric, synthesize once at the end",
   phases: [
     { title: "Research", detail: "parallel agents gather cited findings per topic (code + online)" },
     { title: "Validate", detail: "score findings against the goals rubric; spawn gap research if unmet" },
-    { title: "Synthesize", detail: "write the report from validated findings; revise it to clear the grade" },
-    { title: "Grade", detail: "grade the report against a quality rubric; block and revise on failures" },
+    { title: "Synthesize", detail: "write the report from validated findings" },
+    { title: "Grade", detail: "grade the report against a quality rubric; failures are reported, not revised" },
   ],
 };
 
@@ -42,7 +43,7 @@ export const meta = {
 //   goals:       string[],        // the rubric — objectives that make the analysis review-worthy
 //   topics:      [{ id, name }],  // initial research task ids, seeded by the skill
 //   reportPath:  string,          // where SYNTHESIZE writes the report
-//   maxRounds:   number,          // research↔validate loop cap (default 3)
+//   maxRounds:   number,          // research↔validate loop cap (default 2)
 // }
 
 // Background workflow launches may serialize `args`; on some runtimes it is revived as a
@@ -57,8 +58,13 @@ const {
   goals = [],
   topics = [],
   reportPath,
-  maxRounds = 3,
+  maxRounds = 2,
 } = parsedArgs ?? {};
+
+// Gap research per round. Round 1 fans out one agent per seeded topic; every later round batches its gap
+// briefs into ONE agent. The gap fan-out used to consume whatever the validator returned, uncapped — the
+// only term in this file with no ceiling at all.
+const MAX_GAPS_PER_ROUND = 3;
 
 const goalList = goals.map((g, i) => `${i + 1}. ${g}`).join("\n");
 const tj = `node ${taskScript}`; // task.js invocation prefix agents use
@@ -83,8 +89,8 @@ const VALIDATOR = {
 };
 
 // Report-quality grade — a rubric of per-dimension scores (fail | partial | pass). The gate is
-// per-dimension: any dimension scored `fail` (must-fix) drives a revision pass; `partial` ships with a
-// note. `issues` localize the fixes for the reviser. The overall scalar is DERIVED from the scores by
+// per-dimension: any dimension scored `fail` (must-fix) is surfaced to the human; `partial` ships with a
+// note. `issues` localize the fixes for the human who reads the grade. The overall scalar is DERIVED from the scores by
 // the script below — not declared by the model, so there is a single source of truth. `dimensions` is a
 // rubric the grader may extend with problems it finds.
 const GRADE = {
@@ -120,12 +126,21 @@ const GRADE = {
 
 // ── Prompt builders ────────────────────────────────────────────────────────────────────
 
-function researchPrompt(taskId) {
+// Takes a LIST of task ids. Round 1 calls this once per seeded topic (one id each, genuinely parallel
+// angles); later rounds call it ONCE with every gap id, because gap briefs are narrow follow-ups that do
+// not each warrant their own context — and fanning them out was the uncapped term in this file.
+function researchPrompt(taskIds) {
+  const many = taskIds.length > 1;
   return `You are a research agent for the analysis "${name}".
 Purpose: ${description}
 
-Your assignment lives in a tracker task. Read it first:
-  ${tj} read ${taskId} --home ${home}
+${many
+      ? `You have ${taskIds.length} assignments, each in a tracker task. Read them all first:
+${taskIds.map((id) => `  ${tj} read ${id} --home ${home}`).join("\n")}
+Work them in order and give each its own genuine investigation — they are separate questions, not one
+question in three parts. Record findings back into the task they belong to, separately.`
+      : `Your assignment lives in a tracker task. Read it first:
+  ${tj} read ${taskIds[0]} --home ${home}`}
 It names your topic and may carry a brief from a prior validation round telling you what to dig into.
 
 ## How to research
@@ -134,14 +149,14 @@ It names your topic and may carry a brief from a prior validation round telling 
 - Investigate mechanisms, not surface facts. Prefer primary sources.
 
 ## Record findings (CITED) back into your task
-Write your findings as markdown with an inline source on EVERY claim, then store them:
+Write your findings as markdown with an inline source on EVERY claim, then store them${many ? " — one file per task, into that task" : ""}:
   1. write them to a file, e.g. findings.md
-  2. ${tj} update ${taskId} --home ${home} --body-file findings.md
-Before you mark the task passed, RE-READ your findings and confirm EVERY claim carries a source
+  2. ${tj} update <task-id> --home ${home} --body-file findings.md
+Before you mark ${many ? "a" : "the"} task passed, RE-READ your findings and confirm EVERY claim carries a source
 (\`file:line\` or URL). If any claim is uncited, add the source or delete the claim — an uncited
 claim is not a finding.
-When done, mark the task researched:
-  ${tj} update ${taskId} --home ${home} --status passed
+When done, mark ${many ? "each" : "the"} task researched:
+  ${tj} update <task-id> --home ${home} --status passed
 
 Do NOT write the final report — only gather cited findings. A claim with no source is not done.`;
 }
@@ -169,7 +184,9 @@ For each goal, and each claim a finding makes toward it:
   ACTUALLY substantiates the claim. A citation that does not support the claim counts as UNVERIFIED.
 - A goal is met ONLY when every claim it rests on is independently verified against its source.
   Uncited, thin, unverifiable, or "the source doesn't actually say that" → NOT met.
-- When in doubt, rule NOT met. A false "met" is worse than another research round.
+- Rule NOT met only when you OPENED the source and it failed to substantiate the claim. "I did not check
+  it" is not the same as "it is unsupported" — go and check it, then rule. Do not rule NOT met on a hunch:
+  every unmet goal costs a full research round, so an unexamined doubt is not grounds for one.
 
 ## Citation integrity — check EVERY research task, not just goal coverage
 Scan each research task's findings. If ANY claim lacks a source (\`file:line\` or URL), the analysis is
@@ -188,18 +205,7 @@ Mark research tasks that fully satisfied their goal as passed if not already.
 - nextTaskIds: ids of the gap research tasks you just created (empty if satisfied)`;
 }
 
-function synthesizePrompt(issues) {
-  if (issues && issues.length) {
-    return `You are revising the analysis report at ${reportPath} to fix specific grading issues.
-Read the current report first.
-Fix EACH issue below, changing only what the issue requires — preserve everything else, and every
-existing citation:
-${issues.map((x) => `- ${x.dimension}: ${x.detail}${x.fix ? ` → ${x.fix}` : ""}`).join("\n")}
-If closing an issue needs a source, re-open the relevant research task to get it — list them with
-  ${tj} list --home ${home} --type research
-then  ${tj} read <id> --home ${home}. Do NOT introduce any claim that has no source in the findings.
-Rewrite the file in place. Report the path and a one-line summary of what you changed.`;
-  }
+function synthesizePrompt() {
   return `You are the synthesizer for the analysis "${name}". The research is complete and validated.
 Purpose: ${description}
 
@@ -242,7 +248,7 @@ If the report shows a quality problem none of these name, add it as your own dim
   { dimension, detail, fix } — name the exact claim or section and the change that resolves it. Be specific.`;
 }
 
-// ── Orchestration: research → validate (loop) → synthesize ↔ grade (loop) ───────────────
+// ── Orchestration: research → validate (loop) → synthesize → grade ─────────────────────
 
 let round = 0;
 let researchIds = topics.map((t) => t.id).filter(Boolean);
@@ -250,7 +256,13 @@ let verdict = null;
 
 while (true) {
   if (researchIds.length) {
-    await parallel(researchIds.map((id) => () => agent(researchPrompt(id), { phase: "Research", label: `research:${id}` })));
+    if (round === 0) {
+      // Round 1 only: the seeded topics are independent angles, so they are worth separate contexts.
+      await parallel(researchIds.map((id) => () => agent(researchPrompt([id]), { phase: "Research", label: `research:${id}` })));
+    } else {
+      // Later rounds: gap briefs are narrow follow-ups. One agent takes them all.
+      await agent(researchPrompt(researchIds), { phase: "Research", label: `research:gaps-r${round}` });
+    }
   }
 
   verdict = await agent(validatePrompt(round), { phase: "Validate", label: `validate:r${round + 1}`, schema: VALIDATOR });
@@ -258,35 +270,31 @@ while (true) {
   if (verdict?.satisfied) break;
 
   round += 1;
-  researchIds = (verdict?.nextTaskIds ?? []).filter(Boolean);
+  const proposed = (verdict?.nextTaskIds ?? []).filter(Boolean);
+  researchIds = proposed.slice(0, MAX_GAPS_PER_ROUND);
+  if (proposed.length > researchIds.length) {
+    log(`round ${round}: validator opened ${proposed.length} gap task(s) — researching the first ${MAX_GAPS_PER_ROUND}; the rest stay open in the tracker.`);
+  }
 
   if (round >= maxRounds || researchIds.length === 0) {
     log(`analysis "${name}": stopping after ${round} round(s) — ${researchIds.length ? "round cap reached" : "no further research proposed"}, goals not fully met`);
     break;
   }
   const unmet = (verdict?.goalResults ?? []).filter((g) => !g.met).length;
-  log(`round ${round}: ${unmet} goal(s) unmet → ${researchIds.length} new research task(s)`);
+  log(`round ${round}: ${unmet} goal(s) unmet → ${researchIds.length} gap research task(s)`);
 }
 
-// Synthesize, then grade the written report; blocking issues drive a revision pass. Loop until the
-// report clears the grade or the cap — the grade gate has teeth, it does not just attach a warning.
-const maxGradeRounds = 3; // initial synthesis + up to 2 revisions
-let grade = null;
+// Synthesize once, then grade once. There is no revision loop: the grader re-checked rules the
+// synthesizer had already been given, and on cap exhaustion a failing grade only logged — a gate with no
+// teeth costing up to four extra agents. The grade now travels in the return value instead, so the skill
+// surfaces a failing dimension to the human, who is a better reviser than a third synthesis pass.
+await agent(synthesizePrompt(), { phase: "Synthesize", label: "synthesize" });
 
-for (let g = 0; ; g++) {
-  await agent(synthesizePrompt(g === 0 ? null : grade?.issues ?? []), {
-    phase: "Synthesize",
-    label: g === 0 ? "synthesize" : `revise:r${g}`,
-  });
+const grade = await agent(gradePrompt(), { phase: "Grade", label: "grade", schema: GRADE });
 
-  grade = await agent(gradePrompt(), { phase: "Grade", label: `grade:r${g + 1}`, schema: GRADE });
-
-  const failing = (grade?.dimensions ?? []).filter((d) => d.score === "fail");
-  if (!failing.length || g + 1 >= maxGradeRounds) {
-    if (failing.length) log(`analysis "${name}": report graded with ${failing.length} failing dimension(s) after ${g + 1} pass(es).`);
-    break;
-  }
-  log(`grade round ${g + 1}: ${failing.length} failing dimension(s) → revising report`);
+const failingDimensions = (grade?.dimensions ?? []).filter((d) => String(d.score).toLowerCase() === "fail");
+if (failingDimensions.length) {
+  log(`analysis "${name}": report graded with ${failingDimensions.length} failing dimension(s) — see the grade in the result; the report ships as-is.`);
 }
 
 // Derived rubric value — single source of truth is the per-dimension scores (fail=0, partial=1, pass=2).
@@ -302,4 +310,6 @@ return {
   reportPath,
   goalResults: verdict?.goalResults ?? [],
   grade,
+  // Named explicitly so the skill can surface them: the report is no longer revised to clear the grade.
+  failingDimensions: failingDimensions.map((d) => d.name),
 };

@@ -26,7 +26,7 @@
     └── ...
 ```
 
-`/implement` installs the reusable workflow to the project's `.claude/workflows/implement.js` and
+`/implement` runs the plugin's reusable `implement/reference/implement.js` and
 runs it on the dynamic-workflow runtime, writing each slice task's status in the tracker as slices are
 satisfied (the phase root rolls up).
 
@@ -108,7 +108,7 @@ Solution (specify-solution → solution.mdx)               [WHAT — design]
     ↓
 Plan (specify-plan → narrative plan.mdx + tracker tasks)  [WHAT — the plan]
     ↓
-Ready for Implementation   (/implement installs .claude/workflows/implement.js and runs the slice loop)
+Ready for Implementation   (/implement runs implement/reference/implement.js slice loop)
 ```
 
 Each phase can be:

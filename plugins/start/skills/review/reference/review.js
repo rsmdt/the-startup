@@ -1,9 +1,11 @@
-// review-workflow: v1
-//
 // The Agentic Startup — code review workflow (dynamic dimensions → adversarial verify → rank → report).
 //
-// One reusable dynamic-workflow script. /start:review installs this to <project>/.claude/workflows/
-// review.js and launches it via the Workflow tool, passing a resolved review target as `args`.
+// One reusable dynamic-workflow script, shipped with the `start` plugin at skills/review/reference/review.js. The
+// /start:review SKILL is the entry point: it launches this script in place via the Workflow tool,
+// passing a resolved review target as `args`.
+// It sits beside the skill that launches it, NOT in workflows/: a script in workflows/ registers a
+// slash command, and this one cannot be invoked directly — it needs an `args` object only the skill
+// can build (see the input contract below).
 //
 // It generalizes the solution-design review (solution.js) to code: same pipeline — fan out lenses,
 // adversarially verify each finding, synthesize, report — with ONE addition, a triage stage, because a
@@ -27,7 +29,7 @@
 // VERIFY agent is a DIFFERENT agent from the reviewer, so findings are confirmed independently.
 
 export const meta = {
-  name: "review",
+  name: "run-review",
   description: "Code review: pick dimensions from scope, fan out reviewers, adversarially verify findings, rank, report",
   phases: [
     { title: "Triage", detail: "read the diff and choose review dimensions + fan-out scale (scoped mode)" },
@@ -92,7 +94,7 @@ const TRIAGE = {
           key: { type: "string" },
           title: { type: "string" },
           focus: { type: "string", description: "what this dimension looks for, one or two sentences" },
-          reviewers: { type: "number", description: "how many parallel reviewers for this dimension (>=1), scaled to blast radius" },
+          reviewers: { type: "number", description: "parallel reviewers for this dimension: 1, or 2 for a heavy dimension on a large diff. The script clamps anything higher." },
           effort: { type: "string", description: "low | medium | high — reasoning effort for this dimension's reviewers" },
           rationale: { type: "string", description: "why this dimension fired (or its scale), for the audit trail" },
         },
@@ -136,14 +138,28 @@ const FINDINGS = {
   required: ["findings"],
 };
 
-const VERIFY = {
+// One verifier judges ALL of a reviewer's findings in a single pass. Per-finding verification was
+// multiplicative (reviewers × findings, both LLM-chosen and uncapped) and drove the worst case past the
+// runtime's own agent ceiling. The adversarial framing is preserved verbatim in the prompt; what is lost
+// is per-finding context isolation, which the prompt counters with an explicit anti-anchoring rule.
+const VERIFY_BATCH = {
   type: "object",
   properties: {
-    real: { type: "boolean", description: "true iff the code actually has this flaw AND its consequence is named" },
-    demoteToAccepted: { type: "boolean", description: "true if it is a real observation but harmless here" },
-    reason: { type: "string" },
+    verdicts: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          index: { type: "number", description: "the finding's index in the numbered list you were given" },
+          real: { type: "boolean", description: "true iff the code actually has this flaw AND its consequence is named" },
+          demoteToAccepted: { type: "boolean", description: "true if it is a real observation but harmless here" },
+          reason: { type: "string" },
+        },
+        required: ["index", "real"],
+      },
+    },
   },
-  required: ["real"],
+  required: ["verdicts"],
 };
 
 const SYNTHESIS = {
@@ -196,8 +212,11 @@ Get the diff and read the changed files in full:
 
 ## Choose the dimensions (Dial A — which fire)
 ALWAYS include this core (it fires on every change; never drop one):
-  correctness (logic, edge cases, error paths, does it do what the change claims), security, performance,
-  simplification (YAGNI / over-engineering), quality (naming, patterns, smells), testing (new paths covered).
+  correctness (logic, edge cases, error paths, does it do what the change claims, AND whether the new
+    paths are actually covered by tests),
+  security,
+  performance,
+  quality (naming, patterns, smells, AND YAGNI / over-engineering — code that does more than it needs to).
 ADD conditional dimensions when the change's signals fire them:
   concurrency (async / shared state), dependencies (manifest changes), compatibility (public API / schema /
   config change), data-migration (migration or schema files), accessibility (UI changes)${hasConstitution ? `,
@@ -207,10 +226,12 @@ trivial). If a change looks cosmetic but touches a risky path (auth, money, data
 dimension anyway and say why in the rationale.
 
 ## Scale each dimension (Dial B — how much)
-Set reviewers (>=1) and effort per dimension by blast radius, NOT file type: a tiny one-file diff → 1
-reviewer, low effort each; a large multi-subsystem diff → split a heavy dimension across file-groups
-(reviewers > 1) and raise effort ("high") on the risky ones (security on an auth change, correctness on
-core logic). Keep total reviewers proportional to the change — do not fan out 30 reviewers on a 20-line diff.
+Set reviewers (1 or 2) and effort per dimension by blast radius, NOT file type: a tiny one-file diff → 1
+reviewer, low effort each; a large multi-subsystem diff → split a heavy dimension across two file-groups
+(reviewers: 2) and raise effort ("high") on the risky ones (security on an auth change, correctness on
+core logic). Effort is your main dial, not reviewer count — a "high"-effort single reviewer beats two
+shallow ones. ${MAX_REVIEWERS_PER_DIM} reviewers per dimension is the ceiling and the script enforces it,
+so asking for more only gets clamped.
 
 Return { dimensions: [{ key, title, focus, reviewers, effort, rationale }] }.`;
 }
@@ -245,30 +266,43 @@ here. Return an empty findings list if your dimension is clean — do not invent
 Return { findings: [...], accepted: [...] }.`;
 }
 
-function verifyPrompt(task, finding) {
-  return `You are the ADVERSARIAL verifier for one review finding on "${name}" (dimension: ${task.title}).
-Default to disbelief — assume the finding is WRONG until the code forces the opposite conclusion.
+function verifyBatchPrompt(task, findings) {
+  const list = findings
+    .map((f, i) => `${i}. ${f.severity} — ${f.title}\n   at ${f.file}:${f.line ?? "?"}\n   consequence claimed: ${f.consequence}`)
+    .join("\n");
+  return `You are the ADVERSARIAL verifier for the ${findings.length} review finding(s) below on "${name}"
+(dimension: ${task.title}). Default to disbelief — assume each finding is WRONG until the code forces the
+opposite conclusion.
 
-The finding:
-  ${finding.severity} — ${finding.title}
-  at ${finding.file}:${finding.line ?? "?"}
-  consequence claimed: ${finding.consequence}
+## The findings
+${list}
 
-Open the code yourself (read ${finding.file} and run \`${diffCommand}\` if you need the diff) and check:
+Open the code yourself (read each cited file, and run \`${diffCommand}\` if you need the diff) and check
+EACH finding independently:
 1. Does the code ACTUALLY have this flaw at that location? A finding that misreads the code is NOT real.
 2. Is the consequence genuinely named and plausible? ${EVIDENCE}
 If it is a real observation but harmless in this context, set demoteToAccepted. When in doubt, rule NOT
 real — a false finding destroys the review's credibility.
 
-Return { real, demoteToAccepted, reason }.`;
+Judge each finding ON ITS OWN EVIDENCE. The verdicts are independent: having just confirmed three findings
+is no reason to wave the fourth through, and rejecting one is no reason to reject the next. A run of
+identical verdicts means you have stopped opening the code — go back and open it.
+
+Return { verdicts: [{ index, real, demoteToAccepted, reason }] } — one entry per finding, \`index\` matching
+the numbering above.`;
 }
 
 function synthesizePrompt(confirmed, accepted) {
   const list = confirmed
-    .map((f) => `- [${f.severity}/${f.confidence ?? "?"}] ${f.source}: ${f.title} @ ${f.file}:${f.line ?? "?"} — ${f.consequence}`)
+    .map((f) => `- [${f.severity}/${f.confidence ?? "?"}]${f.unverified ? "[UNVERIFIED]" : ""} ${f.source}: ${f.title} @ ${f.file}:${f.line ?? "?"} — ${f.consequence}`)
     .join("\n");
+  const unverifiedCount = confirmed.filter((f) => f.unverified).length;
   return `You are the synthesizer for the code review of "${name}" (${mode} mode). The findings below are
-already verified — do not re-review. Consolidate them.
+already verified — do not re-review. Consolidate them.${unverifiedCount
+      ? `\n\nNOTE: ${unverifiedCount} finding(s) are tagged [UNVERIFIED] — their reviewer returned more findings
+than the verification cap allowed, so no adversarial verifier checked them. Keep them, but mark each one
+"unverified" in its entry so the reader knows its confidence is lower.`
+      : ""}
 
 ## Confirmed findings
 ${list || "(none)"}
@@ -316,6 +350,20 @@ ${mode === "audit" ? "\n## Top refactors\nThe ranked refactors — what / why (t
 Write the file, then report the path and a one-line summary.`;
 }
 
+// ── Caps ─────────────────────────────────────────────────────────────────────────────────────
+//
+// Every fan-out in this file gets a NUMBER. Before these existed, each multiplier was chosen by an LLM
+// (the triage agent's `reviewers`, each reviewer's finding count) with nothing clamping it, so the agent
+// count was unbounded in principle and ~1400 in practice on a large diff — past the runtime's own 1000
+// ceiling. Caps never drop work silently: over-cap findings ship to the report tagged unverified, and a
+// truncated reviewer split is logged.
+const MAX_REVIEWERS_PER_DIM = 2; // a heavy dimension may split across file-groups, but only so far
+const MAX_REVIEWERS_TOTAL = 10; // ceiling across all dimensions; past it, one reviewer per dimension
+const MAX_FINDINGS_PER_REVIEWER = 8; // verified per reviewer; the rest are reported unverified
+
+const SEVERITY_ORDER = { CRITICAL: 3, HIGH: 2, MEDIUM: 1, LOW: 0 };
+const sevRank = (s) => SEVERITY_ORDER[String(s ?? "").toUpperCase()] ?? 0;
+
 // ── Helpers ──────────────────────────────────────────────────────────────────────────────────
 
 function splitFiles(files, n) {
@@ -348,11 +396,17 @@ if (mode === "audit") {
   reviewTasks = AUDIT_PHASES.map((p) => ({ ...p, files: null }));
 } else {
   const triage = await agent(triagePrompt(), { phase: "Triage", label: "triage", schema: TRIAGE });
-  for (const d of (triage?.dimensions ?? []).filter((x) => x && x.key)) {
-    const n = Math.max(1, Math.floor(d.reviewers ?? 1));
+  const dimensions = (triage?.dimensions ?? []).filter((x) => x && x.key);
+  for (const d of dimensions) {
+    // The triage agent proposes the split; the script clamps it. An LLM-chosen integer never sizes a fan-out.
+    const n = Math.min(MAX_REVIEWERS_PER_DIM, Math.max(1, Math.floor(d.reviewers ?? 1)));
     for (const group of splitFiles(changedFiles, n)) {
       reviewTasks.push({ key: d.key, title: d.title ?? d.key, focus: d.focus ?? "", effort: d.effort, files: group });
     }
+  }
+  if (reviewTasks.length > MAX_REVIEWERS_TOTAL) {
+    log(`review "${name}": ${reviewTasks.length} reviewers exceeds the cap of ${MAX_REVIEWERS_TOTAL} — collapsing to one reviewer per dimension (each now reads the full change).`);
+    reviewTasks = dimensions.map((d) => ({ key: d.key, title: d.title ?? d.key, focus: d.focus ?? "", effort: d.effort, files: null }));
   }
   log(`review "${name}": triaged ${new Set(reviewTasks.map((t) => t.key)).size} dimension(s) → ${reviewTasks.length} reviewer(s)`);
 }
@@ -363,20 +417,29 @@ const perTask = await pipeline(
   (task) =>
     agent(reviewPrompt(task), { phase: "Review", label: `review:${task.key}`, effort: task.effort })
       .then((r) => ({ task, findings: r?.findings ?? [], accepted: r?.accepted ?? [] })),
-  ({ task, findings, accepted }) =>
-    parallel(
-      findings.map((f) => () =>
-        agent(verifyPrompt(task, f), { phase: "Verify", label: `verify:${task.key}`, schema: VERIFY }).then((v) => ({ f, v })),
-      ),
-    ).then((verified) => {
+  ({ task, findings, accepted }) => {
+    if (!findings.length) return { task, confirmed: [], accepted };
+    // Severity-first, so if the cap truncates it drops the least consequential findings, not arbitrary ones.
+    const ranked = [...findings].sort((a, b) => sevRank(b.severity) - sevRank(a.severity));
+    const toVerify = ranked.slice(0, MAX_FINDINGS_PER_REVIEWER);
+    const overflow = ranked.slice(MAX_FINDINGS_PER_REVIEWER);
+    if (overflow.length) {
+      log(`review "${name}": ${task.key} returned ${findings.length} findings — verifying the top ${MAX_FINDINGS_PER_REVIEWER} by severity; ${overflow.length} ship unverified.`);
+    }
+    return agent(verifyBatchPrompt(task, toVerify), { phase: "Verify", label: `verify:${task.key}`, schema: VERIFY_BATCH }).then((res) => {
       const confirmed = [];
       const demoted = [];
-      for (const { f, v } of verified.filter(Boolean)) {
-        if (v?.real && !v?.demoteToAccepted) confirmed.push({ ...f, source: task.key });
-        else if (v?.real && v?.demoteToAccepted) demoted.push({ smell: f.title, location: `${f.file}:${f.line ?? "?"}`, reasoning: v.reason ?? "harmless here" });
+      for (const v of res?.verdicts ?? []) {
+        const f = toVerify[v.index];
+        if (!f) continue; // an out-of-range index means the verifier lost track — drop, do not guess
+        if (v.real && !v.demoteToAccepted) confirmed.push({ ...f, source: task.key });
+        else if (v.real && v.demoteToAccepted) demoted.push({ smell: f.title, location: `${f.file}:${f.line ?? "?"}`, reasoning: v.reason ?? "harmless here" });
       }
+      // Over-cap findings reach the report tagged, rather than disappearing without trace.
+      for (const f of overflow) confirmed.push({ ...f, source: task.key, unverified: true });
       return { task, confirmed, accepted: [...accepted, ...demoted] };
-    }),
+    });
+  },
 );
 
 // 3. Flatten confirmed findings + accepted.

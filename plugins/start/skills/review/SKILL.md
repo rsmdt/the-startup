@@ -76,7 +76,7 @@ State {
 
 ## Reference Materials
 
-- reference/review.js — the review workflow (triage → fan-out → verify → synthesize → markdown report); read its input-contract comment for the `args`
+- reference/review.js — the review workflow (triage → fan-out → batched verify → synthesize → markdown report); read its input-contract comment for the `args`
 - reference/audit-phases.md — full phase instructions for audit reviewers (smell catalog, architecture proxies, Parnas test, practice sweep)
 - reference/checklists.md — per-dimension checklists for scoped reviewers
 - reference/classification.md — severity, confidence, consequence test, likelihood×cost ranking
@@ -105,28 +105,17 @@ You do not review the code yourself or pick perspectives by hand — the workflo
 (dynamically, from the diff) and owns the review→verify→rank→report loop. Your job is to resolve the
 scope (step 1), launch the workflow, and present what it returns.
 
-### 2. Install / Version-Check the Workflow
+### 2. Launch the Workflow
 
-The golden copy is this skill's `reference/review.js` (first line `// review-workflow: vN`).
-
-```
-installed = <project>/.claude/workflows/review.js
-  absent              => create .claude/workflows/ if needed; copy bundled → installed; report "installed review workflow v{N}".
-  same version         => proceed.
-  bundled > installed  => ask under "Upgrade": Upgrade v{old} → v{new}? — Upgrade (Recommended) | Keep current.
-  installed > bundled  => keep the project copy (hand-edited/ahead); note it.
-```
-
-Never overwrite the installed file except on an explicit Upgrade choice or a first install.
-
-### 3. Launch the Workflow
+The script sits beside this SKILL.md at `reference/review.js`. Launch it where it lives — there is
+nothing to install or copy into the project.
 
 Build the args and launch. `reportPath` is markdown: `docs/reviews/review-<target-or-audit>-<YYYY-MM-DD>.md`
 in the reviewed repo (create `docs/reviews/` if needed). The reference paths are absolute paths to THIS
 skill's `reference/` files.
 
 ```
-Workflow({ scriptPath: "<project>/.claude/workflows/review.js", args: {
+Workflow({ scriptPath: "<absolute path to this skill's reference/review.js>", args: {
   name, mode,                                        // from step 1 (scoped | audit)
   diffCommand, changedFiles, hasConstitution,        // scoped
   orientation, coChange,                             // audit — from step 1 Phase 1
@@ -136,14 +125,15 @@ Workflow({ scriptPath: "<project>/.claude/workflows/review.js", args: {
 ```
 
 Scoped: the workflow triages the dimensions (an always-active core — correctness, security, performance,
-simplification, quality, testing — plus conditionals the diff fires, scaled by blast radius), fans out
-reviewers, adversarially verifies each finding, ranks them, and writes the markdown report. Audit: it runs
+quality — plus conditionals the diff fires, scaled by blast radius within the script's reviewer caps), fans
+out reviewers, adversarially verifies each reviewer's findings in one batched pass, ranks them, and writes
+the markdown report. Audit: it runs
 the four fixed phase reviewers. Present a one-line dispatch summary and record the `runId`; report status
 from the run, do not fabricate progress.
 
-### 4. Present and Offer Next Steps
+### 3. Present and Offer Next Steps
 
-When the run returns (`{ mode, verdict, counts, reportPath, findings, accepted, refactors }`):
+When the run returns (`{ name, mode, verdict, counts, reportPath, findings, accepted, refactors }`):
 
 Present the report at `reportPath`, then a concise chat summary: verdict, severity counts, the
 critical/high findings, and strengths (scoped) or the verdict paragraph + top refactors (audit). Format

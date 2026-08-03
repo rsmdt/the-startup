@@ -100,7 +100,7 @@ Execute a specification by running its slice tasks on Claude Code's dynamic-work
 | Step | What happens |
 |------|--------------|
 | **Read** | Read the slice tasks (`task.js graph`); each carries a code brief (features + EARS + gates) with its holdout scenarios as scenario child tasks |
-| **Install** | Copy the bundled `implement.js` to `.claude/workflows/implement.js` (prompt to upgrade if the bundled copy is newer) |
+| **Launch** | Run the implement skill's `reference/implement.js` in place via the Workflow tool |
 | **Launch** | Run it on the dynamic-workflow runtime with the slice tasks as input; independent slices run via `parallel()` |
 | **Loop** | Per slice: code agent builds (reads the slice task, blind to its scenarios) → eval agent proves it (reads the scenario tasks, blind to the slice + source) → retry with filtered summaries until threshold or max iterations |
 
@@ -115,11 +115,11 @@ Execute a specification by running its slice tasks on Claude Code's dynamic-work
 <details>
 <summary><strong>View Details — the slice loop</strong></summary>
 
-Reads the spec's slice tasks from the tracker and topologically sorts them by `--depends-on`. Installs the reusable workflow into the project, then runs it on the dynamic-workflow runtime. Each slice goes through a barriered code→eval loop: a code agent builds it (reading the slice task's features + EARS + gates and AGENTS.md, but never its scenario child tasks), an eval agent proves it against those scenario tasks (accessing the running service, but never the slice or the source), and filtered one-line failure summaries feed the next retry until the satisfaction threshold or max iterations. Independent slices run concurrently; dependent slices run in order.
+Reads the spec's slice tasks from the tracker and topologically sorts them by `--depends-on`. Runs the plugin's reusable workflow on the dynamic-workflow runtime. Each slice goes through a barriered code→eval loop: a code agent builds it (reading the slice task's features + EARS + gates and AGENTS.md, but never its scenario child tasks), an eval agent proves it against those scenario tasks (accessing the running service, but never the slice or the source), and filtered one-line failure summaries feed the next retry until the satisfaction threshold or max iterations. Independent slices run concurrently; dependent slices run in order.
 
 ```mermaid
 flowchart TD
-    A([slice tasks]) --> |read + topo-sort by --depends-on| B[Install .claude/workflows/implement.js]
+    A([slice tasks]) --> |read + topo-sort by --depends-on| B[Launch plugins/start/skills/implement/reference/implement.js]
     B --> C[Launch on dynamic-workflow runtime]
     C --> D{slices remaining?}
     D --> |independent group| E[Code Agents build in parallel<br/>read slice task: features + EARS + gates<br/>blind to scenarios]
@@ -608,7 +608,7 @@ The `start` plugin includes five autonomous skills that activate automatically b
 
 | Skill | Purpose |
 |-------|---------|
-| `implement` | Installs and runs the reusable slice loop (`.claude/workflows/implement.js`) on the dynamic-workflow runtime — barriered code→eval retry per slice |
+| `implement` | Runs the reusable slice loop (`implement/reference/implement.js`) on the dynamic-workflow runtime — barriered code→eval retry per slice |
 
 ### Methodology Skills
 
@@ -797,7 +797,7 @@ Optional: /document after implementation for documentation sync
 
 **What happens:**
 - Optional: Creates `feature/001-notification-system` git branch
-- Installs and runs `.claude/workflows/implement.js` on the dynamic-workflow runtime
+- Runs `plugins/start/skills/implement/reference/implement.js` on the dynamic-workflow runtime
 - Per slice: a code agent builds it, an eval agent proves it against holdout scenario tasks
 - Retries with filtered failure summaries until the satisfaction threshold is met
 - Optional: Creates PR at completion
@@ -892,7 +892,7 @@ plugins/start/skills/
 ├── specify-solution/template.md         # Solution design structure
 ├── specify-plan/template.mdx               # Plan structure (narrative: phases + outcomes)
 ├── specify-plan/templates/scenario.md      # Holdout scenario-task body template
-├── implement/reference/implement.js        # The reusable slice-loop workflow
+├── implement/reference/implement.js        # The reusable slice-loop workflow (launched by scriptPath)
 └── document/templates/                  # Knowledge capture templates
     ├── domain-template.md               # Business rules
     ├── pattern-template.md              # Technical patterns

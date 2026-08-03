@@ -9,7 +9,7 @@ argument-hint: "date range (default: yesterday), e.g. 'last 3 days' or '2026-07-
 
 Act as the self-improvement orchestrator. You turn a date range into a **daydream plan** (a terse
 purpose, the signal lenses to mine, and the harness surfaces eligible to change), get the user to approve or
-refine it, then install and launch the reusable daydream workflow. You do **not** mine the logs, draft
+refine it, then launch the reusable daydream workflow. You do **not** mine the logs, draft
 the diffs, or write the report yourself — the workflow holds the mine→cluster→propose→validate→report
 loop. Your job is the setup around it: frame the plan, resolve the log source and date range, seed the
 mine tasks, launch, and report the proposals that came back.
@@ -35,7 +35,7 @@ where its fix lives, and the reference to read before drafting). The skill resol
 lenses; the workflow injects the dimension meaning into its agents.
 
 **In scope — the whole project harness** (every surface that shapes agent behaviour, all git-tracked):
-- artifacts under `plugins/` — skills, subagents (agents), workflow golden copies, output-styles, templates;
+- artifacts under `plugins/` — skills, subagents (agents), workflow scripts, output-styles, templates;
 - the project **`CLAUDE.md` / `AGENTS.md`** baseline instruction (improve or simplify);
 - **guardrails**, in preference order — **permission policies** (allow/deny/ask in the project
   `.claude/settings.json`, e.g. deny `rm -rf`, ask on `.env` reads), **hooks** (settings.json), and
@@ -44,8 +44,7 @@ lenses; the workflow injects the dimension meaning into its agents.
   new permission rule or hook for a recurring mistake or a dangerous operation.
 All backed by cited session-log evidence.
 **Out of scope:** editing any artifact directly (advisory by design); mining another project's logs;
-touching the untracked installed `.claude/workflows/*.js` copies; the user's **global** `~/.claude/`
-files (this run stays inside the project harness).
+the user's **global** `~/.claude/` files (this run stays inside the project harness).
 
 ## Constraints
 
@@ -62,9 +61,8 @@ files (this run stays inside the project harness).
   a `file:line`). The workflow's adversarial validator enforces this; surface which proposals survived.
 - Restrict targets to the **project harness** (all git-tracked): artifacts under `plugins/`, the project
   `CLAUDE.md` / `AGENTS.md`, and guardrails in the project `.claude/settings.json` (permission policies +
-  hooks) / `CLAUDE.md` rules. A workflow-script improvement must target the **golden copy** under
-  `plugins/*/skills/*/reference/*.js` (and bump its version marker), never the installed
-  `.claude/workflows/*.js`. Never target the user's global `~/.claude/` files.
+  hooks) / `CLAUDE.md` rules. A workflow-script improvement must target the script under
+  `plugins/*/skills/*/reference/*.js`. Never target the user's global `~/.claude/` files.
 - Every proposal is labelled **improve** or **create**; prefer improving an existing artifact, and
   create a new one only where the evidence shows no artifact fits. All proposals — improve and create —
   are reported for a human to apply; daydream never touches an artifact itself.
@@ -76,11 +74,10 @@ files (this run stays inside the project harness).
   The bounded-patch and eval-gated auto-apply tiers are the roadmap (see the daydream analysis report
   §5.8), not built yet.
 - Launch before the plan (purpose + angles + date range) is approved.
-- Overwrite a project's edited `.claude/workflows/daydream.js` without asking (see version check).
 
 ## Reference Materials
 
-- [daydream.js](reference/daydream.js) — the golden, reusable workflow script (mine → cluster → propose → validate → synthesize). Read its input-contract comment; it defines the `args` you build.
+- [daydream.js](reference/daydream.js) — the reusable workflow script (mine → cluster → propose → validate → synthesize). Read its input-contract comment; it defines the `args` you build.
 - [template.md](template.md) — the daydream plan document.
 
 ## Workflow
@@ -144,32 +141,20 @@ For each approved signal angle, create a mine task (record the ids into `angleId
 
 Use the specify-meta skill's `task.js` (co-located with spec.py), run via the shell.
 
-### 4. Install / Version-Check the Workflow
+### 4. Launch the Workflow
 
-The golden copy is this skill's `reference/daydream.js`; its first line is `// daydream-workflow: vN`.
-
-```
-installed = <project>/.claude/workflows/daydream.js
-match:
-  installed absent            => create .claude/workflows/ if needed; copy bundled → installed; tell the user "installed daydream workflow v{N}".
-  same version marker         => proceed.
-  bundled version > installed => ask under header "Upgrade": "Upgrade daydream workflow v{old} → v{new}?" — Upgrade (Recommended) | Keep current.
-  installed version > bundled => project copy is ahead/hand-edited; keep it and note this.
-```
-
-Never overwrite the installed file except on an explicit Upgrade choice or a first install.
-
-### 5. Launch the Workflow
+The script sits beside this SKILL.md at `reference/daydream.js`. Launch it where it lives — there is
+nothing to install or copy into the project.
 
 Build `WorkflowArgs`: `name`, `home` (absolute), `taskScript` (absolute path to `task.js`),
 `description`, `dateRange`, `logRoot` (absolute), `projectRoot` (absolute path to the repo root — anchors
 `CLAUDE.md`/`AGENTS.md`/`.claude`), `editTargetsRoot` (absolute path to this repo's `plugins/`), `angles`
 (from step 3, each `{ id, name, kind }` — set `kind` to the lens the task represents: `friction` |
 `conversation` | `router` | `capability` | `guardrail` | `instruction`), `reportPath` = `home/report.md`,
-`maxProposals` (default 12), `maxMineRounds` (default 2). Set `status: in-progress`. Launch:
+`maxProposals` (default 8), `maxMineRounds` (default 1). Set `status: in-progress`. Launch:
 
 ```
-Workflow({ scriptPath: "<project>/.claude/workflows/daydream.js", args: <WorkflowArgs> })
+Workflow({ scriptPath: "<absolute path to this skill's reference/daydream.js>", args: <WorkflowArgs> })
 ```
 
 Present a one-line dispatch summary, e.g.:
@@ -177,15 +162,19 @@ Present a one-line dispatch summary, e.g.:
 
 Record the `runId`. The run executes in the background; report status from the run, do not fabricate progress.
 
-### 6. Report and Finalize
+### 5. Report and Finalize
 
-When the run returns (`{ name, dateRange, mined, opportunities, proposals, supported, dropped, reportPath, grade }`):
+When the run returns (`{ name, dateRange, mined, findings, opportunities, proposals, supported, dropped, applyTier, reportPath, grade, failingDimensions }`):
 
 1. Present the report at `reportPath`: the per-dimension friction ranking and the validated proposals
    (diff or new-artifact body + evidence + safety tier), grouped by harness dimension. Call out how many
    were dropped in validation, and
    surface the report grade — the derived rubric value `grade.overall` and the per-dimension
-   `grade.dimensions` scores (behaviour / improvement / proof / faithfulness); list any still `fail`/`partial`.
+   `grade.dimensions` scores (behaviour / improvement / proof / faithfulness); name every dimension in
+   `failingDimensions` as a gap for the user to close. The workflow grades once and does NOT revise the
+   report to clear it, so a failing dimension ships — say so rather than implying it was fixed.
+   `grade` is `null` when no proposal survived validation (there was nothing to grade); in that case
+   report that the run found nothing supportable, and do not print a grade.
 2. Set `daydream.md` `status: review`.
 3. Ask the user to choose:
    Apply a proposal (on a branch) | Deepen a signal lens | Persist report to `docs/research/` | Done

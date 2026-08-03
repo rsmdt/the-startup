@@ -1,16 +1,17 @@
-// daydream-workflow: v7
-//
 // The Agentic Startup — daydream workflow (self-improvement from session logs, tracker-backed).
 //
-// One reusable dynamic-workflow script. /start:daydream installs this to
-// <project>/.claude/workflows/daydream.js and launches it via the Workflow tool, passing an
-// approved daydream plan as `args`. It is NOT regenerated per run.
+// One reusable dynamic-workflow script, shipped with the `start` plugin at skills/daydream/reference/daydream.js. The
+// /start:daydream SKILL is the entry point: it launches this script in place via the Workflow tool,
+// passing an approved daydream plan as `args`. It is NOT regenerated per run.
+// It sits beside the skill that launches it, NOT in workflows/: a script in workflows/ registers a
+// slash command, and this one cannot be invoked directly — it needs an `args` object only the skill
+// can build (see the input contract below).
 //
 // It reads the Claude Code session logs over a date range, finds where the agentic system
 // underperformed or was exposed to risk, and PRODUCES A REPORT of what should change across the whole
 // project harness — every surface that shapes how the agent behaves:
 //   - the CLAUDE.md / AGENTS.md baseline instruction,
-//   - skills, subagents (agents), workflow golden copies, output-styles,
+//   - skills, subagents (agents), workflow scripts, output-styles,
 //   - guardrails: permission policies (allow/deny/ask), hooks, and CLAUDE.md "Always/Never" rules.
 // Each report entry is labelled IMPROVE (edit an existing artifact) or CREATE (a new skill, subagent,
 // hook, or permission rule), carries a concrete diff / new-artifact body, and cites the log evidence
@@ -51,20 +52,20 @@
 // structured verdicts agents return.
 //
 // Sandbox note: the session-log archive lives OUTSIDE the project root (under the user's Claude
-// home, e.g. ~/.claude/projects/<slug>/). The command sandbox denies reads there by default, so a
-// mine agent that shells into the archive may hit "Operation not permitted" and must retry with the
-// sandbox disabled. Reading via the file-read tool is unaffected. Mine prompts say so explicitly.
+// home, e.g. ~/.claude/projects/<slug>/). The command sandbox may deny shell reads there, so agents
+// are told to read archive files with the Read file tool (unaffected by the shell sandbox) and keep
+// shell use to path listing. Prompts must never instruct agents to disable or bypass the sandbox.
 
 export const meta = {
-  name: "daydream",
+  name: "run-daydream",
   description: "Self-improvement from session logs: report what should change across the harness (CLAUDE.md, skills, subagents, workflows, output-styles, guardrails incl. permission policies) — each entry labelled improve/create, with a concrete change and cited evidence. Advisory: the human applies.",
   phases: [
     { title: "Mine", detail: "parallel lenses mine the session JSONL (iterative for sampling lenses) → cited findings tagged by harness surface" },
     { title: "Cluster", detail: "dedup/rank findings into opportunities; make the improve-vs-create call per opportunity" },
     { title: "Propose", detail: "read the surface reference, then draft a diff (improve) or new-artifact body (create) + tier" },
     { title: "Validate", detail: "adversarially confirm the log evidence supports each proposal" },
-    { title: "Synthesize", detail: "write the proposals report; revise it to clear the grade" },
-    { title: "Grade", detail: "grade each proposal on behaviour / improvement / proof; block and revise on failures" },
+    { title: "Synthesize", detail: "write the proposals report (once — there is no revision loop)" },
+    { title: "Grade", detail: "grade each proposal on behaviour / improvement / proof; failures are reported, not revised" },
   ],
 };
 
@@ -82,8 +83,8 @@ export const meta = {
 //                                             // below): "friction" (default), "conversation", "router",
 //                                             // "capability", "guardrail", "instruction".
 //   reportPath:      string,          // where SYNTHESIZE writes the report
-//   maxProposals:    number,          // cap on proposals carried to the report (default 12)
-//   maxMineRounds:   number,          // cap on iterative mine passes (default 2) — sampling lenses re-run
+//   maxProposals:    number,          // cap on proposals carried to the report (default 8)
+//   maxMineRounds:   number,          // cap on iterative mine passes (default 1) — sampling lenses re-run
 // }
 
 // Background launches may serialize `args`; on some runtimes it is revived as a JSON string.
@@ -100,8 +101,13 @@ const {
   editTargetsRoot,
   angles = [],
   reportPath,
-  maxProposals = 12,
-  maxMineRounds = 2,
+  // 8, not 12: each proposal costs a propose agent, and the cluster ranks by frequency × severity, so
+  // opportunities 9-12 are the tail it already scored lowest. `droppedCount` still reports what was cut.
+  maxProposals = 8,
+  // 1, not 2: round 2 re-ran only lenses that self-reported un-examined sessions, over the residue THEY
+  // ranked lowest-signal, and nothing downstream branched on the extra yield. `unexaminedRemain` still
+  // comes back in the result, so a user who wants the tail can re-run with maxMineRounds: 2.
+  maxMineRounds = 1,
 } = parsedArgs ?? {};
 
 // FAIL FAST on a mis-wired launch. Every stage prompt templates these values verbatim; if any is
@@ -153,9 +159,9 @@ const DIMENSIONS = {
   },
   workflow: {
     label: "workflow",
-    essence: "improve a workflow golden copy (models, prompts, control flow); bump its version marker",
-    surface: `IMPROVE a workflow GOLDEN COPY under ${editTargetsRoot}/*/skills/*/reference/*.js and BUMP its "// <name>-workflow: vN" version marker (never the installed .claude/workflows/*.js copy)`,
-    reference: `The golden copy itself is the reference — read it in full, and cross-check how it ACTUALLY ran in the session logs (its mine/code/eval/validate agents, their models, their retries).`,
+    essence: "improve a workflow script (models, prompts, control flow, agent budget)",
+    surface: `IMPROVE a workflow script under ${editTargetsRoot}/*/skills/*/reference/*.js — these ship with the plugin and run in place, so there is no separate installed copy to keep in sync`,
+    reference: `The script itself is the reference — read it in full, and cross-check how it ACTUALLY ran in the session logs (its mine/code/eval/validate agents, their models, their retries). Note the agent budget: every fan-out must have a numeric cap, and a per-item verification must never nest inside another fan-out.`,
   },
   "output-style": {
     label: "output-style",
@@ -224,13 +230,27 @@ const PROPOSAL = {
   required: ["target", "action", "summary"],
 };
 
-const VERDICT = {
+// One adversarial auditor judges ALL proposals in a single pass. Per-proposal validation was the third
+// separate re-reading of the same citations (the cluster gate already dropped thin signal, and the grader's
+// Proof dimension re-checks the same thing downstream) and it scaled with the proposal cap. What is lost
+// is per-proposal context isolation; the prompt counters it by forbidding group verdicts.
+const VERDICT_BATCH = {
   type: "object",
   properties: {
-    supported: { type: "boolean", description: "true iff the cited log evidence actually motivates this change" },
-    reason: { type: "string" },
+    verdicts: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          id: { type: "string", description: "the proposal's tracker task id" },
+          supported: { type: "boolean", description: "true iff the cited log evidence actually motivates this change" },
+          reason: { type: "string" },
+        },
+        required: ["id", "supported"],
+      },
+    },
   },
-  required: ["supported"],
+  required: ["verdicts"],
 };
 
 // Report-quality grade — a rubric of per-dimension scores (fail | partial | pass). Daydream's rubric:
@@ -280,9 +300,10 @@ function mineCommon(seen, round) {
 Session transcripts are JSONL under: ${logRoot}
 - Top-level sessions:  <session-uuid>.jsonl
 - Subagent transcripts (SEPARATE, must also be walked):  <session-uuid>/subagents/agent-<id>.jsonl
-Reading this archive may require the shell sandbox to be DISABLED — it lives outside the project
-root, so a plain read can fail with "Operation not permitted". If that happens, retry the command
-with the sandbox disabled. Filter records to the date range by the ISO \`timestamp\` on each record.
+The archive lives outside the project root, so SHELL reads there can fail with "Operation not
+permitted" under the command sandbox. Read archive files with the Read file tool (it is unaffected by
+the shell sandbox); use the shell only where it works (e.g. listing paths). Do NOT disable or bypass
+the sandbox. Filter records to the date range by the ISO \`timestamp\` on each record.
 
 ## Iterative coverage
 ${seenNote}
@@ -410,8 +431,8 @@ outcome signal in that session:
 A verifier/gate role must never be recommended BELOW the generator it checks — call that out if seen.
 
 ${mineDimensionTag()}
-Routing findings target the \`workflow\` surface (an \`agent(..., { model, effort })\` call in a golden
-copy) or the \`agent\` surface (a \`model:\` frontmatter in a team agent) — always IMPROVE.
+Routing findings target the \`workflow\` surface (an \`agent(..., { model, effort })\` call in a workflow
+script) or the \`agent\` surface (a \`model:\` frontmatter in a team agent) — always IMPROVE.
 
 ## Record findings (CITED) inline
 Every recommendation cites: the session file + record uuid, the \`message.model\` and \`usage\` numbers,
@@ -624,14 +645,16 @@ Return { target, targetKind, action, tier, hasEvalSuite, summary, diffWritten }.
 Do NOT edit the real artifact — only propose.`;
 }
 
-function validatePrompt(taskId) {
-  return `You are the ADVERSARIAL validation gate for a daydream proposal (default to disbelief).
-Read the proposal:  ${tj} read ${taskId} --home ${home}
+function validateBatchPrompt(taskIds) {
+  return `You are the ADVERSARIAL validation gate for ${taskIds.length} daydream proposal(s) (default to
+disbelief). Read each proposal:
+${taskIds.map((id) => `  ${tj} read ${id} --home ${home}`).join("\n")}
 
-Assume the proposed change is UNJUSTIFIED until the cited log evidence forces the opposite conclusion.
-For each citation the proposal rests on:
-- OPEN the cited source yourself — the session-log record it points to (disable the sandbox if the
-  read is denied) and any repo \`file:line\` — and confirm it ACTUALLY shows the failure/friction/risk the
+Assume every proposed change is UNJUSTIFIED until the cited log evidence forces the opposite conclusion.
+Take the proposals ONE AT A TIME. For each, and for each citation it rests on:
+- OPEN the cited source yourself — the session-log record it points to (use the Read file tool for
+  archive files; it is unaffected by the shell sandbox — never disable or bypass the sandbox) and any
+  repo \`file:line\` — and confirm it ACTUALLY shows the failure/friction/risk the
   proposal claims. A citation that does not substantiate the claim counts as UNSUPPORTED.
 - The proposal is supported ONLY when the evidence genuinely motivates THIS change (not merely "an error
   happened nearby"). For a CREATE, the evidence must show the recurring need it fills. For a guardrail,
@@ -639,7 +662,11 @@ For each citation the proposal rests on:
   The change must plausibly reduce the evidenced friction/risk.
 When in doubt, rule NOT supported — a dropped weak proposal is better than a wrong recommendation.
 
-Return { supported, reason }.`;
+You must actually OPEN the sources for every proposal, not just the first few. Judging ${taskIds.length}
+proposals in one pass is not licence to judge them as a group: a run of identical verdicts means you
+stopped opening sources. Each verdict stands on the citations of ITS OWN proposal.
+
+Return { verdicts: [{ id, supported, reason }] } — one entry per proposal, \`id\` being the task id above.`;
 }
 
 function gradePrompt() {
@@ -672,21 +699,7 @@ If a proposal shows a quality problem none of these name, add it as your own dim
   fix } — name the exact proposal and the change that resolves it. Be specific.`;
 }
 
-function synthesizePrompt(kept, issues) {
-  if (issues && issues.length) {
-    const fixes = issues
-      .map((x) => `- ${x.dimension}: ${x.detail}${x.fix ? ` → ${x.fix}` : ""}`)
-      .join("\n");
-    return `You are revising the daydream proposals report at ${reportPath} to fix specific grading issues.
-Read the current report first.
-Fix EACH issue below, changing only what it requires — preserve every other proposal, diff, and citation:
-${fixes}
-If closing an issue needs evidence or a diff, re-open the proposal task it refers to:
-  ${tj} list --home ${home} --type proposal
-  ${tj} read <id> --home ${home}
-Do NOT invent a proposal that is not in the tracker, and do NOT weaken any citation.
-Rewrite the file in place. Report the path and a one-line summary of what you changed.`;
-  }
+function synthesizePrompt(kept) {
   const list = kept
     .map((p, i) => `${i + 1}. [${p.tier ?? "advisory"}] [${(p.action ?? "improve").toUpperCase()}] ${p.targetKind ?? "?"} — ${p.target} — ${p.summary} (task ${p.id})`)
     .join("\n");
@@ -751,39 +764,42 @@ for (let round = 0; active.length && round < rounds; round++) {
 const cluster = await agent(clusterPrompt(), { phase: "Cluster", label: "cluster", schema: CLUSTER });
 const proposalIds = (cluster?.proposalIds ?? []).filter(Boolean).slice(0, maxProposals);
 
+// Propose fans out — each proposal must read one artifact in full and write an applicable diff, which does
+// not batch. Validation does not fan out: one auditor takes every proposal.
 let proposals = [];
 if (proposalIds.length) {
-  proposals = await pipeline(
-    proposalIds,
-    (id) => agent(proposePrompt(id), { phase: "Propose", label: `propose:${id}`, schema: PROPOSAL }).then((p) => ({ ...p, id })),
-    (p, id) =>
-      agent(validatePrompt(id), { phase: "Validate", label: `validate:${id}`, schema: VERDICT }).then((v) => ({ ...p, id, verdict: v })),
+  const drafted = await parallel(
+    proposalIds.map((id) => () =>
+      agent(proposePrompt(id), { phase: "Propose", label: `propose:${id}`, schema: PROPOSAL }).then((p) => ({ ...p, id })),
+    ),
   );
+  const draftedIds = drafted.filter(Boolean).map((p) => p.id);
+  const audit = draftedIds.length
+    ? await agent(validateBatchPrompt(draftedIds), { phase: "Validate", label: "validate", schema: VERDICT_BATCH })
+    : null;
+  const byId = new Map((audit?.verdicts ?? []).map((v) => [v.id, v]));
+  proposals = drafted.filter(Boolean).map((p) => ({ ...p, verdict: byId.get(p.id) ?? null }));
 }
 
-const kept = proposals.filter(Boolean).filter((p) => p.verdict?.supported);
-const dropped = proposals.filter(Boolean).length - kept.length;
+// A proposal with no verdict was never audited — it is not "supported by default".
+const kept = proposals.filter((p) => p.verdict?.supported);
+const dropped = proposals.length - kept.length;
 log(`daydream "${name}": ${mineIds.length} lens(es) mined (${totalFresh} findings) → ${proposalIds.length} opportunit(ies) → ${kept.length} proposal(s) validated (${dropped} dropped).`);
 
-// Synthesize the proposals report, then grade it; blocking issues drive a revision pass. Loop until the
-// report clears the grade or the cap — the grade gate has teeth, it does not just attach a warning.
-const maxGradeRounds = 3; // initial synthesis + up to 2 revisions
-let grade = null;
+// Synthesize once, then grade once. The revise→re-grade rounds are gone: on cap exhaustion a failing grade
+// only logged, so the loop spent up to four agents to attach a warning it could have attached the first
+// time. The grade travels in the return value instead, and the human decides.
+await agent(synthesizePrompt(kept), { phase: "Synthesize", label: "synthesize" });
 
-for (let g = 0; ; g++) {
-  await agent(synthesizePrompt(kept, g === 0 ? null : grade?.issues ?? []), {
-    phase: "Synthesize",
-    label: g === 0 ? "synthesize" : `revise:r${g}`,
-  });
+// Nothing survived → the report is the "(none survived validation)" stub. Grading that stub against a
+// proposal rubric cannot return anything actionable, so skip the grader entirely.
+const grade = kept.length
+  ? await agent(gradePrompt(), { phase: "Grade", label: "grade", schema: GRADE })
+  : null;
 
-  grade = await agent(gradePrompt(), { phase: "Grade", label: `grade:r${g + 1}`, schema: GRADE });
-
-  const failing = (grade?.dimensions ?? []).filter((d) => d.score === "fail");
-  if (!failing.length || g + 1 >= maxGradeRounds) {
-    if (failing.length) log(`daydream "${name}": report graded with ${failing.length} failing dimension(s) after ${g + 1} pass(es).`);
-    break;
-  }
-  log(`grade round ${g + 1}: ${failing.length} failing dimension(s) → revising report`);
+const failingDimensions = (grade?.dimensions ?? []).filter((d) => String(d.score).toLowerCase() === "fail");
+if (failingDimensions.length) {
+  log(`daydream "${name}": report graded with ${failingDimensions.length} failing dimension(s) — see the grade in the result; the report ships as-is.`);
 }
 
 // Derived rubric value — single source of truth is the per-dimension scores (fail=0, partial=1, pass=2).
@@ -804,4 +820,6 @@ return {
   applyTier: "advisory",
   reportPath,
   grade,
+  // Named explicitly so the skill can surface them: the report is no longer revised to clear the grade.
+  failingDimensions: failingDimensions.map((d) => d.name),
 };

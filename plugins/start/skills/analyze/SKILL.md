@@ -8,7 +8,7 @@ argument-hint: "what to analyze (e.g. 'how does the auth flow work')"
 ## Persona
 
 Act as the analysis orchestrator. You turn a request into an **analysis plan** (a terse purpose
-and a `goals` rubric), get the user to approve or refine it, then install and launch the reusable
+and a `goals` rubric), get the user to approve or refine it, then launch the reusable
 analysis workflow. You do **not** perform the research or write the report yourself — the workflow
 holds the research→validate loop and the synthesis. Your job is the setup around it: frame the
 plan, seed the research tasks, launch, and report what came back.
@@ -22,7 +22,7 @@ plan, seed the research tasks, launch, and report what came back.
   as readable text; never gate approval on a file path alone.
 - Lead every decision menu with the mechanism explanation and a single recommended option, written as
   chat text first — a menu confirms a recommendation; it does not stand in for the analysis. This
-  applies to every gate in this skill (approve/refine, upgrade, finalize), not just plan approval.
+  applies to every gate in this skill (approve/refine, finalize), not just plan approval.
 - Get explicit user approval of the plan (purpose + goals) before launching. The `goals` are the
   rubric the workflow validates against, so they must be right first.
 - Keep the information split clean: the skill authors the plan and seeds tasks; the workflow's
@@ -30,8 +30,8 @@ plan, seed the research tasks, launch, and report what came back.
 - Seed research tasks and pass `taskScript` + `home` so the workflow's agents use `task.js` as the
   researcher↔validator channel.
 - Require citations: every claim in the final report must trace to a source (code `file:line` or a
-  URL). The workflow's grade pass enforces this (among other quality dimensions) and revises the report
-  until it clears; surface the grade.
+  URL). The workflow's grade pass scores this (among other quality dimensions) but no longer revises the
+  report to clear it — surface the grade, and name any `failingDimensions` as gaps for the user to close.
 - Writing under `.start/analysis/` and `docs/research/` is pre-authorized.
 
 **Never:**
@@ -43,11 +43,11 @@ plan, seed the research tasks, launch, and report what came back.
 - Present a bare decision menu with no analysis shown first, or offer a hybrid / "Both" option you would
   not yourself recommend — recommend one clean option and name its tradeoff instead of enumerating a
   compromise you have already flagged as wrong.
-- Overwrite a project's edited `.claude/workflows/analyze.js` without asking (see version check).
+
 
 ## Reference Materials
 
-- [analyze.js](reference/analyze.js) — the golden, reusable workflow script (research → validate loop → synthesize → cite-check). Read its input-contract comment; it defines the `args` you build.
+- [analyze.js](reference/analyze.js) — the reusable workflow script (research → validate loop → synthesize → cite-check). Read its input-contract comment; it defines the `args` you build.
 - [template.md](template.md) — the analysis plan document.
 
 ## Workflow
@@ -93,29 +93,17 @@ For each approved topic, create a research task (record the ids into `topicIds`)
 Optionally create one `--type goal` task per goal for visible rollup. Use the specify-meta skill's
 `task.js` (co-located with spec.py), run via the shell.
 
-### 4. Install / Version-Check the Workflow
+### 4. Launch the Workflow
 
-The golden copy is this skill's `reference/analyze.js`; its first line is `// analyze-workflow: vN`.
-
-```
-installed = <project>/.claude/workflows/analyze.js
-match:
-  installed absent            => create .claude/workflows/ if needed; copy bundled → installed; tell the user "installed analyze workflow v{N}".
-  same version marker         => proceed.
-  bundled version > installed => ask under header "Upgrade": "Upgrade analyze workflow v{old} → v{new}?" — Upgrade (Recommended) | Keep current.
-  installed version > bundled => project copy is ahead/hand-edited; keep it and note this.
-```
-
-Never overwrite the installed file except on an explicit Upgrade choice or a first install.
-
-### 5. Launch the Workflow
+The script sits beside this SKILL.md at `reference/analyze.js`. Launch it where it lives — there is
+nothing to install or copy into the project.
 
 Build `WorkflowArgs`: `name`, `home` (absolute), `taskScript` (absolute path to `task.js`),
-`description`, `goals`, `topics` (from step 3), `reportPath` = `home/report.md`, `maxRounds` (default 3).
+`description`, `goals`, `topics` (from step 3), `reportPath` = `home/report.md`, `maxRounds` (default 2).
 Set `status: in-progress`. Launch:
 
 ```
-Workflow({ scriptPath: "<project>/.claude/workflows/analyze.js", args: <WorkflowArgs> })
+Workflow({ scriptPath: "<absolute path to this skill's reference/analyze.js>", args: <WorkflowArgs> })
 ```
 
 Present a one-line dispatch summary, e.g.:
@@ -127,9 +115,9 @@ Record the `runId`. The run executes in the background; report status from the r
 return (step 6). Do not keep editing, researching, or holding the plan context open while agents work;
 if the run is backgrounded, end the turn rather than idling on a large prefix.
 
-### 6. Report and Finalize
+### 5. Report and Finalize
 
-When the run returns (`{ name, satisfied, rounds, reportPath, goalResults, grade }`):
+When the run returns (`{ name, satisfied, rounds, reportPath, goalResults, grade, failingDimensions }`):
 
 1. Present the report at `reportPath`, plus a per-goal summary (met/unmet from `goalResults`) and the
    report grade — the derived rubric value `grade.overall` and the per-dimension `grade.dimensions`

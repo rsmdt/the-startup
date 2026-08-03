@@ -1,5 +1,3 @@
-// implement-workflow: v9
-//
 // v9 — the loop learns to stop. Through v8 the retry loop could not tell the difference between "the
 // code is wrong", "the environment is broken", "the harness went away" and "no interface can prove
 // this" — every one of them arrived as a low satisfaction score, burned a retry, and re-spawned a code
@@ -76,9 +74,12 @@
 //
 // The Agentic Startup — single implementation loop (unified task model).
 //
-// One reusable dynamic-workflow script. /start:implement installs this file to
-// <project>/.claude/workflows/implement.js and launches it via the Workflow tool, passing the
-// spec's implementation tasks as `args`. A 1-task plan and a 40-task plan run this same script —
+// One reusable dynamic-workflow script, shipped with the `start` plugin at skills/implement/reference/implement.js. The
+// /start:implement SKILL is the entry point: it resolves the spec, reads and topo-sorts the tracker
+// tasks, discovers the service config, and launches THIS script in place via the Workflow tool with an
+// `args` object. It lives outside workflows/ deliberately — a script in workflows/ registers a slash
+// command, and this one cannot be invoked directly: the runtime gives a workflow script no filesystem
+// or shell access, so it can never resolve its own `tasks`/`groups`/service config. A 1-task plan and a 40-task plan run this same script —
 // scale is emergent from the number of tasks.
 //
 // Everything is a task (see specify-meta/task.js). For a spec's implement phase the tracker holds:
@@ -113,12 +114,12 @@
 // structured verdicts agents return.
 
 export const meta = {
-  name: "implement",
+  name: "run-implement",
   description: "Build a spec by looping each slice task through a barriered code→eval retry loop",
   phases: [
-    { title: "Coverage", detail: "audit that every feature + EARS behavior in the brief maps to a scenario (barrier-safe)" },
+    { title: "Coverage", detail: "one audit that every feature + EARS behavior in every brief maps to a scenario (barrier-safe)" },
     { title: "Build", detail: "code agent implements each slice via TDD (reads the slice task, blind to its scenarios)" },
-    { title: "Preflight", detail: "assert the harness (migrations, health, env vars) before any expensive eval runs" },
+    { title: "Preflight", detail: "assert the harness once per run, and re-apply migrations whenever a slice writes one" },
     { title: "Evaluate", detail: "eval agent scores business + technical surfaces separately (blind to the slice + source)" },
   ],
 };
@@ -155,7 +156,11 @@ const {
   specId,
   taskScript,
   threshold = 0.9,
-  maxIterations = 5,
+  // 3, not 5. The stall/repeat detectors below already halt a non-moving slice at iteration 3, so
+  // attempts 4-5 were only ever reachable by a slice improving its score every single round — rare, and
+  // when it happens the halt reports `failed` with the symptoms so a human can relaunch. The retry budget
+  // is still capacity, not a quota: a slice that clears the threshold on attempt 1 spends nothing.
+  maxIterations = 3,
   stallLimit = 2,
   servicePort,
   startCommand,
@@ -254,6 +259,12 @@ const ATTEMPT = {
   properties: {
     approach: { type: "string", description: "one or two lines: the root cause diagnosed this iteration and the change made for it" },
     wroteCode: { type: "boolean", description: "false if the slice was found already implemented and nothing was changed" },
+    wroteMigration: {
+      type: "boolean",
+      description:
+        "true if this attempt added or changed a database migration / schema file. Say true if unsure — " +
+        "a false negative means the migration is never applied and the eval runs against a stale schema.",
+    },
   },
   required: ["approach"],
 };
@@ -262,21 +273,31 @@ const ATTEMPT = {
 const COVERAGE = {
   type: "object",
   properties: {
-    covered: { type: "boolean", description: "true iff every feature and every EARS behavior maps to >= 1 scenario" },
-    gaps: {
+    slices: {
       type: "array",
       items: {
         type: "object",
         properties: {
-          kind: { type: "string", description: "business | technical" },
-          item: { type: "string", description: "the exact feature or EARS behavior no scenario covers" },
-          why: { type: "string" },
+          sliceId: { type: "string", description: "the slice task id this verdict is for" },
+          covered: { type: "boolean", description: "true iff every feature and every EARS behavior in THIS slice maps to >= 1 scenario" },
+          gaps: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                kind: { type: "string", description: "business | technical" },
+                item: { type: "string", description: "the exact feature or EARS behavior no scenario covers" },
+                why: { type: "string" },
+              },
+              required: ["kind", "item"],
+            },
+          },
         },
-        required: ["kind", "item"],
+        required: ["sliceId", "covered"],
       },
     },
   },
-  required: ["covered"],
+  required: ["slices"],
 };
 
 // ── Harness aborts — an agent that never ran is not a failing verdict ───────────────────
@@ -314,25 +335,35 @@ async function runAgent(prompt, opts, requiredKey) {
 
 // ── Prompt builders — the two halves of the information barrier + the coverage pre-flight ─
 
-function coveragePrompt(taskId) {
-  return `You are the coverage auditor for one slice of a specification. You confirm that every
-acceptance surface in the slice brief is backed by at least one scenario — so nothing is left untested.
-You audit spec completeness ONLY: you do not build, run, test, or edit anything.
+// Takes ALL slice ids. This used to run once per slice inside runSlice, but it is a static brief↔scenario
+// mapping with no per-slice state and no dependency on anything the loop produces — so one auditor does
+// the whole spec before any building starts, instead of S auditors interleaved with the retry loops.
+function coveragePrompt(taskIds) {
+  return `You are the coverage auditor for a specification. You confirm that every acceptance surface in
+each slice brief is backed by at least one scenario — so nothing is left untested. You audit spec
+completeness ONLY: you do not build, run, test, or edit anything.
 
-Read BOTH:
+Audit these ${taskIds.length} slice(s), one at a time:
+${taskIds.map((id) => `  - ${id}`).join("\n")}
+
+For EACH slice id above, read BOTH:
   the slice brief (business features / acceptance criteria AND technical EARS behavior):
-    ${tj}read ${taskId} ${spec}
+    ${tj}read <sliceId> ${spec}
   its scenario child tasks (the holdout acceptance evidence):
-    ${tj}list ${spec} --parent ${taskId} --type scenario   then read each:  ${tj}read <scenarioId> ${spec}
+    ${tj}list ${spec} --parent <sliceId> --type scenario   then read each:  ${tj}read <scenarioId> ${spec}
 
 Map every business FEATURE / acceptance criterion and every technical EARS behavior in the brief to the
 scenario(s) that would exercise it. EARS behaviors include edge and error states (WHEN/WHILE/IF … the
 system SHALL …) — those are the ones most often left uncovered. Report anything NO scenario covers.
 
+Give every slice the same scrutiny — a slice audited late is not audited less. Attribute each gap to the
+slice it belongs to; a gap on the wrong slice is worse than no gap at all.
+
 ## Return
-- covered: true ONLY if every feature and every EARS behavior maps to >= 1 scenario.
-- gaps: for each uncovered item { kind ("business" | "technical"), item, why } — name the exact unmapped
-  feature or EARS behavior.`;
+- slices: one entry per slice id above { sliceId, covered, gaps }.
+  - covered: true ONLY if every feature and every EARS behavior in THAT slice maps to >= 1 scenario.
+  - gaps: for each uncovered item { kind ("business" | "technical"), item, why } — name the exact unmapped
+    feature or EARS behavior.`;
 }
 
 function codePrompt(taskId, iteration, failures, history) {
@@ -534,12 +565,14 @@ correct behaviour — the loop retries the slice. Continuing to probe is not.
 
 // ── The slice loop — build → preflight → evaluate → (retry with filtered summaries) ─────
 
+// sliceId -> gaps[], filled by the single coverage audit that runs before any building starts.
+const coverageGapsById = new Map();
+
 async function runSlice(taskId) {
-  // Coverage pre-flight (barrier-safe third role): confirm every feature + EARS behavior in the brief
-  // maps to a scenario BEFORE we trust the eval's pass-rate. A pass-rate can't see an absent test, so
-  // an uncovered surface would otherwise sail through as "done".
-  const coverage = await runAgent(coveragePrompt(taskId), { phase: "Coverage", label: `coverage:${taskId}`, schema: COVERAGE, ...OPTS.coverage }, "covered");
-  const gaps = coverage?.covered ? [] : (coverage?.gaps ?? []);
+  // Coverage was audited up-front for every slice (barrier-safe third role): every feature + EARS behavior
+  // in the brief maps to a scenario, checked BEFORE we trust any eval's pass-rate. A pass-rate can't see
+  // an absent test, so an uncovered surface would otherwise sail through as "done".
+  const gaps = coverageGapsById.get(taskId) ?? [];
   if (gaps.length) log(`slice ${taskId}: ${gaps.length} acceptance surface(s) have NO scenario — coverage gap (spec incomplete)`);
 
   let iteration = 0;
@@ -558,11 +591,23 @@ async function runSlice(taskId) {
     // PREFLIGHT (deterministic, cheap): apply the migrations the code agent just wrote, then ASSERT the
     // harness before paying for an eval. A broken environment aborts here — it is a human's problem,
     // never a code agent's retry.
-    const pre = await runAgent(preflightPrompt(true), {
-      phase: "Preflight", label: `preflight:${taskId}`, schema: PREFLIGHT, ...OPTS.preflight,
-    }, "ok");
-    if (pre.ok === false) {
-      return { id: taskId, status: "blocked-environment", environment: pre.faults ?? [], coverageGaps: gaps, iterations: iteration };
+    //
+    // This ran unconditionally on every iteration of every slice. It only has work to do when there are
+    // migrations to apply: the run-level gate below already asserted the harness once before anything was
+    // built, and if the harness breaks mid-run the eval agent's `environment` channel still catches it
+    // and aborts WITHOUT spending a retry. So it now runs only when this project HAS migrations.
+    //
+    // Fail-safe by construction: a missing or undefined `wroteMigration` runs the preflight. Only an
+    // explicit `false` from the code agent skips it, and the schema tells the agent to say true if unsure.
+    // A false negative would let an eval run against a stale schema, so the default must never be "skip".
+    const mayHaveMigrated = Boolean(migrateCommand) && attempt?.wroteMigration !== false;
+    if (mayHaveMigrated) {
+      const pre = await runAgent(preflightPrompt(true), {
+        phase: "Preflight", label: `preflight:${taskId}`, schema: PREFLIGHT, ...OPTS.preflight,
+      }, "ok");
+      if (pre.ok === false) {
+        return { id: taskId, status: "blocked-environment", environment: pre.faults ?? [], coverageGaps: gaps, iterations: iteration };
+      }
     }
 
     // EVAL agent: reads the scenario child tasks + service config. Never the slice or the source.
@@ -653,6 +698,43 @@ if (!gate || gate.ok === false) {
 
 const byId = new Map(tasks.map((t) => [t.id, t]));
 const results = [];
+
+// ONE coverage audit for the whole spec, before any slice is built. It reads briefs and scenarios only —
+// never source — so it stays on the safe side of the code/eval barrier exactly as it did per-slice.
+{
+  const auditIds = groups.flatMap((g) => g.taskIds).filter((id) => byId.has(id));
+  if (auditIds.length) {
+    try {
+      const coverage = await runAgent(
+        coveragePrompt(auditIds),
+        { phase: "Coverage", label: "coverage", schema: COVERAGE, ...OPTS.coverage },
+        "slices",
+      );
+      for (const s of coverage?.slices ?? []) {
+        if (s?.sliceId) coverageGapsById.set(s.sliceId, s.covered ? [] : (s.gaps ?? []));
+      }
+      // A slice the auditor silently omitted has no verdict. Say so rather than recording "no gaps",
+      // which would read as a clean audit it never actually performed.
+      const unaudited = auditIds.filter((id) => !coverageGapsById.has(id));
+      if (unaudited.length) {
+        log(`coverage audit returned no verdict for ${unaudited.length} slice(s): ${unaudited.join(", ")} — treated as unaudited, not as covered.`);
+      }
+    } catch (e) {
+      // runAgent throws HarnessAbort on a quota/environment fault. Per-slice, buildTask caught this; now
+      // that the audit is hoisted, it must be caught here or one fault would crash the whole run instead
+      // of returning the structured result the skill reads.
+      if (!(e instanceof HarnessAbort)) throw e;
+      log(`coverage audit hit a harness fault (${e.detail}) — nothing built.`);
+      return {
+        specId,
+        threshold,
+        status: "harness-abort",
+        results: [],
+        harnessAbort: { label: e.label, detail: e.detail },
+      };
+    }
+  }
+}
 
 for (const group of groups) {
   const ids = group.taskIds.filter((id) => byId.has(id));

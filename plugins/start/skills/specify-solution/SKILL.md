@@ -45,7 +45,7 @@ The SDD's output contract — section statuses, the ADR (`ADRStatus`) shape, req
 - [Focus and MECE](reference/focus-and-mece.md) — SDD focus dimensions and MECE rules for components, interfaces, data models, acceptance criteria
 - [MDX Blocks](../specify-plan/reference/mdx-blocks.md) — Block vocabulary and document-quality discipline (shared, Path C)
 - [Template](template.mdx) — SDD template structure, write to `.start/specs/[NNN]-[name]/solution.mdx`
-- [solution.js](reference/solution.js) — the review workflow (lenses → verify → grade); read its input-contract comment for the `args`
+- [solution-review.js](reference/solution-review.js) — the review workflow (lenses → batched verify → in-script grade); read its input-contract comment for the `args`
 - [Validation](validation.md) — the MECE + traceability rubric the review workflow enforces; completion criteria
 - [Output Format](reference/output-format.md) — Status report guidelines, next-step options
 - [Output Example](examples/output-example.md) — Concrete example of expected output format
@@ -102,23 +102,22 @@ Record architecture decisions as ADRs — present each for user confirmation bef
 
 The drafted SDD is human-owned; this step runs an automated review panel over it and grades it — you do
 not hand-review it yourself. The workflow enforces the MECE + traceability rubric in validation.md across
-independent lenses (requirement-coverage, AC→EARS traceability, MECE, security, robustness, compatibility),
-adversarially verifies each finding, and grades the design.
+independent lenses (requirement-coverage, AC→EARS traceability, MECE, and design-risk covering
+security/robustness/compatibility), adversarially verifies each lens's findings in one batched pass, and
+grades the design in-script from what the panel confirmed.
 
-Install / version-check the golden copy `reference/solution.js` (first line `// solution-workflow: vN`)
-into `<project>/.claude/workflows/solution.js`: absent → copy and report the version; same marker →
-proceed; bundled newer → ask to upgrade (recommended) vs keep; installed newer → keep it. Never overwrite
-except on an explicit upgrade or first install.
+The script sits beside this SKILL.md at `reference/solution-review.js`. Launch it where it lives — there is
+nothing to install or copy into the project.
 
 Launch with the drafted paths (`prdPath` = requirements.mdx, `sddPath` = the drafted solution.mdx,
 `reportPath` = `review.md` in the spec dir):
 
 ```
-Workflow({ scriptPath: "<project>/.claude/workflows/solution.js",
+Workflow({ scriptPath: "<absolute path to this skill's reference/solution-review.js>",
            args: { name, specId, prdPath, sddPath, reportPath } })
 ```
 
-When it returns (`{ grade, failingDimensions, reviewReady, reportPath, confirmed }`):
+When it returns (`{ name, specId, reportPath, confirmed, grade, failingDimensions, reviewReady }`):
 - Present the report at `reportPath`: the grade (`grade.overall` + per-dimension scores) and the confirmed
   findings grouped by dimension.
 - For every `fail` dimension, drive the fix WITH THE USER — a design change may require an ADR confirmation.

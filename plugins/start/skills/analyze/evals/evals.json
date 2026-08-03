@@ -4,11 +4,11 @@
     {
       "id": 1,
       "name": "plan-shown-in-chat-before-approval",
-      "prompt": "Analyze how the authentication flow works in this codebase. No .claude/workflows/analyze.js exists in the project yet.",
+      "prompt": "Analyze how the authentication flow works in this codebase.",
       "expected_output": "Frames an analysis plan, displays it inline in the chat, and asks for approval before launching anything.",
       "expectations": [
         "Created .start/analysis/<NNN>-<name>/analysis.md with frontmatter containing name, description, a goals list, and status: draft",
-        "Displayed the full plan inline in the chat before asking for approval — the purpose (description), the goals as a numbered rubric, and the proposed research topics — not merely a path to the file",
+        "Displayed the full plan inline in the chat before asking for approval \u2014 the purpose (description), the goals as a numbered rubric, and the proposed research topics \u2014 not merely a path to the file",
         "Asked the user to approve or refine the plan before launching (interactive gate)",
         "Phrased each goal as a checkable objective a validator can rule met or unmet by evidence",
         "Did NOT begin research, spawn research agents, or write any report itself before approval"
@@ -16,27 +16,15 @@
     },
     {
       "id": 2,
-      "name": "seed-install-launch-on-approval",
-      "prompt": "Analyze the caching strategy across the services and how it invalidates. No installed analyze workflow exists yet. Assume I approve the plan you propose.",
-      "expected_output": "On approval, seeds research tasks, installs the bundled workflow, and launches analyze.js on the dynamic-workflow runtime.",
+      "name": "seed-and-launch-on-approval",
+      "prompt": "Analyze the caching strategy across the services and how it invalidates. Assume I approve the plan you propose.",
+      "expected_output": "On approval, seeds research tasks and launches the plugin's analyze.js on the dynamic-workflow runtime.",
       "expectations": [
         "Seeded one research task per approved topic via task.js create --home .start/analysis/<...> --type research, recording the returned ids",
-        "Detected no installed .claude/workflows/analyze.js and copied the bundled reference/analyze.js into the project, reporting the installed version",
-        "Launched the Workflow tool with scriptPath pointing at .claude/workflows/analyze.js and args containing name, home, taskScript, description, goals, topics, reportPath, and maxRounds",
+        "Launched the Workflow tool with scriptPath pointing at the skill's reference/analyze.js and args containing name, home, taskScript, description, goals, topics, reportPath, and maxRounds",
+        "Did NOT copy the script into the project or perform any install/version-check step \u2014 the script ships with the plugin and runs in place",
         "Passed the approved goals rubric and the seeded topic ids into the workflow args",
-        "Did NOT perform the research, validation, or synthesis itself — delegated all of it to the workflow"
-      ]
-    },
-    {
-      "id": 3,
-      "name": "workflow-version-upgrade-prompt",
-      "prompt": "Analyze the error-handling patterns in the payment service. An older .claude/workflows/analyze.js is already installed with version marker v1; the bundled reference is v2. Assume I approve the plan.",
-      "expected_output": "Detects the version mismatch and prompts to upgrade before launching; never clobbers the installed copy silently.",
-      "expectations": [
-        "Compared the installed version marker (v1) against the bundled reference (v2)",
-        "Asked the user via AskUserQuestion whether to upgrade v1 -> v2, with Upgrade recommended and Keep current as the alternative",
-        "Did not overwrite the installed .claude/workflows/analyze.js without the user's Upgrade choice",
-        "Proceeded to build args and launch the workflow after resolving the version"
+        "Did NOT perform the research, validation, or synthesis itself \u2014 delegated all of it to the workflow"
       ]
     },
     {

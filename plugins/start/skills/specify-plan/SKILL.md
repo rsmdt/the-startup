@@ -36,7 +36,7 @@ so the code agent (reads the slice) and the eval agent (reads the scenarios) nev
 - Present each slice (its brief + scenarios) to the user for review before creating the tasks. The user must approve — they are what `/implement` is held to.
 - Collect `[ASSUMPTION]` entries from requirements.md(x)/solution.md(x); any slice depending on a Standing assumption must flag it in its brief — the plan inherits the ledger visibly.
 - Ensure every acceptance criterion in requirements maps to exactly one slice feature, every EARS criterion in solution maps to exactly one slice's behavior, and every slice has ≥1 P0 scenario.
-- Set `threshold` (default 0.90) and `max_iterations` (default 5) in `plan.mdx` frontmatter — `/implement` reads them.
+- Set `threshold` (default 0.90) and `max_iterations` (default 3) in `plan.mdx` frontmatter — `/implement` reads them.
 
 **Never:**
 - Turn a slice into a prescription — no task-by-task instructions, file edits, code, or execution-group assignments. Dependencies (not hand-assigned groups) decide order. `/implement` owns HOW.
