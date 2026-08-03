@@ -35,7 +35,7 @@ artifact fits). Targets are the **project harness** (all git-tracked):
 
 - Skills — `plugins/*/skills/*/SKILL.md` (+ `reference/`, `templates/`), or a **new skill** directory
 - Subagents — `plugins/team/agents/the-*/*.md`, or a **new subagent**
-- Workflow scripts — `plugins/*/skills/*/reference/*.js`
+- Workflow scripts — `plugins/*/workflows/*.js`
 - Output styles — `plugins/*/output-styles/*.md`
 - Baseline instruction — project `CLAUDE.md` / `AGENTS.md` (improve or simplify)
 - Guardrails (preference order) — a **permission policy** (allow/deny/ask) or a **hook** in the project

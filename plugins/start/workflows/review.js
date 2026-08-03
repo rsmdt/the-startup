@@ -1,11 +1,11 @@
 // The Agentic Startup — code review workflow (dynamic dimensions → adversarial verify → rank → report).
 //
-// One reusable dynamic-workflow script, shipped with the `start` plugin at skills/review/reference/review.js. The
+// One reusable dynamic-workflow script, shipped with the `start` plugin at workflows/review.js. The
 // /start:review SKILL is the entry point: it launches this script in place via the Workflow tool,
 // passing a resolved review target as `args`.
-// It sits beside the skill that launches it, NOT in workflows/: a script in workflows/ registers a
-// slash command, and this one cannot be invoked directly — it needs an `args` object only the skill
-// can build (see the input contract below).
+// It ships in workflows/, so it is discoverable and namespaced as a command — but it is NOT a user
+// entry point: it needs an `args` object only the skill can build (see the input contract below).
+// Invoking it bare hits the fail-fast guard below and aborts with a pointer to the right command.
 //
 // It generalizes the solution-design review (solution.js) to code: same pipeline — fan out lenses,
 // adversarially verify each finding, synthesize, report — with ONE addition, a triage stage, because a
@@ -70,6 +70,25 @@ const {
   checklistsPath = "",
   auditPhasesPath = "",
 } = parsedArgs ?? {};
+
+// FAIL FAST on a mis-wired launch. This script is not a user entry point: it is launched by the
+// /start:review skill, which resolves the mode, the diff command, and the changed-file list. Invoked
+// bare, the reviewers would be pointed at nothing and the report path would be "undefined".
+{
+  const required = { reportPath };
+  const missing = Object.entries(required)
+    .filter(([, v]) => typeof v !== "string" || !v.trim() || v === "undefined")
+    .map(([k]) => k);
+  if (mode === "scoped" && !changedFiles.length && !diffCommand.trim()) missing.push("diffCommand/changedFiles");
+  if (mode === "audit" && !auditPhasesPath.trim()) missing.push("auditPhasesPath");
+  if (missing.length) {
+    throw new Error(
+      `run-review: launch args missing or unresolved: ${missing.join(", ")}. ` +
+        `This workflow is launched BY the /start:review skill, not invoked directly — the skill resolves ` +
+        `the review mode and scope first. Run /start:review instead.`,
+    );
+  }
+}
 
 // The evidence standard — carried verbatim into every reviewer and verifier so the review stays
 // calibrated (no finding without a named consequence; steelman defensible deviations into Accepted).

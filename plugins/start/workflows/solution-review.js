@@ -1,11 +1,11 @@
 // The Agentic Startup — solution-design review workflow (adversarial architect panel + grade).
 //
-// One reusable dynamic-workflow script, shipped with the `start` plugin at skills/specify-solution/reference/solution-review.js. The
+// One reusable dynamic-workflow script, shipped with the `start` plugin at workflows/solution-review.js. The
 // /start:specify SKILL (solution phase) is the entry point: it launches this script in place via the
 // Workflow tool, passing the paths of a DRAFTED solution design (SDD) and its requirements (PRD) as `args`.
-// It sits beside the skill that launches it, NOT in workflows/: a script in workflows/ registers a
-// slash command, and this one cannot be invoked directly — it needs an `args` object only the skill
-// can build (see the input contract below).
+// It ships in workflows/, so it is discoverable and namespaced as a command — but it is NOT a user
+// entry point: it needs an `args` object only the skill can build (see the input contract below).
+// Invoking it bare hits the fail-fast guard below and aborts with a pointer to the right command.
 //
 // It does NOT author the SDD. Authoring stays interactive in the skill — architecture decisions (ADRs)
 // require user confirmation, so the design is human-owned. This workflow is the VERIFIER: it reviews a
@@ -57,6 +57,23 @@ const {
   reportPath,
   lenses,
 } = parsedArgs ?? {};
+
+// FAIL FAST on a mis-wired launch. This script is not a user entry point: it is launched by the
+// /start:specify skill (solution phase) with the paths of a DRAFTED design and its requirements.
+// Invoked bare, every lens would be asked to read "undefined".
+{
+  const required = { prdPath, sddPath, reportPath };
+  const missing = Object.entries(required)
+    .filter(([, v]) => typeof v !== "string" || !v.trim() || v === "undefined")
+    .map(([k]) => k);
+  if (missing.length) {
+    throw new Error(
+      `run-solution-review: launch args missing or unresolved: ${missing.join(", ")}. ` +
+        `This workflow is launched BY the /start:specify skill's solution phase, not invoked directly — ` +
+        `it reviews an already-drafted solution design. Run /start:specify instead.`,
+    );
+  }
+}
 
 // The default review panel. Each lens is one independent angle over the drafted SDD. The traceability
 // lenses (needsPrd) also read the PRD — they are the upstream coverage gate (requirement → component,

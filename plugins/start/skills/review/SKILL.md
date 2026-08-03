@@ -76,7 +76,7 @@ State {
 
 ## Reference Materials
 
-- reference/review.js — the review workflow (triage → fan-out → batched verify → synthesize → markdown report); read its input-contract comment for the `args`
+- ../../workflows/review.js — the review workflow (triage → fan-out → batched verify → synthesize → markdown report); read its input-contract comment for the `args`
 - reference/audit-phases.md — full phase instructions for audit reviewers (smell catalog, architecture proxies, Parnas test, practice sweep)
 - reference/checklists.md — per-dimension checklists for scoped reviewers
 - reference/classification.md — severity, confidence, consequence test, likelihood×cost ranking
@@ -107,15 +107,15 @@ scope (step 1), launch the workflow, and present what it returns.
 
 ### 2. Launch the Workflow
 
-The script sits beside this SKILL.md at `reference/review.js`. Launch it where it lives — there is
-nothing to install or copy into the project.
+The script ships with this plugin at `../../workflows/review.js` (relative to this SKILL.md). Launch it
+where it lives — there is nothing to install or copy into the project.
 
 Build the args and launch. `reportPath` is markdown: `docs/reviews/review-<target-or-audit>-<YYYY-MM-DD>.md`
 in the reviewed repo (create `docs/reviews/` if needed). The reference paths are absolute paths to THIS
 skill's `reference/` files.
 
 ```
-Workflow({ scriptPath: "<absolute path to this skill's reference/review.js>", args: {
+Workflow({ scriptPath: "<absolute path to the plugin's workflows/review.js>", args: {
   name, mode,                                        // from step 1 (scoped | audit)
   diffCommand, changedFiles, hasConstitution,        // scoped
   orientation, coChange,                             // audit — from step 1 Phase 1

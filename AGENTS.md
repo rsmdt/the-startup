@@ -153,7 +153,7 @@ The specification carries **no task-by-task instructions** — a slice says what
 
 #### One implementation loop (the dynamic-workflow runtime)
 
-There is a single `/start:implement`, and it always runs on Claude Code's **dynamic-workflow runtime**. It reads the spec's tasks from the tracker and launches the reusable workflow script that ships beside it — `implement/reference/implement.js`, whose `meta.name` is `run-implement` — via `Workflow({ scriptPath, args })`, with the slice tasks as input. There is no install step: the script runs where it ships.
+There is a single `/start:implement`, and it always runs on Claude Code's **dynamic-workflow runtime**. It reads the spec's tasks from the tracker and launches the plugin's reusable workflow script — `plugins/start/workflows/implement.js`, whose `meta.name` is `run-implement` — via `Workflow({ scriptPath, args })`, with the slice tasks as input. There is no install step: the script runs where it ships.
 
 The workflow drives each slice through a **barriered code→eval retry loop**:
 - a **code agent** builds the slice via TDD — it reads the slice task (features + EARS + gates), never its scenario child tasks;
@@ -182,7 +182,7 @@ Optional `CONSTITUTION.md` at project root defines checkable rules:
 |------|----------|--------|
 | Commands | `plugins/*/commands/*.md` | lowercase-kebab (e.g., `specify.md`) |
 | Skills | `plugins/*/skills/*/SKILL.md` | directory is skill name |
-| Workflow scripts | `plugins/*/skills/*/reference/*.js` | file matches the skill; `meta.name` is **`run-<script>`** (see below) |
+| Workflow scripts | `plugins/*/workflows/*.js` | `meta.name` is **`run-<script>`** (see below) |
 | Agents | `plugins/team/agents/the-*/` | `the-[role]/[activity].md` |
 | Output Styles | `plugins/*/output-styles/*.md` | Title Case (e.g., `The Startup.md`) |
 | Specs | `.start/specs/[NNN]-*/` | 3-digit ID prefix |
@@ -198,11 +198,11 @@ A workflow's `meta.name` is always **`run-<script>`** — the script's filename 
 
 | Skill | Script | Workflow |
 |---|---|---|
-| `implement` | `implement/reference/implement.js` | `run-implement` |
-| `analyze` | `analyze/reference/analyze.js` | `run-analyze` |
-| `review` | `review/reference/review.js` | `run-review` |
-| `specify-solution` | `specify-solution/reference/solution-review.js` | `run-solution-review` |
-| `daydream` | `daydream/reference/daydream.js` | `run-daydream` |
+| `implement` | `workflows/implement.js` | `run-implement` |
+| `analyze` | `workflows/analyze.js` | `run-analyze` |
+| `review` | `workflows/review.js` | `run-review` |
+| `specify-solution` | `workflows/solution-review.js` | `run-solution-review` |
+| `daydream` | `workflows/daydream.js` | `run-daydream` |
 
 The prefix is the whole convention: it is mechanically derivable (no naming judgment, so no drift), it
 sorts every workflow together, and `run-` is instantly recognizable in the `/workflows` progress view and
@@ -214,16 +214,27 @@ namespace, so identical names collide and the workflow shadows the skill — rep
 point with a script that cannot run standalone. The `run-` prefix makes that impossible by construction:
 no skill is named `run-*`.
 
-### Where workflow scripts live — and why not `workflows/`
+### Where workflow scripts live
 
-A plugin *can* ship workflows from a `workflows/` directory at the plugin root (or the `workflows`
-manifest field), which registers each as `/[plugin]:[meta.name]`. **Ours deliberately do not.** A script
-in `workflows/` becomes a command a user can type, and per the Claude Code docs a workflow script has
-"no direct filesystem or shell access" and cannot take mid-run user input — so none of ours can resolve
-its own `args`. They are engines their skill feeds via `Workflow({ scriptPath, args })`, not commands.
+Scripts go in `plugins/*/workflows/` — the standard plugin location. Claude Code discovers them there
+(or wherever the `workflows` manifest field points) and registers each as `/[plugin]:[meta.name]`, so
+ours appear as `/start:run-implement`, `/start:run-analyze`, and so on.
 
-Each script therefore sits beside the one skill that launches it, in that skill's `reference/`. There is
-no install step and no version marker: the script runs where it ships, and the plugin version governs.
+`reference/` is for documentation a skill reads on demand — markdown, not executables. Workflow scripts
+are orchestration code, and three of these skills needed no other reference files at all, so keeping the
+script there meant a directory that existed only to hold it.
+
+**These commands exist but are not entry points.** A workflow script gets no filesystem or shell access
+and cannot take mid-run user input, so none of ours can resolve its own `args` — the skill builds them
+(resolving the spec, seeding the tracker, getting the plan approved) and launches the script with
+`Workflow({ scriptPath, args })`. Every script therefore opens with a **fail-fast guard**: launched
+without usable args it throws immediately, naming the missing fields and the skill to run instead,
+rather than templating `undefined` into every prompt and producing an empty report.
+
+So: use `/start:implement`, not `/start:run-implement`. The `run-` prefix marks the second kind.
+
+There is no install step and no version marker — the script runs where it ships, and the plugin version
+governs.
 
 ## Publishing
 

@@ -100,7 +100,7 @@ Execute a specification by running its slice tasks on Claude Code's dynamic-work
 | Step | What happens |
 |------|--------------|
 | **Read** | Read the slice tasks (`task.js graph`); each carries a code brief (features + EARS + gates) with its holdout scenarios as scenario child tasks |
-| **Launch** | Run the implement skill's `reference/implement.js` in place via the Workflow tool |
+| **Launch** | Run the plugin's `workflows/implement.js` in place via the Workflow tool |
 | **Launch** | Run it on the dynamic-workflow runtime with the slice tasks as input; independent slices run via `parallel()` |
 | **Loop** | Per slice: code agent builds (reads the slice task, blind to its scenarios) → eval agent proves it (reads the scenario tasks, blind to the slice + source) → retry with filtered summaries until threshold or max iterations |
 
@@ -119,7 +119,7 @@ Reads the spec's slice tasks from the tracker and topologically sorts them by `-
 
 ```mermaid
 flowchart TD
-    A([slice tasks]) --> |read + topo-sort by --depends-on| B[Launch plugins/start/skills/implement/reference/implement.js]
+    A([slice tasks]) --> |read + topo-sort by --depends-on| B[Launch plugins/start/workflows/implement.js]
     B --> C[Launch on dynamic-workflow runtime]
     C --> D{slices remaining?}
     D --> |independent group| E[Code Agents build in parallel<br/>read slice task: features + EARS + gates<br/>blind to scenarios]
@@ -608,7 +608,7 @@ The `start` plugin includes five autonomous skills that activate automatically b
 
 | Skill | Purpose |
 |-------|---------|
-| `implement` | Runs the reusable slice loop (`implement/reference/implement.js`) on the dynamic-workflow runtime — barriered code→eval retry per slice |
+| `implement` | Runs the reusable slice loop (`workflows/implement.js`) on the dynamic-workflow runtime — barriered code→eval retry per slice |
 
 ### Methodology Skills
 
@@ -797,7 +797,7 @@ Optional: /document after implementation for documentation sync
 
 **What happens:**
 - Optional: Creates `feature/001-notification-system` git branch
-- Runs `plugins/start/skills/implement/reference/implement.js` on the dynamic-workflow runtime
+- Runs `plugins/start/workflows/implement.js` on the dynamic-workflow runtime
 - Per slice: a code agent builds it, an eval agent proves it against holdout scenario tasks
 - Retries with filtered failure summaries until the satisfaction threshold is met
 - Optional: Creates PR at completion
@@ -892,7 +892,7 @@ plugins/start/skills/
 ├── specify-solution/template.md         # Solution design structure
 ├── specify-plan/template.mdx               # Plan structure (narrative: phases + outcomes)
 ├── specify-plan/templates/scenario.md      # Holdout scenario-task body template
-├── implement/reference/implement.js        # The reusable slice-loop workflow (launched by scriptPath)
+├── workflows/implement.js                  # The reusable slice-loop workflow
 └── document/templates/                  # Knowledge capture templates
     ├── domain-template.md               # Business rules
     ├── pattern-template.md              # Technical patterns

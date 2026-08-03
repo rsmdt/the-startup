@@ -10,7 +10,7 @@
         "Read the implementation tasks from the tracker via task.js graph --spec 005 \u2014 identifying the implement-phase root task, its slice task, and the slice's scenario child tasks",
         "Read plan.mdx only for the narrative and its threshold/max_iterations frontmatter \u2014 did NOT parse tasks or BEANs out of plan.mdx",
         "Discovered the service startCommand, servicePort, and healthPath from the project instructions or package.json",
-        "Launched the Workflow tool with scriptPath pointing at the skill's reference/implement.js and args containing specId, taskScript, threshold, maxIterations, service config, tasks (one {id, dependsOn} per slice, using tracker ids), and groups",
+        "Launched the Workflow tool with scriptPath pointing at the plugin's workflows/implement.js and args containing specId, taskScript, threshold, maxIterations, service config, tasks (one {id, dependsOn} per slice, using tracker ids), and groups",
         "Did NOT implement code directly, run the code/eval loop itself, or author/modify any specification artifact",
         "Did NOT copy the script into the project or perform any install/version-check step \u2014 the script ships with the plugin and runs in place"
       ]

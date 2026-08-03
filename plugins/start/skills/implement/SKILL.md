@@ -22,7 +22,7 @@ acceptance evidence). specify-plan authors them; you read them.
 
 **Always:**
 - Resolve the spec via the specify-meta skill; read the implementation tasks from its tracker.
-- Launch on the dynamic-workflow runtime: the loop MUST run via the Workflow tool on this skill's `reference/implement.js`.
+- Launch on the dynamic-workflow runtime: the loop MUST run via the Workflow tool on this skill's `../../workflows/implement.js`.
 - Preserve the information barrier: the code agent reads the **slice** task; the eval agent reads that slice's **scenario** child tasks. Never put scenario text into a slice task, or spec text into a scenario task — the barrier is which task each agent reads.
 - Pass each slice's `id` and `dependsOn` (tracker ids) plus the topo-sorted `groups`; the loop writes live status to each slice task and the phase root rolls up.
 - Discover the service `startCommand`, `servicePort`, and `healthPath` from the project instructions file and package.json (or equivalent); ask the user if not discoverable.
@@ -36,7 +36,7 @@ acceptance evidence). specify-plan authors them; you read them.
 
 ## Reference Materials
 
-- [implement.js](reference/implement.js) — The reusable workflow script, launched in place via the Workflow tool. Read its input-contract comment block; it defines the `args` shape you build.
+- [implement.js](../../workflows/implement.js) — The reusable workflow script, launched in place via the Workflow tool. Read its input-contract comment block; it defines the `args` shape you build.
 
 ## Workflow
 
@@ -87,8 +87,8 @@ If not discoverable, ask the user for the start command, port, and health path.
 
 ### 5. Launch the Workflow
 
-The script sits beside this SKILL.md at `reference/implement.js`. Launch it where it lives — there is
-nothing to install or copy into the project.
+The script ships with this plugin at `../../workflows/implement.js` (relative to this SKILL.md). Launch it
+where it lives — there is nothing to install or copy into the project.
 
 Build the `args` object for `implement.js` (its input-contract comment is the authoritative shape):
 - `specId` — for `task.js --spec`;
@@ -103,7 +103,7 @@ Build the `args` object for `implement.js` (its input-contract comment is the au
 Launch it on the dynamic-workflow runtime with the Workflow tool:
 
 ```
-Workflow({ scriptPath: "<absolute path to this skill's reference/implement.js>", args: <the args object from above> })
+Workflow({ scriptPath: "<absolute path to the plugin's workflows/implement.js>", args: <the args object from above> })
 ```
 
 Present a one-line dispatch summary before launching, e.g.:

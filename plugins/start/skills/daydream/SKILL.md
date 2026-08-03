@@ -62,7 +62,7 @@ the user's **global** `~/.claude/` files (this run stays inside the project harn
 - Restrict targets to the **project harness** (all git-tracked): artifacts under `plugins/`, the project
   `CLAUDE.md` / `AGENTS.md`, and guardrails in the project `.claude/settings.json` (permission policies +
   hooks) / `CLAUDE.md` rules. A workflow-script improvement must target the script under
-  `plugins/*/skills/*/reference/*.js`. Never target the user's global `~/.claude/` files.
+  `plugins/*/workflows/*.js`. Never target the user's global `~/.claude/` files.
 - Every proposal is labelled **improve** or **create**; prefer improving an existing artifact, and
   create a new one only where the evidence shows no artifact fits. All proposals — improve and create —
   are reported for a human to apply; daydream never touches an artifact itself.
@@ -77,7 +77,7 @@ the user's **global** `~/.claude/` files (this run stays inside the project harn
 
 ## Reference Materials
 
-- [daydream.js](reference/daydream.js) — the reusable workflow script (mine → cluster → propose → validate → synthesize). Read its input-contract comment; it defines the `args` you build.
+- [daydream.js](../../workflows/daydream.js) — the reusable workflow script (mine → cluster → propose → validate → synthesize). Read its input-contract comment; it defines the `args` you build.
 - [template.md](template.md) — the daydream plan document.
 
 ## Workflow
@@ -143,8 +143,8 @@ Use the specify-meta skill's `task.js` (co-located with spec.py), run via the sh
 
 ### 4. Launch the Workflow
 
-The script sits beside this SKILL.md at `reference/daydream.js`. Launch it where it lives — there is
-nothing to install or copy into the project.
+The script ships with this plugin at `../../workflows/daydream.js` (relative to this SKILL.md). Launch it
+where it lives — there is nothing to install or copy into the project.
 
 Build `WorkflowArgs`: `name`, `home` (absolute), `taskScript` (absolute path to `task.js`),
 `description`, `dateRange`, `logRoot` (absolute), `projectRoot` (absolute path to the repo root — anchors
@@ -154,7 +154,7 @@ Build `WorkflowArgs`: `name`, `home` (absolute), `taskScript` (absolute path to 
 `maxProposals` (default 8), `maxMineRounds` (default 1). Set `status: in-progress`. Launch:
 
 ```
-Workflow({ scriptPath: "<absolute path to this skill's reference/daydream.js>", args: <WorkflowArgs> })
+Workflow({ scriptPath: "<absolute path to the plugin's workflows/daydream.js>", args: <WorkflowArgs> })
 ```
 
 Present a one-line dispatch summary, e.g.:

@@ -1,11 +1,11 @@
 // The Agentic Startup — daydream workflow (self-improvement from session logs, tracker-backed).
 //
-// One reusable dynamic-workflow script, shipped with the `start` plugin at skills/daydream/reference/daydream.js. The
+// One reusable dynamic-workflow script, shipped with the `start` plugin at workflows/daydream.js. The
 // /start:daydream SKILL is the entry point: it launches this script in place via the Workflow tool,
 // passing an approved daydream plan as `args`. It is NOT regenerated per run.
-// It sits beside the skill that launches it, NOT in workflows/: a script in workflows/ registers a
-// slash command, and this one cannot be invoked directly — it needs an `args` object only the skill
-// can build (see the input contract below).
+// It ships in workflows/, so it is discoverable and namespaced as a command — but it is NOT a user
+// entry point: it needs an `args` object only the skill can build (see the input contract below).
+// Invoking it bare hits the fail-fast guard below and aborts with a pointer to the right command.
 //
 // It reads the Claude Code session logs over a date range, finds where the agentic system
 // underperformed or was exposed to risk, and PRODUCES A REPORT of what should change across the whole
@@ -160,7 +160,7 @@ const DIMENSIONS = {
   workflow: {
     label: "workflow",
     essence: "improve a workflow script (models, prompts, control flow, agent budget)",
-    surface: `IMPROVE a workflow script under ${editTargetsRoot}/*/skills/*/reference/*.js — these ship with the plugin and run in place, so there is no separate installed copy to keep in sync`,
+    surface: `IMPROVE a workflow script under ${editTargetsRoot}/*/workflows/*.js — these ship with the plugin and run in place, so there is no separate installed copy to keep in sync`,
     reference: `The script itself is the reference — read it in full, and cross-check how it ACTUALLY ran in the session logs (its mine/code/eval/validate agents, their models, their retries). Note the agent budget: every fan-out must have a numeric cap, and a per-item verification must never nest inside another fan-out.`,
   },
   "output-style": {

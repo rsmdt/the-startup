@@ -1,11 +1,11 @@
 // The Agentic Startup — analysis workflow (deep-research style, tracker-backed).
 //
-// One reusable dynamic-workflow script, shipped with the `start` plugin at skills/analyze/reference/analyze.js. The
+// One reusable dynamic-workflow script, shipped with the `start` plugin at workflows/analyze.js. The
 // /start:analyze SKILL is the entry point: it gets the plan approved, seeds the tracker, and launches
 // this script in place via the Workflow tool with an `args` object. It is NOT regenerated per analysis.
-// It sits beside the skill that launches it, NOT in workflows/: a script in workflows/ registers a
-// slash command, and this one cannot be invoked directly — it needs an `args` object only the skill
-// can build (see the input contract below).
+// It ships in workflows/, so it is discoverable and namespaced as a command — but it is NOT a user
+// entry point: it needs an `args` object only the skill can build (see the input contract below).
+// Invoking it bare hits the fail-fast guard below and aborts with a pointer to the right command.
 //
 // Pipeline (grounded in deep-research literature — see SKILL.md "Synthesizer placement"):
 //   RESEARCH  — fan out one agent per open research task; each gathers CITED findings and
@@ -60,6 +60,26 @@ const {
   reportPath,
   maxRounds = 2,
 } = parsedArgs ?? {};
+
+// FAIL FAST on a mis-wired launch. This script is not a user entry point: it is launched by the
+// /start:analyze skill with an `args` object it builds. Invoked bare (e.g. by typing the command), every
+// prompt below would template literal "undefined" paths ("node undefined --home undefined"), research
+// nothing, and synthesize an empty report. Abort before any agent runs instead.
+{
+  const required = { home, taskScript, reportPath };
+  const missing = Object.entries(required)
+    .filter(([, v]) => typeof v !== "string" || !v.trim() || v === "undefined")
+    .map(([k]) => k);
+  if (!goals.length) missing.push("goals");
+  if (!topics.some((t) => t && t.id)) missing.push("topics");
+  if (missing.length) {
+    throw new Error(
+      `run-analyze: launch args missing or unresolved: ${missing.join(", ")}. ` +
+        `This workflow is launched BY the /start:analyze skill, not invoked directly — the skill gets the ` +
+        `goals rubric approved and seeds the research tasks first. Run /start:analyze instead.`,
+    );
+  }
+}
 
 // Gap research per round. Round 1 fans out one agent per seeded topic; every later round batches its gap
 // briefs into ONE agent. The gap fan-out used to consume whatever the validator returned, uncapped — the

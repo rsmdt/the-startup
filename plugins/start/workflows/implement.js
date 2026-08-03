@@ -74,7 +74,7 @@
 //
 // The Agentic Startup — single implementation loop (unified task model).
 //
-// One reusable dynamic-workflow script, shipped with the `start` plugin at skills/implement/reference/implement.js. The
+// One reusable dynamic-workflow script, shipped with the `start` plugin at workflows/implement.js. The
 // /start:implement SKILL is the entry point: it resolves the spec, reads and topo-sorts the tracker
 // tasks, discovers the service config, and launches THIS script in place via the Workflow tool with an
 // `args` object. It lives outside workflows/ deliberately — a script in workflows/ registers a slash
@@ -170,6 +170,26 @@ const {
   tasks = [],
   groups = [{ mode: "sequential", taskIds: tasks.map((t) => t.id) }],
 } = parsedArgs ?? {};
+
+// FAIL FAST on a mis-wired launch. This script is not a user entry point: it is launched by the
+// /start:implement skill, which resolves the spec, topo-sorts the tracker tasks, and discovers the
+// service config. The runtime gives a workflow script no filesystem or shell access, so it can never
+// resolve those itself. Invoked bare, every prompt would carry "undefined" and no slice could be built.
+{
+  const required = { specId, taskScript, startCommand };
+  const missing = Object.entries(required)
+    .filter(([, v]) => typeof v !== "string" || !v.trim() || v === "undefined")
+    .map(([k]) => k);
+  if (!tasks.some((t) => t && t.id)) missing.push("tasks");
+  if (!groups.some((g) => g && (g.taskIds ?? []).length)) missing.push("groups");
+  if (missing.length) {
+    throw new Error(
+      `run-implement: launch args missing or unresolved: ${missing.join(", ")}. ` +
+        `This workflow is launched BY the /start:implement skill, not invoked directly — the skill reads ` +
+        `the spec's tracker tasks and service config first. Run /start:implement <specId> instead.`,
+    );
+  }
+}
 
 const tj = `node ${taskScript} `; // task.js prefix (with --spec appended per call)
 const spec = `--spec ${specId}`;

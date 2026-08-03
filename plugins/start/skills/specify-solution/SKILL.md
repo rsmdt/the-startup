@@ -45,7 +45,7 @@ The SDD's output contract — section statuses, the ADR (`ADRStatus`) shape, req
 - [Focus and MECE](reference/focus-and-mece.md) — SDD focus dimensions and MECE rules for components, interfaces, data models, acceptance criteria
 - [MDX Blocks](../specify-plan/reference/mdx-blocks.md) — Block vocabulary and document-quality discipline (shared, Path C)
 - [Template](template.mdx) — SDD template structure, write to `.start/specs/[NNN]-[name]/solution.mdx`
-- [solution-review.js](reference/solution-review.js) — the review workflow (lenses → batched verify → in-script grade); read its input-contract comment for the `args`
+- [solution-review.js](../../workflows/solution-review.js) — the review workflow (lenses → batched verify → in-script grade); read its input-contract comment for the `args`
 - [Validation](validation.md) — the MECE + traceability rubric the review workflow enforces; completion criteria
 - [Output Format](reference/output-format.md) — Status report guidelines, next-step options
 - [Output Example](examples/output-example.md) — Concrete example of expected output format
@@ -106,14 +106,14 @@ independent lenses (requirement-coverage, AC→EARS traceability, MECE, and desi
 security/robustness/compatibility), adversarially verifies each lens's findings in one batched pass, and
 grades the design in-script from what the panel confirmed.
 
-The script sits beside this SKILL.md at `reference/solution-review.js`. Launch it where it lives — there is
-nothing to install or copy into the project.
+The script ships with this plugin at `../../workflows/solution-review.js` (relative to this SKILL.md). Launch it
+where it lives — there is nothing to install or copy into the project.
 
 Launch with the drafted paths (`prdPath` = requirements.mdx, `sddPath` = the drafted solution.mdx,
 `reportPath` = `review.md` in the spec dir):
 
 ```
-Workflow({ scriptPath: "<absolute path to this skill's reference/solution-review.js>",
+Workflow({ scriptPath: "<absolute path to the plugin's workflows/solution-review.js>",
            args: { name, specId, prdPath, sddPath, reportPath } })
 ```
 

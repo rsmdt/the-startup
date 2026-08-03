@@ -47,7 +47,7 @@ plan, seed the research tasks, launch, and report what came back.
 
 ## Reference Materials
 
-- [analyze.js](reference/analyze.js) — the reusable workflow script (research → validate loop → synthesize → cite-check). Read its input-contract comment; it defines the `args` you build.
+- [analyze.js](../../workflows/analyze.js) — the reusable workflow script (research → validate loop → synthesize → cite-check). Read its input-contract comment; it defines the `args` you build.
 - [template.md](template.md) — the analysis plan document.
 
 ## Workflow
@@ -95,15 +95,15 @@ Optionally create one `--type goal` task per goal for visible rollup. Use the sp
 
 ### 4. Launch the Workflow
 
-The script sits beside this SKILL.md at `reference/analyze.js`. Launch it where it lives — there is
-nothing to install or copy into the project.
+The script ships with this plugin at `../../workflows/analyze.js` (relative to this SKILL.md). Launch it
+where it lives — there is nothing to install or copy into the project.
 
 Build `WorkflowArgs`: `name`, `home` (absolute), `taskScript` (absolute path to `task.js`),
 `description`, `goals`, `topics` (from step 3), `reportPath` = `home/report.md`, `maxRounds` (default 2).
 Set `status: in-progress`. Launch:
 
 ```
-Workflow({ scriptPath: "<absolute path to this skill's reference/analyze.js>", args: <WorkflowArgs> })
+Workflow({ scriptPath: "<absolute path to the plugin's workflows/analyze.js>", args: <WorkflowArgs> })
 ```
 
 Present a one-line dispatch summary, e.g.:
