@@ -21,6 +21,10 @@ Finding {
   issue: string          // one sentence
   fix: string            // actionable recommendation
   code_example?: string  // required for CRITICAL, optional for HIGH
+  breaking?: {           // set when the change alters an external contract
+    consumers: string    // what depends on the contract being changed
+    migration: string    // what consumers must do to adapt
+  }
 }
 
 State {
@@ -37,6 +41,7 @@ State {
 - Launch ALL applicable review activities simultaneously in a single response.
 - Provide full file context to reviewers, not just diffs.
 - Highlight what's done well in a strengths section.
+- Lead the report with breaking changes when any exist. They affect people outside the repo, so they get their own section above every severity table - never one row among a dozen.
 - Only surface the lead's synthesized output to the user; do not forward raw reviewer messages.
 
 **Never:**
@@ -98,16 +103,18 @@ Process findings:
 1. Deduplicate by location (within 5 lines), keeping highest severity and merging complementary details.
 2. Sort by severity descending, then confidence descending.
 3. Assign IDs using pattern `$severityLetter$number` (C1, C2, H1, M1, L1...).
-4. Build summary table.
+4. Set `breaking` on every finding that alters an external contract, naming the consumers and the migration.
+5. Build summary table.
 
 Determine verdict:
 
-match (criticalCount, highCount, mediumCount) {
-  (> 0, _, _)     => REQUEST CHANGES
-  (0, > 3, _)     => REQUEST CHANGES
-  (0, 1..3, _)    => APPROVE WITH COMMENTS
-  (0, 0, > 0)     => APPROVE WITH COMMENTS
-  (0, 0, 0)       => APPROVE
+match (breakingCount, criticalCount, highCount, mediumCount) {
+  (> 0, _, _, _)     => REQUEST CHANGES
+  (_, > 0, _, _)     => REQUEST CHANGES
+  (0, 0, > 3, _)     => REQUEST CHANGES
+  (0, 0, 1..3, _)    => APPROVE WITH COMMENTS
+  (0, 0, 0, > 0)     => APPROVE WITH COMMENTS
+  (0, 0, 0, 0)       => APPROVE
 }
 
 Read reference/output-format.md and format report accordingly.
