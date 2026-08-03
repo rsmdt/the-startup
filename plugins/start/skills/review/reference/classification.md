@@ -13,6 +13,9 @@ Definitions, classification matrix, and example findings at each severity level.
 | 🟡 **MEDIUM** | Code quality issue, maintainability concern, or missing test | **Consider fixing** |
 | ⚪ **LOW** | Style preference, minor improvement, or suggestion | **Nice to have** |
 
+Breaking changes are orthogonal to severity: set the finding's `breaking` field and let severity describe the defect itself.
+A clean, well-written API rename is not a bug, but it still forces REQUEST CHANGES and still leads the report.
+
 ## Confidence Levels
 
 | Level | Definition | Usage |
