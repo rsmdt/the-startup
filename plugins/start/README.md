@@ -2,7 +2,7 @@
 
 **Workflow orchestration plugin for spec-driven development in Claude Code.**
 
-The `start` plugin provides ten user-invocable workflow skills, five autonomous skills, and two output styles to transform how you build software with Claude Code.
+The `start` plugin provides ten user-invocable workflow skills, five autonomous skills, and three output styles to transform how you build software with Claude Code.
 
 **For quick start, workflow guide, and skill selection, see the [main README](../../README.md).**
 
@@ -13,7 +13,7 @@ The `start` plugin provides ten user-invocable workflow skills, five autonomous 
 - [User-Invocable Skills](#user-invocable-skills) — specify, implement, validate, test, review, document, analyze, refactor, debug, constitution
 - [Autonomous Skills](#autonomous-skills) — 5 context-activated skills
 - [Documentation Structure](#documentation-structure) — specs, domain, patterns, interfaces
-- [Output Styles](#output-styles) — The Startup, The ScaleUp
+- [Output Styles](#output-styles) — The Garage, The Startup, The ScaleUp
 - [Typical Development Workflow](#typical-development-workflow) — primary and maintenance flows
 - [Skills in Action](#skills-in-action) — real-world examples
 - [Templates](#templates) — PRD, SDD, Plan, Scenario
@@ -587,7 +587,7 @@ npx the-startup
 **Flags:**
 - `--help` - Show usage information
 
-**Note:** Output styles are available immediately via `/output-style` - no additional setup required.
+**Note:** Output styles are selected via `/config` — see [Output Styles](#output-styles).
 
 ---
 
@@ -664,77 +664,38 @@ The capture workflow always checks existing documentation before creating new fi
 
 ## Output Styles
 
-The `start` plugin includes two output styles for different working preferences. Both share the same operational fundamentals (verification, code ownership, scope management) but express them differently.
+The `start` plugin ships three output styles — one register per company stage. A style changes how
+Claude communicates and how much process it applies, not what it knows. All three keep Claude Code's
+built-in engineering instructions (`keep-coding-instructions: true`), and a style shapes the main
+conversation only — subagents and the plugin's workflows are unaffected.
 
-**Activate via:** `/output-style start:The Startup` or `/output-style start:The ScaleUp`
+Pick the register that matches who the work is for:
 
----
+| Style | Register | Reach for it when |
+|-------|----------|-------------------|
+| **The Garage** | Pre-startup — build the least thing that works, say the least about it | Prototypes and spikes; nothing is load-bearing yet, you are finding out whether the thing works |
+| **The Startup** | Solo — one engineer, one agent, no ceremony | It is just you; no delegation, no plan-for-approval theater, no status for third parties |
+| **The ScaleUp** | Coordinated — work that moves through other people | Someone who was not in the conversation will read what you write and touch what you change; delegate and leave a trail |
 
-### The Startup
+### Activating a style
 
-**High-energy execution with structured momentum.**
+The `/output-style` command was removed in Claude Code v2.1.91. Current ways to select:
 
-| Aspect | Description |
-|--------|-------------|
-| **Vibe** | Demo day energy, Y Combinator intensity |
-| **Voice** | "Let's deliver this NOW!", "BOOM! That's what I'm talking about!" |
-| **Mantra** | "Done is better than perfect, but quality is non-negotiable" |
+- **Interactive:** `/config` → Output style.
+- **Direct:** `/config outputStyle=The Startup` (Claude Code v2.1.181+).
+- **Pinned for a project** (shared with the team via git) in `.claude/settings.json`:
 
-**Personality:**
-- **The Visionary Leader** - "We'll figure it out" - execute fast, iterate faster
-- **The Rally Captain** - Turn challenges into team victories
-- **The Orchestrator** - Run parallel execution like a conductor
-- **The Pragmatist** - MVP today beats perfect next quarter
+  ```json
+  { "outputStyle": "The Garage" }
+  ```
 
-**Best for:**
-- Fast-paced development sprints
-- High-energy execution mode
-- When you want momentum and celebration
+  Use `.claude/settings.local.json` for a personal per-project choice, or `~/.claude/settings.json`
+  for all projects. Precedence: local > project > user. A change takes effect on the next session
+  (or after `/clear`).
 
----
-
-### The ScaleUp
-
-**Calm confidence with educational depth.**
-
-| Aspect | Description |
-|--------|-------------|
-| **Vibe** | Professional craft, engineering excellence |
-| **Voice** | "We've solved harder problems. Here's the approach.", "This decision matters because..." |
-| **Mantra** | "Sustainable speed at scale. We move fast, but we don't break things" |
-
-**Personality:**
-- **The Seasoned Leader** - We've been through the fire. Now we build to last.
-- **The Strategist** - Think two steps ahead. Today's shortcut is tomorrow's outage.
-- **The Multiplier** - Your job is to make the whole team better, not just ship code.
-- **The Guardian** - Reliability isn't optional. Customers trust us with their business.
-
-**Unique feature - Educational Insights:**
-
-The ScaleUp provides contextual explanations as it works:
-
-> I've added the retry logic to the API client:
-> ```typescript
-> await retry(fetchUser, { maxAttempts: 3, backoff: 'exponential' });
-> ```
-> *Insight: I used exponential backoff here because this endpoint has rate limiting. The existing `src/utils/retry.ts` helper already implements this pattern - I'm reusing it rather than adding a new dependency.*
-
-**Best for:**
-- Learning while building
-- Understanding codebase patterns
-- When you want explanations with your code
-- Onboarding to unfamiliar codebases
-
----
-
-### Comparison
-
-| Dimension | The Startup | The ScaleUp |
-|-----------|-------------|-------------|
-| **Energy** | High-octane, celebratory | Calm, measured |
-| **Explanations** | Minimal - ships fast | Educational insights included |
-| **Failures** | "That didn't work. Moving on." | "Here's what failed and why..." |
-| **Closing thought** | "What did we deliver?" | "Can the team maintain this without me?" |
+This plugin deliberately does **not** force a style (`force-for-plugin` is unset on all three): the
+stage is your call, and a forced style would override both your `/config` selection and any settings
+pin for as long as the plugin is enabled.
 
 ---
 

@@ -70,6 +70,7 @@ Track multi-step work with TodoWrite so the state is visible without asking.
 Do not use these. They read as padding to anyone reviewing your output:
 
 - "load-bearing"
+- "house rules"
 - "worth stating plainly"
 - "here's the honest truth"
 - "the real tension"

@@ -85,6 +85,7 @@ cannot get from the code.
 ## Never say
 
 - "load-bearing"
+- "house rules"
 - "worth stating plainly"
 - "here's the honest truth"
 - "the real tension"

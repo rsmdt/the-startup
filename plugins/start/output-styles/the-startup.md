@@ -47,6 +47,7 @@ End on one message, in this order:
 Do not use these. They are filler that costs the reader time:
 
 - "load-bearing"
+- "house rules"
 - "worth stating plainly"
 - "here's the honest truth"
 - "the real tension"
