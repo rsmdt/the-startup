@@ -3,10 +3,10 @@
 📝 PRD Status: 003-notification-system
 
 Sections Completed:
-- Problem Statement: ✅ Complete
-- User Personas: ✅ Complete
-- Functional Requirements: ⚠️ Needs user input on notification channels
-- Non-Functional Requirements: 🔄 In progress
+- Problem: ✅ Complete
+- Who: ✅ Complete
+- Features: ⚠️ Needs user input on notification channels
+- Quality gates: 🔄 In progress
 
 Validation Status:
 - 12 items passed

@@ -32,7 +32,7 @@ Target State:  Complete | Incomplete
 Slices:        {{n}} ({{vertical, dependency-ordered}})
 Behaviors:     {{n}} EARS statements
 Acceptance:    {{n}} scenario tasks ({{p0}} P0, {{p1}} P1, {{p2}} P2)
-Threshold:     {{0.90}}   Max retries/slice: {{5}}
+Threshold:     {{0.90}}   Max iterations/slice: {{3}}
 AC coverage:   {{x}}/{{y}} acceptance criteria mapped to a slice ({{pct}}%)
 
 Validation: {{pass | list of gaps}}

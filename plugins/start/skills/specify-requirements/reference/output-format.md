@@ -32,13 +32,13 @@ Before completing the PRD, validate from multiple perspectives:
 
 ### Context Review
 Verify:
-- Problem statement clarity — is it specific and measurable?
-- User persona completeness — do we understand our users?
-- Value proposition strength — is it compelling?
+- Problem statement clarity — is it specific and evidenced?
+- Who completeness — do we understand every role that uses it or is affected?
+- Outcome strength — is "done" clear and compelling?
 
 ### Gap Analysis
 Identify:
-- Gaps in user journeys
+- Roles whose goal no feature serves
 - Missing edge cases
 - Unclear acceptance criteria
 - Contradictions between sections

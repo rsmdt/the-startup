@@ -61,7 +61,7 @@ This skill is intentionally self-contained; the record structure is inlined in s
 
 ### 1. Resolve
 
-Use the specify-meta skill with `$ARGUMENTS` to read the spec (`spec.py {id} --read`). From the TOML output capture:
+Use the specify-meta skill with `$ARGUMENTS` to read the spec (`node ${CLAUDE_PLUGIN_ROOT}/scripts/spec.js {id} --read`). From the TOML output capture:
 - `dir` → `sourceDir` (e.g., `.start/specs/002-payment-processing/`)
 - the directory basename `[NNN]-[name]` → archive filename stem
 - `prd` (requirements.md) and `sdd` (solution.md) paths, if present

@@ -19,7 +19,7 @@ version: 0.1.0
 ## Target State
 
 {{One or two paragraphs: what the system does and looks like when every slice is delivered.
-Outcome-first, self-contained, grounded in real components from solution.mdx. Describe the
+Outcome-first, self-contained, grounded in real components from solution.md. Describe the
 destination — the phases below describe the route.}}
 
 ## Phases & Outcomes
@@ -37,16 +37,10 @@ the slice tasks, not here.}}
 
 ## Tracking
 
-The operational tasks (and their live status) live in the tracker:
-
-- Location: `.start/specs/{{NNN}}-{{slug}}/.tracker/`
-- Task tree: `node <path-to>/task.js graph --spec {{NNN}}`
-- Phase overview: `node <path-to>/task.js list --spec {{NNN}} --depth 1`
-
-Each slice task carries its code brief; its scenario child tasks carry the holdout acceptance
-evidence. `/implement` writes live status to these tasks as it runs, and the phase root rolls up.
+Tasks and live status: `.start/specs/{{NNN}}-{{slug}}/.tracker/` (`task.js graph --spec {{NNN}}`).
+Each slice task carries its code brief; its scenario child tasks carry the holdout evidence.
 
 ## Open Questions
 
 {{Any decision that changes what "done" looks like, as a single question with a recommended default.
-Otherwise: "None — all slices and completion criteria are settled."}}
+Otherwise: "None — all slices and their scenarios are settled."}}

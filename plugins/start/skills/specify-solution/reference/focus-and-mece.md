@@ -24,7 +24,7 @@ All structural decompositions in the SDD must be **Mutually Exclusive, Collectiv
 | **Components** | Each component has a single, distinct responsibility. No two components should own the same domain logic or serve the same purpose. | All system capabilities from the PRD are assigned to exactly one component. Ask: "Which component handles X?" — if the answer is ambiguous, the decomposition has overlap. |
 | **Interfaces** | Each interface serves a distinct purpose. No two interfaces should expose the same operation or data shape. | All communication paths between components, external systems, and data stores are documented. Ask: "How does component A talk to component B?" — if undocumented, there's a gap. |
 | **Data Models** | Each entity owns a distinct slice of the domain. No two entities should store the same business data. | All data required by the components and interfaces is modeled. Ask: "Where is X stored?" — if unanswerable, there's a gap. |
-| **Acceptance Criteria (EARS)** | Each criterion specifies a unique system behavior. No two criteria should verify the same thing with different triggers. | Every PRD acceptance scenario has a corresponding system-level criterion. Ask: "How does the system satisfy PRD/AC-X.Y?" — if unanswerable, there's a gap. |
+| **Behavior (EARS)** | Each criterion specifies a unique system behavior. No two criteria should verify the same thing with different triggers. | Every PRD acceptance scenario has a corresponding system-level criterion. Ask: "How does the system satisfy PRD/AC-X.Y?" — if unanswerable, there's a gap. |
 
 ### How to apply
 

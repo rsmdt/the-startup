@@ -9,7 +9,7 @@ readiness: "{{READINESS}}"
 > [!NOTE]
 > Written by the specify skill at Finalize. This is the editor-readable record of *how* the
 > specification was clarified: the ledger, research dispositions, document status, and decisions.
-> The documents themselves (`requirements.mdx`, `solution.mdx`, `plan.mdx`) remain canonical —
+> The documents themselves (`requirements.md`, `solution.md`, `plan.md`) remain canonical —
 > nothing here duplicates their content.
 
 ## Readiness
@@ -55,9 +55,9 @@ hypothesis and appears in no document.
 
 | Document | Status | Notes |
 |----------|--------|-------|
-| requirements.mdx | {{STATUS}} | {{NOTES}} |
-| solution.mdx | {{STATUS}} | {{NOTES}} |
-| plan.mdx | {{STATUS}} | {{NOTES}} |
+| requirements.md | {{STATUS}} | {{NOTES}} |
+| solution.md | {{STATUS}} | {{NOTES}} |
+| plan.md | {{STATUS}} | {{NOTES}} |
 
 ## Decisions Log
 

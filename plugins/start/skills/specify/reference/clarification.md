@@ -74,4 +74,4 @@ A finding no user has dispositioned is Pending and must not appear in requiremen
 
 ## MECE Tie-In
 
-Clarification feeds the exhaustiveness half of MECE: every Standing assumption and every closed unknown must trace to a requirement, an acceptance criterion, or an explicit out-of-scope statement. The mechanics of MECE verification for personas, journeys, features, and acceptance criteria are owned by the specify-requirements skill (reference/focus-and-mece.md) — this protocol supplies its inputs, not its rules.
+Clarification feeds the exhaustiveness half of MECE: every Standing assumption and every closed unknown must trace to a requirement, an acceptance criterion, or an explicit out-of-scope statement. The mechanics of MECE verification for roles, features, acceptance criteria, and quality gates are owned by the specify-requirements skill (reference/focus-and-mece.md) — this protocol supplies its inputs, not its rules.

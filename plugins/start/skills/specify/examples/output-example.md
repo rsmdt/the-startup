@@ -37,7 +37,7 @@
 
 Spec: 003-notification-system
 Documents: Requirements ✅ | Solution ✅ | Plan ✅
-📄 Report: `.start/specs/003-notification-system/spec-report.mdx` (full ledger, finding dispositions, decisions — readable in any editor)
+📄 Report: `.start/specs/003-notification-system/spec-report.md` (full ledger, finding dispositions, decisions — readable in any editor)
 
 Readiness: MEDIUM
 Standing assumptions (2): Web only (no mobile push) · At-least-once delivery
@@ -62,14 +62,8 @@ Next Steps:
 
 .start/specs/003-notification-system/
 ├── README.md                 # Decisions, assumption ledger, progress
-├── requirements.mdx          # What and why (carries [ASSUMPTION] markers)
-├── solution.mdx              # How
-├── plan.mdx                  # Completion contract
-├── spec-report.mdx           # Editor-readable report (ledger, findings, documents, decisions)
-└── scenarios/                # Holdout validation scenarios
-    ├── phase-1/
-    │   ├── delivery-confirmation.md
-    │   └── persistence.md
-    └── phase-2/
-        ├── connection-lifecycle.md
-        └── reconnect-handling.md
+├── requirements.md          # What and why (carries [ASSUMPTION] markers)
+├── solution.md              # How
+├── plan.md                  # Narrative plan
+├── spec-report.md           # Editor-readable report (ledger, findings, documents, decisions)
+└── .tracker/                # Slice tasks + scenario child tasks (task.js)

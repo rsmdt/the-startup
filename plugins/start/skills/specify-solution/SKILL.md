@@ -10,18 +10,19 @@ Act as a solution design specialist that creates and validates SDDs focusing on 
 ## Interface
 
 State {
-  specDirectory = ""       // the active spec's dir: .start/specs/[NNN]-[name]/ (legacy: docs/specs/)
-  prd = ""                 // path to requirements.mdx in specDirectory
-  sdd = ""                 // path to solution.mdx in specDirectory
+  specDirectory = ""       // the active spec's dir: .start/specs/[NNN]-[name]/
+  prd = ""                 // path to requirements.md in specDirectory
+  sdd = ""                 // path to solution.md in specDirectory
 }
 
 The SDD's output contract — section statuses, the ADR (`ADRStatus`) shape, required fields — lives in
-`template.mdx`, which is authoritative. Don't restate those shapes here; a second copy only drifts.
+`reference/output-format.md`, which is authoritative. Don't restate those shapes here; a second copy only drifts.
 
 ## Constraints
 
 **Always:**
-- Follow template structure exactly — preserve all sections as defined.
+- Follow template structure exactly — preserve all sections as defined. Add the UI or multi-component sections from reference/conditional-sections.md only when the feature has a UI or spans components.
+- Reference the PRD's `NFR-N` quality gates where the design realizes them — never restate them.
 - Present ALL agent findings to user — complete responses, not summaries.
 - Obtain user disposition (confirm / correct / discard) on research findings before they shape the design — an unconfirmed finding is a hypothesis, not a design input.
 - Obtain user confirmation for every architecture decision (ADR).
@@ -30,8 +31,8 @@ The SDD's output contract — section statuses, the ADR (`ADRStatus`) shape, req
 - Ensure every PRD requirement is addressable by the design.
 - Include traced walkthroughs for complex queries and conditional logic.
 - Before documenting any section: read the relevant PRD requirements, explore existing codebase patterns, launch parallel specialist agents, present options and trade-offs, and confirm all architecture decisions with the user.
-- Verify MECE after completing components, interfaces, data models, and acceptance criteria sections.
-- Follow the MDX block discipline (see MDX Blocks reference): prefer fenced `mermaid` diagrams over ASCII for architecture/data-flow, `> [!IMPORTANT]` decision callouts for ADRs, and tables for comparisons — structured MDX that degrades to readable Markdown, over flat prose. Keep a stable heading spine.
+- Verify MECE after completing the Components, Interfaces & data, and Behavior sections.
+- Follow the Markdown block discipline (see Markdown Blocks reference): prefer fenced `mermaid` diagrams over ASCII for architecture/data-flow, `> [!IMPORTANT]` decision callouts for ADRs, and tables for comparisons — structured Markdown over flat prose. Keep a stable heading spine.
 
 **Never:**
 - Implement code — this skill produces specifications only.
@@ -42,11 +43,12 @@ The SDD's output contract — section statuses, the ADR (`ADRStatus`) shape, req
 
 ## Reference Materials
 
-- [Focus and MECE](reference/focus-and-mece.md) — SDD focus dimensions and MECE rules for components, interfaces, data models, acceptance criteria
-- [MDX Blocks](../specify-plan/reference/mdx-blocks.md) — Block vocabulary and document-quality discipline (shared, Path C)
-- [Template](template.mdx) — SDD template structure, write to `.start/specs/[NNN]-[name]/solution.mdx`
-- [solution-review.js](../../workflows/solution-review.js) — the review workflow (lenses → batched verify → in-script grade); read its input-contract comment for the `args`
-- [Validation](validation.md) — the MECE + traceability rubric the review workflow enforces; completion criteria
+- [Focus and MECE](reference/focus-and-mece.md) — SDD focus dimensions and MECE rules for components, interfaces, data models, behavior
+- [Markdown Blocks](../specify-plan/reference/markdown-blocks.md) — Block vocabulary and document-quality discipline (shared)
+- [Template](template.md) — SDD template structure, write to `.start/specs/[NNN]-[name]/solution.md`
+- [Conditional Sections](reference/conditional-sections.md) — the User interface and Multi-component sections, added only when the feature needs them
+- [Review Workflow](reference/review-workflow.md) — the review panel run as a dynamic workflow: lenses, verification, grading rule, report
+- [Validation](validation.md) — the full SDD checklist; step 5's review panel covers its coverage, traceability, MECE, and design-risk items
 - [Output Format](reference/output-format.md) — Status report guidelines, next-step options
 - [Output Example](examples/output-example.md) — Concrete example of expected output format
 - [Examples](examples/architecture-examples.md) — Reference architecture examples
@@ -56,8 +58,9 @@ The SDD's output contract — section statuses, the ADR (`ADRStatus`) shape, req
 ### 1. Initialize Design
 
 Read the PRD from specDirectory to understand requirements.
-Read the template from template.mdx.
-Write the template to specDirectory/solution.mdx.
+Read the template from template.md.
+Write the template to specDirectory/solution.md.
+If the feature has a UI or spans more than one component, read reference/conditional-sections.md and add those sections.
 Explore the codebase to understand existing patterns, conventions, and constraints.
 
 ### 2. Explore Approaches
@@ -100,24 +103,23 @@ Record architecture decisions as ADRs — present each for user confirmation bef
 
 ### 5. Review & Grade the Design (workflow)
 
-The drafted SDD is human-owned; this step runs an automated review panel over it and grades it — you do
-not hand-review it yourself. The workflow enforces the MECE + traceability rubric in validation.md across
-independent lenses (requirement-coverage, AC→EARS traceability, MECE, and design-risk covering
-security/robustness/compatibility), adversarially verifies each lens's findings in one batched pass, and
-grades the design in-script from what the panel confirmed.
+The drafted SDD is human-owned; this step runs an independent review panel over it as a dynamic workflow
+and grades it. The panel covers the coverage, traceability, MECE, and design-risk items in validation.md —
+you do not hand-review those yourself.
 
-The script ships with this plugin at `../../workflows/solution-review.js` (relative to this SKILL.md). Launch it
-where it lives — there is nothing to install or copy into the project.
+These instructions are the opt-in: read reference/review-workflow.md, then call the Workflow tool
+directly with an inline script that implements it exactly. Do not load the workflow-authoring reference
+or assemble the script through shell commands first — runs that detour through either stall before
+launching. Pass
+`prdPath` (requirements.md), `sddPath` (the drafted solution.md), and `reportPath` (`review.md` in the
+spec dir) as absolute paths.
 
-Launch with the drafted paths (`prdPath` = requirements.mdx, `sddPath` = the drafted solution.mdx,
-`reportPath` = `review.md` in the spec dir):
+Choose `model` and `effort` per stage: the design-risk lens and its verifier need the strongest model;
+the mapping lenses (coverage, traceability, MECE) can run on a smaller, faster model. A verifier never
+runs on a weaker model than the lens it checks. When unsure, omit `model` so the stage inherits the
+session model.
 
-```
-Workflow({ scriptPath: "<absolute path to the plugin's workflows/solution-review.js>",
-           args: { name, specId, prdPath, sddPath, reportPath } })
-```
-
-When it returns (`{ name, specId, reportPath, confirmed, grade, failingDimensions, reviewReady }`):
+When it returns (shape in reference/review-workflow.md):
 - Present the report at `reportPath`: the grade (`grade.overall` + per-dimension scores) and the confirmed
   findings grouped by dimension.
 - For every `fail` dimension, drive the fix WITH THE USER — a design change may require an ADR confirmation.

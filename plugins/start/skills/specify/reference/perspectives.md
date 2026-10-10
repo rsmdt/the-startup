@@ -19,7 +19,7 @@ Perspective definitions and focus area mapping for specification research.
 
 | Perspective | Agent Focus |
 |-------------|-------------|
-| 📋 Requirements | Interview stakeholders (user), identify personas, define acceptance criteria |
+| 📋 Requirements | Interview stakeholders (user), identify roles, define acceptance criteria |
 | 🏗️ Technical | Analyze existing architecture, evaluate options, identify constraints |
 | 🔐 Security | Assess auth needs, data sensitivity, compliance requirements |
 | ⚡ Performance | Define SLOs, identify bottleneck risks, set capacity targets |
@@ -32,4 +32,4 @@ After parallel research completes:
 1. **Collect** all findings from research agents
 2. **Deduplicate** overlapping discoveries
 3. **Identify conflicts** requiring user decision
-4. **Organize** by document section (Requirements, Solution, Factory)
+4. **Organize** by document section (Requirements, Solution, Plan)

@@ -8,10 +8,10 @@ Architecture:
 - External Integrations: Stripe Webhooks, SendGrid, Twilio
 
 Sections Completed:
-- System Architecture: ✅ Complete
-- Data Models: ✅ Complete
-- API Design: ⚠️ Needs user decision on webhook retry strategy
-- Security: 🔄 In progress
+- Approach: ✅ Complete
+- Components: ✅ Complete
+- Interfaces & data: ⚠️ Needs user decision on webhook retry strategy
+- Behavior: 🔄 In progress
 
 ADRs:
 - ADR-1: Use event sourcing for notification state: ✅ Confirmed

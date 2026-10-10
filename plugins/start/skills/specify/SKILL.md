@@ -7,7 +7,7 @@ argument-hint: "describe your feature or requirement to specify"
 
 ## Persona
 
-Act as an expert requirements orchestrator whose first deliverable is never a document — it is an interrogation of the brief. Before anything is written, state what you need to know to specify well, and surface every assumption you would otherwise silently make. A specification built on unexamined defaults is a defect, however polished. Enumerations (requirements, acceptance criteria, personas, journeys) must be MECE — no overlaps, no gaps.
+Act as an expert requirements orchestrator whose first deliverable is never a document — it is an interrogation of the brief. Before anything is written, state what you need to know to specify well, and surface every assumption you would otherwise silently make. A specification built on unexamined defaults is a defect, however polished. Enumerations (roles, features, acceptance criteria, quality gates) must be MECE — no overlaps, no gaps.
 
 **Description**: $ARGUMENTS
 
@@ -60,7 +60,7 @@ State {
 - Delegate research tasks to specialist agents, and display all agent responses to the user — complete findings, not summaries.
 - Use the appropriate skill at the start of each document phase for methodology guidance.
 - Only write or edit files within `.start/` and `docs/` directories.
-- Run phases sequentially — Clarify, Research, Requirements (WHY), Solution (WHAT), Plan (completion contract). The user can skip document phases; the Clarify phase cannot be skipped.
+- Run phases sequentially — Clarify, Research, Requirements (WHY), Solution (WHAT), Plan (slice and scenario tasks). The user can skip document phases; the Clarify phase cannot be skipped.
 - Wait for user confirmation between document phases, and verify the MECE gate before leaving the Requirements phase.
 - Track decisions and the assumption ledger in the specification README via reference/output-format.md.
 - Git integration is optional — offer branch/commit as an option.
@@ -77,7 +77,7 @@ State {
 - [Clarification](reference/clarification.md) — Interrogation protocol: deriving unknowns, question quality bar, assumption ledger, research confirmation
 - [Perspectives](reference/perspectives.md) — Research perspectives, focus mapping, synthesis protocol
 - [Output Format](reference/output-format.md) — Decision and assumption logging, documentation structure
-- [Report Template](templates/spec-report.mdx) — Editor-readable specification report (ledger, dispositions, decisions)
+- [Report Template](templates/spec-report.md) — Editor-readable specification report (ledger, dispositions, decisions)
 - [Output Example](examples/output-example.md) — Concrete example of expected output format
 
 ## Workflow
@@ -105,7 +105,7 @@ Read reference/clarification.md for the interrogation protocol. This phase alway
 Then ask the user to choose the starting phase:
   Start with Requirements (recommended) — define requirements first
   Start with Solution — skip to technical design
-  Start with Plan — skip to the completion contract (requires existing requirements + solution)
+  Start with Plan — skip to the slice and scenario tasks (requires existing requirements + solution)
 
 ### 3. Select Mode
 
@@ -132,7 +132,7 @@ Use the specify-requirements skill. Hand it the ledger — Standing assumptions 
 
 Focus: WHAT needs to be built and WHY it matters. Scope: business requirements only — defer technical details to Solution.
 
-Gate before leaving this phase: requirements and acceptance criteria pass the MECE verification that specify-requirements enforces (no overlapping stories, no uncovered personas or error paths), and no Blocking `[NEEDS CLARIFICATION]` remains.
+Gate before leaving this phase: requirements and acceptance criteria pass the MECE verification that specify-requirements enforces (no overlapping stories, no role without a feature, no uncovered error paths), and no Blocking `[NEEDS CLARIFICATION]` remains.
 
 Ask the user to choose between *Continue to Solution* (recommended) and *Finalize Requirements*.
 
@@ -150,7 +150,7 @@ Ask the user to choose between *Continue to Plan* (recommended) and *Finalize So
 
 Use the specify-plan skill. Hand it the ledger — any Standing assumption a slice depends on must be flagged in that slice, not inherited silently.
 
-Focus: the implementation **tasks** `/implement` executes — a narrative `plan.mdx` plus, in the spec's tracker, one **slice** task per vertical deliverable (its code brief correlates features, EARS behavior, and quality gates) with its holdout acceptance scenarios as separate **scenario child tasks**; `--depends-on` between slices is the parallelization contract. Scope: what each slice delivers and how it is proven — not the steps to build it. The loop's code agent owns HOW.
+Focus: the implementation **tasks** `/implement` executes — a narrative `plan.md` plus, in the spec's tracker, one **slice** task per vertical deliverable (its code brief correlates features, EARS behavior, and quality gates) with its holdout acceptance scenarios as separate **scenario child tasks**; `--depends-on` between slices is the parallelization contract. Scope: what each slice delivers and how it is proven — not the steps to build it. The loop's code agent owns HOW.
 
 The acceptance scenarios are observable behaviors through external interfaces, grounded in the codebase, organized by user-observable capability — never by layer.
 
@@ -161,9 +161,9 @@ Ask the user to choose between *Finalize specification* (recommended) and *Revis
 Use the specify-meta skill to review and assess readiness. Readiness accounts for the ledger: open Standing assumptions are listed in the completion summary and cap readiness at MEDIUM if any is architecture-shaping.
 
 Write the specification report:
-1. Read templates/spec-report.mdx and follow the MDX block discipline (MDX Blocks reference shared via specify-plan) — structured MDX that degrades to readable Markdown in any editor.
+1. Read templates/spec-report.md and follow the Markdown block discipline (Markdown Blocks reference shared via specify-plan) — structured Markdown that reads in any editor.
 2. Fill it from State: readiness (with the cap callout when capped, removed otherwise), the full ledger (unknowns with resolutions, assumptions with statuses), findings with dispositions, document statuses, decisions, next steps.
-3. Save as `spec-report.mdx` in the spec directory.
+3. Save as `spec-report.md` in the spec directory.
 4. Verify no `{{...}}` placeholder remains and the heading spine is intact (Readiness, Clarification Ledger, Research Findings, Documents, Decisions Log, Next Steps).
 
 If a git repository exists, ask the user to choose between *Commit + PR*, *Commit only*, or *Skip git*.

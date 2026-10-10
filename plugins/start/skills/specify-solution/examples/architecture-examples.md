@@ -150,15 +150,6 @@ FUNCTION: handle_operation_errors(operation_result)
     - SystemError → 500 Internal Server Error + generic message
 ```
 
-## Example: Quality Requirements
-
-| Requirement | Target | Measurement |
-|-------------|--------|-------------|
-| API Response Time | p95 < 200ms | APM monitoring (Datadog) |
-| Payment Success Rate | > 99.5% | Success / Total transactions |
-| System Availability | 99.9% uptime | Health check monitoring |
-| Error Rate | < 0.1% | Errors / Total requests |
-
 ## Example: UI Component Specification
 
 ```markdown
