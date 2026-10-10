@@ -13,9 +13,9 @@
 .start/specs/
 ├── 001-user-authentication/
 │   ├── README.md                 # Managed by specify-meta skill
-│   ├── requirements.mdx          # WHY — created by specify-requirements skill
-│   ├── solution.mdx              # WHAT (design) — created by specify-solution skill
-│   ├── plan.mdx                  # WHAT (narrative) — created by specify-plan skill
+│   ├── requirements.md          # WHY — created by specify-requirements skill
+│   ├── solution.md              # WHAT (design) — created by specify-solution skill
+│   ├── plan.md                  # WHAT (narrative) — created by specify-plan skill
 │   └── .tracker/                 # Implementation tasks — created by specify-plan via task.js
 │       ├── <phase-task>.md       #   root phase task
 │       ├── <slice-task>.md       #   slice tasks (code brief in body)
@@ -26,19 +26,15 @@
     └── ...
 ```
 
-`/implement` runs the plugin's reusable `workflows/implement.js` and
-runs it on the dynamic-workflow runtime, writing each slice task's status in the tracker as slices are
-satisfied (the phase root rolls up).
+`/implement` runs a dynamic workflow that builds each slice task and writes its status in the tracker
+as slices are satisfied (the phase root rolls up).
 
-Specs created before the task model may carry a `plan/` directory, a `manifest.md` + `units/`,
-`scenarios/phase-N/`, or a `### BEAN-N` plan spine. `/implement` does not run these; re-run
-`/start:specify` to regenerate the tracker tasks for them.
 
 ## Script Commands
 
 ### Create New Spec
 ```bash
-spec.py "feature name here"
+node <plugin>/scripts/spec.js "feature name here"
 ```
 **Output:**
 ```
@@ -51,7 +47,7 @@ Creates the spec directory only. Document artifacts are added per phase via `--a
 
 ### Read Spec Metadata
 ```bash
-spec.py 005 --read
+node <plugin>/scripts/spec.js 005 --read
 ```
 **Output (TOML):**
 ```toml
@@ -60,32 +56,30 @@ name = "feature-name-here"
 dir = ".start/specs/005-feature-name-here"
 
 [spec]
-prd = ".start/specs/005-feature-name-here/requirements.mdx"
-sdd = ".start/specs/005-feature-name-here/solution.mdx"
-plan_doc = ".start/specs/005-feature-name-here/plan.mdx"
+prd = ".start/specs/005-feature-name-here/requirements.md"
+sdd = ".start/specs/005-feature-name-here/solution.md"
+plan_doc = ".start/specs/005-feature-name-here/plan.md"
 
 files = [
   "README.md",
-  "requirements.mdx",
-  "solution.mdx",
-  "plan.mdx"
+  "requirements.md",
+  "solution.md",
+  "plan.md"
 ]
 ```
 
-Implementation tasks live in `.tracker/` — query them with `task.js graph --spec 005`, not via `spec.py`.
+Implementation tasks live in `.tracker/` — query them with `task.js graph --spec 005`, not via `spec.js`.
 
 ### Add Template to Existing Spec
 ```bash
-spec.py 005 --add specify-requirements   # Creates requirements.md (rename to .mdx per discipline)
-spec.py 005 --add specify-solution       # Creates solution.md
-spec.py 005 --add specify-plan           # Creates plan.mdx + ensures .tracker/
+node <plugin>/scripts/spec.js 005 --add specify-requirements   # Creates requirements.md
+node <plugin>/scripts/spec.js 005 --add specify-solution       # Creates solution.md
+node <plugin>/scripts/spec.js 005 --add specify-plan           # Creates plan.md + ensures .tracker/
 ```
 
 ## Template Resolution
 
-Templates are resolved in this order:
-1. `skills/[template-name]/template.md` (primary)
-2. `templates/[template-name].md` (deprecated fallback)
+Templates are resolved from `skills/[template-name]/template.md`.
 
 ## README.md Fields
 
@@ -102,13 +96,13 @@ Templates are resolved in this order:
 ```
 Initialization
     ↓
-Requirements (specify-requirements → requirements.mdx)   [WHY]
+Requirements (specify-requirements → requirements.md)   [WHY]
     ↓
-Solution (specify-solution → solution.mdx)               [WHAT — design]
+Solution (specify-solution → solution.md)               [WHAT — design]
     ↓
-Plan (specify-plan → narrative plan.mdx + tracker tasks)  [WHAT — the plan]
+Plan (specify-plan → narrative plan.md + tracker tasks)  [WHAT — the plan]
     ↓
-Ready for Implementation   (/implement runs workflows/implement.js slice loop)
+Ready for Implementation   (/implement runs the slice loop)
 ```
 
 Each phase can be:

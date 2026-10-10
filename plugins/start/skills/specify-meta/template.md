@@ -12,22 +12,17 @@
 
 | Document | Status | Notes |
 |----------|--------|-------|
-| requirements.mdx | {{REQUIREMENTS_STATUS}} | WHY — {{REQUIREMENTS_NOTES}} |
-| solution.mdx | {{SOLUTION_STATUS}} | WHAT (design) — {{SOLUTION_NOTES}} |
-| plan.mdx | {{PLAN_STATUS}} | WHAT (completion contract: target state, quality gates, completion criteria) — {{PLAN_NOTES}} |
+| requirements.md | {{REQUIREMENTS_STATUS}} | WHY — {{REQUIREMENTS_NOTES}} |
+| solution.md | {{SOLUTION_STATUS}} | WHAT (design) — {{SOLUTION_NOTES}} |
+| plan.md | {{PLAN_STATUS}} | WHAT (narrative plan; slice and scenario tasks in `.tracker/`) — {{PLAN_NOTES}} |
 
 **Status values**: `pending` | `in_progress` | `completed` | `skipped`
 
 ## Implementation
 
-The specification describes the target state. **How** to implement it is decided by `/implement`,
-which selects an execution strategy and records it (with any generated decomposition) under `.impl/`.
-
-| Field | Value |
-|-------|-------|
-| **Strategy** | {{IMPL_STRATEGY}} |
-
-**Strategy values**: `Direct` | `Iterative` | `Decompose` | `None` (not yet implemented). Chosen at implementation time, not specification time. See `.impl/strategy.md` once `/implement` has run.
+The specification describes the target state. `/implement` builds it by running each slice task in
+`.tracker/` through a code→eval loop and records each slice's status on its task
+(`task.js graph --spec {{SPEC_ID}}`).
 
 ## Decisions Log
 

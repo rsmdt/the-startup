@@ -1,18 +1,19 @@
 ---
 name: specify-meta
+user-invocable: false
 description: Scaffold, status-check, and manage specification directories. Use when creating a new spec, reading spec status, transitioning between phases, or logging decisions on a spec in .start/specs/.
 ---
 
 ## Persona
 
-Act as a specification workflow orchestrator that manages specification directories and tracks user decisions throughout the Requirements (WHY) → Solution (WHAT — design) → Plan (WHAT — completion contract) workflow. The Plan phase produces plan.mdx plus scenarios/ (holdout completion criteria). The specification describes the target state; how to implement it (Direct, Iterative, or Decompose) is decided later by /implement, which writes its decomposition under .impl/. (Legacy specs may still carry Incremental plan/ or Factory manifest.md artifacts; these remain readable.)
+Act as a specification workflow orchestrator that manages specification directories and tracks user decisions throughout the Requirements (WHY) → Solution (WHAT — design) → Plan (slice and scenario tasks) workflow. The Plan phase produces a narrative plan.md plus the slice and scenario tasks in the spec's tracker. The specification describes the target state; /implement builds it by running those slice tasks.
 
 ## Interface
 
 SpecStatus {
   id: string               // 3-digit zero-padded (001, 002, ...)
   name: string
-  directory: string         // .start/specs/[NNN]-[name]/ (legacy: docs/specs/)
+  directory: string         // .start/specs/[NNN]-[name]/
   phase: Initialization | Requirements | Solution | Plan | Ready
   documents: {
     name: string
@@ -30,7 +31,7 @@ State {
 ## Constraints
 
 **Always:**
-- Use spec.py (co-located with this SKILL.md) for all directory operations.
+- Use `node ${CLAUDE_PLUGIN_ROOT}/scripts/spec.js` for all directory operations.
 - Create README.md from template.md when scaffolding new specs.
 - Log all significant decisions with date, decision, and rationale.
 - Keep the README Assumption Ledger current — status changes (Proposed → Confirmed/Corrected/Standing) are updates to this file, made when the specify skill reports them.
@@ -42,7 +43,7 @@ State {
 
 ## Reference Materials
 
-- [Spec Management](reference/spec-management.md) — Spec ID format, directory structure, script commands, phase workflow, decision logging, legacy fallback
+- [Spec Management](reference/spec-management.md) — Spec ID format, directory structure, script commands, phase workflow, decision logging
 - [README Template](template.md) — Template for spec README.md files
 
 ## Workflow
@@ -51,7 +52,7 @@ State {
 
 Create a new spec with an auto-incrementing ID.
 
-1. Run `spec.py "$featureName"` in the terminal.
+1. Run `node ${CLAUDE_PLUGIN_ROOT}/scripts/spec.js "$featureName"` in the terminal.
 2. Create README.md from template.md.
 3. Report the created spec status.
 
@@ -59,15 +60,13 @@ Create a new spec with an auto-incrementing ID.
 
 Read existing spec metadata.
 
-1. Run `spec.py "$specId" --read` in the terminal.
+1. Run `node ${CLAUDE_PLUGIN_ROOT}/scripts/spec.js "$specId" --read` in the terminal.
 2. Parse TOML output into SpecStatus.
 3. Suggest the next continuation point:
 
 match (documents) {
-  plan_doc exists (plan.mdx)        => "Plan found. Proceed to implementation? (/implement selects Direct, Iterative, or Decompose.)"
-  manifest exists (legacy)          => "Legacy Factory manifest found. Proceed to implementation?"
-  plan exists (legacy plan/)        => "Legacy Incremental plan found. Proceed to implementation?"
-  solution exists, no plan          => "Solution found. Continue to Plan (define the completion contract)?"
+  plan_doc exists (plan.md)        => "Plan found. Proceed to implementation with /implement?"
+  solution exists, no plan          => "Solution found. Continue to Plan (slice and scenario tasks)?"
   requirements exists, no solution  => "Requirements found. Continue to Solution?"
   no documents                      => "Start from Requirements?"
 }
@@ -83,7 +82,7 @@ Update the spec directory to reflect the new phase.
 match (phase) {
   Requirements  => specify-requirements skill
   Solution      => specify-solution skill
-  Plan          => specify-plan skill (writes plan.mdx + scenarios/)
+  Plan          => specify-plan skill (writes plan.md + tracker tasks)
 }
 
 4. On completion, return here for the next phase transition.
