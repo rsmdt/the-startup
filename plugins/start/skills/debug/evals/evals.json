@@ -23,6 +23,12 @@
         "Only declared a root cause once demonstrated (toggling the condition switches the bug on and off)",
         "Asked the user for approval before applying the fix",
         "Ran tests after applying the fix and reported actual results"
+      ],
+      "files": [
+        "evals/files/invoice-total-tax/billing/__init__.py",
+        "evals/files/invoice-total-tax/billing/totals.py",
+        "evals/files/invoice-total-tax/conftest.py",
+        "evals/files/invoice-total-tax/tests/test_totals.py"
       ]
     }
   ]

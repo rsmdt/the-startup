@@ -25,6 +25,11 @@
         "Did not modify any code or test files",
         "Identified tautology candidates, framework re-verification, and call-sequence-only tests with file references",
         "Produced recommended deletions/refactors with rationale"
+      ],
+      "files": [
+        "evals/files/cart-test-suite-audit/package.json",
+        "evals/files/cart-test-suite-audit/src/cart.js",
+        "evals/files/cart-test-suite-audit/test/cart.test.js"
       ]
     }
   ]

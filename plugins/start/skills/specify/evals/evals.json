@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "Specify a real-time notification system with WebSocket support",
-      "expected_output": "Full specification workflow: requirements (WHY), solution (WHAT — design), plan (WHAT — completion contract). No decomposition tier is chosen.",
+      "expected_output": "Full specification workflow: requirements (WHY), solution (WHAT — design), plan (narrative plan.md plus slice and scenario tasks in the tracker).",
       "expectations": [
         "Invoked specify-meta to scaffold the spec directory",
         "Created .start/specs/NNN-*/ directory structure",
@@ -16,10 +16,9 @@
         "Waited for user approval before proceeding to solution",
         "Invoked specify-solution skill for solution",
         "Waited for user approval before proceeding to the plan phase",
-        "Invoked specify-plan skill to author plan.mdx (target state, quality gates, completion criteria) and scenarios/",
-        "Wrote spec-report.mdx from templates/spec-report.mdx with no {{...}} placeholders remaining and the ledger, findings, and decisions included",
-        "Did NOT run a complexity classifier or choose a Direct/Incremental/Factory tier",
-        "Did NOT present execution-strategy options (that decision belongs to /implement)"
+        "Invoked specify-plan skill to author plan.md and the slice and scenario tasks in .tracker/",
+        "Wrote spec-report.md from templates/spec-report.md with no {{...}} placeholders remaining and the ledger, findings, and decisions included",
+        "Did NOT prescribe implementation steps (HOW belongs to /implement)"
       ]
     },
     {
@@ -36,15 +35,20 @@
     },
     {
       "id": 3,
-      "prompt": "Resume spec 002 which has requirements.md and solution.md completed but no plan.mdx",
+      "prompt": "Resume spec 002 which has requirements.md and solution.md completed but no plan.md",
       "expected_output": "Detect existing state and suggest continuing to the Plan phase",
       "expectations": [
         "Invoked specify-meta to read spec status",
         "Detected requirements and solution as completed",
-        "Detected no plan.mdx and no scenarios/",
+        "Detected no plan.md and no slice tasks in .tracker/",
         "Suggested continuing to the Plan phase (specify-plan)",
         "Did NOT re-run requirements or solution phases",
-        "Did NOT run a complexity classifier or choose an execution strategy"
+        "Did NOT prescribe implementation steps"
+      ],
+      "files": [
+        "evals/files/saved-searches-no-plan/.start/specs/002-saved-searches/README.md",
+        "evals/files/saved-searches-no-plan/.start/specs/002-saved-searches/requirements.md",
+        "evals/files/saved-searches-no-plan/.start/specs/002-saved-searches/solution.md"
       ]
     },
     {
@@ -74,14 +78,14 @@
     {
       "id": 4,
       "prompt": "Specify a multi-feature auth system, complete requirements and solution, then author the plan.",
-      "expected_output": "Plan phase produces a completion contract focused on outcomes, not implementation steps",
+      "expected_output": "Plan phase produces a narrative plan.md plus dependency-ordered slice tasks with scenario child tasks, focused on outcomes, not implementation steps",
       "expectations": [
         "Invoked specify-plan after solution",
-        "plan.mdx describes the target state as outcomes, not implementation steps or sequencing",
-        "plan.mdx defines quality gates and completion criteria",
-        "Generated holdout scenarios under scenarios/{capability}/ grouped by user-observable capability",
-        "Did NOT decompose into phases, units, execution groups, or a tier",
-        "Presented completion criteria for user approval before finalizing"
+        "plan.md describes the target state as outcomes, not implementation steps or sequencing",
+        "Each slice task carries Features (AC-N.M), Behavior (EARS) and Quality Gates (NFR-N)",
+        "Created holdout scenario child tasks under each slice, with at least one P0 per slice",
+        "Did NOT make layer-only slices or assign execution groups",
+        "Presented each slice and its scenarios for user approval before creating the tasks"
       ]
     }
   ]

@@ -6,7 +6,7 @@
       "prompt": "Archive spec 002 — its implementation is complete. The spec directory contains requirements.md and solution.md.",
       "expected_output": "Archive record written to .start/archive/002-*.md, then spec directory removed",
       "expectations": [
-        "Resolved the spec via the specify-meta skill (spec.py --read) before reading anything",
+        "Resolved the spec via the specify-meta skill (spec.js --read) before reading anything",
         "Read requirements.md and solution.md and distilled them rather than copying verbatim",
         "Searched git history for the implementing/merge commit and recorded its short SHA + subject in the record (or recorded 'unknown' if none could be determined, without fabricating a SHA)",
         "Wrote the archive record to .start/archive/[NNN]-[name].md BEFORE removing anything",
@@ -14,17 +14,11 @@
         "Verified the archive record exists and is non-empty before removing the source directory",
         "Removed the entire spec working directory in a single step after the record was confirmed",
         "Wrote the record directly without spawning a subagent"
-      ]
-    },
-    {
-      "id": 2,
-      "prompt": "Archive spec 007. The spec directory exists but contains neither requirements.md nor solution.md.",
-      "expected_output": "User asked whether to remove the directory anyway or abort; nothing fabricated",
-      "expectations": [
-        "Detected that there is nothing to distill",
-        "Asked the user whether to remove the directory anyway or abort",
-        "Did not fabricate an archive record from nonexistent documents",
-        "Did not remove the directory without user confirmation"
+      ],
+      "files": [
+        "evals/files/saved-searches-complete/.start/specs/002-saved-searches/README.md",
+        "evals/files/saved-searches-complete/.start/specs/002-saved-searches/requirements.md",
+        "evals/files/saved-searches-complete/.start/specs/002-saved-searches/solution.md"
       ]
     },
     {
@@ -37,6 +31,12 @@
         "Back-annotated .start/archive/004-payment-processing.md with a 'Superseded by: 011-...' line directly under its heading, without otherwise rewriting it",
         "Still captured the implementing/merge commit for spec 011",
         "Wrote the new record before removing the source directory"
+      ],
+      "files": [
+        "evals/files/payments-redesign-supersedes/.start/archive/004-payment-processing.md",
+        "evals/files/payments-redesign-supersedes/.start/specs/011-payments-redesign/README.md",
+        "evals/files/payments-redesign-supersedes/.start/specs/011-payments-redesign/requirements.md",
+        "evals/files/payments-redesign-supersedes/.start/specs/011-payments-redesign/solution.md"
       ]
     }
   ]

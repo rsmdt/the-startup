@@ -4,51 +4,70 @@
     {
       "id": 1,
       "prompt": "Author the plan for spec 003 (a notification API) which has completed requirements.md and solution.md.",
-      "expected_output": "plan.mdx with target state, quality gates, completion criteria, and holdout scenarios; no implementation steps or tier",
+      "expected_output": "A narrative plan.md (target state, phases & outcomes, tracking) plus tracker tasks: one phase root, dependency-ordered slice tasks carrying code briefs, and scenario child tasks under each slice",
       "expectations": [
         "Read requirements and solution before authoring",
-        "Wrote plan.mdx with a Target State section described as outcomes (not steps)",
-        "Defined Quality Gates as checkable conditions (tests pass, lint/type checks, etc.)",
-        "Defined Completion Criteria grouped by user-observable capability with links to scenarios",
-        "Set a satisfaction threshold in plan.mdx frontmatter",
-        "Did NOT prescribe implementation steps, phases, units, execution order, or a decomposition tier",
-        "Kept the machine-parseable spine (frontmatter threshold; Completion Criteria headings with scenario links)"
+        "Wrote plan.md with a Target State section described as outcomes (not steps)",
+        "Listed each slice in Phases & Outcomes as a one-line user-observable outcome with its dependencies",
+        "Set threshold and max_iterations in plan.md frontmatter",
+        "Created one phase root task and one slice task per vertical deliverable via task.js, with --depends-on edges between slices",
+        "Each slice body carries Features (AC-N.M), Behavior (EARS) and Quality Gates (with NFR-N ids)",
+        "Did NOT make layer-only slices or prescribe file edits, code, or execution groups"
+      ],
+      "files": [
+        "evals/files/notification-api-unplanned/.start/specs/003-notification-api/README.md",
+        "evals/files/notification-api-unplanned/.start/specs/003-notification-api/requirements.md",
+        "evals/files/notification-api-unplanned/.start/specs/003-notification-api/solution.md"
       ]
     },
     {
       "id": 2,
-      "prompt": "Generate completion criteria (holdout scenarios) for the notification API plan.",
-      "expected_output": "Scenarios test observable behavior through external interfaces, grounded in the codebase, grouped by capability",
+      "prompt": "Generate the holdout acceptance scenarios for the notification API plan.",
+      "expected_output": "Scenario child tasks under each slice that test observable behavior through external interfaces, grounded in the codebase, each tagged with its surface",
       "expectations": [
         "Read the codebase for actual endpoints, data shapes, and conventions",
-        "Wrote scenarios under scenarios/{capability}/{name}.md",
-        "Each scenario tests observable behavior through an external interface (API/UI/CLI)",
-        "Assigned P0/P1/P2 priorities with at least one P0 per capability",
+        "Created each scenario as a task.js scenario child task under its slice (--type scenario --parent <sliceId>)",
+        "Every Feature (AC) has at least one business scenario and every EARS behavior has at least one technical scenario",
+        "Each scenario carries a Surface tag (business | technical) and a P0/P1/P2 priority, with at least one P0 per slice",
         "Did NOT reference internal implementation details (class names, function signatures, file paths)",
-        "Presented all scenarios for user approval before finalizing"
+        "Did NOT put scenario text into a slice task body",
+        "Presented the scenarios with a coverage map for user approval before creating the tasks"
       ]
     },
     {
       "id": 3,
-      "prompt": "Validate the plan for spec 003 against its requirements.",
-      "expected_output": "Coverage and format checks; flag any requirement without a completion criterion",
+      "prompt": "Validate the plan for spec 003 against its requirements and solution.",
+      "expected_output": "Coverage and structure checks over plan.md and the tracker tasks; flag any uncovered acceptance criterion, EARS behavior, or NFR",
       "expectations": [
-        "Checked every requirement maps to at least one completion criterion",
-        "Checked every capability has at least one P0 scenario",
-        "Checked completion criteria test observable behavior, not implementation details",
-        "Flagged any uncovered requirement as a gap",
-        "Confirmed plan.mdx frontmatter has a valid threshold"
+        "Inspected the tasks with task.js graph --spec 003",
+        "Checked every acceptance criterion maps to exactly one slice's Features",
+        "Checked every EARS criterion in solution.md maps to exactly one slice's Behavior",
+        "Checked every NFR-N appears as a quality gate on at least one slice",
+        "Checked every slice has at least one P0 scenario and no acceptance surface lacks a scenario",
+        "Flagged any uncovered item as a gap",
+        "Confirmed plan.md frontmatter has threshold and max_iterations"
+      ],
+      "files": [
+        "evals/files/notification-api-planned/.start/specs/003-notification-api/.tracker/a7x2p4.md",
+        "evals/files/notification-api-planned/.start/specs/003-notification-api/.tracker/b5t8w0.md",
+        "evals/files/notification-api-planned/.start/specs/003-notification-api/.tracker/c1r6n3.md",
+        "evals/files/notification-api-planned/.start/specs/003-notification-api/.tracker/d4v9s2.md",
+        "evals/files/notification-api-planned/.start/specs/003-notification-api/.tracker/e8h2j5.md",
+        "evals/files/notification-api-planned/.start/specs/003-notification-api/.tracker/k3m9q1.md",
+        "evals/files/notification-api-planned/.start/specs/003-notification-api/README.md",
+        "evals/files/notification-api-planned/.start/specs/003-notification-api/plan.md",
+        "evals/files/notification-api-planned/.start/specs/003-notification-api/requirements.md",
+        "evals/files/notification-api-planned/.start/specs/003-notification-api/solution.md"
       ]
     },
     {
       "id": 4,
-      "prompt": "The user asks specify-plan to also lay out the implementation phases and decide whether to use the factory.",
-      "expected_output": "Decline to prescribe HOW; keep the plan to WHAT (completion contract)",
+      "prompt": "The user asks specify-plan to also lay out step-by-step implementation instructions per file.",
+      "expected_output": "Decline to prescribe HOW; slices describe what they deliver and how it is proven",
       "expectations": [
-        "Did NOT write implementation phases, units, or execution order into the plan",
-        "Did NOT choose a Direct/Iterative/Decompose strategy or a tier",
-        "Explained that execution strategy and decomposition are decided by /implement at implementation time",
-        "Kept the plan focused on target state, quality gates, and completion criteria"
+        "Did NOT write per-file steps, code, or execution-group assignments into plan.md or any slice task",
+        "Explained that /implement's code agent owns HOW and dependencies decide order",
+        "Kept each slice to Features, Behavior, and Quality Gates, with scenarios as separate child tasks"
       ]
     }
   ]

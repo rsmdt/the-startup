@@ -13,6 +13,15 @@
         "Every finding includes a file:line location and an actionable fix recommendation",
         "Computed an assessment level (Excellent / Good / Needs Attention / Critical) from fail and warn counts",
         "Asked the user how to proceed with the findings"
+      ],
+      "files": [
+        "evals/files/rate-limiting-spec/.start/specs/005-rate-limiting/.tracker/r4n7k2.md",
+        "evals/files/rate-limiting-spec/.start/specs/005-rate-limiting/.tracker/s9q3m1.md",
+        "evals/files/rate-limiting-spec/.start/specs/005-rate-limiting/.tracker/t2w8h6.md",
+        "evals/files/rate-limiting-spec/.start/specs/005-rate-limiting/.tracker/u6c1v5.md",
+        "evals/files/rate-limiting-spec/.start/specs/005-rate-limiting/plan.md",
+        "evals/files/rate-limiting-spec/.start/specs/005-rate-limiting/requirements.md",
+        "evals/files/rate-limiting-spec/.start/specs/005-rate-limiting/solution.md"
       ]
     },
     {
@@ -24,6 +33,10 @@
         "Treated the L1 violation as blocking rather than advisory",
         "Separated findings by level (L1 autofix, L2 manual, L3 advisory)",
         "Offered the user the choice to apply L1 autofixes, show violations, or skip"
+      ],
+      "files": [
+        "evals/files/constitution-l1-violation/CONSTITUTION.md",
+        "evals/files/constitution-l1-violation/src/services/mailer.js"
       ]
     }
   ]

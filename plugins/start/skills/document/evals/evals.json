@@ -12,6 +12,12 @@
         "Updated existing documentation rather than creating duplicates",
         "Linked to actual file paths and line numbers in produced docs",
         "Presented a summary with next-step options at the end"
+      ],
+      "files": [
+        "evals/files/services-with-stale-doc/docs/services/payment-service.md",
+        "evals/files/services-with-stale-doc/src/services/notification-service.ts",
+        "evals/files/services-with-stale-doc/src/services/payment-service.ts",
+        "evals/files/services-with-stale-doc/src/services/user-service.ts"
       ]
     },
     {

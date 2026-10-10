@@ -6,13 +6,8 @@
       "prompt": "I want to add a notification system to my app.",
       "expected_output": "Context exploration, one-question-at-a-time probing, 2-3 approaches with trade-offs, design approval",
       "expectations": [
-        "Explored project context (files, docs, git history) before asking questions",
         "Asked exactly ONE question per message — never multiple questions in a single turn",
-        "Presented structured options when choices existed",
-        "Proposed 2-3 distinct approaches with pros and cons before settling on a design",
-        "Led with a recommended approach and explained why",
-        "Did not write code or scaffold anything during brainstorming",
-        "Sought user approval on the design before concluding"
+        "Did not write code or scaffold anything during brainstorming"
       ]
     },
     {

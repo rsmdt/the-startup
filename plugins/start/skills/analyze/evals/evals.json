@@ -3,41 +3,45 @@
   "evals": [
     {
       "id": 1,
-      "name": "plan-shown-in-chat-before-approval",
-      "prompt": "Analyze how the authentication flow works in this codebase.",
-      "expected_output": "Frames an analysis plan, displays it inline in the chat, and asks for approval before launching anything.",
+      "prompt": "Analyze how auth works.",
+      "expected_output": "Asks clarifying questions before scoping or launching anything.",
       "expectations": [
-        "Created .start/analysis/<NNN>-<name>/analysis.md with frontmatter containing name, description, a goals list, and status: draft",
-        "Displayed the full plan inline in the chat before asking for approval \u2014 the purpose (description), the goals as a numbered rubric, and the proposed research topics \u2014 not merely a path to the file",
-        "Asked the user to approve or refine the plan before launching (interactive gate)",
-        "Phrased each goal as a checkable objective a validator can rule met or unmet by evidence",
-        "Did NOT begin research, spawn research agents, or write any report itself before approval"
+        "Asked 2-3 clarifying questions (which auth path, codebase vs web, scope) before proposing angles",
+        "Did NOT launch a workflow or spawn research agents before the scope was confirmed"
       ]
     },
     {
       "id": 2,
-      "name": "seed-and-launch-on-approval",
-      "prompt": "Analyze the caching strategy across the services and how it invalidates. Assume I approve the plan you propose.",
-      "expected_output": "On approval, seeds research tasks and launches the plugin's analyze.js on the dynamic-workflow runtime.",
+      "prompt": "Analyze how the session-cookie authentication flow in this codebase validates and refreshes tokens.",
+      "expected_output": "Shows the refined question and 2-6 non-overlapping angles in chat and waits for confirmation.",
       "expectations": [
-        "Seeded one research task per approved topic via task.js create --home .start/analysis/<...> --type research, recording the returned ids",
-        "Launched the Workflow tool with scriptPath pointing at the plugin's workflows/analyze.js and args containing name, home, taskScript, description, goals, topics, reportPath, and maxRounds",
-        "Did NOT copy the script into the project or perform any install/version-check step \u2014 the script ships with the plugin and runs in place",
-        "Passed the approved goals rubric and the seeded topic ids into the workflow args",
-        "Did NOT perform the research, validation, or synthesis itself \u2014 delegated all of it to the workflow"
+        "Displayed the refined question and the angles (label + focus each) inline in the chat",
+        "Proposed between 2 and 6 angles that do not overlap",
+        "Asked the user to Launch, Adjust angles, or Refine the question",
+        "Did NOT launch before confirmation"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Analyze how the caching layer invalidates entries across services. I confirm your question and angles as proposed.",
+      "expected_output": "Authors and runs one dynamic workflow implementing research → consolidate → verify → synthesize.",
+      "expectations": [
+        "Called the Workflow tool with an inline script it authored (no scriptPath), whose meta is a pure literal",
+        "The script runs one research agent per confirmed angle concurrently, each returning cited, excerpted claims",
+        "The script merges duplicates by returned indices and rebuilds sources and excerpts from the original claims in code",
+        "The script runs three independent verifiers per unique claim and tallies confirmed / refuted / unverified in code, never counting an errored vote as a refutation",
+        "The synthesis agent receives only confirmed claims",
+        "Did NOT research or write findings itself outside the workflow"
       ]
     },
     {
       "id": 4,
-      "name": "refine-goals-then-redisplay",
-      "prompt": "Analyze the database access layer. When you show me the plan, add a goal about detecting N+1 query patterns, then proceed.",
-      "expected_output": "Shows the plan, incorporates the refinement into the frontmatter, re-displays the updated plan, and only then proceeds.",
+      "prompt": "The analysis workflow returned: every verification panel errored, zero confirmed claims.",
+      "expected_output": "Reports an infrastructure failure, not a negative finding, and offers a retry.",
       "expectations": [
-        "Displayed the initial plan (purpose, goals, topics) in the chat",
-        "On the refine request, edited analysis.md frontmatter to add the N+1 detection goal and re-displayed the updated plan in the chat",
-        "Preserved the other goals when adding the new one",
-        "Did not launch the workflow until the refined plan was settled",
-        "Set status to approved (or equivalent) only after the plan was finalized"
+        "Stated that no claim could be verified because the verifiers failed, not because claims were refuted",
+        "Did NOT present any unverified claim as a finding",
+        "Offered to retry"
       ]
     }
   ]

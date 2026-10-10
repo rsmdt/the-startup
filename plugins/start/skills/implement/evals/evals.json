@@ -3,58 +3,17 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "Implement spec 005 \u2014 a single-slice rate-limit middleware. specify-plan has authored the tracker: an implement-phase root task with one slice task (type: slice, its body is the code brief) and two scenario child tasks (type: scenario) under it. plan.mdx exists with threshold and max_iterations in its frontmatter.",
-      "expected_output": "Reads the implementation tasks from the tracker, builds task-based args, and launches the plugin's implement.js on the dynamic-workflow runtime.",
+      "prompt": "Implement spec 005 — a single-slice rate-limit middleware. specify-plan has authored the tracker: an implement-phase root task with one slice task (type: slice, its body is the code brief) and two scenario child tasks (type: scenario) under it. plan.md exists with threshold and max_iterations in its frontmatter.",
+      "expected_output": "Reads the task graph structure, discovers the service config, then authors and runs one dynamic workflow that loops each slice through code→eval.",
       "expectations": [
         "Invoked specify-meta to resolve the spec directory and specId",
-        "Read the implementation tasks from the tracker via task.js graph --spec 005 \u2014 identifying the implement-phase root task, its slice task, and the slice's scenario child tasks",
-        "Read plan.mdx only for the narrative and its threshold/max_iterations frontmatter \u2014 did NOT parse tasks or BEANs out of plan.mdx",
+        "Read the task graph via task.js graph --spec 005 — identifying the implement-phase root, its slice task, and the slice's scenario count — without opening any slice or scenario body",
+        "Read plan.md only for its threshold/max_iterations frontmatter",
         "Discovered the service startCommand, servicePort, and healthPath from the project instructions or package.json",
-        "Launched the Workflow tool with scriptPath pointing at the plugin's workflows/implement.js and args containing specId, taskScript, threshold, maxIterations, service config, tasks (one {id, dependsOn} per slice, using tracker ids), and groups",
-        "Did NOT implement code directly, run the code/eval loop itself, or author/modify any specification artifact",
-        "Did NOT copy the script into the project or perform any install/version-check step \u2014 the script ships with the plugin and runs in place"
-      ]
-    },
-    {
-      "id": 2,
-      "prompt": "Implement spec 003 \u2014 a notification feature. The tracker has two slice tasks where slice B lists slice A in its dependsOn.",
-      "expected_output": "Orders the dependent slices sequentially and launches.",
-      "expectations": [
-        "Topologically sorted slice A before slice B into dependency-ordered groups (B sequential after A)",
-        "Launched the plugin's implement.js with the two slice task ids as tasks (each {id, dependsOn}) and the ordered groups",
-        "Did NOT place the two slices in one parallel group \u2014 slice B depends on slice A"
-      ]
-    },
-    {
-      "id": 3,
-      "prompt": "Implement spec 006 \u2014 an auth feature. The tracker has three slice tasks, none of which lists another in its dependsOn.",
-      "expected_output": "Groups the three independent slices into one parallel group and launches.",
-      "expectations": [
-        "Placed the three independent slice tasks into a single parallel execution group because none depend on another",
-        "Launched implement.js with a parallel group of the three slice task ids",
-        "Passed each slice's {id, dependsOn} and preserved the information barrier \u2014 the code agent reads the slice task, the eval agent reads that slice's scenario child tasks"
-      ]
-    },
-    {
-      "id": 4,
-      "prompt": "Implement spec 002 which has a plan.mdx containing '### BEAN-N' headings and a legacy plan/ directory, but no implementation tasks in its tracker.",
-      "expected_output": "Detects the spec predates the task model, does not run legacy artifacts, and offers to re-run /start:specify to author the tracker tasks.",
-      "expectations": [
-        "Read the tracker (task.js graph --spec 002) and found no implement-phase tasks, and/or detected the legacy ### BEAN-N / plan/ layout",
-        "Explained the spec predates the task model",
-        "Offered to re-run /start:specify (which authors the tracker tasks)",
-        "Did NOT attempt to run the legacy artifacts, fabricate tasks, install, or launch the workflow"
-      ]
-    },
-    {
-      "id": 5,
-      "prompt": "Implement spec 004 whose tracker has a slice task with NO scenario child tasks under it.",
-      "expected_output": "Fails validation: a slice with no holdout scenarios cannot be evaluated.",
-      "expectations": [
-        "Read the tracker and found the slice task has zero scenario child tasks",
-        "Reported that every slice needs at least one scenario child task to be evaluated",
-        "Did NOT launch the workflow with an unprovable slice",
-        "Pointed the user back to specify-plan to author the scenario tasks"
+        "Called the Workflow tool with an inline script it authored (no scriptPath), whose meta is a pure literal",
+        "The script's code agent reads only the slice task and its eval agent reads only the scenario child tasks",
+        "The script gates completion on business and technical satisfaction each clearing the threshold",
+        "Did NOT implement code directly, run the code/eval loop outside the workflow, or author/modify any specification artifact"
       ]
     },
     {
@@ -64,7 +23,7 @@
       "expectations": [
         "Reported that no specification directory or tracker was found for spec 099",
         "Suggested running the specify skill first",
-        "Did NOT fabricate tasks, install the workflow, or launch a run"
+        "Did NOT fabricate tasks or launch a workflow"
       ]
     }
   ]

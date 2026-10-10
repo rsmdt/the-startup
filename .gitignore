@@ -26,3 +26,20 @@ Thumbs.db
 # Eval workspaces (regenerated during skill-creator runs)
 *-workspace/
 iteration-*
+
+# output-style benchmark artifacts
+bench/.styles/
+bench/results/
+
+# write-mode bench workspaces
+.test/
+
+# vendored benchmark deps
+bench/polyglot/**/node_modules/
+bench/polyglot/**/__pycache__/
+
+# bench working copies
+.bench-work/
+
+# eval-all logs
+.eval-logs/

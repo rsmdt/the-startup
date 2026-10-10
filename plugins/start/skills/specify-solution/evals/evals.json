@@ -10,7 +10,7 @@
         "Explored the existing codebase for patterns and conventions",
         "Invoked brainstorm to evaluate technical approaches before committing",
         "Wrote output to solution.md in the spec directory",
-        "Followed template.mdx structure exactly — all sections present",
+        "Followed template.md structure exactly — all sections present; UI / multi-component sections added only if needed",
         "No [NEEDS CLARIFICATION] markers remain in completed document",
         "Architecture pattern is clearly stated with rationale",
         "Components are MECE — each has a single distinct responsibility",
@@ -23,6 +23,10 @@
         "Every PRD acceptance criterion has a corresponding EARS criterion",
         "Document contains NO implementation code",
         "Launched parallel specialist agents for research (architecture, security, performance)"
+      ],
+      "files": [
+        "evals/files/payment-processing-prd/.start/specs/003-payment-processing/README.md",
+        "evals/files/payment-processing-prd/.start/specs/003-payment-processing/requirements.md"
       ]
     },
     {
@@ -42,8 +46,8 @@
       "prompt": "Design a solution for a feature that requires no database changes, no new APIs, and no external integrations — just internal refactoring of business logic.",
       "expected_output": "SDD adapts scope appropriately — omits irrelevant sections rather than filling them with N/A",
       "expectations": [
-        "Database schema section is minimal or marked as no change",
-        "External interfaces section reflects no new integrations",
+        "Schema changes are omitted or marked as no change",
+        "Interfaces table reflects no new integrations",
         "Component design focuses on internal restructuring",
         "Solution does NOT invent unnecessary infrastructure",
         "Design stays within PRD scope — no scope creep"
@@ -71,6 +75,10 @@
         "Presented each pending ADR to user for confirmation",
         "Did NOT rewrite sections that were already complete",
         "Updated ADR status from Pending to Confirmed after user approval"
+      ],
+      "files": [
+        "evals/files/team-invitations-partial-sdd/.start/specs/002-team-invitations/requirements.md",
+        "evals/files/team-invitations-partial-sdd/.start/specs/002-team-invitations/solution.md"
       ]
     }
   ]
