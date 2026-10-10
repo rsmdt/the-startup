@@ -9,6 +9,35 @@ Entries are added only when a release is cut. Work in progress is not tracked he
 
 This file retains detailed entries for the last 10 minor releases plus their patch revisions. Older release notes are linked to their [GitHub release page](https://github.com/rsmdt/the-startup/releases).
 
+## [3.10.0] - 2026-10-10
+
+Covers everything since 3.8.0; 3.9.0 was not released separately.
+
+### Added
+- **`reflect` skill**: mines the project's Claude Code session logs over a date range through six lenses (friction, conversation, model routing, capability gaps, guardrails, instruction hygiene) and reports advisory improve/create proposals for skills, subagents, output styles, CLAUDE.md/AGENTS.md and guardrails. Replaces `daydream`.
+- **`improve` skill**: finds deepening opportunities — shallow modules, leaky seams — and designs the interface before handing off to `refactor`.
+- **`archive` skill**: consolidates a completed spec into one record under `.start/archive/` and removes its working directory.
+- **Task tracker**: `specify-plan` authors a phase root, dependency-ordered slice tasks (code briefs) and holdout scenario child tasks; `/start:implement` runs them.
+- **Output styles** rewritten as company-stage registers: The Garage, The Startup, The ScaleUp.
+- **Skill evals**: `make eval SKILL=<name>` and `make eval-all` run each skill's eval set with the skill only (`BASELINE=1` adds the without-skill comparison), with input fixtures for evals that name a spec or file.
+
+### Changed
+- **BREAKING**: one implementation path. `/start:specify` produces requirements (WHY), solution (WHAT) and a plan of slice tasks; `/start:implement` drives each slice through a barriered code→eval loop until its scenarios pass the threshold. There are no tiers or strategies to choose.
+- **BREAKING**: specs are plain Markdown — `requirements.md`, `solution.md`, `plan.md`; `.mdx` specs are no longer read. Templates are simpler: one PRD validation checklist, a single Who table, NFR-N quality gates owned by the PRD, and conditional SDD sections loaded only when needed.
+- `analyze`, `implement`, `review`, `reflect` and the `specify-solution` review panel are skills that have Claude author and run a dynamic workflow; their stages, return schemas and agent prompts live in each skill's `reference/`. Claude chooses smaller models for mechanical stages without hardcoded model names.
+- Shared CLIs live in `plugins/start/scripts/` (`task.js`, `spec.js`) and are called as `node ${CLAUDE_PLUGIN_ROOT}/scripts/<name>.js`. `spec.py` is ported to Node.
+- `specify-meta` is internal (`user-invocable: false`).
+
+### Removed
+- **BREAKING**: shipped workflow scripts (`plugins/start/workflows/`) and their `/start:run-*` commands.
+- **BREAKING**: `daydream` (use `reflect`), `writing-skills`, and the tier skills `implement-direct`, `implement-standard`, `implement-factory`, `specify-standard`, `specify-factory`.
+- The `CLAUDE.md` shim; `AGENTS.md` is the project instruction file.
+
+### Fixed
+- The solution review grades fail-closed: a lens that did not run fails, and unverified findings are reported rather than dropped.
+- `/start:analyze` registers again (its workflow had a non-literal `meta`).
+- Scaffolding a template with `spec --add` no longer fails on `.mdx`/`.md` mismatches.
+
 ## [3.7.0] - 2026-05-07
 
 ### Added
