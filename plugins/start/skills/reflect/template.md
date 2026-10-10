@@ -1,6 +1,6 @@
 ---
 name: {{slug}}
-description: {{terse one-line purpose of this daydream run}}
+description: {{terse one-line purpose of this reflect run}}
 status: draft   # draft | approved | in-progress | review | done
 dateRange:
   since: {{YYYY-MM-DD}}
@@ -11,7 +11,7 @@ angles:
   - {{signal lens 2 — e.g. conversation}}
 ---
 
-# Daydream: {{Title}}
+# Reflect: {{Title}}
 
 {{One paragraph framing the run — which range of sessions it reviews and what it is trying to improve.}}
 
@@ -35,21 +35,20 @@ artifact fits). Targets are the **project harness** (all git-tracked):
 
 - Skills — `plugins/*/skills/*/SKILL.md` (+ `reference/`, `templates/`), or a **new skill** directory
 - Subagents — `plugins/team/agents/the-*/*.md`, or a **new subagent**
-- Workflow scripts — `plugins/*/workflows/*.js`
 - Output styles — `plugins/*/output-styles/*.md`
 - Baseline instruction — project `CLAUDE.md` / `AGENTS.md` (improve or simplify)
 - Guardrails (preference order) — a **permission policy** (allow/deny/ask) or a **hook** in the project
   `.claude/settings.json`, or an "Always/Never" rule in `CLAUDE.md`
 
 Never the user's global `~/.claude/` files.
-**Advisory by design**: daydream reports improve/create proposals; a human applies them on a branch/PR.
+**Advisory by design**: reflect reports improve/create proposals; a human applies them on a branch/PR.
 
 ## Tracker
 
 Granular mine and proposal tasks (and their status) live in the tracker:
 
-- Location: `.start/daydream/{{slug}}/.tracker/`
-- Query the graph: `node <path-to>/task.js graph --home .start/daydream/{{slug}}`
-- Overview (roots): `node <path-to>/task.js list --home .start/daydream/{{slug}}`
+- Location: `.start/reflect/{{slug}}/.tracker/`
+- Query the graph: `node <plugin>/scripts/task.js graph --home .start/reflect/{{slug}}`
+- Overview (roots): `node <plugin>/scripts/task.js list --home .start/reflect/{{slug}}`
 
 The proposals report is written to `report.md` in this directory once the run completes.
