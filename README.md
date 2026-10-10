@@ -174,9 +174,9 @@ This creates a specification directory with three documents plus its holdout sce
 
 ```
 .start/specs/001-notification-system/
-├── requirements.mdx          # What to build and why
-├── solution.mdx              # How to build it technically
-├── plan.mdx                  # The high-level plan narrative (phases + outcomes)
+├── requirements.md          # What to build and why
+├── solution.md              # How to build it technically
+├── plan.md                  # The high-level plan narrative (phases + outcomes)
 └── .tracker/                 # The implementation tasks /implement runs
     ├── <phase + slice tasks> # slice = one deliverable, code brief in its body
     └── <scenario tasks>      # holdout acceptance evidence, per slice
@@ -186,12 +186,12 @@ This creates a specification directory with three documents plus its holdout sce
 
 #### The plan: a narrative + tracker tasks
 
-`plan.mdx` is the high-level approach — phases and their achievable outcomes, plus a link to the tracker. The operational units are **tasks** in the spec's tracker (`.start/specs/NNN/.tracker/`, via `task.js`): one **slice** task per vertical deliverable, whose body correlates:
+`plan.md` is the high-level approach — phases and their achievable outcomes, plus a link to the tracker. The operational units are **tasks** in the spec's tracker (`.start/specs/NNN/.tracker/`, via `task.js`): one **slice** task per vertical deliverable, whose body correlates:
 
 | Facet | Source | Role |
 |-------|--------|------|
-| **Features** (acceptance criteria) | `requirements.mdx` | what the slice delivers |
-| **Behavior** (EARS statements) | `solution.mdx` | how it must behave, precisely |
+| **Features** (acceptance criteria) | `requirements.md` | what the slice delivers |
+| **Behavior** (EARS statements) | `solution.md` | how it must behave, precisely |
 | **Quality Gates** | derived | checkable conditions |
 
 Its acceptance scenarios are separate **scenario child tasks** (holdout evidence — the eval agent reads them, the code agent never does). Slices declare dependencies (`--depends-on`) — that graph is the whole parallelization contract. There is no tier or strategy to choose: a 1-slice plan is a short loop, a 40-slice plan fans out. You always invoke `/specify` and `/implement`; the spec sub-skills (`specify-requirements`, `specify-solution`, `specify-plan`, `specify-meta`) are dispatched internally.
@@ -234,9 +234,8 @@ Validation is advisory—it provides recommendations but doesn't block you.
 
 Claude will:
 1. Read the spec's slice tasks from the tracker and topologically sort them by their `--depends-on` edges
-2. Install the reusable workflow into the project at `.claude/workflows/implement.js` (prompting to upgrade if the bundled copy is newer)
-3. Launch it on the dynamic-workflow runtime — each slice driven through a barriered code→eval loop (a code agent builds it reading the slice task, blind to its scenarios; an eval agent proves it against the slice's scenario child tasks, blind to the slice and the source; failures retry until the satisfaction threshold)
-4. Run independent slices concurrently and dependent ones in order
+2. Author and run one dynamic workflow — each slice driven through a barriered code→eval loop (a code agent builds it reading the slice task, blind to its scenarios; an eval agent proves it against the slice's scenario child tasks, blind to the slice and the source; failures retry until the satisfaction threshold)
+3. Run independent slices concurrently and dependent ones in order
 
 **Large implementations may also need context resets.** Simply run `/implement 001` again in a fresh conversation—Claude tracks progress in the tracker.
 
@@ -602,9 +601,9 @@ Development often moves too fast without proper planning:
 ### Our Approach
 
 **1. Specify First** — Create comprehensive specifications before writing code
-- **requirements.mdx** — What to build and why
-- **solution.mdx** — How to build it technically
-- **plan.mdx** — The ordered task sequence, with holdout acceptance scenarios per task
+- **requirements.md** — What to build and why
+- **solution.md** — How to build it technically
+- **plan.md** — The ordered task sequence, with holdout acceptance scenarios per task
 
 **2. Review & Refine** — Validate specifications with stakeholders
 - Catch issues during planning, not during implementation

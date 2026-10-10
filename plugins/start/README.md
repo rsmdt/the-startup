@@ -29,7 +29,7 @@ These skills are invoked by the user via slash commands (e.g., `/specify`). Unli
 
 Create comprehensive specifications from brief descriptions through deep research and specialist agent coordination, producing a narrative plan plus the slice tasks `/implement` runs.
 
-**Purpose:** Transform ideas into implementation-ready specifications with product requirements, solution design, and a plan — a narrative `plan.mdx` plus the implementation tasks in the tracker
+**Purpose:** Transform ideas into implementation-ready specifications with product requirements, solution design, and a plan — a narrative `plan.md` plus the implementation tasks in the tracker
 
 **Usage:**
 ```bash
@@ -51,8 +51,8 @@ Create comprehensive specifications from brief descriptions through deep researc
 
 | Facet | Source | Role |
 |-------|--------|------|
-| **Features** (acceptance criteria) | requirements.mdx | what the slice delivers |
-| **Behavior** (EARS) | solution.mdx | how it must behave |
+| **Features** (acceptance criteria) | requirements.md | what the slice delivers |
+| **Behavior** (EARS) | solution.md | how it must behave |
 | **Quality Gates** | derived | checkable conditions |
 
 Its **acceptance scenarios** are separate scenario child tasks (holdout evidence) — how it is proven.
@@ -62,18 +62,18 @@ Its **acceptance scenarios** are separate scenario child tasks (holdout evidence
 
 **What you get:** Comprehensive documents in `.start/specs/[NNN]-[name]/`:
 
-- **requirements.mdx** - User stories, feature specifications, success criteria, non-functional requirements
-- **solution.mdx** - Technical architecture, system components, data models, technology stack, security and performance considerations
-- **plan.mdx** - The narrative plan (phases + outcomes); the implementation tasks (slices + scenario child tasks) live in **.tracker/**
+- **requirements.md** - User stories, feature specifications, success criteria, non-functional requirements
+- **solution.md** - Technical architecture, system components, data models, technology stack, security and performance considerations
+- **plan.md** - The narrative plan (phases + outcomes); the implementation tasks (slices + scenario child tasks) live in **.tracker/**
 
 ```mermaid
 flowchart TD
     A([Your Feature Idea]) --> |initialize| B{Check<br>Existing}
     B --> |exists| C[Review and Refine]
     C --> END[Ready for /implement 001]
-    B --> |new| D[Requirements Gathering<br/>Create requirements.mdx]
-    D --> E[Technical Research<br/>Create solution.mdx, document patterns, interfaces]
-    E --> F[Plan the slices<br/>Create plan.mdx + tracker tasks]
+    B --> |new| D[Requirements Gathering<br/>Create requirements.md]
+    D --> E[Technical Research<br/>Create solution.md, document patterns, interfaces]
+    E --> F[Plan the slices<br/>Create plan.md + tracker tasks]
     F --> END
 ```
 
@@ -95,13 +95,12 @@ Execute a specification by running its slice tasks on Claude Code's dynamic-work
 
 **How it works:**
 
-`/implement` reads the spec's slice tasks from the tracker and topologically sorts them by `--depends-on`. It installs one reusable workflow into the project and launches it:
+`/implement` reads the spec's slice tasks from the tracker and topologically sorts them by `--depends-on`. It then authors and runs one dynamic workflow:
 
 | Step | What happens |
 |------|--------------|
 | **Read** | Read the slice tasks (`task.js graph`); each carries a code brief (features + EARS + gates) with its holdout scenarios as scenario child tasks |
-| **Launch** | Run the plugin's `workflows/implement.js` in place via the Workflow tool |
-| **Launch** | Run it on the dynamic-workflow runtime with the slice tasks as input; independent slices run via `parallel()` |
+| **Launch** | Write the workflow script from the skill's loop contract and run it via the Workflow tool; independent slices run concurrently |
 | **Loop** | Per slice: code agent builds (reads the slice task, blind to its scenarios) → eval agent proves it (reads the scenario tasks, blind to the slice + source) → retry with filtered summaries until threshold or max iterations |
 
 **Key Features:**
@@ -115,11 +114,11 @@ Execute a specification by running its slice tasks on Claude Code's dynamic-work
 <details>
 <summary><strong>View Details — the slice loop</strong></summary>
 
-Reads the spec's slice tasks from the tracker and topologically sorts them by `--depends-on`. Runs the plugin's reusable workflow on the dynamic-workflow runtime. Each slice goes through a barriered code→eval loop: a code agent builds it (reading the slice task's features + EARS + gates and AGENTS.md, but never its scenario child tasks), an eval agent proves it against those scenario tasks (accessing the running service, but never the slice or the source), and filtered one-line failure summaries feed the next retry until the satisfaction threshold or max iterations. Independent slices run concurrently; dependent slices run in order.
+Reads the spec's slice tasks from the tracker and topologically sorts them by `--depends-on`. Runs a dynamic workflow written from the skill's loop contract. Each slice goes through a barriered code→eval loop: a code agent builds it (reading the slice task's features + EARS + gates and AGENTS.md, but never its scenario child tasks), an eval agent proves it against those scenario tasks (accessing the running service, but never the slice or the source), and filtered one-line failure summaries feed the next retry until the satisfaction threshold or max iterations. Independent slices run concurrently; dependent slices run in order.
 
 ```mermaid
 flowchart TD
-    A([slice tasks]) --> |read + topo-sort by --depends-on| B[Launch plugins/start/workflows/implement.js]
+    A([slice tasks]) --> |read + topo-sort by --depends-on| B[Author the slice-loop workflow]
     B --> C[Launch on dynamic-workflow runtime]
     C --> D{slices remaining?}
     D --> |independent group| E[Code Agents build in parallel<br/>read slice task: features + EARS + gates<br/>blind to scenarios]
@@ -434,7 +433,7 @@ flowchart TD
     C --> |simple| D[Direct Refactoring<br/>Run tests first<br/>Apply changes<br/>Validate each step]
     D --> |review| E[Specialist Review<br/>Code quality check<br/>Performance impact]
     E --> DONE[Refactoring Complete]
-    C --> |complex| F[Create Specification<br/>Generate solution.mdx<br/>Generate plan.mdx + scenarios/<br/>Document approach]
+    C --> |complex| F[Create Specification<br/>Generate solution.md<br/>Generate plan.md + scenarios/<br/>Document approach]
     F --> |defer| G[Ready for /implement<br/>Execute via the slice loop]
 ```
 
@@ -608,13 +607,7 @@ The `start` plugin includes five autonomous skills that activate automatically b
 
 | Skill | Purpose |
 |-------|---------|
-| `implement` | Runs the reusable slice loop (`workflows/implement.js`) on the dynamic-workflow runtime — barriered code→eval retry per slice |
-
-### Methodology Skills
-
-| Skill | Purpose |
-|-------|---------|
-| `writing-skills` | Skill authoring, auditing, and verification methodology |
+| `implement` | Runs the slice loop as a dynamic workflow — barriered code→eval retry per slice |
 
 ---
 
@@ -627,9 +620,9 @@ The plugin encourages structured knowledge management:
 └── specs/
     └── [3-digit-number]-[feature-name]/
         ├── README.md                        # Decisions and progress
-        ├── requirements.mdx                 # What to build
-        ├── solution.mdx                     # How to build it
-        ├── plan.mdx                         # Narrative plan (phases + outcomes)
+        ├── requirements.md                 # What to build
+        ├── solution.md                     # How to build it
+        ├── plan.md                         # Narrative plan (phases + outcomes)
         └── .tracker/                        # Implementation tasks (phase → slices → scenarios)
 
 docs/
@@ -734,7 +727,7 @@ Optional: /document after implementation for documentation sync
 
 **What happens:**
 - Creates `.start/specs/001-notification-system/`
-- Generates requirements.mdx, solution.mdx, plan.mdx, and the tracker tasks
+- Generates requirements.md, solution.md, plan.md, and the tracker tasks
 - Documents discovered patterns/interfaces
 - Optional: Creates `spec/001-notification-system` git branch
 
@@ -758,7 +751,7 @@ Optional: /document after implementation for documentation sync
 
 **What happens:**
 - Optional: Creates `feature/001-notification-system` git branch
-- Runs `plugins/start/workflows/implement.js` on the dynamic-workflow runtime
+- Runs the slice loop as a dynamic workflow
 - Per slice: a code agent builds it, an eval agent proves it against holdout scenario tasks
 - Retries with filtered failure summaries until the satisfaction threshold is met
 - Optional: Creates PR at completion
@@ -851,9 +844,8 @@ Rich templates for structured documentation, co-located with their skills:
 plugins/start/skills/
 ├── specify-requirements/template.md     # Product requirements structure
 ├── specify-solution/template.md         # Solution design structure
-├── specify-plan/template.mdx               # Plan structure (narrative: phases + outcomes)
+├── specify-plan/template.md               # Plan structure (narrative: phases + outcomes)
 ├── specify-plan/templates/scenario.md      # Holdout scenario-task body template
-├── workflows/implement.js                  # The reusable slice-loop workflow
 └── document/templates/                  # Knowledge capture templates
     ├── domain-template.md               # Business rules
     ├── pattern-template.md              # Technical patterns
