@@ -9,6 +9,11 @@ Entries are added only when a release is cut. Work in progress is not tracked he
 
 This file retains detailed entries for the last 10 minor releases plus their patch revisions. Older release notes are linked to their [GitHub release page](https://github.com/rsmdt/the-startup/releases).
 
+## [3.11.0] - 2026-10-11
+
+### Added
+- **Dynamic Workflow mode** in `validate`, `document`, `refactor`, `specify`, `test` and `debug`: a third choice beside Standard and Agent Team. Claude authors and runs one dynamic workflow for the fan-out, choosing smaller models for mechanical stages and the strongest for analysis, writing and judging. `refactor` uses it for analysis only, `test` for running and categorizing (fixes stay in the session), and `debug` returns a ranked hypothesis ledger for approval before any fix.
+
 ## [3.10.0] - 2026-10-10
 
 Covers everything since 3.8.0; 3.9.0 was not released separately.
