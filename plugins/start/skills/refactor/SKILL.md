@@ -25,7 +25,7 @@ Finding {
 State {
   target = $ARGUMENTS
   perspectives = []              // from reference/perspectives.md
-  mode: Standard | Agent Team
+  mode: Standard | Agent Team | Dynamic Workflow
   baseline: string
   findings: Finding[]
 }
@@ -71,8 +71,10 @@ match (baseline) {
 Ask the user to choose:
   Standard (default) — parallel fire-and-forget analysis agents
   Agent Team — persistent analyst teammates with coordination
+  Dynamic Workflow — one inline workflow script fans out the analysts and collects their findings (analysis only; changes stay sequential)
 
 Recommend Agent Team when scope >= 5 files, multiple interconnected modules, or large codebase.
+Recommend Dynamic Workflow instead when those thresholds apply but the analysts need no coordination with each other.
 
 ### 3. Analyze Issues
 
@@ -83,7 +85,10 @@ Determine perspectives based on target intent: use simplification perspectives f
 match (mode) {
   Standard => launch parallel subagents per applicable perspectives
   Agent Team => create team, spawn one analyst per perspective, assign tasks
+  Dynamic Workflow => run one dynamic workflow: one analyst agent per perspective in parallel, returning every finding; no agent in it edits code
 }
+
+For Dynamic Workflow, these instructions are the opt-in: call the Workflow tool directly with an inline script. Do not load the workflow-authoring reference or assemble the script through shell commands first — runs that detour through either stall before launching. Choose `model` and `effort` per stage from what the stage does. Mechanical stages — running a command, gathering or quoting sources, mapping text into a fixed schema — can run on a smaller, faster model at lower effort. Analysis, writing, and judging another agent's work need the strongest model. A judging stage never runs on a weaker model than the stage it judges. When unsure, omit `model` so the stage inherits the session model.
 
 Process findings:
 1. Deduplicate overlapping issues.

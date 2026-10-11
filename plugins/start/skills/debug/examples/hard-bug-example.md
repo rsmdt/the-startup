@@ -55,7 +55,7 @@ Two hypotheses, both plausible. Per the stopping rule I shouldn't generate a thi
 
 ## Phase 2: Select Mode
 
-"Two hypotheses, reproducible bug, single component. Standard mode is appropriate. Agent Team would be required at ≥ 3 hypotheses or non-reproducibility — neither applies."
+"Two hypotheses, reproducible bug, single component. Standard mode is appropriate. Agent Team or Dynamic Workflow would be required at ≥ 3 hypotheses or non-reproducibility — neither applies."
 
 ---
 

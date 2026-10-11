@@ -27,7 +27,7 @@ State {
   hypotheses = []        // each tagged: pending | supported | ruled out | demonstrated
   evidence = []
   rootCause?: string     // only set when [demonstrated]
-  mode: Standard | Agent Team
+  mode: Standard | Agent Team | Dynamic Workflow
 }
 
 ## Constraints
@@ -88,8 +88,9 @@ Present brief summary per reference/output-format.md.
 Ask the user to choose:
   Standard (default for simple bugs) — conversational step-by-step debugging
   Agent Team — adversarial investigation with competing hypotheses
+  Dynamic Workflow — one inline workflow script tests each hypothesis in parallel, cross-checks them adversarially, and returns a ranked hypothesis ledger
 
-**Agent Team is REQUIRED, not advisory, when ANY of:**
+**Agent Team or Dynamic Workflow is REQUIRED, not advisory, when ANY of:**
 - ≥ 3 hypotheses still alive
 - Bug is not reliably reproducible (Phase 0 exited via instrumentation rather than a trigger)
 - Evidence from different perspectives contradicts
@@ -97,6 +98,8 @@ Ask the user to choose:
 - The failing path crosses ≥ 2 components or layers (service ↔ service, UI ↔ worker, etc.)
 
 Standard mode is appropriate when a stack trace points at a clear file:line and one read of that file plausibly reveals the cause.
+
+Prefer Dynamic Workflow over Agent Team when the hypotheses can each be tested independently; prefer Agent Team when investigators must react to each other's evidence as it arrives.
 
 ### 3. Investigate
 
@@ -113,7 +116,15 @@ match (mode) {
     every claim carries the same vocabulary prefix
     strongest surviving hypothesis = candidate to be promoted to [demonstrated]
   }
+  Dynamic Workflow => {
+    run one dynamic workflow: one investigator per live hypothesis in parallel, each gathering evidence from its perspective (reference/perspectives.md)
+    then an adversarial cross-check where each surviving hypothesis is challenged against the others' evidence
+    every claim carries the same vocabulary prefix
+    the workflow returns a ranked hypothesis ledger and applies no fix — present it to the user before continuing
+  }
 }
+
+For Dynamic Workflow, these instructions are the opt-in: call the Workflow tool directly with an inline script. Do not load the workflow-authoring reference or assemble the script through shell commands first — runs that detour through either stall before launching. Choose `model` and `effort` per stage from what the stage does. Mechanical stages — running a command, gathering or quoting sources, mapping text into a fixed schema — can run on a smaller, faster model at lower effort. Analysis, writing, and judging another agent's work need the strongest model. A judging stage never runs on a weaker model than the stage it judges. When unsure, omit `model` so the stage inherits the session model.
 
 ### 4. Find Root Cause
 

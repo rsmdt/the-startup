@@ -22,7 +22,7 @@ DocChange {
 State {
   target = $ARGUMENTS
   perspectives = []        // from reference/perspectives.md
-  mode: Standard | Agent Team
+  mode: Standard | Agent Team | Dynamic Workflow
   existingDocs = []
   changes: DocChange[]
 }
@@ -74,15 +74,20 @@ Ask the user to choose: Generate all | Focus on gaps | Update stale | Show analy
 Ask the user to choose:
   Standard (default) — parallel fire-and-forget subagents
   Agent Team — persistent teammates with shared task list and coordination
+  Dynamic Workflow — one inline workflow script fans out the documenters and collects their changes
 
 Recommend Agent Team when target is "all" or "audit", perspectives >= 3, or large codebase.
+Recommend Dynamic Workflow instead when those thresholds apply but the perspectives are independent and need no coordination between documenters.
 
 ### 3. Launch Documentation
 
 match (mode) {
   Standard => launch parallel subagents per applicable perspectives
   Agent Team => create team, spawn one documenter per perspective, assign tasks
+  Dynamic Workflow => run one dynamic workflow: one documenter agent per perspective in parallel, returning every DocChange
 }
+
+For Dynamic Workflow, these instructions are the opt-in: call the Workflow tool directly with an inline script. Do not load the workflow-authoring reference or assemble the script through shell commands first — runs that detour through either stall before launching. Choose `model` and `effort` per stage from what the stage does. Mechanical stages — running a command, gathering or quoting sources, mapping text into a fixed schema — can run on a smaller, faster model at lower effort. Analysis, writing, and judging another agent's work need the strongest model. A judging stage never runs on a weaker model than the stage it judges. When unsure, omit `model` so the stage inherits the session model.
 
 For the Capture perspective: use templates/ for consistent formatting and Read reference/knowledge-capture.md for categorization protocol.
 

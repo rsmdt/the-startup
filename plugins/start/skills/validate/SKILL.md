@@ -26,7 +26,7 @@ State {
   target = $ARGUMENTS
   validationMode: Spec | File | Drift | Constitution | Comparison | Understanding
   perspectives = []        // from reference/perspectives.md
-  mode: Standard | Agent Team
+  mode: Standard | Agent Team | Dynamic Workflow
   findings: Finding[]
 }
 
@@ -84,8 +84,10 @@ match (mode) {
 Ask the user to choose:
   Standard (default) — parallel fire-and-forget subagents
   Agent Team — persistent teammates with shared task list and coordination
+  Dynamic Workflow — one inline workflow script fans out the validators and collects their findings
 
 Recommend Agent Team when: full spec validation | drift + constitution together | 4+ perspectives | multi-document scope.
+Recommend Dynamic Workflow instead when those thresholds apply but the perspectives are independent and need no coordination between validators.
 
 ### 4. Launch Validation
 
@@ -94,7 +96,10 @@ Read reference/perspectives.md for the mode-to-perspective mapping.
 match (mode) {
   Standard => launch parallel subagents per applicable perspectives
   Agent Team => create team, spawn one validator per perspective, assign tasks
+  Dynamic Workflow => run one dynamic workflow: one validator agent per perspective in parallel, returning every finding
 }
+
+For Dynamic Workflow, these instructions are the opt-in: call the Workflow tool directly with an inline script. Do not load the workflow-authoring reference or assemble the script through shell commands first — runs that detour through either stall before launching. Choose `model` and `effort` per stage from what the stage does. Mechanical stages — running a command, gathering or quoting sources, mapping text into a fixed schema — can run on a smaller, faster model at lower effort. Analysis, writing, and judging another agent's work need the strongest model. A judging stage never runs on a weaker model than the stage it judges. When unsure, omit `model` so the stage inherits the session model.
 
 ### 5. Synthesize Findings
 

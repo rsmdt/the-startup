@@ -45,7 +45,7 @@ State {
   target = $ARGUMENTS
   runner: string               // discovered test runner
   command: string              // exact test command
-  mode: Standard | Agent Team
+  mode: Standard | Agent Team | Dynamic Workflow
   baseline?: string
   failures: Failure[]
   costSignals?: {              // populated during discovery when available
@@ -110,10 +110,12 @@ If target == "audit": skip mode selection and proceed to step 7 (Audit).
 Ask the user to choose:
   Standard (default) — sequential test execution, discover-run-fix-verify
   Agent Team — parallel runners per test category (unit, integration, E2E, quality)
+  Dynamic Workflow — one inline workflow script runs every category in parallel and categorizes the failures; fixes stay in this session
 
 Recommend Agent Team when:
   3+ test categories | full suite > 2 min | failures span multiple modules |
   both lint/typecheck AND test failures to fix
+Recommend Dynamic Workflow instead when 3+ test categories or the full suite > 2 min, but the failures can be fixed one at a time in this session.
 
 ### 3. Capture Baseline
 
@@ -132,7 +134,10 @@ match (baseline) {
 match (mode) {
   Standard => run each discovered test command sequentially (unit → integration → E2E), capture verbose output, parse results
   Agent Team => create team, spawn one runner per test category, assign tasks — E2E gets its own dedicated runner
+  Dynamic Workflow => run one dynamic workflow: one runner agent per test category in parallel (E2E gets its own), each returning verbatim output and its failures categorized per reference/failure-investigation.md; no agent in it edits code — fix the returned failures below
 }
+
+For Dynamic Workflow, these instructions are the opt-in: call the Workflow tool directly with an inline script. Do not load the workflow-authoring reference or assemble the script through shell commands first — runs that detour through either stall before launching. Choose `model` and `effort` per stage from what the stage does. Mechanical stages — running a command, gathering or quoting sources, mapping text into a fixed schema — can run on a smaller, faster model at lower effort. Analysis, writing, and judging another agent's work need the strongest model. A judging stage never runs on a weaker model than the stage it judges. When unsure, omit `model` so the stage inherits the session model.
 
 **E2E Execution Checklist:**
 - Verify E2E runner is installed (e.g., `npx playwright install` if needed)

@@ -46,7 +46,7 @@ State {
   ledger: { unknowns: [Unknown], assumptions: [Assumption] }
   findings: [Finding]
   perspectives = []
-  mode: Standard | Agent Team
+  mode: Standard | Agent Team | Dynamic Workflow
   status: SpecStatus
 }
 
@@ -112,8 +112,10 @@ Then ask the user to choose the starting phase:
 Ask the user to choose:
   Standard (default) — parallel fire-and-forget research agents
   Agent Team — persistent researcher teammates with peer collaboration
+  Dynamic Workflow — one inline workflow script fans out the researchers and collects their findings
 
 Recommend Agent Team when: 3+ document phases planned, complex domain, multiple integrations, or conflicting perspectives likely (e.g., security vs performance).
+Recommend Dynamic Workflow instead when those thresholds apply but the perspectives are independent and need no peer collaboration.
 
 ### 4. Research
 
@@ -122,7 +124,10 @@ Read reference/perspectives.md for applicable perspectives. Seed each perspectiv
 match (mode) {
   Standard => launch parallel subagents per applicable perspectives
   Agent Team => create team, spawn one researcher per perspective, assign tasks
+  Dynamic Workflow => run one dynamic workflow: one researcher agent per perspective in parallel, each seeded with its Research-routed unknowns, returning every finding
 }
+
+For Dynamic Workflow, these instructions are the opt-in: call the Workflow tool directly with an inline script. Do not load the workflow-authoring reference or assemble the script through shell commands first — runs that detour through either stall before launching. Choose `model` and `effort` per stage from what the stage does. Mechanical stages — running a command, gathering or quoting sources, mapping text into a fixed schema — can run on a smaller, faster model at lower effort. Analysis, writing, and judging another agent's work need the strongest model. A judging stage never runs on a weaker model than the stage it judges. When unsure, omit `model` so the stage inherits the session model.
 
 Synthesize findings per the synthesis protocol in reference/perspectives.md, then present them for disposition: the user confirms, corrects, or discards each material claim before it feeds any document. Confirmed findings close their unknowns; Pending or Discarded ones never enter a document (a Pending finding the user defers becomes a Standing `[ASSUMPTION]`).
 
