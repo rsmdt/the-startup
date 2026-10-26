@@ -554,17 +554,9 @@ Implementation drifting from the spec? Caught automatically during `/implement`.
 
 `/review` auto-detects what matters. Async code triggers concurrency review. Dependency changes trigger supply-chain checks. UI changes trigger accessibility audits. 5 base perspectives + conditional specialists.
 
-### Implement Any Plan
-
-Not just for specs created with `/specify`. `/implement` works with any markdown implementation plan — bring your own architecture docs, migration guides, or design documents.
-
-```bash
-/implement path/to/plan.md
-```
-
 ### Non-Linear Specs
 
-Skip what you don't need. Start with a solution design, jump straight to decomposition, or go full PRD → SDD → tier-appropriate decomposition. Skipped phases are logged as decisions, not gaps.
+Skip what you don't need. Start with a solution design, jump straight to decomposition, or go full requirements → solution → plan. Skipped phases are logged as decisions, not gaps.
 
 ### Adversarial Debugging
 

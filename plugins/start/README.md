@@ -623,6 +623,7 @@ The plugin encourages structured knowledge management:
     └── [3-digit-number]-[feature-name]/
         ├── spec.md                          # Requirements, Solution, Plan parts + Ledger
         ├── review.md                        # Solution review report
+        ├── events.jsonl                     # Event log the dashboard replays
         └── .tracker/                        # Implementation tasks (phase → slices → scenarios)
 
 docs/
@@ -842,10 +843,8 @@ Rich templates for structured documentation, co-located with their skills:
 
 ```
 plugins/start/skills/
-├── specify-requirements/template.md     # Product requirements structure
-├── specify-solution/template.md         # Solution design structure
-├── specify-plan/template.md               # Plan structure (narrative: phases + outcomes)
-├── specify-plan/templates/scenario.md      # Holdout scenario-task body template
+├── specify-meta/template.md             # spec.md structure: Requirements, Solution, Plan, Ledger
+├── specify-plan/templates/scenario.md   # Holdout scenario-task body template
 └── document/templates/                  # Knowledge capture templates
     ├── domain-template.md               # Business rules
     ├── pattern-template.md              # Technical patterns

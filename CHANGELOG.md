@@ -9,6 +9,34 @@ Entries are added only when a release is cut. Work in progress is not tracked he
 
 This file retains detailed entries for the last 10 minor releases plus their patch revisions. Older release notes are linked to their [GitHub release page](https://github.com/rsmdt/the-startup/releases).
 
+## [4.0.0] - 2026-10-26
+
+### Highlights
+
+- **One spec file**: requirements, solution and plan live together in `spec.md`.
+- **Fewer interruptions**: questions come in batches, and only about behavior your users will notice.
+- **Specs stay within your brief**: no quality targets, data rules or design choices you didn't ask for.
+- **Faster builds**: each increment is built and checked as a whole, and only failed checks are re-run.
+- **Lighter test setup**: end-to-end tests are added only if you want them.
+
+### Added
+- **Spec event log**: `spec.js` and `task.js` append every gate, requirement, decision, question, assumption, task change, run and result to the spec's `events.jsonl`. `spec.js <id> --event` records an event; `spec.js <id> --snapshot` starts a log for an existing spec.
+- **Dashboard mod**: a Claude Code mod that shows the spec's gates, requirements, phases, slices and scenarios in a side pane while a spec skill runs, replayed from its event log. `/start-dashboard [spec-id]` opens or closes it.
+- **End-to-end tests on request**: when a project has no end-to-end setup, the plan asks once whether to add one. The suite runs once after every slice is built, not in each TDD step.
+
+### Changed
+- **BREAKING**: one `spec.md` per spec, with Requirements, Solution, Plan and Ledger parts, replaces `requirements.md`, `solution.md` and `plan.md`. `/start:implement` still reads the `plan.md` of an older spec.
+- **BREAKING**: `/start:implement` builds and evaluates per phase. Code agents build all of a phase's slices, a service agent restarts the app, and one eval agent scores the phase with a holdout test script kept outside the project. Retries re-run only failing scenarios; passed and building slices are skipped.
+- Plans have fewer, larger phases, each ending in something a user can see working; a small spec is one phase. Every slice carries its features through each interface the spec defines, and the plan shows which slices run in parallel and which wait on another.
+- `/start:specify` asks fewer questions: up to four per call, and only for product rules users could tell apart. Other defaults are confirmed with each part's approval, and a plan of one or two phases gets a single approval.
+- `/start:specify` leaves UX, quality and data choices to the brief: the UX, Security and Performance research lenses and design guidance are gone, and quality gates and data obligations are recorded only for concerns the brief or user raises.
+- Code agents and the stages that judge them run on the session model.
+- `/start:implement` lists the recorded gaps of built slices without offering a re-run, and names the next commands instead of asking about git or archiving.
+- The `test` skill no longer names specific browser runners.
+
+### Removed
+- The separate requirements, solution and plan templates, the spec report template, the example PRD and architecture examples, and the solution's User interface section.
+
 ## [3.11.0] - 2026-10-11
 
 ### Added
