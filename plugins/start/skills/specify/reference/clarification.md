@@ -46,9 +46,10 @@ Research-routed unknowns seed the research perspectives. When findings return, t
 
 - Every question names its stake: "X or Y? — this decides whether requirements include Z."
 - One decision per question — no stacked multi-part questions.
-- Batched, at most five per round, ordered by leverage (Blocking first).
-- Each question carries a proposed default, so the user can answer with one word.
-- An **observable** assumption — one an acceptance test could tell apart: a criterion, an error, a validation bound, an ordering, a calculation — is always its own question. Only non-observable defaults (technical, cosmetic) may be accepted together in a single action.
+- Batched: up to four questions per call of the question tool, ordered by leverage (Blocking first). Send every question that is ready in as few calls as possible.
+- Each question carries a proposed default as its first option, so the user can answer with one choice. Prefer single-select questions.
+- An **observable** assumption — a product rule the product's users could tell apart in what the UI shows or what the interface the brief or contract defines returns: a criterion, a business-rule error, a validation bound, an ordering, a calculation — is always its own question in the batch, with its own options. Never fold it into a confirm-all option.
+- A non-observable default is not asked: record it as an assumption and confirm it with the approval of the part it shapes. Non-observable covers technical and cosmetic choices and how malformed or hostile requests are handled — which error wins when several apply, unknown or null fields, Origin, Host, or CSRF checks.
 - No question the codebase, git history, or a web search could answer.
 
 ## The Assumption Ledger
@@ -64,7 +65,7 @@ Status lifecycle: **Proposed** (surfaced, unanswered) → **Confirmed** (user va
 
 ## Research Confirmation
 
-Findings return as claims, not facts. Present each material claim with: the claim, its evidence (file, doc, or source), and a proposed disposition. Each observable finding is its own question; the others are presented together and confirmed as a set unless the user picks one to change. The user chooses:
+Findings return as claims, not facts. Present each material claim with: the claim, its evidence (file, doc, or source), and a proposed disposition. Each observable finding is its own question in a batch; the others are listed and confirmed with the approval of the part they shape, unless the user picks one to change. The user chooses:
 
 - **Confirm** — the finding closes its unknown and may enter documents.
 - **Correct** — the user's version supersedes; record the correction.

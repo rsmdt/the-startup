@@ -20,9 +20,9 @@ The SDD's output contract — section statuses, the ADR (`ADRStatus`) shape, req
 ## Constraints
 
 **Always:**
-- Write the `## Solution` part of `spec.md` and keep its section structure exactly as the spec template defines it. Add the UI or multi-component sections from reference/conditional-sections.md only when the feature has a UI or spans components.
+- Write the `## Solution` part of `spec.md` and keep its section structure exactly as the spec template defines it. Add the multi-component section from reference/conditional-sections.md only when the feature spans components.
 - Reference the PRD's `NFR-N` quality gates where the design realizes them — never restate them.
-- Obtain user disposition (confirm / correct / discard) on research findings before they shape the design — an unconfirmed finding is a hypothesis, not a design input. An observable finding (one an acceptance test could tell apart) is its own question; the rest are confirmed with the Solution approval.
+- Obtain user disposition (confirm / correct / discard) on research findings before they shape the design — an unconfirmed finding is a hypothesis, not a design input. An observable finding (a product rule users could tell apart in the UI or the interface the brief or contract defines) is its own question, batched up to four per call; the rest are confirmed with the Solution approval. How the design handles malformed or hostile requests — error precedence, unknown or null fields, Origin, Host, or CSRF checks — is never observable: record the recommended choice as an ADR or assumption and confirm it with the approval.
 - Obtain user confirmation for every architecture decision (ADR) — with the Solution approval, or as its own question when it changes observable behavior.
 - Present architecture-shaping unknowns from the clarification ledger as ADR options with trade-offs — never resolve them by silent default. Cite accepted defaults as `[ASSUMPTION An]`.
 - Ensure every PRD requirement is addressable by the design.
@@ -43,7 +43,7 @@ The SDD's output contract — section statuses, the ADR (`ADRStatus`) shape, req
 - [Focus and MECE](reference/focus-and-mece.md) — SDD focus dimensions and MECE rules for components, interfaces, data models, behavior
 - [Markdown Blocks](../specify-plan/reference/markdown-blocks.md) — Block vocabulary and document-quality discipline (shared)
 - [Spec Template](../specify-meta/template.md) — the `## Solution` part of `.start/specs/[NNN]-[name]/spec.md`
-- [Conditional Sections](reference/conditional-sections.md) — the User interface and Multi-component sections, added only when the feature needs them
+- [Conditional Sections](reference/conditional-sections.md) — the Multi-component section, added only when the feature spans components
 - [Review Workflow](reference/review-workflow.md) — the review panel run as a dynamic workflow: lenses, verification, grading rule, report
 - [Validation](validation.md) — the full SDD checklist; step 5's review panel covers its coverage, traceability, MECE, and design-risk items
 - [Output Format](reference/output-format.md) — Status report guidelines, next-step options
@@ -54,20 +54,20 @@ The SDD's output contract — section statuses, the ADR (`ADRStatus`) shape, req
 
 ### 1. Initialize Design
 
-Read the Requirements part of `spec.md` to understand requirements. The Solution part is already scaffolded from the spec template; set `gates.solution` to `draft`.
-If the feature has a UI or spans more than one component, read reference/conditional-sections.md and add those sections.
+Read the Requirements part of `spec.md` to understand requirements. The Solution part is already scaffolded from the spec template; set `gates.solution` to `draft` and record the `gate` event. Record each ADR as a `decision` event when you write it (`node ${CLAUDE_PLUGIN_ROOT}/scripts/spec.js {specId} --event '{"kind":"decision","id":"ADR-1","title":"…","confirmed":false}'`).
+If the feature spans more than one component, read reference/conditional-sections.md and add that section.
 Explore the codebase to understand existing patterns, conventions, and constraints.
 
 ### 2. Explore Approaches
 
-Use the brainstorm skill to evaluate technical approaches before committing to a direction.
-
-Focus on understanding:
+Evaluate technical approaches before committing to a direction:
 - Architectural alternatives (e.g., monolith vs microservices, REST vs GraphQL).
 - Technology choices and their trade-offs.
 - Key design constraints from the PRD.
 
-User selects an approach before step 3 invests in deep research.
+Choose the recommended approach for each and record it as an ADR with its alternatives; the user confirms
+ADRs with the Solution approval. Ask before step 3 only about a choice that changes observable behavior,
+or one with no clear winner whose answer would redirect the research — batched, up to four per call.
 
 ### 3. Discover Patterns
 
@@ -88,7 +88,7 @@ A finding like "use repository pattern" is incomplete. "Use repository pattern b
 
 Launch parallel specialist agents for these only when the codebase or domain is unknown territory — a large unfamiliar codebase, or external vendors or standards needing independent investigations. If an agent returns surface-level findings, flag them as incomplete and request deeper investigation before proceeding, and present agent findings in full.
 
-Present the findings with trade-offs and conflicting recommendations: each observable finding as its own question, the rest for confirmation together.
+Present the findings with trade-offs and conflicting recommendations: each observable finding as its own question, batched up to four per call; the rest are listed and confirmed with the Solution approval.
 
 ### 4. Document Section
 
@@ -118,9 +118,10 @@ session model.
 When it returns (shape in reference/review-workflow.md):
 - Present the report at `reportPath`: the grade (`grade.overall` + per-dimension scores) and the confirmed
   findings grouped by dimension.
-- For every `fail` dimension, propose the fix and drive it WITH THE USER — present all proposed fixes in
-  one approval, with each fix that changes observable behavior or an ADR as its own question. Then
-  re-run the workflow once to re-grade.
+- For every `fail` dimension, apply the fixes that do not change observable behavior — including those
+  that add or change an ADR — and list them for the Solution approval. Ask only the fixes that change
+  observable behavior, each as its own question, all in one call (up to four per call). Then re-run the
+  workflow once to re-grade.
 - The design gets at most one re-review. `reviewReady` (no failing dimensions) completes the design. If
   dimensions still fail after the re-review, record each remaining confirmed finding as a row in the
   Ledger's Accepted trade-offs table, with its lens and the fix that was not applied. Present them with
@@ -132,4 +133,4 @@ Read reference/output-format.md and present the part for one approval: one or tw
 ADRs with their choices, the review grade, and the accepted trade-offs. Ask the user to choose between
 *Approve and continue*, *Walk me through section by section*, or *Change [topic]*. A walkthrough presents
 one section or ADR at a time for approval. On approval tick every ADR's `User confirmed` box and set
-`gates.solution` to `approved`.
+`gates.solution` to `approved`; record a `decision` event with `confirmed: true` per ADR and the `gate` event.

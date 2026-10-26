@@ -211,7 +211,7 @@ The single home for every unresolved decision, each with a recommended default. 
 
 ### Assumptions
 
-The single home for every assumption; sections cite them as `[ASSUMPTION An]`. **Observable** = an acceptance test could tell the difference (a criterion, an error, a validation bound, an ordering, a calculation).
+The single home for every assumption; sections cite them as `[ASSUMPTION An]`. **Observable** = a product rule users could tell apart in the UI or the interface the brief or contract defines (a criterion, a business-rule error, a validation bound, an ordering, a calculation) — never error precedence, unknown or null fields, or Origin, Host, or CSRF checks.
 
 | ID | Assumption | Impact if wrong | Observable | Status |
 |----|------------|-----------------|:----------:|--------|

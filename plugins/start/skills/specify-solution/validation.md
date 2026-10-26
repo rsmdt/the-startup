@@ -8,7 +8,7 @@ yourself before completing the SDD.
 
 - [ ] **All sections are complete** - No empty or placeholder sections
 - [ ] **No [NEEDS CLARIFICATION] markers remain** - All markers replaced with content
-- [ ] **Template structure preserved** - The heading spine is intact; conditional sections (`reference/conditional-sections.md`) added only when the feature has a UI or spans components
+- [ ] **Template structure preserved** - The heading spine is intact; the multi-component section (`reference/conditional-sections.md`) added only when the feature spans components
 
 ## Approach
 

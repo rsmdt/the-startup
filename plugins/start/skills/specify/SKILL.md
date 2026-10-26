@@ -25,7 +25,7 @@ Assumption {
   topic: String
   default: String                  // what a first draft would bake in unchallenged
   impactIfWrong: String
-  observable: Boolean              // an acceptance test could tell the difference: a criterion, an error, a validation bound, an ordering, a calculation
+  observable: Boolean              // a product rule users could tell apart in the UI or the interface the brief or contract defines: a criterion, a business-rule error, a validation bound, an ordering, a calculation. Never: error precedence, unknown or null fields, Origin/Host/CSRF checks
   status: Proposed | Confirmed | Corrected | Standing   // Standing = user accepted the default; stays visible as [ASSUMPTION An]
 }
 
@@ -57,8 +57,9 @@ State {
 **Always:**
 - Open every run with the Clarify Intent phase — even a complete-looking brief gets its ledger presented and intent confirmed before any document work. There is no brief too detailed to interrogate.
 - Ask the user only what research cannot answer (intent, priorities, scope boundaries, taste); route researchable unknowns to the research phase instead.
-- Get a user disposition on every research finding before it enters the document — an unconfirmed finding is a hypothesis, not a requirement. A finding or default that is **observable** is asked as its own question; every other one is confirmed with the approval of the part it shapes.
+- Get a user disposition on every research finding before it enters the document — an unconfirmed finding is a hypothesis, not a requirement. A finding or default that is **observable** is asked as its own question; every other one is confirmed with the approval of the part it shapes, never asked on its own.
 - Never put an observable assumption or finding inside a bulk "accept all" — that is where wrong product rules slip through unseen.
+- Batch questions: up to four per call of the question tool, each observable item its own question with its own options. Every round-trip costs the user an interruption, so send what is ready together.
 - Carry accepted-by-default assumptions in the Assumptions table of `spec.md`, cited as `[ASSUMPTION An]` where they apply — surfaced, never erased.
 - Research in the main context. Launch research agents only when the codebase or domain is unknown territory — a large unfamiliar codebase, or external vendors, standards, or regulations needing independent investigations — and then display their findings in full.
 - Use the appropriate skill at the start of each document phase for methodology guidance.
@@ -66,7 +67,7 @@ State {
 - Run phases sequentially — Clarify, Research, Requirements (WHY), Solution (WHAT), Plan (slice and scenario tasks). The user can skip document phases; the Clarify phase cannot be skipped.
 - Close each document part with one approval gate; the user may ask to walk through it section by section instead. Verify the MECE gate before leaving the Requirements phase.
 - Track decisions and the assumption ledger in the Ledger part of `spec.md` via reference/output-format.md.
-- Git integration is optional — offer branch/commit as an option.
+- Leave git to the user: do not ask about branches or commits.
 
 **Never:**
 - Write or delegate document content while a Blocking unknown is open.
@@ -100,11 +101,11 @@ Read reference/clarification.md for the interrogation protocol. This phase alway
 
 1. Derive the ledger from the description and spec status: what is known; what must be known to specify well (each unknown with its stake and criticality); and every assumption a first draft would otherwise bake in (each with id, default, impact-if-wrong, and whether it is observable).
 2. Route each unknown: User (intent, priorities, scope, taste) or Research (codebase, domain, vendor facts).
-3. Present the full ledger, then ask the user the User-routed questions — batched (at most five per round), ordered by leverage, each carrying its proposed default. Every observable assumption is its own question, even when its default looks obvious. Only non-observable defaults (technical, cosmetic) may be accepted together in a single action.
-4. Record outcomes: answers mark assumptions Confirmed or Corrected; accepted defaults become Standing rows in the Assumptions table, cited as `[ASSUMPTION An]`. Log everything per reference/output-format.md.
+3. Present the full ledger, then ask the user the User-routed questions — batched (up to four per call), ordered by leverage, each carrying its proposed default. Every observable assumption is its own question, even when its default looks obvious. Non-observable defaults (technical, cosmetic, and the handling of malformed or hostile requests) are not asked: they are listed in the ledger and confirmed with the approval of the part they shape.
+4. Record outcomes: answers mark assumptions Confirmed or Corrected; accepted defaults become Standing rows in the Assumptions table, cited as `[ASSUMPTION An]`. Log everything per reference/output-format.md, and record each assumption and open question as an `assumption` or `question` event through the specify-meta skill.
 5. If answers expose new Blocking unknowns, run another round. Document phases start only when no Blocking unknown remains.
 
-Then ask the user to choose the starting phase:
+Ask the user to choose the starting phase as a question in the last clarification batch, not in a call of its own:
   Start with Requirements (recommended) — define requirements first
   Start with Solution — skip to technical design
   Start with Plan — skip to the slice and scenario tasks (requires existing requirements + solution)
@@ -135,7 +136,7 @@ match (mode) {
 
 For Dynamic Workflow, these instructions are the opt-in: call the Workflow tool directly with an inline script. Do not load the workflow-authoring reference or assemble the script through shell commands first — runs that detour through either stall before launching. Choose `model` and `effort` per stage from what the stage does. Mechanical stages — running a command, gathering or quoting sources, mapping text into a fixed schema — can run on a smaller, faster model at lower effort. Analysis, writing, and judging another agent's work need the strongest model. A judging stage never runs on a weaker model than the stage it judges. When unsure, omit `model` so the stage inherits the session model.
 
-Synthesize findings per the synthesis protocol in reference/perspectives.md, then get their disposition. Ask each observable finding as its own question (confirm, correct, or discard). Present the rest together; the user confirms them as a set or picks the ones to correct. Confirmed findings close their unknowns; Pending or Discarded ones never enter the document (a Pending finding the user defers becomes a Standing assumption).
+Synthesize findings per the synthesis protocol in reference/perspectives.md, then get their disposition. Ask each observable finding as its own question (confirm, correct, or discard), batched up to four per call. List the rest; they are confirmed with the approval of the part they shape unless the user picks one to correct. Confirmed findings close their unknowns; Pending or Discarded ones never enter the document (a Pending finding the user defers becomes a Standing assumption).
 
 ### 5. Write Requirements
 
@@ -174,7 +175,5 @@ The Plan approval gate is also the transition: approving finalizes the specifica
 Use the specify-meta skill to review and assess readiness. Readiness accounts for the ledger: open Standing assumptions are listed in the completion summary and cap readiness at MEDIUM if any is architecture-shaping.
 
 Set `readiness` in the `spec.md` frontmatter and check the Ledger: every assumption carries its status, the Decision log records the run's decisions, and no `[NEEDS CLARIFICATION]` remains in an approved part. There is no separate report file — `spec.md` is the record.
-
-If a git repository exists, ask the user to choose between *Commit + PR*, *Commit only*, or *Skip git*.
 
 Read reference/output-format.md and present the completion summary accordingly, linking `spec.md`.

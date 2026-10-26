@@ -32,11 +32,11 @@ scenarios) never overlap.
 - Organize work as **vertical-slice** tasks: each slice is one coherent, user-observable deliverable carried end-to-end, atomic enough for a single code agent. Order slices by dependency; a later slice extends an earlier one. Never make a layer-only slice ("data-models slice").
 - Size slices to the spec. A small spec — one service, a handful of features — gets 2–4 slices in 1–2 phases; a larger spec gets more phases, never slices too big for one code agent.
 - Group slices into **phases**: each phase is an outcome a user can see working. `/implement` builds a phase's slices, then evaluates the phase once, so a phase is also the unit of evaluation.
-- Declare each slice's dependencies accurately via `task.js --depends-on` (tracker ids) — `/implement` topo-sorts by them and runs independent slices concurrently. It is the whole parallelization contract.
+- Declare each slice's dependencies accurately via `task.js --depends-on` (tracker ids) — `/implement` topo-sorts by them and runs independent slices concurrently, in the same working tree. It is the whole parallelization contract. Leave two slices independent only when they change different components of the Solution; slices that extend the same component or screen depend on each other in order.
 - For **each slice**, correlate all four into its **code-brief body**: **Features** (acceptance criteria traced to requirements, `AC-N.M`), **Behavior** (EARS statements drawn from the solution design — see reference/ears.md), **Quality Gates** (checkable conditions). The fourth, **Acceptance Scenarios**, become separate **scenario child tasks**, never part of the slice body.
 - Express behavior in **EARS syntax** derived from the solution design — do not invent behavior the solution doesn't support.
 - Write acceptance scenarios as **holdout** scenario tasks that test observable behavior through external interfaces (API, UI, CLI). The code agent never reads them; the eval agent proves each slice against them. Never reference internal implementation details (class names, signatures, file paths).
-- Present each phase's slices (briefs + scenarios) to the user for one approval before creating their tasks. The user must approve — they are what `/implement` is held to.
+- Present the slices (briefs + scenarios) to the user for approval before creating their tasks. The user must approve — they are what `/implement` is held to. A plan of one or two phases gets one approval for everything; a larger plan gets one per phase.
 - Collect the `[ASSUMPTION An]` citations from the Requirements and Solution parts; any slice depending on a Standing assumption must cite it in its brief — the plan inherits the ledger visibly.
 - Ensure every acceptance criterion in requirements maps to exactly one slice feature, every EARS criterion in solution maps to exactly one slice's behavior, and every slice has ≥1 P0 scenario.
 - Keep `threshold` (default 0.90) and `max_iterations` (default 3) in the `spec.md` frontmatter — `/implement` reads them.
@@ -76,9 +76,10 @@ user can see working. This is the plan's backbone.
 
 Write the `## Plan` part of `spec.md`: a **Target state** paragraph (what the system does when every
 phase is delivered, grounded in real components — no step list) and the **Phases** table (each phase's
-outcome; its slice ids are filled in as the tasks are created). Set `gates.plan` to `draft`. Present the
-Target state and the phase and slice breakdown; ask the user to *Approve slicing*, *Adjust*, or
-*Re-slice*.
+outcome; its slice ids are filled in as the tasks are created). Set `gates.plan` to `draft` and record the `gate` event (`node ${CLAUDE_PLUGIN_ROOT}/scripts/spec.js {specId} --event`). Present the
+Target state and the phase and slice breakdown. For a plan of three or more phases, ask the user to
+*Approve slicing*, *Adjust*, or *Re-slice*. For one or two phases, do not ask yet: the breakdown is
+approved with the slices in step 3.
 
 ### 3. Build Each Phase (as tasks)
 
@@ -97,14 +98,17 @@ For each phase, in order (read reference/ears.md and reference/scenario-guide.md
 3. Present the phase's slices together in the reference/output-format.md phase shape, with a coverage
    map — each Feature AC and each EARS behavior mapped to the scenario(s) that exercise it, and any
    surface with **no** scenario flagged as a gap. Ask the user to *Approve phase*, *Walk me through slice
-   by slice*, *Edit a brief*, *Edit scenarios*, or *Add missing scenarios*.
+   by slice*, *Edit a brief*, *Edit scenarios*, or *Add missing scenarios*. For a plan of one or two
+   phases, assemble every phase first and present them all at once with the Target state; that single
+   answer (*Approve plan*, *Walk me through slice by slice*, *Edit a brief*, *Edit scenarios*, *Re-slice*)
+   approves the slicing, the phases, and the plan.
 4. After approval, create the tasks:
    - the phase: `node ${CLAUDE_PLUGIN_ROOT}/scripts/task.js create --spec {specId} --type phase --name "Phase {n}: {outcome}" --depends-on {previous phase id, if any}` → record `phaseId`;
-   - each slice, in dependency order: `node ${CLAUDE_PLUGIN_ROOT}/scripts/task.js create --spec {specId} --parent {phaseId} --type slice --name "{title}" --depends-on {slice task ids it extends} --body-file {brief.md}` → record its id;
-   - each scenario: `node ${CLAUDE_PLUGIN_ROOT}/scripts/task.js create --spec {specId} --parent {sliceId} --type scenario --name "{scenario title}" --body-file {scenario.md}`.
+   - each slice, in dependency order: `node ${CLAUDE_PLUGIN_ROOT}/scripts/task.js create --spec {specId} --parent {phaseId} --type slice --name "{title}" --depends-on {slice task ids it extends} --covers {the AC ids in its Features} --body-file {brief.md}` → record its id;
+   - each scenario: `node ${CLAUDE_PLUGIN_ROOT}/scripts/task.js create --spec {specId} --parent {sliceId} --type scenario --name "{scenario title}" --priority {P0|P1|P2} --surface {business|technical} --body-file {scenario.md}`.
    Fill the phase's slice ids into the Phases table.
-5. After the first phase's tasks exist, ask once: *Start implementing approved phases while I plan the
-   rest?* On yes, use the implement skill on the spec after each approved phase — it builds only the
+5. Only when at least two phases remain to be planned after the first one's tasks exist, ask once:
+   *Start implementing approved phases while I plan the rest?* On yes, use the implement skill on the spec after each approved phase — it builds only the
    slices not yet built or building — and keep planning while it runs in the background. On no,
    implementation waits for the finished plan.
 
@@ -125,5 +129,7 @@ Read reference/validation.md and run checks against the created tasks (`task.js 
 ### 5. Approve
 
 Read reference/output-format.md and present the status report: the Plan part, the task tree
-(`task.js list --spec {specId} --depth 1 --format tree`), and the coverage map. Ask the user to *Approve plan*,
-*Revisit a slice*, *Re-slice*, or *Adjust threshold*. On approval set `gates.plan` to `approved`.
+(`task.js list --spec {specId} --depth 1 --format tree`), and the coverage map. When step 3 already took
+the single plan approval and validation changed nothing the user saw, set `gates.plan` to `approved` (and record the `gate` event)
+without asking again. Otherwise ask the user to *Approve plan*, *Revisit a slice*, *Re-slice*, or *Adjust
+threshold*, and on approval set `gates.plan` to `approved` and record the `gate` event.

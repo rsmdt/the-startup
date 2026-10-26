@@ -59,7 +59,7 @@
         "Did NOT begin writing requirements from the vague brief",
         "Presented what it needs to know to specify well — unknowns each carrying a stake (what changes downstream)",
         "Surfaced the assumptions it would otherwise make, each with a default and impact-if-wrong",
-        "Batched at most five questions, ordered by leverage, with proposed defaults the user can accept in one action",
+        "Batched at most four questions per call, ordered by leverage, with proposed defaults the user can accept in one action",
         "Blocking unknowns resolved before any document phase started",
         "Accepted defaults recorded as Standing and carried as visible [ASSUMPTION] entries, logged in the README ledger"
       ]

@@ -28,7 +28,7 @@ State {
 **Always:**
 - Write the `## Requirements` part of `spec.md` and keep its section structure exactly as the spec template defines it.
 - Draft every section, validate, then close the part with one approval gate — not one review per section.
-- Obtain user disposition (confirm / correct / discard) on research findings before folding them into the PRD — an unconfirmed finding is a hypothesis, not a requirement. Ask each observable finding (one an acceptance test could tell apart) as its own question.
+- Obtain user disposition (confirm / correct / discard) on research findings before folding them into the PRD — an unconfirmed finding is a hypothesis, not a requirement. Ask each observable finding (a product rule users could tell apart in the UI or the interface the brief or contract defines) as its own question, batched up to four per call; list the rest for confirmation with the approval. Error precedence, unknown or null fields, and Origin, Host, or CSRF checks are never observable: take the recommended default.
 - Cite Standing assumptions from the clarification ledger as `[ASSUMPTION An]` in the affected sections; the assumption itself lives only in the Ledger's Assumptions table.
 - Run validation checklist before declaring PRD complete.
 - Verify MECE after completing each enumerated section (who, features, acceptance criteria, quality gates, data).
@@ -77,7 +77,7 @@ Close them yourself in the main context: competitive landscape, roles, goals, an
 
 ### 2. Document
 
-Write every section of the Requirements part with the findings, replacing each `[NEEDS CLARIFICATION]` marker. Set `gates.requirements` to `draft`.
+Write every section of the Requirements part with the findings, replacing each `[NEEDS CLARIFICATION]` marker. Set `gates.requirements` to `draft`. Record the gate and one `requirement` event per feature with its criteria ids (`node ${CLAUDE_PLUGIN_ROOT}/scripts/spec.js {specId} --event '{"kind":"requirement","id":"FR-1","acs":["AC-1.1","AC-1.2"]}'`).
 
 ### 3. Validate
 
@@ -87,10 +87,10 @@ Read `validation.md` and run the checklist. Read `reference/output-format.md` an
 
 Present the part for one approval:
 - one or two lines per section — what it now says;
-- each observable item still undecided (a finding, an assumption, an open question), each as its own question with its proposed default;
+- each observable item still undecided (a finding, an assumption, an open question), each as its own question with its proposed default, sent in the same call as the approval question (up to four questions per call);
 - the non-observable findings and defaults together, confirmed with the approval.
 
-Ask the user to choose between *Approve and continue*, *Walk me through section by section*, or *Change [topic]*. A walkthrough presents one section at a time for approval. On approval set `gates.requirements` to `approved` and report status per `reference/output-format.md`.
+Ask the user to choose between *Approve and continue*, *Walk me through section by section*, or *Change [topic]*. A walkthrough presents one section at a time for approval. Record each answered assumption and question as an event. On approval set `gates.requirements` to `approved`, record the `gate` event, and report status per `reference/output-format.md`.
 
 ### Entry Point
 
