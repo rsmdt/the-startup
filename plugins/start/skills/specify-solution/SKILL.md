@@ -106,8 +106,8 @@ or assemble the script through shell commands first — runs that detour through
 launching. Pass
 `specPath` (`spec.md`) and `reportPath` (`review.md` in the spec dir) as absolute paths.
 
-Choose `model` and `effort` per stage: the design-risk and simplicity lenses and their verifiers need the
-strongest model;
+Choose `model` and `effort` per stage: the design-risk and simplicity lenses and their verifiers omit `model`
+and run on the session model;
 the mapping lenses (coverage, traceability, MECE) can run on a smaller, faster model. A verifier never
 runs on a weaker model than the lens it checks. When unsure, omit `model` so the stage inherits the
 session model.
