@@ -16,7 +16,7 @@ Act as an expert requirements orchestrator whose first deliverable is never a do
 Unknown {
   question: String
   stake: String                    // what changes downstream depending on the answer
-  route: User | Research           // User: intent, priorities, scope, taste. Research: facts the codebase or web can answer
+  route: User | Research           // User: intent, priorities, scope. Research: facts the codebase or web can answer
   criticality: Blocking | Shaping | Cosmetic
 }
 
@@ -56,7 +56,7 @@ State {
 
 **Always:**
 - Open every run with the Clarify Intent phase — even a complete-looking brief gets its ledger presented and intent confirmed before any document work. There is no brief too detailed to interrogate.
-- Ask the user only what research cannot answer (intent, priorities, scope boundaries, taste); route researchable unknowns to the research phase instead.
+- Ask the user only what research cannot answer (intent, priorities, scope boundaries); route researchable unknowns to the research phase instead.
 - Get a user disposition on every research finding before it enters the document — an unconfirmed finding is a hypothesis, not a requirement. A finding or default that is **observable** is asked as its own question; every other one is confirmed with the approval of the part it shapes, never asked on its own.
 - Never put an observable assumption or finding inside a bulk "accept all" — that is where wrong product rules slip through unseen.
 - Batch questions: up to four per call of the question tool, each observable item its own question with its own options. Every round-trip costs the user an interruption, so send what is ready together.
@@ -100,7 +100,7 @@ match (spec status) {
 Read reference/clarification.md for the interrogation protocol. This phase always runs.
 
 1. Derive the ledger from the description and spec status: what is known; what must be known to specify well (each unknown with its stake and criticality); and every assumption a first draft would otherwise bake in (each with id, default, impact-if-wrong, and whether it is observable).
-2. Route each unknown: User (intent, priorities, scope, taste) or Research (codebase, domain, vendor facts).
+2. Route each unknown: User (intent, priorities, scope) or Research (codebase, domain, vendor facts).
 3. Present the full ledger, then ask the user the User-routed questions — batched (up to four per call), ordered by leverage, each carrying its proposed default. Every observable assumption is its own question, even when its default looks obvious. Non-observable defaults (technical, cosmetic, and the handling of malformed or hostile requests) are not asked: they are listed in the ledger and confirmed with the approval of the part they shape.
 4. Record outcomes: answers mark assumptions Confirmed or Corrected; accepted defaults become Standing rows in the Assumptions table, cited as `[ASSUMPTION An]`. Log everything per reference/output-format.md, and record each assumption and open question as an `assumption` or `question` event through the specify-meta skill.
 5. If answers expose new Blocking unknowns, run another round. Document phases start only when no Blocking unknown remains.

@@ -10,7 +10,6 @@ version: "1.0"
 
 An HTTP API inside the existing Express monolith writes notifications to a Postgres table; a background worker polls queued rows and delivers them through the SMTP relay. The table is the queue, so an accepted notification survives restarts.
 
-- **Cross-cutting:** service-to-service API key auth; structured logs per delivery attempt
 - **Deployment:** one new worker process; no other change
 
 ## Read first

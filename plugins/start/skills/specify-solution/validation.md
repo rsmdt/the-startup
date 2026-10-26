@@ -14,8 +14,7 @@ yourself before completing the SDD.
 
 - [ ] **Architecture pattern stated with rationale** - A named pattern and why it fits the PRD's constraints
 - [ ] **Technical constraints captured** - Anything the PRD does not carry (language, framework, deployment limits)
-- [ ] **Cross-cutting concerns addressed** - Security, error handling, performance, observability each stated or explicitly not applicable
-- [ ] **Deployment stated** - "No change" or what changes, including rollback
+- [ ] **Deployment stated** - "No change" or what changes
 
 ## Context
 
@@ -42,7 +41,7 @@ yourself before completing the SDD.
 ## Runtime
 
 - [ ] **Primary flow documented** - Trigger, validation, processing, outcome, with a sequence diagram
-- [ ] **Error handling covers all types** - Invalid input, upstream failure, business-rule violation
+- [ ] **Error handling covers the errors the requirements name**
 - [ ] **Non-obvious logic has a traced example** - Real schema names and concrete rows showing how the logic evaluates
 
 ## Decisions
@@ -64,7 +63,7 @@ yourself before completing the SDD.
 
 ## Risks & Consistency
 
-- [ ] **Risks and gotchas listed** - Known limitations, technical debt in the touched area, timing and environment quirks
+- [ ] **Risks and gotchas listed** - What could make this design fail or trip up implementation
 - [ ] **No contradictions between sections** - Names, shapes, and flows agree throughout
 - [ ] **A developer could implement from this** - Clear enough for someone new to the codebase
 

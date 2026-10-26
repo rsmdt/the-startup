@@ -10,7 +10,6 @@ version: "1.0"
 
 An Express middleware applies a sliding-window counter per API key in the shared Redis cluster, reading each key's limit from its plan.
 
-- **Cross-cutting:** fail open if Redis is unreachable; log every 429
 - **Deployment:** feature flag `rate_limiting`
 
 ## Read first

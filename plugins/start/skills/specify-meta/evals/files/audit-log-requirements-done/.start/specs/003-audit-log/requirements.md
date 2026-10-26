@@ -53,11 +53,9 @@ None.
 
 ## Data
 
-| ID | Data item | Purpose | Retention | Classification |
-|----|-----------|---------|-----------|----------------|
-| DR-1 | Audit entry | Change traceability | 1 year | internal |
-
-- **User rights:** Entries are exported with the workspace data export.
+| ID | Data item | Purpose |
+|----|-----------|---------|
+| DR-1 | Audit entry | Change traceability |
 
 ## Constraints & dependencies
 

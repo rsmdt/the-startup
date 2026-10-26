@@ -48,7 +48,6 @@ The SDD's output contract — section statuses, the ADR (`ADRStatus`) shape, req
 - [Validation](validation.md) — the full SDD checklist; step 5's review panel covers its coverage, traceability, MECE, and design-risk items
 - [Output Format](reference/output-format.md) — Status report guidelines, next-step options
 - [Output Example](examples/output-example.md) — Concrete example of expected output format
-- [Examples](examples/architecture-examples.md) — Reference architecture examples
 
 ## Workflow
 
@@ -75,8 +74,6 @@ Investigate, in the main context by default:
 - Architecture patterns and best practices
 - Database and data model design
 - API design and interface contracts
-- Security implications
-- Performance characteristics
 - Integration approaches
 
 **Depth requirement:** Findings must go beyond naming patterns. Every finding must explain:

@@ -32,7 +32,7 @@ max_iterations: 3
 
 ### Who
 
-Everyone with a stake — those who use it and those whose week changes when it ships. One row per distinct goal or concern.
+Everyone who uses it, and anyone else the brief or user names. One row per distinct goal or concern.
 
 | Role | Relationship | Goal or concern today | What success looks like for them |
 |------|--------------|-----------------------|----------------------------------|
@@ -60,21 +60,19 @@ Each feature is one distinct capability, stated once. Acceptance criteria are Gh
 
 ### Quality gates
 
-One row per quality concern a tester who does not know the implementation can measure. The mechanism belongs in Solution.
+One row per quality concern the brief or user raises, measurable by a tester who does not know the implementation. The mechanism belongs in Solution. "None" is a valid entry.
 
 | ID | Concern | Requirement (user-observable) | Gate (measurable) |
 |----|---------|-------------------------------|-------------------|
-| NFR-1 | [NEEDS CLARIFICATION: e.g. Performance] | [e.g. Status lookups feel instant] | [e.g. p95 response < 300 ms at 1,000 concurrent users] |
+| NFR-1 | [NEEDS CLARIFICATION: concern] | [what users notice] | [pass condition] |
 
 ### Data
 
-What the feature collects and keeps, as an obligation. Omit this section only when the feature holds no personal or sensitive data.
+What the feature collects and keeps, as an obligation. Omit this section when the brief or user raises no data obligation.
 
-| ID | Data item | Purpose | Retention | Classification |
-|----|-----------|---------|-----------|----------------|
-| DR-1 | [NEEDS CLARIFICATION: e.g. Customer email] | [e.g. receipt delivery] | [e.g. life of account + 90 days] | [PII / sensitive / internal / public] |
-
-- **User rights:** [NEEDS CLARIFICATION: How do users view, export, correct, or delete this data?]
+| ID | Data item | Purpose |
+|----|-----------|---------|
+| DR-1 | [NEEDS CLARIFICATION: data item] | [why it is kept] |
 
 ### Constraints & dependencies
 
@@ -98,7 +96,6 @@ Only the domain terms a new team member would stumble on. "None" is a valid entr
 
 [NEEDS CLARIFICATION: One paragraph. The architecture pattern, how the feature integrates with the current system, and why this fits the requirements. Add any purely technical constraint the requirements do not carry.]
 
-- **Cross-cutting:** [one line each where relevant — security, error handling, performance, observability]
 - **Deployment:** [NEEDS CLARIFICATION: "No change", or what changes]
 
 ### Read first

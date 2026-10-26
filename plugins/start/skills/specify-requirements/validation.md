@@ -4,20 +4,19 @@ Use this checklist to validate PRD completeness before proceeding to SDD.
 
 ## Structure Validation
 
-- [ ] **All sections are complete** - No empty or placeholder sections; Data may be omitted only when no personal or sensitive data is held
+- [ ] **All sections are complete** - No empty or placeholder sections; Data may be omitted
 - [ ] **No [NEEDS CLARIFICATION] markers remain** - All markers replaced with content
 - [ ] **Template structure preserved** - No sections added, removed, or reorganized
 
 ## Content Quality
 
 ### Problem & Outcome
-- [ ] **Problem is specific and evidenced** - Who has it, what it costs, backed by data or research rather than assumption
+- [ ] **Problem is specific** - Who has it and what it costs
 - [ ] **Outcome states "done"** - A reader can tell what is true for users once this ships and why they would choose it
 - [ ] **Problem → Outcome → Features flow makes sense** - Logical narrative a new team member could follow
 
 ### Who
 - [ ] **Every row has a goal or concern and a success condition** - Not a demographic sketch
-- [ ] **Affected non-users are present** - Support, ops, compliance, legal where their week changes
 - [ ] **Every role's goal is served by at least one feature** - No role without a feature; no feature without a role
 
 ### Features
@@ -29,13 +28,11 @@ Use this checklist to validate PRD completeness before proceeding to SDD.
 
 ### Quality Gates
 - [ ] **Every gate is measurable without knowing the implementation** - Threshold, reference dataset + threshold, or behavior + pass condition
-- [ ] **Every relevant quality dimension is gated or rejected with a reason** - Performance, reliability, security and privacy, usability and accessibility, compliance
-- [ ] **Every release-blocking behavior is gated** - Nothing that could quietly regress is ungated
+- [ ] **Every quality concern the brief or user raises is gated** - No gate for a concern neither raised
 - [ ] **No gate is solution design** - WHAT must hold, never HOW it is achieved
 
 ### Data & Dependencies
-- [ ] **Every data item has purpose, retention, and classification** - Nothing held without a stated why
-- [ ] **User rights addressed** - View, export, correct, delete obligations stated
+- [ ] **Every data item has a purpose** - Nothing held without a stated why
 - [ ] **Dependencies have owner, need-by, and impact-if-late** - Not buried in assumptions
 - [ ] **Constraints identified** - Budget, timeline, platform, compliance; Standing ledger entries cited as [ASSUMPTION An]
 

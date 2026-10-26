@@ -10,7 +10,7 @@
         "Wrote output to requirements.md in the spec directory",
         "Followed template.md structure exactly — all sections present",
         "No [NEEDS CLARIFICATION] markers remain in completed document",
-        "Who table names at least 2 distinct roles with different goals, including affected non-users",
+        "Who table names at least 2 distinct roles with different goals",
         "Who rows are MECE — no two rows share a role or concern",
         "Every role's goal is served by at least one feature",
         "Acceptance criteria cover both happy path and error/recovery paths",

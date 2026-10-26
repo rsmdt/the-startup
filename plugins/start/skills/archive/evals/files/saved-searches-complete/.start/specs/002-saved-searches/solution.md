@@ -10,7 +10,6 @@ version: "1.0"
 
 Saved searches are stored as JSON filter objects in a new table and served by a small REST resource in the existing ticketing API; the web client reuses its current filter state serializer.
 
-- **Cross-cutting:** per-agent ownership enforced in the query; no PII stored
 - **Deployment:** one migration
 
 ## Read first

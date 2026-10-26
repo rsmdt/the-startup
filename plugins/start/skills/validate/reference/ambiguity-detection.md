@@ -63,7 +63,6 @@ echo "Ambiguity: $((vague_count * 100 / total))%"
 |-------|----------|
 | "The system should be fast" | "Response time < 200ms p95" |
 | "Handle many users" | "Support 10,000 concurrent users" |
-| "User-friendly interface" | "WCAG 2.1 AA compliant, 5 clicks max to any feature" |
 | "Secure authentication" | "OAuth 2.0 with JWT, 15-min token expiry" |
 
 ### Architecture Ambiguity

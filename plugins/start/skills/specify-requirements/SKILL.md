@@ -52,7 +52,6 @@ State {
 - [Validation](validation.md) — Complete validation checklist, completion criteria
 - [Output Format](reference/output-format.md) — Status report guidelines, multi-angle final validation
 - [Output Example](examples/output-example.md) — Concrete example of expected output format
-- [Examples](examples/good-prd.md) — Well-structured PRD reference
 
 ## Workflow
 

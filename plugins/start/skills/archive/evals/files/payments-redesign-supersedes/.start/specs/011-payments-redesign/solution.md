@@ -10,7 +10,6 @@ version: "1.0"
 
 Replace the synchronous Charges flow with Stripe PaymentIntents: checkout creates an intent with an idempotency key per order, the client confirms it (handling 3-D Secure), and a webhook handler marks the order paid. `PaymentController` and `stripe-client.ts` from spec 004 are removed.
 
-- **Cross-cutting:** webhook signature verification; idempotency key = order ID
 - **Deployment:** new webhook endpoint registered in Stripe
 
 ## Read first

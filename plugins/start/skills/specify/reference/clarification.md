@@ -37,7 +37,6 @@ Ask the user only what research cannot answer.
 | Intent — the goal behind the ask | What the codebase currently does |
 | Priorities and trade-off preferences | Existing patterns, conventions, contracts |
 | Scope boundaries — in vs. out | Vendor/API capabilities and limits |
-| Taste — UX, tone, style choices | Domain facts, standards, prior art |
 | Success criteria only they can define | Feasibility and effort signals |
 
 Research-routed unknowns seed the research perspectives. When findings return, they are **not** accepted silently — see Research Confirmation below.

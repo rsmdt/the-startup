@@ -56,11 +56,9 @@ None.
 
 ## Data
 
-| ID | Data item | Purpose | Retention | Classification |
-|----|-----------|---------|-----------|----------------|
-| DR-1 | Stripe payment ID per order | Reconciliation and refunds | 7 years | internal |
-
-- **User rights:** Customers request payment history export via support; honored within 30 days.
+| ID | Data item | Purpose |
+|----|-----------|---------|
+| DR-1 | Stripe payment ID per order | Reconciliation and refunds |
 
 ## Constraints & dependencies
 

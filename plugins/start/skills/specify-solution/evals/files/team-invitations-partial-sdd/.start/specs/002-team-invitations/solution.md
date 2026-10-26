@@ -10,7 +10,6 @@ version: "1.0"
 
 A new `invitations` module in the existing Rails monolith stores invites in Postgres and sends join links through the existing mailer. Acceptance reuses the current sign-up flow with an invite token parameter.
 
-- **Cross-cutting:** tokens stored hashed; invite actions logged to the audit log
 - **Deployment:** No change
 
 ## Read first

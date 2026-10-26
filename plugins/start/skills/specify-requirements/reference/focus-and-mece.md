@@ -23,10 +23,10 @@ All structured enumerations in the PRD must be **Mutually Exclusive, Collectivel
 
 | Section | Mutually Exclusive | Collectively Exhaustive |
 |---------|-------------------|------------------------|
-| **Who** | Each row is a distinct role with its own goal or concern. No two rows for the same interest, and no role listed twice as user and affected. | Everyone who uses it and everyone whose week changes when it ships — support, ops, compliance, the negatively affected. Ask: "Who else interacts with this, and whose week changes?" |
+| **Who** | Each row is a distinct role with its own goal or concern. No two rows for the same interest, and no role listed twice as user and affected. | Everyone who uses it, and anyone else the brief or user names. |
 | **Features** | Each user story captures a single, distinct behavior. No two stories describe the same capability, even across Must / Should. Won't-have names the confusable capabilities. | All capabilities needed to solve the stated problem are present. Ask: "If we shipped only these features, would the problem be fully solved for every role?" |
 | **Acceptance Criteria** | Each criterion tests a unique condition. No two criteria verify the same behavior with different wording. | Every feature's happy path, error path, and edge cases are covered. Ask: "What input could break this that we haven't tested?" |
-| **Quality Gates** | One gate per quality concern. No two gates constrain the same behavior with different thresholds, and no two pass or fail together by construction. | Every quality dimension relevant to the feature is gated or explicitly rejected with a reason, and every behavior whose regression would block release has a gate. Ask: "Which quality failure would make users leave even though the feature 'works'? What could quietly regress that no AC would catch?" |
+| **Quality Gates** | One gate per quality concern. No two gates constrain the same behavior with different thresholds, and no two pass or fail together by construction. | Every quality concern the brief or user raises is gated, and no other. |
 | **Data** | Each data item appears once with a single stated purpose. | Everything collected, derived, or retained is listed. Ask: "What do we hold that the user doesn't know about?" |
 
 **Stable IDs:** FR-N (features), AC-N.M (criteria), NFR-N (quality gates), DR-N (data). IDs are permanent once assigned — the plan's slice tasks trace them.

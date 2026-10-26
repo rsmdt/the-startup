@@ -50,11 +50,9 @@ None.
 
 ## Data
 
-| ID | Data item | Purpose | Retention | Classification |
-|----|-----------|---------|-----------|----------------|
-| DR-1 | Export audit entry (user, report, time) | Detect bulk data extraction | [NEEDS CLARIFICATION: How long are export audit entries kept?] | internal |
-
-- **User rights:** Audit entries are visible to the user's admin on request.
+| ID | Data item | Purpose |
+|----|-----------|---------|
+| DR-1 | Export audit entry (user, report, time) | [NEEDS CLARIFICATION: Who reads export audit entries, and why?] |
 
 ## Constraints & dependencies
 

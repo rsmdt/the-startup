@@ -32,7 +32,7 @@ Before completing the PRD, validate from multiple perspectives:
 
 ### Context Review
 Verify:
-- Problem statement clarity — is it specific and evidenced?
+- Problem statement clarity — is it specific?
 - Who completeness — do we understand every role that uses it or is affected?
 - Outcome strength — is "done" clear and compelling?
 
