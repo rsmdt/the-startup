@@ -130,6 +130,8 @@ match (validationMode) {
   Spec | File  => ask the user to choose: Address failures | Show details | Continue anyway
 }
 
+For a drift check on a spec, file each finding as a tracker task (`node ${CLAUDE_PLUGIN_ROOT}/scripts/task.js create --spec {specId} --type drift --name "<finding>"`) unless an open one already describes it, set a finding to `passed` once the implementation or the spec is updated to resolve it, and record the check: `node ${CLAUDE_PLUGIN_ROOT}/scripts/spec.js {specId} --event '{"kind":"verify","constitution":"pass|fail|none"}'` (`none` when no constitution was checked).
+
 ## Integration with Other Skills
 
 Called by other workflow skills:

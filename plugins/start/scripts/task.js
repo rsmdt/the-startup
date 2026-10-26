@@ -43,6 +43,7 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const { parseArgs } = require("util");
+const { appendEvent } = require("./events");
 
 const SPECS_ROOTS = process.env.STARTUP_SPECS_ROOT
   ? [process.env.STARTUP_SPECS_ROOT]
@@ -132,6 +133,13 @@ function serializeTask(t) {
   lines.push(`dependsOn: [${(t.dependsOn || []).join(", ")}]`);
   lines.push("---", "");
   return `${lines.join("\n")}${t.body ? `${t.body}\n` : ""}`;
+}
+
+function taskEvent(t) {
+  return {
+    kind: "task", id: t.id, name: t.name, type: t.type || "task", status: t.status || "pending",
+    parent: t.parentId || null, override: Boolean(t.override),
+  };
 }
 
 const nowIso = () => new Date().toISOString();
@@ -244,6 +252,13 @@ function cmdCreate(o) {
     body: o["body-file"] ? fs.readFileSync(o["body-file"], "utf8").trimEnd() : o.body || "",
   };
   fs.writeFileSync(path.join(dir, `${id}.md`), serializeTask(task));
+  const covers = splitList(o.covers);
+  appendEvent(home, {
+    ...taskEvent(task),
+    ...(covers ? { covers } : {}),
+    ...(o.priority ? { priority: o.priority } : {}),
+    ...(o.surface ? { surface: o.surface } : {}),
+  });
   process.stdout.write(`${id}\n`);
 }
 
@@ -269,6 +284,7 @@ function cmdUpdate(id, o) {
   const found = findTaskFile(id, o);
   if (!found) fail(`Task '${id}' not found`);
   const task = parseTask(fs.readFileSync(found.file, "utf8"));
+  const previousStatus = task.status || "pending";
   const siblings = loadTasks(found.home);
   const known = new Set(siblings.map((t) => t.id));
   if (o.name != null) task.name = o.name;
@@ -296,6 +312,8 @@ function cmdUpdate(id, o) {
     task.body = task.body ? `${task.body}\n${note}` : note;
   }
   fs.writeFileSync(found.file, serializeTask(task));
+  const status = task.status || "pending";
+  appendEvent(found.home, { ...taskEvent(task), ...(status !== previousStatus ? { from: previousStatus } : {}) });
   process.stdout.write(`${id}\n`);
 }
 
@@ -324,6 +342,7 @@ function cmdDelete(id, o) {
     for (const t of tasks) if (t.parentId === toRemove[i]) toRemove.push(t.id);
   }
   for (const rid of toRemove) fs.rmSync(path.join(dir, `${rid}.md`), { force: true });
+  appendEvent(found.home, { kind: "removed", ids: toRemove });
   process.stdout.write(`deleted ${toRemove.length} task(s)\n`);
 }
 
@@ -400,6 +419,9 @@ function main() {
       body: { type: "string" },
       "body-file": { type: "string" },
       "append-note": { type: "string" },
+      covers: { type: "string" },
+      priority: { type: "string" },
+      surface: { type: "string" },
       format: { type: "string" },
       depth: { type: "string" },
       level: { type: "string" },
@@ -424,4 +446,6 @@ function main() {
   }
 }
 
-main();
+if (require.main === module) main();
+
+module.exports = { findSpecDir, loadTasks, taskEvent };

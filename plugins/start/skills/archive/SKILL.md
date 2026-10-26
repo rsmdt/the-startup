@@ -147,7 +147,14 @@ For each spec named in `supersedes`, back-annotate its existing archive record b
 
 ### 6. Remove the Working Directory
 
-Verify the archive record exists and is non-empty. Then remove the source directory in a single step:
+Verify the archive record exists and is non-empty. Record the archive and keep the spec's event log beside its record:
+
+```bash
+node ${CLAUDE_PLUGIN_ROOT}/scripts/spec.js {specId} --event '{"kind":"archived"}'
+mv {sourceDir}/events.jsonl .start/archive/[NNN]-[name].events.jsonl
+```
+
+Then remove the source directory in a single step:
 
 ```bash
 rm -rf {sourceDir}

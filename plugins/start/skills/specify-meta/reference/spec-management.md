@@ -14,6 +14,7 @@
 ├── 001-user-authentication/
 │   ├── spec.md                   # Requirements, Solution, Plan parts + Ledger (gates in frontmatter)
 │   ├── review.md                 # Solution review report — written by specify-solution's review workflow
+│   ├── events.jsonl              # Event log — appended by spec.js and task.js; the dashboard reads it
 │   └── .tracker/                 # Implementation tasks — created by specify-plan via task.js
 │       ├── <phase-task>.md       #   one root task per plan phase
 │       ├── <slice-task>.md       #   slice tasks under their phase (code brief in body)
@@ -67,6 +68,32 @@ files = [
 ```
 
 `prd`, `sdd`, and `plan_doc` all point at `spec.md`; a legacy spec without `spec.md` reports its separate `requirements.md`, `solution.md`, and `plan.md` instead.
+
+### Record an Event
+```bash
+node <plugin>/scripts/spec.js 005 --event '{"kind":"gate","part":"solution","to":"approved"}'
+```
+
+Appends one line to the spec's `events.jsonl`; the script rejects an unknown kind or a missing field. `task.js` records every task change there itself.
+
+| Kind | Fields | Recorded when |
+|------|--------|---------------|
+| `gate` | `part` (requirements\|solution\|plan), `to` (pending\|draft\|approved\|skipped) | a gate changes |
+| `requirement` | `id` (FR-N), `acs` (its AC ids) | a feature is written or its criteria change |
+| `decision` | `id` (ADR-N), `title`, `confirmed` | an ADR is written (`false`) and confirmed (`true`) |
+| `question` | `id` (Qn), `text`, `resolved` | an open question is raised and resolved |
+| `assumption` | `id` (An), `text`, `observable`, `status` (proposed\|confirmed\|corrected\|standing) | an assumption is raised or its status changes |
+| `run` | `state` (started\|ended), `threshold`, `maxIterations` | /implement launches and returns |
+| `result` | `id` (slice id), `result`, `business`, `technical`, `iterations` | /implement reports a slice |
+| `verify` | `constitution` (pass\|fail\|none) | /validate finishes a drift check |
+| `archived` | — | /archive removes the spec directory |
+
+### Start an Event Log for an Existing Spec
+```bash
+node <plugin>/scripts/spec.js 005 --snapshot
+```
+
+Records the current gates, requirements, decisions, assumptions, open questions, and tracker tasks as events, once, for a spec created before the event log existed.
 
 Implementation tasks live in `.tracker/` — query them with `task.js graph --spec 005`, not via `spec.js`.
 

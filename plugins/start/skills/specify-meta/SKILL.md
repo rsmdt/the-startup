@@ -35,6 +35,7 @@ State {
 - Keep phase state in the `gates` frontmatter of `spec.md` and the decisions and assumptions in its `## Ledger` part — `spec.md` has no README beside it.
 - Log all significant decisions with date, decision, and rationale.
 - Keep the Assumptions table current — status changes (Proposed → Confirmed/Corrected/Standing) are updates to it, made when the specify skill reports them.
+- Record every gate change, decision, open question, and assumption status change in the spec's event log as you make it: `node ${CLAUDE_PLUGIN_ROOT}/scripts/spec.js {specId} --event '<json>'` (event kinds in reference/spec-management.md). The progress dashboard reads only this log.
 - A spec with no `spec.md` uses the legacy layout (`README.md`, `requirements.md`, `solution.md`, `plan.md`): read and continue it in those files.
 - Confirm next steps with user before phase transitions.
 
@@ -71,11 +72,13 @@ match (gates) {
   nothing approved                  => "Start from Requirements?"
 }
 
+4. If the spec directory has no `events.jsonl`, run `node ${CLAUDE_PLUGIN_ROOT}/scripts/spec.js "$specId" --snapshot` once to start its event log from the current state.
+
 ### 3. Transition Phase
 
 Update the spec directory to reflect the new phase.
 
-1. Set the finished part's gate to `approved` (or `skipped`) and the next part's gate to `draft`.
+1. Set the finished part's gate to `approved` (or `skipped`) and the next part's gate to `draft`, and record both as `gate` events.
 2. Log the phase transition in the Decision log.
 3. Hand off to the document-specific skill:
 
