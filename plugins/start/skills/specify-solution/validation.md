@@ -53,7 +53,7 @@ yourself before completing the SDD.
 ## Behavior
 
 - [ ] **EARS criteria defined** - Every statement uses an EARS pattern and names a concrete response
-- [ ] **MECE: Behavior** - Each EARS criterion specifies a unique behavior; every PRD acceptance criterion has at least one; none invents behavior the PRD does not ask for
+- [ ] **MECE: Behavior** - Each EARS criterion specifies a unique behavior and names the AC it refines; every edge and error state an AC implies is stated by the AC or an EARS criterion; none invents behavior the PRD does not ask for
 - [ ] **Happy, error, and edge paths covered** - For every component the feature touches
 
 ## PRD Alignment

@@ -37,7 +37,7 @@ Use this checklist to validate PRD completeness before proceeding to SDD.
 - [ ] **Every data item has purpose, retention, and classification** - Nothing held without a stated why
 - [ ] **User rights addressed** - View, export, correct, delete obligations stated
 - [ ] **Dependencies have owner, need-by, and impact-if-late** - Not buried in assumptions
-- [ ] **Constraints identified** - Budget, timeline, platform, compliance; Standing ledger entries visible as [ASSUMPTION]
+- [ ] **Constraints identified** - Budget, timeline, platform, compliance; Standing ledger entries cited as [ASSUMPTION An]
 
 ### Identifiers & Terms
 - [ ] **Stable IDs assigned** - FR-N, AC-N.M, NFR-N, DR-N; unique and never renumbered

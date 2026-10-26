@@ -8,12 +8,8 @@ const SPECS_DIR = path.join(".start", "specs");
 const LEGACY_SPECS_DIR = path.join("docs", "specs");
 const SPEC_ROOTS = [SPECS_DIR, LEGACY_SPECS_DIR];
 
-const DOCUMENT_FILENAMES = {
-  "specify-requirements": "requirements.md",
-  "product-requirements": "requirements.md",
-  "specify-solution": "solution.md",
-  "solution-design": "solution.md",
-};
+const SPEC_FILE = "spec.md";
+const SPEC_TEMPLATE = path.join(SKILLS_DIR, "specify-meta", "template.md");
 
 const GATE_FILES = [
   ["definition-of-ready.md", "definition_of_ready"],
@@ -44,12 +40,6 @@ function filesIn(dir, pattern = () => true) {
 
 function dirsIn(dir) {
   return sortedEntries(dir).filter((name) => isDir(path.join(dir, name)));
-}
-
-function templatePath(templateName) {
-  const candidate = path.join(SKILLS_DIR, templateName, "template.md");
-  if (!isFile(candidate)) throw new Error(`Template not found: ${templateName}`);
-  return candidate;
 }
 
 function nextSpecId() {
@@ -96,11 +86,13 @@ function readSpec(specId) {
   out.push(`dir = "${specDir}"`);
   out.push("", "[spec]");
 
-  const prd = firstExisting(specDir, "requirements.md", "product-requirements.md");
+  const spec = firstExisting(specDir, SPEC_FILE);
+  const prd = spec ?? firstExisting(specDir, "requirements.md", "product-requirements.md");
+  const sdd = spec ?? firstExisting(specDir, "solution.md", "solution-design.md");
+  const plan = spec ?? firstExisting(specDir, "plan.md");
+  if (spec) out.push(`spec = "${spec}"`);
   if (prd) out.push(`prd = "${prd}"`);
-  const sdd = firstExisting(specDir, "solution.md", "solution-design.md");
   if (sdd) out.push(`sdd = "${sdd}"`);
-  const plan = firstExisting(specDir, "plan.md");
   if (plan) out.push(`plan_doc = "${plan}"`);
 
   const planDir = path.join(specDir, "plan");
@@ -153,62 +145,34 @@ function readSpec(specId) {
   process.stdout.write(out.join("\n") + "\n");
 }
 
-function writeTemplate(specDir, templateName, onMissing) {
-  try {
-    const source = templatePath(templateName);
-    const destName = templateName === "specify-plan" ? "plan.md" : DOCUMENT_FILENAMES[templateName] ?? `${templateName}.md`;
-    fs.writeFileSync(path.join(specDir, destName), fs.readFileSync(source, "utf8"));
-    console.log(`Generated template: ${destName}`);
-  } catch (error) {
-    onMissing(error.message);
-  }
-  if (templateName === "specify-plan") {
-    fs.mkdirSync(path.join(specDir, ".tracker"), { recursive: true });
-    console.log("Ensured tracker directory: .tracker/");
-  }
-}
-
-function createSpec(featureName, templateName) {
-  if (/^\d{3}$/.test(featureName) && templateName) {
-    const specDir = findSpecDir(featureName);
-    if (!specDir) fail(`Spec ${featureName} not found`);
-    console.log(`Adding template to existing spec: ${specDir}`);
-    writeTemplate(specDir, templateName, fail);
-    return;
-  }
-
+function createSpec(featureName) {
+  if (!isFile(SPEC_TEMPLATE)) fail(`Template not found: ${SPEC_TEMPLATE}`);
   const specId = nextSpecId();
   const specDir = path.join(SPECS_DIR, `${specId}-${sanitizeName(featureName)}`);
   fs.mkdirSync(path.join(specDir, ".tracker"), { recursive: true });
+  fs.writeFileSync(path.join(specDir, SPEC_FILE), fs.readFileSync(SPEC_TEMPLATE, "utf8"));
   console.log(`Created spec directory: ${specDir}`);
+  console.log(`Created spec document: ${path.join(specDir, SPEC_FILE)}`);
   console.log(`Created tracker directory: ${path.join(specDir, ".tracker")}`);
   console.log(`Spec ID: ${specId}`);
-
-  if (templateName) {
-    const onMissing = templateName === "specify-plan" ? fail : (m) => process.stderr.write(`Warning: ${m}\n`);
-    writeTemplate(specDir, templateName, onMissing);
-  }
   console.log("Specification directory created successfully");
 }
 
 function parseCli(argv) {
-  const args = { feature: null, add: null, read: false };
+  const args = { feature: null, read: false };
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--read") args.read = true;
-    else if (arg === "--add") args.add = argv[++i];
-    else if (arg.startsWith("--add=")) args.add = arg.slice("--add=".length);
     else if (arg === "-h" || arg === "--help") {
-      console.log("usage: spec.js <feature-name | spec-id> [--add TEMPLATE] [--read]");
+      console.log("usage: spec.js <feature-name> | spec.js <spec-id> --read");
       process.exit(0);
     } else if (args.feature === null) args.feature = arg;
     else fail(`unexpected argument: ${arg}`);
   }
   if (args.feature === null) fail("feature name or spec ID is required");
-  if (args.add === undefined) fail("--add requires a template name");
   return args;
 }
 
 const cli = parseCli(process.argv.slice(2));
 if (cli.read) readSpec(cli.feature);
-else createSpec(cli.feature, cli.add);
+else createSpec(cli.feature);

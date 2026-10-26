@@ -29,7 +29,7 @@ These skills are invoked by the user via slash commands (e.g., `/specify`). Unli
 
 Create comprehensive specifications from brief descriptions through deep research and specialist agent coordination, producing a narrative plan plus the slice tasks `/implement` runs.
 
-**Purpose:** Transform ideas into implementation-ready specifications with product requirements, solution design, and a plan — a narrative `plan.md` plus the implementation tasks in the tracker
+**Purpose:** Transform ideas into implementation-ready specifications with product requirements, solution design, and a plan — one `spec.md` plus the implementation tasks in the tracker
 
 **Usage:**
 ```bash
@@ -51,8 +51,8 @@ Create comprehensive specifications from brief descriptions through deep researc
 
 | Facet | Source | Role |
 |-------|--------|------|
-| **Features** (acceptance criteria) | requirements.md | what the slice delivers |
-| **Behavior** (EARS) | solution.md | how it must behave |
+| **Features** (acceptance criteria) | Requirements part | what the slice delivers |
+| **Behavior** (EARS) | Solution part | how it must behave |
 | **Quality Gates** | derived | checkable conditions |
 
 Its **acceptance scenarios** are separate scenario child tasks (holdout evidence) — how it is proven.
@@ -60,20 +60,22 @@ Its **acceptance scenarios** are separate scenario child tasks (holdout evidence
 <details>
 <summary><strong>View Details</strong></summary>
 
-**What you get:** Comprehensive documents in `.start/specs/[NNN]-[name]/`:
+**What you get:** One document, `.start/specs/[NNN]-[name]/spec.md`, in three parts, each closed by its own approval gate:
 
-- **requirements.md** - User stories, feature specifications, success criteria, non-functional requirements
-- **solution.md** - Technical architecture, system components, data models, technology stack, security and performance considerations
-- **plan.md** - The narrative plan (phases + outcomes); the implementation tasks (slices + scenario child tasks) live in **.tracker/**
+- **Requirements** - User stories, feature specifications, success criteria, non-functional requirements
+- **Solution** - Technical architecture, system components, data models, technology stack, security and performance considerations
+- **Plan** - The target state and the phases with their outcomes; the implementation tasks (phases → slices → scenario child tasks) live in **.tracker/**
+
+Its Ledger part holds the open questions, assumptions, decision log, and accepted review trade-offs.
 
 ```mermaid
 flowchart TD
     A([Your Feature Idea]) --> |initialize| B{Check<br>Existing}
     B --> |exists| C[Review and Refine]
     C --> END[Ready for /implement 001]
-    B --> |new| D[Requirements Gathering<br/>Create requirements.md]
-    D --> E[Technical Research<br/>Create solution.md, document patterns, interfaces]
-    E --> F[Plan the slices<br/>Create plan.md + tracker tasks]
+    B --> |new| D[Requirements Gathering<br/>Write the Requirements part]
+    D --> E[Technical Research<br/>Write the Solution part, document patterns, interfaces]
+    E --> F[Plan the phases<br/>Write the Plan part + tracker tasks]
     F --> END
 ```
 
@@ -143,7 +145,7 @@ Validate specifications, implementations, or understanding through intelligent c
 **Usage:**
 ```bash
 /validate 001                                          # Validate spec by ID
-/validate .start/specs/001/solution.md                  # Validate specific file
+/validate .start/specs/001/spec.md                      # Validate specific file
 /validate Check the auth implementation against SDD    # Compare implementation to spec
 /validate drift                                        # Check for spec-implementation drift
 /validate constitution                                 # Validate constitution compliance
@@ -433,7 +435,7 @@ flowchart TD
     C --> |simple| D[Direct Refactoring<br/>Run tests first<br/>Apply changes<br/>Validate each step]
     D --> |review| E[Specialist Review<br/>Code quality check<br/>Performance impact]
     E --> DONE[Refactoring Complete]
-    C --> |complex| F[Create Specification<br/>Generate solution.md<br/>Generate plan.md + scenarios/<br/>Document approach]
+    C --> |complex| F[Create Specification<br/>Generate spec.md<br/>Generate tracker tasks<br/>Document approach]
     F --> |defer| G[Ready for /implement<br/>Execute via the slice loop]
 ```
 
@@ -619,10 +621,8 @@ The plugin encourages structured knowledge management:
 .start/
 └── specs/
     └── [3-digit-number]-[feature-name]/
-        ├── README.md                        # Decisions and progress
-        ├── requirements.md                 # What to build
-        ├── solution.md                     # How to build it
-        ├── plan.md                         # Narrative plan (phases + outcomes)
+        ├── spec.md                          # Requirements, Solution, Plan parts + Ledger
+        ├── review.md                        # Solution review report
         └── .tracker/                        # Implementation tasks (phase → slices → scenarios)
 
 docs/
@@ -727,7 +727,7 @@ Optional: /document after implementation for documentation sync
 
 **What happens:**
 - Creates `.start/specs/001-notification-system/`
-- Generates requirements.md, solution.md, plan.md, and the tracker tasks
+- Generates spec.md and the tracker tasks
 - Documents discovered patterns/interfaces
 - Optional: Creates `spec/001-notification-system` git branch
 

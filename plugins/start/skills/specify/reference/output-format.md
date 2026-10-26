@@ -7,21 +7,14 @@ Guidelines for specification output. See `examples/output-example.md` for concre
 ## Documentation Structure
 
 Specifications live in `.start/specs/[NNN]-[name]/`:
-- `README.md` — Decisions, assumption ledger, and progress tracking
-- `requirements.md` — What and why
-- `solution.md` — How
-- `plan.md` — Narrative plan (target state, phases & outcomes, tracking)
-- `.tracker/` — Slice tasks (code briefs) and their scenario child tasks (holdout evidence)
-- `spec-report.md` — Editor-readable report (ledger, findings, documents, decisions)
-
-## Specification Report
-
-At Finalize, write `spec-report.md` from templates/spec-report.md — plain Markdown (tables, callouts, task lists; only `<details>` HTML, no custom components), so it reviews cleanly in any editor and on GitHub. The chat completion summary stays concise and links the report; the report carries the full ledger, finding dispositions, and decision log. Keep its heading spine stable — other skills may grep it.
+- `spec.md` — one document: the Requirements (what and why), Solution (how), and Plan (phases and their slices) parts, each closed by its gate in the frontmatter, and the Ledger (open questions, assumptions, decision log, accepted trade-offs)
+- `review.md` — the solution review report
+- `.tracker/` — Phase tasks, their slice tasks (code briefs), and each slice's scenario child tasks (holdout evidence)
 
 ## Decision Logging
 
-When the user skips a phase or makes a non-default choice, log it in the spec README.md decisions table with date, decision, and rationale.
+When the user skips a phase or makes a non-default choice, log it in the Decision log of the `spec.md` Ledger with date, decision, and rationale.
 
 ## Assumption Ledger Logging
 
-The Clarify Intent phase writes the ledger to the README's Assumption Ledger table (Topic | Default | Impact if wrong | Status) and updates statuses as they change. Standing entries additionally appear as `[ASSUMPTION]` markers in the affected document sections. The completion summary lists all Standing assumptions; any architecture-shaping Standing assumption caps readiness at MEDIUM.
+The Clarify Intent phase writes the ledger to the Assumptions table of `spec.md` (ID | Assumption | Impact if wrong | Observable | Status) and updates statuses as they change. The document cites Standing entries as `[ASSUMPTION An]` in the affected sections instead of restating them. The completion summary lists all Standing assumptions; any architecture-shaping Standing assumption caps readiness at MEDIUM.

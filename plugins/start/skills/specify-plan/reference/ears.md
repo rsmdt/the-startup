@@ -19,7 +19,7 @@ Patterns compose: *"While the cache is warm, when a lookup misses, the system sh
 - **One requirement per statement.** Split compound behaviors.
 - **Name a concrete response.** "the system shall return HTTP 409 with an `error.code` of `conflict`" beats "the system shall handle the conflict".
 - **Ground the trigger.** Reference real events, endpoints, states, and fields from the solution design — not hypothetical ones.
-- **Derive, don't invent.** Every EARS statement must trace to technical detail in solution.md. The plan expresses the solution's behavior; it does not add new behavior.
+- **Derive, don't invent.** Every EARS statement must trace to technical detail in the Solution part of `spec.md`. The plan expresses the solution's behavior; it does not add new behavior.
 - **Keep it observable where possible.** EARS behavior that surfaces through an external interface can be paired directly with a validation scenario.
 
 ## Examples

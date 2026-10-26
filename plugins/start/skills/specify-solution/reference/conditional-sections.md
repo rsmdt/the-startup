@@ -1,14 +1,14 @@
 # Conditional SDD Sections
 
 Loaded by the specify-solution skill only when the feature has a user interface or spans more than one
-component or deployable. Add the matching section(s) to `solution.md` after **Runtime**; a feature that
-needs neither leaves `solution.md` as the template has it.
+component or deployable. Add the matching section(s) to the Solution part of `spec.md` after **Runtime**; a feature that
+needs neither leaves the Solution part as the template has it.
 
 ---
 
 ## User interface (when the feature has one)
 
-Add a `## User interface` section covering:
+Add a `### User interface` section covering:
 
 - **Information architecture:** where the feature lives in navigation, how content is grouped, entry and exit points
 - **Design system:** components used or extended, tokens, form / feedback / loading patterns
@@ -51,7 +51,7 @@ stateDiagram-v2
 
 ## Multi-component (when the feature spans components, teams, or deployables)
 
-Add a `## Multi-component` section covering:
+Add a `### Multi-component` section covering:
 
 - **Contracts:** which interfaces are public contracts that cannot break; breaking-change policy
 - **Ownership:** which team owns which component; shared resources (databases, queues, caches)

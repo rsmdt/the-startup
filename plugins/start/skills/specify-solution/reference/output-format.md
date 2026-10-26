@@ -42,17 +42,9 @@ Guidelines for SDD output. See `examples/output-example.md` for a concrete rende
 
 ---
 
-## Next-Step Options
+## Approval Options
 
-Use `AskUserQuestion` based on SDD state:
-
-**During design cycles:**
-- "Address pending ADRs"
-- "Continue to next section"
-- "Run validation"
-- "Complete SDD"
-
-**After validation:**
-- "Fix validation failures"
-- "Re-run validation"
-- "Proceed to implementation plan"
+Use `AskUserQuestion` at the approval gate (step 6):
+- "Approve and continue"
+- "Walk me through section by section"
+- "Change [topic]"

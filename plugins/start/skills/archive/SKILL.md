@@ -25,8 +25,8 @@ ArchiveRecord {
 State {
   target = $ARGUMENTS
   sourceDir: string
-  requirements?: string     // path to requirements.md if present
-  solution?: string         // path to solution.md if present
+  requirements?: string     // spec.md (its Requirements part), or requirements.md in a legacy spec
+  solution?: string         // spec.md (its Solution part), or solution.md in a legacy spec
   archivePath: string
   commit?: string           // resolved in step 3
   priorArchives?: string[]  // existing .start/archive/*.md scanned for supersession in step 4
@@ -36,7 +36,7 @@ State {
 
 **Always:**
 - Resolve the spec via the specify-meta skill before reading anything.
-- Read requirements.md and solution.md directly — whichever exist.
+- Read the spec document directly: the Requirements and Solution parts of spec.md, or requirements.md and solution.md (whichever exist) in a legacy spec.
 - Write the archive record to `.start/archive/[NNN]-[name].md` BEFORE removing anything.
 - Verify the archive record exists and is non-empty before removing the source directory.
 - Remove the entire `.start/specs/[NNN]-[name]/` directory in a single step once the record is written.
@@ -64,7 +64,7 @@ This skill is intentionally self-contained; the record structure is inlined in s
 Use the specify-meta skill with `$ARGUMENTS` to read the spec (`node ${CLAUDE_PLUGIN_ROOT}/scripts/spec.js {id} --read`). From the TOML output capture:
 - `dir` → `sourceDir` (e.g., `.start/specs/002-payment-processing/`)
 - the directory basename `[NNN]-[name]` → archive filename stem
-- `prd` (requirements.md) and `sdd` (solution.md) paths, if present
+- `prd` and `sdd` paths, if present (both are spec.md; a legacy spec reports requirements.md and solution.md)
 
 ```
 match (resolution) {
@@ -77,7 +77,7 @@ match (resolution) {
 
 ### 2. Read Intent
 
-Read requirements.md and solution.md (whichever exist). Extract only:
+Read the Requirements and Solution parts (spec.md, or the legacy requirements.md and solution.md, whichever exist). Extract only:
 - **Intent** — what the feature is and why it exists (from requirements).
 - **Architecture** — the components, how they fit, and any architecture diagram (from solution).
 - **Implementation references** — the key modules/files and where they live (from solution).
@@ -130,7 +130,7 @@ Create `.start/archive/` if it does not exist. Write `.start/archive/[NNN]-[name
 {one or two plain sentences: the feature and its intent}
 
 ## Architecture
-{the architecture diagram lifted from solution.md, or a minimal one synthesized from
+{the architecture diagram lifted from the Solution part, or a minimal one synthesized from
  its components; a short paragraph on how the pieces fit}
 
 ## Implementation
@@ -153,7 +153,7 @@ Verify the archive record exists and is non-empty. Then remove the source direct
 rm -rf {sourceDir}
 ```
 
-The scaffolding (`plan/`, `units/`, `scenarios/`, `manifest.md`, `README.md`) is removed with it — it all lives inside `sourceDir`.
+The scaffolding (`spec.md`, `review.md`, `.tracker/`, and in legacy specs `plan/`, `units/`, `scenarios/`, `manifest.md`, `README.md`) is removed with it — it all lives inside `sourceDir`.
 
 ### 7. Report
 

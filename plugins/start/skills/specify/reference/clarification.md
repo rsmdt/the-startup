@@ -47,30 +47,31 @@ Research-routed unknowns seed the research perspectives. When findings return, t
 - Every question names its stake: "X or Y? — this decides whether requirements include Z."
 - One decision per question — no stacked multi-part questions.
 - Batched, at most five per round, ordered by leverage (Blocking first).
-- Each question carries a proposed default, so the user can answer with one word or accept all defaults in a single action.
+- Each question carries a proposed default, so the user can answer with one word.
+- An **observable** assumption — one an acceptance test could tell apart: a criterion, an error, a validation bound, an ordering, a calculation — is always its own question. Only non-observable defaults (technical, cosmetic) may be accepted together in a single action.
 - No question the codebase, git history, or a web search could answer.
 
 ## The Assumption Ledger
 
-Present before any questions, maintain throughout the run, and record in the spec README (see output-format.md):
+Present before any questions, maintain throughout the run, and record in the Assumptions table of `spec.md` (see output-format.md):
 
-| Topic | Default (what I'd otherwise assume) | Impact if wrong | Status |
-|-------|--------------------------------------|-----------------|--------|
-| Auth model | Reuse existing session auth | New auth flow = rework of every AC | Proposed |
-| Notification channels | In-app only, no email | Email adds vendor + template scope | Standing |
+| ID | Assumption (what I'd otherwise assume) | Impact if wrong | Observable | Status |
+|----|----------------------------------------|-----------------|:----------:|--------|
+| A1 | Reuse existing session auth | New auth flow = rework of every AC | no | Proposed |
+| A2 | In-app only, no email | Email adds vendor + template scope | yes | Standing |
 
-Status lifecycle: **Proposed** (surfaced, unanswered) → **Confirmed** (user validated the default) / **Corrected** (user gave a different answer) / **Standing** (user accepted the default without validating it — carried into documents as a visible `[ASSUMPTION]` entry, never erased).
+Status lifecycle: **Proposed** (surfaced, unanswered) → **Confirmed** (user validated the default) / **Corrected** (user gave a different answer) / **Standing** (user accepted the default without validating it — cited in the document as `[ASSUMPTION An]`, never erased).
 
 ## Research Confirmation
 
-Findings return as claims, not facts. Present each material claim with: the claim, its evidence (file, doc, or source), and a proposed disposition. The user chooses:
+Findings return as claims, not facts. Present each material claim with: the claim, its evidence (file, doc, or source), and a proposed disposition. Each observable finding is its own question; the others are presented together and confirmed as a set unless the user picks one to change. The user chooses:
 
 - **Confirm** — the finding closes its unknown and may enter documents.
 - **Correct** — the user's version supersedes; record the correction.
 - **Discard** — the finding never enters a document.
-- **Defer** — becomes a Standing `[ASSUMPTION]` with the finding as its default.
+- **Defer** — becomes a Standing assumption with the finding as its default.
 
-A finding no user has dispositioned is Pending and must not appear in requirements, solution, or plan.
+A finding no user has dispositioned is Pending and must not appear in any part of `spec.md`.
 
 ## MECE Tie-In
 

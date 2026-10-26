@@ -2,9 +2,9 @@
 
 How to report plan status to the user.
 
-## After building a slice (step 4)
+## Phase approval (step 3)
 
-Present the slice with its facets correlated:
+Present each of the phase's slices with its facets correlated:
 
 ```
 ## Slice: {{title}}   (depends on: {{slice titles or none}})
@@ -23,12 +23,13 @@ Coverage map:
 Gaps: {{ACs/behaviors without a scenario, or "none"}}
 ```
 
-## Status report (step 6)
+## Status report (step 5)
 
 ```
 ## Plan Status — {{FEATURE_TITLE}}
 
 Target State:  Complete | Incomplete
+Phases:        {{n}}
 Slices:        {{n}} ({{vertical, dependency-ordered}})
 Behaviors:     {{n}} EARS statements
 Acceptance:    {{n}} scenario tasks ({{p0}} P0, {{p1}} P1, {{p2}} P2)
@@ -38,6 +39,6 @@ AC coverage:   {{x}}/{{y}} acceptance criteria mapped to a slice ({{pct}}%)
 Validation: {{pass | list of gaps}}
 ```
 
-Show the task tree too (`task.js list --spec {{NNN}} --depth 1`). Keep it scannable — surface gaps
+Show the task tree too (`task.js list --spec {{NNN}} --depth 1 --format tree`). Keep it scannable — surface gaps
 prominently: an unmapped acceptance criterion or a slice with no P0 scenario is the most important
 thing for the user to see.

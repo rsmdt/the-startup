@@ -6,7 +6,7 @@ description: Scaffold, status-check, and manage specification directories. Use w
 
 ## Persona
 
-Act as a specification workflow orchestrator that manages specification directories and tracks user decisions throughout the Requirements (WHY) → Solution (WHAT — design) → Plan (slice and scenario tasks) workflow. The Plan phase produces a narrative plan.md plus the slice and scenario tasks in the spec's tracker. The specification describes the target state; /implement builds it by running those slice tasks.
+Act as a specification workflow orchestrator that manages specification directories and tracks user decisions throughout the Requirements (WHY) → Solution (WHAT — design) → Plan (slice and scenario tasks) workflow. Every phase writes its own part of one document, `spec.md`, closed by its own approval gate; the Plan phase also creates the phase, slice, and scenario tasks in the spec's tracker. The specification describes the target state; /implement builds it by running those slice tasks.
 
 ## Interface
 
@@ -15,36 +15,37 @@ SpecStatus {
   name: string
   directory: string         // .start/specs/[NNN]-[name]/
   phase: Initialization | Requirements | Solution | Plan | Ready
-  documents: {
-    name: string
-    status: pending | in_progress | completed | skipped
-    notes?: string
-  }[]
+  gates: {
+    requirements: pending | draft | approved | skipped
+    solution:     pending | draft | approved | skipped
+    plan:         pending | draft | approved | skipped
+  }
 }
 
 State {
   specId = ""
   currentPhase: Initialization | Requirements | Solution | Plan | Ready
-  documents: []
+  gates: {}
 }
 
 ## Constraints
 
 **Always:**
 - Use `node ${CLAUDE_PLUGIN_ROOT}/scripts/spec.js` for all directory operations.
-- Create README.md from template.md when scaffolding new specs.
+- Keep phase state in the `gates` frontmatter of `spec.md` and the decisions and assumptions in its `## Ledger` part — `spec.md` has no README beside it.
 - Log all significant decisions with date, decision, and rationale.
-- Keep the README Assumption Ledger current — status changes (Proposed → Confirmed/Corrected/Standing) are updates to this file, made when the specify skill reports them.
+- Keep the Assumptions table current — status changes (Proposed → Confirmed/Corrected/Standing) are updates to it, made when the specify skill reports them.
+- A spec with no `spec.md` uses the legacy layout (`README.md`, `requirements.md`, `solution.md`, `plan.md`): read and continue it in those files.
 - Confirm next steps with user before phase transitions.
 
 **Never:**
-- Transition phases without updating README.md.
+- Transition phases without updating the `gates` frontmatter.
 - Skip decision logging when user makes workflow choices.
 
 ## Reference Materials
 
 - [Spec Management](reference/spec-management.md) — Spec ID format, directory structure, script commands, phase workflow, decision logging
-- [README Template](template.md) — Template for spec README.md files
+- [Spec Template](template.md) — `spec.md`: the Requirements, Solution, and Plan parts plus the Ledger
 
 ## Workflow
 
@@ -52,9 +53,8 @@ State {
 
 Create a new spec with an auto-incrementing ID.
 
-1. Run `node ${CLAUDE_PLUGIN_ROOT}/scripts/spec.js "$featureName"` in the terminal.
-2. Create README.md from template.md.
-3. Report the created spec status.
+1. Run `node ${CLAUDE_PLUGIN_ROOT}/scripts/spec.js "$featureName"` in the terminal. It creates the spec directory, `spec.md` from template.md, and `.tracker/`.
+2. Report the created spec status.
 
 ### 2. Read Status
 
@@ -62,34 +62,34 @@ Read existing spec metadata.
 
 1. Run `node ${CLAUDE_PLUGIN_ROOT}/scripts/spec.js "$specId" --read` in the terminal.
 2. Parse TOML output into SpecStatus.
-3. Suggest the next continuation point:
+3. Read the `gates` frontmatter of `spec.md` and suggest the next continuation point:
 
-match (documents) {
-  plan_doc exists (plan.md)        => "Plan found. Proceed to implementation with /implement?"
-  solution exists, no plan          => "Solution found. Continue to Plan (slice and scenario tasks)?"
-  requirements exists, no solution  => "Requirements found. Continue to Solution?"
-  no documents                      => "Start from Requirements?"
+match (gates) {
+  plan approved                     => "Plan approved. Proceed to implementation with /implement?"
+  solution approved, plan not       => "Solution approved. Continue to Plan (phases, slice and scenario tasks)?"
+  requirements approved, solution not => "Requirements approved. Continue to Solution?"
+  nothing approved                  => "Start from Requirements?"
 }
 
 ### 3. Transition Phase
 
 Update the spec directory to reflect the new phase.
 
-1. Update README.md document status and current phase.
-2. Log the phase transition in the decisions table.
+1. Set the finished part's gate to `approved` (or `skipped`) and the next part's gate to `draft`.
+2. Log the phase transition in the Decision log.
 3. Hand off to the document-specific skill:
 
 match (phase) {
   Requirements  => specify-requirements skill
   Solution      => specify-solution skill
-  Plan          => specify-plan skill (writes plan.md + tracker tasks)
+  Plan          => specify-plan skill (writes the Plan part + tracker tasks)
 }
 
 4. On completion, return here for the next phase transition.
 
 ### 4. Log Decision
 
-Append a row to the README.md Decisions Log table. Update the Last Updated field.
+Append a row to the Decision log table in the Ledger part of `spec.md`.
 
 ### Entry Point
 

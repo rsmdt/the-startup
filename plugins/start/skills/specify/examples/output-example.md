@@ -15,10 +15,10 @@
 
 **Assumptions I'd otherwise make:**
 
-| Topic | Default | Impact if wrong | Status |
-|-------|---------|-----------------|--------|
-| Auth for socket connections | Reuse session cookie auth | Token-based auth = new AC set + security review | Proposed |
-| Delivery guarantee | At-least-once, dedupe client-side | Exactly-once changes architecture materially | Proposed |
+| ID | Assumption | Impact if wrong | Observable | Status |
+|----|------------|-----------------|:----------:|--------|
+| A1 | Reuse session cookie auth for socket connections | Token-based auth = new AC set + security review | no | Proposed |
+| A2 | At-least-once delivery, dedupe client-side | Exactly-once changes architecture materially | yes | Proposed |
 
 *(User answers #1 "yes, but 7 days", accepts #2 default → Corrected + Standing. Blocking unknowns resolved; document phases begin.)*
 
@@ -36,8 +36,8 @@
 ## Specification Complete
 
 Spec: 003-notification-system
-Documents: Requirements ✅ | Solution ✅ | Plan ✅
-📄 Report: `.start/specs/003-notification-system/spec-report.md` (full ledger, finding dispositions, decisions — readable in any editor)
+Gates: Requirements ✅ | Solution ✅ | Plan ✅
+📄 Spec: `.start/specs/003-notification-system/spec.md` (all three parts and the ledger — readable in any editor)
 
 Readiness: MEDIUM
 Standing assumptions (2): Web only (no mobile push) · At-least-once delivery
@@ -61,9 +61,6 @@ Next Steps:
 ## Documentation Structure
 
 .start/specs/003-notification-system/
-├── README.md                 # Decisions, assumption ledger, progress
-├── requirements.md          # What and why (carries [ASSUMPTION] markers)
-├── solution.md              # How
-├── plan.md                  # Narrative plan
-├── spec-report.md           # Editor-readable report (ledger, findings, documents, decisions)
-└── .tracker/                # Slice tasks + scenario child tasks (task.js)
+├── spec.md                  # Requirements, Solution, Plan parts + Ledger (gates in frontmatter)
+├── review.md                # Solution review report
+└── .tracker/                # Phase tasks, slice tasks + scenario child tasks (task.js)

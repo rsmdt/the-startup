@@ -270,14 +270,14 @@ grep -r "timeout\|limit\|size\|duration\|retry" src/config/
 
 ## Drift Logging
 
-All drift decisions should be logged to the spec README for traceability.
+All drift decisions should be logged in the spec document for traceability.
 
 ### Drift Log Format
 
-Add to spec README under `## Drift Log` section:
+Add to the Ledger part of `spec.md` under a `### Drift log` section (the spec README in a legacy spec):
 
 ```markdown
-## Drift Log
+### Drift log
 
 | Date | Phase | Drift Type | Status | Notes |
 |------|-------|------------|--------|-------|

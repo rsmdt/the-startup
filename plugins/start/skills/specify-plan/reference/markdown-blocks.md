@@ -1,6 +1,6 @@
 # Markdown Blocks & Document Quality
 
-Spec artifacts (`requirements.md`, `solution.md`, `plan.md`) are **plain Markdown that renders richly where supported and reads cleanly everywhere else**. We adopt a block *vocabulary* and a *document-quality discipline* — not a hosted renderer. Everything here renders natively on GitHub, in IDE previews, and in docs sites with **zero custom infrastructure**.
+The spec document (`spec.md`) is **plain Markdown that renders richly where supported and reads cleanly everywhere else**. We adopt a block *vocabulary* and a *document-quality discipline* — not a hosted renderer. Everything here renders natively on GitHub, in IDE previews, and in docs sites with **zero custom infrastructure**.
 
 The hard rule: a human gets a richer, more scannable review surface; an agent still reads a stable, machine-parseable spine. Never sacrifice the spine for chrome.
 
@@ -36,11 +36,11 @@ Avoid raw JSX/HTML — the **only** permitted HTML is `<details>`/`<summary>`, b
 
 ## What `/implement` reads
 
-`plan.md` is a **narrative** — read by humans and agents for orientation, **not parsed for work**. The only machine-read part is its **frontmatter** (`title`, `status`, `threshold`, `max_iterations`, `version`), which `/implement` uses for the loop's config.
+The Plan part of `spec.md` is a **narrative** — read by humans and agents for orientation, **not parsed for work**. The only machine-read part of `spec.md` is its **frontmatter**: `gates` (phase state) and `threshold` and `max_iterations`, which `/implement` uses for the loop's config.
 
-The operational spine lives in the **tracker**, not in `plan.md`. `specify-plan` creates, via `task.js`:
-- a root **phase** task,
-- one **slice** task per deliverable — its body is the code brief (Features / Behavior — EARS / Quality Gates), with `--depends-on` edges to other slices,
+The operational spine lives in the **tracker**, not in `spec.md`. `specify-plan` creates, via `task.js`:
+- one **phase** task per plan phase,
+- under it, one **slice** task per deliverable — its body is the code brief (Features / Behavior — EARS / Quality Gates), with `--depends-on` edges to other slices,
 - **scenario** child tasks under each slice — the holdout acceptance evidence.
 
-`/implement` reads that task tree (`task.js graph`), and status is grep-able there. Keep `plan.md` a clean narrative — **Target State**, **Phases & Outcomes** (one outcome line per slice + its dependencies), and a **Tracking** link to the tracker. Put per-slice detail in the tasks, not the document; a collapsible (`<details>`) may still tuck away verbose scaffolding, but the narrative headings stay at top level.
+`/implement` reads that task tree (`task.js graph`), and status is grep-able there. Keep the Plan part a clean narrative — **Target state**, **Phases** (one row per phase: outcome and slice ids), and the link to the tracker. Put per-slice detail in the tasks, not the document; a collapsible (`<details>`) may still tuck away verbose scaffolding, but the narrative headings stay at top level.

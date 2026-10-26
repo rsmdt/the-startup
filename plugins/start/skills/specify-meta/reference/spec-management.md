@@ -12,13 +12,11 @@
 ```
 .start/specs/
 ├── 001-user-authentication/
-│   ├── README.md                 # Managed by specify-meta skill
-│   ├── requirements.md          # WHY — created by specify-requirements skill
-│   ├── solution.md              # WHAT (design) — created by specify-solution skill
-│   ├── plan.md                  # WHAT (narrative) — created by specify-plan skill
+│   ├── spec.md                   # Requirements, Solution, Plan parts + Ledger (gates in frontmatter)
+│   ├── review.md                 # Solution review report — written by specify-solution's review workflow
 │   └── .tracker/                 # Implementation tasks — created by specify-plan via task.js
-│       ├── <phase-task>.md       #   root phase task
-│       ├── <slice-task>.md       #   slice tasks (code brief in body)
+│       ├── <phase-task>.md       #   one root task per plan phase
+│       ├── <slice-task>.md       #   slice tasks under their phase (code brief in body)
 │       └── <scenario-task>.md    #   scenario child tasks (holdout evidence)
 ├── 002-payment-processing/
 │   └── ...
@@ -39,11 +37,13 @@ node <plugin>/scripts/spec.js "feature name here"
 **Output:**
 ```
 Created spec directory: .start/specs/005-feature-name-here
+Created spec document: .start/specs/005-feature-name-here/spec.md
+Created tracker directory: .start/specs/005-feature-name-here/.tracker
 Spec ID: 005
 Specification directory created successfully
 ```
 
-Creates the spec directory only. Document artifacts are added per phase via `--add`.
+Creates the spec directory, `spec.md` from the spec template, and `.tracker/`. Each phase fills its own part of `spec.md`.
 
 ### Read Spec Metadata
 ```bash
@@ -56,60 +56,48 @@ name = "feature-name-here"
 dir = ".start/specs/005-feature-name-here"
 
 [spec]
-prd = ".start/specs/005-feature-name-here/requirements.md"
-sdd = ".start/specs/005-feature-name-here/solution.md"
-plan_doc = ".start/specs/005-feature-name-here/plan.md"
+spec = ".start/specs/005-feature-name-here/spec.md"
+prd = ".start/specs/005-feature-name-here/spec.md"
+sdd = ".start/specs/005-feature-name-here/spec.md"
+plan_doc = ".start/specs/005-feature-name-here/spec.md"
 
 files = [
-  "README.md",
-  "requirements.md",
-  "solution.md",
-  "plan.md"
+  "spec.md"
 ]
 ```
 
-Implementation tasks live in `.tracker/` — query them with `task.js graph --spec 005`, not via `spec.js`.
+`prd`, `sdd`, and `plan_doc` all point at `spec.md`; a legacy spec without `spec.md` reports its separate `requirements.md`, `solution.md`, and `plan.md` instead.
 
-### Add Template to Existing Spec
-```bash
-node <plugin>/scripts/spec.js 005 --add specify-requirements   # Creates requirements.md
-node <plugin>/scripts/spec.js 005 --add specify-solution       # Creates solution.md
-node <plugin>/scripts/spec.js 005 --add specify-plan           # Creates plan.md + ensures .tracker/
-```
+Implementation tasks live in `.tracker/` — query them with `task.js graph --spec 005`, not via `spec.js`.
 
 ## Template Resolution
 
-Templates are resolved from `skills/[template-name]/template.md`.
+The spec template is `skills/specify-meta/template.md`.
 
-## README.md Fields
+## Gates
 
-| Field | Description |
-|-------|-------------|
-| Created | Date spec was created |
-| Current Phase | Active workflow phase |
-| Last Updated | Date of last status change |
-| Document Status | pending, in_progress, completed, skipped |
-| Notes | Additional context for each document |
+The `gates` frontmatter of `spec.md` is the phase state:
+
+| Value | Meaning |
+|-------|---------|
+| `pending` | Not started |
+| `draft` | Being written |
+| `approved` | The user approved the part |
+| `skipped` | The user skipped the part (decision logged) |
 
 ## Phase Workflow
 
 ```
 Initialization
     ↓
-Requirements (specify-requirements → requirements.md)   [WHY]
+Requirements (specify-requirements → ## Requirements)   [WHY]
     ↓
-Solution (specify-solution → solution.md)               [WHAT — design]
+Solution (specify-solution → ## Solution)               [WHAT — design]
     ↓
-Plan (specify-plan → narrative plan.md + tracker tasks)  [WHAT — the plan]
+Plan (specify-plan → ## Plan + tracker tasks)           [WHAT — the plan]
     ↓
 Ready for Implementation   (/implement runs the slice loop)
 ```
-
-Each phase can be:
-- **Completed**: Document finished and validated
-- **Skipped**: User decided to skip (decision logged)
-- **In Progress**: Currently being worked on
-- **Pending**: Not yet started
 
 ## Decision Logging
 

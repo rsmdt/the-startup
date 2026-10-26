@@ -21,10 +21,12 @@ Unknown {
 }
 
 Assumption {
+  id: String                       // A1, A2, … — cited in the documents as [ASSUMPTION An]
   topic: String
   default: String                  // what a first draft would bake in unchallenged
   impactIfWrong: String
-  status: Proposed | Confirmed | Corrected | Standing   // Standing = user accepted the default; stays visible as [ASSUMPTION]
+  observable: Boolean              // an acceptance test could tell the difference: a criterion, an error, a validation bound, an ordering, a calculation
+  status: Proposed | Confirmed | Corrected | Standing   // Standing = user accepted the default; stays visible as [ASSUMPTION An]
 }
 
 Finding {
@@ -42,7 +44,7 @@ SpecStatus {
 
 State {
   target = $ARGUMENTS
-  spec: string                     // resolved spec directory path (from specify-meta)
+  spec: string                     // resolved spec directory path (from specify-meta); the document is spec.md in it
   ledger: { unknowns: [Unknown], assumptions: [Assumption] }
   findings: [Finding]
   perspectives = []
@@ -55,14 +57,15 @@ State {
 **Always:**
 - Open every run with the Clarify Intent phase — even a complete-looking brief gets its ledger presented and intent confirmed before any document work. There is no brief too detailed to interrogate.
 - Ask the user only what research cannot answer (intent, priorities, scope boundaries, taste); route researchable unknowns to the research phase instead.
-- Present research findings for explicit user confirmation before they enter any document — an unconfirmed finding is a hypothesis, not a requirement.
-- Carry accepted-by-default assumptions as visible `[ASSUMPTION]` entries in the documents and in the spec README ledger — surfaced, never erased.
-- Delegate research tasks to specialist agents, and display all agent responses to the user — complete findings, not summaries.
+- Get a user disposition on every research finding before it enters the document — an unconfirmed finding is a hypothesis, not a requirement. A finding or default that is **observable** is asked as its own question; every other one is confirmed with the approval of the part it shapes.
+- Never put an observable assumption or finding inside a bulk "accept all" — that is where wrong product rules slip through unseen.
+- Carry accepted-by-default assumptions in the Assumptions table of `spec.md`, cited as `[ASSUMPTION An]` where they apply — surfaced, never erased.
+- Research in the main context. Launch research agents only when the codebase or domain is unknown territory — a large unfamiliar codebase, or external vendors, standards, or regulations needing independent investigations — and then display their findings in full.
 - Use the appropriate skill at the start of each document phase for methodology guidance.
 - Only write or edit files within `.start/` and `docs/` directories.
 - Run phases sequentially — Clarify, Research, Requirements (WHY), Solution (WHAT), Plan (slice and scenario tasks). The user can skip document phases; the Clarify phase cannot be skipped.
-- Wait for user confirmation between document phases, and verify the MECE gate before leaving the Requirements phase.
-- Track decisions and the assumption ledger in the specification README via reference/output-format.md.
+- Close each document part with one approval gate; the user may ask to walk through it section by section instead. Verify the MECE gate before leaving the Requirements phase.
+- Track decisions and the assumption ledger in the Ledger part of `spec.md` via reference/output-format.md.
 - Git integration is optional — offer branch/commit as an option.
 
 **Never:**
@@ -77,7 +80,6 @@ State {
 - [Clarification](reference/clarification.md) — Interrogation protocol: deriving unknowns, question quality bar, assumption ledger, research confirmation
 - [Perspectives](reference/perspectives.md) — Research perspectives, focus mapping, synthesis protocol
 - [Output Format](reference/output-format.md) — Decision and assumption logging, documentation structure
-- [Report Template](templates/spec-report.md) — Editor-readable specification report (ledger, dispositions, decisions)
 - [Output Example](examples/output-example.md) — Concrete example of expected output format
 
 ## Workflow
@@ -88,18 +90,18 @@ Use the specify-meta skill to create or read the spec directory.
 
 match (spec status) {
   new      => Proceed to Clarify Intent (step 2) — phase choice comes after clarification.
-  existing => Analyze document status (check for [NEEDS CLARIFICATION] and [ASSUMPTION] markers).
-              Rebuild the ledger from the README, then proceed to step 2 scoped to what remains open.
+  existing => Analyze document status (read the `gates` frontmatter of spec.md; check for [NEEDS CLARIFICATION] markers and [ASSUMPTION An] citations).
+              Rebuild the ledger from the Ledger part of spec.md, then proceed to step 2 scoped to what remains open.
 }
 
 ### 2. Clarify Intent
 
 Read reference/clarification.md for the interrogation protocol. This phase always runs.
 
-1. Derive the ledger from the description and spec status: what is known; what must be known to specify well (each unknown with its stake and criticality); and every assumption a first draft would otherwise bake in (each with default and impact-if-wrong).
+1. Derive the ledger from the description and spec status: what is known; what must be known to specify well (each unknown with its stake and criticality); and every assumption a first draft would otherwise bake in (each with id, default, impact-if-wrong, and whether it is observable).
 2. Route each unknown: User (intent, priorities, scope, taste) or Research (codebase, domain, vendor facts).
-3. Present the full ledger, then ask the user the User-routed questions — batched (at most five per round), ordered by leverage, each carrying its proposed default so the user can accept defaults in a single action.
-4. Record outcomes: answers mark assumptions Confirmed or Corrected; accepted defaults become Standing and will appear as `[ASSUMPTION]` entries. Log everything per reference/output-format.md.
+3. Present the full ledger, then ask the user the User-routed questions — batched (at most five per round), ordered by leverage, each carrying its proposed default. Every observable assumption is its own question, even when its default looks obvious. Only non-observable defaults (technical, cosmetic) may be accepted together in a single action.
+4. Record outcomes: answers mark assumptions Confirmed or Corrected; accepted defaults become Standing rows in the Assumptions table, cited as `[ASSUMPTION An]`. Log everything per reference/output-format.md.
 5. If answers expose new Blocking unknowns, run another round. Document phases start only when no Blocking unknown remains.
 
 Then ask the user to choose the starting phase:
@@ -108,6 +110,8 @@ Then ask the user to choose the starting phase:
   Start with Plan — skip to the slice and scenario tasks (requires existing requirements + solution)
 
 ### 3. Select Mode
+
+Only when step 4 needs research agents. Otherwise skip this step and research in the main context.
 
 Ask the user to choose:
   Standard (default) — parallel fire-and-forget research agents
@@ -121,6 +125,8 @@ Recommend Dynamic Workflow instead when those thresholds apply but the perspecti
 
 Read reference/perspectives.md for applicable perspectives. Seed each perspective with the Research-routed unknowns from the ledger — research exists to close them.
 
+By default, research the perspectives yourself in the main context: read the codebase, search the web, and record each finding with its evidence. Use the selected mode only when step 3 ran:
+
 match (mode) {
   Standard => launch parallel subagents per applicable perspectives
   Agent Team => create team, spawn one researcher per perspective, assign tasks
@@ -129,17 +135,17 @@ match (mode) {
 
 For Dynamic Workflow, these instructions are the opt-in: call the Workflow tool directly with an inline script. Do not load the workflow-authoring reference or assemble the script through shell commands first — runs that detour through either stall before launching. Choose `model` and `effort` per stage from what the stage does. Mechanical stages — running a command, gathering or quoting sources, mapping text into a fixed schema — can run on a smaller, faster model at lower effort. Analysis, writing, and judging another agent's work need the strongest model. A judging stage never runs on a weaker model than the stage it judges. When unsure, omit `model` so the stage inherits the session model.
 
-Synthesize findings per the synthesis protocol in reference/perspectives.md, then present them for disposition: the user confirms, corrects, or discards each material claim before it feeds any document. Confirmed findings close their unknowns; Pending or Discarded ones never enter a document (a Pending finding the user defers becomes a Standing `[ASSUMPTION]`).
+Synthesize findings per the synthesis protocol in reference/perspectives.md, then get their disposition. Ask each observable finding as its own question (confirm, correct, or discard). Present the rest together; the user confirms them as a set or picks the ones to correct. Confirmed findings close their unknowns; Pending or Discarded ones never enter the document (a Pending finding the user defers becomes a Standing assumption).
 
 ### 5. Write Requirements
 
-Use the specify-requirements skill. Hand it the ledger — Standing assumptions must surface as `[ASSUMPTION]` entries in the affected sections, and its discovery step must not re-ask what clarification already answered.
+Use the specify-requirements skill. Hand it the ledger — Standing assumptions must be cited as `[ASSUMPTION An]` in the affected sections, and its discovery step must not re-ask what clarification already answered.
 
 Focus: WHAT needs to be built and WHY it matters. Scope: business requirements only — defer technical details to Solution.
 
 Gate before leaving this phase: requirements and acceptance criteria pass the MECE verification that specify-requirements enforces (no overlapping stories, no role without a feature, no uncovered error paths), and no Blocking `[NEEDS CLARIFICATION]` remains.
 
-Ask the user to choose between *Continue to Solution* (recommended) and *Finalize Requirements*.
+The Requirements approval gate is also the transition: approving continues to Solution (recommended); the user may instead finalize after Requirements.
 
 ### 6. Write Solution
 
@@ -149,28 +155,26 @@ Focus: HOW the solution will be built. Scope: design decisions and interfaces �
 
 If a CONSTITUTION.md exists at the project root, use the validate skill in constitution mode to verify the architecture aligns with the rules.
 
-Ask the user to choose between *Continue to Plan* (recommended) and *Finalize Solution*.
+The Solution approval gate is also the transition: approving continues to Plan (recommended); the user may instead finalize after Solution.
 
 ### 7. Write Plan
 
 Use the specify-plan skill. Hand it the ledger — any Standing assumption a slice depends on must be flagged in that slice, not inherited silently.
 
-Focus: the implementation **tasks** `/implement` executes — a narrative `plan.md` plus, in the spec's tracker, one **slice** task per vertical deliverable (its code brief correlates features, EARS behavior, and quality gates) with its holdout acceptance scenarios as separate **scenario child tasks**; `--depends-on` between slices is the parallelization contract. Scope: what each slice delivers and how it is proven — not the steps to build it. The loop's code agent owns HOW.
+Focus: the implementation **tasks** `/implement` executes — the Plan part of `spec.md` plus, in the spec's tracker, one **phase** task per plan phase, its **slice** tasks (each code brief correlates features, EARS behavior, and quality gates), and each slice's holdout acceptance scenarios as separate **scenario child tasks**; `--depends-on` between slices is the parallelization contract. Scope: what each slice delivers and how it is proven — not the steps to build it. The loop's code agent owns HOW.
 
 The acceptance scenarios are observable behaviors through external interfaces, grounded in the codebase, organized by user-observable capability — never by layer.
 
-Ask the user to choose between *Finalize specification* (recommended) and *Revisit Plan*.
+specify-plan offers, once the first phase's tasks exist, to start implementing approved phases while it plans the rest.
+
+The Plan approval gate is also the transition: approving finalizes the specification (recommended); the user may instead revisit the plan.
 
 ### 8. Finalize
 
 Use the specify-meta skill to review and assess readiness. Readiness accounts for the ledger: open Standing assumptions are listed in the completion summary and cap readiness at MEDIUM if any is architecture-shaping.
 
-Write the specification report:
-1. Read templates/spec-report.md and follow the Markdown block discipline (Markdown Blocks reference shared via specify-plan) — structured Markdown that reads in any editor.
-2. Fill it from State: readiness (with the cap callout when capped, removed otherwise), the full ledger (unknowns with resolutions, assumptions with statuses), findings with dispositions, document statuses, decisions, next steps.
-3. Save as `spec-report.md` in the spec directory.
-4. Verify no `{{...}}` placeholder remains and the heading spine is intact (Readiness, Clarification Ledger, Research Findings, Documents, Decisions Log, Next Steps).
+Set `readiness` in the `spec.md` frontmatter and check the Ledger: every assumption carries its status, the Decision log records the run's decisions, and no `[NEEDS CLARIFICATION]` remains in an approved part. There is no separate report file — `spec.md` is the record.
 
 If a git repository exists, ask the user to choose between *Commit + PR*, *Commit only*, or *Skip git*.
 
-Read reference/output-format.md and present the completion summary accordingly, linking the report.
+Read reference/output-format.md and present the completion summary accordingly, linking `spec.md`.
