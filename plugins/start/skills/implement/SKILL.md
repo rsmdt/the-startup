@@ -90,8 +90,8 @@ from steps 1–4. Launch it with the Workflow tool, passing the resolved values 
 
 Choose `model` and `effort` per stage from what the stage does. Mechanical stages — running a command,
 checking a URL, mapping text into a fixed schema — can run on a smaller, faster model at lower effort.
-Code agents build from a complete brief and run on a smaller, faster model. Stages that judge another
-agent's work need the strongest model; a judging stage never runs on a weaker model than the stage it
+Code agents write the product code and need the strongest model. Stages that judge another agent's work
+need the strongest model too; a judging stage never runs on a weaker model than the stage it
 judges. When unsure, omit `model` so the stage inherits the
 session model.
 
@@ -126,7 +126,9 @@ leaving out a score the slice never got), then `{"kind":"run","state":"ended"}`,
    - `stalled` — the loop stopped converging with retries left. Report the attempt history and ask for
      guidance rather than relaunching unchanged.
    - `harness-abort` — agents stopped being served. Offer to relaunch the same slices once available.
-4. Ask how to proceed: retry with guidance, add the missing scenarios, skip, or stop.
+4. Only when a slice is not built (`failed`, `stalled`, `blocked-environment`, `harness-abort`), ask how to
+   proceed: retry with guidance, add the missing scenarios, skip, or stop. Recorded gaps and `bug` tasks of
+   a built slice are not open work: list them without offering a re-run.
 5. Use the validate skill in constitution mode if a CONSTITUTION.md exists at the project root.
 6. If every slice is `completed`, say so and name the next commands — commit per project convention and
    `/start:archive {specId}` — without asking; git and archiving stay the user's call.
