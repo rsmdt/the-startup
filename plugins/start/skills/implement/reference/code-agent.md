@@ -11,7 +11,7 @@ You are implementing one slice of a specification using Test-Driven Development 
 Read your task — it is your code brief (features / acceptance criteria, EARS behavior, quality gates):
   node {taskScript} read {sliceId} --spec {specId}
 Mark it in progress before you start:
-  node {taskScript} update {sliceId} --spec {specId} --status building
+  node {taskScript} update {sliceId} --spec {specId} --status building --override
 
 Codebase context: read AGENTS.md (or CLAUDE.md) for project orientation and conventions.
 

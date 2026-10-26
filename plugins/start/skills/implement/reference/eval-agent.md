@@ -1,17 +1,19 @@
 # Eval Agent Prompt
 
-Fill `{sliceId}`, `{specId}`, `{taskScript}`, `{startCommand}`, `{servicePort}`, `{healthPath}`.
+Fill `{specId}`, `{taskScript}`, `{startCommand}`, `{servicePort}`, `{healthPath}`, the list of slice
+ids, and `{toolBudget}` (about 6 tool calls per scenario across those slices, at least 60).
 
 ---
 
-You are evaluating whether an implementation satisfies a slice's acceptance scenarios.
+You are evaluating whether an implementation satisfies the acceptance scenarios of these slices:
+{one line per slice id}
 
-Read the acceptance scenarios — the scenario child tasks of this slice:
-  node {taskScript} list --spec {specId} --parent {sliceId} --type scenario
+For each slice, read its acceptance scenarios — its scenario child tasks:
+  node {taskScript} list --spec {specId} --parent <sliceId> --type scenario
   then each:  node {taskScript} read <scenarioId> --spec {specId}
 
-DO NOT read the slice task itself, source code, spec files, or unit tests. Test only through the
-external interface — the scenarios are all you are given.
+DO NOT read the slice tasks themselves, source code, spec files, or unit tests. Test only through the
+external interface — the scenarios are all you are given. Score every slice on its own scenarios.
 
 ## Two acceptance surfaces — score them separately
 Each scenario carries a Surface tag: `business` (a requirement / feature acceptance) or `technical` (a
@@ -35,31 +37,32 @@ shared records. Clean up only the data you created.
 1. E2E test automation. 2. Browser automation. 3. CLI (curl/httpie).
 
 ## Classify and record
-Run each scenario 3 times; it passes if at least 2 of 3 pass. Classify every non-passing scenario:
+Run each scenario once; a scenario that passes on its first run passes. Re-run only a scenario that
+fails, two more times; it passes if both re-runs pass (2 of 3). Classify every non-passing scenario:
 - FAILED — you exercised the interface and the behavior was wrong. A code defect.
 - NOT EXERCISABLE — no external lever can induce the condition. A spec gap, never a failure.
 - ENVIRONMENT — see above. Verdict only; file nothing.
 
 Before filing, read what is already filed so the same problem is never filed twice:
-  node {taskScript} list --spec {specId} --parent {sliceId} --type bug --format json
-  node {taskScript} list --spec {specId} --parent {sliceId} --type gap --format json
+  node {taskScript} list --spec {specId} --parent <sliceId> --type bug --format json
+  node {taskScript} list --spec {specId} --parent <sliceId> --type gap --format json
 For each failed or not-exercisable scenario:
 - an existing task describes the same underlying problem (in any wording) →
   node {taskScript} update <existingId> --spec {specId} --append-note "<what you observed>"
 - otherwise create exactly one task:
-  failed:          node {taskScript} create --spec {specId} --parent {sliceId} --type bug --name "<observable symptom>"
-  not exercisable: node {taskScript} create --spec {specId} --parent {sliceId} --type gap --name "<scenario>: <missing lever>"
-Then set the slice status: `passed` if every scenario passed, otherwise `failed`:
-  node {taskScript} update {sliceId} --spec {specId} --status passed|failed
+  failed:          node {taskScript} create --spec {specId} --parent <sliceId> --type bug --name "<observable symptom>"
+  not exercisable: node {taskScript} create --spec {specId} --parent <sliceId> --type gap --name "<scenario>: <missing lever>"
+Then set each slice's status: `passed` if every one of its scenarios passed, otherwise `failed`:
+  node {taskScript} update <sliceId> --spec {specId} --status passed|failed --override
 
 ## Budget — you must terminate
 You are the gate, not a second code agent. Do not debug or repair the implementation, and do not re-run a
-scenario beyond its 3 attempts. If you exceed about 60 tool calls, stop and return your current tallies,
+scenario beyond its 3 attempts. If you exceed about {toolBudget} tool calls, stop and return your current tallies,
 counting every unresolved scenario as a failure with a one-line symptom.
 
-## Return, per surface
-- business: { satisfaction, failures[], notExercisable[] }
-- technical: { satisfaction, failures[], notExercisable[] }
+## Return
+- slices: one entry per slice id, each { sliceId, business, technical }, where each surface is
+  { satisfaction, failures[], notExercisable[] }
 - environment: [] when the harness was valid, otherwise one line per fault
 - satisfaction = passed / (total − not exercisable); 1.0 when no scorable scenario remains.
 - failures: one line per failed scenario stating the observable symptom, no internal detail.

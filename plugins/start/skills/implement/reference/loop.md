@@ -11,18 +11,20 @@ passes a `schema`, so the loop branches on data, never on prose.
 - Phases: `Preflight`, `Coverage`, `Build`, `Evaluate`.
 - Inputs (via `args`): `specId`, `taskScript` (absolute path), `threshold`, `maxIterations`,
   `startCommand`, `servicePort`, `healthPath`, `migrateCommand` (optional), `requiredEnv` (optional),
-  `groups` (ordered; each `{ parallel: boolean, sliceIds: string[] }`).
+  `phases` (ordered; each `{ phaseId: string, groups: [ { parallel: boolean, sliceIds: string[] } ] }`,
+  groups ordered within the phase).
 - Every task.js command in a prompt is `node {taskScript} <verb> ... --spec {specId}`.
 
 ## Harness abort
 
 An agent that returns `null`, or an object missing its stage's key field — code `approach`, preflight
-`ok`, eval `business`, coverage `slices` — did no work (quota, session limit, spawn failure). This is
+and service `ok`, eval `slices`, coverage `slices` — did no work (quota, session limit, spawn failure). This is
 never a verdict:
 
 - latch a run-wide abort flag and spawn no further agents;
 - charge no iteration and produce no score for the slice in progress;
-- that slice's result is `{ id, status: "harness-abort", abortedAt: <stage label> }`.
+- every slice of the phase in progress that is not yet decided gets the result
+  `{ id, status: "harness-abort", abortedAt: <stage label> }`.
 
 ## Stages
 
@@ -47,34 +49,45 @@ One coverage agent over every slice id. Schema:
 Record gaps per slice. A slice the auditor omitted is logged as **unaudited** — never treated as covered.
 A harness abort here → return `{ specId, threshold, status: "harness-abort", results: [] }`.
 
-### 3. Build each slice
+### 3. Build and evaluate each phase
 
-Run the groups in order. Within a parallel group, run its slices concurrently; otherwise one at a time.
-Each slice runs this loop, starting with `iteration = 0`, empty `failures`, empty `history`, `best = -1`:
+Run the phases in order. Each slice keeps its own state: `iteration = 0`, empty `failures`, empty
+`history`, `best = -1`. A phase repeats these rounds until every one of its slices is decided:
 
-1. **Code agent** — prompt from code-agent.md with the last three `history` entries and the current
-   `failures`. Schema:
+1. **Code agents** — for each undecided slice, a code agent with the prompt from code-agent.md, the last
+   three `history` entries, and the current `failures`. Run the phase's groups in order; within a
+   parallel group, run its slices concurrently. Schema:
    ```
    { approach: string (required), wroteCode: boolean, wroteMigration: boolean }
    ```
-2. **Preflight** — only when `migrateCommand` is set and `wroteMigration` is not explicitly `false`.
-   Preflight agent with migrations applied. `ok: false` → slice result `blocked-environment` with its
-   faults; iteration **not** charged.
-3. **Eval agent** — prompt from eval-agent.md. Schema:
+2. **Preflight** — only when `migrateCommand` is set and some code agent's `wroteMigration` is not
+   explicitly `false`. Preflight agent with migrations applied. `ok: false` → every undecided slice is
+   `blocked-environment` with its faults; iteration **not** charged.
+3. **Service** — one service agent (prompt from service-agent.md) restarts the service from the current
+   code. `ok: false` → every undecided slice is `blocked-environment` with its faults; iteration **not**
+   charged.
+4. **Eval agent** — one eval agent for the phase (prompt from eval-agent.md) over every undecided slice.
+   Schema:
    ```
    surface = { satisfaction: number (required), failures: string[], notExercisable: [ { scenario: string, missingLever: string } ] }
-   { business: surface (required), technical: surface (required), environment: string[] }
+   { slices: [ { sliceId: string (required), business: surface (required), technical: surface (required) } ] (required), environment: string[] }
    ```
-4. **Decide:**
-   - `environment` non-empty → `blocked-environment` with those faults; iteration **not** charged.
+5. **Decide, per slice:**
+   - `environment` non-empty → every undecided slice is `blocked-environment` with those faults;
+     iteration **not** charged.
+   - A slice missing from `slices` was not judged → `harness-abort` for that slice.
    - `business.satisfaction ≥ threshold` **and** `technical.satisfaction ≥ threshold` → `completed`, or
      `incomplete-coverage` when the slice has coverage gaps or any `notExercisable` entries. Both
      surfaces must clear the threshold independently; never blend them.
    - Otherwise: `iteration += 1`; `failures` = both surfaces' failures, first six; append
      `{ iteration, business, technical, failures, approach }` to `history`.
      - `iteration ≥ maxIterations` → stop with status `failed`.
-     - `score = business + technical`. If `score > best`, set `best = score` and loop to step 1;
-       otherwise stop with status `stalled` — retries remain, but the loop is not converging.
+     - `score = business + technical`. If `score > best`, set `best = score` and the slice stays
+       undecided for the next round; otherwise stop with status `stalled` — retries remain, but the
+       loop is not converging.
+
+The next round rebuilds only the undecided slices; slices already decided are not rebuilt or
+re-evaluated.
 
 Slice result:
 
@@ -90,5 +103,5 @@ Slice result:
 
 A run-level `status` (`blocked-environment` or `harness-abort`) appears only when nothing was built.
 
-Log one line per decision (slice, scores, retry n/max, or why it stopped) and a closing summary:
+Log one line per decision (phase, slice, scores, retry n/max, or why it stopped) and a closing summary:
 satisfied count, slices with unproven surfaces, stalled slices, blocked slices, aborted slices.
