@@ -103,7 +103,7 @@ Execute a specification by running its slice tasks on Claude Code's dynamic-work
 |------|--------------|
 | **Read** | Read the slice tasks (`task.js graph`); each carries a code brief (features + EARS + gates) with its holdout scenarios as scenario child tasks |
 | **Launch** | Write the workflow script from the skill's loop contract and run it via the Workflow tool; independent slices run concurrently |
-| **Loop** | Per slice: code agent builds (reads the slice task, blind to its scenarios) → eval agent proves it (reads the scenario tasks, blind to the slice + source) → retry with filtered summaries until threshold or max iterations |
+| **Loop** | Per phase: code agents build its slices — one agent for a phase whose slices depend on each other in a chain, one per slice for slices that can run in parallel (they read the slice tasks, blind to the scenarios) → one eval agent proves the phase with a holdout script kept outside the project (it reads the scenario tasks, blind to the slices + source) → retry with filtered summaries until threshold or max iterations |
 
 **Key Features:**
 - **One loop, emergent scale** - A 1-slice plan is a short loop; a 40-slice plan fans out. No tier or strategy to choose
@@ -116,7 +116,7 @@ Execute a specification by running its slice tasks on Claude Code's dynamic-work
 <details>
 <summary><strong>View Details — the slice loop</strong></summary>
 
-Reads the spec's slice tasks from the tracker and topologically sorts them by `--depends-on`. Runs a dynamic workflow written from the skill's loop contract. Each slice goes through a barriered code→eval loop: a code agent builds it (reading the slice task's features + EARS + gates and AGENTS.md, but never its scenario child tasks), an eval agent proves it against those scenario tasks (accessing the running service, but never the slice or the source), and filtered one-line failure summaries feed the next retry until the satisfaction threshold or max iterations. Independent slices run concurrently; dependent slices run in order.
+Reads the spec's slice tasks from the tracker and topologically sorts them by `--depends-on`. Runs a dynamic workflow written from the skill's loop contract. Each phase goes through a barriered code→eval loop: code agents build its slices (reading the slice tasks' features + EARS + gates and AGENTS.md, but never their scenario child tasks), one eval agent proves the phase against those scenario tasks with a holdout script it keeps outside the project (accessing the running service and, for UI scenarios, a real browser, but never the slices or the source), and filtered one-line failure summaries feed the next retry until the satisfaction threshold or max iterations. A phase whose slices form a dependency chain is built by one code agent; slices that can run in parallel get one agent each, concurrently.
 
 ```mermaid
 flowchart TD

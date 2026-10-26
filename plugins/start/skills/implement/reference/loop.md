@@ -10,7 +10,8 @@ passes a `schema`, so the loop branches on data, never on prose.
   variables, no template interpolation. A non-literal `meta` fails to register.
 - Phases: `Preflight`, `Coverage`, `Build`, `Evaluate`.
 - Inputs (via `args`): `specId`, `taskScript` (absolute path), `threshold`, `maxIterations`,
-  `startCommand`, `servicePort`, `healthPath`, `migrateCommand` (optional), `requiredEnv` (optional),
+  `startCommand`, `servicePort`, `healthPath`, `evalDir` (absolute, outside the project),
+  `migrateCommand` (optional), `requiredEnv` (optional),
   `phases` (ordered; each `{ phaseId: string, groups: [ { parallel: boolean, sliceIds: string[] } ] }`,
   groups ordered within the phase).
 - Every task.js command in a prompt is `node {taskScript} <verb> ... --spec {specId}`.
@@ -54,9 +55,14 @@ A harness abort here → return `{ specId, threshold, status: "harness-abort", r
 Run the phases in order. Each slice keeps its own state: `iteration = 0`, empty `failures`, empty
 `history`, `best = -1`. A phase repeats these rounds until every one of its slices is decided:
 
-1. **Code agents** — for each undecided slice, a code agent with the prompt from code-agent.md, the last
-   three `history` entries, and the current `failures`. Run the phase's groups in order; within a
-   parallel group, run its slices concurrently. Schema:
+1. **Code agents** — prompt from code-agent.md, with each slice's last three `history` entries and
+   current `failures`.
+   - No parallel group in the phase → **one** code agent builds every undecided slice of the phase, in
+     group order. Separate agents would only run one after another and each re-read the same code.
+   - Otherwise → one code agent per undecided slice: run the groups in order, and within a parallel
+     group run its slices concurrently.
+
+   Schema:
    ```
    { approach: string (required), wroteCode: boolean, wroteMigration: boolean }
    ```
@@ -80,7 +86,8 @@ Run the phases in order. Each slice keeps its own state: `iteration = 0`, empty 
      `incomplete-coverage` when the slice has coverage gaps or any `notExercisable` entries. Both
      surfaces must clear the threshold independently; never blend them.
    - Otherwise: `iteration += 1`; `failures` = both surfaces' failures, first six; append
-     `{ iteration, business, technical, failures, approach }` to `history`.
+     `{ iteration, business, technical, failures, approach }` to `history`, where `approach` is the
+     `approach` of the code agent that built the slice this round.
      - `iteration ≥ maxIterations` → stop with status `failed`.
      - `score = business + technical`. If `score > best`, set `best = score` and the slice stays
        undecided for the next round; otherwise stop with status `stalled` — retries remain, but the

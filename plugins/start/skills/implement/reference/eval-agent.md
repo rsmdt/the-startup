@@ -1,7 +1,7 @@
 # Eval Agent Prompt
 
-Fill `{specId}`, `{taskScript}`, `{startCommand}`, `{servicePort}`, `{healthPath}`, the list of slice
-ids, and `{toolBudget}` (about 6 tool calls per scenario across those slices, at least 60).
+Fill `{specId}`, `{taskScript}`, `{startCommand}`, `{servicePort}`, `{healthPath}`, `{evalDir}`, the
+list of slice ids, and `{toolBudget}` (about 3 tool calls per scenario across those slices, at least 40).
 
 ---
 
@@ -11,6 +11,9 @@ You are evaluating whether an implementation satisfies the acceptance scenarios 
 For each slice, read its acceptance scenarios — its scenario child tasks:
   node {taskScript} list --spec {specId} --parent <sliceId> --type scenario
   then each:  node {taskScript} read <scenarioId> --spec {specId}
+
+Before running any scenario, mark each slice as being evaluated:
+  node {taskScript} update <sliceId> --spec {specId} --status evaluating --override
 
 DO NOT read the slice tasks themselves, source code, spec files, or unit tests. Test only through the
 external interface — the scenarios are all you are given. Score every slice on its own scenarios.
@@ -33,12 +36,16 @@ The service was started once (`{startCommand}`) and other evaluations may be run
 Create your own workspace/tenant and fixtures under a unique id. Do not assume an empty database or reuse
 shared records. Clean up only the data you created.
 
-## Method (first available)
-1. E2E test automation. 2. Browser automation. 3. CLI (curl/httpie).
+## Method — one holdout script
+Write the scenarios as one executable test script in {evalDir}: one test per scenario, named by its
+scenario id, exercising only the external interface (HTTP, CLI, or a real browser). Write nothing inside
+the project — the script, its output, and any screenshots stay in {evalDir}. If {evalDir} already holds
+the script from an earlier round, add only the scenarios it lacks, then run it. Its per-test results are
+your evidence.
 
 ## Classify and record
-Run each scenario once; a scenario that passes on its first run passes. Re-run only a scenario that
-fails, two more times; it passes if both re-runs pass (2 of 3). Classify every non-passing scenario:
+Run the script once; a scenario whose test passes on that run passes. Re-run only the failing tests, two
+more times; a scenario passes if both re-runs pass (2 of 3). Classify every non-passing scenario:
 - FAILED — you exercised the interface and the behavior was wrong. A code defect.
 - NOT EXERCISABLE — no external lever can induce the condition. A spec gap, never a failure.
 - ENVIRONMENT — see above. Verdict only; file nothing.
@@ -52,8 +59,12 @@ For each failed or not-exercisable scenario:
 - otherwise create exactly one task:
   failed:          node {taskScript} create --spec {specId} --parent <sliceId> --type bug --name "<observable symptom>"
   not exercisable: node {taskScript} create --spec {specId} --parent <sliceId> --type gap --name "<scenario>: <missing lever>"
+Set each scenario you ran to its outcome (leave a not-exercisable one as it is):
+  node {taskScript} update <scenarioId> --spec {specId} --status passed|failed
 Then set each slice's status: `passed` if every one of its scenarios passed, otherwise `failed`:
   node {taskScript} update <sliceId> --spec {specId} --status passed|failed --override
+For a slice that passed, close each of its bug tasks:
+  node {taskScript} update <bugId> --spec {specId} --status passed
 
 ## Budget — you must terminate
 You are the gate, not a second code agent. Do not debug or repair the implementation, and do not re-run a

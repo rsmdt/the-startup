@@ -25,7 +25,7 @@ evidence). specify-plan authors them; you read their structure.
 - Read task **structure only** — ids, `dependsOn`, scenario counts. Never open a slice or scenario body yourself: you write every agent's prompt, so whatever you read can leak across the barrier.
 - Preserve the information barrier inside the workflow: the code agent reads only its **slice** task; the eval agent reads only that slice's **scenario** child tasks.
 - Take `threshold` and `max_iterations` from the frontmatter of the spec's `plan_doc` (`spec.md`; `plan.md` in a legacy spec); the workflow, not you, decides pass/fail and retries.
-- Ask the user for service configuration you cannot discover — before launching, never mid-run.
+- Ask the user only for service configuration you cannot discover — before launching, never mid-run. Never ask to confirm what you read from a file.
 - Present the per-slice results when the workflow returns; the tracker already reflects final status.
 
 **Never:**
@@ -79,6 +79,9 @@ yourself; fix or omit it if it errors. Ask the user for anything you could not r
 
 Start the service once, configured, before launching. Every eval agent evaluates against it read-only.
 
+Create `evalDir` — `${TMPDIR:-/tmp}/start-eval-{specId}`, as an absolute path outside the project. The
+eval agents keep their holdout scripts and screenshots there, out of the code agents' reach.
+
 ### 5. Run the Dynamic Workflow
 
 These instructions are the opt-in: call the Workflow tool directly with an inline script. Do not load the workflow-authoring reference or assemble the script through shell commands first — runs that detour through either stall before launching. Read reference/loop.md and the five agent references. Author one workflow script that implements the
@@ -91,6 +94,8 @@ Stages that write code or judge another agent's work need the strongest model. A
 runs on a weaker model than the stage it judges. When unsure, omit `model` so the stage inherits the
 session model.
 
+Record the launch: `node ${CLAUDE_PLUGIN_ROOT}/scripts/spec.js {specId} --event '{"kind":"run","state":"started","threshold":<threshold>,"maxIterations":<max_iterations>}'`.
+
 Present a one-line dispatch summary before launching:
 
 ```
@@ -101,7 +106,10 @@ The run executes in the background. Do not re-run the loop yourself or fabricate
 
 ### 6. Report and Finalize
 
-When the workflow returns (shape in reference/loop.md):
+When the workflow returns (shape in reference/loop.md), record one `result` event per slice result
+(`{"kind":"result","id":"<sliceId>","result":"<status>","business":<n>,"technical":<n>,"iterations":<n>}`,
+leaving out a score the slice never got), then `{"kind":"run","state":"ended"}`, with
+`node ${CLAUDE_PLUGIN_ROOT}/scripts/spec.js {specId} --event`.
 
 1. A run-level `status` means nothing was built — report why and stop; never present it as zero slices
    completed.
@@ -119,5 +127,5 @@ When the workflow returns (shape in reference/loop.md):
    - `harness-abort` — agents stopped being served. Offer to relaunch the same slices once available.
 4. Ask how to proceed: retry with guidance, add the missing scenarios, skip, or stop.
 5. Use the validate skill in constitution mode if a CONSTITUTION.md exists at the project root.
-6. If every slice is `completed`, offer to finalize (commit / PR per project convention) and to archive:
-   `/start:archive {specId}`.
+6. If every slice is `completed`, say so and name the next commands — commit per project convention and
+   `/start:archive {specId}` — without asking; git and archiving stay the user's call.
