@@ -90,8 +90,9 @@ from steps 1–4. Launch it with the Workflow tool, passing the resolved values 
 
 Choose `model` and `effort` per stage from what the stage does. Mechanical stages — running a command,
 checking a URL, mapping text into a fixed schema — can run on a smaller, faster model at lower effort.
-Stages that write code or judge another agent's work need the strongest model. A judging stage never
-runs on a weaker model than the stage it judges. When unsure, omit `model` so the stage inherits the
+Code agents build from a complete brief and run on a smaller, faster model. Stages that judge another
+agent's work need the strongest model; a judging stage never runs on a weaker model than the stage it
+judges. When unsure, omit `model` so the stage inherits the
 session model.
 
 Record the launch: `node ${CLAUDE_PLUGIN_ROOT}/scripts/spec.js {specId} --event '{"kind":"run","state":"started","threshold":<threshold>,"maxIterations":<max_iterations>}'`.

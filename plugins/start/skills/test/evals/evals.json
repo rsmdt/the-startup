@@ -3,7 +3,7 @@
   "evals": [
     {
       "id": 1,
-      "prompt": "Run the full test suite. Context: the project has vitest unit tests and playwright E2E tests; two unit tests are failing in code you did not write this session.",
+      "prompt": "Run the full test suite. Context: the project has unit tests and browser E2E tests on a separate runner; two unit tests are failing in code you did not write this session.",
       "expected_output": "All categories executed, failures owned and resolved, no 'pre-existing' excuses",
       "expectations": [
         "Discovered test infrastructure (runners, commands, categories) before running anything",

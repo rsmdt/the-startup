@@ -10,7 +10,7 @@ Test Categories:
 |----------|--------|---------|--------|-------|
 | Unit | vitest (1.6.0) | `npx vitest run` | vitest.config.ts | 38 (src/**/*.test.ts) |
 | Integration | vitest (1.6.0) | `npx vitest run tests/integration` | vitest.config.ts | 7 (tests/integration/**/*.test.ts) |
-| E2E | playwright (1.42.0) | `npx playwright test` | playwright.config.ts | 2 (tests/e2e/**/*.spec.ts) |
+| E2E | e2e runner | `npm run test:e2e` | e2e.config.ts | 2 (tests/e2e/**/*.spec.ts) |
 
 Total Test Files: 47
 
@@ -29,7 +29,7 @@ Quality Commands:
 |----------|---------|-------|----|----|----|
 | Unit | `npx vitest run` | 195 | 193 | 2 | 0 |
 | Integration | `npx vitest run tests/integration` | 27 | 26 | 1 | 0 |
-| E2E | `npx playwright test` | 12 | 12 | 0 | 0 |
+| E2E | `npm run test:e2e` | 12 | 12 | 0 | 0 |
 | **Total** | | **234** | **231** | **3** | **0** |
 
 Pre-existing failures (YOU STILL OWN THESE):
@@ -81,7 +81,7 @@ Workaround: Skip integration tests with `npx vitest run --exclude tests/integrat
 |----------|---------|----------|-------|----|----|----|
 | Unit | `npx vitest run` | 2.1s | 195 | 195 | 0 | 0 |
 | Integration | `npx vitest run tests/integration` | 1.4s | 27 | 27 | 0 | 0 |
-| E2E | `npx playwright test` | 8.7s | 12 | 12 | 0 | 0 |
+| E2E | `npm run test:e2e` | 8.7s | 12 | 12 | 0 | 0 |
 | **Total** | | **12.2s** | **234** | **234** | **0** | **0** |
 
 Quality:
@@ -116,7 +116,7 @@ Suite Status: ✅ HEALTHY (passes), but ⚠️ design issues to address — see 
 |----------|--------|-------|-----------|----------|-------|
 | Unit | vitest | 234 | 18,400 | 28,984 | 1.58 |
 | Integration | vitest | 175 | — | 12,300 | — |
-| E2E | playwright | 12 | — | 3,400 | — |
+| E2E | e2e runner | 12 | — | 3,400 | — |
 
 ### Cost Signals
 

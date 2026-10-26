@@ -37,7 +37,7 @@ Every report that includes test counts MUST break them down by category:
 |----------|---------|-------|---------|---------|
 | Unit | `npx vitest run` | 180 | 180 | 0 |
 | Integration | `npx vitest run tests/integration` | 32 | 31 | 1 |
-| E2E | `npx playwright test` | 12 | 12 | 0 |
+| E2E | `npm run test:e2e` | 12 | 12 | 0 |
 
 If a category was **not executed**, it MUST appear with status `⚠️ NOT RUN` and a reason.
 

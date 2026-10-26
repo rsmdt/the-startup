@@ -28,11 +28,10 @@ scenarios) never overlap.
 ## Constraints
 
 **Always:**
-- Read the Requirements and Solution parts of `spec.md` before planning. If either is missing or not approved, tell the user and proceed with what's available. Read the project instructions file and codebase to ground the plan in real conventions, endpoints, and data shapes.
+- Read the Requirements and Solution parts of `spec.md` before planning. If either is missing or not approved, tell the user and proceed with what's available. Read the project instructions file and codebase to ground the plan in real conventions, endpoints, data shapes, and test setup.
 - Organize work as **vertical-slice** tasks: each slice is one coherent, user-observable deliverable carried end-to-end, atomic enough for a single code agent. Order slices by dependency; a later slice extends an earlier one. Never make a layer-only slice ("data-models slice").
-- Size slices to the spec. A small spec — one service, a handful of features — gets 2–4 slices in 1–2 phases; a larger spec gets more phases, never slices too big for one code agent.
-- Group slices into **phases**: each phase is an outcome a user can see working. `/implement` builds a phase's slices, then evaluates the phase once, so a phase is also the unit of evaluation.
-- Declare each slice's dependencies accurately via `task.js --depends-on` (tracker ids) — `/implement` topo-sorts by them and runs independent slices concurrently, in the same working tree. It is the whole parallelization contract. Leave two slices independent only when they change different components of the Solution; slices that extend the same component or screen depend on each other in order.
+- Group slices into **phases**: each phase is an outcome a user can see working. `/implement` builds all of a phase's slices, then evaluates the phase once; the next phase starts only after that evaluation. Make phases as large as they can be while each still ends in something working: a small spec — one service, a handful of features — is one phase; a larger spec gets the fewest phases that each deliver a working outcome. Keep each slice vertical and small enough to evaluate on its own.
+- Declare each slice's dependencies accurately via `task.js --depends-on` (tracker ids) — `/implement` topo-sorts by them and runs independent slices concurrently, in the same working tree. It is the whole parallelization contract. Decide per slice whether it can run in parallel or depends on another: leave two slices independent only when they change different components of the Solution; slices that extend the same component or screen depend on each other in order.
 - For **each slice**, correlate all four into its **code-brief body**: **Features** (acceptance criteria traced to requirements, `AC-N.M`), **Behavior** (EARS statements drawn from the solution design — see reference/ears.md), **Quality Gates** (checkable conditions). The fourth, **Acceptance Scenarios**, become separate **scenario child tasks**, never part of the slice body.
 - Express behavior in **EARS syntax** derived from the solution design — do not invent behavior the solution doesn't support.
 - Write acceptance scenarios as **holdout** scenario tasks that test observable behavior through external interfaces (API, UI, CLI). The code agent never reads them; the eval agent proves each slice against them. Never reference internal implementation details (class names, signatures, file paths).
@@ -87,16 +86,18 @@ For each phase, in order (read reference/ears.md and reference/scenario-guide.md
 
 1. For each of the phase's slices, **assemble the code brief** — a markdown doc with: **Features** (the
    `AC-N.M` this slice delivers, traced to requirements); **Behavior — EARS** (EARS statements derived
-   from the Solution part; every EARS criterion lands in exactly one slice); **Quality Gates** (baseline
-   gates + what the solution implies; carry NFR-N with their ids). Cite any Standing assumption it
+   from the Solution part; every EARS criterion lands in exactly one slice); **Quality Gates** (the NFR-N
+   gates this slice realizes, with their ids, and the test levels the plan settled). Cite any Standing assumption it
    depends on.
 2. Write its **scenarios** — cover BOTH acceptance surfaces so nothing is left untested: every
    **Feature** (AC) needs ≥1 `business` scenario and every **EARS behavior** (incl. edge/error states)
    needs ≥1 `technical` scenario. Write each body from templates/scenario.md and tag its **Surface**
    (`business` | `technical`) — the eval agent scores the two surfaces separately. Assign P0/P1/P2
-   (every slice needs ≥1 P0).
-3. Present the phase's slices together in the reference/output-format.md phase shape, with a coverage
-   map — each Feature AC and each EARS behavior mapped to the scenario(s) that exercise it, and any
+   (every slice needs ≥1 P0). If the project has no end-to-end test setup, ask once, in the approval
+   call below, whether to add end-to-end tests; without a yes, the briefs ask for unit and integration
+   tests only.
+3. Present the phase's slices together in the reference/output-format.md phase shape, with the build
+   order — which slices run in parallel and which wait on another — and a coverage map — each Feature AC and each EARS behavior mapped to the scenario(s) that exercise it, and any
    surface with **no** scenario flagged as a gap. Ask the user to *Approve phase*, *Walk me through slice
    by slice*, *Edit a brief*, *Edit scenarios*, or *Add missing scenarios*. For a plan of one or two
    phases, assemble every phase first and present them all at once with the Target state; that single

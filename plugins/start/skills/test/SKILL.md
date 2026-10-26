@@ -119,7 +119,7 @@ Recommend Dynamic Workflow instead when 3+ test categories or the full suite > 2
 
 ### 3. Capture Baseline
 
-Run ALL test commands discovered in step 1 — not just the primary suite. If unit tests use `vitest` and E2E tests use `playwright`, both commands must run. Record passing, failing, skipped counts per category.
+Run ALL test commands discovered in step 1 — not just the primary suite. If unit and E2E tests use different runners, both commands must run. Record passing, failing, skipped counts per category.
 
 Read reference/output-format.md and present baseline accordingly.
 
@@ -140,7 +140,7 @@ match (mode) {
 For Dynamic Workflow, these instructions are the opt-in: call the Workflow tool directly with an inline script. Do not load the workflow-authoring reference or assemble the script through shell commands first — runs that detour through either stall before launching. Choose `model` and `effort` per stage from what the stage does. Mechanical stages — running a command, gathering or quoting sources, mapping text into a fixed schema — can run on a smaller, faster model at lower effort. Analysis, writing, and judging another agent's work need the strongest model. A judging stage never runs on a weaker model than the stage it judges. When unsure, omit `model` so the stage inherits the session model.
 
 **E2E Execution Checklist:**
-- Verify E2E runner is installed (e.g., `npx playwright install` if needed)
+- Verify the E2E runner is installed, including any browsers it needs
 - Run E2E tests with their specific command — do NOT assume the unit test command covers E2E
 - If E2E requires running services (dev server, database), start them or escalate with specifics
 - Report E2E results separately in the output

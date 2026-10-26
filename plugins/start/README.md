@@ -63,7 +63,7 @@ Its **acceptance scenarios** are separate scenario child tasks (holdout evidence
 **What you get:** One document, `.start/specs/[NNN]-[name]/spec.md`, in three parts, each closed by its own approval gate:
 
 - **Requirements** - User stories, feature specifications, success criteria, non-functional requirements
-- **Solution** - Technical architecture, system components, data models, technology stack, security and performance considerations
+- **Solution** - Technical architecture, system components, data models, technology stack
 - **Plan** - The target state and the phases with their outcomes; the implementation tasks (phases → slices → scenario child tasks) live in **.tracker/**
 
 Its Ledger part holds the open questions, assumptions, decision log, and accepted review trade-offs.

@@ -14,8 +14,7 @@ Search for test configuration files:
 | `jest.config.*` | Jest | Node.js |
 | `vitest.config.*` | Vitest | Node.js |
 | `.mocharc.*` | Mocha | Node.js |
-| `playwright.config.*` | Playwright | Node.js (E2E) |
-| `cypress.config.*` | Cypress | Node.js (E2E) |
+| An E2E runner config (`*e2e*`, a browser-runner config) | the E2E runner | E2E |
 | `pytest.ini`, `pyproject.toml`, `setup.cfg` | pytest | Python |
 | `Cargo.toml` | cargo test | Rust |
 | `go.mod` | go test | Go |
@@ -49,10 +48,10 @@ Count and categorize:
 | Category | Common Separate Runners |
 |----------|------------------------|
 | Unit/Integration | `vitest`, `jest`, `pytest`, `go test` |
-| E2E (browser) | `playwright test`, `cypress run`, `selenium` |
+| E2E (browser) | the project's browser runner |
 | E2E (API) | `supertest` (usually runs via unit runner), `hurl`, `bruno` |
 
-If E2E config files exist (`playwright.config.*`, `cypress.config.*`) but no E2E script is in `package.json`, flag this — the tests exist but may not be wired up. Record each command separately in State.
+If an E2E runner config exists but no E2E script is in `package.json`, flag this — the tests exist but may not be wired up. Record each command separately in State.
 
 ## Step 4: Check for Related Commands
 

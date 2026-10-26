@@ -41,6 +41,10 @@ Test behaviour: domain rules, API responses, and the UI state a user action prod
 for how the UI looks — layout, sizes, spacing, colours, viewport widths. They pin the styling and slow the
 suite.
 
+Run the unit and integration tests in each red-green step. Write end-to-end tests only when a brief asks
+for them; run that suite once, after every slice is built, in the foreground with a timeout, and fix what
+fails before you return.
+
 ## Slice {sliceId} — prior attempts, do NOT repeat them
 {for each history entry: "- attempt {n} (business {b}% / technical {t}%): {approach} — symptoms that survived: {failures}"}
 
